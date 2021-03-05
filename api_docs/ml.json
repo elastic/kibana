@@ -44,12 +44,18 @@
                   "Params"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts#L45"
+                "source": {
+                  "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
+                  "lineNumber": 45
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts#L45"
+            "source": {
+              "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
+              "lineNumber": 45
+            }
           },
           {
             "tags": [],
@@ -57,7 +63,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts#L47",
+            "source": {
+              "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
+              "lineNumber": 47
+            },
             "signature": [
               "\"ML_APP_URL_GENERATOR\""
             ]
@@ -80,7 +89,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts#L50"
+                "source": {
+                  "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
+                  "lineNumber": 50
+                }
               }
             ],
             "signature": [
@@ -96,12 +108,18 @@
             ],
             "description": [],
             "label": "createUrl",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts#L49",
+            "source": {
+              "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
+              "lineNumber": 49
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts#L44",
+        "source": {
+          "path": "x-pack/plugins/ml/public/ml_url_generator/ml_url_generator.ts",
+          "lineNumber": 44
+        },
         "initialIsOpen": false
       }
     ],
@@ -125,12 +143,18 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L116"
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+              "lineNumber": 116
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L116",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+          "lineNumber": 116
+        },
         "initialIsOpen": false
       },
       {
@@ -144,7 +168,10 @@
         ],
         "description": [],
         "label": "getMlSharedImports",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/index.ts#L60",
+        "source": {
+          "path": "x-pack/plugins/ml/public/index.ts",
+          "lineNumber": 60
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -166,12 +193,18 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L177"
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+              "lineNumber": 177
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L177",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+          "lineNumber": 177
+        },
         "initialIsOpen": false
       },
       {
@@ -198,12 +231,18 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L138"
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+              "lineNumber": 138
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L138",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+          "lineNumber": 138
+        },
         "initialIsOpen": false
       },
       {
@@ -226,7 +265,10 @@
               "<\"ML_APP_URL_GENERATOR\"> | undefined; } | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts",
+              "lineNumber": 17
+            }
           },
           {
             "type": "string",
@@ -236,7 +278,10 @@
               "string | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts#L18"
+            "source": {
+              "path": "x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts",
+              "lineNumber": 18
+            }
           },
           {
             "type": "CompoundType",
@@ -252,7 +297,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts#L19"
+            "source": {
+              "path": "x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts",
+              "lineNumber": 19
+            }
           }
         ],
         "signature": [
@@ -272,7 +320,10 @@
           "\nProvides a URL to ML plugin page\nTODO remove basePath parameter"
         ],
         "label": "useMlHref",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/ml/public/ml_url_generator/use_ml_href.ts",
+          "lineNumber": 16
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -292,7 +343,10 @@
             "type": "number",
             "label": "time",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L44"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 44
+            }
           },
           {
             "tags": [],
@@ -300,7 +354,10 @@
             "type": "Object",
             "label": "source",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L45",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 45
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -317,7 +374,10 @@
             "type": "string",
             "label": "rowId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L46"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 46
+            }
           },
           {
             "tags": [],
@@ -325,7 +385,10 @@
             "type": "string",
             "label": "jobId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L47"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 47
+            }
           },
           {
             "tags": [],
@@ -333,7 +396,10 @@
             "type": "number",
             "label": "detectorIndex",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -341,7 +407,10 @@
             "type": "number",
             "label": "severity",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L49"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 49
+            }
           },
           {
             "tags": [],
@@ -349,7 +418,10 @@
             "type": "string",
             "label": "entityName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L50",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 50
+            },
             "signature": [
               "string | undefined"
             ]
@@ -360,7 +432,10 @@
             "type": "Any",
             "label": "entityValue",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L51",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 51
+            },
             "signature": [
               "any"
             ]
@@ -371,7 +446,10 @@
             "type": "Array",
             "label": "influencers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L52",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 52
+            },
             "signature": [
               "{ [key: string]: any; }[] | undefined"
             ]
@@ -382,7 +460,10 @@
             "type": "Array",
             "label": "actual",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L53",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 53
+            },
             "signature": [
               "number[] | undefined"
             ]
@@ -393,7 +474,10 @@
             "type": "Any",
             "label": "actualSort",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L54",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "any"
             ]
@@ -404,7 +488,10 @@
             "type": "Array",
             "label": "typical",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L55",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 55
+            },
             "signature": [
               "number[] | undefined"
             ]
@@ -415,7 +502,10 @@
             "type": "Any",
             "label": "typicalSort",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L56",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 56
+            },
             "signature": [
               "any"
             ]
@@ -426,13 +516,19 @@
             "type": "number",
             "label": "metricDescriptionSort",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L57",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 57
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L43",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 43
+        },
         "initialIsOpen": false
       },
       {
@@ -448,7 +544,10 @@
             "type": "Array",
             "label": "datafeeds",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/modules.ts#L80",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/modules.ts",
+              "lineNumber": 80
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -466,7 +565,10 @@
             "type": "Array",
             "label": "jobs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/modules.ts#L81",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/modules.ts",
+              "lineNumber": 81
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -484,7 +586,10 @@
             "type": "Object",
             "label": "kibana",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/modules.ts#L82",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/modules.ts",
+              "lineNumber": 82
+            },
             "signature": [
               "{ search: ",
               {
@@ -514,7 +619,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/modules.ts#L79",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/modules.ts",
+          "lineNumber": 79
+        },
         "initialIsOpen": false
       },
       {
@@ -530,7 +638,10 @@
             "type": "string",
             "label": "influencer_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -538,13 +649,19 @@
             "type": "Array",
             "label": "influencer_field_values",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "string[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -560,7 +677,10 @@
             "type": "boolean",
             "label": "jobsExist",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/data_recognizer.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -568,7 +688,10 @@
             "type": "Array",
             "label": "jobs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/data_recognizer.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+              "lineNumber": 17
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -581,7 +704,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/data_recognizer.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -597,7 +723,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/data_recognizer.ts#L9"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+              "lineNumber": 9
+            }
           },
           {
             "tags": [],
@@ -605,7 +734,10 @@
             "type": "number",
             "label": "earliestTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/data_recognizer.ts#L10"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+              "lineNumber": 10
+            }
           },
           {
             "tags": [],
@@ -613,7 +745,10 @@
             "type": "number",
             "label": "latestTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/data_recognizer.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -621,13 +756,19 @@
             "type": "number",
             "label": "latestResultsTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/data_recognizer.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/data_recognizer.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -643,7 +784,10 @@
             "type": "CompoundType",
             "label": "capabilities",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/capabilities.ts#L147",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+              "lineNumber": 147
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -660,7 +804,10 @@
             "type": "boolean",
             "label": "upgradeInProgress",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/capabilities.ts#L148"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+              "lineNumber": 148
+            }
           },
           {
             "tags": [],
@@ -668,7 +815,10 @@
             "type": "boolean",
             "label": "isPlatinumOrTrialLicense",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/capabilities.ts#L149"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+              "lineNumber": 149
+            }
           },
           {
             "tags": [],
@@ -676,10 +826,16 @@
             "type": "boolean",
             "label": "mlFeatureEnabledInSpace",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/capabilities.ts#L150"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+              "lineNumber": 150
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/capabilities.ts#L146",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+          "lineNumber": 146
+        },
         "initialIsOpen": false
       },
       {
@@ -695,7 +851,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -703,7 +862,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -711,7 +873,10 @@
             "type": "Array",
             "label": "groups",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "string[]"
             ]
@@ -722,7 +887,10 @@
             "type": "number",
             "label": "processed_record_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "number | undefined"
             ]
@@ -733,7 +901,10 @@
             "type": "string",
             "label": "memory_status",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "string | undefined"
             ]
@@ -744,7 +915,10 @@
             "type": "string",
             "label": "jobState",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -752,7 +926,10 @@
             "type": "Array",
             "label": "datafeedIndices",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L21",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 21
+            },
             "signature": [
               "string[]"
             ]
@@ -763,7 +940,10 @@
             "type": "boolean",
             "label": "hasDatafeed",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L22"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 22
+            }
           },
           {
             "tags": [],
@@ -771,7 +951,10 @@
             "type": "string",
             "label": "datafeedId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L23"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -779,7 +962,10 @@
             "type": "string",
             "label": "datafeedState",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L24"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -787,7 +973,10 @@
             "type": "number",
             "label": "latestTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 25
+            },
             "signature": [
               "number | undefined"
             ]
@@ -798,7 +987,10 @@
             "type": "number",
             "label": "earliestTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 26
+            },
             "signature": [
               "number | undefined"
             ]
@@ -809,7 +1001,10 @@
             "type": "number",
             "label": "latestResultsTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "number | undefined"
             ]
@@ -820,7 +1015,10 @@
             "type": "Object",
             "label": "fullJob",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 28
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -838,7 +1036,10 @@
             "type": "string",
             "label": "nodeName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L29",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "string | undefined"
             ]
@@ -849,7 +1050,10 @@
             "type": "Object",
             "label": "auditMessage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 30
+            },
             "signature": [
               "Partial<",
               {
@@ -868,7 +1072,10 @@
             "type": "boolean",
             "label": "isSingleMetricViewerJob",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L31"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 31
+            }
           },
           {
             "tags": [],
@@ -876,7 +1083,10 @@
             "type": "string",
             "label": "isNotSingleMetricViewerJobMessage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "string | undefined"
             ]
@@ -887,7 +1097,10 @@
             "type": "CompoundType",
             "label": "deleting",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 33
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -898,7 +1111,10 @@
             "type": "number",
             "label": "latestTimestampSortValue",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "number | undefined"
             ]
@@ -909,7 +1125,10 @@
             "type": "number",
             "label": "earliestStartTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "number | undefined"
             ]
@@ -920,10 +1139,16 @@
             "type": "boolean",
             "label": "awaitingNodeAssignment",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L36"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 36
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -951,7 +1176,10 @@
             "type": "Function",
             "label": "renderCellValue",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/application/components/data_grid/types.ts#L78",
+            "source": {
+              "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+              "lineNumber": 78
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -963,7 +1191,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/application/components/data_grid/types.ts#L52",
+        "source": {
+          "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+          "lineNumber": 52
+        },
         "initialIsOpen": false
       }
     ],
@@ -974,7 +1205,10 @@
         "label": "ANOMALY_SEVERITY",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       }
     ],
@@ -985,7 +1219,10 @@
         "type": "string",
         "label": "ANOMALY_SWIMLANE_EMBEDDABLE_TYPE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/embeddables/constants.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/ml/public/embeddables/constants.ts",
+          "lineNumber": 8
+        },
         "signature": [
           "\"ml_anomaly_swimlane\""
         ],
@@ -997,7 +1234,10 @@
         "label": "AnomalySwimlaneEmbeddableInput",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/embeddables/types.ts#L40",
+        "source": {
+          "path": "x-pack/plugins/ml/public/embeddables/types.ts",
+          "lineNumber": 40
+        },
         "signature": [
           "EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput"
         ],
@@ -1009,7 +1249,10 @@
         "type": "string",
         "label": "CONTROLLED_BY_SWIM_LANE_FILTER",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/ui_actions/constants.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/ml/public/ui_actions/constants.ts",
+          "lineNumber": 8
+        },
         "signature": [
           "\"anomaly-swim-lane\""
         ],
@@ -1021,7 +1264,10 @@
         "label": "EsSorting",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/application/components/data_grid/types.ts#L48",
+        "source": {
+          "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+          "lineNumber": 48
+        },
         "signature": [
           "Dictionary<{ order: 'asc' | 'desc'; }>"
         ],
@@ -1033,7 +1279,10 @@
         "label": "GetMlSharedImportsReturnType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/index.ts#L65",
+        "source": {
+          "path": "x-pack/plugins/ml/public/index.ts",
+          "lineNumber": 65
+        },
         "signature": [
           "typeof ",
           "x-pack/plugins/ml/public/shared"
@@ -1046,7 +1295,10 @@
         "label": "RenderCellValue",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/application/components/data_grid/types.ts#L38",
+        "source": {
+          "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+          "lineNumber": 38
+        },
         "signature": [
           "(__0: { rowIndex: number; columnId: string; setCellProps: any; }) => any"
         ],
@@ -1060,7 +1312,10 @@
         "type": "Object",
         "label": "HITS_TOTAL_RELATION",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/es_client.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "{ readonly EQ: \"eq\"; readonly GTE: \"gte\"; }"
         ],
@@ -1072,7 +1327,10 @@
         "type": "Object",
         "label": "ML_PAGES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/ml_url_generator.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ml/common/constants/ml_url_generator.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly DATA_FRAME_ANALYTICS_MODELS_MANAGE: \"data_frame_analytics/models\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
         ],
@@ -1085,7 +1343,10 @@
       "label": "MlPluginSetup",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/plugin.ts#L209",
+      "source": {
+        "path": "x-pack/plugins/ml/public/plugin.ts",
+        "lineNumber": 209
+      },
       "signature": [
         "{ urlGenerator: UrlGeneratorContract<\"ML_APP_URL_GENERATOR\"> | undefined; }"
       ],
@@ -1098,7 +1359,10 @@
       "label": "MlPluginStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/public/plugin.ts#L210",
+      "source": {
+        "path": "x-pack/plugins/ml/public/plugin.ts",
+        "lineNumber": 210
+      },
       "signature": [
         "{ urlGenerator: UrlGeneratorContract<\"ML_APP_URL_GENERATOR\"> | undefined; }"
       ],
@@ -1142,15 +1406,24 @@
                   "string | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L18"
+                "source": {
+                  "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                  "lineNumber": 18
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L18"
+            "source": {
+              "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+              "lineNumber": 18
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+          "lineNumber": 17
+        },
         "initialIsOpen": false
       },
       {
@@ -1187,15 +1460,24 @@
                   "string | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L25"
+                "source": {
+                  "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                  "lineNumber": 25
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L25"
+            "source": {
+              "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+              "lineNumber": 25
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       },
       {
@@ -1232,15 +1514,24 @@
                   "string | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L11"
+                "source": {
+                  "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                  "lineNumber": 11
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+              "lineNumber": 11
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/lib/capabilities/errors.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       }
     ],
@@ -1263,7 +1554,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L241"
+            "source": {
+              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+              "lineNumber": 241
+            }
           },
           {
             "type": "string",
@@ -1273,7 +1567,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L242"
+            "source": {
+              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+              "lineNumber": 242
+            }
           },
           {
             "type": "Any",
@@ -1283,7 +1580,10 @@
               "any"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L243"
+            "source": {
+              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+              "lineNumber": 243
+            }
           },
           {
             "type": "Array",
@@ -1300,7 +1600,10 @@
               "[]"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L244"
+            "source": {
+              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+              "lineNumber": 244
+            }
           },
           {
             "type": "number",
@@ -1310,7 +1613,10 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L245"
+            "source": {
+              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+              "lineNumber": 245
+            }
           },
           {
             "type": "Object",
@@ -1328,7 +1634,10 @@
               "> | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L246"
+            "source": {
+              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+              "lineNumber": 246
+            }
           }
         ],
         "signature": [
@@ -1348,7 +1657,10 @@
         ],
         "description": [],
         "label": "getHistogramsForFields",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts#L240",
+        "source": {
+          "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
+          "lineNumber": 240
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1370,12 +1682,18 @@
               "any"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L28"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+              "lineNumber": 28
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L28",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+          "lineNumber": 28
+        },
         "initialIsOpen": false
       }
     ],
@@ -1393,7 +1711,10 @@
             "type": "string",
             "label": "bucket_span",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -1401,7 +1722,10 @@
             "type": "string",
             "label": "categorization_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L49",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 49
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1412,7 +1736,10 @@
             "type": "Array",
             "label": "categorization_filters",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L50",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 50
+            },
             "signature": [
               "string[] | undefined"
             ]
@@ -1423,7 +1750,10 @@
             "type": "CompoundType",
             "label": "categorization_analyzer",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L51",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 51
+            },
             "signature": [
               "string | object | undefined"
             ]
@@ -1434,7 +1764,10 @@
             "type": "Array",
             "label": "detectors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L52",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 52
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -1452,7 +1785,10 @@
             "type": "Array",
             "label": "influencers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L53",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 53
+            },
             "signature": [
               "string[]"
             ]
@@ -1463,7 +1799,10 @@
             "type": "number",
             "label": "latency",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L54",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "number | undefined"
             ]
@@ -1474,7 +1813,10 @@
             "type": "CompoundType",
             "label": "multivariate_by_fields",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L55",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 55
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -1485,7 +1827,10 @@
             "type": "string",
             "label": "summary_count_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L56",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 56
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1496,7 +1841,10 @@
             "type": "Object",
             "label": "per_partition_categorization",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L57",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 57
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -1509,7 +1857,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L47",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 47
+        },
         "initialIsOpen": false
       },
       {
@@ -1525,7 +1876,10 @@
             "type": "number",
             "label": "categorization_examples_limit",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L73",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 73
+            },
             "signature": [
               "number | undefined"
             ]
@@ -1536,10 +1890,16 @@
             "type": "string",
             "label": "model_memory_limit",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L74"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 74
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L72",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 72
+        },
         "initialIsOpen": false
       },
       {
@@ -1555,7 +1915,10 @@
             "type": "number",
             "label": "time",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L44"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 44
+            }
           },
           {
             "tags": [],
@@ -1563,7 +1926,10 @@
             "type": "Object",
             "label": "source",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L45",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 45
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -1580,7 +1946,10 @@
             "type": "string",
             "label": "rowId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L46"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 46
+            }
           },
           {
             "tags": [],
@@ -1588,7 +1957,10 @@
             "type": "string",
             "label": "jobId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L47"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 47
+            }
           },
           {
             "tags": [],
@@ -1596,7 +1968,10 @@
             "type": "number",
             "label": "detectorIndex",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -1604,7 +1979,10 @@
             "type": "number",
             "label": "severity",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L49"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 49
+            }
           },
           {
             "tags": [],
@@ -1612,7 +1990,10 @@
             "type": "string",
             "label": "entityName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L50",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 50
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1623,7 +2004,10 @@
             "type": "Any",
             "label": "entityValue",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L51",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 51
+            },
             "signature": [
               "any"
             ]
@@ -1634,7 +2018,10 @@
             "type": "Array",
             "label": "influencers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L52",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 52
+            },
             "signature": [
               "{ [key: string]: any; }[] | undefined"
             ]
@@ -1645,7 +2032,10 @@
             "type": "Array",
             "label": "actual",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L53",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 53
+            },
             "signature": [
               "number[] | undefined"
             ]
@@ -1656,7 +2046,10 @@
             "type": "Any",
             "label": "actualSort",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L54",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "any"
             ]
@@ -1667,7 +2060,10 @@
             "type": "Array",
             "label": "typical",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L55",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 55
+            },
             "signature": [
               "number[] | undefined"
             ]
@@ -1678,7 +2074,10 @@
             "type": "Any",
             "label": "typicalSort",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L56",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 56
+            },
             "signature": [
               "any"
             ]
@@ -1689,13 +2088,19 @@
             "type": "number",
             "label": "metricDescriptionSort",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L57",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 57
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L43",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 43
+        },
         "initialIsOpen": false
       },
       {
@@ -1711,7 +2116,10 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L63",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 63
+            },
             "signature": [
               "any"
             ]
@@ -1722,7 +2130,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L64"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 64
+            }
           },
           {
             "tags": [],
@@ -1730,7 +2141,10 @@
             "type": "string",
             "label": "result_type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L65",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 65
+            },
             "signature": [
               "\"categorizer_stats\""
             ]
@@ -1741,7 +2155,10 @@
             "type": "string",
             "label": "partition_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L66",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 66
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1752,7 +2169,10 @@
             "type": "string",
             "label": "partition_field_value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L67",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 67
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1763,7 +2183,10 @@
             "type": "number",
             "label": "categorized_doc_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L68"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 68
+            }
           },
           {
             "tags": [],
@@ -1771,7 +2194,10 @@
             "type": "number",
             "label": "total_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L69"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 69
+            }
           },
           {
             "tags": [],
@@ -1779,7 +2205,10 @@
             "type": "number",
             "label": "frequent_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L70"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 70
+            }
           },
           {
             "tags": [],
@@ -1787,7 +2216,10 @@
             "type": "number",
             "label": "rare_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L71"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 71
+            }
           },
           {
             "tags": [],
@@ -1795,7 +2227,10 @@
             "type": "number",
             "label": "dead_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L72"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 72
+            }
           },
           {
             "tags": [],
@@ -1803,7 +2238,10 @@
             "type": "number",
             "label": "failed_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L73"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 73
+            }
           },
           {
             "tags": [],
@@ -1811,7 +2249,10 @@
             "type": "CompoundType",
             "label": "categorization_status",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L74",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 74
+            },
             "signature": [
               "\"ok\" | \"warn\""
             ]
@@ -1822,7 +2263,10 @@
             "type": "number",
             "label": "log_time",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L75"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 75
+            }
           },
           {
             "tags": [],
@@ -1830,10 +2274,16 @@
             "type": "number",
             "label": "timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L76"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 76
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L62",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 62
+        },
         "initialIsOpen": false
       },
       {
@@ -1849,7 +2299,10 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "any"
             ]
@@ -1860,7 +2313,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -1868,7 +2324,10 @@
             "type": "string",
             "label": "result_type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L18"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -1876,7 +2335,10 @@
             "type": "number",
             "label": "probability",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L19"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 19
+            }
           },
           {
             "tags": [],
@@ -1884,7 +2346,10 @@
             "type": "number",
             "label": "record_score",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -1892,7 +2357,10 @@
             "type": "number",
             "label": "initial_record_score",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L21"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 21
+            }
           },
           {
             "tags": [],
@@ -1900,7 +2368,10 @@
             "type": "number",
             "label": "bucket_span",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L22"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 22
+            }
           },
           {
             "tags": [],
@@ -1908,7 +2379,10 @@
             "type": "number",
             "label": "detector_index",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L23"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -1916,7 +2390,10 @@
             "type": "boolean",
             "label": "is_interim",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L24"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -1924,7 +2401,10 @@
             "type": "number",
             "label": "timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L25"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 25
+            }
           },
           {
             "tags": [],
@@ -1932,7 +2412,10 @@
             "type": "string",
             "label": "partition_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 26
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1943,7 +2426,10 @@
             "type": "CompoundType",
             "label": "partition_field_value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "string | number | undefined"
             ]
@@ -1954,7 +2440,10 @@
             "type": "string",
             "label": "function",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L28"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 28
+            }
           },
           {
             "tags": [],
@@ -1962,7 +2451,10 @@
             "type": "string",
             "label": "function_description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L29"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 29
+            }
           },
           {
             "tags": [],
@@ -1970,7 +2462,10 @@
             "type": "Array",
             "label": "typical",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 30
+            },
             "signature": [
               "number[] | undefined"
             ]
@@ -1981,7 +2476,10 @@
             "type": "Array",
             "label": "actual",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L31",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 31
+            },
             "signature": [
               "number[] | undefined"
             ]
@@ -1992,7 +2490,10 @@
             "type": "Array",
             "label": "influencers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 32
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2010,7 +2511,10 @@
             "type": "string",
             "label": "by_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 33
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2021,7 +2525,10 @@
             "type": "string",
             "label": "field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2032,7 +2539,10 @@
             "type": "string",
             "label": "by_field_value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2043,7 +2553,10 @@
             "type": "number",
             "label": "multi_bucket_impact",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L36",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 36
+            },
             "signature": [
               "number | undefined"
             ]
@@ -2054,7 +2567,10 @@
             "type": "string",
             "label": "over_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L37",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 37
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2065,7 +2581,10 @@
             "type": "string",
             "label": "over_field_value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L38",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 38
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2076,13 +2595,19 @@
             "type": "Array",
             "label": "causes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L40",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 40
+            },
             "signature": [
               "any[] | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -2098,7 +2623,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L40"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 40
+            }
           },
           {
             "tags": [],
@@ -2106,7 +2634,10 @@
             "type": "number",
             "label": "msgTime",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L41"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 41
+            }
           },
           {
             "tags": [],
@@ -2114,7 +2645,10 @@
             "type": "string",
             "label": "level",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L42"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 42
+            }
           },
           {
             "tags": [],
@@ -2122,7 +2656,10 @@
             "type": "string",
             "label": "highestLevel",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L43"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 43
+            }
           },
           {
             "tags": [],
@@ -2130,7 +2667,10 @@
             "type": "string",
             "label": "highestLevelText",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L44"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 44
+            }
           },
           {
             "tags": [],
@@ -2138,10 +2678,16 @@
             "type": "string",
             "label": "text",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L45"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 45
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L39",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+          "lineNumber": 39
+        },
         "initialIsOpen": false
       },
       {
@@ -2157,7 +2703,10 @@
             "type": "CompoundType",
             "label": "mode",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "\"auto\" | \"off\" | \"manual\""
             ]
@@ -2168,13 +2717,19 @@
             "type": "string",
             "label": "time_span",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 33
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L31",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       },
       {
@@ -2195,7 +2750,10 @@
             "type": "Array",
             "label": "calendars",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "string[] | undefined"
             ]
@@ -2206,7 +2764,10 @@
             "type": "Object",
             "label": "datafeed_config",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L20",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+              "lineNumber": 20
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2218,7 +2779,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L18",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+          "lineNumber": 18
+        },
         "initialIsOpen": false
       },
       {
@@ -2239,7 +2803,10 @@
             "type": "Array",
             "label": "calendars",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L24",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+              "lineNumber": 24
+            },
             "signature": [
               "string[] | undefined"
             ]
@@ -2250,7 +2817,10 @@
             "type": "CompoundType",
             "label": "datafeed_config",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2262,7 +2832,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L23",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+          "lineNumber": 23
+        },
         "initialIsOpen": false
       },
       {
@@ -2278,7 +2851,10 @@
             "type": "Array",
             "label": "actions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L91",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 91
+            },
             "signature": [
               "string[]"
             ]
@@ -2289,7 +2865,10 @@
             "type": "Uncategorized",
             "label": "scope",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L92",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 92
+            },
             "signature": [
               "object | undefined"
             ]
@@ -2300,13 +2879,19 @@
             "type": "Array",
             "label": "conditions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L93",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 93
+            },
             "signature": [
               "any[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L90",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 90
+        },
         "initialIsOpen": false
       },
       {
@@ -2322,7 +2907,10 @@
             "type": "Array",
             "label": "custom_urls",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L15",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 15
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2340,7 +2928,10 @@
             "type": "CompoundType",
             "label": "created_by",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 16
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2358,13 +2949,19 @@
             "type": "Object",
             "label": "job_tags",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "{ [tag: string]: string; } | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -2380,7 +2977,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L23"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -2388,7 +2988,10 @@
             "type": "number",
             "label": "processed_record_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L24"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -2396,7 +2999,10 @@
             "type": "number",
             "label": "processed_field_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L25"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 25
+            }
           },
           {
             "tags": [],
@@ -2404,7 +3010,10 @@
             "type": "number",
             "label": "input_bytes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L26"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 26
+            }
           },
           {
             "tags": [],
@@ -2412,7 +3021,10 @@
             "type": "number",
             "label": "input_field_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L27"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 27
+            }
           },
           {
             "tags": [],
@@ -2420,7 +3032,10 @@
             "type": "number",
             "label": "invalid_date_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L28"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 28
+            }
           },
           {
             "tags": [],
@@ -2428,7 +3043,10 @@
             "type": "number",
             "label": "missing_field_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L29"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 29
+            }
           },
           {
             "tags": [],
@@ -2436,7 +3054,10 @@
             "type": "number",
             "label": "out_of_order_timestamp_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -2444,7 +3065,10 @@
             "type": "number",
             "label": "empty_bucket_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L31"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 31
+            }
           },
           {
             "tags": [],
@@ -2452,7 +3076,10 @@
             "type": "number",
             "label": "sparse_bucket_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L32"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 32
+            }
           },
           {
             "tags": [],
@@ -2460,7 +3087,10 @@
             "type": "number",
             "label": "bucket_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L33"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 33
+            }
           },
           {
             "tags": [],
@@ -2468,7 +3098,10 @@
             "type": "number",
             "label": "earliest_record_timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L34"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 34
+            }
           },
           {
             "tags": [],
@@ -2476,7 +3109,10 @@
             "type": "number",
             "label": "latest_record_timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L35"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 35
+            }
           },
           {
             "tags": [],
@@ -2484,7 +3120,10 @@
             "type": "number",
             "label": "last_data_time",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L36"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 36
+            }
           },
           {
             "tags": [],
@@ -2492,7 +3131,10 @@
             "type": "number",
             "label": "input_record_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L37"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 37
+            }
           },
           {
             "tags": [],
@@ -2500,7 +3142,10 @@
             "type": "number",
             "label": "latest_empty_bucket_timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L38"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 38
+            }
           },
           {
             "tags": [],
@@ -2508,7 +3153,10 @@
             "type": "number",
             "label": "latest_sparse_bucket_timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L39"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 39
+            }
           },
           {
             "tags": [],
@@ -2516,13 +3164,19 @@
             "type": "number",
             "label": "latest_bucket_timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L40",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 40
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       },
       {
@@ -2538,7 +3192,10 @@
             "type": "string",
             "label": "format",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L78",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 78
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2549,7 +3206,10 @@
             "type": "string",
             "label": "time_field",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L79"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 79
+            }
           },
           {
             "tags": [],
@@ -2557,13 +3217,19 @@
             "type": "string",
             "label": "time_format",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L80",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 80
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L77",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 77
+        },
         "initialIsOpen": false
       },
       {
@@ -2579,7 +3245,10 @@
             "type": "string",
             "label": "datafeed_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L14"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -2587,7 +3256,10 @@
             "type": "Object",
             "label": "aggregations",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L15",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 15
+            },
             "signature": [
               "Record<string, { date_histogram: { field: string; fixed_interval: string; }; aggregations?: { [key: string]: any; } | undefined; aggs?: { [key: string]: any; } | undefined; }> | undefined"
             ]
@@ -2598,7 +3270,10 @@
             "type": "Object",
             "label": "aggs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "Record<string, { date_histogram: { field: string; fixed_interval: string; }; aggregations?: { [key: string]: any; } | undefined; aggs?: { [key: string]: any; } | undefined; }> | undefined"
             ]
@@ -2609,7 +3284,10 @@
             "type": "Object",
             "label": "chunking_config",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 17
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2627,7 +3305,10 @@
             "type": "string",
             "label": "frequency",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2638,7 +3319,10 @@
             "type": "Array",
             "label": "indices",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "string[]"
             ]
@@ -2649,7 +3333,10 @@
             "type": "Array",
             "label": "indexes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L20",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 20
+            },
             "signature": [
               "string[] | undefined"
             ]
@@ -2660,7 +3347,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L21"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 21
+            }
           },
           {
             "tags": [],
@@ -2668,7 +3358,10 @@
             "type": "Uncategorized",
             "label": "query",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L22",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "object"
             ]
@@ -2679,7 +3372,10 @@
             "type": "string",
             "label": "query_delay",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L23",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 23
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2690,7 +3386,10 @@
             "type": "Object",
             "label": "script_fields",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L24",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 24
+            },
             "signature": [
               "Record<string, any> | undefined"
             ]
@@ -2701,7 +3400,10 @@
             "type": "Object",
             "label": "runtime_mappings",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 25
+            },
             "signature": [
               "Record<string, ",
               {
@@ -2720,7 +3422,10 @@
             "type": "number",
             "label": "scroll_size",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 26
+            },
             "signature": [
               "number | undefined"
             ]
@@ -2731,7 +3436,10 @@
             "type": "Uncategorized",
             "label": "delayed_data_check_config",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "object | undefined"
             ]
@@ -2742,13 +3450,19 @@
             "type": "Object",
             "label": "indices_options",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "IndicesOptions | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -2764,7 +3478,10 @@
             "type": "string",
             "label": "datafeed_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts#L12"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+              "lineNumber": 12
+            }
           },
           {
             "tags": [],
@@ -2772,7 +3489,10 @@
             "type": "Enum",
             "label": "state",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts#L13",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+              "lineNumber": 13
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2789,7 +3509,10 @@
             "type": "Object",
             "label": "node",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts#L14",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+              "lineNumber": 14
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2806,7 +3529,10 @@
             "type": "string",
             "label": "assignment_explanation",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -2814,13 +3540,19 @@
             "type": "Object",
             "label": "timing_stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "TimingStats"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -2836,7 +3568,10 @@
             "type": "string",
             "label": "by_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L61",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 61
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2847,7 +3582,10 @@
             "type": "string",
             "label": "detector_description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L62",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 62
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2858,7 +3596,10 @@
             "type": "number",
             "label": "detector_index",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L63",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 63
+            },
             "signature": [
               "number | undefined"
             ]
@@ -2869,7 +3610,10 @@
             "type": "string",
             "label": "exclude_frequent",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L64",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 64
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2880,7 +3624,10 @@
             "type": "string",
             "label": "field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L65",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 65
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2891,7 +3638,10 @@
             "type": "string",
             "label": "function",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L66"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 66
+            }
           },
           {
             "tags": [],
@@ -2899,7 +3649,10 @@
             "type": "string",
             "label": "over_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L67",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 67
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2910,7 +3663,10 @@
             "type": "string",
             "label": "partition_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L68",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 68
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2921,7 +3677,10 @@
             "type": "CompoundType",
             "label": "use_null",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L69",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 69
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -2932,7 +3691,10 @@
             "type": "Array",
             "label": "custom_rules",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L70",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 70
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -2945,7 +3707,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L60",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 60
+        },
         "initialIsOpen": false
       },
       {
@@ -2961,7 +3726,10 @@
             "type": "number",
             "label": "total",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L66"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 66
+            }
           },
           {
             "tags": [],
@@ -2969,7 +3737,10 @@
             "type": "number",
             "label": "forecasted_jobs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L67"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 67
+            }
           },
           {
             "tags": [],
@@ -2977,7 +3748,10 @@
             "type": "Any",
             "label": "memory_bytes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L68",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 68
+            },
             "signature": [
               "any"
             ]
@@ -2988,7 +3762,10 @@
             "type": "Any",
             "label": "records",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L69",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 69
+            },
             "signature": [
               "any"
             ]
@@ -2999,7 +3776,10 @@
             "type": "Any",
             "label": "processing_time_ms",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L70",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 70
+            },
             "signature": [
               "any"
             ]
@@ -3010,13 +3790,19 @@
             "type": "Any",
             "label": "status",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L71",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 71
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L65",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+          "lineNumber": 65
+        },
         "initialIsOpen": false
       },
       {
@@ -3032,7 +3818,10 @@
             "type": "string",
             "label": "influencer_field_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -3040,13 +3829,19 @@
             "type": "Array",
             "label": "influencer_field_values",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "string[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -3062,7 +3857,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L23"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -3070,7 +3868,10 @@
             "type": "Object",
             "label": "analysis_config",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L24",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 24
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3087,7 +3888,10 @@
             "type": "Object",
             "label": "analysis_limits",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3105,7 +3909,10 @@
             "type": "string",
             "label": "background_persist_interval",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 26
+            },
             "signature": [
               "string | undefined"
             ]
@@ -3116,7 +3923,10 @@
             "type": "Object",
             "label": "custom_settings",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 27
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3134,7 +3944,10 @@
             "type": "Object",
             "label": "data_description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 28
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3151,7 +3964,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L29"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 29
+            }
           },
           {
             "tags": [],
@@ -3159,7 +3975,10 @@
             "type": "Array",
             "label": "groups",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 30
+            },
             "signature": [
               "string[]"
             ]
@@ -3170,7 +3989,10 @@
             "type": "Object",
             "label": "model_plot_config",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L31",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 31
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3188,7 +4010,10 @@
             "type": "number",
             "label": "model_snapshot_retention_days",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3199,7 +4024,10 @@
             "type": "number",
             "label": "daily_model_snapshot_retention_after_days",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 33
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3210,7 +4038,10 @@
             "type": "number",
             "label": "renormalization_window_days",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3221,7 +4052,10 @@
             "type": "string",
             "label": "results_index_name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "string | undefined"
             ]
@@ -3232,7 +4066,10 @@
             "type": "number",
             "label": "results_retention_days",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L36",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 36
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3243,7 +4080,10 @@
             "type": "number",
             "label": "create_time",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L39",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 39
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3254,7 +4094,10 @@
             "type": "number",
             "label": "finished_time",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L40",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 40
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3265,7 +4108,10 @@
             "type": "string",
             "label": "job_type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L41",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 41
+            },
             "signature": [
               "\"anomaly_detector\" | undefined"
             ]
@@ -3276,7 +4122,10 @@
             "type": "string",
             "label": "job_version",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L42",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 42
+            },
             "signature": [
               "string | undefined"
             ]
@@ -3287,7 +4136,10 @@
             "type": "string",
             "label": "model_snapshot_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L43",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 43
+            },
             "signature": [
               "string | undefined"
             ]
@@ -3298,13 +4150,19 @@
             "type": "CompoundType",
             "label": "deleting",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L44",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 44
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       },
       {
@@ -3320,7 +4178,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -3328,7 +4189,10 @@
             "type": "Object",
             "label": "data_counts",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 12
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3345,7 +4209,10 @@
             "type": "Object",
             "label": "model_size_stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L13",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 13
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3362,7 +4229,10 @@
             "type": "Object",
             "label": "forecasts_stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L14",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 14
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3379,7 +4249,10 @@
             "type": "Enum",
             "label": "state",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L15",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 15
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3396,7 +4269,10 @@
             "type": "Object",
             "label": "node",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 16
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3413,7 +4289,10 @@
             "type": "string",
             "label": "assignment_explanation",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -3421,7 +4300,10 @@
             "type": "string",
             "label": "open_time",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L18"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -3429,13 +4311,19 @@
             "type": "Object",
             "label": "timing_stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "TimingStats"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -3456,7 +4344,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L51"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 51
+            }
           },
           {
             "tags": [],
@@ -3464,7 +4355,10 @@
             "type": "CompoundType",
             "label": "isRunning",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L52",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 52
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -3475,7 +4369,10 @@
             "type": "string",
             "label": "isNotSingleMetricViewerJobMessage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L53",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 53
+            },
             "signature": [
               "string | undefined"
             ]
@@ -3486,13 +4383,19 @@
             "type": "Object",
             "label": "timeRange",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L54",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "{ from: number; to: number; fromPx: number; toPx: number; fromMoment: moment.Moment; toMoment: moment.Moment; widthPx: number; label: string; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L50",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+          "lineNumber": 50
+        },
         "initialIsOpen": false
       },
       {
@@ -3508,7 +4411,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -3516,7 +4422,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -3524,7 +4433,10 @@
             "type": "Array",
             "label": "groups",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "string[]"
             ]
@@ -3535,7 +4447,10 @@
             "type": "number",
             "label": "processed_record_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3546,7 +4461,10 @@
             "type": "string",
             "label": "memory_status",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "string | undefined"
             ]
@@ -3557,7 +4475,10 @@
             "type": "string",
             "label": "jobState",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -3565,7 +4486,10 @@
             "type": "Array",
             "label": "datafeedIndices",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L21",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 21
+            },
             "signature": [
               "string[]"
             ]
@@ -3576,7 +4500,10 @@
             "type": "boolean",
             "label": "hasDatafeed",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L22"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 22
+            }
           },
           {
             "tags": [],
@@ -3584,7 +4511,10 @@
             "type": "string",
             "label": "datafeedId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L23"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -3592,7 +4522,10 @@
             "type": "string",
             "label": "datafeedState",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L24"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -3600,7 +4533,10 @@
             "type": "number",
             "label": "latestTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 25
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3611,7 +4547,10 @@
             "type": "number",
             "label": "earliestTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 26
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3622,7 +4561,10 @@
             "type": "number",
             "label": "latestResultsTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3633,7 +4575,10 @@
             "type": "Object",
             "label": "fullJob",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 28
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -3651,7 +4596,10 @@
             "type": "string",
             "label": "nodeName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L29",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "string | undefined"
             ]
@@ -3662,7 +4610,10 @@
             "type": "Object",
             "label": "auditMessage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 30
+            },
             "signature": [
               "Partial<",
               {
@@ -3681,7 +4632,10 @@
             "type": "boolean",
             "label": "isSingleMetricViewerJob",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L31"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 31
+            }
           },
           {
             "tags": [],
@@ -3689,7 +4643,10 @@
             "type": "string",
             "label": "isNotSingleMetricViewerJobMessage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "string | undefined"
             ]
@@ -3700,7 +4657,10 @@
             "type": "CompoundType",
             "label": "deleting",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 33
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -3711,7 +4671,10 @@
             "type": "number",
             "label": "latestTimestampSortValue",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3722,7 +4685,10 @@
             "type": "number",
             "label": "earliestStartTimestampMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3733,10 +4699,16 @@
             "type": "boolean",
             "label": "awaitingNodeAssignment",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L36"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+              "lineNumber": 36
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -3752,7 +4724,10 @@
             "type": "CompoundType",
             "label": "enabled",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L84",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 84
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -3763,7 +4738,10 @@
             "type": "CompoundType",
             "label": "annotations_enabled",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L85",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 85
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -3774,13 +4752,19 @@
             "type": "string",
             "label": "terms",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L86",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 86
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L83",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 83
+        },
         "initialIsOpen": false
       },
       {
@@ -3796,7 +4780,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L44"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 44
+            }
           },
           {
             "tags": [],
@@ -3804,7 +4791,10 @@
             "type": "string",
             "label": "result_type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L45"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 45
+            }
           },
           {
             "tags": [],
@@ -3812,7 +4802,10 @@
             "type": "number",
             "label": "model_bytes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L46"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 46
+            }
           },
           {
             "tags": [],
@@ -3820,7 +4813,10 @@
             "type": "number",
             "label": "model_bytes_exceeded",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L47"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 47
+            }
           },
           {
             "tags": [],
@@ -3828,7 +4824,10 @@
             "type": "number",
             "label": "model_bytes_memory_limit",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -3836,7 +4835,10 @@
             "type": "number",
             "label": "peak_model_bytes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L49",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 49
+            },
             "signature": [
               "number | undefined"
             ]
@@ -3847,7 +4849,10 @@
             "type": "number",
             "label": "total_by_field_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L50"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 50
+            }
           },
           {
             "tags": [],
@@ -3855,7 +4860,10 @@
             "type": "number",
             "label": "total_over_field_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L51"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 51
+            }
           },
           {
             "tags": [],
@@ -3863,7 +4871,10 @@
             "type": "number",
             "label": "total_partition_field_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L52"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 52
+            }
           },
           {
             "tags": [],
@@ -3871,7 +4882,10 @@
             "type": "number",
             "label": "bucket_allocation_failures_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L53"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 53
+            }
           },
           {
             "tags": [],
@@ -3879,7 +4893,10 @@
             "type": "CompoundType",
             "label": "memory_status",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L54",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "\"ok\" | \"soft_limit\" | \"hard_limit\""
             ]
@@ -3890,7 +4907,10 @@
             "type": "number",
             "label": "categorized_doc_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L55"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 55
+            }
           },
           {
             "tags": [],
@@ -3898,7 +4918,10 @@
             "type": "number",
             "label": "total_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L56"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 56
+            }
           },
           {
             "tags": [],
@@ -3906,7 +4929,10 @@
             "type": "number",
             "label": "frequent_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L57"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 57
+            }
           },
           {
             "tags": [],
@@ -3914,7 +4940,10 @@
             "type": "number",
             "label": "rare_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L58"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 58
+            }
           },
           {
             "tags": [],
@@ -3922,7 +4951,10 @@
             "type": "number",
             "label": "dead_category_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L59"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 59
+            }
           },
           {
             "tags": [],
@@ -3930,7 +4962,10 @@
             "type": "CompoundType",
             "label": "categorization_status",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L60",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 60
+            },
             "signature": [
               "\"ok\" | \"warn\""
             ]
@@ -3941,7 +4976,10 @@
             "type": "number",
             "label": "log_time",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L61"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 61
+            }
           },
           {
             "tags": [],
@@ -3949,10 +4987,16 @@
             "type": "number",
             "label": "timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L62"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 62
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L43",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+          "lineNumber": 43
+        },
         "initialIsOpen": false
       },
       {
@@ -3968,7 +5012,10 @@
             "type": "string",
             "label": "job_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L12"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 12
+            }
           },
           {
             "tags": [],
@@ -3976,7 +5023,10 @@
             "type": "string",
             "label": "min_version",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -3984,7 +5034,10 @@
             "type": "number",
             "label": "timestamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L14"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -3992,7 +5045,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -4000,7 +5056,10 @@
             "type": "string",
             "label": "snapshot_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -4008,7 +5067,10 @@
             "type": "number",
             "label": "snapshot_doc_count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -4016,7 +5078,10 @@
             "type": "Object",
             "label": "model_size_stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 18
+            },
             "signature": [
               {
                 "pluginId": "ml",
@@ -4033,7 +5098,10 @@
             "type": "number",
             "label": "latest_record_time_stamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L19"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 19
+            }
           },
           {
             "tags": [],
@@ -4041,7 +5109,10 @@
             "type": "number",
             "label": "latest_result_time_stamp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -4049,10 +5120,16 @@
             "type": "boolean",
             "label": "retain",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L21"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+              "lineNumber": 21
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -4068,7 +5145,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L75"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 75
+            }
           },
           {
             "tags": [],
@@ -4076,7 +5156,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L76"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 76
+            }
           },
           {
             "tags": [],
@@ -4084,7 +5167,10 @@
             "type": "string",
             "label": "ephemeral_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L77"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 77
+            }
           },
           {
             "tags": [],
@@ -4092,7 +5178,10 @@
             "type": "string",
             "label": "transport_address",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L78"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 78
+            }
           },
           {
             "tags": [],
@@ -4100,13 +5189,19 @@
             "type": "Object",
             "label": "attributes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L79",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+              "lineNumber": 79
+            },
             "signature": [
               "{ 'transform.remote_connect'?: boolean | undefined; 'ml.machine_memory'?: number | undefined; 'xpack.installed'?: boolean | undefined; 'transform.node'?: boolean | undefined; 'ml.max_open_jobs'?: number | undefined; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts#L74",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
+          "lineNumber": 74
+        },
         "initialIsOpen": false
       },
       {
@@ -4122,7 +5217,10 @@
             "type": "CompoundType",
             "label": "enabled",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L97",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 97
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -4133,13 +5231,19 @@
             "type": "CompoundType",
             "label": "stop_on_warn",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L98",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+              "lineNumber": 98
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L96",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 96
+        },
         "initialIsOpen": false
       }
     ],
@@ -4151,7 +5255,10 @@
         "label": "Aggregation",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L36",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+          "lineNumber": 36
+        },
         "signature": [
           "{ [x: string]: { date_histogram: {    field: string;    fixed_interval: string;}; aggregations?: { [key: string]: any; } | undefined; aggs?: { [key: string]: any; } | undefined; }; }"
         ],
@@ -4163,7 +5270,10 @@
         "label": "AnomalyResultType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L81",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 81
+        },
         "signature": [
           "\"bucket\" | \"record\" | \"influencer\""
         ],
@@ -4175,7 +5285,10 @@
         "label": "BucketSpan",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "string"
         ],
@@ -4187,7 +5300,10 @@
         "label": "DatafeedId",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "string"
         ],
@@ -4199,7 +5315,10 @@
         "label": "DatafeedWithStats",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "Datafeed & DatafeedStats"
         ],
@@ -4211,7 +5330,10 @@
         "label": "EntityFieldType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L79",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 79
+        },
         "signature": [
           "\"partition_field\" | \"over_field\" | \"by_field\""
         ],
@@ -4223,7 +5345,10 @@
         "label": "JobId",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "string"
         ],
@@ -4235,7 +5360,10 @@
         "label": "JobWithStats",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "Job & JobStats"
         ],
@@ -4247,7 +5375,10 @@
         "label": "MlSummaryJobs",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts#L48",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+          "lineNumber": 48
+        },
         "signature": [
           "MlSummaryJob[]"
         ],
@@ -4259,7 +5390,10 @@
         "label": "ModuleSetupPayload",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/shared_services/providers/modules.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/ml/server/shared_services/providers/modules.ts",
+          "lineNumber": 16
+        },
         "signature": [
           "Readonly<{} & { moduleId: string; }> & Readonly<{ start?: number | undefined; query?: any; prefix?: string | undefined; end?: number | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; jobOverrides?: any; datafeedOverrides?: any; estimateModelMemory?: boolean | undefined; applyToAllSpaces?: boolean | undefined; } & {}>"
         ],
@@ -4271,7 +5405,10 @@
         "label": "PartitionFieldsType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/anomalies.ts#L60",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+          "lineNumber": 60
+        },
         "signature": [
           "\"partition_field\" | \"over_field\" | \"by_field\""
         ],
@@ -4285,7 +5422,10 @@
       "label": "MlPluginSetup",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/plugin.ts#L64",
+      "source": {
+        "path": "x-pack/plugins/ml/server/plugin.ts",
+        "lineNumber": 64
+      },
       "signature": [
         "JobServiceProvider",
         " & ",
@@ -4306,7 +5446,10 @@
       "label": "MlPluginStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/server/plugin.ts#L65",
+      "source": {
+        "path": "x-pack/plugins/ml/server/plugin.ts",
+        "lineNumber": 65
+      },
       "signature": [
         "void"
       ],
@@ -4336,12 +5479,18 @@
               "((value: any) => { [key: string]: any; } | null)[]"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/validators.ts#L51"
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/validators.ts",
+              "lineNumber": 51
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/validators.ts#L50",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/validators.ts",
+          "lineNumber": 50
+        },
         "initialIsOpen": false
       },
       {
@@ -4362,7 +5511,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/errors/process_errors.ts#L97"
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
+              "lineNumber": 97
+            }
           }
         ],
         "signature": [
@@ -4372,7 +5524,10 @@
         ],
         "description": [],
         "label": "extractErrorMessage",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/errors/process_errors.ts#L97",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
+          "lineNumber": 97
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -4394,12 +5549,18 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L177"
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+              "lineNumber": 177
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L177",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+          "lineNumber": 177
+        },
         "initialIsOpen": false
       },
       {
@@ -4426,12 +5587,18 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L138"
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+              "lineNumber": 138
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/anomaly_utils.ts#L138",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
+          "lineNumber": 138
+        },
         "initialIsOpen": false
       },
       {
@@ -4453,12 +5620,18 @@
               "RegExp"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/validators.ts#L34"
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/validators.ts",
+              "lineNumber": 34
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/util/validators.ts#L33",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/validators.ts",
+          "lineNumber": 33
+        },
         "initialIsOpen": false
       }
     ],
@@ -4486,7 +5659,10 @@
             "type": "number",
             "label": "took",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L26"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/es_client.ts",
+              "lineNumber": 26
+            }
           },
           {
             "tags": [],
@@ -4494,7 +5670,10 @@
             "type": "boolean",
             "label": "timed_out",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L27"
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/es_client.ts",
+              "lineNumber": 27
+            }
           },
           {
             "tags": [],
@@ -4502,7 +5681,10 @@
             "type": "string",
             "label": "_scroll_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/es_client.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "string | undefined"
             ]
@@ -4513,7 +5695,10 @@
             "type": "Object",
             "label": "_shards",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L29",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/es_client.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "ShardsResponse"
             ]
@@ -4524,7 +5709,10 @@
             "type": "Object",
             "label": "hits",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/es_client.ts",
+              "lineNumber": 30
+            },
             "signature": [
               "SearchResponse7Hits<T>"
             ]
@@ -4535,13 +5723,19 @@
             "type": "Any",
             "label": "aggregations",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L31",
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/es_client.ts",
+              "lineNumber": 31
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L25",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/es_client.ts",
+          "lineNumber": 25
+        },
         "initialIsOpen": false
       }
     ],
@@ -4552,7 +5746,10 @@
         "label": "ANOMALY_SEVERITY",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -4561,7 +5758,10 @@
         "label": "ANOMALY_THRESHOLD",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+          "lineNumber": 17
+        },
         "initialIsOpen": false
       }
     ],
@@ -4572,7 +5772,10 @@
         "label": "ChartData",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/field_histograms.ts#L68",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/field_histograms.ts",
+          "lineNumber": 68
+        },
         "signature": [
           "NumericChartData",
           " | ",
@@ -4588,7 +5791,10 @@
         "label": "HitsTotalRelation",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/es_client.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "\"gte\" | \"eq\""
         ],
@@ -4602,7 +5808,10 @@
         "type": "Object",
         "label": "HITS_TOTAL_RELATION",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/types/es_client.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/es_client.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "{ readonly EQ: \"eq\"; readonly GTE: \"gte\"; }"
         ],
@@ -4619,7 +5828,10 @@
             "type": "string",
             "label": "CRITICAL",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L26"
+            "source": {
+              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+              "lineNumber": 26
+            }
           },
           {
             "tags": [],
@@ -4627,7 +5839,10 @@
             "type": "string",
             "label": "MAJOR",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L27"
+            "source": {
+              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+              "lineNumber": 27
+            }
           },
           {
             "tags": [],
@@ -4635,7 +5850,10 @@
             "type": "string",
             "label": "MINOR",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L28"
+            "source": {
+              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+              "lineNumber": 28
+            }
           },
           {
             "tags": [],
@@ -4643,7 +5861,10 @@
             "type": "string",
             "label": "WARNING",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L29"
+            "source": {
+              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+              "lineNumber": 29
+            }
           },
           {
             "tags": [],
@@ -4651,7 +5872,10 @@
             "type": "string",
             "label": "LOW",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -4659,12 +5883,18 @@
             "type": "string",
             "label": "BLANK",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L31"
+            "source": {
+              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+              "lineNumber": 31
+            }
           }
         ],
         "description": [],
         "label": "SEVERITY_COLORS",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ml/common/constants/anomalies.ts#L25",
+        "source": {
+          "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+          "lineNumber": 25
+        },
         "initialIsOpen": false
       }
     ]

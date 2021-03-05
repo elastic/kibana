@@ -14,7 +14,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/osquery/public/types.ts#L14",
+      "source": {
+        "path": "x-pack/plugins/osquery/public/types.ts",
+        "lineNumber": 14
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -25,7 +28,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/osquery/public/types.ts#L16",
+      "source": {
+        "path": "x-pack/plugins/osquery/public/types.ts",
+        "lineNumber": 16
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -44,7 +50,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/osquery/server/types.ts#L15",
+      "source": {
+        "path": "x-pack/plugins/osquery/server/types.ts",
+        "lineNumber": 15
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -55,7 +64,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/osquery/server/types.ts#L17",
+      "source": {
+        "path": "x-pack/plugins/osquery/server/types.ts",
+        "lineNumber": 17
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -72,7 +84,10 @@
         "type": "string",
         "label": "DEFAULT_DARK_MODE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/osquery/common/constants.ts#L9",
+        "source": {
+          "path": "x-pack/plugins/osquery/common/constants.ts",
+          "lineNumber": 9
+        },
         "signature": [
           "\"theme:darkMode\""
         ],
@@ -84,7 +99,10 @@
         "type": "number",
         "label": "DEFAULT_MAX_TABLE_QUERY_SIZE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/osquery/common/constants.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/osquery/common/constants.ts",
+          "lineNumber": 8
+        },
         "signature": [
           "10000"
         ],
@@ -96,7 +114,10 @@
         "type": "string",
         "label": "PLUGIN_ID",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/osquery/common/index.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/osquery/common/index.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "\"osquery\""
         ],
@@ -108,7 +129,10 @@
         "type": "string",
         "label": "PLUGIN_NAME",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/osquery/common/index.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/osquery/common/index.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "\"osquery\""
         ],

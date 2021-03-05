@@ -59,12 +59,18 @@
                   "<unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L30"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                  "lineNumber": 30
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+              "lineNumber": 30
+            }
           },
           {
             "id": "def-server.DashboardModeServerPlugin.setup",
@@ -98,7 +104,10 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                  "lineNumber": 34
+                }
               },
               {
                 "type": "Object",
@@ -108,12 +117,18 @@
                   "DashboardModeServerSetupDependencies"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                  "lineNumber": 34
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L34"
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+              "lineNumber": 34
+            }
           },
           {
             "id": "def-server.DashboardModeServerPlugin.start",
@@ -146,12 +161,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L60"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+                  "lineNumber": 60
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L60"
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+              "lineNumber": 60
+            }
           },
           {
             "id": "def-server.DashboardModeServerPlugin.stop",
@@ -164,10 +185,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L62"
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+              "lineNumber": 62
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/server/plugin.ts#L26",
+        "source": {
+          "path": "x-pack/plugins/dashboard_mode/server/plugin.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       }
     ],
@@ -195,12 +222,18 @@
             "type": "string",
             "label": "CONFIG_DASHBOARD_ONLY_MODE_ROLES",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/common/constants.ts#L9"
+            "source": {
+              "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
+              "lineNumber": 9
+            }
           }
         ],
         "description": [],
         "label": "UI_SETTINGS",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_mode/common/constants.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/dashboard_mode/common/constants.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       }
     ]

@@ -25,7 +25,10 @@
             "type": "Function",
             "label": "getCaseClient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/case/server/types.ts#L14",
+            "source": {
+              "path": "x-pack/plugins/case/server/types.ts",
+              "lineNumber": 14
+            },
             "signature": [
               "() => ",
               {
@@ -38,7 +41,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/case/server/types.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/case/server/types.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       }
     ],

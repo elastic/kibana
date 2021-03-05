@@ -28,12 +28,18 @@
                   "object"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L32"
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 32
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L32"
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 32
+            }
           },
           {
             "id": "def-public.RenderTooltipContentParams.closeTooltip",
@@ -46,7 +52,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L33"
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 33
+            }
           },
           {
             "tags": [],
@@ -54,7 +63,10 @@
             "type": "Array",
             "label": "features",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 34
+            },
             "signature": [
               {
                 "pluginId": "maps",
@@ -72,7 +84,10 @@
             "type": "boolean",
             "label": "isLocked",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L35"
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 35
+            }
           },
           {
             "id": "def-public.RenderTooltipContentParams.getLayerName",
@@ -91,12 +106,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L36"
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 36
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L36"
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 36
+            }
           },
           {
             "id": "def-public.RenderTooltipContentParams.loadFeatureProperties",
@@ -137,12 +158,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L37"
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 37
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L37"
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 37
+            }
           },
           {
             "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry",
@@ -182,15 +209,24 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L38"
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 38
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L38"
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 38
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts#L31",
+        "source": {
+          "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       }
     ],
@@ -202,7 +238,10 @@
         "type": "string",
         "label": "MAP_SAVED_OBJECT_TYPE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/common/constants.ts#L29",
+        "source": {
+          "path": "x-pack/plugins/maps/common/constants.ts",
+          "lineNumber": 29
+        },
         "signature": [
           "\"map\""
         ],
@@ -223,7 +262,10 @@
           "type": "Object",
           "label": "createLayerDescriptors",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/api/start_api.ts#L14",
+          "source": {
+            "path": "x-pack/plugins/maps/public/api/start_api.ts",
+            "lineNumber": 14
+          },
           "signature": [
             "{ createSecurityLayerDescriptors: (indexPatternId: string, indexPatternTitle: string) => Promise<",
             {
@@ -291,12 +333,18 @@
                 }
               ],
               "description": [],
-              "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/api/start_api.ts#L24"
+              "source": {
+                "path": "x-pack/plugins/maps/public/api/start_api.ts",
+                "lineNumber": 24
+              }
             }
           ],
           "tags": [],
           "returnComment": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/api/start_api.ts#L24"
+          "source": {
+            "path": "x-pack/plugins/maps/public/api/start_api.ts",
+            "lineNumber": 24
+          }
         },
         {
           "id": "def-public.MapsStartApi.registerSource",
@@ -329,15 +377,24 @@
                 }
               ],
               "description": [],
-              "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/api/start_api.ts#L25"
+              "source": {
+                "path": "x-pack/plugins/maps/public/api/start_api.ts",
+                "lineNumber": 25
+              }
             }
           ],
           "tags": [],
           "returnComment": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/api/start_api.ts#L25"
+          "source": {
+            "path": "x-pack/plugins/maps/public/api/start_api.ts",
+            "lineNumber": 25
+          }
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/maps/public/api/start_api.ts#L13",
+      "source": {
+        "path": "x-pack/plugins/maps/public/api/start_api.ts",
+        "lineNumber": 13
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }

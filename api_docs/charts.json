@@ -15,7 +15,10 @@
               "ColorPickerProps"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/color_picker.tsx#L83"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/color_picker.tsx",
+              "lineNumber": 83
+            }
           }
         ],
         "signature": [
@@ -23,7 +26,10 @@
         ],
         "description": [],
         "label": "ColorPicker",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/color_picker.tsx#L83",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/color_picker.tsx",
+          "lineNumber": 83
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -47,12 +53,18 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/colors/color_palette.ts#L41"
+            "source": {
+              "path": "src/plugins/charts/public/static/colors/color_palette.ts",
+              "lineNumber": 41
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/colors/color_palette.ts#L41",
+        "source": {
+          "path": "src/plugins/charts/public/static/colors/color_palette.ts",
+          "lineNumber": 41
+        },
         "initialIsOpen": false
       },
       {
@@ -67,7 +79,10 @@
               "React.PropsWithChildren<CurrentTimeProps>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/current_time.tsx#L24"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/current_time.tsx",
+              "lineNumber": 24
+            }
           }
         ],
         "signature": [
@@ -77,7 +92,10 @@
           "\nRender current time line annotation on @elastic/charts `Chart`"
         ],
         "label": "CurrentTime",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/current_time.tsx#L24",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/current_time.tsx",
+          "lineNumber": 24
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -94,7 +112,10 @@
               "React.PropsWithChildren<EndzonesProps>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L37"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 37
+            }
           }
         ],
         "signature": [
@@ -102,7 +123,10 @@
         ],
         "description": [],
         "label": "Endzones",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L37",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/endzones.tsx",
+          "lineNumber": 37
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -119,7 +143,10 @@
               "number[]"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L121"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 121
+            }
           },
           {
             "type": "number",
@@ -129,7 +156,10 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L122"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 122
+            }
           },
           {
             "type": "CompoundType",
@@ -139,7 +169,10 @@
               "moment.unitOfTime.Base"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L123"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 123
+            }
           },
           {
             "type": "string",
@@ -149,7 +182,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L124"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 124
+            }
           }
         ],
         "signature": [
@@ -159,7 +195,10 @@
           "\nReturns the adjusted interval based on the data\n"
         ],
         "label": "getAdjustedInterval",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L120",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/endzones.tsx",
+          "lineNumber": 120
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -182,7 +221,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L255"
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 255
+            }
           },
           {
             "type": "CompoundType",
@@ -193,7 +235,10 @@
               "AccessorFn"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L256"
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 256
+            }
           }
         ],
         "signature": [
@@ -222,7 +267,10 @@
           "\nHelper function to transform `@elastic/charts` brush event into brush action event"
         ],
         "label": "getBrushFromChartBrushEventFn",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L254",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 254
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -245,7 +293,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L172"
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 172
+            }
           },
           {
             "type": "CompoundType",
@@ -256,7 +307,10 @@
               "AccessorFn"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L173"
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 173
+            }
           },
           {
             "type": "Object",
@@ -268,7 +322,10 @@
               "> | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L174"
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 174
+            }
           },
           {
             "type": "CompoundType",
@@ -280,7 +337,10 @@
               " | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L175"
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 175
+            }
           },
           {
             "type": "boolean",
@@ -290,7 +350,10 @@
               "boolean"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L176"
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 176
+            }
           }
         ],
         "signature": [
@@ -315,7 +378,10 @@
           "\nHelper function to transform `@elastic/charts` click event into filter action event\n"
         ],
         "label": "getFilterFromChartClickEventFn",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L171",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 171
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -338,7 +404,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L220"
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 220
+            }
           }
         ],
         "signature": [
@@ -369,7 +438,10 @@
           "\nHelper function to get filter action event from series"
         ],
         "label": "getFilterFromSeriesFn",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L220",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 220
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -391,7 +463,10 @@
               "any"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/heatmap_color.ts#L47"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+              "lineNumber": 47
+            }
           },
           {
             "type": "string",
@@ -401,12 +476,18 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/heatmap_color.ts#L47"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+              "lineNumber": 47
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/heatmap_color.ts#L47",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/heatmap_color.ts",
+          "lineNumber": 47
+        },
         "initialIsOpen": false
       },
       {
@@ -415,7 +496,10 @@
         "type": "Function",
         "label": "LegendToggle",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/legend_toggle.tsx#L51",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/legend_toggle.tsx",
+          "lineNumber": 51
+        },
         "signature": [
           "React.MemoExoticComponent<({ onClick, showLegend, legendPosition }: LegendToggleProps) => JSX.Element>"
         ],
@@ -433,7 +517,10 @@
               "number | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L160"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 160
+            }
           },
           {
             "type": "number",
@@ -443,7 +530,10 @@
               "number | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L161"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 161
+            }
           },
           {
             "type": "number",
@@ -453,7 +543,10 @@
               "number | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L162"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 162
+            }
           },
           {
             "type": "Function",
@@ -463,7 +556,10 @@
               "((v: any) => string) | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L163"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 163
+            }
           },
           {
             "type": "boolean",
@@ -473,7 +569,10 @@
               "boolean"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L164"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/endzones.tsx",
+              "lineNumber": 164
+            }
           }
         ],
         "signature": [
@@ -483,7 +582,10 @@
         ],
         "description": [],
         "label": "renderEndzoneTooltip",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/endzones.tsx#L159",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/endzones.tsx",
+          "lineNumber": 159
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -503,7 +605,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L27",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "\"brush\""
             ]
@@ -514,7 +619,10 @@
             "type": "Object",
             "label": "data",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L28",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "{ table: ",
               {
@@ -528,7 +636,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L26",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -548,7 +659,10 @@
             "description": [
               "\nOverall number of series in the current chart"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L37",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 37
+            },
             "signature": [
               "number | undefined"
             ]
@@ -561,7 +675,10 @@
             "description": [
               "\nMax nesting depth of the series tree"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L41",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 41
+            },
             "signature": [
               "number | undefined"
             ]
@@ -574,7 +691,10 @@
             "description": [
               "\nFlag whether the color will be used behind text. The palette can use this information to\nadjust colors for better a11y. Might be ignored depending on the palette."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L46",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 46
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -587,13 +707,19 @@
             "description": [
               "\nFlag whether a color assignment to a given key should be remembered and re-used the next time the key shows up.\nThis setting might be ignored based on the palette."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L51",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 51
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L33",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/types.ts",
+          "lineNumber": 33
+        },
         "initialIsOpen": false
       },
       {
@@ -609,7 +735,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L22",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "\"filterBucket\""
             ]
@@ -620,7 +749,10 @@
             "type": "Object",
             "label": "data",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L23",
+            "source": {
+              "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+              "lineNumber": 23
+            },
             "signature": [
               "{ data: { table: Pick<",
               {
@@ -634,7 +766,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/utils/transform_click_event.ts#L21",
+        "source": {
+          "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -650,13 +785,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L32",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L31",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       },
       {
@@ -672,7 +813,10 @@
             "type": "Enum",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L21",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 21
+            },
             "signature": [
               {
                 "pluginId": "charts",
@@ -689,10 +833,16 @@
             "type": "string",
             "label": "text",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L22"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 22
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L20",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -708,7 +858,10 @@
             "type": "Enum",
             "label": "colorSchema",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L13",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 13
+            },
             "signature": [
               {
                 "pluginId": "charts",
@@ -725,10 +878,16 @@
             "type": "boolean",
             "label": "invertColors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L14"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 14
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L12",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/types.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       },
       {
@@ -744,7 +903,10 @@
             "type": "Array",
             "label": "color",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L14",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 14
+            },
             "signature": [
               "string[] | undefined"
             ]
@@ -755,7 +917,10 @@
             "type": "boolean",
             "label": "gradient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L15"
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -763,13 +928,19 @@
             "type": "CompoundType",
             "label": "reverse",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L16",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L13",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -785,7 +956,10 @@
             "type": "Array",
             "label": "colors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L20",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 20
+            },
             "signature": [
               "string[]"
             ]
@@ -796,10 +970,16 @@
             "type": "boolean",
             "label": "gradient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L21"
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 21
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L19",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 19
+        },
         "initialIsOpen": false
       },
       {
@@ -815,7 +995,10 @@
             "type": "string",
             "label": "color",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L18",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "string | undefined"
             ]
@@ -826,7 +1009,10 @@
             "type": "CompoundType",
             "label": "filter",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L19",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -837,7 +1023,10 @@
             "type": "CompoundType",
             "label": "overwriteColor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L20",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 20
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -848,7 +1037,10 @@
             "type": "number",
             "label": "rotate",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L21",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 21
+            },
             "signature": [
               "number | undefined"
             ]
@@ -859,7 +1051,10 @@
             "type": "CompoundType",
             "label": "show",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L22",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -870,13 +1065,19 @@
             "type": "CompoundType",
             "label": "truncate",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L23",
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 23
+            },
             "signature": [
               "number | null | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L17",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/types.ts",
+          "lineNumber": 17
+        },
         "initialIsOpen": false
       },
       {
@@ -906,7 +1107,10 @@
             "description": [
               "\nUnique id of the palette (this will be persisted along with the visualization state)"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L67"
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 67
+            }
           },
           {
             "tags": [],
@@ -916,7 +1120,10 @@
             "description": [
               "\nUser facing title (should be i18n-ized)"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L71"
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 71
+            }
           },
           {
             "tags": [],
@@ -926,7 +1133,10 @@
             "description": [
               "\nFlag indicating whether users should be able to pick this palette manually."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L75",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 75
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -939,7 +1149,10 @@
             "description": [
               "\nSerialize the internal state of the palette into an expression function.\nThis function should be used to pass the palette to the expression function applying color and other styles"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L81",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 81
+            },
             "signature": [
               "(state?: T | undefined) => ",
               "Ast"
@@ -953,7 +1166,10 @@
             "description": [
               "\nRenders the UI for editing the internal state of the palette.\nNot each palette has to feature an internal state, so this is an optional property."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L88",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 88
+            },
             "signature": [
               "((domElement: Element, props: { state?: T | undefined; setState: (updater: (oldState: T) => T) => void; }) => void) | undefined"
             ]
@@ -966,7 +1182,10 @@
             "description": [
               "\nColor a series according to the internal rules of the palette."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L97",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 97
+            },
             "signature": [
               "(series: ",
               {
@@ -995,13 +1214,19 @@
             "description": [
               "\nGet a spectrum of colors of the current palette.\nThis can be used if the chart wants to control color assignment locally."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L106",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 106
+            },
             "signature": [
               "(size: number, state?: T | undefined) => string[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L63",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/types.ts",
+          "lineNumber": 63
+        },
         "initialIsOpen": false
       },
       {
@@ -1027,7 +1252,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L29",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "\"palette\""
             ]
@@ -1038,7 +1266,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L30"
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -1046,13 +1277,19 @@
             "type": "Uncategorized",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L31",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 31
+            },
             "signature": [
               "T | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L28",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 28
+        },
         "initialIsOpen": false
       },
       {
@@ -1068,7 +1305,10 @@
             "type": "Function",
             "label": "get",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L110",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 110
+            },
             "signature": [
               "(name: string) => ",
               {
@@ -1087,7 +1327,10 @@
             "type": "Function",
             "label": "getAll",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L111",
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 111
+            },
             "signature": [
               "() => ",
               {
@@ -1101,7 +1344,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L109",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/types.ts",
+          "lineNumber": 109
+        },
         "initialIsOpen": false
       },
       {
@@ -1117,7 +1363,10 @@
             "type": "Enum",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L26",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 26
+            },
             "signature": [
               {
                 "pluginId": "charts",
@@ -1134,7 +1383,10 @@
             "type": "string",
             "label": "label",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L27"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 27
+            }
           },
           {
             "tags": [],
@@ -1142,13 +1394,19 @@
             "type": "Array",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L28",
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "[number, number[]][]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L25",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 25
+        },
         "initialIsOpen": false
       },
       {
@@ -1168,7 +1426,10 @@
             "description": [
               "\nName of the series (can be used for lookup-based coloring)"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L19"
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 19
+            }
           },
           {
             "tags": [],
@@ -1178,7 +1439,10 @@
             "description": [
               "\nRank of the series compared to siblings with the same ancestor"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L23"
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -1188,10 +1452,16 @@
             "description": [
               "\nTotal number of series with the same ancestor"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L27"
+            "source": {
+              "path": "src/plugins/charts/public/services/palettes/types.ts",
+              "lineNumber": 27
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/services/palettes/types.ts#L15",
+        "source": {
+          "path": "src/plugins/charts/public/services/palettes/types.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -1207,7 +1477,10 @@
             "type": "string",
             "label": "bgFill",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L27"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 27
+            }
           },
           {
             "tags": [],
@@ -1215,7 +1488,10 @@
             "type": "boolean",
             "label": "bgColor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L28"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 28
+            }
           },
           {
             "tags": [],
@@ -1223,7 +1499,10 @@
             "type": "boolean",
             "label": "labelColor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L29"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 29
+            }
           },
           {
             "tags": [],
@@ -1231,7 +1510,10 @@
             "type": "string",
             "label": "subText",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L30"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -1239,10 +1521,16 @@
             "type": "number",
             "label": "fontSize",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L31"
+            "source": {
+              "path": "src/plugins/charts/public/static/components/types.ts",
+              "lineNumber": 31
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/types.ts#L26",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/types.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -1258,10 +1546,16 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L25"
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 25
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L24",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       }
     ],
@@ -1272,7 +1566,10 @@
         "label": "ColorSchemas",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L11",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       }
     ],
@@ -1283,7 +1580,10 @@
         "label": "ColorMode",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L17",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "\"Background\" | \"Labels\" | \"None\""
         ],
@@ -1295,7 +1595,10 @@
         "type": "Array",
         "label": "colorSchemas",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L3160",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 3160
+        },
         "signature": [
           {
             "pluginId": "charts",
@@ -1314,7 +1617,10 @@
         "type": "string",
         "label": "defaultCountLabel",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L26",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -1323,7 +1629,10 @@
         "label": "LabelRotation",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L24",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 24
+        },
         "signature": [
           "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; } number"
         ],
@@ -1335,7 +1644,10 @@
         "type": "Array",
         "label": "paletteIds",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/constants.ts#L10",
+        "source": {
+          "path": "src/plugins/charts/common/constants.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "string[]"
         ],
@@ -1349,7 +1661,10 @@
         "description": [
           "\nUsing a random color generator presented awful colors and unpredictable color schemes.\nSo we needed to come up with a color scheme of our own that creates consistent, pleasing color patterns.\nThe order allows us to guarantee that 1st, 2nd, 3rd, etc values always get the same color."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/colors/seed_colors.ts#L14",
+        "source": {
+          "path": "src/plugins/charts/public/static/colors/seed_colors.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "string[]"
         ],
@@ -1361,7 +1676,10 @@
         "type": "Array",
         "label": "truncatedColorSchemas",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/truncated_color_maps.ts#L26",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/truncated_color_maps.ts",
+          "lineNumber": 26
+        },
         "signature": [
           {
             "pluginId": "charts",
@@ -1382,7 +1700,10 @@
         "type": "Object",
         "label": "ColorMode",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L12",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "Readonly<{ Background: \"Background\"; Labels: \"Labels\"; None: \"None\"; }>"
         ],
@@ -1394,7 +1715,10 @@
         "type": "Object",
         "label": "LabelRotation",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/components/collections.ts#L19",
+        "source": {
+          "path": "src/plugins/charts/public/static/components/collections.ts",
+          "lineNumber": 19
+        },
         "signature": [
           "Readonly<{ Horizontal: number; Vertical: number; Angled: number; }>"
         ],
@@ -1407,7 +1731,10 @@
         "children": [],
         "description": [],
         "label": "truncatedColorMaps",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/truncated_color_maps.ts#L11",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/truncated_color_maps.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -1426,7 +1753,10 @@
                 "type": "string",
                 "label": "id",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L38",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 38
+                },
                 "signature": [
                   {
                     "pluginId": "charts",
@@ -1444,7 +1774,10 @@
                 "type": "string",
                 "label": "label",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L39"
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 39
+                }
               },
               {
                 "tags": [],
@@ -1452,7 +1785,10 @@
                 "type": "Array",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L42",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 42
+                },
                 "signature": [
                   "[number, number[]][]"
                 ]
@@ -1462,7 +1798,10 @@
               "// Sequential"
             ],
             "label": "[ColorSchemas.Blues]",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L37"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 37
+            }
           },
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.Greens]",
@@ -1475,7 +1814,10 @@
                 "type": "string",
                 "label": "id",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L558",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 558
+                },
                 "signature": [
                   {
                     "pluginId": "charts",
@@ -1493,7 +1835,10 @@
                 "type": "string",
                 "label": "label",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L559"
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 559
+                }
               },
               {
                 "tags": [],
@@ -1501,7 +1846,10 @@
                 "type": "Array",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L562",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 562
+                },
                 "signature": [
                   "[number, number[]][]"
                 ]
@@ -1509,7 +1857,10 @@
             ],
             "description": [],
             "label": "[ColorSchemas.Greens]",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L557"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 557
+            }
           },
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.Greys]",
@@ -1522,7 +1873,10 @@
                 "type": "string",
                 "label": "id",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1078",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 1078
+                },
                 "signature": [
                   {
                     "pluginId": "charts",
@@ -1540,7 +1894,10 @@
                 "type": "string",
                 "label": "label",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1079"
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 1079
+                }
               },
               {
                 "tags": [],
@@ -1548,7 +1905,10 @@
                 "type": "Array",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1082",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 1082
+                },
                 "signature": [
                   "[number, number[]][]"
                 ]
@@ -1556,7 +1916,10 @@
             ],
             "description": [],
             "label": "[ColorSchemas.Greys]",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1077"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 1077
+            }
           },
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.Reds]",
@@ -1569,7 +1932,10 @@
                 "type": "string",
                 "label": "id",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1598",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 1598
+                },
                 "signature": [
                   {
                     "pluginId": "charts",
@@ -1587,7 +1953,10 @@
                 "type": "string",
                 "label": "label",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1599"
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 1599
+                }
               },
               {
                 "tags": [],
@@ -1595,7 +1964,10 @@
                 "type": "Array",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1602",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 1602
+                },
                 "signature": [
                   "[number, number[]][]"
                 ]
@@ -1603,7 +1975,10 @@
             ],
             "description": [],
             "label": "[ColorSchemas.Reds]",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L1597"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 1597
+            }
           },
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed]",
@@ -1616,7 +1991,10 @@
                 "type": "string",
                 "label": "id",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2118",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 2118
+                },
                 "signature": [
                   {
                     "pluginId": "charts",
@@ -1634,7 +2012,10 @@
                 "type": "string",
                 "label": "label",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2119"
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 2119
+                }
               },
               {
                 "tags": [],
@@ -1642,7 +2023,10 @@
                 "type": "Array",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2122",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 2122
+                },
                 "signature": [
                   "[number, number[]][]"
                 ]
@@ -1650,7 +2034,10 @@
             ],
             "description": [],
             "label": "[ColorSchemas.YellowToRed]",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2117"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 2117
+            }
           },
           {
             "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed]",
@@ -1663,7 +2050,10 @@
                 "type": "string",
                 "label": "id",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2639",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 2639
+                },
                 "signature": [
                   {
                     "pluginId": "charts",
@@ -1681,7 +2071,10 @@
                 "type": "string",
                 "label": "label",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2640"
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 2640
+                }
               },
               {
                 "tags": [],
@@ -1689,7 +2082,10 @@
                 "type": "Array",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2643",
+                "source": {
+                  "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+                  "lineNumber": 2643
+                },
                 "signature": [
                   "[number, number[]][]"
                 ]
@@ -1697,12 +2093,18 @@
             ],
             "description": [],
             "label": "[ColorSchemas.GreenToRed]",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L2638"
+            "source": {
+              "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+              "lineNumber": 2638
+            }
           }
         ],
         "description": [],
         "label": "vislibColorMaps",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/static/color_maps/color_maps.ts#L35",
+        "source": {
+          "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
+          "lineNumber": 35
+        },
         "initialIsOpen": false
       }
     ],
@@ -1714,7 +2116,10 @@
         "public"
       ],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/public/plugin.ts#L31",
+      "source": {
+        "path": "src/plugins/charts/public/plugin.ts",
+        "lineNumber": 31
+      },
       "signature": [
         "ChartsPluginSetup"
       ],
@@ -1783,7 +2188,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L53",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 53
+        },
         "initialIsOpen": false
       },
       {
@@ -1836,7 +2244,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L119",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 119
+        },
         "initialIsOpen": false
       }
     ],
@@ -1854,7 +2265,10 @@
             "type": "Array",
             "label": "color",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L14",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 14
+            },
             "signature": [
               "string[] | undefined"
             ]
@@ -1865,7 +2279,10 @@
             "type": "boolean",
             "label": "gradient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L15"
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -1873,13 +2290,19 @@
             "type": "CompoundType",
             "label": "reverse",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L16",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L13",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -1895,7 +2318,10 @@
             "type": "Array",
             "label": "colors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L20",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 20
+            },
             "signature": [
               "string[]"
             ]
@@ -1906,10 +2332,16 @@
             "type": "boolean",
             "label": "gradient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L21"
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 21
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L19",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 19
+        },
         "initialIsOpen": false
       },
       {
@@ -1935,7 +2367,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L29",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "\"palette\""
             ]
@@ -1946,7 +2381,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L30"
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -1954,13 +2392,19 @@
             "type": "Uncategorized",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L31",
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 31
+            },
             "signature": [
               "T | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L28",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 28
+        },
         "initialIsOpen": false
       },
       {
@@ -1976,10 +2420,16 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L25"
+            "source": {
+              "path": "src/plugins/charts/common/palette.ts",
+              "lineNumber": 25
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L24",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       }
     ],
@@ -1991,7 +2441,10 @@
         "type": "string",
         "label": "COLOR_MAPPING_SETTING",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/index.ts#L9",
+        "source": {
+          "path": "src/plugins/charts/common/index.ts",
+          "lineNumber": 9
+        },
         "signature": [
           "\"visualization:colorMapping\""
         ],
@@ -2003,7 +2456,10 @@
         "type": "Array",
         "label": "defaultCustomColors",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/palette.ts#L33",
+        "source": {
+          "path": "src/plugins/charts/common/palette.ts",
+          "lineNumber": 33
+        },
         "signature": [
           "string[]"
         ],
@@ -2015,7 +2471,10 @@
         "type": "Array",
         "label": "paletteIds",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/charts/common/constants.ts#L10",
+        "source": {
+          "path": "src/plugins/charts/common/constants.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "string[]"
         ],

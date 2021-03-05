@@ -23,7 +23,10 @@
             "description": [
               "\nIf set to true, will use the tag's `name` instead of `id` for the tag field clause, which is recommended\nfor a better end-user experience.\n\nDefaults to true.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L276",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 276
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -36,13 +39,19 @@
             "description": [
               "\nThe tag clause field name to generate the query. Defaults to `tag`.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L282",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 282
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L259",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 259
+        },
         "initialIsOpen": false
       },
       {
@@ -75,7 +84,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L44"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 44
+            }
           },
           {
             "id": "def-public.ITagsCache.getState$",
@@ -100,10 +112,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L49"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 49
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L40",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 40
+        },
         "initialIsOpen": false
       },
       {
@@ -121,7 +139,10 @@
             "type": "string",
             "label": "searchTerm",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L289"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 289
+            }
           },
           {
             "tags": [],
@@ -129,7 +150,10 @@
             "type": "Array",
             "label": "tagReferences",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L290",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 290
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -147,10 +171,16 @@
             "type": "boolean",
             "label": "valid",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L291"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 291
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L288",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 288
+        },
         "initialIsOpen": false
       },
       {
@@ -172,7 +202,10 @@
             "description": [
               "\nIf set to true, will assume the tag clause is using tag names instead of ids.\nIn that case, will perform a reverse lookup from the client-side tag cache to resolve tag ids from names.\n\nDefaults to true.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L309",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 309
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -185,13 +218,19 @@
             "description": [
               "\nThe tag clause field name to extract the tags from. Defaults to `tag`.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L315",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 315
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L299",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 299
+        },
         "initialIsOpen": false
       },
       {
@@ -213,7 +252,10 @@
             "description": [
               "\nIds of the initially selected tags.\nChanging the value of this prop after initial mount will not rerender the component (see component description for more details)"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L247",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 247
+            },
             "signature": [
               "string[]"
             ]
@@ -226,13 +268,19 @@
             "description": [
               "\ntags selection callback"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L251",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 251
+            },
             "signature": [
               "(ids: string[]) => void"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L242",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 242
+        },
         "initialIsOpen": false
       },
       {
@@ -252,7 +300,10 @@
             "description": [
               "\nThe client to perform tag-related operations on the server-side"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L25",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "savedObjects",
@@ -271,7 +322,10 @@
             "description": [
               "\nA client-side auto-refreshing cache of the existing tags. Can be used\nto synchronously access the list of tags."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L30",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 30
+            },
             "signature": [
               {
                 "pluginId": "savedObjects",
@@ -290,7 +344,10 @@
             "description": [
               "\nUI API to use to add tagging capabilities to an application"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L34",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 34
+            },
             "signature": [
               {
                 "pluginId": "savedObjects",
@@ -302,7 +359,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L21",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -343,12 +403,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L68"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 68
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L68"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 68
+            }
           },
           {
             "id": "def-public.SavedObjectsTaggingApiUi.hasTagDecoration",
@@ -390,12 +456,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L75"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 75
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L75"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 75
+            }
           },
           {
             "id": "def-public.SavedObjectsTaggingApiUi.getSearchBarFilter",
@@ -432,12 +504,18 @@
                   " | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L89"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 89
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L89"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 89
+            }
           },
           {
             "id": "def-public.SavedObjectsTaggingApiUi.getTableColumnDefinition",
@@ -462,7 +540,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L105"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 105
+            }
           },
           {
             "id": "def-public.SavedObjectsTaggingApiUi.convertNameToReference",
@@ -491,12 +572,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L112"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 112
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L112"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 112
+            }
           },
           {
             "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery",
@@ -534,7 +621,10 @@
                 "description": [
                   "The query to parse"
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L157"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 157
+                }
               },
               {
                 "type": "Object",
@@ -553,12 +643,18 @@
                 "description": [
                   "see {@link ParseSearchQueryOptions}"
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L157"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 157
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L157"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 157
+            }
           },
           {
             "id": "def-public.SavedObjectsTaggingApiUi.getTagIdsFromReferences",
@@ -611,12 +707,18 @@
                   ")[]"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L163"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 163
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L162"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 162
+            }
           },
           {
             "id": "def-public.SavedObjectsTaggingApiUi.getTagIdFromName",
@@ -637,12 +739,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L170"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 170
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L170"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 170
+            }
           },
           {
             "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences",
@@ -686,7 +794,10 @@
                   "[]"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L177"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 177
+                }
               },
               {
                 "type": "Array",
@@ -696,12 +807,18 @@
                   "string[]"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L178"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                  "lineNumber": 178
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L176"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 176
+            }
           },
           {
             "tags": [],
@@ -711,7 +828,10 @@
             "description": [
               "\n{@link SavedObjectsTaggingApiUiComponent | React components} to support the tagging feature."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L184",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 184
+            },
             "signature": [
               {
                 "pluginId": "savedObjects",
@@ -723,7 +843,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L62",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 62
+        },
         "initialIsOpen": false
       },
       {
@@ -745,7 +868,10 @@
             "description": [
               "\nDisplays the tags for given saved object."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L196",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 196
+            },
             "signature": [
               "React.FunctionComponent<",
               {
@@ -766,7 +892,10 @@
             "description": [
               "\nWidget to select tags."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L200",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 200
+            },
             "signature": [
               "React.FunctionComponent<",
               {
@@ -787,7 +916,10 @@
             "description": [
               "\nComponent to be used with the `options` property of the `SavedObjectSaveModal` or `SavedObjectSaveModalOrigin`\nmodals from the `savedObjects` plugin. It displays the whole field row and handles the 'stateless' nature\nof props passed to inline components"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L206",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 206
+            },
             "signature": [
               "React.FunctionComponent<",
               {
@@ -801,7 +933,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L192",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 192
+        },
         "initialIsOpen": false
       },
       {
@@ -823,7 +958,10 @@
             "description": [
               "\nThe object to display tags for."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L218",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 218
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -836,7 +974,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L214",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 214
+        },
         "initialIsOpen": false
       },
       {
@@ -858,7 +999,10 @@
             "description": [
               "\nIds of the currently selected tags"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L230",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 230
+            },
             "signature": [
               "string[]"
             ]
@@ -871,13 +1015,19 @@
             "description": [
               "\ntags selection callback"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L234",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+              "lineNumber": 234
+            },
             "signature": [
               "(ids: string[]) => void"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L226",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 226
+        },
         "initialIsOpen": false
       }
     ],
@@ -891,7 +1041,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/api.ts#L55",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+          "lineNumber": 55
+        },
         "signature": [
           "(object: ",
           {
@@ -913,7 +1066,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/decorator/types.ts#L14",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "SavedObject & { getTags(): string[]; setTags(tags: string[]): void; }"
         ],
@@ -963,15 +1119,24 @@
                 ">"
               ],
               "description": [],
-              "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/types.ts#L21"
+              "source": {
+                "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+                "lineNumber": 21
+              }
             }
           ],
           "tags": [],
           "returnComment": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/types.ts#L21"
+          "source": {
+            "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+            "lineNumber": 21
+          }
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/types.ts#L11",
+      "source": {
+        "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+        "lineNumber": 11
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -995,7 +1160,10 @@
           "children": [],
           "tags": [],
           "returnComment": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/types.ts#L28"
+          "source": {
+            "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+            "lineNumber": 28
+          }
         },
         {
           "id": "def-public.SavedObjectTaggingOssPluginStart.getTaggingApi",
@@ -1018,10 +1186,16 @@
           "children": [],
           "tags": [],
           "returnComment": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/types.ts#L34"
+          "source": {
+            "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+            "lineNumber": 34
+          }
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/public/types.ts#L24",
+      "source": {
+        "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+        "lineNumber": 24
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1051,13 +1225,19 @@
             "type": "CompoundType",
             "label": "asSystemRequest",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L23",
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 23
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L22",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       },
       {
@@ -1106,12 +1286,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L27"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 27
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L27"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 27
+            }
           },
           {
             "id": "def-common.ITagsClient.get",
@@ -1138,12 +1324,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L28"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 28
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L28"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 28
+            }
           },
           {
             "id": "def-common.ITagsClient.getAll",
@@ -1185,12 +1377,18 @@
                   " | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L29"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 29
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L29"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 29
+            }
           },
           {
             "id": "def-common.ITagsClient.delete",
@@ -1209,12 +1407,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L30"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 30
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L30"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 30
+            }
           },
           {
             "id": "def-common.ITagsClient.update",
@@ -1249,7 +1453,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L31"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 31
+                }
               },
               {
                 "type": "Object",
@@ -1265,15 +1472,24 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L31"
+                "source": {
+                  "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                  "lineNumber": 31
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L31"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 31
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L26",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -1289,7 +1505,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L10"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 10
+            }
           },
           {
             "tags": [],
@@ -1297,7 +1516,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L11"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -1305,7 +1527,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L12"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 12
+            }
           },
           {
             "tags": [],
@@ -1313,10 +1538,16 @@
             "type": "string",
             "label": "color",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L13"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 13
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L9",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 9
+        },
         "initialIsOpen": false
       },
       {
@@ -1332,7 +1563,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L17"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -1340,7 +1574,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L18"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -1348,10 +1585,16 @@
             "type": "string",
             "label": "color",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L19"
+            "source": {
+              "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+              "lineNumber": 19
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/saved_objects_tagging_oss/common/types.ts#L16",
+        "source": {
+          "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       }
     ],

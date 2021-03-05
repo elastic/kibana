@@ -20,7 +20,10 @@
           "type": "Object",
           "label": "insecureCluster",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L26",
+          "source": {
+            "path": "src/plugins/security_oss/public/plugin.ts",
+            "lineNumber": 26
+          },
           "signature": [
             {
               "pluginId": "securityOss",
@@ -32,7 +35,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L25",
+      "source": {
+        "path": "src/plugins/security_oss/public/plugin.ts",
+        "lineNumber": 25
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -49,7 +55,10 @@
           "type": "Object",
           "label": "insecureCluster",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L30",
+          "source": {
+            "path": "src/plugins/security_oss/public/plugin.ts",
+            "lineNumber": 30
+          },
           "signature": [
             {
               "pluginId": "securityOss",
@@ -66,7 +75,10 @@
           "type": "Object",
           "label": "anonymousAccess",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L31",
+          "source": {
+            "path": "src/plugins/security_oss/public/plugin.ts",
+            "lineNumber": 31
+          },
           "signature": [
             "{ getAccessURLParameters: () => Promise<Record<string, string> | null>; getCapabilities: () => Promise<",
             {
@@ -80,7 +92,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/public/plugin.ts#L29",
+      "source": {
+        "path": "src/plugins/security_oss/public/plugin.ts",
+        "lineNumber": 29
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -107,7 +122,10 @@
           "description": [
             "\nAllows consumers to show/hide the insecure cluster warning."
           ],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/server/plugin.ts#L29",
+          "source": {
+            "path": "src/plugins/security_oss/server/plugin.ts",
+            "lineNumber": 29
+          },
           "signature": [
             "BehaviorSubject",
             "<boolean>"
@@ -121,7 +139,10 @@
           "description": [
             "\nSet the provider function that returns a service to deal with the anonymous access."
           ],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/server/plugin.ts#L35",
+          "source": {
+            "path": "src/plugins/security_oss/server/plugin.ts",
+            "lineNumber": 35
+          },
           "signature": [
             "(provider: () => ",
             {
@@ -135,7 +156,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/server/plugin.ts#L25",
+      "source": {
+        "path": "src/plugins/security_oss/server/plugin.ts",
+        "lineNumber": 25
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }
@@ -159,7 +183,10 @@
             "type": "Object",
             "label": "insecureClusterAlert",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/common/app_state.ts#L13",
+            "source": {
+              "path": "src/plugins/security_oss/common/app_state.ts",
+              "lineNumber": 13
+            },
             "signature": [
               "{ displayAlert: boolean; }"
             ]
@@ -170,13 +197,19 @@
             "type": "Object",
             "label": "anonymousAccess",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/common/app_state.ts#L14",
+            "source": {
+              "path": "src/plugins/security_oss/common/app_state.ts",
+              "lineNumber": 14
+            },
             "signature": [
               "{ isEnabled: boolean; accessURLParameters: Record<string, string> | null; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/security_oss/common/app_state.ts#L12",
+        "source": {
+          "path": "src/plugins/security_oss/common/app_state.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       }
     ],

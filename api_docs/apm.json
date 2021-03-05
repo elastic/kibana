@@ -17,7 +17,10 @@
             "type": "boolean",
             "label": "serviceMapEnabled",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/public/index.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/apm/public/index.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -25,7 +28,10 @@
             "type": "boolean",
             "label": "profilingEnabled",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/public/index.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/apm/public/index.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -33,13 +39,19 @@
             "type": "Object",
             "label": "ui",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/public/index.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/apm/public/index.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "{ enabled: boolean; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/public/index.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/apm/public/index.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       }
     ],
@@ -52,7 +64,10 @@
       "label": "ApmPluginStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/public/plugin.ts#L45",
+      "source": {
+        "path": "x-pack/plugins/apm/public/plugin.ts",
+        "lineNumber": 45
+      },
       "signature": [
         "void"
       ],
@@ -119,12 +134,18 @@
                   "<unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L61"
+                "source": {
+                  "path": "x-pack/plugins/apm/server/plugin.ts",
+                  "lineNumber": 61
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L61"
+            "source": {
+              "path": "x-pack/plugins/apm/server/plugin.ts",
+              "lineNumber": 61
+            }
           },
           {
             "id": "def-server.APMPlugin.setup",
@@ -189,7 +210,10 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L66"
+                "source": {
+                  "path": "x-pack/plugins/apm/server/plugin.ts",
+                  "lineNumber": 66
+                }
               },
               {
                 "id": "def-server.APMPlugin.setup.plugins",
@@ -204,7 +228,10 @@
                     "type": "Object",
                     "label": "apmOss",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L68",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 68
+                    },
                     "signature": [
                       {
                         "pluginId": "apmOss",
@@ -221,7 +248,10 @@
                     "type": "Object",
                     "label": "home",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L69",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 69
+                    },
                     "signature": [
                       {
                         "pluginId": "home",
@@ -238,7 +268,10 @@
                     "type": "Object",
                     "label": "licensing",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L70",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 70
+                    },
                     "signature": [
                       {
                         "pluginId": "licensing",
@@ -255,7 +288,10 @@
                     "type": "Object",
                     "label": "cloud",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L71",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 71
+                    },
                     "signature": [
                       {
                         "pluginId": "cloud",
@@ -273,7 +309,10 @@
                     "type": "Object",
                     "label": "usageCollection",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L72",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 72
+                    },
                     "signature": [
                       "Pick<",
                       {
@@ -292,7 +331,10 @@
                     "type": "CompoundType",
                     "label": "taskManager",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L73",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 73
+                    },
                     "signature": [
                       {
                         "pluginId": "taskManager",
@@ -310,7 +352,10 @@
                     "type": "Object",
                     "label": "alerts",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L74",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 74
+                    },
                     "signature": [
                       {
                         "pluginId": "alerts",
@@ -328,7 +373,10 @@
                     "type": "Object",
                     "label": "actions",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L75",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 75
+                    },
                     "signature": [
                       {
                         "pluginId": "actions",
@@ -346,7 +394,10 @@
                     "type": "Object",
                     "label": "observability",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L76",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 76
+                    },
                     "signature": [
                       {
                         "pluginId": "observability",
@@ -364,7 +415,10 @@
                     "type": "Object",
                     "label": "features",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L77",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 77
+                    },
                     "signature": [
                       {
                         "pluginId": "features",
@@ -381,7 +435,10 @@
                     "type": "Object",
                     "label": "security",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L78",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 78
+                    },
                     "signature": [
                       {
                         "pluginId": "security",
@@ -399,7 +456,10 @@
                     "type": "CompoundType",
                     "label": "ml",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L79",
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 79
+                    },
                     "signature": [
                       {
                         "pluginId": "ml",
@@ -412,12 +472,18 @@
                     ]
                   }
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L67"
+                "source": {
+                  "path": "x-pack/plugins/apm/server/plugin.ts",
+                  "lineNumber": 67
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L65"
+            "source": {
+              "path": "x-pack/plugins/apm/server/plugin.ts",
+              "lineNumber": 65
+            }
           },
           {
             "id": "def-server.APMPlugin.start",
@@ -450,12 +516,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L196"
+                "source": {
+                  "path": "x-pack/plugins/apm/server/plugin.ts",
+                  "lineNumber": 196
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L196"
+            "source": {
+              "path": "x-pack/plugins/apm/server/plugin.ts",
+              "lineNumber": 196
+            }
           },
           {
             "id": "def-server.APMPlugin.stop",
@@ -468,10 +540,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L215"
+            "source": {
+              "path": "x-pack/plugins/apm/server/plugin.ts",
+              "lineNumber": 215
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L58",
+        "source": {
+          "path": "x-pack/plugins/apm/server/plugin.ts",
+          "lineNumber": 58
+        },
         "initialIsOpen": false
       }
     ],
@@ -497,7 +575,10 @@
               "Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/index.ts#L60"
+            "source": {
+              "path": "x-pack/plugins/apm/server/index.ts",
+              "lineNumber": 60
+            }
           },
           {
             "type": "Object",
@@ -515,12 +596,18 @@
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; maxServiceEnvironments: number; maxServiceSelection: number; profilingEnabled: boolean; }>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/index.ts#L61"
+            "source": {
+              "path": "x-pack/plugins/apm/server/index.ts",
+              "lineNumber": 61
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/index.ts#L59",
+        "source": {
+          "path": "x-pack/plugins/apm/server/index.ts",
+          "lineNumber": 59
+        },
         "initialIsOpen": false
       }
     ],
@@ -532,7 +619,10 @@
         "label": "ProcessorEvent",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/common/processor_event.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/apm/common/processor_event.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       }
     ],
@@ -543,7 +633,10 @@
         "label": "APMConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/index.ts#L56",
+        "source": {
+          "path": "x-pack/plugins/apm/server/index.ts",
+          "lineNumber": 56
+        },
         "signature": [
           "{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': SearchAggregatedTransactionSetting; 'xpack.apm.metricsInterval': number; }"
         ],
@@ -555,7 +648,10 @@
         "label": "APMXPackConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/index.ts#L55",
+        "source": {
+          "path": "x-pack/plugins/apm/server/index.ts",
+          "lineNumber": 55
+        },
         "signature": [
           "{ readonly enabled: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly autocreateApmIndexPattern: boolean; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: SearchAggregatedTransactionSetting; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly maxServiceEnvironments: number; readonly maxServiceSelection: number; readonly profilingEnabled: boolean; }"
         ],
@@ -576,7 +672,10 @@
           "type": "Object",
           "label": "config$",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L49",
+          "source": {
+            "path": "x-pack/plugins/apm/server/plugin.ts",
+            "lineNumber": 49
+          },
           "signature": [
             "Observable",
             "<{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': ",
@@ -596,7 +695,10 @@
           "type": "Function",
           "label": "getApmIndices",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L50",
+          "source": {
+            "path": "x-pack/plugins/apm/server/plugin.ts",
+            "lineNumber": 50
+          },
           "signature": [
             "() => Promise<",
             {
@@ -615,7 +717,10 @@
           "type": "Function",
           "label": "createApmEventClient",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L51",
+          "source": {
+            "path": "x-pack/plugins/apm/server/plugin.ts",
+            "lineNumber": 51
+          },
           "signature": [
             "(params: { debug?: boolean | undefined; request: ",
             {
@@ -648,7 +753,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/apm/server/plugin.ts#L48",
+      "source": {
+        "path": "x-pack/plugins/apm/server/plugin.ts",
+        "lineNumber": 48
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

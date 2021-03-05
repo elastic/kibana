@@ -15,7 +15,10 @@
             "type": "Object",
             "label": "componentType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L28",
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "{ [key: string]: Id; }"
             ]
@@ -31,7 +34,10 @@
                 "type": "Function",
                 "label": "advanced_settings_page_title",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L30",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 30
+                },
                 "signature": [
                   "() => JSX.Element"
                 ]
@@ -42,7 +48,10 @@
                 "type": "Function",
                 "label": "advanced_settings_page_subtitle",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L31",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 31
+                },
                 "signature": [
                   "() => null"
                 ]
@@ -53,7 +62,10 @@
                 "type": "Function",
                 "label": "advanced_settings_page_footer",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L32",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 32
+                },
                 "signature": [
                   "() => null"
                 ]
@@ -61,7 +73,10 @@
             ],
             "description": [],
             "label": "defaultRegistry",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L29"
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 29
+            }
           },
           {
             "id": "def-public.ComponentRegistry.registry",
@@ -70,7 +85,10 @@
             "children": [],
             "description": [],
             "label": "registry",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L35"
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 35
+            }
           },
           {
             "id": "def-public.ComponentRegistry.setup",
@@ -83,7 +101,10 @@
                 "type": "Object",
                 "label": "componentType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L72",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 72
+                },
                 "signature": [
                   "{ [key: string]: Id; }"
                 ]
@@ -94,7 +115,10 @@
                 "type": "Function",
                 "label": "register",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L73",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 73
+                },
                 "signature": [
                   "(id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void"
                 ]
@@ -102,7 +126,10 @@
             ],
             "description": [],
             "label": "setup",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L71"
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 71
+            }
           },
           {
             "id": "def-public.ComponentRegistry.start",
@@ -115,7 +142,10 @@
                 "type": "Object",
                 "label": "componentType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L77",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 77
+                },
                 "signature": [
                   "{ [key: string]: Id; }"
                 ]
@@ -126,7 +156,10 @@
                 "type": "Function",
                 "label": "get",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L78",
+                "source": {
+                  "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+                  "lineNumber": 78
+                },
                 "signature": [
                   "(id: Id) => React.ComponentType<Record<string, any> | undefined>"
                 ]
@@ -134,10 +167,16 @@
             ],
             "description": [],
             "label": "start",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L76"
+            "source": {
+              "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+              "lineNumber": 76
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/component_registry/component_registry.ts#L27",
+        "source": {
+          "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
+          "lineNumber": 27
+        },
         "initialIsOpen": false
       }
     ],
@@ -150,7 +189,10 @@
         "description": [
           "\nExports the field component as a React.lazy component. We're explicitly naming it lazy here\nso any plugin that would import that can clearly see it's lazy loaded and can only be used\ninside a suspense context."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/index.ts#L20",
+        "source": {
+          "path": "src/plugins/advanced_settings/public/index.ts",
+          "lineNumber": 20
+        },
         "signature": [
           "React.LazyExoticComponent<typeof ",
           "Field",
@@ -176,13 +218,19 @@
           "type": "Object",
           "label": "component",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/types.ts#L16",
+          "source": {
+            "path": "src/plugins/advanced_settings/public/types.ts",
+            "lineNumber": 16
+          },
           "signature": [
             "{ componentType: { [key: string]: Id; }; register: (id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void; }"
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/types.ts#L15",
+      "source": {
+        "path": "src/plugins/advanced_settings/public/types.ts",
+        "lineNumber": 15
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -199,13 +247,19 @@
           "type": "Object",
           "label": "component",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/types.ts#L19",
+          "source": {
+            "path": "src/plugins/advanced_settings/public/types.ts",
+            "lineNumber": 19
+          },
           "signature": [
             "{ componentType: { [key: string]: Id; }; get: (id: Id) => React.ComponentType<Record<string, any> | undefined>; }"
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/advanced_settings/public/types.ts#L18",
+      "source": {
+        "path": "src/plugins/advanced_settings/public/types.ts",
+        "lineNumber": 18
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }

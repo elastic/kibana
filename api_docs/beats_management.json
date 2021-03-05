@@ -28,7 +28,10 @@
         "label": "BeatsManagementConfigType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/beats_management/common/index.ts#L23",
+        "source": {
+          "path": "x-pack/plugins/beats_management/common/index.ts",
+          "lineNumber": 23
+        },
         "signature": [
           "{ readonly enabled: boolean; readonly defaultUserRoles: string[]; readonly encryptionKey: string; readonly enrollmentTokensTtlInSeconds: number; }"
         ],
@@ -42,7 +45,10 @@
         "type": "Object",
         "label": "beatsManagementConfigSchema",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/beats_management/common/index.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/beats_management/common/index.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "ObjectType",
           "<{ enabled: ",

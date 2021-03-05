@@ -43,7 +43,10 @@
                   "<any>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L59"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 59
+                }
               },
               {
                 "type": "string",
@@ -53,12 +56,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L59"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 59
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L59"
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 59
+            }
           },
           {
             "id": "def-public.ScopedHistory.createSubHistory",
@@ -72,7 +81,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L78"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 78
+                }
               }
             ],
             "signature": [
@@ -90,7 +102,10 @@
               "\nCreates a `ScopedHistory` for a subpath of this `ScopedHistory`. Useful for applications that may have sub-apps\nthat do not need access to the containing application's history.\n"
             ],
             "label": "createSubHistory",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L77",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 77
+            },
             "tags": [],
             "returnComment": []
           },
@@ -102,7 +117,10 @@
             "description": [
               "\nThe number of entries in the history stack, including all entries forwards and backwards from the current location."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L86"
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 86
+            }
           },
           {
             "id": "def-public.ScopedHistory.location",
@@ -112,7 +130,10 @@
             "description": [
               "\nThe current location of the history stack."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L94",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 94
+            },
             "signature": [
               "Location",
               "<HistoryLocationState>"
@@ -126,7 +147,10 @@
             "description": [
               "\nThe last action dispatched on the history stack."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L102",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 102
+            },
             "signature": [
               "Action"
             ]
@@ -145,7 +169,10 @@
                   "<HistoryLocationState>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L114"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 114
+                }
               },
               {
                 "type": "Uncategorized",
@@ -155,7 +182,10 @@
                   "HistoryLocationState | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L115"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 115
+                }
               }
             ],
             "signature": [
@@ -167,7 +197,10 @@
               "\nPushes a new location onto the history stack. If there are forward entries in the stack, they will be removed.\n"
             ],
             "label": "push",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L113",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 113
+            },
             "tags": [],
             "returnComment": []
           },
@@ -185,7 +218,10 @@
                   "<HistoryLocationState>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L132"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 132
+                }
               },
               {
                 "type": "Uncategorized",
@@ -195,7 +231,10 @@
                   "HistoryLocationState | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L133"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 133
+                }
               }
             ],
             "signature": [
@@ -207,7 +246,10 @@
               "\nReplaces the current location in the history stack. Does not remove forward or backward entries.\n"
             ],
             "label": "replace",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L131",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 131
+            },
             "tags": [],
             "returnComment": []
           },
@@ -223,7 +265,10 @@
                   "number"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L150"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 150
+                }
               }
             ],
             "signature": [
@@ -233,7 +278,10 @@
               "\nSend the user forward or backwards in the history stack.\n"
             ],
             "label": "go",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L150",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 150
+            },
             "tags": [],
             "returnComment": []
           },
@@ -248,7 +296,10 @@
               "\nSend the user one location back in the history stack. Equivalent to calling\n{@link ScopedHistory.go | ScopedHistory.go(-1)}. If no more entries are available backwards, this is a no-op."
             ],
             "label": "goBack",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L168",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 168
+            },
             "tags": [],
             "returnComment": []
           },
@@ -263,7 +314,10 @@
               "\nSend the user one location forward in the history stack. Equivalent to calling\n{@link ScopedHistory.go | ScopedHistory.go(1)}. If no more entries are available forwards, this is a no-op."
             ],
             "label": "goForward",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L177",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 177
+            },
             "tags": [],
             "returnComment": []
           },
@@ -281,7 +335,10 @@
                   ".TransitionPromptHook<HistoryLocationState> | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L186"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 186
+                }
               }
             ],
             "signature": [
@@ -294,7 +351,10 @@
               "\nAdd a block prompt requesting user confirmation when navigating away from the current page."
             ],
             "label": "block",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L185",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 185
+            },
             "tags": [],
             "returnComment": []
           },
@@ -314,7 +374,10 @@
                   ") => void"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L206"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 206
+                }
               }
             ],
             "signature": [
@@ -329,7 +392,10 @@
               "\nAdds a listener for location updates.\n"
             ],
             "label": "listen",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L205",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 205
+            },
             "tags": [],
             "returnComment": [
               "an function to unsubscribe the listener."
@@ -348,7 +414,10 @@
                   "<HistoryLocationState>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L223"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 223
+                }
               },
               {
                 "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }",
@@ -363,13 +432,19 @@
                     "type": "CompoundType",
                     "label": "prependBasePath",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L224",
+                    "source": {
+                      "path": "src/core/public/application/scoped_history.ts",
+                      "lineNumber": 224
+                    },
                     "signature": [
                       "boolean | undefined"
                     ]
                   }
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L224"
+                "source": {
+                  "path": "src/core/public/application/scoped_history.ts",
+                  "lineNumber": 224
+                }
               }
             ],
             "signature": [
@@ -381,12 +456,18 @@
               "\nCreates an href (string) to the location.\nIf `prependBasePath` is true (default), it will prepend the location's path with the scoped history basePath.\n"
             ],
             "label": "createHref",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L222",
+            "source": {
+              "path": "src/core/public/application/scoped_history.ts",
+              "lineNumber": 222
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/scoped_history.ts#L34",
+        "source": {
+          "path": "src/core/public/application/scoped_history.ts",
+          "lineNumber": 34
+        },
         "initialIsOpen": false
       }
     ],
@@ -419,7 +500,10 @@
             "description": [
               "\nThe unique identifier of the application"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L83"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 83
+            }
           },
           {
             "tags": [],
@@ -429,7 +513,10 @@
             "description": [
               "\nThe title of the application."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L88"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 88
+            }
           },
           {
             "tags": [],
@@ -439,7 +526,10 @@
             "description": [
               "\nThe category definition of the product\nSee {@link AppCategory}\nSee DEFAULT_APP_CATEGORIES for more reference"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L95",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 95
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -459,7 +549,10 @@
             "description": [
               "\nThe initial status of the application.\nDefaulting to `accessible`"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L101",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 101
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -479,7 +572,10 @@
             "description": [
               "\nThe initial status of the application's navLink.\nDefaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible`\nSee {@link AppNavLinkStatus}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L108",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 108
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -499,7 +595,10 @@
             "description": [
               "\nAllow to define the default path a user should be directed to when navigating to the app.\nWhen defined, this value will be used as a default for the `path` option when calling {@link ApplicationStart.navigateToApp | navigateToApp}`,\nand will also be appended to the {@link ChromeNavLink | application navLink} in the navigation bar."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L115",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 115
+            },
             "signature": [
               "string | undefined"
             ]
@@ -512,7 +611,10 @@
             "description": [
               "\nAn {@link AppUpdater} observable that can be used to update the application {@link AppUpdatableFields} at runtime.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L149",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 149
+            },
             "signature": [
               "Observable",
               "<",
@@ -534,7 +636,10 @@
             "description": [
               "\nAn ordinal used to sort nav links relative to one another for display."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L154",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 154
+            },
             "signature": [
               "number | undefined"
             ]
@@ -547,7 +652,10 @@
             "description": [
               "\nA tooltip shown when hovering over app link."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L159",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 159
+            },
             "signature": [
               "string | undefined"
             ]
@@ -560,7 +668,10 @@
             "description": [
               "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precendence over the `icon` property."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L165",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 165
+            },
             "signature": [
               "string | undefined"
             ]
@@ -573,7 +684,10 @@
             "description": [
               "\nA URL to an image file used as an icon. Used as a fallback\nif `euiIconType` is not provided."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L171",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 171
+            },
             "signature": [
               "string | undefined"
             ]
@@ -586,7 +700,10 @@
             "description": [
               "\nCustom capabilities defined by the app."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L176",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 176
+            },
             "signature": [
               "Partial<",
               {
@@ -607,7 +724,10 @@
             "description": [
               "\nHide the UI chrome when the application is mounted. Defaults to `false`.\nTakes precedence over chrome service visibility settings."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L182",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 182
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -620,7 +740,10 @@
             "description": [
               "\nA mount function called when the user navigates to this app's route."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L187",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 187
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -640,7 +763,10 @@
             "description": [
               "\nOverride the application's routing path from `/app/${id}`.\nMust be unique across registered applications. Should not include the\nbase path from HTTP."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L194",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 194
+            },
             "signature": [
               "string | undefined"
             ]
@@ -653,7 +779,10 @@
             "description": [
               "\nIf set to true, the application's route will only be checked against an exact match. Defaults to `false`.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L212",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 212
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -666,7 +795,10 @@
             "description": [
               "\nMeta data for an application that represent additional information for the app.\nSee {@link AppMeta}\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L244",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 244
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -679,7 +811,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L79",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 79
+        },
         "initialIsOpen": false
       },
       {
@@ -699,7 +834,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L566",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 566
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -717,7 +855,10 @@
             "type": "string",
             "label": "text",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L567"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 567
+            }
           },
           {
             "tags": [],
@@ -725,7 +866,10 @@
             "type": "string",
             "label": "title",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L568",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 568
+            },
             "signature": [
               "string | undefined"
             ]
@@ -736,13 +880,19 @@
             "type": "Function",
             "label": "callback",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L569",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 569
+            },
             "signature": [
               "(() => void) | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L565",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 565
+        },
         "initialIsOpen": false
       },
       {
@@ -762,7 +912,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L554",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 554
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -775,7 +928,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L553",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 553
+        },
         "initialIsOpen": false
       },
       {
@@ -823,12 +979,18 @@
                 "description": [
                   "- an {@link App}"
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L626"
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 626
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L626"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 626
+            }
           },
           {
             "id": "def-public.ApplicationSetup.registerAppUpdater",
@@ -868,15 +1030,24 @@
                   ">"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L655"
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 655
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L655"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 655
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L620",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 620
+        },
         "initialIsOpen": false
       },
       {
@@ -896,7 +1067,10 @@
             "description": [
               "\nGets the read-only capabilities."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L695",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 695
+            },
             "signature": [
               "Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>"
             ]
@@ -909,7 +1083,10 @@
             "description": [
               "\nObservable emitting the list of currently registered apps and their associated status.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L704",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 704
+            },
             "signature": [
               "Observable",
               "<ReadonlyMap<string, ",
@@ -950,7 +1127,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L712"
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 712
+                }
               },
               {
                 "type": "Object",
@@ -969,12 +1149,18 @@
                 "description": [
                   "- navigation options"
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L712"
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 712
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L712"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 712
+            }
           },
           {
             "id": "def-public.ApplicationStart.navigateToUrl",
@@ -997,12 +1183,18 @@
                 "description": [
                   "- an absolute URL, an absolute path or a relative path, to navigate to."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L750"
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 750
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L750"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 750
+            }
           },
           {
             "id": "def-public.ApplicationStart.getUrlForApp",
@@ -1023,7 +1215,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L764"
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 764
+                }
               },
               {
                 "id": "def-public.ApplicationStart.getUrlForApp.options",
@@ -1038,7 +1233,10 @@
                     "type": "string",
                     "label": "path",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L764",
+                    "source": {
+                      "path": "src/core/public/application/types.ts",
+                      "lineNumber": 764
+                    },
                     "signature": [
                       "string | undefined"
                     ]
@@ -1049,18 +1247,27 @@
                     "type": "CompoundType",
                     "label": "absolute",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L764",
+                    "source": {
+                      "path": "src/core/public/application/types.ts",
+                      "lineNumber": 764
+                    },
                     "signature": [
                       "boolean | undefined"
                     ]
                   }
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L764"
+                "source": {
+                  "path": "src/core/public/application/types.ts",
+                  "lineNumber": 764
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L764"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 764
+            }
           },
           {
             "tags": [],
@@ -1070,14 +1277,20 @@
             "description": [
               "\nAn observable that emits the current application id and each subsequent id update."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L769",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 769
+            },
             "signature": [
               "Observable",
               "<string | undefined>"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L691",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 691
+        },
         "initialIsOpen": false
       },
       {
@@ -1099,7 +1312,10 @@
             "description": [
               "Keywords to represent this application"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L257",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 257
+            },
             "signature": [
               "string[] | undefined"
             ]
@@ -1112,7 +1328,10 @@
             "description": [
               "Array of links that represent secondary in-app locations for the app."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L259",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 259
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1125,7 +1344,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L255",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 255
+        },
         "initialIsOpen": false
       },
       {
@@ -1155,7 +1377,10 @@
             "description": [
               "\nThe container element to render the application into."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L353",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 353
+            },
             "signature": [
               "HTMLElement"
             ]
@@ -1168,7 +1393,10 @@
             "description": [
               "\nA scoped history instance for your application. Should be used to wire up\nyour applications Router.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L399",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 399
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1190,7 +1418,10 @@
             "description": [
               "\nThe route path for configuring navigation to the application.\nThis string should not include the base path from HTTP.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L449"
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 449
+            }
           },
           {
             "tags": [
@@ -1202,7 +1433,10 @@
             "description": [
               "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L484",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 484
+            },
             "signature": [
               "(handler: ",
               {
@@ -1223,7 +1457,10 @@
             "description": [
               "\nA function that can be used to set the mount point used to populate the application action container\nin the chrome header.\n\nCalling the handler multiple time will erase the current content of the action menu with the mount from the latest call.\nCalling the handler with `undefined` will unmount the current mount point.\nCalling the handler after the application has been unmounted will have no effect.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L515",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 515
+            },
             "signature": [
               "(menuMount: ",
               {
@@ -1237,7 +1474,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L349",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 349
+        },
         "initialIsOpen": false
       },
       {
@@ -1257,7 +1497,10 @@
             "description": [
               "\noptional path inside application to deep link to.\nIf undefined, will use {@link App.defaultPath | the app's default path}` as default."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L679",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 679
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1270,7 +1513,10 @@
             "description": [
               "\noptional state to forward to the application"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L683",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 683
+            },
             "signature": [
               "unknown"
             ]
@@ -1283,13 +1529,19 @@
             "description": [
               "\nif true, will not create a new history entry when navigating (using `replace` instead of `push`)"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L687",
+            "source": {
+              "path": "src/core/public/application/types.ts",
+              "lineNumber": 687
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L674",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 674
+        },
         "initialIsOpen": false
       }
     ],
@@ -1304,7 +1556,10 @@
         "description": [
           "\nPossible type of actions on application leave.\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L540",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 540
+        },
         "initialIsOpen": false
       },
       {
@@ -1317,7 +1572,10 @@
         "description": [
           "\nStatus of the application's navLink.\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L40",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 40
+        },
         "initialIsOpen": false
       },
       {
@@ -1330,7 +1588,10 @@
         "description": [
           "\nAccessibility status of an application.\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L24",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       }
     ],
@@ -1345,7 +1606,10 @@
         "description": [
           "\nPossible actions to return from a {@link AppLeaveHandler}\n\nSee {@link AppLeaveConfirmAction} and {@link AppLeaveDefaultAction}\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L579",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 579
+        },
         "signature": [
           {
             "pluginId": "core",
@@ -1376,7 +1640,10 @@
         "description": [
           "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L530",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 530
+        },
         "signature": [
           "(factory: ",
           "AppLeaveActionFactory",
@@ -1401,7 +1668,10 @@
         "description": [
           "\nA mount function called when the user navigates to this app's route.\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L338",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 338
+        },
         "signature": [
           "(params: ",
           {
@@ -1441,7 +1711,10 @@
         "description": [
           "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L293",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 293
+        },
         "signature": [
           "{ id: string; title: string; } & { path: string; searchDeepLinks?: ",
           {
@@ -1473,7 +1746,10 @@
         "description": [
           "\nA function called when an application should be unmounted from the page. This function should be synchronous."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L346",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 346
+        },
         "signature": [
           "() => void"
         ],
@@ -1489,7 +1765,10 @@
         "description": [
           "\nDefines the list of fields that can be updated via an {@link AppUpdater}."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L64",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 64
+        },
         "signature": [
           "{ status?: AppStatus | undefined; meta?: AppMeta | undefined; navLinkStatus?: AppNavLinkStatus | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
         ],
@@ -1505,7 +1784,10 @@
         "description": [
           "\nUpdater for applications.\nsee {@link ApplicationSetup}"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L74",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 74
+        },
         "signature": [
           "(app: ",
           {
@@ -1537,7 +1819,10 @@
         "description": [
           "\nPublic information about a registered {@link App | application}\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L322",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 322
+        },
         "signature": [
           "Pick<App<unknown>, \"status\" | \"id\" | \"title\" | \"order\" | \"category\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\" | \"euiIconType\" | \"icon\" | \"capabilities\" | \"chromeless\" | \"appRoute\" | \"exactRoute\"> & { status: AppStatus; navLinkStatus: AppNavLinkStatus; appRoute: string; meta: PublicAppMetaInfo; }"
         ],
@@ -1553,7 +1838,10 @@
         "description": [
           "\nPublic information about a registered app's {@link AppMeta | keywords }\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L267",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 267
+        },
         "signature": [
           "Pick<AppMeta, never> & { keywords: string[]; searchDeepLinks: PublicAppSearchDeepLinkInfo[]; }"
         ],
@@ -1569,7 +1857,10 @@
         "description": [
           "\nPublic information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/application/types.ts#L277",
+        "source": {
+          "path": "src/core/public/application/types.ts",
+          "lineNumber": 277
+        },
         "signature": [
           "Pick<AppSearchDeepLink, \"id\" | \"title\" | \"path\"> & { searchDeepLinks: PublicAppSearchDeepLinkInfo[]; keywords: string[]; }"
         ],

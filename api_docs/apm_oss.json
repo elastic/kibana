@@ -12,7 +12,10 @@
         "type": "string",
         "label": "APM_STATIC_INDEX_PATTERN_ID",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/common/index_pattern_constants.ts#L9",
+        "source": {
+          "path": "src/plugins/apm_oss/common/index_pattern_constants.ts",
+          "lineNumber": 9
+        },
         "signature": [
           "\"apm_static_index_pattern_id\""
         ],
@@ -27,7 +30,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/public/types.ts#L10",
+      "source": {
+        "path": "src/plugins/apm_oss/public/types.ts",
+        "lineNumber": 10
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -38,7 +44,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/public/types.ts#L13",
+      "source": {
+        "path": "src/plugins/apm_oss/public/types.ts",
+        "lineNumber": 13
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -58,7 +67,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L88"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 88
+            }
           },
           {
             "type": "string",
@@ -68,7 +80,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L88"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 88
+            }
           }
         ],
         "signature": [
@@ -76,7 +91,10 @@
         ],
         "description": [],
         "label": "createDjangoAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L88",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 88
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -93,7 +111,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L631"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 631
+            }
           },
           {
             "type": "string",
@@ -103,7 +124,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L631"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 631
+            }
           }
         ],
         "signature": [
@@ -111,7 +135,10 @@
         ],
         "description": [],
         "label": "createDotNetAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L631",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 631
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -128,7 +155,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L173"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 173
+            }
           },
           {
             "type": "string",
@@ -138,7 +168,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L173"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 173
+            }
           }
         ],
         "signature": [
@@ -146,7 +179,10 @@
         ],
         "description": [],
         "label": "createFlaskAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L173",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 173
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -163,7 +199,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L492"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 492
+            }
           },
           {
             "type": "string",
@@ -173,7 +212,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L492"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 492
+            }
           }
         ],
         "signature": [
@@ -181,7 +223,10 @@
         ],
         "description": [],
         "label": "createGoAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L492",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 492
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -198,7 +243,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L585"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 585
+            }
           },
           {
             "type": "string",
@@ -208,7 +256,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L585"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 585
+            }
           }
         ],
         "signature": [
@@ -216,7 +267,10 @@
         ],
         "description": [],
         "label": "createJavaAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L585",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 585
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -233,7 +287,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L393"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 393
+            }
           }
         ],
         "signature": [
@@ -241,7 +298,10 @@
         ],
         "description": [],
         "label": "createJsAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L393",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 393
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -258,7 +318,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L11"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 11
+            }
           },
           {
             "type": "string",
@@ -268,7 +331,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L11"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 11
+            }
           }
         ],
         "signature": [
@@ -276,7 +342,10 @@
         ],
         "description": [],
         "label": "createNodeAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L11",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 11
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -293,7 +362,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L705"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 705
+            }
           },
           {
             "type": "string",
@@ -303,7 +375,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L705"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 705
+            }
           }
         ],
         "signature": [
@@ -311,7 +386,10 @@
         ],
         "description": [],
         "label": "createPhpAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L705",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 705
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -328,7 +406,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L298"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 298
+            }
           },
           {
             "type": "string",
@@ -338,7 +419,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L298"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 298
+            }
           }
         ],
         "signature": [
@@ -346,7 +430,10 @@
         ],
         "description": [],
         "label": "createRackAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L298",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 298
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -363,7 +450,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L255"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 255
+            }
           },
           {
             "type": "string",
@@ -373,7 +463,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L255"
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 255
+            }
           }
         ],
         "signature": [
@@ -381,7 +474,10 @@
         ],
         "description": [],
         "label": "createRailsAgentInstructions",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L255",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 255
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -396,7 +492,10 @@
         "type": "string",
         "label": "APM_STATIC_INDEX_PATTERN_ID",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/common/index_pattern_constants.ts#L9",
+        "source": {
+          "path": "src/plugins/apm_oss/common/index_pattern_constants.ts",
+          "lineNumber": 9
+        },
         "signature": [
           "\"apm_static_index_pattern_id\""
         ],
@@ -408,7 +507,10 @@
         "label": "APMOSSConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/index.ts#L32",
+        "source": {
+          "path": "src/plugins/apm_oss/server/index.ts",
+          "lineNumber": 32
+        },
         "signature": [
           "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
         ],
@@ -429,7 +531,10 @@
           "type": "Object",
           "label": "config",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/plugin.ts#L48",
+          "source": {
+            "path": "src/plugins/apm_oss/server/plugin.ts",
+            "lineNumber": 48
+          },
           "signature": [
             "Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>"
           ]
@@ -440,7 +545,10 @@
           "type": "Object",
           "label": "config$",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/plugin.ts#L49",
+          "source": {
+            "path": "src/plugins/apm_oss/server/plugin.ts",
+            "lineNumber": 49
+          },
           "signature": [
             "Observable",
             "<Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>>"
@@ -464,10 +572,16 @@
           "children": [],
           "tags": [],
           "returnComment": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/plugin.ts#L50"
+          "source": {
+            "path": "src/plugins/apm_oss/server/plugin.ts",
+            "lineNumber": 50
+          }
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/apm_oss/server/plugin.ts#L47",
+      "source": {
+        "path": "src/plugins/apm_oss/server/plugin.ts",
+        "lineNumber": 47
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

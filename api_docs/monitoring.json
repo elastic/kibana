@@ -25,7 +25,10 @@
             "type": "Function",
             "label": "getKibanaStats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/monitoring/server/types.ts#L93",
+            "source": {
+              "path": "x-pack/plugins/monitoring/server/types.ts",
+              "lineNumber": 93
+            },
             "signature": [
               "() => any"
             ]
@@ -36,13 +39,19 @@
             "type": "Function",
             "label": "stop",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/monitoring/server/types.ts#L94",
+            "source": {
+              "path": "x-pack/plugins/monitoring/server/types.ts",
+              "lineNumber": 94
+            },
             "signature": [
               "() => void"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/monitoring/server/types.ts#L92",
+        "source": {
+          "path": "x-pack/plugins/monitoring/server/types.ts",
+          "lineNumber": 92
+        },
         "initialIsOpen": false
       }
     ],
@@ -54,7 +63,10 @@
         "label": "KibanaSettingsCollector",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts#L53",
+        "source": {
+          "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
+          "lineNumber": 53
+        },
         "signature": [
           "Collector<EmailSettingData | undefined, {}> & KibanaSettingsCollectorExtraOptions"
         ],
@@ -66,7 +78,10 @@
         "label": "MonitoringConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/monitoring/server/config.ts#L92",
+        "source": {
+          "path": "x-pack/plugins/monitoring/server/config.ts",
+          "lineNumber": 92
+        },
         "signature": [
           "{ ui: { elasticsearch: MonitoringElasticsearchConfig; enabled: boolean; logs: Readonly<{} & { index: string; }>; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; ccs: Readonly<{} & { enabled: boolean; }>; metricbeat: Readonly<{} & { index: string; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; licensing: Readonly<{} & { api_polling_frequency: ",
           "Duration",
@@ -89,13 +104,19 @@
           "type": "Function",
           "label": "getKibanaStats",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/monitoring/server/types.ts#L98",
+          "source": {
+            "path": "x-pack/plugins/monitoring/server/types.ts",
+            "lineNumber": 98
+          },
           "signature": [
             "() => any"
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/monitoring/server/types.ts#L97",
+      "source": {
+        "path": "x-pack/plugins/monitoring/server/types.ts",
+        "lineNumber": 97
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

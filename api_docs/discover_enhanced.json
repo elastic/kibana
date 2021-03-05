@@ -49,7 +49,10 @@
             "type": "Object",
             "label": "config",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L43",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 43
+            },
             "signature": [
               {
                 "pluginId": "discoverEnhanced",
@@ -84,12 +87,18 @@
                   "<object>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L45"
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                  "lineNumber": 45
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L45"
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 45
+            }
           },
           {
             "id": "def-public.DiscoverEnhancedPlugin.setup",
@@ -147,7 +156,10 @@
                   ", unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L50"
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                  "lineNumber": 50
+                }
               },
               {
                 "type": "Object",
@@ -163,12 +175,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L51"
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                  "lineNumber": 51
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L49"
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 49
+            }
           },
           {
             "id": "def-public.DiscoverEnhancedPlugin.start",
@@ -209,7 +227,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L69"
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                  "lineNumber": 69
+                }
               },
               {
                 "type": "Object",
@@ -225,12 +246,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L69"
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                  "lineNumber": 69
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L69"
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 69
+            }
           },
           {
             "id": "def-public.DiscoverEnhancedPlugin.stop",
@@ -243,10 +270,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L71"
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 71
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L40",
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+          "lineNumber": 40
+        },
         "initialIsOpen": false
       },
       {
@@ -287,7 +320,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "\"ACTION_EXPLORE_DATA_CHART\""
             ]
@@ -298,7 +334,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L37",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 37
+            },
             "signature": [
               "\"ACTION_EXPLORE_DATA_CHART\""
             ]
@@ -309,7 +348,10 @@
             "type": "number",
             "label": "order",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L39",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 39
+            },
             "signature": [
               "200"
             ]
@@ -345,12 +387,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L41"
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                  "lineNumber": 41
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L41"
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 41
+            }
           },
           {
             "id": "def-public.ExploreDataChartAction.getUrl",
@@ -370,7 +418,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L47"
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                  "lineNumber": 47
+                }
               }
             ],
             "signature": [
@@ -394,12 +445,18 @@
             ],
             "description": [],
             "label": "getUrl",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L46",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 46
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L32",
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+          "lineNumber": 32
+        },
         "initialIsOpen": false
       },
       {
@@ -437,7 +494,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L37",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+              "lineNumber": 37
+            },
             "signature": [
               "\"ACTION_EXPLORE_DATA\""
             ]
@@ -448,7 +508,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L39",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+              "lineNumber": 39
+            },
             "signature": [
               "\"ACTION_EXPLORE_DATA\""
             ]
@@ -459,7 +522,10 @@
             "type": "number",
             "label": "order",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L41",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+              "lineNumber": 41
+            },
             "signature": [
               "200"
             ]
@@ -476,7 +542,10 @@
                   "EmbeddableQueryContext"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L43"
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+                  "lineNumber": 43
+                }
               }
             ],
             "signature": [
@@ -492,12 +561,18 @@
             ],
             "description": [],
             "label": "getUrl",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L43",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+              "lineNumber": 43
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L34",
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+          "lineNumber": 34
+        },
         "initialIsOpen": false
       }
     ],
@@ -516,7 +591,10 @@
             "type": "Object",
             "label": "discover",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "discover",
@@ -533,7 +611,10 @@
             "type": "Object",
             "label": "embeddable",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 26
+            },
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -550,7 +631,10 @@
             "type": "Object",
             "label": "kibanaLegacy",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "{} | undefined"
             ]
@@ -561,7 +645,10 @@
             "type": "CompoundType",
             "label": "share",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 28
+            },
             "signature": [
               {
                 "pluginId": "share",
@@ -579,7 +666,10 @@
             "type": "Object",
             "label": "uiActions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L29",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "Pick<",
               {
@@ -593,7 +683,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       },
       {
@@ -609,7 +702,10 @@
             "type": "Object",
             "label": "discover",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 33
+            },
             "signature": [
               {
                 "pluginId": "discover",
@@ -626,7 +722,10 @@
             "type": "Object",
             "label": "embeddable",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 34
+            },
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -643,7 +742,10 @@
             "type": "Object",
             "label": "kibanaLegacy",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "{ dashboardConfig: ",
               {
@@ -662,7 +764,10 @@
             "type": "CompoundType",
             "label": "share",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L36",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 36
+            },
             "signature": [
               {
                 "pluginId": "share",
@@ -680,7 +785,10 @@
             "type": "Object",
             "label": "uiActions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L37",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 37
+            },
             "signature": [
               "Pick<",
               {
@@ -704,7 +812,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/public/plugin.ts#L32",
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+          "lineNumber": 32
+        },
         "initialIsOpen": false
       }
     ],
@@ -737,13 +848,19 @@
             "type": "Object",
             "label": "actions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/common/config.ts#L9",
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/common/config.ts",
+              "lineNumber": 9
+            },
             "signature": [
               "{ exploreDataInChart: { enabled: boolean; }; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/discover_enhanced/common/config.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/common/config.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       }
     ],

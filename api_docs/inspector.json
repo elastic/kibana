@@ -49,7 +49,10 @@
             "type": "Object",
             "label": "views",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L55",
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 55
+            },
             "signature": [
               {
                 "pluginId": "inspector",
@@ -85,12 +88,18 @@
                   "<object>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L57"
+                "source": {
+                  "path": "src/plugins/inspector/public/plugin.tsx",
+                  "lineNumber": 57
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L57"
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 57
+            }
           },
           {
             "id": "def-public.InspectorPublicPlugin.setup",
@@ -140,12 +149,18 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L59"
+                "source": {
+                  "path": "src/plugins/inspector/public/plugin.tsx",
+                  "lineNumber": 59
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L59"
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 59
+            }
           },
           {
             "id": "def-public.InspectorPublicPlugin.start",
@@ -209,12 +224,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L73"
+                "source": {
+                  "path": "src/plugins/inspector/public/plugin.tsx",
+                  "lineNumber": 73
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L73"
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 73
+            }
           },
           {
             "id": "def-public.InspectorPublicPlugin.stop",
@@ -227,10 +248,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L114"
+            "source": {
+              "path": "src/plugins/inspector/public/plugin.tsx",
+              "lineNumber": 114
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L54",
+        "source": {
+          "path": "src/plugins/inspector/public/plugin.tsx",
+          "lineNumber": 54
+        },
         "initialIsOpen": false
       },
       {
@@ -266,7 +293,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L24"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 24
+            }
           },
           {
             "id": "def-public.RequestAdapter.start",
@@ -304,7 +334,10 @@
                 "description": [
                   "The name of this request as it should be shown in the UI."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L39"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 39
+                }
               },
               {
                 "type": "Object",
@@ -320,7 +353,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L39"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 39
+                }
               }
             ],
             "tags": [
@@ -329,7 +365,10 @@
             "returnComment": [
               "An instance to add information to the request and finish it."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L39"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 39
+            }
           },
           {
             "id": "def-public.RequestAdapter.reset",
@@ -342,7 +381,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L52"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 52
+            }
           },
           {
             "id": "def-public.RequestAdapter.resetRequest",
@@ -361,12 +403,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L57"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 57
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L57"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 57
+            }
           },
           {
             "id": "def-public.RequestAdapter.getRequests",
@@ -387,10 +435,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L62"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 62
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L21",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -425,7 +479,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L20"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 20
+                }
               },
               {
                 "type": "Function",
@@ -435,12 +492,18 @@
                   "() => void"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L20"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 20
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L20"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 20
+            }
           },
           {
             "id": "def-public.RequestResponder.json",
@@ -466,12 +529,18 @@
                   "object"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L25"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 25
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L25"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 25
+            }
           },
           {
             "id": "def-public.RequestResponder.stats",
@@ -511,12 +580,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L31"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 31
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L31"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 31
+            }
           },
           {
             "id": "def-public.RequestResponder.finish",
@@ -557,7 +632,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L53"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 53
+                }
               },
               {
                 "type": "Object",
@@ -573,12 +651,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L53"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 53
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L53"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 53
+            }
           },
           {
             "id": "def-public.RequestResponder.ok",
@@ -611,12 +695,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L60"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 60
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L60"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 60
+            }
           },
           {
             "id": "def-public.RequestResponder.error",
@@ -649,15 +739,24 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L64"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 64
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L64"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 64
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L16",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       }
     ],
@@ -678,7 +777,10 @@
             "type": "Object",
             "label": "requests",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/types.ts#L15",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/types.ts",
+              "lineNumber": 15
+            },
             "signature": [
               {
                 "pluginId": "inspector",
@@ -696,13 +798,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/types.ts#L16",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/types.ts#L14",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/types.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -722,7 +830,10 @@
             "type": "string",
             "label": "title",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L60",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 60
+            },
             "signature": [
               "string | undefined"
             ]
@@ -733,13 +844,19 @@
             "type": "Unknown",
             "label": "options",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L61",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 61
+            },
             "signature": [
               "unknown"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L59",
+        "source": {
+          "path": "src/plugins/inspector/public/types.ts",
+          "lineNumber": 59
+        },
         "initialIsOpen": false
       },
       {
@@ -759,7 +876,10 @@
             "type": "CompoundType",
             "label": "component",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L46",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 46
+            },
             "signature": [
               "React.ComponentType<",
               {
@@ -786,7 +906,10 @@
             "type": "string",
             "label": "help",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L47",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 47
+            },
             "signature": [
               "string | undefined"
             ]
@@ -797,7 +920,10 @@
             "type": "number",
             "label": "order",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L48",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 48
+            },
             "signature": [
               "number | undefined"
             ]
@@ -808,7 +934,10 @@
             "type": "Function",
             "label": "shouldShow",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L49",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 49
+            },
             "signature": [
               "((adapters: ",
               {
@@ -827,10 +956,16 @@
             "type": "string",
             "label": "title",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L50"
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 50
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L45",
+        "source": {
+          "path": "src/plugins/inspector/public/types.ts",
+          "lineNumber": 45
+        },
         "initialIsOpen": false
       },
       {
@@ -860,7 +995,10 @@
             "description": [
               "\nAdapters used to open the inspector."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L20",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 20
+            },
             "signature": [
               "TAdapters"
             ]
@@ -873,7 +1011,10 @@
             "description": [
               "\nThe title that the inspector is currently using e.g. a visualization name."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L24"
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -883,13 +1024,19 @@
             "description": [
               "\nA set of specific options for each view."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L28",
+            "source": {
+              "path": "src/plugins/inspector/public/types.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "unknown"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L16",
+        "source": {
+          "path": "src/plugins/inspector/public/types.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       },
       {
@@ -905,7 +1052,10 @@
             "type": "string",
             "label": "label",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L49"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 49
+            }
           },
           {
             "tags": [],
@@ -913,7 +1063,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L50",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 50
+            },
             "signature": [
               "string | undefined"
             ]
@@ -924,13 +1077,19 @@
             "type": "Any",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L51",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 51
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L48",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 48
+        },
         "initialIsOpen": false
       },
       {
@@ -946,13 +1105,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L45",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 45
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L44",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 44
+        },
         "initialIsOpen": false
       }
     ],
@@ -965,7 +1130,10 @@
         "description": [
           "\nThe status a request can have."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L12",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       }
     ],
@@ -976,7 +1144,10 @@
         "label": "InspectorSession",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/types.ts#L64",
+        "source": {
+          "path": "src/plugins/inspector/public/types.ts",
+          "lineNumber": 64
+        },
         "signature": [
           "OverlayRef"
         ],
@@ -997,7 +1168,10 @@
           "type": "Function",
           "label": "registerView",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L21",
+          "source": {
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "lineNumber": 21
+          },
           "signature": [
             "(view: ",
             {
@@ -1016,7 +1190,10 @@
           "type": "Object",
           "label": "__LEGACY",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L23",
+          "source": {
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "lineNumber": 23
+          },
           "signature": [
             "{ views: ",
             {
@@ -1030,7 +1207,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L20",
+      "source": {
+        "path": "src/plugins/inspector/public/plugin.tsx",
+        "lineNumber": 20
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1049,7 +1229,10 @@
           "description": [
             "\nChecks if a inspector panel could be shown based on the passed adapters.\n"
           ],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L37",
+          "source": {
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "lineNumber": 37
+          },
           "signature": [
             "(adapters?: ",
             {
@@ -1073,7 +1256,10 @@
           "description": [
             "\nOpens the inspector panel for the given adapters and close any previously opened\ninspector panel. The previously panel will be closed also if no new panel will be\nopened (e.g. because of the passed adapters no view is available). You can use\n{@link InspectorSession#close} on the return value to close that opened panel again.\n"
           ],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L51",
+          "source": {
+            "path": "src/plugins/inspector/public/plugin.tsx",
+            "lineNumber": 51
+          },
           "signature": [
             "(adapters: ",
             {
@@ -1102,7 +1288,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/public/plugin.tsx#L28",
+      "source": {
+        "path": "src/plugins/inspector/public/plugin.tsx",
+        "lineNumber": 28
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1150,7 +1339,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L24"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 24
+            }
           },
           {
             "id": "def-common.RequestAdapter.start",
@@ -1188,7 +1380,10 @@
                 "description": [
                   "The name of this request as it should be shown in the UI."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L39"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 39
+                }
               },
               {
                 "type": "Object",
@@ -1204,7 +1399,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L39"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 39
+                }
               }
             ],
             "tags": [
@@ -1213,7 +1411,10 @@
             "returnComment": [
               "An instance to add information to the request and finish it."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L39"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 39
+            }
           },
           {
             "id": "def-common.RequestAdapter.reset",
@@ -1226,7 +1427,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L52"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 52
+            }
           },
           {
             "id": "def-common.RequestAdapter.resetRequest",
@@ -1245,12 +1449,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L57"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                  "lineNumber": 57
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L57"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 57
+            }
           },
           {
             "id": "def-common.RequestAdapter.getRequests",
@@ -1271,10 +1481,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L62"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+              "lineNumber": 62
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_adapter.ts#L21",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -1309,7 +1525,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L20"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 20
+                }
               },
               {
                 "type": "Function",
@@ -1319,12 +1538,18 @@
                   "() => void"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L20"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 20
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L20"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 20
+            }
           },
           {
             "id": "def-common.RequestResponder.json",
@@ -1350,12 +1575,18 @@
                   "object"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L25"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 25
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L25"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 25
+            }
           },
           {
             "id": "def-common.RequestResponder.stats",
@@ -1395,12 +1626,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L31"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 31
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L31"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 31
+            }
           },
           {
             "id": "def-common.RequestResponder.finish",
@@ -1441,7 +1678,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L53"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 53
+                }
               },
               {
                 "type": "Object",
@@ -1457,12 +1697,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L53"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 53
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L53"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 53
+            }
           },
           {
             "id": "def-common.RequestResponder.ok",
@@ -1495,12 +1741,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L60"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 60
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L60"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 60
+            }
           },
           {
             "id": "def-common.RequestResponder.error",
@@ -1533,15 +1785,24 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L64"
+                "source": {
+                  "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                  "lineNumber": 64
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L64"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+              "lineNumber": 64
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/request_responder.ts#L16",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       }
     ],
@@ -1562,7 +1823,10 @@
             "type": "Object",
             "label": "requests",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/types.ts#L15",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/types.ts",
+              "lineNumber": 15
+            },
             "signature": [
               {
                 "pluginId": "inspector",
@@ -1580,13 +1844,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/types.ts#L16",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/types.ts#L14",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/types.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -1602,7 +1872,10 @@
             "type": "string",
             "label": "label",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L49"
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 49
+            }
           },
           {
             "tags": [],
@@ -1610,7 +1883,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L50",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 50
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1621,13 +1897,19 @@
             "type": "Any",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L51",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 51
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L48",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 48
+        },
         "initialIsOpen": false
       },
       {
@@ -1643,13 +1925,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L45",
+            "source": {
+              "path": "src/plugins/inspector/common/adapters/request/types.ts",
+              "lineNumber": 45
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L44",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 44
+        },
         "initialIsOpen": false
       }
     ],
@@ -1662,7 +1950,10 @@
         "description": [
           "\nThe status a request can have."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/inspector/common/adapters/request/types.ts#L12",
+        "source": {
+          "path": "src/plugins/inspector/common/adapters/request/types.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       }
     ],

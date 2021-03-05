@@ -20,12 +20,18 @@
               "Props"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L74"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 74
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L74",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 74
+        },
         "initialIsOpen": false
       },
       {
@@ -39,7 +45,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L70",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 70
+        },
         "initialIsOpen": false
       },
       {
@@ -64,7 +73,10 @@
                 "type": "string",
                 "label": "traceId",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L13"
+                "source": {
+                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                  "lineNumber": 13
+                }
               },
               {
                 "tags": [],
@@ -72,7 +84,10 @@
                 "type": "string",
                 "label": "rangeFrom",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L14"
+                "source": {
+                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                  "lineNumber": 14
+                }
               },
               {
                 "tags": [],
@@ -80,15 +95,24 @@
                 "type": "string",
                 "label": "rangeTo",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L15"
+                "source": {
+                  "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+                  "lineNumber": 15
+                }
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L12"
+            "source": {
+              "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+              "lineNumber": 12
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/utils/get_apm_trace_url.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/observability/public/utils/get_apm_trace_url.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -116,12 +140,18 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L13"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+              "lineNumber": 13
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L13",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -149,12 +179,18 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L23"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+              "lineNumber": 23
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/index.tsx#L23",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
+          "lineNumber": 23
+        },
         "initialIsOpen": false
       },
       {
@@ -163,7 +199,10 @@
         "type": "Function",
         "label": "Section",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L58",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 58
+        },
         "signature": [
           "StyledComponent",
           "<\"div\", any, {}, never>"
@@ -189,12 +228,18 @@
               "EuiListGroupItemProps"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L66"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 66
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L66",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 66
+        },
         "initialIsOpen": false
       },
       {
@@ -222,12 +267,18 @@
               "[] | undefined; color?: \"text\" | \"primary\" | \"inherit\" | \"ghost\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: string | number | boolean | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L46"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 46
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L46",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 46
+        },
         "initialIsOpen": false
       },
       {
@@ -241,7 +292,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L54",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 54
+        },
         "initialIsOpen": false
       },
       {
@@ -266,18 +320,27 @@
                 "type": "CompoundType",
                 "label": "children",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+                  "lineNumber": 35
+                },
                 "signature": [
                   "React.ReactNode"
                 ]
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 35
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L35",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 35
+        },
         "initialIsOpen": false
       },
       {
@@ -302,18 +365,27 @@
                 "type": "CompoundType",
                 "label": "children",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+                  "lineNumber": 24
+                },
                 "signature": [
                   "React.ReactNode"
                 ]
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+              "lineNumber": 24
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L24",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       },
       {
@@ -336,7 +408,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_chart_theme.tsx#L11",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_chart_theme.tsx",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -358,7 +433,10 @@
               "() => TReturn"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L30"
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+              "lineNumber": 30
+            }
           },
           {
             "type": "Array",
@@ -368,7 +446,10 @@
               "any[]"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L31"
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+              "lineNumber": 31
+            }
           },
           {
             "id": "def-public.useFetcher.options",
@@ -383,18 +464,27 @@
                 "type": "CompoundType",
                 "label": "preservePreviousData",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L33",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+                  "lineNumber": 33
+                },
                 "signature": [
                   "boolean | undefined"
                 ]
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L32"
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+              "lineNumber": 32
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L29",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+          "lineNumber": 29
+        },
         "initialIsOpen": false
       },
       {
@@ -415,7 +505,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_theme.tsx#L12",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_theme.tsx",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       },
       {
@@ -449,7 +542,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L53"
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 53
+            }
           },
           {
             "type": "Array",
@@ -459,12 +555,18 @@
               "EffectDeps"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L54"
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 54
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L52",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 52
+        },
         "initialIsOpen": false
       },
       {
@@ -484,7 +586,10 @@
               "TrackPageviewProps"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L88"
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 88
+            }
           },
           {
             "type": "Array",
@@ -494,12 +599,18 @@
               "EffectDeps"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L89"
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 89
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L87",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 87
+        },
         "initialIsOpen": false
       },
       {
@@ -532,18 +643,27 @@
                 "type": "CompoundType",
                 "label": "app",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L40",
+                "source": {
+                  "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+                  "lineNumber": 40
+                },
                 "signature": [
                   "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"observability-overview\" | \"stack_monitoring\" | \"ux\" | undefined"
                 ]
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L40"
+            "source": {
+              "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+              "lineNumber": 40
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L38",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 38
+        },
         "initialIsOpen": false
       }
     ],
@@ -578,7 +698,10 @@
             "type": "Object",
             "label": "stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L91",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 91
+            },
             "signature": [
               "{ services: ",
               {
@@ -605,7 +728,10 @@
             "type": "Object",
             "label": "series",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L95",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 95
+            },
             "signature": [
               "{ transactions: ",
               {
@@ -619,7 +745,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L90",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 90
+        },
         "initialIsOpen": false
       },
       {
@@ -635,7 +764,10 @@
             "type": "number",
             "label": "x",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -643,13 +775,19 @@
             "type": "number",
             "label": "y",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       },
       {
@@ -675,7 +813,10 @@
             "type": "Function",
             "label": "fetchData",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L57",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 57
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -701,7 +842,10 @@
             "type": "Function",
             "label": "hasData",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L58",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 58
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -714,7 +858,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L54",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 54
+        },
         "initialIsOpen": false
       },
       {
@@ -730,7 +877,10 @@
             "type": "Object",
             "label": "absoluteTime",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 26
+            },
             "signature": [
               "{ start: number; end: number; }"
             ]
@@ -741,7 +891,10 @@
             "type": "Object",
             "label": "relativeTime",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "{ start: string; end: string; }"
             ]
@@ -752,7 +905,10 @@
             "type": "string",
             "label": "bucketSize",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L28"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 28
+            }
           },
           {
             "tags": [],
@@ -760,13 +916,19 @@
             "type": "string",
             "label": "serviceName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L29",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L25",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 25
+        },
         "initialIsOpen": false
       },
       {
@@ -782,10 +944,16 @@
             "type": "string",
             "label": "appLink",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L62"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 62
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L61",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 61
+        },
         "initialIsOpen": false
       },
       {
@@ -801,13 +969,19 @@
             "type": "Object",
             "label": "absoluteTime",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 33
+            },
             "signature": [
               "{ start: number; end: number; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L32",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 32
+        },
         "initialIsOpen": false
       },
       {
@@ -840,7 +1014,10 @@
             "type": "Object",
             "label": "stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L66",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 66
+            },
             "signature": [
               "Record<string, ",
               {
@@ -859,7 +1036,10 @@
             "type": "Object",
             "label": "series",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L67",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 67
+            },
             "signature": [
               "Record<string, ",
               {
@@ -873,7 +1053,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L65",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 65
+        },
         "initialIsOpen": false
       },
       {
@@ -906,7 +1089,10 @@
             "type": "Object",
             "label": "stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L71",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 71
+            },
             "signature": [
               "{ hosts: ",
               {
@@ -936,7 +1122,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L70",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 70
+        },
         "initialIsOpen": false
       },
       {
@@ -952,7 +1141,10 @@
             "type": "Object",
             "label": "apm",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L105",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 105
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -969,7 +1161,10 @@
             "type": "Object",
             "label": "infra_metrics",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L106",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 106
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -986,7 +1181,10 @@
             "type": "Object",
             "label": "infra_logs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L107",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 107
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -1003,7 +1201,10 @@
             "type": "Object",
             "label": "uptime",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L108",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 108
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -1020,7 +1221,10 @@
             "type": "Object",
             "label": "ux",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L109",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 109
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -1032,7 +1236,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L104",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 104
+        },
         "initialIsOpen": false
       },
       {
@@ -1048,7 +1255,10 @@
             "type": "boolean",
             "label": "apm",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L113"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 113
+            }
           },
           {
             "tags": [],
@@ -1056,7 +1266,10 @@
             "type": "boolean",
             "label": "infra_metrics",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L114"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 114
+            }
           },
           {
             "tags": [],
@@ -1064,7 +1277,10 @@
             "type": "boolean",
             "label": "infra_logs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L115"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 115
+            }
           },
           {
             "tags": [],
@@ -1072,7 +1288,10 @@
             "type": "boolean",
             "label": "uptime",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L116"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 116
+            }
           },
           {
             "tags": [],
@@ -1080,7 +1299,10 @@
             "type": "Object",
             "label": "ux",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L117",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 117
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -1092,7 +1314,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L112",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 112
+        },
         "initialIsOpen": false
       },
       {
@@ -1108,7 +1333,10 @@
             "type": "Array",
             "label": "coordinates",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L22",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 22
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -1121,7 +1349,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -1137,7 +1368,10 @@
             "type": "CompoundType",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "\"number\" | \"percent\" | \"bytesPerSecond\""
             ]
@@ -1148,10 +1382,16 @@
             "type": "number",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 13
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -1184,7 +1424,10 @@
             "type": "Object",
             "label": "stats",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L79",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 79
+            },
             "signature": [
               "{ monitors: ",
               {
@@ -1219,7 +1462,10 @@
             "type": "Object",
             "label": "series",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L84",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 84
+            },
             "signature": [
               "{ up: ",
               {
@@ -1241,7 +1487,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L78",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 78
+        },
         "initialIsOpen": false
       },
       {
@@ -1274,7 +1523,10 @@
             "type": "Object",
             "label": "coreWebVitals",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L101",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 101
+            },
             "signature": [
               {
                 "pluginId": "observability",
@@ -1286,7 +1538,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L100",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 100
+        },
         "initialIsOpen": false
       },
       {
@@ -1302,7 +1557,10 @@
             "type": "boolean",
             "label": "hasData",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L37"
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 37
+            }
           },
           {
             "tags": [],
@@ -1310,13 +1568,19 @@
             "type": "CompoundType",
             "label": "serviceName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L38",
+            "source": {
+              "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+              "lineNumber": 38
+            },
             "signature": [
               "string | number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L36",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 36
+        },
         "initialIsOpen": false
       },
       {
@@ -1332,7 +1596,10 @@
             "type": "CompoundType",
             "label": "cls",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L24",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 24
+            },
             "signature": [
               "number | null"
             ]
@@ -1343,7 +1610,10 @@
             "type": "CompoundType",
             "label": "fid",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L25",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 25
+            },
             "signature": [
               "number | null | undefined"
             ]
@@ -1354,7 +1624,10 @@
             "type": "CompoundType",
             "label": "lcp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L26",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 26
+            },
             "signature": [
               "number | null | undefined"
             ]
@@ -1365,7 +1638,10 @@
             "type": "number",
             "label": "tbt",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L27"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 27
+            }
           },
           {
             "tags": [],
@@ -1373,7 +1649,10 @@
             "type": "CompoundType",
             "label": "fcp",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L28",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 28
+            },
             "signature": [
               "number | null | undefined"
             ]
@@ -1384,7 +1663,10 @@
             "type": "number",
             "label": "coreVitalPages",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L29"
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 29
+            }
           },
           {
             "tags": [],
@@ -1392,7 +1674,10 @@
             "type": "Array",
             "label": "lcpRanks",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L30",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 30
+            },
             "signature": [
               "number[]"
             ]
@@ -1403,7 +1688,10 @@
             "type": "Array",
             "label": "fidRanks",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L31",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 31
+            },
             "signature": [
               "number[]"
             ]
@@ -1414,13 +1702,19 @@
             "type": "Array",
             "label": "clsRanks",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L32",
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+              "lineNumber": 32
+            },
             "signature": [
               "number[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx#L23",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/core_web_vitals/index.tsx",
+          "lineNumber": 23
+        },
         "initialIsOpen": false
       }
     ],
@@ -1431,7 +1725,10 @@
         "label": "FETCH_STATUS",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_fetcher.tsx#L10",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_fetcher.tsx",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -1440,7 +1737,10 @@
         "label": "METRIC_TYPE",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/node_modules/@kbn/analytics/target/types/metrics/index.d.ts#L10",
+        "source": {
+          "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "METRIC_TYPE"
         ],
@@ -1454,7 +1754,10 @@
         "label": "DragHandleProps",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/eui_draggable/index.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "undefined | ",
           "DraggableProvidedDragHandleProps"
@@ -1467,7 +1770,10 @@
         "label": "DropResult",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/eui_draggable/index.ts#L18",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
+          "lineNumber": 18
+        },
         "signature": [
           "DropResult"
         ],
@@ -1479,7 +1785,10 @@
         "label": "FetchData",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L41",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 41
+        },
         "signature": [
           "(fetchDataParams: ",
           {
@@ -1499,7 +1808,10 @@
         "label": "HasData",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L45",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 45
+        },
         "signature": [
           "(params: ",
           {
@@ -1527,7 +1839,10 @@
         "label": "ObservabilityFetchDataPlugins",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts#L49",
+        "source": {
+          "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+          "lineNumber": 49
+        },
         "signature": [
           "\"apm\" | \"infra_metrics\" | \"infra_logs\" | \"uptime\" | \"ux\""
         ],
@@ -1539,7 +1854,10 @@
         "label": "SectionLinkProps",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/components/shared/action_menu/index.tsx#L65",
+        "source": {
+          "path": "x-pack/plugins/observability/public/components/shared/action_menu/index.tsx",
+          "lineNumber": 65
+        },
         "signature": [
           "CommonProps",
           " & Pick<(",
@@ -1559,7 +1877,10 @@
         "label": "TrackMetricOptions",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L33",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 33
+        },
         "signature": [
           "TrackOptions & { metric: string; }"
         ],
@@ -1571,7 +1892,10 @@
         "label": "UiTracker",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/hooks/use_track_metric.tsx#L34",
+        "source": {
+          "path": "x-pack/plugins/observability/public/hooks/use_track_metric.tsx",
+          "lineNumber": 34
+        },
         "signature": [
           "(__0: ",
           {
@@ -1600,7 +1924,10 @@
           "type": "Object",
           "label": "dashboard",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L25",
+          "source": {
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "lineNumber": 25
+          },
           "signature": [
             "{ register: typeof ",
             {
@@ -1614,7 +1941,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L24",
+      "source": {
+        "path": "x-pack/plugins/observability/public/plugin.ts",
+        "lineNumber": 24
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1624,7 +1954,10 @@
       "label": "ObservabilityPluginStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/public/plugin.ts#L33",
+      "source": {
+        "path": "x-pack/plugins/observability/public/plugin.ts",
+        "lineNumber": 33
+      },
       "signature": [
         "void"
       ],
@@ -1657,7 +1990,10 @@
             "type": "Object",
             "label": "originalError",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "ElasticsearchClientError"
             ]
@@ -1679,15 +2015,24 @@
                   "ElasticsearchClientError"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L13"
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+                  "lineNumber": 13
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+              "lineNumber": 13
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       }
     ],
@@ -1732,7 +2077,10 @@
                 "type": "string",
                 "label": "index",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L32"
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                  "lineNumber": 32
+                }
               },
               {
                 "tags": [],
@@ -1740,7 +2088,10 @@
                 "type": "Object",
                 "label": "mappings",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L33",
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                  "lineNumber": 33
+                },
                 "signature": [
                   {
                     "pluginId": "observability",
@@ -1757,7 +2108,10 @@
                 "type": "CompoundType",
                 "label": "client",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L34",
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                  "lineNumber": 34
+                },
                 "signature": [
                   {
                     "pluginId": "core",
@@ -1774,18 +2128,27 @@
                 "type": "Object",
                 "label": "logger",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L35",
+                "source": {
+                  "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+                  "lineNumber": 35
+                },
                 "signature": [
                   "Logger"
                 ]
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L31"
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+              "lineNumber": 31
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L26",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -1807,12 +2170,18 @@
               "T"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L40"
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+              "lineNumber": 40
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/unwrap_es_response.ts#L39",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/unwrap_es_response.ts",
+          "lineNumber": 39
+        },
         "initialIsOpen": false
       }
     ],
@@ -1830,7 +2199,10 @@
             "type": "CompoundType",
             "label": "dynamic",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L21",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+              "lineNumber": 21
+            },
             "signature": [
               "boolean | \"strict\" | undefined"
             ]
@@ -1841,7 +2213,10 @@
             "type": "Object",
             "label": "properties",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L22",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "Record<string, ",
               {
@@ -1868,13 +2243,19 @@
             "type": "Array",
             "label": "dynamic_templates",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L23",
+            "source": {
+              "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+              "lineNumber": 23
+            },
             "signature": [
               "any[] | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/utils/create_or_update_index.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/observability/server/utils/create_or_update_index.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       }
     ],
@@ -1886,7 +2267,10 @@
         "label": "ObservabilityConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/index.ts#L25",
+        "source": {
+          "path": "x-pack/plugins/observability/server/index.ts",
+          "lineNumber": 25
+        },
         "signature": [
           "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
         ],
@@ -1898,7 +2282,10 @@
         "label": "ScopedAnnotationsClient",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/observability/server/lib/annotations/bootstrap_annotations.ts",
+          "lineNumber": 24
+        },
         "signature": [
           "{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
           "Annotation",
@@ -1923,13 +2310,19 @@
           "type": "Function",
           "label": "getScopedAnnotationsClient",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/plugin.ts#L22",
+          "source": {
+            "path": "x-pack/plugins/observability/server/plugin.ts",
+            "lineNumber": 22
+          },
           "signature": [
             "LazyScopedAnnotationsClientFactory"
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/observability/server/plugin.ts#L21",
+      "source": {
+        "path": "x-pack/plugins/observability/server/plugin.ts",
+        "lineNumber": 21
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

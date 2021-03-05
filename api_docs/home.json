@@ -22,7 +22,10 @@
               "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\""
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L55"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 55
+            }
           }
         ],
         "tags": [
@@ -32,7 +35,10 @@
         "returnComment": [
           "display name"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L55",
+        "source": {
+          "path": "src/plugins/home/common/instruction_variant.ts",
+          "lineNumber": 55
+        },
         "initialIsOpen": false
       }
     ],
@@ -54,7 +60,10 @@
             "description": [
               "\nFlag whether the home app should advertise cloud features"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/environment/environment.ts#L14"
+            "source": {
+              "path": "src/plugins/home/public/services/environment/environment.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -64,7 +73,10 @@
             "description": [
               "\nFlag whether the home app should advertise apm features"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/environment/environment.ts#L18"
+            "source": {
+              "path": "src/plugins/home/public/services/environment/environment.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -74,10 +86,16 @@
             "description": [
               "\nFlag whether the home app should advertise ml features"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/environment/environment.ts#L22"
+            "source": {
+              "path": "src/plugins/home/public/services/environment/environment.ts",
+              "lineNumber": 22
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/environment/environment.ts#L10",
+        "source": {
+          "path": "src/plugins/home/public/services/environment/environment.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -97,7 +115,10 @@
             "description": [
               "Unique string identifier for this feature."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L22"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 22
+            }
           },
           {
             "tags": [],
@@ -107,7 +128,10 @@
             "description": [
               "Title of feature displayed to the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L24"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -117,7 +141,10 @@
             "description": [
               "{@link FeatureCatalogueCategory} to display this feature in."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L26",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 26
+            },
             "signature": [
               {
                 "pluginId": "home",
@@ -136,7 +163,10 @@
             "description": [
               "A tagline of feature displayed to the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L28",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "string | undefined"
             ]
@@ -149,7 +179,10 @@
             "description": [
               "One-line description of feature displayed to the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L30"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -159,7 +192,10 @@
             "description": [
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L32",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "IconType"
             ]
@@ -172,7 +208,10 @@
             "description": [
               "URL path to link to this future. Should not include the basePath."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L34"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 34
+            }
           },
           {
             "tags": [],
@@ -182,7 +221,10 @@
             "description": [
               "Whether or not this link should be shown on the front page of Kibana."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L36"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 36
+            }
           },
           {
             "tags": [],
@@ -192,7 +234,10 @@
             "description": [
               "An ordinal used to sort features relative to one another for display on the home page"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L38",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 38
+            },
             "signature": [
               "number | undefined"
             ]
@@ -205,7 +250,10 @@
             "description": [
               "Optional function to control visibility of this feature."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L40",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 40
+            },
             "signature": [
               "(() => boolean) | undefined"
             ]
@@ -218,13 +266,19 @@
             "description": [
               "Unique string identifier of the solution this feature belongs to"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L42",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 42
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L20",
+        "source": {
+          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -244,7 +298,10 @@
             "description": [
               "Unique string identifier for this solution."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L48"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -254,7 +311,10 @@
             "description": [
               "Title of solution displayed to the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L50"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 50
+            }
           },
           {
             "tags": [],
@@ -264,7 +324,10 @@
             "description": [
               "The tagline of the solution displayed to the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L52"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 52
+            }
           },
           {
             "tags": [],
@@ -274,7 +337,10 @@
             "description": [
               "One-line description of the solution displayed to the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L54",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "string | undefined"
             ]
@@ -287,7 +353,10 @@
             "description": [
               "A list of use cases for this solution displayed to the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L56",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 56
+            },
             "signature": [
               "string[]"
             ]
@@ -300,7 +369,10 @@
             "description": [
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L58",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 58
+            },
             "signature": [
               "IconType"
             ]
@@ -313,7 +385,10 @@
             "description": [
               "URL path to link to this future. Should not include the basePath."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L60"
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 60
+            }
           },
           {
             "tags": [],
@@ -323,13 +398,19 @@
             "description": [
               "An ordinal used to sort solutions relative to one another for display on the home page"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L62",
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 62
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L46",
+        "source": {
+          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+          "lineNumber": 46
+        },
         "initialIsOpen": false
       }
     ],
@@ -342,7 +423,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts#L13",
+        "source": {
+          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       }
     ],
@@ -355,7 +439,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L161",
+        "source": {
+          "path": "src/plugins/home/public/plugin.ts",
+          "lineNumber": 161
+        },
         "signature": [
           "{ update: (update: Partial<",
           {
@@ -377,7 +464,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L158",
+        "source": {
+          "path": "src/plugins/home/public/plugin.ts",
+          "lineNumber": 158
+        },
         "signature": [
           "{ register: (feature: ",
           {
@@ -407,7 +497,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/tutorials/tutorial_service.ts#L18",
+        "source": {
+          "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
+          "lineNumber": 18
+        },
         "signature": [
           "(props: { children?: React.ReactNode; }, context: any) => React.ReactElement<any, any> | null"
         ],
@@ -421,7 +514,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/tutorials/tutorial_service.ts#L15",
+        "source": {
+          "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "(props: { children?: React.ReactNode; }, context: any) => React.ReactElement<any, any> | null"
         ],
@@ -435,7 +531,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/tutorials/tutorial_service.ts#L21",
+        "source": {
+          "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "(props: React.PropsWithChildren<{ moduleName: string; }>, context: any) => React.ReactElement<any, any> | null"
         ],
@@ -449,7 +548,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L164",
+        "source": {
+          "path": "src/plugins/home/public/plugin.ts",
+          "lineNumber": 164
+        },
         "signature": [
           "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: ",
           "FC",
@@ -469,7 +571,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/services/tutorials/tutorial_service.ts#L12",
+        "source": {
+          "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "{ [x: string]: unknown; }"
         ],
@@ -488,7 +593,10 @@
             "type": "string",
             "label": "ESC",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L10"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 10
+            }
           },
           {
             "tags": [],
@@ -496,7 +604,10 @@
             "type": "string",
             "label": "OSX",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L11"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -504,7 +615,10 @@
             "type": "string",
             "label": "DEB",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L12"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 12
+            }
           },
           {
             "tags": [],
@@ -512,7 +626,10 @@
             "type": "string",
             "label": "RPM",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L13"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -520,7 +637,10 @@
             "type": "string",
             "label": "DOCKER",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L14"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -528,7 +648,10 @@
             "type": "string",
             "label": "WINDOWS",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L15"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -536,7 +659,10 @@
             "type": "string",
             "label": "NODE",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L16"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -544,7 +670,10 @@
             "type": "string",
             "label": "DJANGO",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L17"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -552,7 +681,10 @@
             "type": "string",
             "label": "FLASK",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L18"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -560,7 +692,10 @@
             "type": "string",
             "label": "RAILS",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L19"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 19
+            }
           },
           {
             "tags": [],
@@ -568,7 +703,10 @@
             "type": "string",
             "label": "RACK",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L20"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -576,7 +714,10 @@
             "type": "string",
             "label": "JS",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L21"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 21
+            }
           },
           {
             "tags": [],
@@ -584,7 +725,10 @@
             "type": "string",
             "label": "GO",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L22"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 22
+            }
           },
           {
             "tags": [],
@@ -592,7 +736,10 @@
             "type": "string",
             "label": "JAVA",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L23"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -600,7 +747,10 @@
             "type": "string",
             "label": "DOTNET",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L24"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -608,7 +758,10 @@
             "type": "string",
             "label": "LINUX",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L25"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 25
+            }
           },
           {
             "tags": [],
@@ -616,12 +769,18 @@
             "type": "string",
             "label": "PHP",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L26"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 26
+            }
           }
         ],
         "description": [],
         "label": "INSTRUCTION_VARIANT",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L9",
+        "source": {
+          "path": "src/plugins/home/common/instruction_variant.ts",
+          "lineNumber": 9
+        },
         "initialIsOpen": false
       }
     ],
@@ -640,7 +799,10 @@
           "type": "Object",
           "label": "tutorials",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L168",
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 168
+          },
           "signature": [
             "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; }"
           ]
@@ -651,7 +813,10 @@
           "type": "Object",
           "label": "featureCatalogue",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L169",
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 169
+          },
           "signature": [
             "{ register: (feature: ",
             {
@@ -682,7 +847,10 @@
           "description": [
             "\nThe environment service is only available for a transition period and will\nbe replaced by display specific extension points."
           ],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L176",
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 176
+          },
           "signature": [
             "{ update: (update: Partial<",
             {
@@ -696,7 +864,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L167",
+      "source": {
+        "path": "src/plugins/home/public/plugin.ts",
+        "lineNumber": 167
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -713,7 +884,10 @@
           "type": "Object",
           "label": "featureCatalogue",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L179",
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 179
+          },
           "signature": [
             {
               "pluginId": "home",
@@ -725,7 +899,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/public/plugin.ts#L178",
+      "source": {
+        "path": "src/plugins/home/public/plugin.ts",
+        "lineNumber": 178
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -747,7 +924,10 @@
             "type": "Object",
             "label": "exportedFields",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts#L60",
+            "source": {
+              "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+              "lineNumber": 60
+            },
             "signature": [
               "{ documentationUrl: string; } | undefined"
             ]
@@ -758,7 +938,10 @@
             "type": "Array",
             "label": "dashboards",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts#L63",
+            "source": {
+              "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+              "lineNumber": 63
+            },
             "signature": [
               {
                 "pluginId": "home",
@@ -776,13 +959,19 @@
             "type": "Object",
             "label": "application",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts#L64",
+            "source": {
+              "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+              "lineNumber": 64
+            },
             "signature": [
               "{ path: string; label: string; } | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts#L59",
+        "source": {
+          "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+          "lineNumber": 59
+        },
         "initialIsOpen": false
       }
     ],
@@ -795,7 +984,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts#L13",
+        "source": {
+          "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       }
     ],
@@ -808,7 +1000,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/sample_data/sample_data_registry.ts#L168",
+        "source": {
+          "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
+          "lineNumber": 168
+        },
         "signature": [
           "{ registerSampleDataset: (specProvider: SampleDatasetProvider) => void; getSampleDatasets: () => SampleDatasetSchema<unknown>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: AppLinkSchema[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: SampleDatasetDashboardPanel) => void; }"
         ],
@@ -820,7 +1015,10 @@
         "label": "SampleDatasetProvider",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts#L82",
+        "source": {
+          "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+          "lineNumber": 82
+        },
         "signature": [
           "() => ",
           "SampleDatasetSchema",
@@ -834,7 +1032,10 @@
         "label": "TutorialProvider",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts#L100",
+        "source": {
+          "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+          "lineNumber": 100
+        },
         "signature": [
           "(context: ",
           "TutorialContext",
@@ -856,7 +1057,10 @@
             "type": "string",
             "label": "ESC",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L10"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 10
+            }
           },
           {
             "tags": [],
@@ -864,7 +1068,10 @@
             "type": "string",
             "label": "OSX",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L11"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -872,7 +1079,10 @@
             "type": "string",
             "label": "DEB",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L12"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 12
+            }
           },
           {
             "tags": [],
@@ -880,7 +1090,10 @@
             "type": "string",
             "label": "RPM",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L13"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -888,7 +1101,10 @@
             "type": "string",
             "label": "DOCKER",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L14"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -896,7 +1112,10 @@
             "type": "string",
             "label": "WINDOWS",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L15"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -904,7 +1123,10 @@
             "type": "string",
             "label": "NODE",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L16"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -912,7 +1134,10 @@
             "type": "string",
             "label": "DJANGO",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L17"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -920,7 +1145,10 @@
             "type": "string",
             "label": "FLASK",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L18"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -928,7 +1156,10 @@
             "type": "string",
             "label": "RAILS",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L19"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 19
+            }
           },
           {
             "tags": [],
@@ -936,7 +1167,10 @@
             "type": "string",
             "label": "RACK",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L20"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -944,7 +1178,10 @@
             "type": "string",
             "label": "JS",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L21"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 21
+            }
           },
           {
             "tags": [],
@@ -952,7 +1189,10 @@
             "type": "string",
             "label": "GO",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L22"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 22
+            }
           },
           {
             "tags": [],
@@ -960,7 +1200,10 @@
             "type": "string",
             "label": "JAVA",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L23"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -968,7 +1211,10 @@
             "type": "string",
             "label": "DOTNET",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L24"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -976,7 +1222,10 @@
             "type": "string",
             "label": "LINUX",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L25"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 25
+            }
           },
           {
             "tags": [],
@@ -984,12 +1233,18 @@
             "type": "string",
             "label": "PHP",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L26"
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 26
+            }
           }
         ],
         "description": [],
         "label": "INSTRUCTION_VARIANT",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/common/instruction_variant.ts#L9",
+        "source": {
+          "path": "src/plugins/home/common/instruction_variant.ts",
+          "lineNumber": 9
+        },
         "initialIsOpen": false
       }
     ],
@@ -1008,7 +1263,10 @@
           "type": "Object",
           "label": "tutorials",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/plugin.ts#L55",
+          "source": {
+            "path": "src/plugins/home/server/plugin.ts",
+            "lineNumber": 55
+          },
           "signature": [
             "{ registerTutorial: (specProvider: ",
             {
@@ -1043,7 +1301,10 @@
           "type": "Object",
           "label": "sampleData",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/plugin.ts#L56",
+          "source": {
+            "path": "src/plugins/home/server/plugin.ts",
+            "lineNumber": 56
+          },
           "signature": [
             "{ registerSampleDataset: (specProvider: ",
             {
@@ -1088,7 +1349,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/plugin.ts#L54",
+      "source": {
+        "path": "src/plugins/home/server/plugin.ts",
+        "lineNumber": 54
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1107,7 +1371,10 @@
           "type": "Object",
           "label": "tutorials",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/plugin.ts#L61",
+          "source": {
+            "path": "src/plugins/home/server/plugin.ts",
+            "lineNumber": 61
+          },
           "signature": [
             "{}"
           ]
@@ -1118,13 +1385,19 @@
           "type": "Object",
           "label": "sampleData",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/plugin.ts#L62",
+          "source": {
+            "path": "src/plugins/home/server/plugin.ts",
+            "lineNumber": 62
+          },
           "signature": [
             "{}"
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/home/server/plugin.ts#L60",
+      "source": {
+        "path": "src/plugins/home/server/plugin.ts",
+        "lineNumber": 60
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }

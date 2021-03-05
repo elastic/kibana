@@ -33,7 +33,10 @@
             "type": "CompoundType",
             "label": "placement",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               {
                 "pluginId": "banners",
@@ -50,7 +53,10 @@
             "type": "string",
             "label": "textContent",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -58,7 +64,10 @@
             "type": "string",
             "label": "textColor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L18"
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -66,10 +75,16 @@
             "type": "string",
             "label": "backgroundColor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L19"
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 19
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/banners/common/types.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -85,7 +100,10 @@
             "type": "boolean",
             "label": "allowed",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L9"
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 9
+            }
           },
           {
             "tags": [],
@@ -93,7 +111,10 @@
             "type": "Object",
             "label": "banner",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L10",
+            "source": {
+              "path": "x-pack/plugins/banners/common/types.ts",
+              "lineNumber": 10
+            },
             "signature": [
               {
                 "pluginId": "banners",
@@ -105,7 +126,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/banners/common/types.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       }
     ],
@@ -117,7 +141,10 @@
         "label": "BannerPlacement",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/banners/common/types.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/banners/common/types.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "\"disabled\" | \"header\""
         ],

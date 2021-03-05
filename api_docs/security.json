@@ -26,7 +26,10 @@
             "description": [
               "\nThe name and type of the Realm that has authenticated the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "security",
@@ -45,7 +48,10 @@
             "description": [
               "\nThe name and type of the Realm where the user information were retrieved from."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 30
+            },
             "signature": [
               {
                 "pluginId": "security",
@@ -64,7 +70,10 @@
             "description": [
               "\nThe authentication provider that used to authenticate user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 35
+            },
             "signature": [
               {
                 "pluginId": "security",
@@ -83,10 +92,16 @@
             "description": [
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L42"
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 42
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -107,7 +122,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_service.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 15
+            }
           },
           {
             "id": "def-public.SecurityLicense.isEnabled",
@@ -120,7 +138,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_service.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 16
+            }
           },
           {
             "id": "def-public.SecurityLicense.getType",
@@ -133,7 +154,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_service.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 17
+            }
           },
           {
             "id": "def-public.SecurityLicense.getFeatures",
@@ -153,7 +177,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_service.ts#L18"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -161,7 +188,10 @@
             "type": "Object",
             "label": "features$",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_service.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "Observable",
               "<",
@@ -176,7 +206,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_service.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/security/common/licensing/license_service.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -196,7 +229,10 @@
             "description": [
               "\nIndicates whether we show login page or skip it."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -206,7 +242,10 @@
             "description": [
               "\nIndicates whether we allow login or disable it on the login page."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L25"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 25
+            }
           },
           {
             "tags": [],
@@ -216,7 +255,10 @@
             "description": [
               "\nIndicates whether we show security links throughout the kibana app."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -226,7 +268,10 @@
             "description": [
               "\nIndicates whether we show the Role Mappings UI."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L35"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 35
+            }
           },
           {
             "tags": [],
@@ -236,7 +281,10 @@
             "description": [
               "\nIndicates whether we allow users to access agreement UI and acknowledge it."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L40"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 40
+            }
           },
           {
             "tags": [],
@@ -246,7 +294,10 @@
             "description": [
               "\nIndicates whether we allow logging of audit events."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L45"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 45
+            }
           },
           {
             "tags": [
@@ -258,7 +309,10 @@
             "description": [
               "\nIndicates whether we allow logging of legacy audit events."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L51"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 51
+            }
           },
           {
             "tags": [],
@@ -268,7 +322,10 @@
             "description": [
               "\nIndicates whether we allow users to define document level security in roles."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L56"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 56
+            }
           },
           {
             "tags": [],
@@ -278,7 +335,10 @@
             "description": [
               "\nIndicates whether we allow users to define field level security in roles."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L61"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 61
+            }
           },
           {
             "tags": [],
@@ -288,7 +348,10 @@
             "description": [
               "\nIndicates whether we allow Role-based access control (RBAC)."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L66"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 66
+            }
           },
           {
             "tags": [],
@@ -298,7 +361,10 @@
             "description": [
               "\nIndicates whether we allow sub-feature privileges."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L71"
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 71
+            }
           },
           {
             "tags": [],
@@ -308,13 +374,19 @@
             "description": [
               "\nDescribes the layout of the login form if it's displayed."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L76",
+            "source": {
+              "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+              "lineNumber": 76
+            },
             "signature": [
               "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\" | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/licensing/license_features.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       },
       {
@@ -330,7 +402,10 @@
             "type": "string",
             "label": "label",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/public/nav_control/nav_control_component.tsx#L29"
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 29
+            }
           },
           {
             "tags": [],
@@ -338,7 +413,10 @@
             "type": "CompoundType",
             "label": "iconType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/public/nav_control/nav_control_component.tsx#L30",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 30
+            },
             "signature": [
               "IconType"
             ]
@@ -349,7 +427,10 @@
             "type": "string",
             "label": "href",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/public/nav_control/nav_control_component.tsx#L31"
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 31
+            }
           },
           {
             "tags": [],
@@ -357,13 +438,19 @@
             "type": "number",
             "label": "order",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/public/nav_control/nav_control_component.tsx#L32",
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 32
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/public/nav_control/nav_control_component.tsx#L28",
+        "source": {
+          "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+          "lineNumber": 28
+        },
         "initialIsOpen": false
       }
     ],
@@ -376,7 +463,10 @@
       "label": "SecurityPluginSetup",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/public/plugin.tsx#L168",
+      "source": {
+        "path": "x-pack/plugins/security/public/plugin.tsx",
+        "lineNumber": 168
+      },
       "signature": [
         "{ authc: AuthenticationServiceSetup; sessionTimeout: ISessionTimeout; license: Readonly<{ isLicenseAvailable: () => boolean; isEnabled: () => boolean; getType: () => \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; getFeatures: () => ",
         "SecurityLicenseFeatures",
@@ -395,7 +485,10 @@
       "label": "SecurityPluginStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/public/plugin.tsx#L169",
+      "source": {
+        "path": "x-pack/plugins/security/public/plugin.tsx",
+        "lineNumber": 169
+      },
       "signature": [
         "{ navControlService: ",
         "SecurityNavControlServiceStart",
@@ -428,7 +521,10 @@
             "description": [
               "\nHuman readable message describing action, outcome and user.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L27"
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 27
+            }
           },
           {
             "tags": [],
@@ -436,7 +532,10 @@
             "type": "Object",
             "label": "event",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "{ action: string; category?: ",
               {
@@ -471,7 +570,10 @@
             "type": "Object",
             "label": "user",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "{ name: string; roles?: readonly string[] | undefined; } | undefined"
             ]
@@ -482,7 +584,10 @@
             "type": "Object",
             "label": "kibana",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L38",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 38
+            },
             "signature": [
               "{ space_id?: string | undefined; session_id?: string | undefined; saved_object?: { type: string; id: string; } | undefined; authentication_provider?: string | undefined; authentication_type?: string | undefined; authentication_realm?: string | undefined; lookup_realm?: string | undefined; add_to_spaces?: readonly string[] | undefined; delete_from_spaces?: readonly string[] | undefined; } | undefined"
             ]
@@ -493,7 +598,10 @@
             "type": "Object",
             "label": "error",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L80",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 80
+            },
             "signature": [
               "{ code?: string | undefined; message?: string | undefined; } | undefined"
             ]
@@ -504,7 +612,10 @@
             "type": "Object",
             "label": "http",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L84",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 84
+            },
             "signature": [
               "{ request?: { method?: string | undefined; } | undefined; } | undefined"
             ]
@@ -515,13 +626,19 @@
             "type": "Object",
             "label": "url",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L89",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+              "lineNumber": 89
+            },
             "signature": [
               "{ domain?: string | undefined; path?: string | undefined; port?: number | undefined; query?: string | undefined; scheme?: string | undefined; } | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -537,7 +654,10 @@
             "type": "Function",
             "label": "log",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_service.ts#L37",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+              "lineNumber": 37
+            },
             "signature": [
               "(event: ",
               {
@@ -551,7 +671,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_service.ts#L36",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+          "lineNumber": 36
+        },
         "initialIsOpen": false
       },
       {
@@ -576,7 +699,10 @@
             "description": [
               "\nThe name and type of the Realm that has authenticated the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "security",
@@ -595,7 +721,10 @@
             "description": [
               "\nThe name and type of the Realm where the user information were retrieved from."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 30
+            },
             "signature": [
               {
                 "pluginId": "security",
@@ -614,7 +743,10 @@
             "description": [
               "\nThe authentication provider that used to authenticate user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 35
+            },
             "signature": [
               {
                 "pluginId": "security",
@@ -633,10 +765,16 @@
             "description": [
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L42"
+            "source": {
+              "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+              "lineNumber": 42
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/common/model/authenticated_user.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -656,7 +794,10 @@
             "description": [
               "\nUnique id for this API key"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L60"
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 60
+            }
           },
           {
             "tags": [],
@@ -666,7 +807,10 @@
             "description": [
               "\nName for this API key"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L64"
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 64
+            }
           },
           {
             "tags": [],
@@ -676,7 +820,10 @@
             "description": [
               "\nOptional expiration in milliseconds for this API key"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L68",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 68
+            },
             "signature": [
               "number | undefined"
             ]
@@ -689,10 +836,16 @@
             "description": [
               "\nGenerated API key"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L72"
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 72
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L56",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+          "lineNumber": 56
+        },
         "initialIsOpen": false
       },
       {
@@ -710,7 +863,10 @@
             "description": [
               "\nUnique id for this API key"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L79"
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 79
+            }
           },
           {
             "tags": [],
@@ -720,7 +876,10 @@
             "description": [
               "\nName for this API key"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L83"
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 83
+            }
           },
           {
             "tags": [],
@@ -730,10 +889,16 @@
             "description": [
               "\nGenerated API key"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L87"
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 87
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L75",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+          "lineNumber": 75
+        },
         "initialIsOpen": false
       },
       {
@@ -753,7 +918,10 @@
             "description": [
               "\nThe IDs of the API keys that were invalidated as part of the request."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L97",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 97
+            },
             "signature": [
               "string[]"
             ]
@@ -766,7 +934,10 @@
             "description": [
               "\nThe IDs of the API keys that were already invalidated."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L101",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 101
+            },
             "signature": [
               "string[]"
             ]
@@ -779,7 +950,10 @@
             "description": [
               "\nThe number of errors that were encountered when invalidating the API keys."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L105"
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 105
+            }
           },
           {
             "tags": [],
@@ -789,13 +963,19 @@
             "description": [
               "\nDetails about these errors. This field is not present in the response when error_count is 0."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L109",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 109
+            },
             "signature": [
               "{ type: string; reason: string; caused_by: { type: string; reason: string; }; }[] | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L93",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+          "lineNumber": 93
+        },
         "initialIsOpen": false
       },
       {
@@ -813,13 +993,19 @@
             "type": "Array",
             "label": "ids",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L47",
+            "source": {
+              "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+              "lineNumber": 47
+            },
             "signature": [
               "string[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/authentication/api_keys/api_keys.ts#L46",
+        "source": {
+          "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+          "lineNumber": 46
+        },
         "initialIsOpen": false
       },
       {
@@ -837,13 +1023,19 @@
             "type": "Function",
             "label": "log",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_service.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+              "lineNumber": 33
+            },
             "signature": [
               "(eventType: string, message: string, data?: Record<string, any> | undefined) => void"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_service.ts#L32",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+          "lineNumber": 32
+        },
         "initialIsOpen": false
       },
       {
@@ -863,7 +1055,10 @@
             "type": "Object",
             "label": "authc",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/plugin.ts#L73",
+            "source": {
+              "path": "x-pack/plugins/security/server/plugin.ts",
+              "lineNumber": 73
+            },
             "signature": [
               "{ getCurrentUser: (request: ",
               {
@@ -892,7 +1087,10 @@
             "type": "Object",
             "label": "authz",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/plugin.ts#L77",
+            "source": {
+              "path": "x-pack/plugins/security/server/plugin.ts",
+              "lineNumber": 77
+            },
             "signature": [
               "Pick<",
               {
@@ -911,7 +1109,10 @@
             "type": "Object",
             "label": "license",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/plugin.ts#L81",
+            "source": {
+              "path": "x-pack/plugins/security/server/plugin.ts",
+              "lineNumber": 81
+            },
             "signature": [
               {
                 "pluginId": "security",
@@ -928,7 +1129,10 @@
             "type": "Object",
             "label": "audit",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/plugin.ts#L82",
+            "source": {
+              "path": "x-pack/plugins/security/server/plugin.ts",
+              "lineNumber": 82
+            },
             "signature": [
               {
                 "pluginId": "security",
@@ -940,7 +1144,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/plugin.ts#L69",
+        "source": {
+          "path": "x-pack/plugins/security/server/plugin.ts",
+          "lineNumber": 69
+        },
         "initialIsOpen": false
       },
       {
@@ -958,7 +1165,10 @@
             "type": "Object",
             "label": "authc",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/plugin.ts#L89",
+            "source": {
+              "path": "x-pack/plugins/security/server/plugin.ts",
+              "lineNumber": 89
+            },
             "signature": [
               "Pick<",
               {
@@ -977,7 +1187,10 @@
             "type": "Object",
             "label": "authz",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/plugin.ts#L90",
+            "source": {
+              "path": "x-pack/plugins/security/server/plugin.ts",
+              "lineNumber": 90
+            },
             "signature": [
               "Pick<",
               {
@@ -991,7 +1204,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/plugin.ts#L88",
+        "source": {
+          "path": "x-pack/plugins/security/server/plugin.ts",
+          "lineNumber": 88
+        },
         "initialIsOpen": false
       }
     ],
@@ -1002,7 +1218,10 @@
         "label": "EventCategory",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L98",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+          "lineNumber": 98
+        },
         "initialIsOpen": false
       },
       {
@@ -1011,7 +1230,10 @@
         "label": "EventOutcome",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L111",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+          "lineNumber": 111
+        },
         "initialIsOpen": false
       },
       {
@@ -1020,7 +1242,10 @@
         "label": "EventType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/security/server/audit/audit_events.ts#L104",
+        "source": {
+          "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+          "lineNumber": 104
+        },
         "initialIsOpen": false
       }
     ],

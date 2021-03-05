@@ -21,7 +21,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22"
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+              "lineNumber": 22
+            }
           }
         ],
         "signature": [
@@ -37,7 +40,10 @@
         ],
         "description": [],
         "label": "RuntimeFieldEditor",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+          "lineNumber": 22
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -60,7 +66,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78"
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 78
+            }
           }
         ],
         "signature": [
@@ -76,7 +85,10 @@
         ],
         "description": [],
         "label": "RuntimeFieldEditorFlyoutContent",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+          "lineNumber": 78
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -96,7 +108,10 @@
             "type": "CompoundType",
             "label": "isValid",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L40",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 40
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -107,7 +122,10 @@
             "type": "boolean",
             "label": "isSubmitted",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L41"
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 41
+            }
           },
           {
             "tags": [],
@@ -115,7 +133,10 @@
             "type": "Function",
             "label": "submit",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L42",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 42
+            },
             "signature": [
               "(e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined) => Promise<{ data: ",
               {
@@ -129,7 +150,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L39",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+          "lineNumber": 39
+        },
         "initialIsOpen": false
       },
       {
@@ -147,7 +171,10 @@
             "description": [
               "\nHandler for the \"save\" footer button"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L59",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 59
+            },
             "signature": [
               "(field: ",
               {
@@ -168,7 +195,10 @@
             "description": [
               "\nHandler for the \"cancel\" footer button"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L63",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 63
+            },
             "signature": [
               "() => void"
             ]
@@ -181,7 +211,10 @@
             "description": [
               "\nThe docLinks start service from core"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L67",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 67
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -200,7 +233,10 @@
             "description": [
               "\nAn optional runtime field to edit"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L71",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 71
+            },
             "signature": [
               {
                 "pluginId": "runtimeFields",
@@ -220,13 +256,19 @@
             "description": [
               "\nOptional context object"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L75",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+              "lineNumber": 75
+            },
             "signature": [
               "{ namesNotAllowed?: string[] | undefined; existingConcreteFields?: Field[] | undefined; } | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L55",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
+          "lineNumber": 55
+        },
         "initialIsOpen": false
       },
       {
@@ -242,7 +284,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L34"
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/types.ts",
+              "lineNumber": 34
+            }
           },
           {
             "tags": [],
@@ -250,7 +295,10 @@
             "type": "CompoundType",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/types.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
             ]
@@ -261,13 +309,19 @@
             "type": "Object",
             "label": "script",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L36",
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/types.ts",
+              "lineNumber": 36
+            },
             "signature": [
               "{ source: string; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L33",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/types.ts",
+          "lineNumber": 33
+        },
         "initialIsOpen": false
       }
     ],
@@ -279,7 +333,10 @@
         "type": "Array",
         "label": "RUNTIME_FIELD_OPTIONS",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/constants.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/constants.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "ComboBoxOption",
           "<\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\">[]"
@@ -292,7 +349,10 @@
         "label": "RuntimeType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L31",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/types.ts",
+          "lineNumber": 31
+        },
         "signature": [
           "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
         ],
@@ -326,10 +386,16 @@
           "children": [],
           "tags": [],
           "returnComment": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L18"
+          "source": {
+            "path": "x-pack/plugins/runtime_fields/public/types.ts",
+            "lineNumber": 18
+          }
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/runtime_fields/public/types.ts#L17",
+      "source": {
+        "path": "x-pack/plugins/runtime_fields/public/types.ts",
+        "lineNumber": 17
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

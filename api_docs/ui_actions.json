@@ -25,7 +25,10 @@
             "type": "string",
             "label": "code",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/incompatible_action_error.ts#L12"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
+              "lineNumber": 12
+            }
           },
           {
             "id": "def-public.IncompatibleActionError.Unnamed",
@@ -38,10 +41,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/incompatible_action_error.ts#L14"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
+              "lineNumber": 14
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/incompatible_action_error.ts#L11",
+        "source": {
+          "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -57,7 +66,10 @@
             "type": "Object",
             "label": "executionService",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L27",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 27
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -74,7 +86,10 @@
             "type": "Object",
             "label": "triggers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L28",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 28
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -91,7 +106,10 @@
             "type": "Object",
             "label": "actions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L29",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 29
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -108,7 +126,10 @@
             "type": "Object",
             "label": "triggerToActions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L30",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 30
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -142,12 +163,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L32"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 32
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L32"
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 32
+            }
           },
           {
             "id": "def-public.UiActionsService.registerTrigger",
@@ -167,7 +194,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L42"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 42
+                }
               }
             ],
             "signature": [
@@ -183,7 +213,10 @@
             ],
             "description": [],
             "label": "registerTrigger",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L42",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 42
+            },
             "tags": [],
             "returnComment": []
           },
@@ -199,7 +232,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L53"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 53
+                }
               }
             ],
             "signature": [
@@ -215,7 +251,10 @@
             ],
             "description": [],
             "label": "getTrigger",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L53",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 53
+            },
             "tags": [],
             "returnComment": []
           },
@@ -231,7 +270,10 @@
                   "A"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L64"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 64
+                }
               }
             ],
             "signature": [
@@ -263,7 +305,10 @@
             ],
             "description": [],
             "label": "registerAction",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L63",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 63
+            },
             "tags": [],
             "returnComment": []
           },
@@ -279,7 +324,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L77"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 77
+                }
               }
             ],
             "signature": [
@@ -287,7 +335,10 @@
             ],
             "description": [],
             "label": "unregisterAction",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L77",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 77
+            },
             "tags": [],
             "returnComment": []
           },
@@ -303,7 +354,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L85"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 85
+                }
               }
             ],
             "signature": [
@@ -311,7 +365,10 @@
             ],
             "description": [],
             "label": "hasAction",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L85",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 85
+            },
             "tags": [],
             "returnComment": []
           },
@@ -327,7 +384,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L89"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 89
+                }
               },
               {
                 "type": "string",
@@ -337,7 +397,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L89"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 89
+                }
               }
             ],
             "signature": [
@@ -345,7 +408,10 @@
             ],
             "description": [],
             "label": "attachAction",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L89",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 89
+            },
             "tags": [],
             "returnComment": []
           },
@@ -361,7 +427,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L105"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 105
+                }
               },
               {
                 "type": "string",
@@ -371,7 +440,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L105"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 105
+                }
               }
             ],
             "signature": [
@@ -379,7 +451,10 @@
             ],
             "description": [],
             "label": "detachAction",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L105",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 105
+            },
             "tags": [],
             "returnComment": []
           },
@@ -395,7 +470,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L127"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 127
+                }
               },
               {
                 "type": "Object",
@@ -412,7 +490,10 @@
                   "<object>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L128"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 128
+                }
               }
             ],
             "signature": [
@@ -430,7 +511,10 @@
               "\n`addTriggerAction` is similar to `attachAction` as it attaches action to a\ntrigger, but it also registers the action, if it has not been registered, yet."
             ],
             "label": "addTriggerAction",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L126",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 126
+            },
             "tags": [],
             "returnComment": []
           },
@@ -446,7 +530,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L135"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 135
+                }
               }
             ],
             "signature": [
@@ -478,7 +565,10 @@
             ],
             "description": [],
             "label": "getAction",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L134",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 134
+            },
             "tags": [],
             "returnComment": []
           },
@@ -494,7 +584,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L144"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 144
+                }
               }
             ],
             "signature": [
@@ -510,7 +603,10 @@
             ],
             "description": [],
             "label": "getTriggerActions",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L144",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 144
+            },
             "tags": [],
             "returnComment": []
           },
@@ -526,7 +622,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L158"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 158
+                }
               },
               {
                 "type": "Uncategorized",
@@ -536,7 +635,10 @@
                   "object"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L159"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 159
+                }
               }
             ],
             "signature": [
@@ -552,7 +654,10 @@
             ],
             "description": [],
             "label": "getTriggerCompatibleActions",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L157",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 157
+            },
             "tags": [],
             "returnComment": []
           },
@@ -568,7 +673,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L181"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 181
+                }
               },
               {
                 "type": "Uncategorized",
@@ -578,7 +686,10 @@
                   "object"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L181"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                  "lineNumber": 181
+                }
               }
             ],
             "signature": [
@@ -586,7 +697,10 @@
             ],
             "description": [],
             "label": "executeTriggerActions",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L181",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 181
+            },
             "tags": [
               "deprecated"
             ],
@@ -603,7 +717,10 @@
               "\nRemoves all registered triggers and actions."
             ],
             "label": "clear",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L189",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 189
+            },
             "tags": [],
             "returnComment": []
           },
@@ -625,12 +742,18 @@
               "\n\"Fork\" a separate instance of `UiActionsService` that inherits all existing\ntriggers and actions, but going forward all new triggers and actions added\nto this instance of `UiActionsService` are only available within this instance."
             ],
             "label": "fork",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L200",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 200
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L26",
+        "source": {
+          "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       }
     ],
@@ -664,12 +787,18 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx#L120"
+            "source": {
+              "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+              "lineNumber": 120
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx#L120",
+        "source": {
+          "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+          "lineNumber": 120
+        },
         "initialIsOpen": false
       },
       {
@@ -712,12 +841,18 @@
               "<Context>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/create_action.ts#L12"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/create_action.ts",
+              "lineNumber": 12
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/create_action.ts#L11",
+        "source": {
+          "path": "src/plugins/ui_actions/public/actions/create_action.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       }
     ],
@@ -763,7 +898,10 @@
             "description": [
               "\nDetermined the order when there is more than one action matched to a trigger.\nHigher numbers are displayed first."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L44",
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 44
+            },
             "signature": [
               "number | undefined"
             ]
@@ -776,7 +914,10 @@
             "description": [
               "\nA unique identifier for this action instance."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L49"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 49
+            }
           },
           {
             "tags": [],
@@ -786,7 +927,10 @@
             "description": [
               "\nThe action type is what determines the context shape."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L54"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 54
+            }
           },
           {
             "id": "def-public.Action.getIconType",
@@ -822,12 +966,18 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L59"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 59
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L59"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 59
+            }
           },
           {
             "id": "def-public.Action.getDisplayName",
@@ -863,12 +1013,18 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L65"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 65
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L65"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 65
+            }
           },
           {
             "tags": [],
@@ -878,7 +1034,10 @@
             "description": [
               "\n`UiComponent` to render when displaying this action as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L71",
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 71
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -932,12 +1091,18 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L77"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 77
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L77"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 77
+            }
           },
           {
             "id": "def-public.Action.execute",
@@ -973,12 +1138,18 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L82"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 82
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L82"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 82
+            }
           },
           {
             "id": "def-public.Action.getHref",
@@ -1014,12 +1185,18 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L89"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 89
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L89"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 89
+            }
           },
           {
             "id": "def-public.Action.shouldAutoExecute",
@@ -1055,15 +1232,24 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L96"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 96
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L96"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 96
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L38",
+        "source": {
+          "path": "src/plugins/ui_actions/public/actions/action.ts",
+          "lineNumber": 38
+        },
         "initialIsOpen": false
       },
       {
@@ -1103,7 +1289,10 @@
             "description": [
               "\nID of the action that uniquely identifies this action in the actions registry."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L107"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 107
+            }
           },
           {
             "tags": [],
@@ -1113,7 +1302,10 @@
             "description": [
               "\nID of the factory for this action. Used to construct dynamic actions."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L112",
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 112
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1152,12 +1344,18 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L118"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 118
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L118"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 118
+            }
           },
           {
             "id": "def-public.ActionDefinition.execute",
@@ -1193,12 +1391,18 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L123"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 123
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L123"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 123
+            }
           },
           {
             "id": "def-public.ActionDefinition.shouldAutoExecute",
@@ -1234,12 +1438,18 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L130"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 130
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L130"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 130
+            }
           },
           {
             "id": "def-public.ActionDefinition.getHref",
@@ -1275,15 +1485,24 @@
                   "<Context>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L137"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/actions/action.ts",
+                  "lineNumber": 137
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L137"
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 137
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L102",
+        "source": {
+          "path": "src/plugins/ui_actions/public/actions/action.ts",
+          "lineNumber": 102
+        },
         "initialIsOpen": false
       },
       {
@@ -1303,7 +1522,10 @@
             "description": [
               "\nTrigger that executed the action"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L21",
+            "source": {
+              "path": "src/plugins/ui_actions/public/actions/action.ts",
+              "lineNumber": 21
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -1315,7 +1537,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L17",
+        "source": {
+          "path": "src/plugins/ui_actions/public/actions/action.ts",
+          "lineNumber": 17
+        },
         "initialIsOpen": false
       },
       {
@@ -1345,7 +1570,10 @@
             "description": [
               "\nID that uniquely identifies this object."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L18"
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -1355,7 +1583,10 @@
             "description": [
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L24"
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -1365,7 +1596,10 @@
             "description": [
               "\n`UiComponent` to render when displaying this entity as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L30",
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 30
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -1396,12 +1630,18 @@
                   "Context"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L35"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                  "lineNumber": 35
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L35"
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 35
+            }
           },
           {
             "id": "def-public.Presentable.getDisplayName",
@@ -1422,12 +1662,18 @@
                   "Context"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L40"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                  "lineNumber": 40
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L40"
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 40
+            }
           },
           {
             "id": "def-public.Presentable.getDisplayNameTooltip",
@@ -1448,12 +1694,18 @@
                   "Context"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L46"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                  "lineNumber": 46
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L46"
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 46
+            }
           },
           {
             "id": "def-public.Presentable.getHref",
@@ -1474,12 +1726,18 @@
                   "Context"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L53"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                  "lineNumber": 53
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L53"
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 53
+            }
           },
           {
             "id": "def-public.Presentable.isCompatible",
@@ -1500,12 +1758,18 @@
                   "Context"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L59"
+                "source": {
+                  "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                  "lineNumber": 59
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L59"
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 59
+            }
           },
           {
             "tags": [],
@@ -1515,7 +1779,10 @@
             "description": [
               "\nGrouping where this item should appear as a submenu. Each entry is a new\nsub-menu level. For example, used to show drilldowns and sharing options\nin panel context menu in a sub-menu."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L66",
+            "source": {
+              "path": "src/plugins/ui_actions/public/util/presentable.ts",
+              "lineNumber": 66
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -1528,7 +1795,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L14",
+        "source": {
+          "path": "src/plugins/ui_actions/public/util/presentable.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -1544,7 +1814,10 @@
             "type": "Unknown",
             "label": "embeddable",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/row_click_trigger.ts#L28",
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "unknown"
             ]
@@ -1555,7 +1828,10 @@
             "type": "Object",
             "label": "data",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/row_click_trigger.ts#L29",
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "{ rowIndex: number; table: ",
               {
@@ -1569,7 +1845,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/row_click_trigger.ts#L25",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+          "lineNumber": 25
+        },
         "initialIsOpen": false
       },
       {
@@ -1589,7 +1868,10 @@
             "description": [
               "\nUnique name of the trigger as identified in `ui_actions` plugin trigger registry."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/trigger.ts#L24"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -1599,7 +1881,10 @@
             "description": [
               "\nUser friendly name of the trigger."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/trigger.ts#L29",
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
+              "lineNumber": 29
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1612,13 +1897,19 @@
             "description": [
               "\nA longer user friendly description of the trigger."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/trigger.ts#L34",
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/trigger.ts#L20",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/trigger.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -1634,7 +1925,10 @@
             "type": "Object",
             "label": "triggers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L17",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 17
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -1652,7 +1946,10 @@
             "type": "Object",
             "label": "actions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L18",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 18
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -1672,7 +1969,10 @@
             "description": [
               "\nA 1-to-N mapping from `Trigger` to zero or more `Action`."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L23",
+            "source": {
+              "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+              "lineNumber": 23
+            },
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -1685,7 +1985,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/service/ui_actions_service.ts#L16",
+        "source": {
+          "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       },
       {
@@ -1701,7 +2004,10 @@
             "type": "string",
             "label": "fieldName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/types.ts#L17"
+            "source": {
+              "path": "src/plugins/ui_actions/public/types.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -1709,7 +2015,10 @@
             "type": "string",
             "label": "indexPatternId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/types.ts#L18"
+            "source": {
+              "path": "src/plugins/ui_actions/public/types.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -1717,13 +2026,19 @@
             "type": "Array",
             "label": "contextualFields",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/types.ts#L19",
+            "source": {
+              "path": "src/plugins/ui_actions/public/types.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "string[] | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/types.ts#L16",
+        "source": {
+          "path": "src/plugins/ui_actions/public/types.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       }
     ],
@@ -1735,7 +2050,10 @@
         "type": "string",
         "label": "ACTION_VISUALIZE_FIELD",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/types.ts#L22",
+        "source": {
+          "path": "src/plugins/ui_actions/public/types.ts",
+          "lineNumber": 22
+        },
         "signature": [
           "\"ACTION_VISUALIZE_FIELD\""
         ],
@@ -1747,7 +2065,10 @@
         "type": "string",
         "label": "ACTION_VISUALIZE_GEO_FIELD",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/types.ts#L23",
+        "source": {
+          "path": "src/plugins/ui_actions/public/types.ts",
+          "lineNumber": 23
+        },
         "signature": [
           "\"ACTION_VISUALIZE_GEO_FIELD\""
         ],
@@ -1759,7 +2080,10 @@
         "type": "string",
         "label": "ACTION_VISUALIZE_LENS_FIELD",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/types.ts#L24",
+        "source": {
+          "path": "src/plugins/ui_actions/public/types.ts",
+          "lineNumber": 24
+        },
         "signature": [
           "\"ACTION_VISUALIZE_LENS_FIELD\""
         ],
@@ -1773,7 +2097,10 @@
         "description": [
           "\nAction methods are executed with Context from trigger + {@link ActionExecutionMeta}"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/actions/action.ts#L27",
+        "source": {
+          "path": "src/plugins/ui_actions/public/actions/action.ts",
+          "lineNumber": 27
+        },
         "signature": [
           "Context & ActionExecutionMeta"
         ],
@@ -1785,7 +2112,10 @@
         "label": "PresentableGrouping",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/util/presentable.ts#L76",
+        "source": {
+          "path": "src/plugins/ui_actions/public/util/presentable.ts",
+          "lineNumber": 76
+        },
         "signature": [
           "PresentableGroup<Context>[]"
         ],
@@ -1797,7 +2127,10 @@
         "type": "string",
         "label": "ROW_CLICK_TRIGGER",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/row_click_trigger.ts#L13",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "\"ROW_CLICK_TRIGGER\""
         ],
@@ -1809,7 +2142,10 @@
         "type": "string",
         "label": "VISUALIZE_FIELD_TRIGGER",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L11",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "\"VISUALIZE_FIELD_TRIGGER\""
         ],
@@ -1821,7 +2157,10 @@
         "type": "string",
         "label": "VISUALIZE_GEO_FIELD_TRIGGER",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L11",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "\"VISUALIZE_GEO_FIELD_TRIGGER\""
         ],
@@ -1840,7 +2179,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/row_click_trigger.ts#L16"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -1848,7 +2190,10 @@
             "type": "string",
             "label": "title",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/row_click_trigger.ts#L17"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -1856,12 +2201,18 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/row_click_trigger.ts#L20"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+              "lineNumber": 20
+            }
           }
         ],
         "description": [],
         "label": "rowClickTrigger",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/row_click_trigger.ts#L15",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -1875,7 +2226,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L13"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -1883,7 +2237,10 @@
             "type": "string",
             "label": "title",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L14"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -1891,12 +2248,18 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L15"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+              "lineNumber": 15
+            }
           }
         ],
         "description": [],
         "label": "visualizeFieldTrigger",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts#L12",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/visualize_field_trigger.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       },
       {
@@ -1910,7 +2273,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L13"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -1918,7 +2284,10 @@
             "type": "string",
             "label": "title",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L14"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -1926,12 +2295,18 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L15"
+            "source": {
+              "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+              "lineNumber": 15
+            }
           }
         ],
         "description": [],
         "label": "visualizeGeoFieldTrigger",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts#L12",
+        "source": {
+          "path": "src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       }
     ],
@@ -1941,7 +2316,10 @@
       "label": "UiActionsSetup",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/plugin.ts#L14",
+      "source": {
+        "path": "src/plugins/ui_actions/public/plugin.ts",
+        "lineNumber": 14
+      },
       "signature": [
         "{ readonly addTriggerAction: (triggerId: string, action: ",
         "UiActionsActionDefinition",
@@ -1974,7 +2352,10 @@
       "label": "UiActionsStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/src/plugins/ui_actions/public/plugin.ts#L24",
+      "source": {
+        "path": "src/plugins/ui_actions/public/plugin.ts",
+        "lineNumber": 24
+      },
       "signature": [
         "{ readonly clear: () => void; readonly fork: () => UiActionsService; readonly addTriggerAction: (triggerId: string, action: ",
         "UiActionsActionDefinition",

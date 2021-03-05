@@ -29,7 +29,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
+            "source": {
+              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+              "lineNumber": 28
+            }
           },
           {
             "type": "Object",
@@ -45,7 +48,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28"
+            "source": {
+              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+              "lineNumber": 28
+            }
           }
         ],
         "signature": [
@@ -57,7 +63,10 @@
         ],
         "description": [],
         "label": "initServerWithKibana",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L28",
+        "source": {
+          "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+          "lineNumber": 28
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -88,7 +97,10 @@
             "type": "Function",
             "label": "route",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+              "lineNumber": 25
+            },
             "signature": [
               "(options: ",
               {
@@ -102,7 +114,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/uptime/server/kibana.index.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/uptime/server/kibana.index.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       }
     ],

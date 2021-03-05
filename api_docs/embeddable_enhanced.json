@@ -15,7 +15,10 @@
               "E"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts#L12"
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
+              "lineNumber": 12
+            }
           }
         ],
         "signature": [
@@ -55,7 +58,10 @@
         ],
         "description": [],
         "label": "isEnhancedEmbeddable",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
+          "lineNumber": 11
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -75,7 +81,10 @@
             "type": "CompoundType",
             "label": "embeddable",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/types.ts#L21",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+              "lineNumber": 21
+            },
             "signature": [
               {
                 "pluginId": "embeddableEnhanced",
@@ -112,7 +121,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/types.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -128,7 +140,10 @@
             "type": "Object",
             "label": "embeddable",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/plugin.ts#L36",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 36
+            },
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -145,7 +160,10 @@
             "type": "Object",
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/plugin.ts#L37",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 37
+            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -157,7 +175,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/plugin.ts#L35",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+          "lineNumber": 35
+        },
         "initialIsOpen": false
       },
       {
@@ -173,7 +194,10 @@
             "type": "Object",
             "label": "embeddable",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/plugin.ts#L41",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 41
+            },
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -190,7 +214,10 @@
             "type": "Object",
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/plugin.ts#L42",
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 42
+            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -202,7 +229,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/plugin.ts#L40",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+          "lineNumber": 40
+        },
         "initialIsOpen": false
       }
     ],
@@ -214,7 +244,10 @@
         "type": "Array",
         "label": "drilldownGrouping",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
+          "lineNumber": 12
+        },
         "signature": [
           {
             "pluginId": "uiActions",
@@ -257,7 +290,10 @@
         "label": "EnhancedEmbeddable",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/types.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "E & { enhancements: {    dynamicActions: DynamicActionManager;}; }"
         ],
@@ -272,7 +308,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/plugin.ts#L46",
+      "source": {
+        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "lineNumber": 46
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -283,7 +322,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/embeddable_enhanced/public/plugin.ts#L49",
+      "source": {
+        "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+        "lineNumber": 49
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }

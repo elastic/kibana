@@ -28,7 +28,10 @@
         "type": "string",
         "label": "API_BASE_PATH",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/index.ts#L19",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/index.ts",
+          "lineNumber": 19
+        },
         "signature": [
           "\"/api/rollup\""
         ],
@@ -40,7 +43,10 @@
         "type": "string",
         "label": "CONFIG_ROLLUPS",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/index.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/index.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "\"rollups:enableIndexPatterns\""
         ],
@@ -52,7 +58,10 @@
         "type": "string",
         "label": "UIM_APP_LOAD",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "\"app_load\""
         ],
@@ -64,7 +73,10 @@
         "type": "string",
         "label": "UIM_APP_NAME",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 8
+        },
         "signature": [
           "\"rollup_jobs\""
         ],
@@ -76,7 +88,10 @@
         "type": "string",
         "label": "UIM_DETAIL_PANEL_HISTOGRAM_TAB_CLICK",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "\"detail_panel_histogram_tab_click\""
         ],
@@ -88,7 +103,10 @@
         "type": "string",
         "label": "UIM_DETAIL_PANEL_JSON_TAB_CLICK",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L23",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 23
+        },
         "signature": [
           "\"detail_panel_json_tab_click\""
         ],
@@ -100,7 +118,10 @@
         "type": "string",
         "label": "UIM_DETAIL_PANEL_METRICS_TAB_CLICK",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 22
+        },
         "signature": [
           "\"detail_panel_metrics_tab_click\""
         ],
@@ -112,7 +133,10 @@
         "type": "string",
         "label": "UIM_DETAIL_PANEL_SUMMARY_TAB_CLICK",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L19",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 19
+        },
         "signature": [
           "\"detail_panel_summary_tab_click\""
         ],
@@ -124,7 +148,10 @@
         "type": "string",
         "label": "UIM_DETAIL_PANEL_TERMS_TAB_CLICK",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 20
+        },
         "signature": [
           "\"detail_panel_terms_tab_click\""
         ],
@@ -136,7 +163,10 @@
         "type": "string",
         "label": "UIM_JOB_CREATE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "\"job_create\""
         ],
@@ -148,7 +178,10 @@
         "type": "string",
         "label": "UIM_JOB_DELETE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "\"job_delete\""
         ],
@@ -160,7 +193,10 @@
         "type": "string",
         "label": "UIM_JOB_DELETE_MANY",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "\"job_delete_many\""
         ],
@@ -172,7 +208,10 @@
         "type": "string",
         "label": "UIM_JOB_START",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "\"job_start\""
         ],
@@ -184,7 +223,10 @@
         "type": "string",
         "label": "UIM_JOB_START_MANY",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "\"job_start_many\""
         ],
@@ -196,7 +238,10 @@
         "type": "string",
         "label": "UIM_JOB_STOP",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 16
+        },
         "signature": [
           "\"job_stop\""
         ],
@@ -208,7 +253,10 @@
         "type": "string",
         "label": "UIM_JOB_STOP_MANY",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "\"job_stop_many\""
         ],
@@ -220,7 +268,10 @@
         "type": "string",
         "label": "UIM_SHOW_DETAILS_CLICK",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/ui_metric.ts#L18",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+          "lineNumber": 18
+        },
         "signature": [
           "\"show_details_click\""
         ],
@@ -239,7 +290,10 @@
             "type": "string",
             "label": "ID",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/index.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/rollup/common/index.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -247,7 +301,10 @@
             "type": "string",
             "label": "minimumLicenseType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/index.ts#L14",
+            "source": {
+              "path": "x-pack/plugins/rollup/common/index.ts",
+              "lineNumber": 14
+            },
             "signature": [
               "\"basic\""
             ]
@@ -255,7 +312,10 @@
         ],
         "description": [],
         "label": "PLUGIN",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/rollup/common/index.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/rollup/common/index.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       }
     ]

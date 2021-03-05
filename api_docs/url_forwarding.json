@@ -57,12 +57,18 @@
                   "[]; }>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L27"
+                "source": {
+                  "path": "src/plugins/url_forwarding/public/plugin.ts",
+                  "lineNumber": 27
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L27"
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 27
+            }
           },
           {
             "id": "def-public.UrlForwardingPlugin.start",
@@ -111,7 +117,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L75"
+                "source": {
+                  "path": "src/plugins/url_forwarding/public/plugin.ts",
+                  "lineNumber": 75
+                }
               },
               {
                 "id": "def-public.UrlForwardingPlugin.start.{-kibanaLegacy }",
@@ -126,7 +135,10 @@
                     "type": "Object",
                     "label": "kibanaLegacy",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L76",
+                    "source": {
+                      "path": "src/plugins/url_forwarding/public/plugin.ts",
+                      "lineNumber": 76
+                    },
                     "signature": [
                       "{ dashboardConfig: ",
                       {
@@ -140,12 +152,18 @@
                     ]
                   }
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L76"
+                "source": {
+                  "path": "src/plugins/url_forwarding/public/plugin.ts",
+                  "lineNumber": 76
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L74"
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 74
+            }
           },
           {
             "id": "def-public.UrlForwardingPlugin.stop",
@@ -158,10 +176,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L115"
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 115
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L22",
+        "source": {
+          "path": "src/plugins/url_forwarding/public/plugin.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       }
     ],
@@ -180,7 +204,10 @@
             "type": "string",
             "label": "legacyAppId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L17"
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -188,7 +215,10 @@
             "type": "string",
             "label": "newAppId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L18"
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 18
+            }
           },
           {
             "tags": [],
@@ -196,13 +226,19 @@
             "type": "Function",
             "label": "rewritePath",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L19",
+            "source": {
+              "path": "src/plugins/url_forwarding/public/plugin.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "(legacyPath: string) => string"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L16",
+        "source": {
+          "path": "src/plugins/url_forwarding/public/plugin.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       }
     ],
@@ -214,7 +250,10 @@
         "label": "UrlForwardingSetup",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L122",
+        "source": {
+          "path": "src/plugins/url_forwarding/public/plugin.ts",
+          "lineNumber": 122
+        },
         "signature": [
           "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
         ],
@@ -226,7 +265,10 @@
         "label": "UrlForwardingStart",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/url_forwarding/public/plugin.ts#L123",
+        "source": {
+          "path": "src/plugins/url_forwarding/public/plugin.ts",
+          "lineNumber": 123
+        },
         "signature": [
           "{ navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ForwardDefinition[]; }"
         ],

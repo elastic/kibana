@@ -68,12 +68,18 @@
                   "<object>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L19"
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 19
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L19"
+            "source": {
+              "path": "x-pack/plugins/lists/public/plugin.ts",
+              "lineNumber": 19
+            }
           },
           {
             "id": "def-public.Plugin.setup",
@@ -154,7 +160,10 @@
                   ">"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L22"
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 22
+                }
               },
               {
                 "type": "Object",
@@ -170,12 +179,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L22"
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 22
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L22"
+            "source": {
+              "path": "x-pack/plugins/lists/public/plugin.ts",
+              "lineNumber": 22
+            }
           },
           {
             "id": "def-public.Plugin.start",
@@ -223,7 +238,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L27"
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 27
+                }
               },
               {
                 "type": "Object",
@@ -239,15 +257,24 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L27"
+                "source": {
+                  "path": "x-pack/plugins/lists/public/plugin.ts",
+                  "lineNumber": 27
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L27"
+            "source": {
+              "path": "x-pack/plugins/lists/public/plugin.ts",
+              "lineNumber": 27
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/plugin.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/lists/public/plugin.ts",
+          "lineNumber": 17
+        },
         "initialIsOpen": false
       }
     ],
@@ -270,7 +297,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L532"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+              "lineNumber": 532
+            }
           }
         ],
         "signature": [
@@ -280,7 +310,10 @@
         ],
         "description": [],
         "label": "addEndpointExceptionListWithValidation",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L532",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+          "lineNumber": 532
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -303,7 +336,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L109"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+              "lineNumber": 109
+            }
           }
         ],
         "signature": [
@@ -313,7 +349,10 @@
         ],
         "description": [],
         "label": "addExceptionListItemWithValidation",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L109",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+          "lineNumber": 109
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -336,7 +375,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L66"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+              "lineNumber": 66
+            }
           }
         ],
         "signature": [
@@ -346,7 +388,10 @@
         ],
         "description": [],
         "label": "addExceptionListWithValidation",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L66",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+          "lineNumber": 66
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -369,7 +414,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/api.ts#L174"
+            "source": {
+              "path": "x-pack/plugins/lists/public/lists/api.ts",
+              "lineNumber": 174
+            }
           }
         ],
         "signature": [
@@ -379,7 +427,10 @@
         ],
         "description": [],
         "label": "exportListWithValidation",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/api.ts#L174",
+        "source": {
+          "path": "x-pack/plugins/lists/public/lists/api.ts",
+          "lineNumber": 174
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -402,7 +453,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L299"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+              "lineNumber": 299
+            }
           }
         ],
         "signature": [
@@ -412,7 +466,10 @@
         ],
         "description": [],
         "label": "fetchExceptionListByIdWithValidation",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L299",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+          "lineNumber": 299
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -435,7 +492,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L195"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+              "lineNumber": 195
+            }
           }
         ],
         "signature": [
@@ -445,7 +505,10 @@
         ],
         "description": [],
         "label": "updateExceptionListItemWithValidation",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/api.ts#L195",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/api.ts",
+          "lineNumber": 195
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -468,7 +531,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/use_api.ts#L41"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/hooks/use_api.ts",
+              "lineNumber": 41
+            }
           }
         ],
         "signature": [
@@ -485,7 +551,10 @@
         ],
         "description": [],
         "label": "useApi",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/use_api.ts#L41",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/hooks/use_api.ts",
+          "lineNumber": 41
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -502,7 +571,10 @@
               "(...args: Args) => Promise<Result>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/common/hooks/use_async.ts#L26"
+            "source": {
+              "path": "x-pack/plugins/lists/public/common/hooks/use_async.ts",
+              "lineNumber": 26
+            }
           }
         ],
         "signature": [
@@ -514,7 +586,10 @@
           "\n"
         ],
         "label": "useAsync",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/common/hooks/use_async.ts#L25",
+        "source": {
+          "path": "x-pack/plugins/lists/public/common/hooks/use_async.ts",
+          "lineNumber": 25
+        },
         "tags": [],
         "returnComment": [
           "An {@link AsyncTask} containing the underlying task's state along with a start callback"
@@ -536,7 +611,10 @@
         ],
         "description": [],
         "label": "useCreateListIndex",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/hooks/use_create_list_index.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/public/lists/hooks/use_create_list_index.ts",
+          "lineNumber": 15
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -559,7 +637,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/common/hooks/use_cursor.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/lists/public/common/hooks/use_cursor.ts",
+              "lineNumber": 20
+            }
           }
         ],
         "signature": [
@@ -569,7 +650,10 @@
         ],
         "description": [],
         "label": "useCursor",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/common/hooks/use_cursor.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/lists/public/common/hooks/use_cursor.ts",
+          "lineNumber": 20
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -589,7 +673,10 @@
         ],
         "description": [],
         "label": "useDeleteList",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/hooks/use_delete_list.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/public/lists/hooks/use_delete_list.ts",
+          "lineNumber": 15
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -612,7 +699,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/use_exception_list_items.ts#L39"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/hooks/use_exception_list_items.ts",
+              "lineNumber": 39
+            }
           }
         ],
         "signature": [
@@ -625,7 +715,10 @@
           "\nHook for using to get an ExceptionList and it's ExceptionListItems\n"
         ],
         "label": "useExceptionListItems",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/use_exception_list_items.ts#L39",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/hooks/use_exception_list_items.ts",
+          "lineNumber": 39
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -648,7 +741,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/use_exception_lists.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/hooks/use_exception_lists.ts",
+              "lineNumber": 30
+            }
           }
         ],
         "signature": [
@@ -661,7 +757,10 @@
           "\nHook for fetching ExceptionLists\n"
         ],
         "label": "useExceptionLists",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/use_exception_lists.ts#L30",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/hooks/use_exception_lists.ts",
+          "lineNumber": 30
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -681,7 +780,10 @@
         ],
         "description": [],
         "label": "useExportList",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/hooks/use_export_list.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/public/lists/hooks/use_export_list.ts",
+          "lineNumber": 15
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -701,7 +803,10 @@
         ],
         "description": [],
         "label": "useFindLists",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/hooks/use_find_lists.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/public/lists/hooks/use_find_lists.ts",
+          "lineNumber": 15
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -721,7 +826,10 @@
         ],
         "description": [],
         "label": "useImportList",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/hooks/use_import_list.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/public/lists/hooks/use_import_list.ts",
+          "lineNumber": 15
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -737,7 +845,10 @@
           "\n"
         ],
         "label": "useIsMounted",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/common/hooks/use_is_mounted.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/lists/public/common/hooks/use_is_mounted.ts",
+          "lineNumber": 16
+        },
         "tags": [],
         "returnComment": [
           "A {@link GetIsMounted} getter function returning whether the component is currently mounted"
@@ -762,7 +873,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/persist_exception_item.ts#L35"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/hooks/persist_exception_item.ts",
+              "lineNumber": 35
+            }
           }
         ],
         "signature": [
@@ -775,7 +889,10 @@
           "\nHook for creating or updating ExceptionListItem\n"
         ],
         "label": "usePersistExceptionItem",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/persist_exception_item.ts#L35",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/hooks/persist_exception_item.ts",
+          "lineNumber": 35
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -798,7 +915,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/persist_exception_list.ts#L31"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/hooks/persist_exception_list.ts",
+              "lineNumber": 31
+            }
           }
         ],
         "signature": [
@@ -811,7 +931,10 @@
           "\nHook for creating or updating ExceptionList\n"
         ],
         "label": "usePersistExceptionList",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/hooks/persist_exception_list.ts#L31",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/hooks/persist_exception_list.ts",
+          "lineNumber": 31
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -831,7 +954,10 @@
         ],
         "description": [],
         "label": "useReadListIndex",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/hooks/use_read_list_index.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/public/lists/hooks/use_read_list_index.ts",
+          "lineNumber": 15
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -851,7 +977,10 @@
         ],
         "description": [],
         "label": "useReadListPrivileges",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/lists/hooks/use_read_list_privileges.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/public/lists/hooks/use_read_list_privileges.ts",
+          "lineNumber": 15
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -868,7 +997,10 @@
               "(args: Args) => Result"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/common/with_optional_signal.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/lists/public/common/with_optional_signal.ts",
+              "lineNumber": 20
+            }
           }
         ],
         "signature": [
@@ -880,7 +1012,10 @@
           "\n"
         ],
         "label": "withOptionalSignal",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/common/with_optional_signal.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/lists/public/common/with_optional_signal.ts",
+          "lineNumber": 20
+        },
         "tags": [],
         "returnComment": [
           "An async function where the AbortSignal argument is optional"
@@ -912,10 +1047,16 @@
             "type": "number",
             "label": "totalItems",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L42"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 42
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L41",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+          "lineNumber": 41
+        },
         "initialIsOpen": false
       },
       {
@@ -931,7 +1072,10 @@
             "type": "CompoundType",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L126",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 126
+            },
             "signature": [
               "string | null | undefined"
             ]
@@ -942,7 +1086,10 @@
             "type": "CompoundType",
             "label": "list_id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L127",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 127
+            },
             "signature": [
               "string | null | undefined"
             ]
@@ -953,7 +1100,10 @@
             "type": "CompoundType",
             "label": "created_by",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L128",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 128
+            },
             "signature": [
               "string | null | undefined"
             ]
@@ -964,7 +1114,10 @@
             "type": "CompoundType",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L129",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 129
+            },
             "signature": [
               "string | null | undefined"
             ]
@@ -975,13 +1128,19 @@
             "type": "CompoundType",
             "label": "tags",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L130",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 130
+            },
             "signature": [
               "string | null | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L125",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+          "lineNumber": 125
+        },
         "initialIsOpen": false
       },
       {
@@ -997,7 +1156,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L63"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 63
+            }
           },
           {
             "tags": [],
@@ -1005,7 +1167,10 @@
             "type": "string",
             "label": "listId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L64"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 64
+            }
           },
           {
             "tags": [],
@@ -1013,7 +1178,10 @@
             "type": "CompoundType",
             "label": "namespaceType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L65",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 65
+            },
             "signature": [
               "\"single\" | \"agnostic\""
             ]
@@ -1024,13 +1192,19 @@
             "type": "CompoundType",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L66",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 66
+            },
             "signature": [
               "\"endpoint\" | \"detection\""
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L62",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+          "lineNumber": 62
+        },
         "initialIsOpen": false
       },
       {
@@ -1046,7 +1220,10 @@
             "type": "number",
             "label": "page",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L29"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 29
+            }
           },
           {
             "tags": [],
@@ -1054,7 +1231,10 @@
             "type": "number",
             "label": "perPage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -1062,13 +1242,19 @@
             "type": "number",
             "label": "total",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L31",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 31
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L28",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+          "lineNumber": 28
+        },
         "initialIsOpen": false
       },
       {
@@ -1084,7 +1270,10 @@
             "type": "Array",
             "label": "exceptions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L46",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 46
+            },
             "signature": [
               "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]"
             ]
@@ -1095,7 +1284,10 @@
             "type": "Object",
             "label": "pagination",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L47",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 47
+            },
             "signature": [
               {
                 "pluginId": "lists",
@@ -1107,7 +1299,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L45",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+          "lineNumber": 45
+        },
         "initialIsOpen": false
       },
       {
@@ -1123,7 +1318,10 @@
             "type": "Array",
             "label": "exceptions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L121",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 121
+            },
             "signature": [
               "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }[]"
             ]
@@ -1134,7 +1332,10 @@
             "type": "Object",
             "label": "pagination",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L122",
+            "source": {
+              "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+              "lineNumber": 122
+            },
             "signature": [
               {
                 "pluginId": "lists",
@@ -1146,7 +1347,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/exceptions/types.ts#L120",
+        "source": {
+          "path": "x-pack/plugins/lists/public/exceptions/types.ts",
+          "lineNumber": 120
+        },
         "initialIsOpen": false
       }
     ],
@@ -1160,7 +1364,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/types.ts#L9",
+      "source": {
+        "path": "x-pack/plugins/lists/public/types.ts",
+        "lineNumber": 9
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1171,7 +1378,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/public/types.ts#L11",
+      "source": {
+        "path": "x-pack/plugins/lists/public/types.ts",
+        "lineNumber": 11
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1208,12 +1418,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L61"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 61
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L61"
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 61
+            }
           },
           {
             "id": "def-server.ExceptionListClient.getExceptionList",
@@ -1233,7 +1449,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L66"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 66
+                }
               }
             ],
             "signature": [
@@ -1249,7 +1468,10 @@
             ],
             "description": [],
             "label": "getExceptionList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L66",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 66
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1271,7 +1493,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L75"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 75
+                }
               }
             ],
             "signature": [
@@ -1287,7 +1512,10 @@
             ],
             "description": [],
             "label": "getExceptionListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L75",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 75
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1302,7 +1530,10 @@
               "\nThis creates an agnostic space endpoint list if it does not exist. This tries to be\nas fast as possible by ignoring conflict errors and not returning the contents of the\nlist if it already exists."
             ],
             "label": "createEndpointList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L90",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 90
+            },
             "tags": [],
             "returnComment": [
               "ExceptionListSchema if it created the endpoint list, otherwise null if it already exists"
@@ -1319,7 +1550,10 @@
               "\nCreate the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)"
             ],
             "label": "createTrustedAppsList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L102",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 102
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1341,7 +1575,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L116"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 116
+                }
               }
             ],
             "signature": [
@@ -1359,7 +1596,10 @@
               "\nThis is the same as \"createListItem\" except it applies specifically to the agnostic endpoint list and will\nauto-call the \"createEndpointList\" for you so that you have the best chance of the agnostic endpoint\nbeing there and existing before the item is inserted into the agnostic endpoint list."
             ],
             "label": "createEndpointListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L116",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 116
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1381,7 +1621,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L152"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 152
+                }
               }
             ],
             "signature": [
@@ -1399,7 +1642,10 @@
               "\nThis is the same as \"updateExceptionListItem\" except it applies specifically to the endpoint list and will\nauto-call the \"createEndpointList\" for you so that you have the best chance of the endpoint\nbeing there if it did not exist before. If the list did not exist before, then creating it here will still cause a\nreturn of null but at least the list exists again."
             ],
             "label": "updateEndpointListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L152",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 152
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1421,7 +1667,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L188"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 188
+                }
               }
             ],
             "signature": [
@@ -1439,7 +1688,10 @@
               "\nThis is the same as \"getExceptionListItem\" except it applies specifically to the endpoint list."
             ],
             "label": "getEndpointListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L188",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 188
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1461,7 +1713,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L196"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 196
+                }
               }
             ],
             "signature": [
@@ -1477,7 +1732,10 @@
             ],
             "description": [],
             "label": "createExceptionList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L196",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 196
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1499,7 +1757,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L223"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 223
+                }
               }
             ],
             "signature": [
@@ -1515,7 +1776,10 @@
             ],
             "description": [],
             "label": "updateExceptionList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L223",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 223
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1537,7 +1801,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L254"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 254
+                }
               }
             ],
             "signature": [
@@ -1553,7 +1820,10 @@
             ],
             "description": [],
             "label": "deleteExceptionList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L254",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 254
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1575,7 +1845,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L268"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 268
+                }
               }
             ],
             "signature": [
@@ -1591,7 +1864,10 @@
             ],
             "description": [],
             "label": "createExceptionListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L268",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 268
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1613,7 +1889,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L299"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 299
+                }
               }
             ],
             "signature": [
@@ -1629,7 +1908,10 @@
             ],
             "description": [],
             "label": "updateExceptionListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L299",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 299
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1651,7 +1933,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L332"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 332
+                }
               }
             ],
             "signature": [
@@ -1667,7 +1952,10 @@
             ],
             "description": [],
             "label": "deleteExceptionListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L332",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 332
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1689,7 +1977,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L346"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 346
+                }
               }
             ],
             "signature": [
@@ -1705,7 +1996,10 @@
             ],
             "description": [],
             "label": "deleteExceptionListItemById",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L346",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 346
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1727,7 +2021,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L361"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 361
+                }
               }
             ],
             "signature": [
@@ -1745,7 +2042,10 @@
               "\nThis is the same as \"deleteExceptionListItem\" except it applies specifically to the endpoint list."
             ],
             "label": "deleteEndpointListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L361",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 361
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1767,7 +2067,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L374"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 374
+                }
               }
             ],
             "signature": [
@@ -1783,7 +2086,10 @@
             ],
             "description": [],
             "label": "findExceptionListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L374",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 374
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1805,7 +2111,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L396"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 396
+                }
               }
             ],
             "signature": [
@@ -1821,7 +2130,10 @@
             ],
             "description": [],
             "label": "findExceptionListsItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L396",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 396
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1843,7 +2155,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L418"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 418
+                }
               }
             ],
             "signature": [
@@ -1859,7 +2174,10 @@
             ],
             "description": [],
             "label": "findValueListExceptionListItems",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L418",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 418
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1881,7 +2199,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L436"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 436
+                }
               }
             ],
             "signature": [
@@ -1897,7 +2218,10 @@
             ],
             "description": [],
             "label": "findExceptionList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L436",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 436
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1919,7 +2243,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L464"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                  "lineNumber": 464
+                }
               }
             ],
             "signature": [
@@ -1937,12 +2264,18 @@
               "\nThis is the same as \"findExceptionList\" except it applies specifically to the  endpoint list and will\nauto-call the \"createEndpointList\" for you so that you have the best chance of the  endpoint\nbeing there if it did not exist before. If the list did not exist before, then creating it here should give you\na good guarantee that you will get an empty record set rather than null. I keep the null as the return value in\nthe off chance that you still might somehow not get into a race condition where the  endpoint list does\nnot exist because someone deleted it in-between the initial create and then the find."
             ],
             "label": "findEndpointListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L464",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+              "lineNumber": 464
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts#L56",
+        "source": {
+          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+          "lineNumber": 56
+        },
         "initialIsOpen": false
       },
       {
@@ -1975,12 +2308,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L85"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 85
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L85"
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 85
+            }
           },
           {
             "id": "def-server.ListClient.getListIndex",
@@ -1991,7 +2330,10 @@
             ],
             "description": [],
             "label": "getListIndex",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L92",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 92
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2004,7 +2346,10 @@
             ],
             "description": [],
             "label": "getListItemIndex",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L100",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 100
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2026,7 +2371,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L108"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 108
+                }
               }
             ],
             "signature": [
@@ -2042,7 +2390,10 @@
             ],
             "description": [],
             "label": "getList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L108",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 108
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2064,7 +2415,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L114"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 114
+                }
               }
             ],
             "signature": [
@@ -2080,7 +2434,10 @@
             ],
             "description": [],
             "label": "createList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L114",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 114
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2102,7 +2459,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L143"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 143
+                }
               }
             ],
             "signature": [
@@ -2118,7 +2478,10 @@
             ],
             "description": [],
             "label": "createListIfItDoesNotExist",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L143",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 143
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2131,7 +2494,10 @@
             ],
             "description": [],
             "label": "getListIndexExists",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L172",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 172
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2144,7 +2510,10 @@
             ],
             "description": [],
             "label": "getListItemIndexExists",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L178",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 178
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2157,7 +2526,10 @@
             ],
             "description": [],
             "label": "createListBootStrapIndex",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L184",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 184
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2170,7 +2542,10 @@
             ],
             "description": [],
             "label": "createListItemBootStrapIndex",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L190",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 190
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2183,7 +2558,10 @@
             ],
             "description": [],
             "label": "getListPolicyExists",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L196",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 196
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2196,7 +2574,10 @@
             ],
             "description": [],
             "label": "getListItemPolicyExists",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L202",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 202
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2209,7 +2590,10 @@
             ],
             "description": [],
             "label": "getListTemplateExists",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L208",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 208
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2222,7 +2606,10 @@
             ],
             "description": [],
             "label": "getListItemTemplateExists",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L214",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 214
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2235,7 +2622,10 @@
             ],
             "description": [],
             "label": "getListTemplate",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L220",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 220
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2248,7 +2638,10 @@
             ],
             "description": [],
             "label": "getListItemTemplate",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L225",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 225
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2261,7 +2654,10 @@
             ],
             "description": [],
             "label": "setListTemplate",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L230",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 230
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2274,7 +2670,10 @@
             ],
             "description": [],
             "label": "setListItemTemplate",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L237",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 237
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2287,7 +2686,10 @@
             ],
             "description": [],
             "label": "setListPolicy",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L244",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 244
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2300,7 +2702,10 @@
             ],
             "description": [],
             "label": "setListItemPolicy",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L250",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 250
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2313,7 +2718,10 @@
             ],
             "description": [],
             "label": "deleteListIndex",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L256",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 256
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2326,7 +2734,10 @@
             ],
             "description": [],
             "label": "deleteListItemIndex",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L262",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 262
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2339,7 +2750,10 @@
             ],
             "description": [],
             "label": "deleteListPolicy",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L268",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 268
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2352,7 +2766,10 @@
             ],
             "description": [],
             "label": "deleteListItemPolicy",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L274",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 274
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2365,7 +2782,10 @@
             ],
             "description": [],
             "label": "deleteListTemplate",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L280",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 280
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2378,7 +2798,10 @@
             ],
             "description": [],
             "label": "deleteListItemTemplate",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L286",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 286
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2400,7 +2823,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L292"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 292
+                }
               }
             ],
             "signature": [
@@ -2416,7 +2842,10 @@
             ],
             "description": [],
             "label": "deleteListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L292",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 292
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2438,7 +2867,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L298"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 298
+                }
               }
             ],
             "signature": [
@@ -2454,7 +2886,10 @@
             ],
             "description": [],
             "label": "deleteListItemByValue",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L298",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 298
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2476,7 +2911,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L314"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 314
+                }
               }
             ],
             "signature": [
@@ -2492,7 +2930,10 @@
             ],
             "description": [],
             "label": "deleteList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L314",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 314
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2514,7 +2955,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L326"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 326
+                }
               }
             ],
             "signature": [
@@ -2530,7 +2974,10 @@
             ],
             "description": [],
             "label": "exportListItemsToStream",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L326",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 326
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2552,7 +2999,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L342"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 342
+                }
               }
             ],
             "signature": [
@@ -2568,7 +3018,10 @@
             ],
             "description": [],
             "label": "importListItemsToStream",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L342",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 342
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2590,7 +3043,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L370"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 370
+                }
               }
             ],
             "signature": [
@@ -2606,7 +3062,10 @@
             ],
             "description": [],
             "label": "getListItemByValue",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L370",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 370
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2628,7 +3087,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L386"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 386
+                }
               }
             ],
             "signature": [
@@ -2644,7 +3106,10 @@
             ],
             "description": [],
             "label": "createListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L386",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 386
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2666,7 +3131,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L411"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 411
+                }
               }
             ],
             "signature": [
@@ -2682,7 +3150,10 @@
             ],
             "description": [],
             "label": "updateListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L411",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 411
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2704,7 +3175,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L430"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 430
+                }
               }
             ],
             "signature": [
@@ -2720,7 +3194,10 @@
             ],
             "description": [],
             "label": "updateList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L430",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 430
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2742,7 +3219,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L453"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 453
+                }
               }
             ],
             "signature": [
@@ -2758,7 +3238,10 @@
             ],
             "description": [],
             "label": "getListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L453",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 453
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2780,7 +3263,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L463"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 463
+                }
               }
             ],
             "signature": [
@@ -2796,7 +3282,10 @@
             ],
             "description": [],
             "label": "getListItemByValues",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L463",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 463
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2818,7 +3307,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L479"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 479
+                }
               }
             ],
             "signature": [
@@ -2834,7 +3326,10 @@
             ],
             "description": [],
             "label": "searchListItemByValues",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L479",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 479
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2856,7 +3351,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L495"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 495
+                }
               }
             ],
             "signature": [
@@ -2872,7 +3370,10 @@
             ],
             "description": [],
             "label": "findList",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L495",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 495
+            },
             "tags": [],
             "returnComment": []
           },
@@ -2894,7 +3395,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L519"
+                "source": {
+                  "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                  "lineNumber": 519
+                }
               }
             ],
             "signature": [
@@ -2910,12 +3414,18 @@
             ],
             "description": [],
             "label": "findListItem",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L519",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+              "lineNumber": 519
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/lists/list_client.ts#L79",
+        "source": {
+          "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+          "lineNumber": 79
+        },
         "initialIsOpen": false
       }
     ],
@@ -2934,7 +3444,10 @@
             "type": "Array",
             "label": "comments",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L118",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 118
+            },
             "signature": [
               "{ comment: string; }[]"
             ]
@@ -2945,7 +3458,10 @@
             "type": "Array",
             "label": "entries",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L119",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 119
+            },
             "signature": [
               "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
             ]
@@ -2956,7 +3472,10 @@
             "type": "string",
             "label": "itemId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L120"
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 120
+            }
           },
           {
             "tags": [],
@@ -2964,7 +3483,10 @@
             "type": "string",
             "label": "listId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L121"
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 121
+            }
           },
           {
             "tags": [],
@@ -2972,7 +3494,10 @@
             "type": "CompoundType",
             "label": "namespaceType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L122",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 122
+            },
             "signature": [
               "\"single\" | \"agnostic\""
             ]
@@ -2983,7 +3508,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L123"
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 123
+            }
           },
           {
             "tags": [],
@@ -2991,7 +3519,10 @@
             "type": "Array",
             "label": "osTypes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L124",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 124
+            },
             "signature": [
               "(\"windows\" | \"linux\" | \"macos\")[]"
             ]
@@ -3002,7 +3533,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L125"
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 125
+            }
           },
           {
             "tags": [],
@@ -3010,7 +3544,10 @@
             "type": "Uncategorized",
             "label": "meta",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L126",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 126
+            },
             "signature": [
               "object | undefined"
             ]
@@ -3021,7 +3558,10 @@
             "type": "Array",
             "label": "tags",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L127",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 127
+            },
             "signature": [
               "string[]"
             ]
@@ -3032,13 +3572,19 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L128",
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 128
+            },
             "signature": [
               "\"simple\""
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts#L117",
+        "source": {
+          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+          "lineNumber": 117
+        },
         "initialIsOpen": false
       },
       {
@@ -3054,7 +3600,10 @@
             "type": "Function",
             "label": "getExceptionListClient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/types.ts#L41",
+            "source": {
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "lineNumber": 41
+            },
             "signature": [
               {
                 "pluginId": "lists",
@@ -3071,7 +3620,10 @@
             "type": "Function",
             "label": "getListClient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/types.ts#L42",
+            "source": {
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "lineNumber": 42
+            },
             "signature": [
               {
                 "pluginId": "lists",
@@ -3083,7 +3635,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/types.ts#L40",
+        "source": {
+          "path": "x-pack/plugins/lists/server/types.ts",
+          "lineNumber": 40
+        },
         "initialIsOpen": false
       },
       {
@@ -3101,7 +3656,10 @@
             "type": "Function",
             "label": "getListClient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/types.ts#L49",
+            "source": {
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "lineNumber": 49
+            },
             "signature": [
               "() => ",
               {
@@ -3119,7 +3677,10 @@
             "type": "Function",
             "label": "getExceptionListClient",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/types.ts#L50",
+            "source": {
+              "path": "x-pack/plugins/lists/server/types.ts",
+              "lineNumber": 50
+            },
             "signature": [
               "() => ",
               {
@@ -3132,7 +3693,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/server/types.ts#L48",
+        "source": {
+          "path": "x-pack/plugins/lists/server/types.ts",
+          "lineNumber": 48
+        },
         "initialIsOpen": false
       }
     ],
@@ -3151,7 +3715,10 @@
         "label": "ExceptionListTypeEnum",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L219",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 219
+        },
         "initialIsOpen": false
       },
       {
@@ -3160,7 +3727,10 @@
         "label": "OperatorEnum",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L276",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 276
+        },
         "initialIsOpen": false
       },
       {
@@ -3169,7 +3739,10 @@
         "label": "OperatorTypeEnum",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L281",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 281
+        },
         "initialIsOpen": false
       }
     ],
@@ -3180,7 +3753,10 @@
         "label": "Comment",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/comment.ts#L32",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/comment.ts",
+          "lineNumber": 32
+        },
         "signature": [
           "{ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; }"
         ],
@@ -3192,7 +3768,10 @@
         "label": "CommentsArray",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/comment.ts#L31",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/comment.ts",
+          "lineNumber": 31
+        },
         "signature": [
           "({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]"
         ],
@@ -3204,7 +3783,10 @@
         "label": "CreateComment",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/create_comment.ts#L18",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/create_comment.ts",
+          "lineNumber": 18
+        },
         "signature": [
           "{ comment: string; }"
         ],
@@ -3216,7 +3798,10 @@
         "label": "CreateCommentsArray",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/create_comment.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/create_comment.ts",
+          "lineNumber": 20
+        },
         "signature": [
           "{ comment: string; }[]"
         ],
@@ -3228,7 +3813,10 @@
         "label": "CreateExceptionListItemSchema",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/request/create_exception_list_item_schema.ts#L55",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/request/create_exception_list_item_schema.ts",
+          "lineNumber": 55
+        },
         "signature": [
           "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
         ],
@@ -3240,7 +3828,10 @@
         "label": "CreateExceptionListSchema",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/request/create_exception_list_schema.ts#L50",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/request/create_exception_list_schema.ts",
+          "lineNumber": 50
+        },
         "signature": [
           "{ description: string; name: string; type: \"endpoint\" | \"detection\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
         ],
@@ -3254,7 +3845,10 @@
         "description": [
           "\nThis ID is used for _both_ the Saved Object ID and for the list_id\nfor the single global space agnostic endpoint list"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/constants.ts#L45",
+        "source": {
+          "path": "x-pack/plugins/lists/common/constants.ts",
+          "lineNumber": 45
+        },
         "signature": [
           "\"endpoint_list\""
         ],
@@ -3268,7 +3862,10 @@
         "description": [
           "ID of trusted apps agnostic list"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/constants.ts#L56",
+        "source": {
+          "path": "x-pack/plugins/lists/common/constants.ts",
+          "lineNumber": 56
+        },
         "signature": [
           "\"endpoint_trusted_apps\""
         ],
@@ -3280,7 +3877,10 @@
         "label": "EntriesArray",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entries.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entries.ts",
+          "lineNumber": 22
+        },
         "signature": [
           "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
         ],
@@ -3292,7 +3892,10 @@
         "label": "Entry",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entries.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entries.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "{ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; }"
         ],
@@ -3304,7 +3907,10 @@
         "label": "EntryExists",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_exists.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_exists.ts",
+          "lineNumber": 20
+        },
         "signature": [
           "{ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; }"
         ],
@@ -3316,7 +3922,10 @@
         "label": "EntryList",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_list.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_list.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "{ field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; }"
         ],
@@ -3328,7 +3937,10 @@
         "label": "EntryMatch",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_match.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_match.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "{ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; }"
         ],
@@ -3340,7 +3952,10 @@
         "label": "EntryMatchAny",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_match_any.ts#L23",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_match_any.ts",
+          "lineNumber": 23
+        },
         "signature": [
           "{ field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; }"
         ],
@@ -3352,7 +3967,10 @@
         "label": "EntryNested",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_nested.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_nested.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "{ entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; }"
         ],
@@ -3364,7 +3982,10 @@
         "label": "ExceptionListItemSchema",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.ts#L53",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.ts",
+          "lineNumber": 53
+        },
         "signature": [
           "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
         ],
@@ -3376,7 +3997,10 @@
         "label": "ExceptionListSchema",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/response/exception_list_schema.ts#L52",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.ts",
+          "lineNumber": 52
+        },
         "signature": [
           "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\"; updated_at: string; updated_by: string; version: number; }"
         ],
@@ -3388,7 +4012,10 @@
         "label": "ExceptionListType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L217",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 217
+        },
         "signature": [
           "\"endpoint\" | \"detection\""
         ],
@@ -3400,7 +4027,10 @@
         "label": "ListSchema",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/response/list_schema.ts#L48",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/response/list_schema.ts",
+          "lineNumber": 48
+        },
         "signature": [
           "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }"
         ],
@@ -3412,7 +4042,10 @@
         "label": "NamespaceType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/default_namespace.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/default_namespace.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "\"single\" | \"agnostic\""
         ],
@@ -3424,7 +4057,10 @@
         "label": "NestedEntriesArray",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/non_empty_nested_entries_array.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/non_empty_nested_entries_array.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]"
         ],
@@ -3436,7 +4072,10 @@
         "label": "Operator",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L275",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 275
+        },
         "signature": [
           "\"excluded\" | \"included\""
         ],
@@ -3448,7 +4087,10 @@
         "label": "OsTypeArray",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L325",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 325
+        },
         "signature": [
           "(\"windows\" | \"linux\" | \"macos\")[]"
         ],
@@ -3460,7 +4102,10 @@
         "label": "Type",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L123",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 123
+        },
         "signature": [
           "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\""
         ],
@@ -3472,7 +4117,10 @@
         "label": "UpdateExceptionListItemSchema",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/request/update_exception_list_item_schema.ts#L55",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/request/update_exception_list_item_schema.ts",
+          "lineNumber": 55
+        },
         "signature": [
           "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; } & { _version?: string | undefined; comments?: ({ comment: string; } & { id?: string | undefined; })[] | undefined; id?: string | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
         ],
@@ -3486,7 +4134,10 @@
         "type": "Object",
         "label": "comment",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/comment.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/comment.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "IntersectionC",
           "<[",
@@ -3506,7 +4157,10 @@
         "type": "Object",
         "label": "createExceptionListItemSchema",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/request/create_exception_list_item_schema.ts#L33",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/request/create_exception_list_item_schema.ts",
+          "lineNumber": 33
+        },
         "signature": [
           "IntersectionC",
           "<[",
@@ -3526,7 +4180,10 @@
         "type": "Object",
         "label": "entriesExists",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_exists.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_exists.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "ExactC",
           "<",
@@ -3546,7 +4203,10 @@
         "type": "Object",
         "label": "entriesList",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_list.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_list.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "ExactC",
           "<",
@@ -3566,7 +4226,10 @@
         "type": "Object",
         "label": "entriesMatch",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_match.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_match.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "ExactC",
           "<",
@@ -3586,7 +4249,10 @@
         "type": "Object",
         "label": "entriesMatchAny",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_match_any.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_match_any.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "ExactC",
           "<",
@@ -3606,7 +4272,10 @@
         "type": "Object",
         "label": "entriesNested",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entry_nested.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entry_nested.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "ExactC",
           "<",
@@ -3626,7 +4295,10 @@
         "type": "Object",
         "label": "entry",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/entries.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/entries.ts",
+          "lineNumber": 16
+        },
         "signature": [
           "UnionC",
           "<[",
@@ -3646,7 +4318,10 @@
         "type": "Object",
         "label": "exceptionListItemSchema",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.ts#L30",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.ts",
+          "lineNumber": 30
+        },
         "signature": [
           "ExactC",
           "<",
@@ -3666,7 +4341,10 @@
         "type": "Object",
         "label": "exceptionListType",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L215",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 215
+        },
         "signature": [
           "KeyofC",
           "<{ detection: null; endpoint: null; }>"
@@ -3679,7 +4357,10 @@
         "type": "Object",
         "label": "listSchema",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/response/list_schema.ts#L28",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/response/list_schema.ts",
+          "lineNumber": 28
+        },
         "signature": [
           "ExactC",
           "<",
@@ -3699,7 +4380,10 @@
         "type": "Object",
         "label": "namespaceType",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/default_namespace.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/default_namespace.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "KeyofC",
           "<{ agnostic: null; single: null; }>"
@@ -3712,7 +4396,10 @@
         "type": "Object",
         "label": "nestedEntryItem",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/types/non_empty_nested_entries_array.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/types/non_empty_nested_entries_array.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "UnionC",
           "<[",
@@ -3732,7 +4419,10 @@
         "type": "Object",
         "label": "osTypeArray",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lists/common/schemas/common/schemas.ts#L324",
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 324
+        },
         "signature": [
           "Type",
           "<(\"windows\" | \"linux\" | \"macos\")[], (\"windows\" | \"linux\" | \"macos\")[] | undefined, unknown>"

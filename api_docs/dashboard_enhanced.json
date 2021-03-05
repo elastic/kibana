@@ -66,12 +66,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L36"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                  "lineNumber": 36
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L36"
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 36
+            }
           },
           {
             "tags": [],
@@ -79,7 +85,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L38"
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 38
+            }
           },
           {
             "tags": [],
@@ -87,7 +96,10 @@
             "type": "Function",
             "label": "supportedTriggers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L40",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 40
+            },
             "signature": [
               "() => string[]"
             ]
@@ -131,7 +143,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L42"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                  "lineNumber": 42
+                }
               },
               {
                 "type": "Uncategorized",
@@ -141,12 +156,18 @@
                   "Context"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L42"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                  "lineNumber": 42
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L42"
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 42
+            }
           },
           {
             "tags": [],
@@ -154,7 +175,10 @@
             "type": "number",
             "label": "order",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L44",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 44
+            },
             "signature": [
               "100"
             ]
@@ -168,7 +192,10 @@
             ],
             "description": [],
             "label": "getDisplayName",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L46",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 46
+            },
             "tags": [],
             "returnComment": []
           },
@@ -178,7 +205,10 @@
             "type": "string",
             "label": "euiIcon",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L48",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 48
+            },
             "signature": [
               "\"dashboardApp\""
             ]
@@ -189,7 +219,10 @@
             "type": "Function",
             "label": "CollectConfig",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L54",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 54
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -234,7 +267,10 @@
             ],
             "description": [],
             "label": "createConfig",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L56",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 56
+            },
             "tags": [],
             "returnComment": []
           },
@@ -256,7 +292,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L62"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                  "lineNumber": 62
+                }
               }
             ],
             "signature": [
@@ -279,7 +318,10 @@
             ],
             "description": [],
             "label": "isConfigValid",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L62",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 62
+            },
             "tags": [],
             "returnComment": []
           },
@@ -301,7 +343,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L67"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                  "lineNumber": 67
+                }
               },
               {
                 "type": "Uncategorized",
@@ -311,7 +356,10 @@
                   "Context"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L67"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                  "lineNumber": 67
+                }
               }
             ],
             "signature": [
@@ -327,7 +375,10 @@
             ],
             "description": [],
             "label": "getHref",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L67",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 67
+            },
             "tags": [],
             "returnComment": []
           },
@@ -349,7 +400,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L72"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                  "lineNumber": 72
+                }
               },
               {
                 "type": "Uncategorized",
@@ -359,7 +413,10 @@
                   "Context"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L72"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+                  "lineNumber": 72
+                }
               }
             ],
             "signature": [
@@ -375,7 +432,10 @@
             ],
             "description": [],
             "label": "execute",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L72",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 72
+            },
             "tags": [],
             "returnComment": []
           },
@@ -385,7 +445,10 @@
             "label": "urlGenerator",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L77",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 77
+            },
             "signature": [
               {
                 "pluginId": "dashboard",
@@ -397,7 +460,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L34",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+          "lineNumber": 34
+        },
         "initialIsOpen": false
       }
     ],
@@ -416,7 +482,10 @@
             "type": "Function",
             "label": "start",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L27",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+              "lineNumber": 27
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -460,7 +529,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx#L26",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -476,7 +548,10 @@
             "type": "Object",
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+              "lineNumber": 17
+            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -493,7 +568,10 @@
             "type": "Object",
             "label": "embeddable",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+              "lineNumber": 18
+            },
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -510,7 +588,10 @@
             "type": "CompoundType",
             "label": "share",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+              "lineNumber": 19
+            },
             "signature": [
               {
                 "pluginId": "share",
@@ -522,7 +603,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       },
       {
@@ -538,7 +622,10 @@
             "type": "Object",
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L23",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+              "lineNumber": 23
+            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -555,7 +642,10 @@
             "type": "Object",
             "label": "data",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L24",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+              "lineNumber": 24
+            },
             "signature": [
               {
                 "pluginId": "data",
@@ -572,7 +662,10 @@
             "type": "Object",
             "label": "embeddable",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -589,7 +682,10 @@
             "type": "CompoundType",
             "label": "share",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+              "lineNumber": 26
+            },
             "signature": [
               {
                 "pluginId": "share",
@@ -606,7 +702,10 @@
             "type": "Object",
             "label": "dashboard",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+              "lineNumber": 27
+            },
             "signature": [
               {
                 "pluginId": "dashboard",
@@ -618,7 +717,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       }
     ],
@@ -630,7 +732,10 @@
         "label": "Config",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "{ dashboardId?: string | undefined; useCurrentFilters: boolean; useCurrentDateRange: boolean; }"
         ],
@@ -645,7 +750,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L31",
+      "source": {
+        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+        "lineNumber": 31
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -656,7 +764,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/public/plugin.ts#L34",
+      "source": {
+        "path": "x-pack/plugins/dashboard_enhanced/public/plugin.ts",
+        "lineNumber": 34
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -678,7 +789,10 @@
             "type": "Object",
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/server/plugin.ts#L13",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+              "lineNumber": 13
+            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -690,7 +804,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/server/plugin.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       },
       {
@@ -706,13 +823,19 @@
             "type": "Uncategorized",
             "label": "uiActionsEnhanced",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/server/plugin.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "void"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/server/plugin.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       }
     ],
@@ -726,7 +849,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/server/plugin.ts#L21",
+      "source": {
+        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+        "lineNumber": 21
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -737,7 +863,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/server/plugin.ts#L24",
+      "source": {
+        "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
+        "lineNumber": 24
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -762,10 +891,16 @@
                 "type": "string",
                 "label": "drilldownId",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts#L49"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+                  "lineNumber": 49
+                }
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+              "lineNumber": 48
+            }
           }
         ],
         "signature": [
@@ -791,7 +926,10 @@
         ],
         "description": [],
         "label": "createExtract",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts#L46",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+          "lineNumber": 46
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -813,10 +951,16 @@
                 "type": "string",
                 "label": "drilldownId",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts#L34"
+                "source": {
+                  "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+                  "lineNumber": 34
+                }
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts#L33"
+            "source": {
+              "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+              "lineNumber": 33
+            }
           }
         ],
         "signature": [
@@ -841,7 +985,10 @@
         ],
         "description": [],
         "label": "createInject",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts#L31",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
+          "lineNumber": 31
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -856,7 +1003,10 @@
         "label": "DrilldownConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/types.ts#L9",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/types.ts",
+          "lineNumber": 9
+        },
         "signature": [
           "{ dashboardId?: string | undefined; useCurrentFilters: boolean; useCurrentDateRange: boolean; }"
         ],
@@ -870,7 +1020,10 @@
         "description": [
           "\nNOTE: DO NOT CHANGE THIS STRING WITHOUT CAREFUL CONSIDERATOIN, BECAUSE IT IS\nSTORED IN SAVED OBJECTS.\n\nAlso temporary dashboard drilldown migration code inside embeddable plugin relies on it\nx-pack/plugins/embeddable_enhanced/public/embeddables/embeddable_action_storage.ts"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/constants.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/constants.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\""
         ],

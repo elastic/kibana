@@ -44,12 +44,18 @@
                   "(absolute: boolean) => Promise<string>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L57"
+                "source": {
+                  "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+                  "lineNumber": 57
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L57"
+            "source": {
+              "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+              "lineNumber": 57
+            }
           },
           {
             "tags": [],
@@ -57,7 +63,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L59",
+            "source": {
+              "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+              "lineNumber": 59
+            },
             "signature": [
               "\"INGEST_PIPELINES_APP_URL_GENERATOR\""
             ]
@@ -80,7 +89,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L61"
+                "source": {
+                  "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+                  "lineNumber": 61
+                }
               }
             ],
             "signature": [
@@ -96,12 +108,18 @@
             ],
             "description": [],
             "label": "createUrl",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L61",
+            "source": {
+              "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+              "lineNumber": 61
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L55",
+        "source": {
+          "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+          "lineNumber": 55
+        },
         "initialIsOpen": false
       }
     ],
@@ -114,7 +132,10 @@
         "label": "INGEST_PIPELINES_PAGES",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       }
     ],
@@ -125,7 +146,10 @@
         "type": "string",
         "label": "INGEST_PIPELINES_APP_ULR_GENERATOR",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+          "lineNumber": 20
+        },
         "signature": [
           "\"INGEST_PIPELINES_APP_URL_GENERATOR\""
         ],
@@ -137,7 +161,10 @@
         "label": "IngestPipelinesUrlGeneratorState",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ingest_pipelines/public/url_generator.ts#L49",
+        "source": {
+          "path": "x-pack/plugins/ingest_pipelines/public/url_generator.ts",
+          "lineNumber": 49
+        },
         "signature": [
           "PipelinesListUrlGeneratorState",
           " | ",

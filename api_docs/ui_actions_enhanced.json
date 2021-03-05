@@ -26,7 +26,10 @@
             "type": "CompoundType",
             "label": "reload$",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "Observable",
               "<void> & Pick<",
@@ -45,7 +48,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L36"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 36
+            }
           },
           {
             "id": "def-public.AbstractActionStorage.read",
@@ -72,12 +78,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L40"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                  "lineNumber": 40
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L40"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 40
+            }
           },
           {
             "id": "def-public.AbstractActionStorage.create",
@@ -110,12 +122,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L47"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                  "lineNumber": 47
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L47"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 47
+            }
           },
           {
             "id": "def-public.AbstractActionStorage.update",
@@ -148,12 +166,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L48"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                  "lineNumber": 48
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 48
+            }
           },
           {
             "id": "def-public.AbstractActionStorage.remove",
@@ -172,12 +196,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L49"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                  "lineNumber": 49
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L49"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 49
+            }
           },
           {
             "id": "def-public.AbstractActionStorage.list",
@@ -198,10 +228,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L50"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 50
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L33",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+          "lineNumber": 33
+        },
         "initialIsOpen": false
       },
       {
@@ -276,7 +312,10 @@
                   "<Config, ExecutionContext, FactoryContext>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L37"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 37
+                }
               },
               {
                 "type": "Object",
@@ -292,12 +331,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L38"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 38
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L36"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 36
+            }
           },
           {
             "tags": [],
@@ -305,7 +350,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L47"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 47
+            }
           },
           {
             "tags": [],
@@ -313,7 +361,10 @@
             "type": "boolean",
             "label": "isBeta",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -321,7 +372,10 @@
             "type": "CompoundType",
             "label": "minimalLicense",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L49",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 49
+            },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ]
@@ -332,7 +386,10 @@
             "type": "string",
             "label": "licenseFeatureName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L50",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 50
+            },
             "signature": [
               "string | undefined"
             ]
@@ -343,7 +400,10 @@
             "type": "number",
             "label": "order",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L51"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 51
+            }
           },
           {
             "tags": [],
@@ -351,7 +411,10 @@
             "type": "Function",
             "label": "MenuItem",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L52",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 52
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -369,7 +432,10 @@
             "type": "Function",
             "label": "ReactMenuItem",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L53",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 53
+            },
             "signature": [
               "React.FC<{ context: FactoryContext; }> | undefined"
             ]
@@ -380,7 +446,10 @@
             "type": "Function",
             "label": "CollectConfig",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L55",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 55
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -406,7 +475,10 @@
             "type": "Function",
             "label": "ReactCollectConfig",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L56",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 56
+            },
             "signature": [
               "React.FC<",
               {
@@ -425,7 +497,10 @@
             "type": "Function",
             "label": "createConfig",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L57",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 57
+            },
             "signature": [
               "(context: FactoryContext) => Config"
             ]
@@ -436,7 +511,10 @@
             "type": "Function",
             "label": "isConfigValid",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L58",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 58
+            },
             "signature": [
               "(config: Config, context: FactoryContext) => boolean"
             ]
@@ -447,7 +525,10 @@
             "type": "Object",
             "label": "migrations",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L59",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 59
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -475,12 +556,18 @@
                   "FactoryContext"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L61"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 61
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L61"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 61
+            }
           },
           {
             "id": "def-public.ActionFactory.getDisplayName",
@@ -499,12 +586,18 @@
                   "FactoryContext"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L66"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 66
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L66"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 66
+            }
           },
           {
             "id": "def-public.ActionFactory.getDisplayNameTooltip",
@@ -523,12 +616,18 @@
                   "FactoryContext"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L71"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 71
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L71"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 71
+            }
           },
           {
             "id": "def-public.ActionFactory.isCompatible",
@@ -547,12 +646,18 @@
                   "FactoryContext"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L75"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 75
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L75"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 75
+            }
           },
           {
             "id": "def-public.ActionFactory.isCompatibleLicense",
@@ -567,7 +672,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L84"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 84
+            }
           },
           {
             "id": "def-public.ActionFactory.create",
@@ -610,12 +718,18 @@
                   "<Config>, \"name\" | \"config\">"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L91"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 91
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L90"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 90
+            }
           },
           {
             "id": "def-public.ActionFactory.supportedTriggers",
@@ -628,7 +742,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L108"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 108
+            }
           },
           {
             "id": "def-public.ActionFactory.telemetry",
@@ -661,7 +778,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 125
+                }
               },
               {
                 "type": "Object",
@@ -671,12 +791,18 @@
                   "Record<string, any>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 125
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L125"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 125
+            }
           },
           {
             "id": "def-public.ActionFactory.extract",
@@ -725,12 +851,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L129"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 129
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L129"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 129
+            }
           },
           {
             "id": "def-public.ActionFactory.inject",
@@ -778,7 +910,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 133
+                }
               },
               {
                 "type": "Array",
@@ -795,15 +930,24 @@
                   "[]"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                  "lineNumber": 133
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L133"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+              "lineNumber": 133
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts#L28",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+          "lineNumber": 28
+        },
         "initialIsOpen": false
       },
       {
@@ -854,7 +998,10 @@
             "type": "Object",
             "label": "licenseInfo",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L65",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+              "lineNumber": 65
+            },
             "signature": [
               "BehaviorSubject",
               "<",
@@ -892,12 +1039,18 @@
                   "<object>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L77"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                  "lineNumber": 77
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L77"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+              "lineNumber": 77
+            }
           },
           {
             "id": "def-public.AdvancedUiActionsPublicPlugin.setup",
@@ -954,7 +1107,10 @@
                   ", unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L80"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                  "lineNumber": 80
+                }
               },
               {
                 "type": "Object",
@@ -964,12 +1120,18 @@
                   "SetupDependencies"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L81"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                  "lineNumber": 81
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L79"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+              "lineNumber": 79
+            }
           },
           {
             "id": "def-public.AdvancedUiActionsPublicPlugin.start",
@@ -1017,7 +1179,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                  "lineNumber": 96
+                }
               },
               {
                 "type": "Object",
@@ -1033,12 +1198,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+                  "lineNumber": 96
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L96"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+              "lineNumber": 96
+            }
           },
           {
             "id": "def-public.AdvancedUiActionsPublicPlugin.stop",
@@ -1051,10 +1222,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L132"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+              "lineNumber": 132
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L63",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+          "lineNumber": 63
+        },
         "initialIsOpen": false
       },
       {
@@ -1070,7 +1247,10 @@
             "type": "number",
             "label": "idPrefixCounter",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -1080,7 +1260,10 @@
             "description": [
               "\nUI State of the dynamic action manager."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L57",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 57
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -1139,12 +1322,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L59"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 59
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L59"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 59
+            }
           },
           {
             "id": "def-public.DynamicActionManager.getEvent",
@@ -1170,12 +1359,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L61"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 61
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L61"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 61
+            }
           },
           {
             "id": "def-public.DynamicActionManager.generateActionId",
@@ -1196,12 +1391,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L71"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 71
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L71"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 71
+            }
           },
           {
             "id": "def-public.DynamicActionManager.reviveAction",
@@ -1234,12 +1435,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L75"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 75
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L75"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 75
+            }
           },
           {
             "id": "def-public.DynamicActionManager.killAction",
@@ -1272,12 +1479,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L115"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 115
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L115"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 115
+            }
           },
           {
             "tags": [],
@@ -1287,7 +1500,10 @@
             "description": [
               "\nRead-only state container of dynamic action manager. Use it to perform all\n*read* operations."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L159",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 159
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -1320,7 +1536,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L168"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 168
+            }
           },
           {
             "id": "def-public.DynamicActionManager.stop",
@@ -1335,7 +1554,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L192"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 192
+            }
           },
           {
             "id": "def-public.DynamicActionManager.createEvent",
@@ -1389,7 +1611,10 @@
                 "description": [
                   "Dynamic action for which to create an event."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 215
+                }
               },
               {
                 "type": "Array",
@@ -1401,12 +1626,18 @@
                 "description": [
                   "List of triggers to which action should react."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 215
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L215"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 215
+            }
           },
           {
             "id": "def-public.DynamicActionManager.updateEvent",
@@ -1445,7 +1676,10 @@
                 "description": [
                   "ID of the event to replace."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 246
+                }
               },
               {
                 "type": "Object",
@@ -1472,7 +1706,10 @@
                 "description": [
                   "New action for which to create the event."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 246
+                }
               },
               {
                 "type": "Array",
@@ -1484,12 +1721,18 @@
                 "description": [
                   "List of triggers to which action should react."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 246
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L246"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 246
+            }
           },
           {
             "id": "def-public.DynamicActionManager.deleteEvent",
@@ -1512,12 +1755,18 @@
                 "description": [
                   "ID of the event to remove."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L277"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 277
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L277"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 277
+            }
           },
           {
             "id": "def-public.DynamicActionManager.deleteEvents",
@@ -1540,15 +1789,24 @@
                 "description": [
                   "List of event IDs."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L297"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+                  "lineNumber": 297
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L297"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 297
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L47",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+          "lineNumber": 47
+        },
         "initialIsOpen": false
       },
       {
@@ -1602,12 +1860,18 @@
                   "[]"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L58"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                  "lineNumber": 58
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L58"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 58
+            }
           },
           {
             "id": "def-public.MemoryActionStorage.list",
@@ -1636,7 +1900,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L62"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 62
+            }
           },
           {
             "id": "def-public.MemoryActionStorage.create",
@@ -1669,12 +1936,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L66"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                  "lineNumber": 66
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L66"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 66
+            }
           },
           {
             "id": "def-public.MemoryActionStorage.update",
@@ -1707,12 +1980,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L70"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                  "lineNumber": 70
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L70"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 70
+            }
           },
           {
             "id": "def-public.MemoryActionStorage.remove",
@@ -1731,15 +2010,24 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L76"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+                  "lineNumber": 76
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L76"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+              "lineNumber": 76
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts#L57",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
+          "lineNumber": 57
+        },
         "initialIsOpen": false
       }
     ],
@@ -1772,7 +2060,10 @@
               ">>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx#L89"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx",
+              "lineNumber": 89
+            }
           }
         ],
         "signature": [
@@ -1790,7 +2081,10 @@
         ],
         "description": [],
         "label": "ActionWizard",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx#L89",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx",
+          "lineNumber": 89
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1812,7 +2106,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
+              "lineNumber": 130
+            }
           },
           {
             "type": "Uncategorized",
@@ -1822,7 +2119,10 @@
               "object"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
+              "lineNumber": 130
+            }
           },
           {
             "type": "boolean",
@@ -1832,12 +2132,18 @@
               "boolean"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
+              "lineNumber": 130
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts#L130",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
+          "lineNumber": 130
+        },
         "initialIsOpen": false
       },
       {
@@ -1864,12 +2170,18 @@
               "UrlDrilldownGlobalScopeDeps"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
+              "lineNumber": 15
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -1892,7 +2204,10 @@
               ">"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx#L19"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
+              "lineNumber": 19
+            }
           }
         ],
         "signature": [
@@ -1902,7 +2217,10 @@
         ],
         "description": [],
         "label": "UrlDrilldownCollectConfig",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx#L19",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
+          "lineNumber": 19
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1924,12 +2242,18 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L34"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+              "lineNumber": 34
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L34",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+          "lineNumber": 34
+        },
         "initialIsOpen": false
       },
       {
@@ -1957,7 +2281,10 @@
               "{ format?: \"handlebars_v1\" | undefined; template: string; }"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L54"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+              "lineNumber": 54
+            }
           },
           {
             "type": "Object",
@@ -1974,12 +2301,18 @@
               "<object, object>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L55"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+              "lineNumber": 55
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts#L53",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
+          "lineNumber": 53
+        },
         "initialIsOpen": false
       }
     ],
@@ -2042,7 +2375,10 @@
             "description": [
               "\nUnique ID of the action factory. This ID is used to identify this action\nfactory in the registry as well as to construct actions of this type and\nidentify this action factory when presenting it to the user in UI."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L37"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+              "lineNumber": 37
+            }
           },
           {
             "tags": [],
@@ -2052,7 +2388,10 @@
             "description": [
               "\nMinimal license level\nEmpty means no license restrictions"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L43",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+              "lineNumber": 43
+            },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ]
@@ -2065,7 +2404,10 @@
             "description": [
               "\nRequired when `minimalLicense` is used.\nIs a user-facing string. Has to be unique. Doesn't need i18n.\nThe feature's name will be displayed to Cloud end-users when they're billed based on their feature usage."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L50",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+              "lineNumber": 50
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2078,7 +2420,10 @@
             "description": [
               "\nIs this action factory not GA?\nAdds a beta badge on a list item representing this ActionFactory"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L56",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+              "lineNumber": 56
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -2126,12 +2471,18 @@
                   "<Config>, \"name\" | \"config\">"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L63"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+                  "lineNumber": 63
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L62"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+              "lineNumber": 62
+            }
           },
           {
             "id": "def-public.ActionFactoryDefinition.supportedTriggers",
@@ -2144,10 +2495,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L66"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+              "lineNumber": 66
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts#L25",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
+          "lineNumber": 25
+        },
         "initialIsOpen": false
       },
       {
@@ -2165,13 +2522,19 @@
             "type": "Array",
             "label": "triggers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "string[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -2217,7 +2580,10 @@
             "description": [
               "\nGlobally unique identifier for this drilldown."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L40"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 40
+            }
           },
           {
             "tags": [],
@@ -2227,7 +2593,10 @@
             "description": [
               "\nIs this action factory not GA?\nAdds a beta badge on a list item representing this ActionFactory"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L46",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 46
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -2240,7 +2609,10 @@
             "description": [
               "\nMinimal license level\nEmpty means no restrictions"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L52",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 52
+            },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ]
@@ -2253,7 +2625,10 @@
             "description": [
               "\nRequired when `minimalLicense` is used.\nIs a user-facing string. Has to be unique. Doesn't need i18n.\nThe feature's name will be displayed to Cloud end-users when they're billed based on their feature usage."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L59",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 59
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2266,7 +2641,10 @@
             "description": [
               "\nDetermines the display order of the drilldowns in the flyout picker.\nHigher numbers are displayed first."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L65",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 65
+            },
             "signature": [
               "number | undefined"
             ]
@@ -2279,7 +2657,10 @@
             "description": [
               "\nFunction that returns default config for this drilldown."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L70",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 70
+            },
             "signature": [
               "(context: FactoryContext) => Config"
             ]
@@ -2292,7 +2673,10 @@
             "description": [
               "\n`UiComponent` that collections config for this drilldown. You can create\na React component and transform it `UiComponent` using `uiToReactComponent`\nhelper from `kibana_utils` plugin.\n\n```tsx\nimport React from 'react';\nimport { uiToReactComponent } from 'src/plugins/kibana_utils';\nimport { CollectConfigProps } from 'src/plugins/kibana_utils/public';\n\ntype Props = CollectConfigProps<Config>;\n\nconst ReactCollectConfig: React.FC<Props> = () => {\n  return <div>Collecting config...'</div>;\n};\n\nexport const CollectConfig = uiToReactComponent(ReactCollectConfig);\n```"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L91",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 91
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -2320,7 +2704,10 @@
             "description": [
               "\nA validator function for the config object. Should always return a boolean\ngiven any input."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L97",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 97
+            },
             "signature": [
               "(config: Config, context: FactoryContext) => boolean"
             ]
@@ -2333,7 +2720,10 @@
             "description": [
               "\nName of EUI icon to display when showing this drilldown to user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L102",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 102
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2346,7 +2736,10 @@
             "description": [
               "\nShould return an internationalized name of the drilldown, which will be\ndisplayed to the user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L108",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 108
+            },
             "signature": [
               "() => string"
             ]
@@ -2378,7 +2771,10 @@
                   "Config"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L115"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                  "lineNumber": 115
+                }
               },
               {
                 "type": "CompoundType",
@@ -2396,12 +2792,18 @@
                   "<ExecutionContext>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L116"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                  "lineNumber": 116
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L114"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 114
+            }
           },
           {
             "id": "def-public.DrilldownDefinition.execute",
@@ -2432,7 +2834,10 @@
                 "description": [
                   "Config object that user configured this drilldown with."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L129"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                  "lineNumber": 129
+                }
               },
               {
                 "type": "CompoundType",
@@ -2452,12 +2857,18 @@
                 "description": [
                   "Object that represents context in which the underlying\n`UIAction` of this drilldown is being executed in."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L130"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                  "lineNumber": 130
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L128"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 128
+            }
           },
           {
             "id": "def-public.DrilldownDefinition.getHref",
@@ -2486,7 +2897,10 @@
                   "Config"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L137"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                  "lineNumber": 137
+                }
               },
               {
                 "type": "CompoundType",
@@ -2504,12 +2918,18 @@
                   "<ExecutionContext>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L138"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+                  "lineNumber": 138
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L136"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 136
+            }
           },
           {
             "id": "def-public.DrilldownDefinition.supportedTriggers",
@@ -2524,10 +2944,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L145"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+              "lineNumber": 145
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts#L32",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+          "lineNumber": 32
+        },
         "initialIsOpen": false
       },
       {
@@ -2543,7 +2969,10 @@
             "type": "Object",
             "label": "storage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 33
+            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -2560,7 +2989,10 @@
             "type": "Object",
             "label": "uiActions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "Pick<",
               {
@@ -2579,13 +3011,19 @@
             "type": "Function",
             "label": "isCompatible",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L44",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+              "lineNumber": 44
+            },
             "signature": [
               "<C = unknown>(context: C) => Promise<boolean>"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L32",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+          "lineNumber": 32
+        },
         "initialIsOpen": false
       },
       {
@@ -2603,10 +3041,16 @@
             "type": "string",
             "label": "kibanaUrl",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L38"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+              "lineNumber": 38
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L37",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+          "lineNumber": 37
+        },
         "initialIsOpen": false
       },
       {
@@ -2643,7 +3087,10 @@
             "description": [
               "\nDynamic variables that are differ depending on where drilldown is created and used,\nFor example: variables extracted from embeddable panel"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+              "lineNumber": 25
+            },
             "signature": [
               "ContextScope | undefined"
             ]
@@ -2656,13 +3103,19 @@
             "description": [
               "\nVariables extracted from trigger context"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+              "lineNumber": 30
+            },
             "signature": [
               "EventScope | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+          "lineNumber": 17
+        },
         "initialIsOpen": false
       }
     ],
@@ -2674,7 +3127,10 @@
         "label": "BaseActionConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "{ [key: string]: ",
           {
@@ -2694,7 +3150,10 @@
         "label": "DynamicActionManagerState",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts#L30",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
+          "lineNumber": 30
+        },
         "signature": [
           "State"
         ],
@@ -2706,7 +3165,10 @@
         "label": "DynamicActionsState",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L27",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 27
+        },
         "signature": [
           "{ events: SerializedEvent[]; }"
         ],
@@ -2718,7 +3180,10 @@
         "label": "SerializedAction",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
         ],
@@ -2732,7 +3197,10 @@
         "description": [
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "{ eventId: string; triggers: string[]; action: SerializedAction; }"
         ],
@@ -2744,7 +3212,10 @@
         "label": "UrlDrilldownConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+          "lineNumber": 8
+        },
         "signature": [
           "{ url: {    format?: 'handlebars_v1';    template: string;}; openInNewTab: boolean; encodeUrl?: boolean | undefined; }"
         ],
@@ -2779,7 +3250,10 @@
       "description": [],
       "tags": [],
       "children": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L45",
+      "source": {
+        "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+        "lineNumber": 45
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2825,7 +3299,10 @@
           "type": "Function",
           "label": "FlyoutManageDrilldowns",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L60",
+          "source": {
+            "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+            "lineNumber": 60
+          },
           "signature": [
             "React.FC<ConnectedFlyoutManageDrilldownsProps<",
             {
@@ -2839,7 +3316,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/public/plugin.ts#L49",
+      "source": {
+        "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
+        "lineNumber": 49
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -2885,7 +3365,10 @@
             "type": "Object",
             "label": "actionFactories",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+              "lineNumber": 26
+            },
             "signature": [
               {
                 "pluginId": "uiActionsEnhanced",
@@ -2907,7 +3390,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L28"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+              "lineNumber": 28
+            }
           },
           {
             "id": "def-server.AdvancedUiActionsServerPlugin.setup",
@@ -2957,7 +3443,10 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+                  "lineNumber": 30
+                }
               },
               {
                 "type": "Object",
@@ -2967,12 +3456,18 @@
                   "SetupDependencies"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+                  "lineNumber": 30
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+              "lineNumber": 30
+            }
           },
           {
             "id": "def-server.AdvancedUiActionsServerPlugin.start",
@@ -2985,7 +3480,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L40"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+              "lineNumber": 40
+            }
           },
           {
             "id": "def-server.AdvancedUiActionsServerPlugin.stop",
@@ -2998,7 +3496,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L42"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+              "lineNumber": 42
+            }
           },
           {
             "id": "def-server.AdvancedUiActionsServerPlugin.registerActionFactory",
@@ -3027,7 +3528,10 @@
                   ">"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L48"
+                "source": {
+                  "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+                  "lineNumber": 48
+                }
               }
             ],
             "signature": [
@@ -3053,12 +3557,18 @@
               "\nRegister an action factory. Action factories are used to configure and\nserialize/deserialize dynamic actions."
             ],
             "label": "registerActionFactory",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L48",
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+              "lineNumber": 48
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       }
     ],
@@ -3095,10 +3605,16 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/types.ts#L24"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
+              "lineNumber": 24
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/types.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       },
       {
@@ -3132,10 +3648,16 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/types.ts#L19"
+            "source": {
+              "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
+              "lineNumber": 19
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/types.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/server/types.ts",
+          "lineNumber": 17
+        },
         "initialIsOpen": false
       }
     ],
@@ -3147,7 +3669,10 @@
         "label": "BaseActionConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "{ [key: string]: ",
           {
@@ -3167,7 +3692,10 @@
         "label": "DynamicActionsState",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L27",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 27
+        },
         "signature": [
           "{ events: SerializedEvent[]; }"
         ],
@@ -3179,7 +3707,10 @@
         "label": "SerializedAction",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
         ],
@@ -3193,7 +3724,10 @@
         "description": [
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "{ eventId: string; triggers: string[]; action: SerializedAction; }"
         ],
@@ -3214,7 +3748,10 @@
           "type": "Function",
           "label": "registerActionFactory",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L15",
+          "source": {
+            "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+            "lineNumber": 15
+          },
           "signature": [
             "(definition: ",
             {
@@ -3236,7 +3773,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L14",
+      "source": {
+        "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+        "lineNumber": 14
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -3246,7 +3786,10 @@
       "label": "StartContract",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/server/plugin.ts#L18",
+      "source": {
+        "path": "x-pack/plugins/ui_actions_enhanced/server/plugin.ts",
+        "lineNumber": 18
+      },
       "signature": [
         "void"
       ],
@@ -3266,7 +3809,10 @@
         "label": "BaseActionConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "{ [key: string]: ",
           {
@@ -3286,7 +3832,10 @@
         "label": "DynamicActionsState",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L27",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 27
+        },
         "signature": [
           "{ events: SerializedEvent[]; }"
         ],
@@ -3298,7 +3847,10 @@
         "label": "SerializedAction",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "{ readonly factoryId: string; readonly name: string; readonly config: Config; }"
         ],
@@ -3312,7 +3864,10 @@
         "description": [
           "\nSerialized representation of a triggers-action pair, used to persist in storage."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/ui_actions_enhanced/common/types.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "{ eventId: string; triggers: string[]; action: SerializedAction; }"
         ],

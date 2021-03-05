@@ -23,7 +23,10 @@
             "description": [
               "\nResults for this batch"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L89",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 89
+            },
             "signature": [
               {
                 "pluginId": "globalSearch",
@@ -36,7 +39,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L85",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 85
+        },
         "initialIsOpen": false
       },
       {
@@ -56,7 +62,10 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster.\n\nIf not specified, a random token will be generated and used. The token is stored in the sessionStorage and is guaranteed\nto be consistent during a given http 'session'"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/services/types.ts#L22",
+            "source": {
+              "path": "x-pack/plugins/global_search/public/services/types.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "string | undefined"
             ]
@@ -69,14 +78,20 @@
             "description": [
               "\nOptional observable to notify that the associated `find` call should be canceled.\nIf/when provided and emitting, the result observable will be completed and no further result emission will be performed."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/services/types.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/global_search/public/services/types.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "Observable",
               "<void> | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/services/types.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/global_search/public/services/types.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -98,7 +113,10 @@
             "description": [
               "\nThe term to search for. Can be undefined if searching by filters."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L101",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 101
+            },
             "signature": [
               "string | undefined"
             ]
@@ -111,7 +129,10 @@
             "description": [
               "\nThe types of results to search for."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L105",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 105
+            },
             "signature": [
               "string[] | undefined"
             ]
@@ -124,13 +145,19 @@
             "description": [
               "\nThe tag ids to filter search by."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L109",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 109
+            },
             "signature": [
               "string[] | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L97",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 97
+        },
         "initialIsOpen": false
       },
       {
@@ -150,7 +177,10 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -160,7 +190,10 @@
             "description": [
               "\nObservable that emits once if and when the `find` call has been aborted, either manually by the consumer,\nor when the internal timeout period as been reached.\n\nWhen a `find` request is effectively aborted, the service will stop emitting any new result to the consumer anyway, but\nthis can (and should) be used to cancel any pending asynchronous task and complete the result observable from within the provider."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "Observable",
               "<void>"
@@ -174,10 +207,16 @@
             "description": [
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L33"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 33
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -197,7 +236,10 @@
             "description": [
               "an id that should be unique for an individual provider's results"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L46"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 46
+            }
           },
           {
             "tags": [],
@@ -207,7 +249,10 @@
             "description": [
               "the title/label of the result"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -217,7 +262,10 @@
             "description": [
               "the type of result"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L50"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 50
+            }
           },
           {
             "tags": [],
@@ -227,7 +275,10 @@
             "description": [
               "an optional EUI icon name to associate with the search result"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L52",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 52
+            },
             "signature": [
               "string | undefined"
             ]
@@ -240,7 +291,10 @@
             "description": [
               "\nThe url associated with this result.\nThis can be either an absolute url, a path relative to the incoming request's basePath, or a structure specifying if the basePath should be prepended.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L62",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 62
+            },
             "signature": [
               {
                 "pluginId": "globalSearch",
@@ -259,7 +313,10 @@
             "description": [
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L64"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 64
+            }
           },
           {
             "tags": [],
@@ -269,7 +326,10 @@
             "description": [
               "an optional record of metadata for this result"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L66",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 66
+            },
             "signature": [
               "Record<string, ",
               {
@@ -283,7 +343,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L44",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 44
+        },
         "initialIsOpen": false
       },
       {
@@ -303,7 +366,10 @@
             "description": [
               "\nid of the provider"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/types.ts#L26"
+            "source": {
+              "path": "x-pack/plugins/global_search/public/types.ts",
+              "lineNumber": 26
+            }
           },
           {
             "id": "def-public.GlobalSearchResultProvider.find",
@@ -356,7 +422,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/types.ts#L45"
+                "source": {
+                  "path": "x-pack/plugins/global_search/public/types.ts",
+                  "lineNumber": 45
+                }
               },
               {
                 "type": "Object",
@@ -372,12 +441,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/types.ts#L46"
+                "source": {
+                  "path": "x-pack/plugins/global_search/public/types.ts",
+                  "lineNumber": 46
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/types.ts#L44"
+            "source": {
+              "path": "x-pack/plugins/global_search/public/types.ts",
+              "lineNumber": 44
+            }
           },
           {
             "tags": [],
@@ -387,13 +462,19 @@
             "description": [
               "\nMethod that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that\nthis provider can return."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/types.ts#L53",
+            "source": {
+              "path": "x-pack/plugins/global_search/public/types.ts",
+              "lineNumber": 53
+            },
             "signature": [
               "() => string[] | Promise<string[]>"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/types.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/global_search/public/types.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       }
     ],
@@ -407,7 +488,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L115",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 115
+        },
         "signature": [
           "GlobalSearchFindParams"
         ],
@@ -421,7 +505,10 @@
         "description": [
           "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L39",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 39
+        },
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
@@ -435,7 +522,10 @@
         "description": [
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L72",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 72
+        },
         "signature": [
           "Pick<GlobalSearchProviderResult, \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
@@ -449,7 +539,10 @@
       "label": "GlobalSearchPluginSetup",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/types.ts#L16",
+      "source": {
+        "path": "x-pack/plugins/global_search/public/types.ts",
+        "lineNumber": 16
+      },
       "signature": [
         "{ registerResultProvider: (provider: GlobalSearchResultProvider) => void; }"
       ],
@@ -462,7 +555,10 @@
       "label": "GlobalSearchPluginStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/public/types.ts#L17",
+      "source": {
+        "path": "x-pack/plugins/global_search/public/types.ts",
+        "lineNumber": 17
+      },
       "signature": [
         "{ find: (params: ",
         "GlobalSearchFindParams",
@@ -505,7 +601,10 @@
             "description": [
               "\nResults for this batch"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L89",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 89
+            },
             "signature": [
               {
                 "pluginId": "globalSearch",
@@ -518,7 +617,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L85",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 85
+        },
         "initialIsOpen": false
       },
       {
@@ -540,7 +642,10 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster.\nIf not specified, a random token will be generated and used."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L95",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 95
+            },
             "signature": [
               "string | undefined"
             ]
@@ -553,14 +658,20 @@
             "description": [
               "\nOptional observable to notify that the associated `find` call should be canceled.\nIf/when provided and emitting, no further result emission will be performed and the result observable will be completed."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L100",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 100
+            },
             "signature": [
               "Observable",
               "<void> | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L88",
+        "source": {
+          "path": "x-pack/plugins/global_search/server/types.ts",
+          "lineNumber": 88
+        },
         "initialIsOpen": false
       },
       {
@@ -580,7 +691,10 @@
             "type": "Object",
             "label": "core",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L66",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 66
+            },
             "signature": [
               "{ savedObjects: { client: Pick<",
               {
@@ -619,7 +733,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L65",
+        "source": {
+          "path": "x-pack/plugins/global_search/server/types.ts",
+          "lineNumber": 65
+        },
         "initialIsOpen": false
       },
       {
@@ -639,7 +756,10 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -649,7 +769,10 @@
             "description": [
               "\nObservable that emits once if and when the `find` call has been aborted, either manually by the consumer,\nor when the internal timeout period as been reached.\n\nWhen a `find` request is effectively aborted, the service will stop emitting any new result to the consumer anyway, but\nthis can (and should) be used to cancel any pending asynchronous task and complete the result observable from within the provider."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "Observable",
               "<void>"
@@ -663,10 +786,16 @@
             "description": [
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L33"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 33
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -686,7 +815,10 @@
             "description": [
               "an id that should be unique for an individual provider's results"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L46"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 46
+            }
           },
           {
             "tags": [],
@@ -696,7 +828,10 @@
             "description": [
               "the title/label of the result"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -706,7 +841,10 @@
             "description": [
               "the type of result"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L50"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 50
+            }
           },
           {
             "tags": [],
@@ -716,7 +854,10 @@
             "description": [
               "an optional EUI icon name to associate with the search result"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L52",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 52
+            },
             "signature": [
               "string | undefined"
             ]
@@ -729,7 +870,10 @@
             "description": [
               "\nThe url associated with this result.\nThis can be either an absolute url, a path relative to the incoming request's basePath, or a structure specifying if the basePath should be prepended.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L62",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 62
+            },
             "signature": [
               {
                 "pluginId": "globalSearch",
@@ -748,7 +892,10 @@
             "description": [
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L64"
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 64
+            }
           },
           {
             "tags": [],
@@ -758,7 +905,10 @@
             "description": [
               "an optional record of metadata for this result"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L66",
+            "source": {
+              "path": "x-pack/plugins/global_search/common/types.ts",
+              "lineNumber": 66
+            },
             "signature": [
               "Record<string, ",
               {
@@ -772,7 +922,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L44",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 44
+        },
         "initialIsOpen": false
       },
       {
@@ -794,7 +947,10 @@
             "description": [
               "\nid of the provider"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L112"
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 112
+            }
           },
           {
             "id": "def-server.GlobalSearchResultProvider.find",
@@ -854,7 +1010,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L131"
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 131
+                }
               },
               {
                 "type": "Object",
@@ -870,7 +1029,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L132"
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 132
+                }
               },
               {
                 "type": "Object",
@@ -886,12 +1048,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L133"
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 133
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L130"
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 130
+            }
           },
           {
             "tags": [],
@@ -901,7 +1069,10 @@
             "description": [
               "\nMethod that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that\nthis provider can return."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L140",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 140
+            },
             "signature": [
               "(context: ",
               {
@@ -915,7 +1086,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L108",
+        "source": {
+          "path": "x-pack/plugins/global_search/server/types.ts",
+          "lineNumber": 108
+        },
         "initialIsOpen": false
       },
       {
@@ -980,7 +1154,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L51"
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 51
+                }
               },
               {
                 "type": "Object",
@@ -996,12 +1173,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L52"
+                "source": {
+                  "path": "x-pack/plugins/global_search/server/types.ts",
+                  "lineNumber": 52
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L50"
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 50
+            }
           },
           {
             "tags": [],
@@ -1011,13 +1194,19 @@
             "description": [
               "\nSee {@link SearchServiceStart.getSearchableTypes | the getSearchableTypes API}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L57",
+            "source": {
+              "path": "x-pack/plugins/global_search/server/types.ts",
+              "lineNumber": 57
+            },
             "signature": [
               "() => Promise<string[]>"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L46",
+        "source": {
+          "path": "x-pack/plugins/global_search/server/types.ts",
+          "lineNumber": 46
+        },
         "initialIsOpen": false
       }
     ],
@@ -1031,7 +1220,10 @@
         "description": [
           "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L39",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 39
+        },
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
@@ -1045,7 +1237,10 @@
         "description": [
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/common/types.ts#L72",
+        "source": {
+          "path": "x-pack/plugins/global_search/common/types.ts",
+          "lineNumber": 72
+        },
         "signature": [
           "Pick<GlobalSearchProviderResult, \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
@@ -1059,7 +1254,10 @@
       "label": "GlobalSearchPluginStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L28",
+      "source": {
+        "path": "x-pack/plugins/global_search/server/types.ts",
+        "lineNumber": 28
+      },
       "signature": [
         "{ find: (params: GlobalSearchFindParams, options: GlobalSearchFindOptions, request: ",
         {
@@ -1088,7 +1286,10 @@
       "label": "GlobalSearchPluginSetup",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/global_search/server/types.ts#L27",
+      "source": {
+        "path": "x-pack/plugins/global_search/server/types.ts",
+        "lineNumber": 27
+      },
       "signature": [
         "{ registerResultProvider: (provider: GlobalSearchResultProvider) => void; }"
       ],

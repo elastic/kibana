@@ -20,7 +20,10 @@
         "label": "ConfigType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/enterprise_search/server/index.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/enterprise_search/server/index.ts",
+          "lineNumber": 24
+        },
         "signature": [
           "{ readonly host?: string | undefined; readonly enabled: boolean; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; }"
         ],
@@ -34,7 +37,10 @@
         "type": "Object",
         "label": "configSchema",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/enterprise_search/server/index.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/enterprise_search/server/index.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "ObjectType",
           "<{ host: ",

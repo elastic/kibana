@@ -40,7 +40,10 @@
             "description": [
               "\nThe query string for an HTTP request. See {@link HttpFetchQuery}."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L249",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 249
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -60,7 +63,10 @@
             "description": [
               "\nWhether or not the request should automatically prepend the basePath. Defaults to `true`."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L254",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 254
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -73,7 +79,10 @@
             "description": [
               "\nHeaders to send with the request. See {@link HttpHeadersInit}."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L259",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 259
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -93,7 +102,10 @@
             "description": [
               "\nWhether or not the request should include the \"system request\" header to differentiate an end user request from\nKibana internal request.\nCan be read on the server-side using KibanaRequest#isSystemRequest. Defaults to `false`."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L266",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 266
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -106,13 +118,19 @@
             "description": [
               "\nWhen `true` the return type of {@link HttpHandler} will be an {@link HttpResponse} with detailed request and\nresponse information. When `false`, the return type will just be the parsed response body. Defaults to `false`."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L272",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 272
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L245",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 245
+        },
         "initialIsOpen": false
       },
       {
@@ -149,10 +167,16 @@
             "type": "string",
             "label": "path",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L283"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 283
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L279",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 279
+        },
         "initialIsOpen": false
       },
       {
@@ -172,13 +196,19 @@
             "description": [
               "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L238",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 238
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L225",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 225
+        },
         "initialIsOpen": false
       },
       {
@@ -198,7 +228,10 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L296",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 296
+            },
             "signature": [
               "any"
             ]
@@ -209,7 +242,10 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L299",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 299
+            },
             "signature": [
               "any"
             ]
@@ -220,7 +256,10 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L302",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 302
+            },
             "signature": [
               "any"
             ]
@@ -231,13 +270,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L303",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 303
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L295",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 295
+        },
         "initialIsOpen": false
       },
       {
@@ -257,13 +302,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L145",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 145
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L144",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 144
+        },
         "initialIsOpen": false
       },
       {
@@ -336,7 +387,10 @@
                   ">"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L369"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 369
+                }
               },
               {
                 "type": "Object",
@@ -352,12 +406,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L370"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 370
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L368"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 368
+            }
           },
           {
             "id": "def-public.HttpInterceptor.requestError",
@@ -416,7 +476,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L379"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 379
+                }
               },
               {
                 "type": "Object",
@@ -432,12 +495,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L380"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 380
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L378"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 378
+            }
           },
           {
             "id": "def-public.HttpInterceptor.response",
@@ -497,7 +566,10 @@
                   "<any>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L389"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 389
+                }
               },
               {
                 "type": "Object",
@@ -513,12 +585,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L390"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 390
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L388"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 388
+            }
           },
           {
             "id": "def-public.HttpInterceptor.responseError",
@@ -577,7 +655,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L399"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 399
+                }
               },
               {
                 "type": "Object",
@@ -593,15 +674,24 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L400"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 400
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L398"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 398
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L362",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 362
+        },
         "initialIsOpen": false
       },
       {
@@ -619,7 +709,10 @@
             "type": "Object",
             "label": "fetchOptions",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L352",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 352
+            },
             "signature": [
               "Readonly<",
               {
@@ -638,13 +731,19 @@
             "type": "Object",
             "label": "error",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L353",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 353
+            },
             "signature": [
               "Error"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L351",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 351
+        },
         "initialIsOpen": false
       },
       {
@@ -680,7 +779,10 @@
             "type": "Object",
             "label": "request",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L347",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 347
+            },
             "signature": [
               "Readonly<Request>"
             ]
@@ -691,7 +793,10 @@
             "type": "CompoundType",
             "label": "error",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L348",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 348
+            },
             "signature": [
               "Error | ",
               {
@@ -704,7 +809,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L346",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 346
+        },
         "initialIsOpen": false
       },
       {
@@ -726,7 +834,10 @@
             "description": [
               "\nA BodyInit object or null to set request's body."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L158",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 158
+            },
             "signature": [
               "string | ArrayBuffer | Blob | URLSearchParams | ArrayBufferView | FormData | ReadableStream<Uint8Array> | null | undefined"
             ]
@@ -739,7 +850,10 @@
             "description": [
               "\nThe cache mode associated with request, which is a string indicating how the request will interact with the\nbrowser's cache when fetching."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L164",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 164
+            },
             "signature": [
               "\"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined"
             ]
@@ -752,7 +866,10 @@
             "description": [
               "\nThe credentials mode associated with request, which is a string indicating whether credentials will be sent with\nthe request always, never, or only when sent to a same-origin URL."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L170",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 170
+            },
             "signature": [
               "\"include\" | \"omit\" | \"same-origin\" | undefined"
             ]
@@ -765,7 +882,10 @@
             "description": [
               "{@link HttpHeadersInit}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L173",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 173
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -785,7 +905,10 @@
             "description": [
               "\nSubresource integrity metadata, which is a cryptographic hash of the resource being fetched. Its value consists of\nmultiple hashes separated by whitespace."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L179",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 179
+            },
             "signature": [
               "string | undefined"
             ]
@@ -798,7 +921,10 @@
             "description": [
               "Whether or not request can outlive the global in which it was created."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L182",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 182
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -811,7 +937,10 @@
             "description": [
               "HTTP method, which is \"GET\" by default."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L185",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 185
+            },
             "signature": [
               "string | undefined"
             ]
@@ -824,7 +953,10 @@
             "description": [
               "\nThe mode associated with request, which is a string indicating whether the request will use CORS, or will be\nrestricted to same-origin URLs."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L191",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 191
+            },
             "signature": [
               "\"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined"
             ]
@@ -837,7 +969,10 @@
             "description": [
               "\nThe redirect mode associated with request, which is a string indicating how redirects for the request will be\nhandled during fetching. A request will follow redirects by default."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L197",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 197
+            },
             "signature": [
               "\"error\" | \"manual\" | \"follow\" | undefined"
             ]
@@ -850,7 +985,10 @@
             "description": [
               "\nThe referrer of request. Its value can be a same-origin URL if explicitly set in init, the empty string to\nindicate no referrer, and \"about:client\" when defaulting to the global's default. This is used during fetching to\ndetermine the value of the `Referer` header of the request being made."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L204",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 204
+            },
             "signature": [
               "string | undefined"
             ]
@@ -863,7 +1001,10 @@
             "description": [
               "\nThe referrer policy associated with request. This is used during fetching to compute the value of the request's\nreferrer."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L210",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 210
+            },
             "signature": [
               "\"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined"
             ]
@@ -876,7 +1017,10 @@
             "description": [
               "\nReturns the signal associated with request, which is an AbortSignal object indicating whether or not request has\nbeen aborted, and its abort event handler."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L216",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 216
+            },
             "signature": [
               "AbortSignal | null | undefined"
             ]
@@ -889,13 +1033,19 @@
             "description": [
               "\nCan only be null. Used to disassociate request from any Window."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L221",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 221
+            },
             "signature": [
               "null | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L154",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 154
+        },
         "initialIsOpen": false
       },
       {
@@ -925,7 +1075,10 @@
             "description": [
               "The original {@link HttpFetchOptionsWithPath} used to send this request."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L309",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 309
+            },
             "signature": [
               "Readonly<",
               {
@@ -946,7 +1099,10 @@
             "description": [
               "Raw request sent to Kibana server."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L311",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 311
+            },
             "signature": [
               "Readonly<Request>"
             ]
@@ -959,7 +1115,10 @@
             "description": [
               "Raw response received, may be undefined if there was an error."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L313",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 313
+            },
             "signature": [
               "Readonly<Response> | undefined"
             ]
@@ -972,13 +1131,19 @@
             "description": [
               "Parsed body received, may be undefined if there was an error."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L315",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 315
+            },
             "signature": [
               "TResponseBody | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L307",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 307
+        },
         "initialIsOpen": false
       },
       {
@@ -998,7 +1163,10 @@
             "description": [
               "\nAPIs for manipulating the basePath on URL segments.\nSee {@link IBasePath}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L18",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 18
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1017,7 +1185,10 @@
             "description": [
               "\nAPIs for denoting certain paths for not requiring authentication"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L23",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 23
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1034,7 +1205,10 @@
             "type": "Object",
             "label": "externalUrl",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L25",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1080,14 +1254,20 @@
                 "description": [
                   "a {@link HttpInterceptor}"
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L32"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 32
+                }
               }
             ],
             "tags": [],
             "returnComment": [
               "a function for removing the attached interceptor."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L32"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 32
+            }
           },
           {
             "tags": [],
@@ -1097,7 +1277,10 @@
             "description": [
               "Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L35",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 35
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1116,7 +1299,10 @@
             "description": [
               "Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L37",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 37
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1135,7 +1321,10 @@
             "description": [
               "Makes an HTTP request with the GET method. See {@link HttpHandler} for options."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L39",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 39
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1154,7 +1343,10 @@
             "description": [
               "Makes an HTTP request with the HEAD method. See {@link HttpHandler} for options."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L41",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 41
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1173,7 +1365,10 @@
             "description": [
               "Makes an HTTP request with the OPTIONS method. See {@link HttpHandler} for options."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L43",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 43
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1192,7 +1387,10 @@
             "description": [
               "Makes an HTTP request with the PATCH method. See {@link HttpHandler} for options."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L45",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 45
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1211,7 +1409,10 @@
             "description": [
               "Makes an HTTP request with the POST method. See {@link HttpHandler} for options."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L47",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 47
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1230,7 +1431,10 @@
             "description": [
               "Makes an HTTP request with the PUT method. See {@link HttpHandler} for options."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L49",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 49
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1265,12 +1469,18 @@
                 "description": [
                   "an Observable to subscribe to for loading count updates."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L56"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 56
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L56"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 56
+            }
           },
           {
             "id": "def-public.HttpSetup.getLoadingCount$",
@@ -1287,10 +1497,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L61"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 61
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L13",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -1321,12 +1537,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L131"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 131
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L131"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 131
+            }
           },
           {
             "id": "def-public.IAnonymousPaths.register",
@@ -1347,15 +1569,24 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L136"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 136
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L136"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 136
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L127",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 127
+        },
         "initialIsOpen": false
       },
       {
@@ -1377,7 +1608,10 @@
             "description": [
               "\nGets the `basePath` string."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L78",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 78
+            },
             "signature": [
               "() => string"
             ]
@@ -1390,7 +1624,10 @@
             "description": [
               "\nPrepends `path` with the basePath."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L83",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 83
+            },
             "signature": [
               "(url: string) => string"
             ]
@@ -1403,7 +1640,10 @@
             "description": [
               "\nRemoves the prepended basePath from the `path`."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L88",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 88
+            },
             "signature": [
               "(url: string) => string"
             ]
@@ -1416,7 +1656,10 @@
             "description": [
               "\nReturns the server's root basePath as configured, without any namespace prefix.\n\nSee {@link BasePath.get} for getting the basePath value for a specific request"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L95"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 95
+            }
           },
           {
             "tags": [],
@@ -1426,13 +1669,19 @@
             "description": [
               "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n{@link IBasePath.serverBasePath}.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L104",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 104
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L74",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 74
+        },
         "initialIsOpen": false
       },
       {
@@ -1465,15 +1714,24 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L121"
+                "source": {
+                  "path": "src/core/public/http/types.ts",
+                  "lineNumber": 121
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L121"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 121
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L111",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 111
+        },
         "initialIsOpen": false
       },
       {
@@ -1501,7 +1759,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L331"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 331
+            }
           },
           {
             "tags": [],
@@ -1509,7 +1770,10 @@
             "type": "Object",
             "label": "request",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L332",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 332
+            },
             "signature": [
               "Request"
             ]
@@ -1520,7 +1784,10 @@
             "type": "Object",
             "label": "response",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L333",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 333
+            },
             "signature": [
               "Response | undefined"
             ]
@@ -1533,7 +1800,10 @@
             "type": "Object",
             "label": "req",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L337",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 337
+            },
             "signature": [
               "Request"
             ]
@@ -1546,7 +1816,10 @@
             "type": "Object",
             "label": "res",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L341",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 341
+            },
             "signature": [
               "Response | undefined"
             ]
@@ -1557,13 +1830,19 @@
             "type": "Any",
             "label": "body",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L342",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 342
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L330",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 330
+        },
         "initialIsOpen": false
       },
       {
@@ -1585,7 +1864,10 @@
             "description": [
               "Whether or not this chain has been halted."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L410"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 410
+            }
           },
           {
             "id": "def-public.IHttpInterceptController.halt",
@@ -1600,10 +1882,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L412"
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 412
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L408",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 408
+        },
         "initialIsOpen": false
       },
       {
@@ -1635,7 +1923,10 @@
             "description": [
               "Raw response received, may be undefined if there was an error."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L324",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 324
+            },
             "signature": [
               "Readonly<Response> | undefined"
             ]
@@ -1648,13 +1939,19 @@
             "description": [
               "Parsed body received, may be undefined if there was an error."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L326",
+            "source": {
+              "path": "src/core/public/http/types.ts",
+              "lineNumber": 326
+            },
             "signature": [
               "TResponseBody | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L322",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 322
+        },
         "initialIsOpen": false
       }
     ],
@@ -1670,7 +1967,10 @@
         "description": [
           "\nSee {@link HttpSetup}"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/public/http/types.ts#L68",
+        "source": {
+          "path": "src/core/public/http/types.ts",
+          "lineNumber": 68
+        },
         "signature": [
           "HttpSetup"
         ],
@@ -1700,7 +2000,10 @@
             "description": [
               "\nreturns the server's basePath\n\nSee {@link BasePath.get} for getting the basePath value for a specific request"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L26"
+            "source": {
+              "path": "src/core/server/http/base_path_service.ts",
+              "lineNumber": 26
+            }
           },
           {
             "tags": [],
@@ -1710,7 +2013,10 @@
             "description": [
               "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n{@link BasePath.serverBasePath}.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L34",
+            "source": {
+              "path": "src/core/server/http/base_path_service.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1741,7 +2047,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L45"
+                "source": {
+                  "path": "src/core/server/http/base_path_service.ts",
+                  "lineNumber": 45
+                }
               }
             ],
             "signature": [
@@ -1767,7 +2076,10 @@
               "\nreturns `basePath` value, specific for an incoming request."
             ],
             "label": "get",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L45",
+            "source": {
+              "path": "src/core/server/http/base_path_service.ts",
+              "lineNumber": 45
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1797,7 +2109,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L55"
+                "source": {
+                  "path": "src/core/server/http/base_path_service.ts",
+                  "lineNumber": 55
+                }
               },
               {
                 "type": "string",
@@ -1807,7 +2122,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L55"
+                "source": {
+                  "path": "src/core/server/http/base_path_service.ts",
+                  "lineNumber": 55
+                }
               }
             ],
             "signature": [
@@ -1833,7 +2151,10 @@
               "\nsets `basePath` value, specific for an incoming request.\n"
             ],
             "label": "set",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L55",
+            "source": {
+              "path": "src/core/server/http/base_path_service.ts",
+              "lineNumber": 55
+            },
             "tags": [
               "privateRemarks"
             ],
@@ -1851,7 +2172,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L69"
+                "source": {
+                  "path": "src/core/server/http/base_path_service.ts",
+                  "lineNumber": 69
+                }
               }
             ],
             "signature": [
@@ -1861,7 +2185,10 @@
               "\nPrepends `path` with the basePath."
             ],
             "label": "prepend",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L69",
+            "source": {
+              "path": "src/core/server/http/base_path_service.ts",
+              "lineNumber": 69
+            },
             "tags": [],
             "returnComment": []
           },
@@ -1877,7 +2204,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L81"
+                "source": {
+                  "path": "src/core/server/http/base_path_service.ts",
+                  "lineNumber": 81
+                }
               }
             ],
             "signature": [
@@ -1887,12 +2217,18 @@
               "\nRemoves the prepended basePath from the `path`."
             ],
             "label": "remove",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L81",
+            "source": {
+              "path": "src/core/server/http/base_path_service.ts",
+              "lineNumber": 81
+            },
             "tags": [],
             "returnComment": []
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L18",
+        "source": {
+          "path": "src/core/server/http/base_path_service.ts",
+          "lineNumber": 18
+        },
         "initialIsOpen": false
       },
       {
@@ -1924,7 +2260,10 @@
             "description": [
               "\nA identifier to identify this request.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L144"
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 144
+            }
           },
           {
             "tags": [],
@@ -1934,7 +2273,10 @@
             "description": [
               "\nA UUID to identify this request.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L152"
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 152
+            }
           },
           {
             "tags": [],
@@ -1944,7 +2286,10 @@
             "description": [
               "a WHATWG URL standard object."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L154",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 154
+            },
             "signature": [
               "URL"
             ]
@@ -1957,7 +2302,10 @@
             "description": [
               "matched route details"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L156",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 156
+            },
             "signature": [
               "Readonly<{ path: string; method: ",
               "RecursiveReadonly",
@@ -1982,7 +2330,10 @@
             "description": [
               "\nReadonly copy of incoming request headers."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L162",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 162
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2001,7 +2352,10 @@
             "description": [
               "\nWhether or not the request is a \"system request\" rather than an application-level request.\nCan be set on the client using the `HttpFetchOptions#asSystemRequest` option."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L167"
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 167
+            }
           },
           {
             "tags": [],
@@ -2011,7 +2365,10 @@
             "description": [
               "{@link IKibanaSocket}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L170",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 170
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2030,7 +2387,10 @@
             "description": [
               "Request events {@link KibanaRequestEvents}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L172",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 172
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2047,7 +2407,10 @@
             "type": "Object",
             "label": "auth",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L173",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 173
+            },
             "signature": [
               "{ isAuthenticated: boolean; }"
             ]
@@ -2060,7 +2423,10 @@
             "description": [
               "\nURL rewritten in onPreRouting request interceptor."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L181",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 181
+            },
             "signature": [
               "URL",
               " | undefined"
@@ -2083,7 +2449,10 @@
                   "Request"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L187"
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 187
+                }
               },
               {
                 "type": "Uncategorized",
@@ -2093,7 +2462,10 @@
                   "Params"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L188"
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 188
+                }
               },
               {
                 "type": "Uncategorized",
@@ -2103,7 +2475,10 @@
                   "Query"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L189"
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 189
+                }
               },
               {
                 "type": "Uncategorized",
@@ -2113,7 +2488,10 @@
                   "Body"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L190"
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 190
+                }
               },
               {
                 "type": "boolean",
@@ -2123,15 +2501,24 @@
                   "boolean"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L193"
+                "source": {
+                  "path": "src/core/server/http/router/request.ts",
+                  "lineNumber": 193
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L186"
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 186
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L90",
+        "source": {
+          "path": "src/core/server/http/router/request.ts",
+          "lineNumber": 90
+        },
         "initialIsOpen": false
       },
       {
@@ -2173,7 +2560,10 @@
                   "string | Error"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator_error.ts#L16"
+                "source": {
+                  "path": "src/core/server/http/router/validator/validator_error.ts",
+                  "lineNumber": 16
+                }
               },
               {
                 "type": "Array",
@@ -2183,15 +2573,24 @@
                   "string[]"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator_error.ts#L16"
+                "source": {
+                  "path": "src/core/server/http/router/validator/validator_error.ts",
+                  "lineNumber": 16
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator_error.ts#L16"
+            "source": {
+              "path": "src/core/server/http/router/validator/validator_error.ts",
+              "lineNumber": 16
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator_error.ts#L15",
+        "source": {
+          "path": "src/core/server/http/router/validator/validator_error.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       }
     ],
@@ -2229,7 +2628,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L30",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 30
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2242,7 +2644,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L29",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 29
+        },
         "initialIsOpen": false
       },
       {
@@ -2260,7 +2665,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L35",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 35
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2273,7 +2681,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L34",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 34
+        },
         "initialIsOpen": false
       },
       {
@@ -2308,7 +2719,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L40",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 40
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2321,7 +2735,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L39",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 39
+        },
         "initialIsOpen": false
       },
       {
@@ -2343,13 +2760,19 @@
             "description": [
               "\nHeaders to attach for auth redirect.\nMust include \"location\" header"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L114",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 114
+            },
             "signature": [
               "({ location: string; } & Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L109",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 109
+        },
         "initialIsOpen": false
       },
       {
@@ -2371,7 +2794,10 @@
             "description": [
               "\nData to associate with an incoming request. Any downstream plugin may get access to the data."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L92",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 92
+            },
             "signature": [
               "Record<string, any> | undefined"
             ]
@@ -2384,7 +2810,10 @@
             "description": [
               "\nAuth specific headers to attach to a request object.\nUsed to perform a request to Elasticsearch on behalf of an authenticated user."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L97",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 97
+            },
             "signature": [
               "Record<string, string | string[]> | undefined"
             ]
@@ -2397,13 +2826,19 @@
             "description": [
               "\nAuth specific headers to attach to a response object.\nUsed to send back authentication mechanism related headers to a client when needed."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L102",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 102
+            },
             "signature": [
               "Record<string, string | string[]> | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L88",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 88
+        },
         "initialIsOpen": false
       },
       {
@@ -2423,7 +2858,10 @@
             "description": [
               "Authentication is successful with given credentials, allow request to pass through"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L123",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 123
+            },
             "signature": [
               "(data?: ",
               {
@@ -2451,7 +2889,10 @@
             "description": [
               "\nUser has no credentials.\nAllows user to access a resource when authRequired: 'optional'\nRejects a request when authRequired: true"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L129",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 129
+            },
             "signature": [
               "() => ",
               {
@@ -2471,7 +2912,10 @@
             "description": [
               "\nRedirects user to another location to complete authentication when authRequired: true\nAllows user to access a resource without redirection when authRequired: 'optional'"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L134",
+            "source": {
+              "path": "src/core/server/http/lifecycle/auth.ts",
+              "lineNumber": 134
+            },
             "signature": [
               "(headers: ({ location: string; } & Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]>) | ({ location: string; } & Record<string, string | string[]>)) => ",
               {
@@ -2484,7 +2928,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L121",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 121
+        },
         "initialIsOpen": false
       },
       {
@@ -2516,7 +2963,10 @@
             "description": [
               "HTTP message to send to the client"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L79",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 79
+            },
             "signature": [
               "T | undefined"
             ]
@@ -2529,7 +2979,10 @@
             "description": [
               "HTTP Headers with additional information about response"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L81",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 81
+            },
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ]
@@ -2540,10 +2993,16 @@
             "type": "number",
             "label": "statusCode",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L82"
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 82
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L77",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 77
+        },
         "initialIsOpen": false
       },
       {
@@ -2565,7 +3024,10 @@
             "description": [
               "HTTP message to send to the client"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L101",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 101
+            },
             "signature": [
               "string | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | undefined"
             ]
@@ -2578,13 +3040,19 @@
             "description": [
               "HTTP Headers with additional information about response"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L103",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 103
+            },
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L99",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 99
+        },
         "initialIsOpen": false
       },
       {
@@ -2604,7 +3072,10 @@
             "description": [
               "\nGets authentication state for a request. Returned by `auth` interceptor.\n{@link GetAuthState}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L51",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 51
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2623,7 +3094,10 @@
             "description": [
               "\nReturns authentication status for a request.\n{@link IsAuthenticated}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L56",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 56
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2635,7 +3109,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L46",
+        "source": {
+          "path": "src/core/server/http/types.ts",
+          "lineNumber": 46
+        },
         "initialIsOpen": false
       },
       {
@@ -2657,7 +3134,10 @@
             "description": [
               "HTTP message to send to the client"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L62",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 62
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2676,13 +3156,19 @@
             "description": [
               "HTTP Headers with additional information about response"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L64",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 64
+            },
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L60",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 60
+        },
         "initialIsOpen": false
       },
       {
@@ -2704,7 +3190,10 @@
             "description": [
               "The name of the Kibana server"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L336"
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 336
+            }
           },
           {
             "tags": [],
@@ -2714,7 +3203,10 @@
             "description": [
               "The hostname of the server"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L338"
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 338
+            }
           },
           {
             "tags": [],
@@ -2724,7 +3216,10 @@
             "description": [
               "The port the server is listening on"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L340"
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 340
+            }
           },
           {
             "tags": [],
@@ -2734,13 +3229,19 @@
             "description": [
               "The protocol used by the server"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L342",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 342
+            },
             "signature": [
               "\"http\" | \"https\" | \"socket\""
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L334",
+        "source": {
+          "path": "src/core/server/http/types.ts",
+          "lineNumber": 334
+        },
         "initialIsOpen": false
       },
       {
@@ -2762,7 +3263,10 @@
             "description": [
               "\nCreates cookie based session storage factory {@link SessionStorageFactory}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L136",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 136
+            },
             "signature": [
               "<T>(cookieOptions: ",
               {
@@ -2791,7 +3295,10 @@
             "description": [
               "\nTo define custom logic to perform for incoming requests before server performs a route lookup.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L150",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 150
+            },
             "signature": [
               "(handler: ",
               {
@@ -2812,7 +3319,10 @@
             "description": [
               "\nTo define custom logic to perform for incoming requests before\nthe Auth interceptor performs a check that user has access to requested resources.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L162",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 162
+            },
             "signature": [
               "(handler: ",
               {
@@ -2833,7 +3343,10 @@
             "description": [
               "\nTo define custom authentication and/or authorization mechanism for incoming requests.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L174",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 174
+            },
             "signature": [
               "(handler: ",
               {
@@ -2854,7 +3367,10 @@
             "description": [
               "\nTo define custom logic after Auth interceptor did make sure a user has access to the requested resource.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L186",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 186
+            },
             "signature": [
               "(handler: ",
               {
@@ -2875,7 +3391,10 @@
             "description": [
               "\nTo define custom logic to perform for the server response.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L198",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 198
+            },
             "signature": [
               "(handler: ",
               {
@@ -2896,7 +3415,10 @@
             "description": [
               "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L204",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 204
+            },
             "signature": [
               "Pick<",
               {
@@ -2919,7 +3441,10 @@
             "description": [
               "\nAuth status.\nSee {@link HttpAuth}\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L212",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 212
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2938,7 +3463,10 @@
             "description": [
               "\nThe CSP config used for Kibana."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L217",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 217
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2959,7 +3487,10 @@
             "description": [
               "\nProvides ability to declare a handler function for a particular path and HTTP request method.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L234",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 234
+            },
             "signature": [
               "<Context extends ",
               {
@@ -2998,7 +3529,10 @@
             "description": [
               "\nRegister a context provider for a route handler."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L266",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 266
+            },
             "signature": [
               "<Context extends ",
               {
@@ -3034,7 +3568,10 @@
             "description": [
               "\nProvides common {@link HttpServerInfo | information} about the running http server."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L277",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 277
+            },
             "signature": [
               "() => ",
               {
@@ -3047,7 +3584,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L131",
+        "source": {
+          "path": "src/core/server/http/types.ts",
+          "lineNumber": 131
+        },
         "initialIsOpen": false
       },
       {
@@ -3067,7 +3607,10 @@
             "description": [
               "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L308",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 308
+            },
             "signature": [
               "Pick<",
               {
@@ -3088,7 +3631,10 @@
             "description": [
               "\nAuth status.\nSee {@link HttpAuth}"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L314",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 314
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3107,7 +3653,10 @@
             "description": [
               "\nProvides common {@link HttpServerInfo | information} about the running http server."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L319",
+            "source": {
+              "path": "src/core/server/http/types.ts",
+              "lineNumber": 319
+            },
             "signature": [
               "() => ",
               {
@@ -3120,7 +3669,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L303",
+        "source": {
+          "path": "src/core/server/http/types.ts",
+          "lineNumber": 303
+        },
         "initialIsOpen": false
       },
       {
@@ -3150,7 +3702,10 @@
             "type": "number",
             "label": "status",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L34"
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 34
+            }
           },
           {
             "tags": [],
@@ -3158,7 +3713,10 @@
             "type": "Uncategorized",
             "label": "payload",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L35",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "T | undefined"
             ]
@@ -3169,7 +3727,10 @@
             "type": "Object",
             "label": "options",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L36",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 36
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3181,7 +3742,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L33",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 33
+        },
         "initialIsOpen": false
       },
       {
@@ -3220,12 +3784,18 @@
                   "true"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L18"
+                "source": {
+                  "path": "src/core/server/http/router/socket.ts",
+                  "lineNumber": 18
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L18"
+            "source": {
+              "path": "src/core/server/http/router/socket.ts",
+              "lineNumber": 18
+            }
           },
           {
             "id": "def-server.IKibanaSocket.getPeerCertificate",
@@ -3252,12 +3822,18 @@
                   "false"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L19"
+                "source": {
+                  "path": "src/core/server/http/router/socket.ts",
+                  "lineNumber": 19
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L19"
+            "source": {
+              "path": "src/core/server/http/router/socket.ts",
+              "lineNumber": 19
+            }
           },
           {
             "id": "def-server.IKibanaSocket.getPeerCertificate",
@@ -3288,14 +3864,20 @@
                 "description": [
                   "- If true; the full chain with issuer property will be returned."
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L29"
+                "source": {
+                  "path": "src/core/server/http/router/socket.ts",
+                  "lineNumber": 29
+                }
               }
             ],
             "tags": [],
             "returnComment": [
               "An object representing the peer's certificate."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L29"
+            "source": {
+              "path": "src/core/server/http/router/socket.ts",
+              "lineNumber": 29
+            }
           },
           {
             "id": "def-server.IKibanaSocket.getProtocol",
@@ -3310,7 +3892,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L36"
+            "source": {
+              "path": "src/core/server/http/router/socket.ts",
+              "lineNumber": 36
+            }
           },
           {
             "id": "def-server.IKibanaSocket.renegotiate",
@@ -3336,7 +3921,10 @@
                     "type": "CompoundType",
                     "label": "rejectUnauthorized",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L43",
+                    "source": {
+                      "path": "src/core/server/http/router/socket.ts",
+                      "lineNumber": 43
+                    },
                     "signature": [
                       "boolean | undefined"
                     ]
@@ -3347,20 +3935,29 @@
                     "type": "CompoundType",
                     "label": "requestCert",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L43",
+                    "source": {
+                      "path": "src/core/server/http/router/socket.ts",
+                      "lineNumber": 43
+                    },
                     "signature": [
                       "boolean | undefined"
                     ]
                   }
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L43"
+                "source": {
+                  "path": "src/core/server/http/router/socket.ts",
+                  "lineNumber": 43
+                }
               }
             ],
             "tags": [],
             "returnComment": [
               "A Promise that will be resolved if renegotiation succeeded, or will be rejected if renegotiation failed."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L43"
+            "source": {
+              "path": "src/core/server/http/router/socket.ts",
+              "lineNumber": 43
+            }
           },
           {
             "tags": [],
@@ -3370,7 +3967,10 @@
             "description": [
               "\nIndicates whether or not the peer certificate was signed by one of the specified CAs. When TLS\nisn't used the value is `undefined`."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L49",
+            "source": {
+              "path": "src/core/server/http/router/socket.ts",
+              "lineNumber": 49
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -3383,13 +3983,19 @@
             "description": [
               "\nThe reason why the peer's certificate has not been verified. This property becomes available\nonly when `authorized` is `false`."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L55",
+            "source": {
+              "path": "src/core/server/http/router/socket.ts",
+              "lineNumber": 55
+            },
             "signature": [
               "Error | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/socket.ts#L17",
+        "source": {
+          "path": "src/core/server/http/router/socket.ts",
+          "lineNumber": 17
+        },
         "initialIsOpen": false
       },
       {
@@ -3421,7 +4027,10 @@
             "description": [
               "\nResulted path"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L65"
+            "source": {
+              "path": "src/core/server/http/router/router.ts",
+              "lineNumber": 65
+            }
           },
           {
             "tags": [],
@@ -3431,7 +4040,10 @@
             "description": [
               "\nRegister a route handler for `GET` request."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L72",
+            "source": {
+              "path": "src/core/server/http/router/router.ts",
+              "lineNumber": 72
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3451,7 +4063,10 @@
             "description": [
               "\nRegister a route handler for `POST` request."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L79",
+            "source": {
+              "path": "src/core/server/http/router/router.ts",
+              "lineNumber": 79
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3471,7 +4086,10 @@
             "description": [
               "\nRegister a route handler for `PUT` request."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L86",
+            "source": {
+              "path": "src/core/server/http/router/router.ts",
+              "lineNumber": 86
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3491,7 +4109,10 @@
             "description": [
               "\nRegister a route handler for `PATCH` request."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L93",
+            "source": {
+              "path": "src/core/server/http/router/router.ts",
+              "lineNumber": 93
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3511,7 +4132,10 @@
             "description": [
               "\nRegister a route handler for `DELETE` request."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L100",
+            "source": {
+              "path": "src/core/server/http/router/router.ts",
+              "lineNumber": 100
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3531,7 +4155,10 @@
             "description": [
               "\nWrap a router handler to catch and converts legacy boom errors to proper custom errors."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L106",
+            "source": {
+              "path": "src/core/server/http/router/router.ts",
+              "lineNumber": 106
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3543,7 +4170,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L61",
+        "source": {
+          "path": "src/core/server/http/router/router.ts",
+          "lineNumber": 61
+        },
         "initialIsOpen": false
       },
       {
@@ -3565,7 +4195,10 @@
             "description": [
               "\nObservable that emits once if and when the request has been aborted."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L66",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 66
+            },
             "signature": [
               "Observable",
               "<void>"
@@ -3579,14 +4212,20 @@
             "description": [
               "\nObservable that emits once if and when the request has been completely handled.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L76",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 76
+            },
             "signature": [
               "Observable",
               "<void>"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L62",
+        "source": {
+          "path": "src/core/server/http/router/request.ts",
+          "lineNumber": 62
+        },
         "initialIsOpen": false
       },
       {
@@ -3616,7 +4255,10 @@
             "type": "string",
             "label": "path",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L53"
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 53
+            }
           },
           {
             "tags": [],
@@ -3624,7 +4266,10 @@
             "type": "Uncategorized",
             "label": "method",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L54",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "Method"
             ]
@@ -3635,7 +4280,10 @@
             "type": "Uncategorized",
             "label": "options",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L55",
+            "source": {
+              "path": "src/core/server/http/router/request.ts",
+              "lineNumber": 55
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3648,7 +4296,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L52",
+        "source": {
+          "path": "src/core/server/http/router/request.ts",
+          "lineNumber": 52
+        },
         "initialIsOpen": false
       },
       {
@@ -3672,7 +4323,10 @@
           "public"
         ],
         "children": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L84",
+        "source": {
+          "path": "src/core/server/http/router/request.ts",
+          "lineNumber": 84
+        },
         "initialIsOpen": false
       },
       {
@@ -3692,13 +4346,19 @@
             "description": [
               "To pass request to the next handler"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_post_auth.ts#L44",
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_post_auth.ts",
+              "lineNumber": 44
+            },
             "signature": [
               "() => Next"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_post_auth.ts#L42",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_post_auth.ts",
+          "lineNumber": 42
+        },
         "initialIsOpen": false
       },
       {
@@ -3718,13 +4378,19 @@
             "description": [
               "To pass request to the next handler"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_auth.ts#L44",
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
+              "lineNumber": 44
+            },
             "signature": [
               "() => Next"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_auth.ts#L42",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
+          "lineNumber": 42
+        },
         "initialIsOpen": false
       },
       {
@@ -3746,13 +4412,19 @@
             "description": [
               "additional headers to attach to the response"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L58",
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+              "lineNumber": 58
+            },
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L56",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+          "lineNumber": 56
+        },
         "initialIsOpen": false
       },
       {
@@ -3772,10 +4444,16 @@
             "type": "number",
             "label": "statusCode",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L66"
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+              "lineNumber": 66
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L65",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+          "lineNumber": 65
+        },
         "initialIsOpen": false
       },
       {
@@ -3797,7 +4475,10 @@
             "description": [
               "additional headers to attach to the response"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L47",
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+              "lineNumber": 47
+            },
             "signature": [
               "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]> | undefined"
             ]
@@ -3810,10 +4491,16 @@
             "description": [
               "the body to use in the response"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L49"
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+              "lineNumber": 49
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L45",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+          "lineNumber": 45
+        },
         "initialIsOpen": false
       },
       {
@@ -3835,7 +4522,10 @@
             "description": [
               "To override the response with a different body"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L90",
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+              "lineNumber": 90
+            },
             "signature": [
               "(responseRender: ",
               {
@@ -3856,7 +4546,10 @@
             "description": [
               "To pass request to the next handler"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L92",
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+              "lineNumber": 92
+            },
             "signature": [
               "(responseExtensions?: ",
               {
@@ -3870,7 +4563,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L88",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+          "lineNumber": 88
+        },
         "initialIsOpen": false
       },
       {
@@ -3890,7 +4586,10 @@
             "description": [
               "To pass request to the next handler"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_routing.ts#L57",
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
+              "lineNumber": 57
+            },
             "signature": [
               "() => OnPreRoutingResult"
             ]
@@ -3903,13 +4602,19 @@
             "description": [
               "Rewrite requested resources url before is was authenticated and routed to a handler"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_routing.ts#L59",
+            "source": {
+              "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
+              "lineNumber": 59
+            },
             "signature": [
               "(url: string) => OnPreRoutingResult"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_routing.ts#L55",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
+          "lineNumber": 55
+        },
         "initialIsOpen": false
       },
       {
@@ -3941,7 +4646,10 @@
             "description": [
               "\nThe endpoint _within_ the router path to register the route.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L171"
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 171
+            }
           },
           {
             "tags": [],
@@ -3951,7 +4659,10 @@
             "description": [
               "\nA schema created with `@kbn/config-schema` that every request will be validated against.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L229",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 229
+            },
             "signature": [
               "false | ",
               {
@@ -3972,7 +4683,10 @@
             "description": [
               "\nAdditional route options {@link RouteConfigOptions}."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L234",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 234
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -3985,7 +4699,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L157",
+        "source": {
+          "path": "src/core/server/http/router/route.ts",
+          "lineNumber": 157
+        },
         "initialIsOpen": false
       },
       {
@@ -4017,7 +4734,10 @@
             "description": [
               "\nDefines authentication mode for a route:\n- true. A user has to have valid credentials to access a resource\n- false. A user can access a resource without any credentials.\n- 'optional'. A user can access a resource if has valid credentials or no credentials at all.\nCan be useful when we grant access to a resource but want to identify a user if possible.\n\nDefaults to `true` if an auth mechanism is registered."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L116",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 116
+            },
             "signature": [
               "boolean | \"optional\" | undefined"
             ]
@@ -4030,7 +4750,10 @@
             "description": [
               "\nDefines xsrf protection requirements for a route:\n- true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.\n- false. Disables xsrf protection.\n\nSet to true by default"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L125",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 125
+            },
             "signature": [
               "(Method extends \"get\" ? never : boolean) | undefined"
             ]
@@ -4043,7 +4766,10 @@
             "description": [
               "\nAdditional metadata tag strings to attach to the route."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L130",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 130
+            },
             "signature": [
               "readonly string[] | undefined"
             ]
@@ -4056,7 +4782,10 @@
             "description": [
               "\nAdditional body options {@link RouteConfigOptionsBody}."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L135",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 135
+            },
             "signature": [
               "(Method extends ",
               {
@@ -4085,7 +4814,10 @@
             "description": [
               "\nDefines per-route timeouts."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L140",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 140
+            },
             "signature": [
               "{ payload?: (Method extends ",
               {
@@ -4099,7 +4831,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L106",
+        "source": {
+          "path": "src/core/server/http/router/route.ts",
+          "lineNumber": 106
+        },
         "initialIsOpen": false
       },
       {
@@ -4121,7 +4856,10 @@
             "description": [
               "\nA string or an array of strings with the allowed mime types for the endpoint. Use this settings to limit the set of allowed mime types. Note that allowing additional mime types not listed\nabove will not enable them to be parsed, and if parse is true, the request will result in an error response.\n\nDefault value: allows parsing of the following mime types:\n* application/json\n* application/*+json\n* application/octet-stream\n* application/x-www-form-urlencoded\n* multipart/form-data\n* text/*"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L68",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 68
+            },
             "signature": [
               "string | string[] | ",
               {
@@ -4142,7 +4880,10 @@
             "description": [
               "\nLimits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.\n\nDefault value: The one set in the kibana.yml config file under the parameter `server.maxPayloadBytes`."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L75",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 75
+            },
             "signature": [
               "number | undefined"
             ]
@@ -4155,7 +4896,10 @@
             "description": [
               "\nThe processed payload format. The value must be one of:\n* 'data' - the incoming payload is read fully into memory. If parse is true, the payload is parsed (JSON, form-decoded, multipart) based on the 'Content-Type' header. If parse is false, a raw\nBuffer is returned.\n* 'stream' - the incoming payload is made available via a Stream.Readable interface. If the payload is 'multipart/form-data' and parse is true, field values are presented as text while files\nare provided as streams. File streams from a 'multipart/form-data' upload will also have a hapi property containing the filename and headers properties. Note that payload streams for multipart\npayloads are a synthetic interface created on top of the entire multipart content loaded into memory. To avoid loading large multipart payloads into memory, set parse to false and handle the\nmultipart payload in the handler using a streaming parser (e.g. pez).\n\nDefault value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L88",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 88
+            },
             "signature": [
               "\"data\" | \"stream\" | undefined"
             ]
@@ -4168,13 +4912,19 @@
             "description": [
               "\nDetermines if the incoming payload is processed or presented raw. Available values:\n* true - if the request 'Content-Type' matches the allowed mime types set by allow (for the whole payload as well as parts), the payload is converted into an object when possible. If the\nformat is unknown, a Bad Request (400) error response is sent. Any known content encoding is decoded.\n* false - the raw payload is returned unmodified.\n* 'gunzip' - the raw payload is returned unmodified after any known content encoding is decoded.\n\nDefault value: true, unless no validation.body is provided in the route definition. In that case the default is false to alleviate memory pressure."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L99",
+            "source": {
+              "path": "src/core/server/http/router/route.ts",
+              "lineNumber": 99
+            },
             "signature": [
               "boolean | \"gunzip\" | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L55",
+        "source": {
+          "path": "src/core/server/http/router/route.ts",
+          "lineNumber": 55
+        },
         "initialIsOpen": false
       },
       {
@@ -4194,7 +4944,10 @@
             "type": "Function",
             "label": "ok",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L21",
+            "source": {
+              "path": "src/core/server/http/router/validator/validator.ts",
+              "lineNumber": 21
+            },
             "signature": [
               "<T>(value: T) => { value: T; }"
             ]
@@ -4205,7 +4958,10 @@
             "type": "Function",
             "label": "badRequest",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L22",
+            "source": {
+              "path": "src/core/server/http/router/validator/validator.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "(error: string | Error, path?: string[] | undefined) => { error: ",
               {
@@ -4219,7 +4975,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L20",
+        "source": {
+          "path": "src/core/server/http/router/validator/validator.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -4253,7 +5012,10 @@
             "description": [
               "\nValidation logic for the URL params"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L92",
+            "source": {
+              "path": "src/core/server/http/router/validator/validator.ts",
+              "lineNumber": 92
+            },
             "signature": [
               "ObjectType",
               "<any> | ",
@@ -4279,7 +5041,10 @@
             "description": [
               "\nValidation logic for the Query params"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L97",
+            "source": {
+              "path": "src/core/server/http/router/validator/validator.ts",
+              "lineNumber": 97
+            },
             "signature": [
               "ObjectType",
               "<any> | ",
@@ -4305,7 +5070,10 @@
             "description": [
               "\nValidation logic for the body payload"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L102",
+            "source": {
+              "path": "src/core/server/http/router/validator/validator.ts",
+              "lineNumber": 102
+            },
             "signature": [
               "ObjectType",
               "<any> | ",
@@ -4322,7 +5090,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L87",
+        "source": {
+          "path": "src/core/server/http/router/validator/validator.ts",
+          "lineNumber": 87
+        },
         "initialIsOpen": false
       },
       {
@@ -4346,13 +5117,19 @@
             "description": [
               "\nSet the `unsafe` config to avoid running some additional internal *safe* validations on top of your custom validation"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L115",
+            "source": {
+              "path": "src/core/server/http/router/validator/validator.ts",
+              "lineNumber": 115
+            },
             "signature": [
               "{ params?: boolean | undefined; query?: boolean | undefined; body?: boolean | undefined; } | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L110",
+        "source": {
+          "path": "src/core/server/http/router/validator/validator.ts",
+          "lineNumber": 110
+        },
         "initialIsOpen": false
       },
       {
@@ -4374,7 +5151,10 @@
             "description": [
               "\nWhether the cookie is valid or not."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L52"
+            "source": {
+              "path": "src/core/server/http/cookie_session_storage.ts",
+              "lineNumber": 52
+            }
           },
           {
             "tags": [],
@@ -4384,13 +5164,19 @@
             "description": [
               "\nThe \"Path\" attribute of the cookie; if the cookie is invalid, this is used to clear it."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L56",
+            "source": {
+              "path": "src/core/server/http/cookie_session_storage.ts",
+              "lineNumber": 56
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L48",
+        "source": {
+          "path": "src/core/server/http/cookie_session_storage.ts",
+          "lineNumber": 48
+        },
         "initialIsOpen": false
       },
       {
@@ -4427,7 +5213,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/session_storage.ts#L18"
+            "source": {
+              "path": "src/core/server/http/session_storage.ts",
+              "lineNumber": 18
+            }
           },
           {
             "id": "def-server.SessionStorage.set",
@@ -4450,12 +5239,18 @@
                 "description": [
                   "- value to put"
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/session_storage.ts#L23"
+                "source": {
+                  "path": "src/core/server/http/session_storage.ts",
+                  "lineNumber": 23
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/session_storage.ts#L23"
+            "source": {
+              "path": "src/core/server/http/session_storage.ts",
+              "lineNumber": 23
+            }
           },
           {
             "id": "def-server.SessionStorage.clear",
@@ -4470,10 +5265,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/session_storage.ts#L27"
+            "source": {
+              "path": "src/core/server/http/session_storage.ts",
+              "lineNumber": 27
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/session_storage.ts#L14",
+        "source": {
+          "path": "src/core/server/http/session_storage.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -4505,7 +5306,10 @@
             "description": [
               "\nName of the session cookie."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L24"
+            "source": {
+              "path": "src/core/server/http/cookie_session_storage.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -4515,7 +5319,10 @@
             "description": [
               "\nA key used to encrypt a cookie's value. Should be at least 32 characters long."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L28"
+            "source": {
+              "path": "src/core/server/http/cookie_session_storage.ts",
+              "lineNumber": 28
+            }
           },
           {
             "tags": [],
@@ -4525,7 +5332,10 @@
             "description": [
               "\nFunction called to validate a cookie's decrypted value."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L32",
+            "source": {
+              "path": "src/core/server/http/cookie_session_storage.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "(sessionValue: T | T[]) => ",
               {
@@ -4545,7 +5355,10 @@
             "description": [
               "\nFlag indicating whether the cookie should be sent only via a secure connection."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L36"
+            "source": {
+              "path": "src/core/server/http/cookie_session_storage.ts",
+              "lineNumber": 36
+            }
           },
           {
             "tags": [],
@@ -4555,13 +5368,19 @@
             "description": [
               "\nDefines SameSite attribute of the Set-Cookie Header.\nhttps://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L41",
+            "source": {
+              "path": "src/core/server/http/cookie_session_storage.ts",
+              "lineNumber": 41
+            },
             "signature": [
               "\"None\" | \"Strict\" | \"Lax\" | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/cookie_session_storage.ts#L20",
+        "source": {
+          "path": "src/core/server/http/cookie_session_storage.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -4591,7 +5410,10 @@
             "type": "Function",
             "label": "asScoped",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/session_storage.ts#L34",
+            "source": {
+              "path": "src/core/server/http/session_storage.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "(request: ",
               {
@@ -4613,7 +5435,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/session_storage.ts#L33",
+        "source": {
+          "path": "src/core/server/http/session_storage.ts",
+          "lineNumber": 33
+        },
         "initialIsOpen": false
       }
     ],
@@ -4626,7 +5451,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L22",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       },
       {
@@ -4639,7 +5467,10 @@
         "description": [
           "\nStatus indicating an outcome of the authentication."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/auth_state_storage.ts#L15",
+        "source": {
+          "path": "src/core/server/http/auth_state_storage.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       }
     ],
@@ -4654,7 +5485,10 @@
         "description": [
           "\nSee {@link AuthToolkit}."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L147",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 147
+        },
         "signature": [
           "(request: ",
           {
@@ -4703,7 +5537,10 @@
         "description": [
           "\nAuth Headers map"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L82",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 82
+        },
         "signature": [
           "{ [x: string]: string | string[]; }"
         ],
@@ -4717,7 +5554,10 @@
           "public"
         ],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/auth.ts#L44",
+        "source": {
+          "path": "src/core/server/http/lifecycle/auth.ts",
+          "lineNumber": 44
+        },
         "signature": [
           {
             "pluginId": "core",
@@ -4755,7 +5595,10 @@
         "description": [
           "\nSet of HTTP methods changing the state of the server."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L19",
+        "source": {
+          "path": "src/core/server/http/router/route.ts",
+          "lineNumber": 19
+        },
         "signature": [
           "\"post\" | \"put\" | \"delete\" | \"patch\""
         ],
@@ -4772,7 +5615,10 @@
         "description": [
           "\nGet headers to authenticate a user against Elasticsearch."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/auth_headers_storage.ts#L18",
+        "source": {
+          "path": "src/core/server/http/auth_headers_storage.ts",
+          "lineNumber": 18
+        },
         "signature": [
           "(request: ",
           {
@@ -4804,7 +5650,10 @@
         "description": [
           "\nGets authentication state for a request. Returned by `auth` interceptor."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/auth_state_storage.ts#L35",
+        "source": {
+          "path": "src/core/server/http/auth_state_storage.ts",
+          "lineNumber": 35
+        },
         "signature": [
           "(request: ",
           {
@@ -4844,7 +5693,10 @@
         "description": [
           "\nHttp request headers to read."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/headers.ts#L40",
+        "source": {
+          "path": "src/core/server/http/router/headers.ts",
+          "lineNumber": 40
+        },
         "signature": [
           "{ accept?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; allow?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; date?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; range?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; warning?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
@@ -4860,7 +5712,10 @@
         "description": [
           "\nData send to the client as a response payload."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L71",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 71
+        },
         "signature": [
           "undefined | string | Record<string, any> | Buffer | ",
           "Stream"
@@ -4877,7 +5732,10 @@
         "description": [
           "\nAccess or manipulate the Kibana base path\n\n{@link BasePath}"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/base_path_service.ts#L104",
+        "source": {
+          "path": "src/core/server/http/base_path_service.ts",
+          "lineNumber": 104
+        },
         "signature": [
           "{ remove: (path: string) => string; get: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest) => string; prepend: (path: string) => string; set: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
         ],
@@ -4893,7 +5751,10 @@
         "description": [
           "\nReturns authentication status for a request."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/auth_state_storage.ts#L44",
+        "source": {
+          "path": "src/core/server/http/auth_state_storage.ts",
+          "lineNumber": 44
+        },
         "signature": [
           "(request: ",
           {
@@ -4925,7 +5786,10 @@
         "description": [
           "\nRoute options: If 'GET' or 'OPTIONS' method, body options won't be returned."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/request.ts#L44",
+        "source": {
+          "path": "src/core/server/http/router/request.ts",
+          "lineNumber": 44
+        },
         "signature": [
           "Method extends ",
           {
@@ -4949,7 +5813,10 @@
         "description": [
           "\nCreates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L319",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 319
+        },
         "signature": [
           "{ custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>; badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>; redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>; ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>; accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>; noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>; }"
         ],
@@ -4965,7 +5832,10 @@
         "description": [
           "\nSet of well-known HTTP headers."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/headers.ts#L34",
+        "source": {
+          "path": "src/core/server/http/router/headers.ts",
+          "lineNumber": 34
+        },
         "signature": [
           "\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\""
         ],
@@ -4981,7 +5851,10 @@
         "description": [
           "\nCreates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L325",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 325
+        },
         "signature": [
           "{ badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>; customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>; redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>; }"
         ],
@@ -4997,7 +5870,10 @@
         "description": [
           "\nSee {@link OnPostAuthToolkit}."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_post_auth.ts#L51",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_post_auth.ts",
+          "lineNumber": 51
+        },
         "signature": [
           "(request: ",
           {
@@ -5046,7 +5922,10 @@
         "description": [
           "\nSee {@link OnPreAuthToolkit}."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_auth.ts#L55",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_auth.ts",
+          "lineNumber": 55
+        },
         "signature": [
           "(request: ",
           {
@@ -5095,7 +5974,10 @@
         "description": [
           "\nSee {@link OnPreRoutingToolkit}."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_response.ts#L104",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_response.ts",
+          "lineNumber": 104
+        },
         "signature": [
           "(request: ",
           {
@@ -5135,7 +6017,10 @@
         "description": [
           "\nSee {@link OnPreRoutingToolkit}."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/lifecycle/on_pre_routing.ts#L71",
+        "source": {
+          "path": "src/core/server/http/lifecycle/on_pre_routing.ts",
+          "lineNumber": 71
+        },
         "signature": [
           "(request: ",
           {
@@ -5184,7 +6069,10 @@
         "description": [
           "\nHTTP response parameters for redirection response"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L89",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 89
+        },
         "signature": [
           "HttpResponseOptions & { headers: {    location: string;}; }"
         ],
@@ -5200,7 +6088,10 @@
         "description": [
           "\nA function executed when route path matched requested resource path.\nRequest handler is expected to return a result of one of {@link KibanaResponseFactory} functions.\nIf anything else is returned, or an error is thrown, the HTTP service will automatically log the error\nand respond `500 - Internal Server Error`."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L350",
+        "source": {
+          "path": "src/core/server/http/router/router.ts",
+          "lineNumber": 350
+        },
         "signature": [
           "(context: Context, request: ",
           {
@@ -5240,7 +6131,10 @@
         "description": [
           "\nAn object that handles registration of http request context providers."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L30",
+        "source": {
+          "path": "src/core/server/http/types.ts",
+          "lineNumber": 30
+        },
         "signature": [
           "IContextContainer"
         ],
@@ -5256,7 +6150,10 @@
         "description": [
           "\nContext provider for request handler.\nExtends request context object with provided functionality or data.\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/types.ts#L38",
+        "source": {
+          "path": "src/core/server/http/types.ts",
+          "lineNumber": 38
+        },
         "signature": [
           "(context: Pick<Context, Exclude<keyof Context, ContextName>>, rest: [request: ",
           {
@@ -5299,7 +6196,10 @@
         "description": [
           "\nType-safe wrapper for {@link RequestHandler} function."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L376",
+        "source": {
+          "path": "src/core/server/http/router/router.ts",
+          "lineNumber": 376
+        },
         "signature": [
           "(handler: ",
           {
@@ -5331,7 +6231,10 @@
         "description": [
           "\nError message and optional data send to the client in case of error."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L21",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "string | Error | { message: string | Error; attributes?: Record<string, any> | undefined; }"
         ],
@@ -5347,7 +6250,10 @@
         "description": [
           "\nAdditional data to provide error details."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L16",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 16
+        },
         "signature": [
           "{ [x: string]: any; }"
         ],
@@ -5363,7 +6269,10 @@
         "description": [
           "\nHttp response headers to set."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/headers.ts#L48",
+        "source": {
+          "path": "src/core/server/http/router/headers.ts",
+          "lineNumber": 48
+        },
         "signature": [
           "Record<\"accept\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"allow\" | \"alt-svc\" | \"authorization\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"date\" | \"expect\" | \"expires\" | \"forwarded\" | \"from\" | \"host\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"location\" | \"origin\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"range\" | \"referer\" | \"retry-after\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"warning\" | \"www-authenticate\", string | string[]> | Record<string, string | string[]>"
         ],
@@ -5379,7 +6288,10 @@
         "description": [
           "\nThe set of supported parseable Content-Types"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L43",
+        "source": {
+          "path": "src/core/server/http/router/route.ts",
+          "lineNumber": 43
+        },
         "signature": [
           "\"application/json\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"multipart/form-data\" | \"text/*\""
         ],
@@ -5395,7 +6307,10 @@
         "description": [
           "\nThe set of common HTTP methods supported by Kibana routing."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L31",
+        "source": {
+          "path": "src/core/server/http/router/route.ts",
+          "lineNumber": 31
+        },
         "signature": [
           "\"get\" | \"options\" | \"post\" | \"put\" | \"delete\" | \"patch\""
         ],
@@ -5411,7 +6326,10 @@
         "description": [
           "\nRoute handler common definition\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/router.ts#L47",
+        "source": {
+          "path": "src/core/server/http/router/router.ts",
+          "lineNumber": 47
+        },
         "signature": [
           "(route: ",
           {
@@ -5454,7 +6372,10 @@
         "description": [
           "\nThe custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L50",
+        "source": {
+          "path": "src/core/server/http/router/validator/validator.ts",
+          "lineNumber": 50
+        },
         "signature": [
           "(data: any, validationResult: ",
           {
@@ -5486,7 +6407,10 @@
         "description": [
           "\nAllowed property validation options: either @kbn/config-schema validations or custom validation functions\n\nSee {@link RouteValidationFunction} for custom validation.\n"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L70",
+        "source": {
+          "path": "src/core/server/http/router/validator/validator.ts",
+          "lineNumber": 70
+        },
         "signature": [
           "ObjectType",
           "<any> | ",
@@ -5513,7 +6437,10 @@
         "description": [
           "\nRoute validations config and options merged into one object"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/validator/validator.ts#L126",
+        "source": {
+          "path": "src/core/server/http/router/validator/validator.ts",
+          "lineNumber": 126
+        },
         "signature": [
           "RouteValidatorConfig<P, Q, B> & RouteValidatorOptions"
         ],
@@ -5529,7 +6456,10 @@
         "description": [
           "\nSet of HTTP methods not changing the state of the server."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L25",
+        "source": {
+          "path": "src/core/server/http/router/route.ts",
+          "lineNumber": 25
+        },
         "signature": [
           "\"get\" | \"options\""
         ],
@@ -5550,7 +6480,10 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L290",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 290
+            },
             "signature": [
               "any"
             ]
@@ -5561,7 +6494,10 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L291",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 291
+            },
             "signature": [
               "any"
             ]
@@ -5572,7 +6508,10 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L292",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 292
+            },
             "signature": [
               "any"
             ]
@@ -5596,7 +6535,10 @@
                   "<T>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L298"
+                "source": {
+                  "path": "src/core/server/http/router/response.ts",
+                  "lineNumber": 298
+                }
               }
             ],
             "signature": [
@@ -5624,7 +6566,10 @@
               "/**\n   * Creates a response with defined status code and payload.\n   * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.\n   */"
             ],
             "label": "custom",
-            "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L297",
+            "source": {
+              "path": "src/core/server/http/router/response.ts",
+              "lineNumber": 297
+            },
             "tags": [],
             "returnComment": []
           }
@@ -5633,7 +6578,10 @@
           "\nSet of helpers used to create `KibanaResponse` to form HTTP response on an incoming request.\nShould be returned as a result of {@link RequestHandler} execution.\n"
         ],
         "label": "kibanaResponseFactory",
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/response.ts#L289",
+        "source": {
+          "path": "src/core/server/http/router/response.ts",
+          "lineNumber": 289
+        },
         "initialIsOpen": false
       },
       {
@@ -5646,7 +6594,10 @@
         "description": [
           "\nThe set of valid body.output"
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/core/server/http/router/route.ts#L37",
+        "source": {
+          "path": "src/core/server/http/router/route.ts",
+          "lineNumber": 37
+        },
         "signature": [
           "readonly [\"data\", \"stream\"]"
         ],

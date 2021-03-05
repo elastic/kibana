@@ -44,7 +44,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts#L18"
+                "source": {
+                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
+                  "lineNumber": 18
+                }
               },
               {
                 "type": "string",
@@ -54,7 +57,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts#L19"
+                "source": {
+                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
+                  "lineNumber": 19
+                }
               },
               {
                 "type": "Enum",
@@ -70,7 +76,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts#L20"
+                "source": {
+                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
+                  "lineNumber": 20
+                }
               },
               {
                 "type": "Object",
@@ -80,12 +89,18 @@
                   "Error | undefined"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts#L21"
+                "source": {
+                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
+                  "lineNumber": 21
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
+              "lineNumber": 17
+            }
           },
           {
             "id": "def-server.EncryptionError.toJSON",
@@ -98,10 +113,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
+              "lineNumber": 30
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       }
     ],
@@ -120,7 +141,10 @@
             "type": "Function",
             "label": "getDecryptedAsInternalUser",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts#L41",
+            "source": {
+              "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+              "lineNumber": 41
+            },
             "signature": [
               "<T = unknown>(type: string, id: string, options?: ",
               {
@@ -142,7 +166,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts#L40",
+        "source": {
+          "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+          "lineNumber": 40
+        },
         "initialIsOpen": false
       },
       {
@@ -160,7 +187,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L34"
+            "source": {
+              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
+              "lineNumber": 34
+            }
           },
           {
             "tags": [],
@@ -168,7 +198,10 @@
             "type": "Object",
             "label": "attributesToEncrypt",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "ReadonlySet<string | ",
               {
@@ -187,13 +220,19 @@
             "type": "Object",
             "label": "attributesToExcludeFromAAD",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L36",
+            "source": {
+              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
+              "lineNumber": 36
+            },
             "signature": [
               "ReadonlySet<string> | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts#L33",
+        "source": {
+          "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
+          "lineNumber": 33
+        },
         "initialIsOpen": false
       }
     ],
@@ -215,7 +254,10 @@
           "description": [
             "\nIndicates if Saved Object encryption is possible. Requires an encryption key to be explicitly set via `xpack.encryptedSavedObjects.encryptionKey`."
           ],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/plugin.ts#L35"
+          "source": {
+            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+            "lineNumber": 35
+          }
         },
         {
           "tags": [],
@@ -223,7 +265,10 @@
           "type": "Function",
           "label": "registerType",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/plugin.ts#L36",
+          "source": {
+            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+            "lineNumber": 36
+          },
           "signature": [
             "(typeRegistration: ",
             {
@@ -242,7 +287,10 @@
           "type": "Function",
           "label": "createMigration",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/plugin.ts#L37",
+          "source": {
+            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+            "lineNumber": 37
+          },
           "signature": [
             {
               "pluginId": "encryptedSavedObjects",
@@ -254,7 +302,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/plugin.ts#L31",
+      "source": {
+        "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+        "lineNumber": 31
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -271,7 +322,10 @@
           "type": "Function",
           "label": "isEncryptionError",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/plugin.ts#L41",
+          "source": {
+            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+            "lineNumber": 41
+          },
           "signature": [
             "(error: Error) => boolean"
           ]
@@ -282,7 +336,10 @@
           "type": "Function",
           "label": "getClient",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/plugin.ts#L42",
+          "source": {
+            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+            "lineNumber": 42
+          },
           "signature": [
             {
               "pluginId": "encryptedSavedObjects",
@@ -294,7 +351,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/encrypted_saved_objects/server/plugin.ts#L40",
+      "source": {
+        "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+        "lineNumber": 40
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }

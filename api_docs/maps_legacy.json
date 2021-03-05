@@ -49,7 +49,10 @@
             "type": "Object",
             "label": "_initializerContext",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L36",
+            "source": {
+              "path": "src/plugins/maps_legacy/server/index.ts",
+              "lineNumber": 36
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -85,12 +88,18 @@
                   "<Readonly<{} & { includeElasticMapsService: boolean; proxyElasticMapsServiceInMaps: boolean; tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; regionmap: Readonly<{} & { includeElasticMapsService: boolean; layers: Readonly<{} & { name: string; format: Readonly<{} & { type: string; }>; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; url: string; attribution: string; }>[]; }>; manifestServiceUrl: string; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }>>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L38"
+                "source": {
+                  "path": "src/plugins/maps_legacy/server/index.ts",
+                  "lineNumber": 38
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L38"
+            "source": {
+              "path": "src/plugins/maps_legacy/server/index.ts",
+              "lineNumber": 38
+            }
           },
           {
             "id": "def-server.MapsLegacyPlugin.setup",
@@ -124,12 +133,18 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L42"
+                "source": {
+                  "path": "src/plugins/maps_legacy/server/index.ts",
+                  "lineNumber": 42
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L42"
+            "source": {
+              "path": "src/plugins/maps_legacy/server/index.ts",
+              "lineNumber": 42
+            }
           },
           {
             "id": "def-server.MapsLegacyPlugin.start",
@@ -142,10 +157,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L51"
+            "source": {
+              "path": "src/plugins/maps_legacy/server/index.ts",
+              "lineNumber": 51
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L35",
+        "source": {
+          "path": "src/plugins/maps_legacy/server/index.ts",
+          "lineNumber": 35
+        },
         "initialIsOpen": false
       }
     ],
@@ -164,13 +185,19 @@
             "type": "Object",
             "label": "config",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L32",
+            "source": {
+              "path": "src/plugins/maps_legacy/server/index.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "Readonly<{} & { includeElasticMapsService: boolean; proxyElasticMapsServiceInMaps: boolean; tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; regionmap: Readonly<{} & { includeElasticMapsService: boolean; layers: Readonly<{} & { name: string; format: Readonly<{} & { type: string; }>; fields: Readonly<{} & { description: string; name: string; }>[]; meta: Readonly<{} & { feature_collection_path: string; }>; url: string; attribution: string; }>[]; }>; manifestServiceUrl: string; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { bright: string; desaturated: string; dark: string; }>; }>"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/server/index.ts#L31",
+        "source": {
+          "path": "src/plugins/maps_legacy/server/index.ts",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       }
     ],
@@ -190,7 +217,10 @@
         "type": "string",
         "label": "DEFAULT_EMS_FILE_API_URL",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/common/ems_defaults.ts#L10",
+        "source": {
+          "path": "src/plugins/maps_legacy/common/ems_defaults.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "\"https://vector.maps.elastic.co\""
         ],
@@ -202,7 +232,10 @@
         "type": "string",
         "label": "DEFAULT_EMS_FONT_LIBRARY_URL",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/common/ems_defaults.ts#L13",
+        "source": {
+          "path": "src/plugins/maps_legacy/common/ems_defaults.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "\"https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf\""
         ],
@@ -214,7 +247,10 @@
         "type": "string",
         "label": "DEFAULT_EMS_LANDING_PAGE_URL",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/common/ems_defaults.ts#L12",
+        "source": {
+          "path": "src/plugins/maps_legacy/common/ems_defaults.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "\"https://maps.elastic.co/v7.12\""
         ],
@@ -226,7 +262,10 @@
         "type": "string",
         "label": "DEFAULT_EMS_TILE_API_URL",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/maps_legacy/common/ems_defaults.ts#L11",
+        "source": {
+          "path": "src/plugins/maps_legacy/common/ems_defaults.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "\"https://tiles.maps.elastic.co\""
         ],

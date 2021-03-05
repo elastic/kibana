@@ -54,7 +54,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L88"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 88
+            }
           },
           {
             "id": "def-public.Plugin.setup",
@@ -95,7 +98,10 @@
                   "<object, unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L93"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+                  "lineNumber": 93
+                }
               },
               {
                 "type": "Object",
@@ -105,12 +111,18 @@
                   "PluginsSetup"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L93"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+                  "lineNumber": 93
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L93"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 93
+            }
           },
           {
             "id": "def-public.Plugin.start",
@@ -130,7 +142,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L169"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 169
+            }
           },
           {
             "id": "def-public.Plugin.stop",
@@ -143,10 +158,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L203"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "lineNumber": 203
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L77",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "lineNumber": 77
+        },
         "initialIsOpen": false
       }
     ],
@@ -157,7 +178,10 @@
         "type": "Function",
         "label": "ActionForm",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "(props: ",
           "ActionAccordionFormProps",
@@ -171,7 +195,10 @@
         "type": "Function",
         "label": "AlertAdd",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/index.tsx#L11",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/index.tsx",
+          "lineNumber": 11
+        },
         "signature": [
           "(props: ",
           "AlertAddProps",
@@ -185,7 +212,10 @@
         "type": "Function",
         "label": "AlertConditions",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx#L13",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
+          "lineNumber": 13
+        },
         "signature": [
           "React.LazyExoticComponent<(<ConditionProps extends unknown, ActionGroupIds extends string>({ headline, actionGroups, onInitializeConditionsFor, onResetConditionsFor, includeBuiltInActionGroups, children, }: React.PropsWithChildren<",
           "AlertConditionsProps",
@@ -199,7 +229,10 @@
         "type": "Function",
         "label": "AlertConditionsGroup",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx#L14",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
+          "lineNumber": 14
+        },
         "signature": [
           "React.LazyExoticComponent<(<ConditionProps extends unknown>({ actionGroup, onResetConditionsFor, children, ...otherProps }: React.PropsWithChildren<",
           "AlertConditionsGroupProps",
@@ -213,7 +246,10 @@
         "type": "Function",
         "label": "AlertEdit",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx#L17",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
+          "lineNumber": 17
+        },
         "signature": [
           "(props: ",
           "AlertEditProps",
@@ -227,7 +263,10 @@
         "type": "Function",
         "label": "ConnectorAddFlyout",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "(props: ",
           "ConnectorAddFlyoutProps",
@@ -241,7 +280,10 @@
         "type": "Function",
         "label": "ConnectorEditFlyout",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "(props: ",
           "ConnectorEditFlyoutProps",
@@ -255,7 +297,10 @@
         "type": "Function",
         "label": "ForLastExpression",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "(props: ",
           "ForLastExpressionProps",
@@ -282,7 +327,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/jira/jira.tsx#L63",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/jira/jira.tsx",
+          "lineNumber": 63
+        },
         "initialIsOpen": false
       },
       {
@@ -304,7 +352,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/resilient/resilient.tsx#L68",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/resilient/resilient.tsx",
+          "lineNumber": 68
+        },
         "initialIsOpen": false
       },
       {
@@ -325,7 +376,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L88"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 88
+            }
           },
           {
             "type": "Array",
@@ -335,7 +389,10 @@
               "string[]"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L88"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 88
+            }
           }
         ],
         "signature": [
@@ -351,7 +408,10 @@
         ],
         "description": [],
         "label": "getFields",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L88",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+          "lineNumber": 88
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -374,7 +434,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L33"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 33
+            }
           },
           {
             "type": "string",
@@ -384,7 +447,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L34"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 34
+            }
           },
           {
             "type": "Array",
@@ -394,7 +460,10 @@
               "string[]"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L35"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 35
+            }
           }
         ],
         "signature": [
@@ -418,7 +487,10 @@
         ],
         "description": [],
         "label": "getIndexOptions",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L32",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+          "lineNumber": 32
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -432,7 +504,10 @@
         ],
         "description": [],
         "label": "getIndexPatterns",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L23",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+          "lineNumber": 23
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -456,7 +531,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx#L64",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx",
+          "lineNumber": 64
+        },
         "initialIsOpen": false
       },
       {
@@ -478,7 +556,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx#L99",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/servicenow.tsx",
+          "lineNumber": 99
+        },
         "initialIsOpen": false
       },
       {
@@ -493,7 +574,10 @@
               "{ type: string; name: string; }[]"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts#L25"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+              "lineNumber": 25
+            }
           }
         ],
         "signature": [
@@ -501,7 +585,10 @@
         ],
         "description": [],
         "label": "getTimeFieldOptions",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+          "lineNumber": 24
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -518,7 +605,10 @@
               "number"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+              "lineNumber": 11
+            }
           }
         ],
         "signature": [
@@ -534,7 +624,10 @@
         ],
         "description": [],
         "label": "getTimeOptions",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+          "lineNumber": 11
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -570,7 +663,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+              "lineNumber": 11
+            }
           },
           {
             "type": "string",
@@ -580,12 +676,18 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+              "lineNumber": 11
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -594,7 +696,10 @@
         "type": "Function",
         "label": "GroupByExpression",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "(props: ",
           "GroupByExpressionProps",
@@ -640,7 +745,10 @@
                 "type": "Object",
                 "label": "http",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts#L13",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts",
+                  "lineNumber": 13
+                },
                 "signature": [
                   {
                     "pluginId": "core",
@@ -652,12 +760,18 @@
                 ]
               }
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts",
+              "lineNumber": 13
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -666,7 +780,10 @@
         "type": "Function",
         "label": "OfExpression",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+          "lineNumber": 16
+        },
         "signature": [
           "(props: ",
           "OfExpressionProps",
@@ -680,7 +797,10 @@
         "type": "Function",
         "label": "ThresholdExpression",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "(props: ",
           "ThresholdExpressionProps",
@@ -694,7 +814,10 @@
         "type": "Function",
         "label": "ValueExpression",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "(props: ",
           "ValueExpressionProps",
@@ -708,7 +831,10 @@
         "type": "Function",
         "label": "WhenExpression",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "(props: ",
           "WhenExpressionProps",
@@ -731,7 +857,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions/common/types.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -739,7 +868,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions/common/types.ts#L12"
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 12
+            }
           },
           {
             "tags": [],
@@ -747,7 +879,10 @@
             "type": "boolean",
             "label": "enabled",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions/common/types.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -755,7 +890,10 @@
             "type": "boolean",
             "label": "enabledInConfig",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions/common/types.ts#L14"
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -763,7 +901,10 @@
             "type": "boolean",
             "label": "enabledInLicense",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions/common/types.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -771,13 +912,19 @@
             "type": "CompoundType",
             "label": "minimumLicenseRequired",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions/common/types.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions/common/types.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/actions/common/types.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -793,7 +940,10 @@
             "type": "string",
             "label": "name",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L156"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 156
+            }
           },
           {
             "tags": [],
@@ -801,7 +951,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L157"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 157
+            }
           },
           {
             "tags": [],
@@ -809,13 +962,19 @@
             "type": "CompoundType",
             "label": "useWithTripleBracesInTemplates",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L158",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 158
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L155",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 155
+        },
         "initialIsOpen": false
       },
       {
@@ -831,7 +990,10 @@
             "type": "string",
             "label": "text",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L15"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 15
+            }
           },
           {
             "tags": [],
@@ -839,7 +1001,10 @@
             "type": "boolean",
             "label": "fieldRequired",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -847,7 +1012,10 @@
             "type": "string",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -855,13 +1023,19 @@
             "type": "Array",
             "label": "validNormalizedTypes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "string[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -877,7 +1051,10 @@
             "type": "string",
             "label": "group",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts/common/alert.ts#L44"
+            "source": {
+              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "lineNumber": 44
+            }
           },
           {
             "tags": [],
@@ -885,7 +1062,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts/common/alert.ts#L45"
+            "source": {
+              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "lineNumber": 45
+            }
           },
           {
             "tags": [],
@@ -893,7 +1073,10 @@
             "type": "string",
             "label": "actionTypeId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts/common/alert.ts#L46"
+            "source": {
+              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "lineNumber": 46
+            }
           },
           {
             "tags": [],
@@ -901,7 +1084,10 @@
             "type": "Object",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts/common/alert.ts#L47",
+            "source": {
+              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "lineNumber": 47
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -913,7 +1099,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts/common/alert.ts#L43",
+        "source": {
+          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "lineNumber": 43
+        },
         "initialIsOpen": false
       },
       {
@@ -939,7 +1128,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L221"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 221
+            }
           },
           {
             "tags": [],
@@ -947,7 +1139,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L222"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 222
+            }
           },
           {
             "tags": [],
@@ -955,7 +1150,10 @@
             "type": "string",
             "label": "iconClass",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L223"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 223
+            }
           },
           {
             "tags": [],
@@ -963,7 +1161,10 @@
             "type": "CompoundType",
             "label": "documentationUrl",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L224",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 224
+            },
             "signature": [
               "string | ((docLinks: ",
               {
@@ -982,7 +1183,10 @@
             "type": "Function",
             "label": "validate",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L225",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 225
+            },
             "signature": [
               "(alertParams: Params) => ",
               {
@@ -1000,7 +1204,10 @@
             "type": "Function",
             "label": "alertParamsExpression",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L226",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 226
+            },
             "signature": [
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<",
               {
@@ -1019,7 +1226,10 @@
             "type": "boolean",
             "label": "requiresAppContext",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L229"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 229
+            }
           },
           {
             "tags": [],
@@ -1027,13 +1237,19 @@
             "type": "string",
             "label": "defaultActionMessage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L230",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 230
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L220",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 220
+        },
         "initialIsOpen": false
       },
       {
@@ -1059,7 +1275,10 @@
             "type": "Uncategorized",
             "label": "alertParams",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L203",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 203
+            },
             "signature": [
               "Params"
             ]
@@ -1070,7 +1289,10 @@
             "type": "string",
             "label": "alertInterval",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L204"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 204
+            }
           },
           {
             "tags": [],
@@ -1078,7 +1300,10 @@
             "type": "string",
             "label": "alertThrottle",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L205"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 205
+            }
           },
           {
             "tags": [],
@@ -1086,7 +1311,10 @@
             "type": "CompoundType",
             "label": "alertNotifyWhen",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L206",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 206
+            },
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
             ]
@@ -1097,7 +1325,10 @@
             "type": "Function",
             "label": "setAlertParams",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L207",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 207
+            },
             "signature": [
               "<Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void"
             ]
@@ -1108,7 +1339,10 @@
             "type": "Function",
             "label": "setAlertProperty",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L208",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 208
+            },
             "signature": [
               "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
               {
@@ -1127,7 +1361,10 @@
             "type": "Object",
             "label": "errors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L212",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 212
+            },
             "signature": [
               {
                 "pluginId": "triggersActionsUi",
@@ -1144,7 +1381,10 @@
             "type": "string",
             "label": "defaultActionGroupId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L213"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 213
+            }
           },
           {
             "tags": [],
@@ -1152,7 +1392,10 @@
             "type": "Array",
             "label": "actionGroups",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L214",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 214
+            },
             "signature": [
               {
                 "pluginId": "alerts",
@@ -1170,7 +1413,10 @@
             "type": "Uncategorized",
             "label": "metadata",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L215",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 215
+            },
             "signature": [
               "MetaData | undefined"
             ]
@@ -1181,7 +1427,10 @@
             "type": "Object",
             "label": "charts",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L216",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 216
+            },
             "signature": [
               {
                 "pluginId": "charts",
@@ -1198,7 +1447,10 @@
             "type": "Object",
             "label": "data",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L217",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 217
+            },
             "signature": [
               {
                 "pluginId": "data",
@@ -1210,7 +1462,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L198",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 198
+        },
         "initialIsOpen": false
       },
       {
@@ -1226,7 +1481,10 @@
             "type": "string",
             "label": "text",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L9"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 9
+            }
           },
           {
             "tags": [],
@@ -1234,7 +1492,10 @@
             "type": "string",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L10"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 10
+            }
           },
           {
             "tags": [],
@@ -1242,10 +1503,16 @@
             "type": "number",
             "label": "requiredValues",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 11
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -1261,7 +1528,10 @@
             "type": "string",
             "label": "text",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L22"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 22
+            }
           },
           {
             "tags": [],
@@ -1269,7 +1539,10 @@
             "type": "boolean",
             "label": "sizeRequired",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L23"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 23
+            }
           },
           {
             "tags": [],
@@ -1277,7 +1550,10 @@
             "type": "string",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L24"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -1285,13 +1561,19 @@
             "type": "Array",
             "label": "validNormalizedTypes",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+              "lineNumber": 25
+            },
             "signature": [
               "string[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/types.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -1307,13 +1589,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L234",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 234
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L233",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 233
+        },
         "initialIsOpen": false
       },
       {
@@ -1329,7 +1617,10 @@
             "type": "string",
             "label": "label",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L19"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 19
+            }
           },
           {
             "tags": [],
@@ -1337,13 +1628,19 @@
             "type": "Array",
             "label": "options",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L20",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 20
+            },
             "signature": [
               "{ value: string; label: string; }[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L18",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+          "lineNumber": 18
+        },
         "initialIsOpen": false
       },
       {
@@ -1376,7 +1673,10 @@
             "type": "Object",
             "label": "data",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L35",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 35
+            },
             "signature": [
               {
                 "pluginId": "data",
@@ -1393,7 +1693,10 @@
             "type": "Object",
             "label": "charts",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L36",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 36
+            },
             "signature": [
               {
                 "pluginId": "charts",
@@ -1410,7 +1713,10 @@
             "type": "Object",
             "label": "alerts",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L37",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 37
+            },
             "signature": [
               {
                 "pluginId": "alerts",
@@ -1428,7 +1734,10 @@
             "type": "Object",
             "label": "spaces",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L38",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 38
+            },
             "signature": [
               {
                 "pluginId": "spacesOss",
@@ -1446,7 +1755,10 @@
             "type": "Object",
             "label": "storage",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L39",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 39
+            },
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -1464,7 +1776,10 @@
             "type": "Function",
             "label": "setBreadcrumbs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L40",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 40
+            },
             "signature": [
               "(crumbs: ",
               "EuiBreadcrumb",
@@ -1477,7 +1792,10 @@
             "type": "Object",
             "label": "actionTypeRegistry",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L41",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 41
+            },
             "signature": [
               "Pick<",
               {
@@ -1504,7 +1822,10 @@
             "type": "Object",
             "label": "alertTypeRegistry",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L42",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 42
+            },
             "signature": [
               "Pick<",
               {
@@ -1531,7 +1852,10 @@
             "type": "Object",
             "label": "history",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L43",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 43
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -1549,7 +1873,10 @@
             "type": "Array",
             "label": "kibanaFeatures",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L44",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 44
+            },
             "signature": [
               {
                 "pluginId": "features",
@@ -1567,13 +1894,19 @@
             "type": "Object",
             "label": "element",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L45",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+              "lineNumber": 45
+            },
             "signature": [
               "HTMLElement"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/app.tsx#L34",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+          "lineNumber": 34
+        },
         "initialIsOpen": false
       },
       {
@@ -1589,13 +1922,19 @@
             "type": "Object",
             "label": "errors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L110",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+              "lineNumber": 110
+            },
             "signature": [
               "Record<string, any>"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L109",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 109
+        },
         "initialIsOpen": false
       }
     ],
@@ -1606,7 +1945,10 @@
         "label": "AGGREGATION_TYPES",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -1615,7 +1957,10 @@
         "label": "AlertFlyoutCloseReason",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L66",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 66
+        },
         "initialIsOpen": false
       },
       {
@@ -1624,7 +1969,10 @@
         "label": "COMPARATORS",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -1633,7 +1981,10 @@
         "label": "TIME_UNITS",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/constants/time_units.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/constants/time_units.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       }
     ],
@@ -1644,7 +1995,10 @@
         "label": "ActionConnector",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L142",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 142
+        },
         "signature": [
           "PreConfiguredActionConnector",
           " | ",
@@ -1659,7 +2013,10 @@
         "label": "ActionGroupWithCondition",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/alert_conditions.tsx#L16",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_form/alert_conditions.tsx",
+          "lineNumber": 16
+        },
         "signature": [
           {
             "pluginId": "alerts",
@@ -1686,7 +2043,10 @@
         "label": "ActionTypeRegistryContract",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L51",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 51
+        },
         "signature": [
           "{ get: (id: string) => ActionTypeModel<ActionConnector, ActionParams, any>; register: (objectType: ActionTypeModel<ActionConnector, ActionParams, any>) => void; list: () => ActionTypeModel<ActionConnector, ActionParams, any>[]; has: (id: string) => boolean; }"
         ],
@@ -1698,7 +2058,10 @@
         "label": "ActionVariables",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L166",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 166
+        },
         "signature": [
           "AsActionVariables<\"params\" | \"state\"> & Partial<AsActionVariables<\"context\">>"
         ],
@@ -1710,7 +2073,10 @@
         "label": "Alert",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L33",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 33
+        },
         "signature": [
           "{ enabled: boolean; id: string; name: string; params: Record<string, unknown>; actions: AlertAction[]; muteAll: boolean; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
           {
@@ -1738,7 +2104,10 @@
         "label": "AlertTypeParams",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts/common/alert.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "{ [x: string]: unknown; }"
         ],
@@ -1750,7 +2119,10 @@
         "label": "AlertTypeRegistryContract",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/types.ts#L55",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+          "lineNumber": 55
+        },
         "signature": [
           "{ get: (id: string) => AlertTypeModel<Record<string, unknown>>; register: (objectType: AlertTypeModel<Record<string, unknown>>) => void; list: () => AlertTypeModel<Record<string, unknown>>[]; has: (id: string) => boolean; }"
         ],
@@ -1762,7 +2134,10 @@
         "type": "Array",
         "label": "DEFAULT_HIDDEN_ACTION_TYPES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "string[]"
         ],
@@ -1774,7 +2149,10 @@
         "type": "Array",
         "label": "DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+          "lineNumber": 16
+        },
         "signature": [
           "string[]"
         ],
@@ -1786,7 +2164,10 @@
         "type": "string",
         "label": "VIEW_LICENSE_OPTIONS_LINK",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "\"https://www.elastic.co/subscriptions\""
         ],
@@ -1810,7 +2191,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L20"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 20
+                }
               },
               {
                 "tags": [],
@@ -1818,7 +2202,10 @@
                 "type": "boolean",
                 "label": "fieldRequired",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L21",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 21
+                },
                 "signature": [
                   "false"
                 ]
@@ -1829,7 +2216,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L22",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 22
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -1846,7 +2236,10 @@
                 "type": "Array",
                 "label": "validNormalizedTypes",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L23",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 23
+                },
                 "signature": [
                   "never[]"
                 ]
@@ -1854,7 +2247,10 @@
             ],
             "description": [],
             "label": "count",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L19"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+              "lineNumber": 19
+            }
           },
           {
             "id": "def-public.builtInAggregationTypes.avg",
@@ -1867,7 +2263,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L26"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 26
+                }
               },
               {
                 "tags": [],
@@ -1875,7 +2274,10 @@
                 "type": "boolean",
                 "label": "fieldRequired",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L27",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 27
+                },
                 "signature": [
                   "true"
                 ]
@@ -1886,7 +2288,10 @@
                 "type": "Array",
                 "label": "validNormalizedTypes",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L28",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 28
+                },
                 "signature": [
                   "string[]"
                 ]
@@ -1897,7 +2302,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L29",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 29
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -1911,7 +2319,10 @@
             ],
             "description": [],
             "label": "avg",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L25"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+              "lineNumber": 25
+            }
           },
           {
             "id": "def-public.builtInAggregationTypes.sum",
@@ -1924,7 +2335,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L32"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 32
+                }
               },
               {
                 "tags": [],
@@ -1932,7 +2346,10 @@
                 "type": "boolean",
                 "label": "fieldRequired",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L33",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 33
+                },
                 "signature": [
                   "true"
                 ]
@@ -1943,7 +2360,10 @@
                 "type": "Array",
                 "label": "validNormalizedTypes",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L34",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 34
+                },
                 "signature": [
                   "string[]"
                 ]
@@ -1954,7 +2374,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L35",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 35
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -1968,7 +2391,10 @@
             ],
             "description": [],
             "label": "sum",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L31"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+              "lineNumber": 31
+            }
           },
           {
             "id": "def-public.builtInAggregationTypes.min",
@@ -1981,7 +2407,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L38"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 38
+                }
               },
               {
                 "tags": [],
@@ -1989,7 +2418,10 @@
                 "type": "boolean",
                 "label": "fieldRequired",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L39",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 39
+                },
                 "signature": [
                   "true"
                 ]
@@ -2000,7 +2432,10 @@
                 "type": "Array",
                 "label": "validNormalizedTypes",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L40",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 40
+                },
                 "signature": [
                   "string[]"
                 ]
@@ -2011,7 +2446,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L41",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 41
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -2025,7 +2463,10 @@
             ],
             "description": [],
             "label": "min",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L37"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+              "lineNumber": 37
+            }
           },
           {
             "id": "def-public.builtInAggregationTypes.max",
@@ -2038,7 +2479,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L44"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 44
+                }
               },
               {
                 "tags": [],
@@ -2046,7 +2490,10 @@
                 "type": "boolean",
                 "label": "fieldRequired",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L45",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 45
+                },
                 "signature": [
                   "true"
                 ]
@@ -2057,7 +2504,10 @@
                 "type": "Array",
                 "label": "validNormalizedTypes",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L46",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 46
+                },
                 "signature": [
                   "string[]"
                 ]
@@ -2068,7 +2518,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L47",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                  "lineNumber": 47
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -2082,12 +2535,18 @@
             ],
             "description": [],
             "label": "max",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L43"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+              "lineNumber": 43
+            }
           }
         ],
         "description": [],
         "label": "builtInAggregationTypes",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts#L18",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+          "lineNumber": 18
+        },
         "initialIsOpen": false
       },
       {
@@ -2106,7 +2565,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L21"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 21
+                }
               },
               {
                 "tags": [],
@@ -2114,7 +2576,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L24",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 24
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -2131,12 +2596,18 @@
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L25"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 25
+                }
               }
             ],
             "description": [],
             "label": "[COMPARATORS.GREATER_THAN]",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+              "lineNumber": 20
+            }
           },
           {
             "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS]",
@@ -2149,7 +2620,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L28"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 28
+                }
               },
               {
                 "tags": [],
@@ -2157,7 +2631,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L34",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 34
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -2174,12 +2651,18 @@
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L35"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 35
+                }
               }
             ],
             "description": [],
             "label": "[COMPARATORS.GREATER_THAN_OR_EQUALS]",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L27"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+              "lineNumber": 27
+            }
           },
           {
             "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN]",
@@ -2192,7 +2675,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L38"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 38
+                }
               },
               {
                 "tags": [],
@@ -2200,7 +2686,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L41",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 41
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -2217,12 +2706,18 @@
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L42"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 42
+                }
               }
             ],
             "description": [],
             "label": "[COMPARATORS.LESS_THAN]",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L37"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+              "lineNumber": 37
+            }
           },
           {
             "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS]",
@@ -2235,7 +2730,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L45"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 45
+                }
               },
               {
                 "tags": [],
@@ -2243,7 +2741,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L51",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 51
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -2260,12 +2761,18 @@
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L52"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 52
+                }
               }
             ],
             "description": [],
             "label": "[COMPARATORS.LESS_THAN_OR_EQUALS]",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L44"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+              "lineNumber": 44
+            }
           },
           {
             "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN]",
@@ -2278,7 +2785,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L55"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 55
+                }
               },
               {
                 "tags": [],
@@ -2286,7 +2796,10 @@
                 "type": "Enum",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L58",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 58
+                },
                 "signature": [
                   {
                     "pluginId": "triggersActionsUi",
@@ -2303,17 +2816,26 @@
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L59"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                  "lineNumber": 59
+                }
               }
             ],
             "description": [],
             "label": "[COMPARATORS.BETWEEN]",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L54"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+              "lineNumber": 54
+            }
           }
         ],
         "description": [],
         "label": "builtInComparators",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts#L19",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+          "lineNumber": 19
+        },
         "initialIsOpen": false
       },
       {
@@ -2332,7 +2854,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L13"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                  "lineNumber": 13
+                }
               },
               {
                 "tags": [],
@@ -2340,7 +2865,10 @@
                 "type": "boolean",
                 "label": "sizeRequired",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L19",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                  "lineNumber": 19
+                },
                 "signature": [
                   "false"
                 ]
@@ -2351,7 +2879,10 @@
                 "type": "string",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L20"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                  "lineNumber": 20
+                }
               },
               {
                 "tags": [],
@@ -2359,7 +2890,10 @@
                 "type": "Array",
                 "label": "validNormalizedTypes",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L21",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                  "lineNumber": 21
+                },
                 "signature": [
                   "never[]"
                 ]
@@ -2367,7 +2901,10 @@
             ],
             "description": [],
             "label": "all",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L12"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+              "lineNumber": 12
+            }
           },
           {
             "id": "def-public.builtInGroupByTypes.top",
@@ -2380,7 +2917,10 @@
                 "type": "string",
                 "label": "text",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L24"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                  "lineNumber": 24
+                }
               },
               {
                 "tags": [],
@@ -2388,7 +2928,10 @@
                 "type": "boolean",
                 "label": "sizeRequired",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L30",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                  "lineNumber": 30
+                },
                 "signature": [
                   "true"
                 ]
@@ -2399,7 +2942,10 @@
                 "type": "string",
                 "label": "value",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L31"
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                  "lineNumber": 31
+                }
               },
               {
                 "tags": [],
@@ -2407,7 +2953,10 @@
                 "type": "Array",
                 "label": "validNormalizedTypes",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L32",
+                "source": {
+                  "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                  "lineNumber": 32
+                },
                 "signature": [
                   "string[]"
                 ]
@@ -2415,12 +2964,18 @@
             ],
             "description": [],
             "label": "top",
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L23"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+              "lineNumber": 23
+            }
           }
         ],
         "description": [],
         "label": "builtInGroupByTypes",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -2434,7 +2989,10 @@
             "type": "string",
             "label": "text",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L93"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 93
+            }
           },
           {
             "tags": [],
@@ -2442,12 +3000,18 @@
             "type": "string",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L99"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+              "lineNumber": 99
+            }
           }
         ],
         "description": [],
         "label": "firstFieldOption",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts#L92",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+          "lineNumber": 92
+        },
         "initialIsOpen": false
       }
     ],
@@ -2464,7 +3028,10 @@
           "type": "Object",
           "label": "actionTypeRegistry",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L42",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 42
+          },
           "signature": [
             {
               "pluginId": "triggersActionsUi",
@@ -2490,7 +3057,10 @@
           "type": "Object",
           "label": "alertTypeRegistry",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L43",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 43
+          },
           "signature": [
             {
               "pluginId": "triggersActionsUi",
@@ -2511,7 +3081,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L41",
+      "source": {
+        "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+        "lineNumber": 41
+      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2528,7 +3101,10 @@
           "type": "Object",
           "label": "actionTypeRegistry",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L47",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 47
+          },
           "signature": [
             {
               "pluginId": "triggersActionsUi",
@@ -2554,7 +3130,10 @@
           "type": "Object",
           "label": "alertTypeRegistry",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L48",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 48
+          },
           "signature": [
             {
               "pluginId": "triggersActionsUi",
@@ -2580,7 +3159,10 @@
           "type": "Function",
           "label": "getAddConnectorFlyout",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L49",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 49
+          },
           "signature": [
             "(props: Pick<",
             {
@@ -2607,7 +3189,10 @@
           "type": "Function",
           "label": "getEditConnectorFlyout",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L52",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 52
+          },
           "signature": [
             "(props: Pick<",
             {
@@ -2634,7 +3219,10 @@
           "type": "Function",
           "label": "getAddAlertFlyout",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L55",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 55
+          },
           "signature": [
             "(props: Pick<",
             {
@@ -2661,7 +3249,10 @@
           "type": "Function",
           "label": "getEditAlertFlyout",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L58",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "lineNumber": 58
+          },
           "signature": [
             "(props: Pick<",
             {
@@ -2683,7 +3274,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/public/plugin.ts#L46",
+      "source": {
+        "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+        "lineNumber": 46
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -2708,12 +3302,18 @@
               "unknown"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L46"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 46
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L46",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+          "lineNumber": 46
+        },
         "initialIsOpen": false
       },
       {
@@ -2733,12 +3333,18 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L128"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 128
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L128",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+          "lineNumber": 128
+        },
         "initialIsOpen": false
       }
     ],
@@ -2751,7 +3357,10 @@
         "label": "CoreQueryParams",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L40",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+          "lineNumber": 40
+        },
         "signature": [
           "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
         ],
@@ -2763,7 +3372,10 @@
         "type": "number",
         "label": "DEFAULT_GROUPS",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/index.ts#L23",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
+          "lineNumber": 23
+        },
         "signature": [
           "100"
         ],
@@ -2775,7 +3387,10 @@
         "type": "number",
         "label": "MAX_GROUPS",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/index.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
+          "lineNumber": 22
+        },
         "signature": [
           "1000"
         ],
@@ -2787,7 +3402,10 @@
         "type": "number",
         "label": "MAX_INTERVALS",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/index.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
+          "lineNumber": 21
+        },
         "signature": [
           "1000"
         ],
@@ -2799,7 +3417,10 @@
         "label": "TimeSeriesQuery",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts#L29",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
+          "lineNumber": 29
+        },
         "signature": [
           "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
         ],
@@ -2820,7 +3441,10 @@
             "description": [
               "// name of the indices to search"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "Type",
               "<string | string[]>"
@@ -2834,7 +3458,10 @@
             "description": [
               "// field in index used for date/time"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L22",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "Type",
               "<string>"
@@ -2848,7 +3475,10 @@
             "description": [
               "// aggregation type"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L24",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 24
+            },
             "signature": [
               "Type",
               "<string>"
@@ -2862,7 +3492,10 @@
             "description": [
               "// aggregation field"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 26
+            },
             "signature": [
               "Type",
               "<string | undefined>"
@@ -2876,7 +3509,10 @@
             "description": [
               "// how to group"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "Type",
               "<string>"
@@ -2890,7 +3526,10 @@
             "description": [
               "// field to group on (for groupBy: top)"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 30
+            },
             "signature": [
               "Type",
               "<string | undefined>"
@@ -2904,7 +3543,10 @@
             "description": [
               "// limit on number of groups returned"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "Type",
               "<number | undefined>"
@@ -2918,7 +3560,10 @@
             "description": [
               "// size of time window for date range aggregations"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "Type",
               "<number>"
@@ -2932,7 +3577,10 @@
             "description": [
               "// units of time window for date range aggregations"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L36",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+              "lineNumber": 36
+            },
             "signature": [
               "Type",
               "<string>"
@@ -2941,7 +3589,10 @@
         ],
         "description": [],
         "label": "CoreQueryParamsSchemaProperties",
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       }
     ],
@@ -2958,7 +3609,10 @@
           "type": "Object",
           "label": "data",
           "description": [],
-          "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/plugin.ts#L16",
+          "source": {
+            "path": "x-pack/plugins/triggers_actions_ui/server/plugin.ts",
+            "lineNumber": 16
+          },
           "signature": [
             "{ timeSeriesQuery: typeof ",
             {
@@ -2972,7 +3626,10 @@
           ]
         }
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/server/plugin.ts#L15",
+      "source": {
+        "path": "x-pack/plugins/triggers_actions_ui/server/plugin.ts",
+        "lineNumber": 15
+      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -2994,7 +3651,10 @@
             "type": "Array",
             "label": "results",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/common/data/index.ts#L9",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+              "lineNumber": 9
+            },
             "signature": [
               {
                 "pluginId": "triggersActionsUi",
@@ -3007,7 +3667,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/common/data/index.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -3023,7 +3686,10 @@
             "type": "string",
             "label": "group",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/common/data/index.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -3031,7 +3697,10 @@
             "type": "Array",
             "label": "metrics",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/common/data/index.ts#L14",
+            "source": {
+              "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+              "lineNumber": 14
+            },
             "signature": [
               {
                 "pluginId": "triggersActionsUi",
@@ -3044,7 +3713,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/common/data/index.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       }
     ],
@@ -3056,7 +3728,10 @@
         "label": "MetricResult",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui/common/data/index.ts#L17",
+        "source": {
+          "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+          "lineNumber": 17
+        },
         "signature": [
           "[string, number]"
         ],

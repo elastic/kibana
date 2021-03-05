@@ -17,7 +17,10 @@
             "type": "boolean",
             "label": "success",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L24"
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 24
+            }
           },
           {
             "tags": [],
@@ -25,7 +28,10 @@
             "type": "number",
             "label": "remainder",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L25"
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 25
+            }
           },
           {
             "tags": [],
@@ -33,7 +39,10 @@
             "type": "Array",
             "label": "docs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L26",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 26
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -51,13 +60,19 @@
             "type": "Any",
             "label": "error",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L23",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 23
+        },
         "initialIsOpen": false
       },
       {
@@ -73,10 +88,16 @@
             "type": "string",
             "label": "message",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L26"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 26
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L25",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 25
+        },
         "initialIsOpen": false
       },
       {
@@ -92,7 +113,10 @@
             "type": "boolean",
             "label": "isIndexingTriggered",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L14"
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -100,7 +124,10 @@
             "type": "Function",
             "label": "onFileUpload",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L15",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 15
+            },
             "signature": [
               "(geojsonFile: GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>, name: string, previewCoverage: number) => void"
             ]
@@ -111,7 +138,10 @@
             "type": "Function",
             "label": "onFileRemove",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "() => void"
             ]
@@ -122,7 +152,10 @@
             "type": "Function",
             "label": "onIndexReady",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "(indexReady: boolean) => void"
             ]
@@ -133,7 +166,10 @@
             "type": "Function",
             "label": "onIndexingComplete",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "(results: { indexDataResp: ",
               {
@@ -160,13 +196,19 @@
             "type": "Function",
             "label": "onIndexingError",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L22",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "() => void"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -193,12 +235,18 @@
                   "ArrayBuffer"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L37"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 37
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L37"
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 37
+            }
           },
           {
             "id": "def-public.IImporter.initializeImport",
@@ -249,7 +297,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L39"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 39
+                }
               },
               {
                 "type": "Object",
@@ -265,7 +316,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L40"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 40
+                }
               },
               {
                 "type": "Object",
@@ -281,7 +335,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L41"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 41
+                }
               },
               {
                 "type": "Object",
@@ -297,12 +354,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L42"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 42
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L38"
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 38
+            }
           },
           {
             "id": "def-public.IImporter.import",
@@ -329,7 +392,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L45"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 45
+                }
               },
               {
                 "type": "string",
@@ -339,7 +405,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L46"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 46
+                }
               },
               {
                 "type": "string",
@@ -349,7 +418,10 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L47"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 47
+                }
               },
               {
                 "type": "Function",
@@ -359,15 +431,24 @@
                   "(progress: number) => void"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L48"
+                "source": {
+                  "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+                  "lineNumber": 48
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L44"
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 44
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L36",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 36
+        },
         "initialIsOpen": false
       },
       {
@@ -383,7 +464,10 @@
             "type": "Object",
             "label": "settings",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L11",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 11
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -400,7 +484,10 @@
             "type": "Object",
             "label": "mappings",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 12
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -417,7 +504,10 @@
             "type": "Object",
             "label": "pipeline",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L13",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 13
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -429,7 +519,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -445,7 +538,10 @@
             "type": "string",
             "label": "excludeLinesPattern",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L31",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 31
+            },
             "signature": [
               "string | undefined"
             ]
@@ -456,7 +552,10 @@
             "type": "string",
             "label": "multilineStartPattern",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "string | undefined"
             ]
@@ -467,7 +566,10 @@
             "type": "Object",
             "label": "importConfig",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 33
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -479,7 +581,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L30",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 30
+        },
         "initialIsOpen": false
       },
       {
@@ -495,7 +600,10 @@
             "type": "number",
             "label": "item",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -503,7 +611,10 @@
             "type": "string",
             "label": "reason",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L21"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 21
+            }
           },
           {
             "tags": [],
@@ -511,7 +622,10 @@
             "type": "CompoundType",
             "label": "doc",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L22",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 22
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -523,7 +637,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L19",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 19
+        },
         "initialIsOpen": false
       },
       {
@@ -539,7 +656,10 @@
             "type": "boolean",
             "label": "success",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L9"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 9
+            }
           },
           {
             "tags": [],
@@ -547,7 +667,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L10"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 10
+            }
           },
           {
             "tags": [],
@@ -555,7 +678,10 @@
             "type": "string",
             "label": "index",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L11",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 11
+            },
             "signature": [
               "string | undefined"
             ]
@@ -566,7 +692,10 @@
             "type": "string",
             "label": "pipelineId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "string | undefined"
             ]
@@ -577,7 +706,10 @@
             "type": "number",
             "label": "docCount",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -585,7 +717,10 @@
             "type": "Array",
             "label": "failures",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L14",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 14
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -603,7 +738,10 @@
             "type": "Any",
             "label": "error",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L15",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 15
+            },
             "signature": [
               "any"
             ]
@@ -614,13 +752,19 @@
             "type": "CompoundType",
             "label": "ingestError",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -636,7 +780,10 @@
             "type": "boolean",
             "label": "success",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 17
+            }
           },
           {
             "tags": [],
@@ -644,7 +791,10 @@
             "type": "Array",
             "label": "failures",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "any[] | undefined"
             ]
@@ -655,7 +805,10 @@
             "type": "number",
             "label": "docCount",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "number | undefined"
             ]
@@ -666,13 +819,19 @@
             "type": "Any",
             "label": "error",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L20",
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 20
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/importer/types.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       },
       {
@@ -688,7 +847,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L53"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 53
+            }
           },
           {
             "tags": [],
@@ -696,13 +858,19 @@
             "type": "Array",
             "label": "processors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L54",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "any[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L52",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 52
+        },
         "initialIsOpen": false
       },
       {
@@ -718,7 +886,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -726,7 +897,10 @@
             "type": "Object",
             "label": "pipeline",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L49",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 49
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -738,7 +912,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L47",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 47
+        },
         "initialIsOpen": false
       },
       {
@@ -754,7 +931,10 @@
             "type": "Object",
             "label": "_meta",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L39",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 39
+            },
             "signature": [
               "{ created_by: string; } | undefined"
             ]
@@ -765,13 +945,19 @@
             "type": "Object",
             "label": "properties",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L42",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 42
+            },
             "signature": [
               "{ [key: string]: any; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L38",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 38
+        },
         "initialIsOpen": false
       },
       {
@@ -787,7 +973,10 @@
             "type": "string",
             "label": "pipeline",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "string | undefined"
             ]
@@ -798,7 +987,10 @@
             "type": "string",
             "label": "index",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L33"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 33
+            }
           },
           {
             "tags": [],
@@ -806,7 +998,10 @@
             "type": "Array",
             "label": "body",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "any[]"
             ]
@@ -817,13 +1012,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L31",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       }
     ],
@@ -835,7 +1036,10 @@
         "type": "number",
         "label": "ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "1073741274"
         ],
@@ -847,7 +1051,10 @@
         "type": "string",
         "label": "FILE_SIZE_DISPLAY_FORMAT",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "\"0,0.[0] b\""
         ],
@@ -859,7 +1066,10 @@
         "label": "ImportDoc",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L29",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 29
+        },
         "signature": [
           "string | object | ",
           {
@@ -878,7 +1088,10 @@
         "type": "string",
         "label": "INDEX_META_DATA_CREATED_BY",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L19",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 19
+        },
         "signature": [
           "\"ml-file-data-visualizer\""
         ],
@@ -890,7 +1103,10 @@
         "type": "string",
         "label": "MAX_FILE_SIZE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "\"100MB\""
         ],
@@ -902,7 +1118,10 @@
         "type": "number",
         "label": "MAX_FILE_SIZE_BYTES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "104857600"
         ],
@@ -914,7 +1133,10 @@
         "type": "number",
         "label": "MB",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -923,7 +1145,10 @@
         "type": "string",
         "label": "UI_SETTING_MAX_FILE_SIZE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 8
+        },
         "signature": [
           "\"fileUpload:maxFileSize\""
         ],
@@ -937,7 +1162,10 @@
       "label": "FileUploadPluginStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/public/plugin.ts#L21",
+      "source": {
+        "path": "x-pack/plugins/file_upload/public/plugin.ts",
+        "lineNumber": 21
+      },
       "signature": [
         "FileUploadStartApi"
       ],
@@ -970,10 +1198,16 @@
             "type": "string",
             "label": "message",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L26"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 26
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L25",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 25
+        },
         "initialIsOpen": false
       },
       {
@@ -989,7 +1223,10 @@
             "type": "number",
             "label": "item",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 20
+            }
           },
           {
             "tags": [],
@@ -997,7 +1234,10 @@
             "type": "string",
             "label": "reason",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L21"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 21
+            }
           },
           {
             "tags": [],
@@ -1005,7 +1245,10 @@
             "type": "CompoundType",
             "label": "doc",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L22",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 22
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -1017,7 +1260,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L19",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 19
+        },
         "initialIsOpen": false
       },
       {
@@ -1033,7 +1279,10 @@
             "type": "boolean",
             "label": "success",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L9"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 9
+            }
           },
           {
             "tags": [],
@@ -1041,7 +1290,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L10"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 10
+            }
           },
           {
             "tags": [],
@@ -1049,7 +1301,10 @@
             "type": "string",
             "label": "index",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L11",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 11
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1060,7 +1315,10 @@
             "type": "string",
             "label": "pipelineId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1071,7 +1329,10 @@
             "type": "number",
             "label": "docCount",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L13"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 13
+            }
           },
           {
             "tags": [],
@@ -1079,7 +1340,10 @@
             "type": "Array",
             "label": "failures",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L14",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 14
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -1097,7 +1361,10 @@
             "type": "Any",
             "label": "error",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L15",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 15
+            },
             "signature": [
               "any"
             ]
@@ -1108,13 +1375,19 @@
             "type": "CompoundType",
             "label": "ingestError",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -1130,7 +1403,10 @@
             "type": "string",
             "label": "description",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L53"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 53
+            }
           },
           {
             "tags": [],
@@ -1138,13 +1414,19 @@
             "type": "Array",
             "label": "processors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L54",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 54
+            },
             "signature": [
               "any[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L52",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 52
+        },
         "initialIsOpen": false
       },
       {
@@ -1160,7 +1442,10 @@
             "type": "string",
             "label": "id",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L48"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 48
+            }
           },
           {
             "tags": [],
@@ -1168,7 +1453,10 @@
             "type": "Object",
             "label": "pipeline",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L49",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 49
+            },
             "signature": [
               {
                 "pluginId": "fileUpload",
@@ -1180,7 +1468,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L47",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 47
+        },
         "initialIsOpen": false
       },
       {
@@ -1196,7 +1487,10 @@
             "type": "Object",
             "label": "_meta",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L39",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 39
+            },
             "signature": [
               "{ created_by: string; } | undefined"
             ]
@@ -1207,13 +1501,19 @@
             "type": "Object",
             "label": "properties",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L42",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 42
+            },
             "signature": [
               "{ [key: string]: any; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L38",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 38
+        },
         "initialIsOpen": false
       },
       {
@@ -1229,7 +1529,10 @@
             "type": "string",
             "label": "pipeline",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L32",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 32
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1240,7 +1543,10 @@
             "type": "string",
             "label": "index",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L33"
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 33
+            }
           },
           {
             "tags": [],
@@ -1248,7 +1554,10 @@
             "type": "Array",
             "label": "body",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "any[]"
             ]
@@ -1259,13 +1568,19 @@
             "label": "Unnamed",
             "tags": [],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 35
+            },
             "signature": [
               "any"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L31",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       }
     ],
@@ -1277,7 +1592,10 @@
         "type": "number",
         "label": "ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "1073741274"
         ],
@@ -1289,7 +1607,10 @@
         "type": "string",
         "label": "FILE_SIZE_DISPLAY_FORMAT",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 15
+        },
         "signature": [
           "\"0,0.[0] b\""
         ],
@@ -1301,7 +1622,10 @@
         "label": "ImportDoc",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/types.ts#L29",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 29
+        },
         "signature": [
           "string | object | ",
           {
@@ -1320,7 +1644,10 @@
         "type": "string",
         "label": "INDEX_META_DATA_CREATED_BY",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L19",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 19
+        },
         "signature": [
           "\"ml-file-data-visualizer\""
         ],
@@ -1332,7 +1659,10 @@
         "type": "string",
         "label": "MAX_FILE_SIZE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "\"100MB\""
         ],
@@ -1344,7 +1674,10 @@
         "type": "number",
         "label": "MAX_FILE_SIZE_BYTES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "104857600"
         ],
@@ -1356,7 +1689,10 @@
         "type": "number",
         "label": "MB",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -1365,7 +1701,10 @@
         "type": "string",
         "label": "UI_SETTING_MAX_FILE_SIZE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/file_upload/common/constants.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 8
+        },
         "signature": [
           "\"fileUpload:maxFileSize\""
         ],

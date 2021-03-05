@@ -17,7 +17,10 @@
             "type": "Object",
             "label": "kibana",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/canvas/public/index.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/canvas/public/index.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "{ services: ",
               {
@@ -47,7 +50,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/canvas/public/index.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/canvas/public/index.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       }
     ],
@@ -64,7 +70,10 @@
       "description": [
         "\nThese are the interfaces with your public contracts. You should export these\nfor other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces."
       ],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/canvas/public/plugin.tsx#L63",
+      "source": {
+        "path": "x-pack/plugins/canvas/public/plugin.tsx",
+        "lineNumber": 63
+      },
       "signature": [
         "CanvasApi"
       ],
@@ -77,7 +86,10 @@
       "label": "CanvasStart",
       "tags": [],
       "description": [],
-      "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/canvas/public/plugin.tsx#L64",
+      "source": {
+        "path": "x-pack/plugins/canvas/public/plugin.tsx",
+        "lineNumber": 64
+      },
       "signature": [
         "void"
       ],

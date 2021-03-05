@@ -20,7 +20,10 @@
         "type": "string",
         "label": "ID",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
+          "lineNumber": 20
+        },
         "signature": [
           "\".index-threshold\""
         ],
@@ -41,7 +44,10 @@
         "label": "Config",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/config.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/config.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "{ readonly enabled: boolean; }"
         ],
@@ -53,7 +59,10 @@
         "type": "string",
         "label": "STACK_ALERTS_FEATURE_ID",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/index.ts#L9",
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/index.ts",
+          "lineNumber": 9
+        },
         "signature": [
           "\"stackAlerts\""
         ],
@@ -67,7 +76,10 @@
         "type": "Object",
         "label": "configSchema",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/stack_alerts/common/config.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/stack_alerts/common/config.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "ObjectType",
           "<{ enabled: ",

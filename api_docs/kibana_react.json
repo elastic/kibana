@@ -58,12 +58,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L90"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                  "lineNumber": 90
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L90"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 90
+            }
           },
           {
             "id": "def-public.TableListView.UNSAFE_componentWillMount",
@@ -76,7 +82,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L111"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 111
+            }
           },
           {
             "id": "def-public.TableListView.componentWillUnmount",
@@ -89,7 +98,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L115"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 115
+            }
           },
           {
             "id": "def-public.TableListView.componentDidMount",
@@ -102,7 +114,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L120"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 120
+            }
           },
           {
             "tags": [],
@@ -110,7 +125,10 @@
             "type": "Function",
             "label": "debouncedFetch",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L124",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 124
+            },
             "signature": [
               "((filter: string) => Promise<void>) & _.Cancelable"
             ]
@@ -124,7 +142,10 @@
             ],
             "description": [],
             "label": "fetchItems",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L156",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 156
+            },
             "tags": [],
             "returnComment": []
           },
@@ -137,7 +158,10 @@
             ],
             "description": [],
             "label": "deleteSelectedItems",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L166",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 166
+            },
             "tags": [],
             "returnComment": []
           },
@@ -150,7 +174,10 @@
             ],
             "description": [],
             "label": "closeDeleteModal",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L196",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 196
+            },
             "tags": [],
             "returnComment": []
           },
@@ -163,7 +190,10 @@
             ],
             "description": [],
             "label": "openDeleteModal",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L200",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 200
+            },
             "tags": [],
             "returnComment": []
           },
@@ -189,15 +219,24 @@
                     "type": "string",
                     "label": "queryText",
                     "description": [],
-                    "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L204"
+                    "source": {
+                      "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                      "lineNumber": 204
+                    }
                   }
                 ],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L204"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                  "lineNumber": 204
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L204"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 204
+            }
           },
           {
             "id": "def-public.TableListView.hasNoItems",
@@ -210,7 +249,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L215"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 215
+            }
           },
           {
             "id": "def-public.TableListView.renderConfirmDeleteModal",
@@ -223,7 +265,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L223"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 223
+            }
           },
           {
             "id": "def-public.TableListView.renderListingLimitWarning",
@@ -236,7 +281,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L277"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 277
+            }
           },
           {
             "id": "def-public.TableListView.renderFetchError",
@@ -249,7 +297,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L319"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 319
+            }
           },
           {
             "id": "def-public.TableListView.renderNoItemsMessage",
@@ -262,7 +313,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L350"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 350
+            }
           },
           {
             "id": "def-public.TableListView.renderToolsLeft",
@@ -275,7 +329,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L364"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 364
+            }
           },
           {
             "id": "def-public.TableListView.renderTable",
@@ -288,7 +345,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L395"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 395
+            }
           },
           {
             "id": "def-public.TableListView.renderListingOrEmptyState",
@@ -301,7 +361,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L475"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 475
+            }
           },
           {
             "id": "def-public.TableListView.renderListing",
@@ -314,7 +377,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L483"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 483
+            }
           },
           {
             "id": "def-public.TableListView.renderPageContent",
@@ -327,7 +393,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L528"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 528
+            }
           },
           {
             "id": "def-public.TableListView.render",
@@ -340,10 +409,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L540"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 540
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L86",
+        "source": {
+          "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+          "lineNumber": 86
+        },
         "initialIsOpen": false
       },
       {
@@ -374,7 +449,10 @@
                 "type": "boolean",
                 "label": "allowEmptyRange",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L41",
+                "source": {
+                  "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                  "lineNumber": 41
+                },
                 "signature": [
                   "true"
                 ]
@@ -385,7 +463,10 @@
                 "type": "boolean",
                 "label": "fullWidth",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L42",
+                "source": {
+                  "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                  "lineNumber": 42
+                },
                 "signature": [
                   "false"
                 ]
@@ -396,7 +477,10 @@
                 "type": "boolean",
                 "label": "compressed",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L43",
+                "source": {
+                  "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                  "lineNumber": 43
+                },
                 "signature": [
                   "false"
                 ]
@@ -404,7 +488,10 @@
             ],
             "description": [],
             "label": "defaultProps",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L40"
+            "source": {
+              "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+              "lineNumber": 40
+            }
           },
           {
             "id": "def-public.ValidatedDualRange.getDerivedStateFromProps",
@@ -431,7 +518,10 @@
                   "Props"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L46"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                  "lineNumber": 46
+                }
               },
               {
                 "type": "Object",
@@ -441,12 +531,18 @@
                   "State"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L46"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                  "lineNumber": 46
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L46"
+            "source": {
+              "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+              "lineNumber": 46
+            }
           },
           {
             "id": "def-public.ValidatedDualRange.state",
@@ -455,7 +551,10 @@
             "children": [],
             "description": [],
             "label": "state",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L66"
+            "source": {
+              "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+              "lineNumber": 66
+            }
           },
           {
             "id": "def-public.ValidatedDualRange._onChange",
@@ -469,7 +568,10 @@
                   "[React.ReactText, React.ReactText]"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L68"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                  "lineNumber": 68
+                }
               }
             ],
             "signature": [
@@ -477,7 +579,10 @@
             ],
             "description": [],
             "label": "_onChange",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L68",
+            "source": {
+              "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+              "lineNumber": 68
+            },
             "tags": [],
             "returnComment": []
           },
@@ -492,10 +597,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L87"
+            "source": {
+              "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+              "lineNumber": 87
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L39",
+        "source": {
+          "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+          "lineNumber": 39
+        },
         "initialIsOpen": false
       }
     ],
@@ -520,7 +631,10 @@
               ">"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/code_editor/index.tsx#L22"
+            "source": {
+              "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
+              "lineNumber": 22
+            }
           }
         ],
         "signature": [
@@ -530,7 +644,10 @@
         ],
         "description": [],
         "label": "CodeEditor",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/code_editor/index.tsx#L22",
+        "source": {
+          "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
+          "lineNumber": 22
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -547,7 +664,10 @@
               "Services"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L46"
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/context.tsx",
+              "lineNumber": 46
+            }
           }
         ],
         "signature": [
@@ -571,7 +691,10 @@
         ],
         "description": [],
         "label": "createKibanaReactContext",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L45",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/context.tsx",
+          "lineNumber": 45
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -596,7 +719,10 @@
               ">"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/create_notifications.tsx#L14"
+            "source": {
+              "path": "src/plugins/kibana_react/public/notifications/create_notifications.tsx",
+              "lineNumber": 14
+            }
           }
         ],
         "signature": [
@@ -619,7 +745,10 @@
         ],
         "description": [],
         "label": "createNotifications",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/create_notifications.tsx#L14",
+        "source": {
+          "path": "src/plugins/kibana_react/public/notifications/create_notifications.tsx",
+          "lineNumber": 14
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -644,7 +773,10 @@
               ">"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overlays/create_react_overlays.tsx#L14"
+            "source": {
+              "path": "src/plugins/kibana_react/public/overlays/create_react_overlays.tsx",
+              "lineNumber": 14
+            }
           }
         ],
         "signature": [
@@ -667,7 +799,10 @@
         ],
         "description": [],
         "label": "createReactOverlays",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overlays/create_react_overlays.tsx#L14",
+        "source": {
+          "path": "src/plugins/kibana_react/public/overlays/create_react_overlays.tsx",
+          "lineNumber": 14
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -703,12 +838,18 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L68"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 68
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L68",
+        "source": {
+          "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+          "lineNumber": 68
+        },
         "initialIsOpen": false
       },
       {
@@ -744,12 +885,18 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L53"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 53
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L53",
+        "source": {
+          "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+          "lineNumber": 53
+        },
         "initialIsOpen": false
       },
       {
@@ -758,7 +905,10 @@
         "label": "KibanaContextProvider",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L76",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/context.tsx",
+          "lineNumber": 76
+        },
         "signature": [
           "React.FC<{ services?: {} | undefined; }>"
         ],
@@ -782,7 +932,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/markdown/index.tsx#L28"
+            "source": {
+              "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+              "lineNumber": 28
+            }
           }
         ],
         "signature": [
@@ -792,7 +945,10 @@
         ],
         "description": [],
         "label": "Markdown",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/markdown/index.tsx#L28",
+        "source": {
+          "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+          "lineNumber": 28
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -815,7 +971,10 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/markdown/index.tsx#L21"
+            "source": {
+              "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+              "lineNumber": 21
+            }
           }
         ],
         "signature": [
@@ -825,7 +984,10 @@
         ],
         "description": [],
         "label": "MarkdownSimple",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/markdown/index.tsx#L21",
+        "source": {
+          "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+          "lineNumber": 21
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -842,7 +1004,10 @@
               "React.PropsWithChildren<MountPointPortalProps>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/util/mount_point_portal.tsx#L22"
+            "source": {
+              "path": "src/plugins/kibana_react/public/util/mount_point_portal.tsx",
+              "lineNumber": 22
+            }
           }
         ],
         "signature": [
@@ -852,7 +1017,10 @@
           "\nUtility component to portal a part of a react application into the provided `MountPoint`."
         ],
         "label": "MountPointPortal",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/util/mount_point_portal.tsx#L22",
+        "source": {
+          "path": "src/plugins/kibana_react/public/util/mount_point_portal.tsx",
+          "lineNumber": 22
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -869,7 +1037,10 @@
               "React.PropsWithChildren<Props>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx#L28"
+            "source": {
+              "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
+              "lineNumber": 28
+            }
           }
         ],
         "signature": [
@@ -877,7 +1048,10 @@
         ],
         "description": [],
         "label": "OverviewPageFooter",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx#L28",
+        "source": {
+          "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
+          "lineNumber": 28
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -894,7 +1068,10 @@
               "React.PropsWithChildren<Props>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overview_page/overview_page_header/overview_page_header.tsx#L35"
+            "source": {
+              "path": "src/plugins/kibana_react/public/overview_page/overview_page_header/overview_page_header.tsx",
+              "lineNumber": 35
+            }
           }
         ],
         "signature": [
@@ -902,7 +1079,10 @@
         ],
         "description": [],
         "label": "OverviewPageHeader",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overview_page/overview_page_header/overview_page_header.tsx#L35",
+        "source": {
+          "path": "src/plugins/kibana_react/public/overview_page/overview_page_header/overview_page_header.tsx",
+          "lineNumber": 35
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -932,12 +1112,18 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/split_panel/containers/panel.tsx#L23"
+            "source": {
+              "path": "src/plugins/kibana_react/public/split_panel/containers/panel.tsx",
+              "lineNumber": 23
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/split_panel/containers/panel.tsx#L23",
+        "source": {
+          "path": "src/plugins/kibana_react/public/split_panel/containers/panel.tsx",
+          "lineNumber": 23
+        },
         "initialIsOpen": false
       },
       {
@@ -965,12 +1151,18 @@
               }
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/split_panel/containers/panel_container.tsx#L32"
+            "source": {
+              "path": "src/plugins/kibana_react/public/split_panel/containers/panel_container.tsx",
+              "lineNumber": 32
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/split_panel/containers/panel_container.tsx#L32",
+        "source": {
+          "path": "src/plugins/kibana_react/public/split_panel/containers/panel_container.tsx",
+          "lineNumber": 32
+        },
         "initialIsOpen": false
       },
       {
@@ -994,7 +1186,10 @@
               "<unknown>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L27"
+            "source": {
+              "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+              "lineNumber": 27
+            }
           },
           {
             "type": "CompoundType",
@@ -1004,7 +1199,10 @@
               "string | LocationObject"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L28"
+            "source": {
+              "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+              "lineNumber": 28
+            }
           },
           {
             "type": "Object",
@@ -1014,7 +1212,10 @@
               "Function | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L29"
+            "source": {
+              "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+              "lineNumber": 29
+            }
           }
         ],
         "signature": [
@@ -1032,7 +1233,10 @@
         ],
         "description": [],
         "label": "reactRouterNavigate",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L26",
+        "source": {
+          "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+          "lineNumber": 26
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1058,7 +1262,10 @@
               "<unknown>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L36"
+            "source": {
+              "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+              "lineNumber": 36
+            }
           },
           {
             "type": "CompoundType",
@@ -1068,7 +1275,10 @@
               "string | LocationObject"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L37"
+            "source": {
+              "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+              "lineNumber": 37
+            }
           },
           {
             "type": "Object",
@@ -1078,7 +1288,10 @@
               "Function | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L38"
+            "source": {
+              "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+              "lineNumber": 38
+            }
           }
         ],
         "signature": [
@@ -1096,7 +1309,10 @@
         ],
         "description": [],
         "label": "reactRouterOnClickHandler",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx#L35",
+        "source": {
+          "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+          "lineNumber": 35
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1113,7 +1329,10 @@
               "React.ComponentType<Props>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/adapters/react_to_ui_component.ts#L19"
+            "source": {
+              "path": "src/plugins/kibana_react/public/adapters/react_to_ui_component.ts",
+              "lineNumber": 19
+            }
           }
         ],
         "signature": [
@@ -1131,7 +1350,10 @@
           "\nTransform a React component into a `UiComponent`.\n"
         ],
         "label": "reactToUiComponent",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/adapters/react_to_ui_component.ts#L18",
+        "source": {
+          "path": "src/plugins/kibana_react/public/adapters/react_to_ui_component.ts",
+          "lineNumber": 18
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1148,7 +1370,10 @@
               "React.PropsWithChildren<RedirectCrossAppLinksProps>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L38"
+            "source": {
+              "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
+              "lineNumber": 38
+            }
           }
         ],
         "signature": [
@@ -1158,7 +1383,10 @@
           "\nUtility component that will intercept click events on children anchor (`<a>`) elements to call\n`application.navigateToUrl` with the link's href. This will trigger SPA friendly navigation\nwhen the link points to a valid Kibana app.\n"
         ],
         "label": "RedirectAppLinks",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L38",
+        "source": {
+          "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
+          "lineNumber": 38
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1175,7 +1403,10 @@
               "React.ReactNode"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/util/to_mount_point.tsx#L19"
+            "source": {
+              "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
+              "lineNumber": 19
+            }
           }
         ],
         "signature": [
@@ -1193,7 +1424,10 @@
           "\nMountPoint converter for react nodes.\n"
         ],
         "label": "toMountPoint",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/util/to_mount_point.tsx#L19",
+        "source": {
+          "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
+          "lineNumber": 19
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1218,7 +1452,10 @@
               ">"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx#L49"
+            "source": {
+              "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
+              "lineNumber": 49
+            }
           }
         ],
         "signature": [
@@ -1234,7 +1471,10 @@
         ],
         "description": [],
         "label": "ToolbarButton",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx#L49",
+        "source": {
+          "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
+          "lineNumber": 49
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1258,7 +1498,10 @@
               "<Props>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/adapters/ui_to_react_component.ts#L16"
+            "source": {
+              "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
+              "lineNumber": 16
+            }
           },
           {
             "type": "string",
@@ -1268,7 +1511,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/adapters/ui_to_react_component.ts#L17"
+            "source": {
+              "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
+              "lineNumber": 17
+            }
           }
         ],
         "signature": [
@@ -1286,7 +1532,10 @@
           "\nTransforms `UiComponent` into a React component."
         ],
         "label": "uiToReactComponent",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/adapters/ui_to_react_component.ts#L15",
+        "source": {
+          "path": "src/plugins/kibana_react/public/adapters/ui_to_react_component.ts",
+          "lineNumber": 15
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1311,7 +1560,10 @@
               ">"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L40"
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 40
+            }
           }
         ],
         "signature": [
@@ -1327,7 +1579,10 @@
         ],
         "description": [],
         "label": "UrlTemplateEditor",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L40",
+        "source": {
+          "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+          "lineNumber": 40
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1357,7 +1612,10 @@
         ],
         "description": [],
         "label": "useKibana",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L24",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/context.tsx",
+          "lineNumber": 24
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1382,7 +1640,10 @@
               "<any>) => React.ReactNode; }>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L43"
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/context.tsx",
+              "lineNumber": 43
+            }
           }
         ],
         "signature": [
@@ -1398,7 +1659,10 @@
         ],
         "description": [],
         "label": "UseKibana",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L41",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/context.tsx",
+          "lineNumber": 41
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1415,7 +1679,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts#L22"
+            "source": {
+              "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+              "lineNumber": 22
+            }
           },
           {
             "type": "Uncategorized",
@@ -1425,7 +1692,10 @@
               "T | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts#L22"
+            "source": {
+              "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+              "lineNumber": 22
+            }
           }
         ],
         "signature": [
@@ -1435,7 +1705,10 @@
           "\nReturns the current UI-settings value.\n\nUsage:\n\n```js\nconst darkMode = useUiSetting('theme:darkMode');\n```"
         ],
         "label": "useUiSetting",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts#L22",
+        "source": {
+          "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+          "lineNumber": 22
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1452,7 +1725,10 @@
               "string"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts#L47"
+            "source": {
+              "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+              "lineNumber": 47
+            }
           },
           {
             "type": "Uncategorized",
@@ -1462,7 +1738,10 @@
               "T | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts#L47"
+            "source": {
+              "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+              "lineNumber": 47
+            }
           }
         ],
         "signature": [
@@ -1472,7 +1751,10 @@
           "\nReturns a 2-tuple, where first entry is the setting value and second is a\nfunction to update the setting value.\n\nSynchronously returns the most current value of the setting and subscribes\nto all subsequent updates, which will re-render your component on new values.\n\nUsage:\n\n```js\nconst [darkMode, setDarkMode] = useUiSetting$('theme:darkMode');\n```"
         ],
         "label": "useUiSetting$",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts#L47",
+        "source": {
+          "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+          "lineNumber": 47
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1489,7 +1771,10 @@
               "React.ComponentType<Props>"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L32"
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/context.tsx",
+              "lineNumber": 32
+            }
           }
         ],
         "signature": [
@@ -1505,7 +1790,10 @@
         ],
         "description": [],
         "label": "withKibana",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L31",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/context.tsx",
+          "lineNumber": 31
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1525,13 +1813,19 @@
             "type": "Function",
             "label": "onExitFullScreenMode",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx#L15",
+            "source": {
+              "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
+              "lineNumber": 15
+            },
             "signature": [
               "() => void"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx#L14",
+        "source": {
+          "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -1559,7 +1853,10 @@
             "description": [
               "\nLabel for the button"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L18",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 18
+            },
             "signature": [
               "React.ReactNode"
             ]
@@ -1572,7 +1869,10 @@
             "description": [
               "\nIcon representing the field type.\nRecommend using FieldIcon"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L23",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 23
+            },
             "signature": [
               "React.ReactNode"
             ]
@@ -1585,7 +1885,10 @@
             "description": [
               "\nAn optional node to place inside and at the end of the <button>"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L27",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 27
+            },
             "signature": [
               "React.ReactNode"
             ]
@@ -1598,7 +1901,10 @@
             "description": [
               "\nAn optional node to place outside of and to the right of the <button>"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L31",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 31
+            },
             "signature": [
               "React.ReactNode"
             ]
@@ -1611,7 +1917,10 @@
             "description": [
               "\nAdds a forced focus ring to the whole component"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L35",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 35
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -1624,7 +1933,10 @@
             "description": [
               "\nStyles the component differently to indicate it is draggable"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L39",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 39
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -1637,7 +1949,10 @@
             "description": [
               "\nUse the small size in condensed areas"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L43",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 43
+            },
             "signature": [
               "\"m\" | \"s\" | undefined"
             ]
@@ -1648,7 +1963,10 @@
             "type": "string",
             "label": "className",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L44",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 44
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1661,7 +1979,10 @@
             "description": [
               "\nThe component will render a `<button>` when provided an `onClick`"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L48",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 48
+            },
             "signature": [
               "(() => void) | undefined"
             ]
@@ -1674,7 +1995,10 @@
             "description": [
               "\nApplies to the inner `<button>`  or `<div>`"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L52",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 52
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1687,7 +2011,10 @@
             "description": [
               "\nPass more button props to the `<button>` element"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L56",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+              "lineNumber": 56
+            },
             "signature": [
               "(React.ButtonHTMLAttributes<HTMLButtonElement> & ",
               "CommonProps",
@@ -1695,7 +2022,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L14",
+        "source": {
+          "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+          "lineNumber": 14
+        },
         "initialIsOpen": false
       },
       {
@@ -1723,7 +2053,10 @@
             "type": "string",
             "label": "type",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L14"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 14
+            }
           },
           {
             "tags": [],
@@ -1731,7 +2064,10 @@
             "type": "string",
             "label": "label",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L27",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 27
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1742,13 +2078,19 @@
             "type": "CompoundType",
             "label": "scripted",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L28",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 28
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L13",
+        "source": {
+          "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+          "lineNumber": 13
+        },
         "initialIsOpen": false
       },
       {
@@ -1774,7 +2116,10 @@
             "type": "Object",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L23",
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/types.ts",
+              "lineNumber": 23
+            },
             "signature": [
               {
                 "pluginId": "kibanaReact",
@@ -1792,7 +2137,10 @@
             "type": "Function",
             "label": "Provider",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L24",
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/types.ts",
+              "lineNumber": 24
+            },
             "signature": [
               "React.FC<{ services?: T | undefined; }>"
             ]
@@ -1803,7 +2151,10 @@
             "type": "Function",
             "label": "Consumer",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L25",
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/types.ts",
+              "lineNumber": 25
+            },
             "signature": [
               "React.Consumer<",
               {
@@ -1817,7 +2168,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L22",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/types.ts",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       },
       {
@@ -1843,7 +2197,10 @@
             "type": "Uncategorized",
             "label": "services",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L17",
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/types.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "Services"
             ]
@@ -1854,7 +2211,10 @@
             "type": "Object",
             "label": "overlays",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L18",
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/types.ts",
+              "lineNumber": 18
+            },
             "signature": [
               {
                 "pluginId": "kibanaReact",
@@ -1871,7 +2231,10 @@
             "type": "Object",
             "label": "notifications",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L19",
+            "source": {
+              "path": "src/plugins/kibana_react/public/context/types.ts",
+              "lineNumber": 19
+            },
             "signature": [
               {
                 "pluginId": "kibanaReact",
@@ -1883,7 +2246,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L16",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/types.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       },
       {
@@ -1899,7 +2265,10 @@
             "type": "Object",
             "label": "toasts",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L22",
+            "source": {
+              "path": "src/plugins/kibana_react/public/notifications/types.ts",
+              "lineNumber": 22
+            },
             "signature": [
               "{ show: (input: ",
               {
@@ -1937,7 +2306,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L21",
+        "source": {
+          "path": "src/plugins/kibana_react/public/notifications/types.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -1953,7 +2325,10 @@
             "type": "Function",
             "label": "openFlyout",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overlays/types.ts#L13",
+            "source": {
+              "path": "src/plugins/kibana_react/public/overlays/types.ts",
+              "lineNumber": 13
+            },
             "signature": [
               "(node: React.ReactNode, options?: ",
               {
@@ -1979,7 +2354,10 @@
             "type": "Function",
             "label": "openModal",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overlays/types.ts#L17",
+            "source": {
+              "path": "src/plugins/kibana_react/public/overlays/types.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "(node: React.ReactNode, options?: ",
               {
@@ -2000,7 +2378,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/overlays/types.ts#L12",
+        "source": {
+          "path": "src/plugins/kibana_react/public/overlays/types.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       },
       {
@@ -2021,7 +2402,10 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L39"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 39
+            }
           },
           {
             "id": "def-public.TableListViewProps.deleteItems",
@@ -2040,12 +2424,18 @@
                   "object[]"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L40"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                  "lineNumber": 40
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L40"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 40
+            }
           },
           {
             "id": "def-public.TableListViewProps.editItem",
@@ -2064,12 +2454,18 @@
                   "object"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L41"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                  "lineNumber": 41
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L41"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 41
+            }
           },
           {
             "tags": [],
@@ -2077,7 +2473,10 @@
             "type": "string",
             "label": "entityName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L42"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 42
+            }
           },
           {
             "tags": [],
@@ -2085,7 +2484,10 @@
             "type": "string",
             "label": "entityNamePlural",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L43"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 43
+            }
           },
           {
             "id": "def-public.TableListViewProps.findItems",
@@ -2104,12 +2506,18 @@
                   "string"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L44"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+                  "lineNumber": 44
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L44"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 44
+            }
           },
           {
             "tags": [],
@@ -2117,7 +2525,10 @@
             "type": "number",
             "label": "listingLimit",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L45"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 45
+            }
           },
           {
             "tags": [],
@@ -2125,7 +2536,10 @@
             "type": "string",
             "label": "initialFilter",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L46"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 46
+            }
           },
           {
             "tags": [],
@@ -2133,7 +2547,10 @@
             "type": "number",
             "label": "initialPageSize",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L47"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 47
+            }
           },
           {
             "tags": [],
@@ -2141,7 +2558,10 @@
             "type": "Object",
             "label": "noItemsFragment",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L48",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 48
+            },
             "signature": [
               "JSX.Element | undefined"
             ]
@@ -2152,7 +2572,10 @@
             "type": "Array",
             "label": "tableColumns",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L49",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 49
+            },
             "signature": [
               "EuiBasicTableColumn",
               "<any>[]"
@@ -2164,7 +2587,10 @@
             "type": "string",
             "label": "tableListTitle",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L50"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 50
+            }
           },
           {
             "tags": [],
@@ -2172,7 +2598,10 @@
             "type": "Object",
             "label": "toastNotifications",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L51",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 51
+            },
             "signature": [
               "Pick<",
               {
@@ -2193,7 +2622,10 @@
             "description": [
               "\nId of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.\nIf the table is not empty, this component renders its own h1 element using the same id."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L56",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 56
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2206,7 +2638,10 @@
             "description": [
               "\nIndicates which column should be used as the identifying cell in each row."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L60"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 60
+            }
           },
           {
             "tags": [],
@@ -2216,7 +2651,10 @@
             "description": [
               "\nDescribes the content of the table. If not specified, the caption will be \"This table contains {itemCount} rows.\""
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L64",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 64
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2227,14 +2665,20 @@
             "type": "Array",
             "label": "searchFilters",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L65",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 65
+            },
             "signature": [
               "SearchFilterConfig",
               "[] | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L38",
+        "source": {
+          "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+          "lineNumber": 38
+        },
         "initialIsOpen": false
       },
       {
@@ -2250,7 +2694,10 @@
             "type": "Array",
             "label": "items",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L69",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 69
+            },
             "signature": [
               "object[]"
             ]
@@ -2261,7 +2708,10 @@
             "type": "boolean",
             "label": "hasInitialFetchReturned",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L70"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 70
+            }
           },
           {
             "tags": [],
@@ -2269,7 +2719,10 @@
             "type": "boolean",
             "label": "isFetchingItems",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L71"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 71
+            }
           },
           {
             "tags": [],
@@ -2277,7 +2730,10 @@
             "type": "boolean",
             "label": "isDeletingItems",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L72"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 72
+            }
           },
           {
             "tags": [],
@@ -2285,7 +2741,10 @@
             "type": "boolean",
             "label": "showDeleteModal",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L73"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 73
+            }
           },
           {
             "tags": [],
@@ -2293,7 +2752,10 @@
             "type": "boolean",
             "label": "showLimitError",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L74"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 74
+            }
           },
           {
             "tags": [],
@@ -2301,7 +2763,10 @@
             "type": "Object",
             "label": "fetchError",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L75",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 75
+            },
             "signature": [
               {
                 "pluginId": "core",
@@ -2319,7 +2784,10 @@
             "type": "string",
             "label": "filter",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L76"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 76
+            }
           },
           {
             "tags": [],
@@ -2327,7 +2795,10 @@
             "type": "Array",
             "label": "selectedIds",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L77",
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 77
+            },
             "signature": [
               "string[]"
             ]
@@ -2338,10 +2809,16 @@
             "type": "number",
             "label": "totalItems",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L78"
+            "source": {
+              "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+              "lineNumber": 78
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/table_list_view/table_list_view.tsx#L68",
+        "source": {
+          "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+          "lineNumber": 68
+        },
         "initialIsOpen": false
       },
       {
@@ -2357,7 +2834,10 @@
             "type": "CompoundType",
             "label": "title",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L13",
+            "source": {
+              "path": "src/plugins/kibana_react/public/notifications/types.ts",
+              "lineNumber": 13
+            },
             "signature": [
               "React.ReactNode"
             ]
@@ -2368,7 +2848,10 @@
             "type": "CompoundType",
             "label": "body",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L14",
+            "source": {
+              "path": "src/plugins/kibana_react/public/notifications/types.ts",
+              "lineNumber": 14
+            },
             "signature": [
               "React.ReactNode"
             ]
@@ -2379,7 +2862,10 @@
             "type": "CompoundType",
             "label": "color",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L15",
+            "source": {
+              "path": "src/plugins/kibana_react/public/notifications/types.ts",
+              "lineNumber": 15
+            },
             "signature": [
               "\"warning\" | \"primary\" | \"success\" | \"danger\" | undefined"
             ]
@@ -2390,7 +2876,10 @@
             "type": "CompoundType",
             "label": "iconType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L16",
+            "source": {
+              "path": "src/plugins/kibana_react/public/notifications/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
             ]
@@ -2401,7 +2890,10 @@
             "type": "number",
             "label": "toastLifeTimeMs",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L17",
+            "source": {
+              "path": "src/plugins/kibana_react/public/notifications/types.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "number | undefined"
             ]
@@ -2412,13 +2904,19 @@
             "type": "Function",
             "label": "onClose",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L18",
+            "source": {
+              "path": "src/plugins/kibana_react/public/notifications/types.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "(() => void) | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/notifications/types.ts#L12",
+        "source": {
+          "path": "src/plugins/kibana_react/public/notifications/types.ts",
+          "lineNumber": 12
+        },
         "initialIsOpen": false
       },
       {
@@ -2434,7 +2932,10 @@
             "type": "string",
             "label": "value",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L32"
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 32
+            }
           },
           {
             "tags": [],
@@ -2442,7 +2943,10 @@
             "type": "CompoundType",
             "label": "height",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L33",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 33
+            },
             "signature": [
               "string | number | undefined"
             ]
@@ -2453,7 +2957,10 @@
             "type": "Array",
             "label": "variables",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L34",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 34
+            },
             "signature": [
               {
                 "pluginId": "kibanaReact",
@@ -2471,7 +2978,10 @@
             "type": "Function",
             "label": "onChange",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L35",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 35
+            },
             "signature": [
               "(value: string) => void"
             ]
@@ -2482,7 +2992,10 @@
             "type": "Function",
             "label": "onEditor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L36",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 36
+            },
             "signature": [
               "((editor: ",
               "editor",
@@ -2495,7 +3008,10 @@
             "type": "CompoundType",
             "label": "Editor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L37",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 37
+            },
             "signature": [
               "React.FunctionComponent<",
               {
@@ -2517,7 +3033,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L31",
+        "source": {
+          "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       },
       {
@@ -2533,7 +3052,10 @@
             "type": "string",
             "label": "label",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L25"
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 25
+            }
           },
           {
             "tags": [],
@@ -2541,7 +3063,10 @@
             "type": "string",
             "label": "title",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L26",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 26
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2552,7 +3077,10 @@
             "type": "string",
             "label": "documentation",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L27",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 27
+            },
             "signature": [
               "string | undefined"
             ]
@@ -2563,7 +3091,10 @@
             "type": "CompoundType",
             "label": "kind",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L28",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 28
+            },
             "signature": [
               "languages",
               ".CompletionItemKind | undefined"
@@ -2575,13 +3106,19 @@
             "type": "string",
             "label": "sortText",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L29",
+            "source": {
+              "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+              "lineNumber": 29
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx#L24",
+        "source": {
+          "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       }
     ],
@@ -2593,7 +3130,10 @@
         "label": "ButtonSize",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L64",
+        "source": {
+          "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+          "lineNumber": 64
+        },
         "signature": [
           "\"m\" | \"s\""
         ],
@@ -2605,7 +3145,10 @@
         "label": "KibanaServices",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/types.ts#L14",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/types.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "{ application?: ",
           {
@@ -2656,7 +3199,10 @@
         "type": "Array",
         "label": "POSITIONS",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx#L22",
+        "source": {
+          "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
+          "lineNumber": 22
+        },
         "signature": [
           "(\"left\" | \"right\" | \"none\" | \"center\")[]"
         ],
@@ -2668,7 +3214,10 @@
         "type": "Array",
         "label": "SIZES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_button/field_button.tsx#L66",
+        "source": {
+          "path": "src/plugins/kibana_react/public/field_button/field_button.tsx",
+          "lineNumber": 66
+        },
         "signature": [
           "(\"m\" | \"s\")[]"
         ],
@@ -2680,7 +3229,10 @@
         "type": "Array",
         "label": "TOOLBAR_BUTTON_SIZES",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx#L27",
+        "source": {
+          "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
+          "lineNumber": 27
+        },
         "signature": [
           "(\"m\" | \"s\" | undefined)[]"
         ],
@@ -2692,7 +3244,10 @@
         "label": "ToolbarButtonProps",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx#L29",
+        "source": {
+          "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
+          "lineNumber": 29
+        },
         "signature": [
           "DisambiguateSet",
           "<",
@@ -2712,7 +3267,10 @@
         "label": "Value",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx#L19",
+        "source": {
+          "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+          "lineNumber": 19
+        },
         "signature": [
           "[React.ReactText, React.ReactText]"
         ],
@@ -2724,7 +3282,10 @@
         "type": "Array",
         "label": "WEIGHTS",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx#L25",
+        "source": {
+          "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
+          "lineNumber": 25
+        },
         "signature": [
           "Weights[]"
         ],
@@ -2738,7 +3299,10 @@
         "type": "Object",
         "label": "context",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/context/context.tsx#L22",
+        "source": {
+          "path": "src/plugins/kibana_react/public/context/context.tsx",
+          "lineNumber": 22
+        },
         "signature": [
           "React.Context<",
           {
@@ -2766,7 +3330,10 @@
         "type": "Object",
         "label": "ExitFullScreenButton",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx#L86",
+        "source": {
+          "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
+          "lineNumber": 86
+        },
         "signature": [
           "typeof ExitFullScreenButtonUi"
         ],
@@ -2788,12 +3355,18 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L35"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 35
+                }
               }
             ],
             "description": [],
             "label": "boolean",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L35"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 35
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.conflict",
@@ -2806,7 +3379,10 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L37"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 37
+                }
               },
               {
                 "tags": [],
@@ -2814,7 +3390,10 @@
                 "type": "string",
                 "label": "color",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L37"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 37
+                }
               },
               {
                 "tags": [],
@@ -2822,7 +3401,10 @@
                 "type": "string",
                 "label": "shape",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L37",
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 37
+                },
                 "signature": [
                   "\"square\""
                 ]
@@ -2832,7 +3414,10 @@
               "// icon for an index pattern mapping conflict in discover"
             ],
             "label": "conflict",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L37"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 37
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.date",
@@ -2845,12 +3430,18 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L38"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 38
+                }
               }
             ],
             "description": [],
             "label": "date",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L38"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 38
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.geo_point",
@@ -2863,12 +3454,18 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L39"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 39
+                }
               }
             ],
             "description": [],
             "label": "geo_point",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L39"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 39
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.geo_shape",
@@ -2881,12 +3478,18 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L40"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 40
+                }
               }
             ],
             "description": [],
             "label": "geo_shape",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L40"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 40
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.ip",
@@ -2899,12 +3502,18 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L41"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 41
+                }
               }
             ],
             "description": [],
             "label": "ip",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L41"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 41
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.murmur3",
@@ -2917,14 +3526,20 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L43"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 43
+                }
               }
             ],
             "description": [
               "// is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html"
             ],
             "label": "murmur3",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L43"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 43
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.number",
@@ -2937,12 +3552,18 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L44"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 44
+                }
               }
             ],
             "description": [],
             "label": "number",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L44"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 44
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap._source",
@@ -2955,7 +3576,10 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L45"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 45
+                }
               },
               {
                 "tags": [],
@@ -2963,12 +3587,18 @@
                 "type": "string",
                 "label": "color",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L45"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 45
+                }
               }
             ],
             "description": [],
             "label": "_source",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L45"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 45
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.string",
@@ -2981,12 +3611,18 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L46"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 46
+                }
               }
             ],
             "description": [],
             "label": "string",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L46"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 46
+            }
           },
           {
             "id": "def-public.typeToEuiIconMap.nested",
@@ -2999,17 +3635,26 @@
                 "type": "string",
                 "label": "iconType",
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L47"
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 47
+                }
               }
             ],
             "description": [],
             "label": "nested",
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L47"
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 47
+            }
           }
         ],
         "description": [],
         "label": "typeToEuiIconMap",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/field_icon/field_icon.tsx#L34",
+        "source": {
+          "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+          "lineNumber": 34
+        },
         "initialIsOpen": false
       }
     ]
@@ -3031,7 +3676,10 @@
         "label": "createGlobalStyle",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L42",
+        "source": {
+          "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+          "lineNumber": 42
+        },
         "signature": [
           "<P>(first: ",
           "CSSObject",
@@ -3058,7 +3706,10 @@
         "label": "css",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L41",
+        "source": {
+          "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+          "lineNumber": 41
+        },
         "signature": [
           "ThemedCssFunction",
           "<",
@@ -3079,7 +3730,10 @@
         "label": "euiStyled",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L40",
+        "source": {
+          "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+          "lineNumber": 40
+        },
         "signature": [
           "ThemedStyledInterface",
           "<",
@@ -3116,7 +3770,10 @@
               ">, \"children\"> & { darkMode?: boolean | undefined; }"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L23"
+            "source": {
+              "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+              "lineNumber": 23
+            }
           }
         ],
         "signature": [
@@ -3138,7 +3795,10 @@
         ],
         "description": [],
         "label": "EuiThemeProvider",
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L21",
+        "source": {
+          "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+          "lineNumber": 21
+        },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -3149,7 +3809,10 @@
         "label": "keyframes",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L43",
+        "source": {
+          "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+          "lineNumber": 43
+        },
         "signature": [
           "(strings: TemplateStringsArray | ",
           "CSSKeyframes",
@@ -3166,7 +3829,10 @@
         "label": "withTheme",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L44",
+        "source": {
+          "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+          "lineNumber": 44
+        },
         "signature": [
           "BaseWithThemeFnInterface",
           "<",
@@ -3196,7 +3862,10 @@
             "type": "CompoundType",
             "label": "eui",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L17",
+            "source": {
+              "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+              "lineNumber": 17
+            },
             "signature": [
               "{ paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiButtonIconTypes: { accent: string; danger: string; disabled: string; ghost: string; primary: string; subdued: string; success: string; text: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavWidth: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuItemBetaBadgeSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; secondary: string; warning: string; danger: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZContent: number; euiZHeader: number; euiZContentMenu: number; euiZFlyout: number; euiZNavigation: number; euiZMask: number; euiZModal: number; euiZToastList: number; } | { paddingSizes: { xs: string; s: string; m: string; l: string; xl: string; }; avatarSizing: { s: { size: string; 'font-size': string; }; m: { size: string; 'font-size': string; }; l: { size: string; 'font-size': string; }; xl: { size: string; 'font-size': string; }; }; euiBadgeGroupGutterTypes: { gutterExtraSmall: string; gutterSmall: string; }; euiBreadcrumbSpacing: string; euiBreadcrumbTruncateWidth: string; euiButtonEmptyTypes: { primary: string; danger: string; disabled: string; ghost: string; text: string; success: string; warning: string; }; euiButtonIconTypes: { accent: string; danger: string; disabled: string; ghost: string; primary: string; subdued: string; success: string; text: string; warning: string; }; euiCallOutTypes: { primary: string; success: string; warning: string; danger: string; }; euiCardSpacing: string; euiCardBottomNodeHeight: string; euiCardSelectButtonBorders: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardSelectButtonBackgrounds: { text: string; primary: string; success: string; danger: string; ghost: string; }; euiCardPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiCollapsibleNavWidth: string; euiCollapsibleNavGroupLightBackgroundColor: string; euiCollapsibleNavGroupDarkBackgroundColor: string; euiCollapsibleNavGroupDarkHighContrastColor: string; euiColorPickerValueRange0: string; euiColorPickerValueRange1: string; euiColorPickerSaturationRange0: string; euiColorPickerSaturationRange1: string; euiColorPickerIndicatorSize: string; euiColorPickerWidth: string; euiColorPaletteDisplaySizes: { sizeExtraSmall: string; sizeSmall: string; sizeMedium: string; }; euiContextMenuWidth: string; euiControlBarBackground: string; euiControlBarText: string; euiControlBarBorderColor: string; euiControlBarInitialHeight: string; euiControlBarMaxHeight: string; euiControlBarHeights: { s: string; m: string; l: string; }; euiDataGridPrefix: string; euiDataGridStyles: string; euiDataGridColumnResizerWidth: string; euiDataGridPopoverMaxHeight: string; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiDataGridVerticalBorder: string; euiDatePickerCalendarWidth: string; euiSuperDatePickerWidth: string; euiSuperDatePickerButtonWidth: string; euiDragAndDropSpacing: { s: string; m: string; l: string; }; euiExpressionColors: { subdued: string; primary: string; secondary: string; warning: string; danger: string; accent: string; }; euiFacetGutterSizes: { gutterNone: number; gutterSmall: string; gutterMedium: string; gutterLarge: string; }; gutterTypes: { gutterExtraSmall: string; gutterSmall: string; gutterMedium: string; gutterLarge: string; gutterExtraLarge: string; }; fractions: { fourths: { percentage: string; count: number; }; thirds: { percentage: string; count: number; }; halves: { percentage: string; count: number; }; single: { percentage: string; count: number; }; }; flyoutSizes: { small: { min: string; width: string; max: string; }; medium: { min: string; width: string; max: string; }; large: { min: string; width: string; max: string; }; }; euiFlyoutBorder: string; euiFlyoutPaddingModifiers: { paddingNone: number; paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiFilePickerTallHeight: string; euiRangeLevelColors: { primary: string; success: string; warning: string; danger: string; }; textareaResizing: { vertical: string; horizontal: string; both: string; none: string; }; euiHeaderLinksGutterSizes: { gutterXS: string; gutterS: string; gutterM: string; gutterL: string; }; ruleMargins: { marginXSmall: string; marginSmall: string; marginMedium: string; marginLarge: string; marginXLarge: string; marginXXLarge: string; }; euiIconLoadingOpacity: number; euiIconColors: { accent: string; danger: string; ghost: string; primary: string; secondary: string; success: string; subdued: string; text: string; warning: string; }; euiIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiKeyPadMenuSize: string; euiKeyPadMenuItemBetaBadgeSize: string; euiLinkColors: { subdued: string; primary: string; secondary: string; accent: string; warning: string; danger: string; text: string; ghost: string; }; euiListGroupItemHoverBackground: string; euiListGroupItemHoverBackgroundGhost: string; euiListGroupGutterTypes: { gutterSmall: string; gutterMedium: string; }; euiListGroupItemColorTypes: { primary: string; text: string; subdued: string; ghost: string; }; euiListGroupItemSizeTypes: { xSmall: string; small: string; medium: string; large: string; }; euiGradientStartStop: string; euiGradientMiddle: string; browserDefaultFontSize: string; euiMarkdownEditorMinHeight: string; euiPopoverArrowSize: string; euiPopoverTranslateDistance: string; euiProgressSizes: { xs: string; s: string; m: string; l: string; }; euiProgressColors: { primary: string; secondary: string; success: string; warning: string; danger: string; accent: string; subdued: string; vis0: string; vis1: string; vis2: string; vis3: string; vis4: string; vis5: string; vis6: string; vis7: string; vis8: string; vis9: string; customColor: string; }; euiResizableButtonTransitionSpeed: string; euiResizableButtonSize: string; euiSelectableListItemBorder: string; euiSelectableListItemPadding: string; euiSelectableTemplateSitewideTypes: { application: { color: string; 'font-weight': number; }; deployment: { color: string; 'font-weight': number; }; article: { color: string; 'font-weight': number; }; case: { color: string; 'font-weight': number; }; platform: { color: string; 'font-weight': number; }; }; spacerSizes: { xs: string; s: string; m: string; l: string; xl: string; xxl: string; }; euiStepNumberSize: string; euiStepNumberSmallSize: string; euiStepNumberMargin: string; euiStepStatusColorsToFade: { warning: string; danger: string; disabled: string; incomplete: string; }; euiSuggestItemColors: { tint0: string; tint1: string; tint2: string; tint3: string; tint4: string; tint5: string; tint6: string; tint7: string; tint8: string; tint9: string; tint10: string; }; euiTableCellContentPadding: string; euiTableCellContentPaddingCompressed: string; euiTableCellCheckboxWidth: string; euiTableActionsAreaWidth: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiTabFontSize: string; euiTabFontSizeS: string; euiTabFontSizeL: string; euiTextColors: { default: string; subdued: string; secondary: string; accent: string; warning: string; danger: string; ghost: string; }; euiTextConstrainedMaxWidth: string; euiToastWidth: string; euiToastTypes: { primary: string; success: string; warning: string; danger: string; }; euiTokenGrayColor: string; euiTokenTypes: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; gray: { graphic: string; behindText: string; }; }; euiTokenTypeKeys: string; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; secondary: string; warning: string; danger: string; ghost: string; text: string; }; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorSecondary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSecondaryText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiColorSuccessText: string; euiLinkColor: string; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorChartLines: string; euiColorChartBand: string; euiCodeBlockBackgroundColor: string; euiCodeBlockColor: string; euiCodeBlockSelectedBackgroundColor: string; euiCodeBlockCommentColor: string; euiCodeBlockSelectorTagColor: string; euiCodeBlockStringColor: string; euiCodeBlockTagColor: string; euiCodeBlockNameColor: string; euiCodeBlockNumberColor: string; euiCodeBlockKeywordColor: string; euiCodeBlockFunctionTitleColor: string; euiCodeBlockTypeColor: string; euiCodeBlockAttributeColor: string; euiCodeBlockSymbolColor: string; euiCodeBlockParamsColor: string; euiCodeBlockMetaColor: string; euiCodeBlockTitleColor: string; euiCodeBlockSectionColor: string; euiCodeBlockAdditionColor: string; euiCodeBlockDeletionColor: string; euiCodeBlockSelectorClassColor: string; euiCodeBlockSelectorIdColor: string; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: number; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiRangeTrackColor: string; euiRangeThumbRadius: string; euiRangeThumbHeight: string; euiRangeThumbWidth: string; euiRangeThumbBorderColor: string; euiRangeTrackWidth: string; euiRangeTrackHeight: string; euiRangeTrackBorderWidth: number; euiRangeTrackBorderColor: string; euiRangeTrackRadius: string; euiRangeDisabledOpacity: number; euiRangeHighlightHeight: string; euiHeaderBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiShadowColorLarge: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiButtonMinWidth: string; euiScrollBar: string; euiScrollBarCorner: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusBackgroundColor: string; euiTooltipBackgroundColor: string; euiTooltipAnimations: { top: string; left: string; bottom: string; right: string; }; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; 'letter-spacing': string; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZContent: number; euiZHeader: number; euiZContentMenu: number; euiZFlyout: number; euiZNavigation: number; euiZMask: number; euiZModal: number; euiZToastList: number; }"
             ]
@@ -3207,10 +3876,16 @@
             "type": "boolean",
             "label": "darkMode",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L18"
+            "source": {
+              "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+              "lineNumber": 18
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/common/eui_styled_components.tsx#L16",
+        "source": {
+          "path": "src/plugins/kibana_react/common/eui_styled_components.tsx",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       }
     ],

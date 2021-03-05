@@ -17,7 +17,10 @@
             "type": "boolean",
             "label": "x",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L84"
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 84
+            }
           },
           {
             "tags": [],
@@ -25,7 +28,10 @@
             "type": "boolean",
             "label": "yLeft",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L85"
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 85
+            }
           },
           {
             "tags": [],
@@ -33,10 +39,16 @@
             "type": "boolean",
             "label": "yRight",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L86"
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 86
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L83",
+        "source": {
+          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+          "lineNumber": 83
+        },
         "initialIsOpen": false
       },
       {
@@ -65,13 +77,19 @@
             "type": "string",
             "label": "operationType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx#L34",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
+              "lineNumber": 34
+            },
             "signature": [
               "\"cardinality\""
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx#L31",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       },
       {
@@ -87,7 +105,10 @@
             "type": "Array",
             "label": "columns",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L35",
+            "source": {
+              "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+              "lineNumber": 35
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -105,7 +126,10 @@
             "type": "string",
             "label": "layerId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L36"
+            "source": {
+              "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+              "lineNumber": 36
+            }
           },
           {
             "tags": [],
@@ -113,7 +137,10 @@
             "type": "Object",
             "label": "sorting",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L37",
+            "source": {
+              "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+              "lineNumber": 37
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -126,7 +153,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/datatable_visualization/visualization.tsx#L34",
+        "source": {
+          "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
+          "lineNumber": 34
+        },
         "initialIsOpen": false
       },
       {
@@ -153,7 +183,10 @@
             "type": "string",
             "label": "operationType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx#L44",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
+              "lineNumber": 44
+            },
             "signature": [
               "\"date_histogram\""
             ]
@@ -164,13 +197,19 @@
             "type": "Object",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx#L45",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
+              "lineNumber": 45
+            },
             "signature": [
               "{ interval: string; timeZone?: string | undefined; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx#L43",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
+          "lineNumber": 43
+        },
         "initialIsOpen": false
       },
       {
@@ -197,7 +236,10 @@
             "type": "string",
             "label": "operationType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx#L73",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
+              "lineNumber": 73
+            },
             "signature": [
               "\"filters\""
             ]
@@ -208,7 +250,10 @@
             "type": "Object",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx#L74",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
+              "lineNumber": 74
+            },
             "signature": [
               "{ filters: ",
               {
@@ -222,7 +267,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx#L72",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/filters/filters.tsx",
+          "lineNumber": 72
+        },
         "initialIsOpen": false
       },
       {
@@ -238,7 +286,10 @@
             "type": "CompoundType",
             "label": "operationType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts#L44",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+              "lineNumber": 44
+            },
             "signature": [
               "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"counter_rate\" | \"cardinality\" | \"percentile\" | \"last_value\" | undefined"
             ]
@@ -249,13 +300,19 @@
             "type": "string",
             "label": "sourceField",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts#L45",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+              "lineNumber": 45
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts#L43",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
+          "lineNumber": 43
+        },
         "initialIsOpen": false
       },
       {
@@ -271,7 +328,10 @@
             "type": "Object",
             "label": "layers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/types.ts#L72",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
+              "lineNumber": 72
+            },
             "signature": [
               "Record<string, Pick<",
               {
@@ -285,7 +345,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/types.ts#L71",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
+          "lineNumber": 71
+        },
         "initialIsOpen": false
       },
       {
@@ -312,7 +375,10 @@
             "type": "string",
             "label": "operationType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx#L76",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
+              "lineNumber": 76
+            },
             "signature": [
               "\"last_value\""
             ]
@@ -323,13 +389,19 @@
             "type": "Object",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx#L77",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
+              "lineNumber": 77
+            },
             "signature": [
               "{ sortField: string; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx#L75",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
+          "lineNumber": 75
+        },
         "initialIsOpen": false
       },
       {
@@ -347,7 +419,10 @@
             "description": [
               "\nFlag whether the legend should be shown. If there is just a single series, it will be hidden"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L30"
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 30
+            }
           },
           {
             "tags": [],
@@ -357,7 +432,10 @@
             "description": [
               "\nPosition of the legend relative to the chart"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L34",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 34
+            },
             "signature": [
               "node_modules/utility-types/dist/utility-types",
               "$Values<Readonly<{ Top: \"top\"; Bottom: \"bottom\"; Left: \"left\"; Right: \"right\"; }>>"
@@ -371,13 +449,19 @@
             "description": [
               "\nFlag whether the legend should be shown even with just a single series"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L38",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 38
+            },
             "signature": [
               "boolean | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L26",
+        "source": {
+          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -397,7 +481,10 @@
             "description": [
               "\nReact component which can be used to embed a Lens visualization into another application.\nSee `x-pack/examples/embedded_lens_example` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/plugin.ts#L88",
+            "source": {
+              "path": "x-pack/plugins/lens/public/plugin.ts",
+              "lineNumber": 88
+            },
             "signature": [
               "React.ComponentType<",
               {
@@ -420,7 +507,10 @@
             "description": [
               "\nMethod which navigates to the Lens editor, loading the state specified by the `input` parameter.\nSee `x-pack/examples/embedded_lens_example` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/plugin.ts#L97",
+            "source": {
+              "path": "x-pack/plugins/lens/public/plugin.ts",
+              "lineNumber": 97
+            },
             "signature": [
               "(input: ",
               {
@@ -441,13 +531,19 @@
             "description": [
               "\nMethod which returns true if the user has permission to use Lens as defined by application capabilities."
             ],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/plugin.ts#L101",
+            "source": {
+              "path": "x-pack/plugins/lens/public/plugin.ts",
+              "lineNumber": 101
+            },
             "signature": [
               "() => boolean"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/plugin.ts#L79",
+        "source": {
+          "path": "x-pack/plugins/lens/public/plugin.ts",
+          "lineNumber": 79
+        },
         "initialIsOpen": false
       },
       {
@@ -463,7 +559,10 @@
             "type": "string",
             "label": "layerId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/metric_visualization/types.ts#L9"
+            "source": {
+              "path": "x-pack/plugins/lens/public/metric_visualization/types.ts",
+              "lineNumber": 9
+            }
           },
           {
             "tags": [],
@@ -471,13 +570,19 @@
             "type": "string",
             "label": "accessor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/metric_visualization/types.ts#L10",
+            "source": {
+              "path": "x-pack/plugins/lens/public/metric_visualization/types.ts",
+              "lineNumber": 10
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/metric_visualization/types.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/lens/public/metric_visualization/types.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -504,7 +609,10 @@
             "type": "string",
             "label": "operationType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx#L23",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
+              "lineNumber": 23
+            },
             "signature": [
               "\"percentile\""
             ]
@@ -515,13 +623,19 @@
             "type": "Object",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx#L24",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
+              "lineNumber": 24
+            },
             "signature": [
               "{ percentile: number; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx#L22",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
+          "lineNumber": 22
+        },
         "initialIsOpen": false
       },
       {
@@ -537,7 +651,10 @@
             "type": "CompoundType",
             "label": "shape",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L27",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 27
+            },
             "signature": [
               "\"donut\" | \"pie\" | \"treemap\""
             ]
@@ -548,7 +665,10 @@
             "type": "Array",
             "label": "layers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 28
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -566,7 +686,10 @@
             "type": "Object",
             "label": "palette",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L29",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 29
+            },
             "signature": [
               {
                 "pluginId": "charts",
@@ -579,7 +702,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L26",
+        "source": {
+          "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -606,7 +732,10 @@
             "type": "string",
             "label": "operationType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx#L37",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx",
+              "lineNumber": 37
+            },
             "signature": [
               "\"range\""
             ]
@@ -617,7 +746,10 @@
             "type": "Object",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx#L38",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx",
+              "lineNumber": 38
+            },
             "signature": [
               "{ type: ",
               {
@@ -639,7 +771,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx#L36",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/ranges/ranges.tsx",
+          "lineNumber": 36
+        },
         "initialIsOpen": false
       },
       {
@@ -655,7 +790,10 @@
             "type": "Array",
             "label": "groups",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "string[]"
             ]
@@ -666,7 +804,10 @@
             "type": "string",
             "label": "metric",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L13",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 13
+            },
             "signature": [
               "string | undefined"
             ]
@@ -677,7 +818,10 @@
             "type": "CompoundType",
             "label": "numberDisplay",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L14",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 14
+            },
             "signature": [
               "\"hidden\" | \"value\" | \"percent\""
             ]
@@ -688,7 +832,10 @@
             "type": "CompoundType",
             "label": "categoryDisplay",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L15",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 15
+            },
             "signature": [
               "\"default\" | \"hide\" | \"inside\""
             ]
@@ -699,7 +846,10 @@
             "type": "CompoundType",
             "label": "legendDisplay",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L16",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 16
+            },
             "signature": [
               "\"default\" | \"hide\" | \"show\""
             ]
@@ -710,7 +860,10 @@
             "type": "CompoundType",
             "label": "legendPosition",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 17
+            },
             "signature": [
               "\"top\" | \"bottom\" | \"left\" | \"right\" | undefined"
             ]
@@ -721,7 +874,10 @@
             "type": "CompoundType",
             "label": "nestedLegend",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 18
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -732,13 +888,19 @@
             "type": "number",
             "label": "percentDecimals",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L19",
+            "source": {
+              "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+              "lineNumber": 19
+            },
             "signature": [
               "number | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       },
       {
@@ -765,7 +927,10 @@
             "type": "string",
             "label": "operationType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx#L59",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
+              "lineNumber": 59
+            },
             "signature": [
               "\"terms\""
             ]
@@ -776,13 +941,19 @@
             "type": "Object",
             "label": "params",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx#L60",
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
+              "lineNumber": 60
+            },
             "signature": [
               "{ size: number; orderBy: { type: \"alphabetical\"; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx#L58",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
+          "lineNumber": 58
+        },
         "initialIsOpen": false
       },
       {
@@ -798,7 +969,10 @@
             "type": "CompoundType",
             "label": "hide",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L377",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 377
+            },
             "signature": [
               "boolean | undefined"
             ]
@@ -809,7 +983,10 @@
             "type": "string",
             "label": "layerId",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L378"
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 378
+            }
           },
           {
             "tags": [],
@@ -817,7 +994,10 @@
             "type": "string",
             "label": "xAccessor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L379",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 379
+            },
             "signature": [
               "string | undefined"
             ]
@@ -828,7 +1008,10 @@
             "type": "Array",
             "label": "accessors",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L380",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 380
+            },
             "signature": [
               "string[]"
             ]
@@ -839,7 +1022,10 @@
             "type": "Array",
             "label": "yConfig",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L381",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 381
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -857,7 +1043,10 @@
             "type": "CompoundType",
             "label": "seriesType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L382",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 382
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -874,7 +1063,10 @@
             "type": "string",
             "label": "splitAccessor",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L383",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 383
+            },
             "signature": [
               "string | undefined"
             ]
@@ -885,7 +1077,10 @@
             "type": "Object",
             "label": "palette",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L384",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 384
+            },
             "signature": [
               {
                 "pluginId": "charts",
@@ -898,7 +1093,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L376",
+        "source": {
+          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+          "lineNumber": 376
+        },
         "initialIsOpen": false
       },
       {
@@ -914,7 +1112,10 @@
             "type": "CompoundType",
             "label": "preferredSeriesType",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L420",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 420
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -931,7 +1132,10 @@
             "type": "Object",
             "label": "legend",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L421",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 421
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -948,7 +1152,10 @@
             "type": "CompoundType",
             "label": "valueLabels",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L422",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 422
+            },
             "signature": [
               "\"hide\" | \"inside\" | \"outside\" | undefined"
             ]
@@ -959,7 +1166,10 @@
             "type": "CompoundType",
             "label": "fittingFunction",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L423",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 423
+            },
             "signature": [
               "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
             ]
@@ -970,7 +1180,10 @@
             "type": "Array",
             "label": "layers",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L424",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 424
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -988,7 +1201,10 @@
             "type": "string",
             "label": "xTitle",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L425",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 425
+            },
             "signature": [
               "string | undefined"
             ]
@@ -999,7 +1215,10 @@
             "type": "string",
             "label": "yTitle",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L426",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 426
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1010,7 +1229,10 @@
             "type": "string",
             "label": "yRightTitle",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L427",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 427
+            },
             "signature": [
               "string | undefined"
             ]
@@ -1021,7 +1243,10 @@
             "type": "Object",
             "label": "axisTitlesVisibilitySettings",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L428",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 428
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -1039,7 +1264,10 @@
             "type": "Object",
             "label": "tickLabelsVisibilitySettings",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L429",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 429
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -1057,7 +1285,10 @@
             "type": "Object",
             "label": "gridlinesVisibilitySettings",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L430",
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 430
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -1070,7 +1301,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L419",
+        "source": {
+          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+          "lineNumber": 419
+        },
         "initialIsOpen": false
       }
     ],
@@ -1082,7 +1316,10 @@
         "label": "AvgIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx#L128",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+          "lineNumber": 128
+        },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"avg\"; }"
         ],
@@ -1094,7 +1331,10 @@
         "label": "CounterRateIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/counter_rate.tsx#L34",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/counter_rate.tsx",
+          "lineNumber": 34
+        },
         "signature": [
           "BaseIndexPatternColumn",
           " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: 'counter_rate'; }"
@@ -1107,7 +1347,10 @@
         "label": "CountIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/count.tsx#L24",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/count.tsx",
+          "lineNumber": 24
+        },
         "signature": [
           "BaseIndexPatternColumn",
           " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: 'count'; }"
@@ -1120,7 +1363,10 @@
         "label": "CumulativeSumIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/cumulative_sum.tsx#L32",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/cumulative_sum.tsx",
+          "lineNumber": 32
+        },
         "signature": [
           "BaseIndexPatternColumn",
           " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: 'cumulative_sum'; }"
@@ -1133,7 +1379,10 @@
         "label": "DerivativeIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/derivative.tsx#L34",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/derivative.tsx",
+          "lineNumber": 34
+        },
         "signature": [
           "BaseIndexPatternColumn",
           " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: 'derivative'; }"
@@ -1146,7 +1395,10 @@
         "label": "EmbeddableComponentProps",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx#L46",
+        "source": {
+          "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx",
+          "lineNumber": 46
+        },
         "signature": [
           {
             "pluginId": "lens",
@@ -1168,7 +1420,10 @@
         "description": [
           "\nA union type of all available column types. If a column is of an unknown type somewhere\nwithing the indexpattern data source it should be typed as `IndexPatternColumn` to make\ntypeguards possible that consider all available column types."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts#L52",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
+          "lineNumber": 52
+        },
         "signature": [
           {
             "pluginId": "lens",
@@ -1218,7 +1473,10 @@
         "label": "MaxIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx#L130",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+          "lineNumber": 130
+        },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"max\"; }"
         ],
@@ -1230,7 +1488,10 @@
         "label": "MedianIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx#L131",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+          "lineNumber": 131
+        },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"median\"; }"
         ],
@@ -1242,7 +1503,10 @@
         "label": "MinIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx#L129",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+          "lineNumber": 129
+        },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"min\"; }"
         ],
@@ -1254,7 +1518,10 @@
         "label": "MovingAverageIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/moving_average.tsx#L40",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/moving_average.tsx",
+          "lineNumber": 40
+        },
         "signature": [
           "BaseIndexPatternColumn",
           " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ReferenceBasedIndexPatternColumn & { operationType: 'moving_average'; params: {    window: number;}; }"
@@ -1269,7 +1536,10 @@
         "description": [
           "\nA union type of all available operation types. The operation type is a unique id of an operation.\nEach column is assigned to exactly one operation type."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts#L405",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
+          "lineNumber": 405
+        },
         "signature": [
           "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"terms\" | \"avg\" | \"median\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"counter_rate\" | \"cardinality\" | \"percentile\" | \"last_value\""
         ],
@@ -1281,7 +1551,10 @@
         "label": "PersistedIndexPatternLayer",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/types.ts#L75",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
+          "lineNumber": 75
+        },
         "signature": [
           "{ columns: Record<string, IndexPatternColumn>; columnOrder: string[]; incompleteColumns?: Record<string, IncompleteColumn> | undefined; }"
         ],
@@ -1293,7 +1566,10 @@
         "label": "PieLayerState",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/pie_visualization/types.ts#L22",
+        "source": {
+          "path": "x-pack/plugins/lens/public/pie_visualization/types.ts",
+          "lineNumber": 22
+        },
         "signature": [
           "SharedPieLayerState & { layerId: string; }"
         ],
@@ -1305,7 +1581,10 @@
         "label": "SeriesType",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L354",
+        "source": {
+          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+          "lineNumber": 354
+        },
         "signature": [
           "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
         ],
@@ -1317,7 +1596,10 @@
         "label": "SumIndexPatternColumn",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx#L127",
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+          "lineNumber": 127
+        },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"sum\"; }"
         ],
@@ -1331,7 +1613,10 @@
         "description": [
           "\nType-safe variant of by value embeddable input for Lens.\nThis can be used to hardcode certain Lens chart configurations within another app."
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx#L38",
+        "source": {
+          "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx",
+          "lineNumber": 38
+        },
         "signature": [
           "Pick<LensByValueInput, \"palette\" | \"id\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"title\" | \"query\" | \"hidePanelTitles\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"renderMode\"> & { attributes: LensAttributes<'lnsXY', XYState> | LensAttributes<'lnsPie', PieVisualizationState> | LensAttributes<'lnsDatatable', DatatableVisualizationState> | LensAttributes<'lnsMetric', MetricState>; }"
         ],
@@ -1343,7 +1628,10 @@
         "label": "ValueLabelConfig",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L368",
+        "source": {
+          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+          "lineNumber": 368
+        },
         "signature": [
           "\"hide\" | \"inside\" | \"outside\""
         ],
@@ -1355,7 +1643,10 @@
         "label": "YAxisMode",
         "tags": [],
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/public/xy_visualization/types.ts#L366",
+        "source": {
+          "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+          "lineNumber": 366
+        },
         "signature": [
           "\"left\" | \"right\" | \"auto\""
         ],
@@ -1415,12 +1706,18 @@
                   "<unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L35"
+                "source": {
+                  "path": "x-pack/plugins/lens/server/plugin.tsx",
+                  "lineNumber": 35
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L35"
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 35
+            }
           },
           {
             "id": "def-server.LensServerPlugin.setup",
@@ -1478,7 +1775,10 @@
                   ", unknown>"
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L39"
+                "source": {
+                  "path": "x-pack/plugins/lens/server/plugin.tsx",
+                  "lineNumber": 39
+                }
               },
               {
                 "type": "Object",
@@ -1494,12 +1794,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L39"
+                "source": {
+                  "path": "x-pack/plugins/lens/server/plugin.tsx",
+                  "lineNumber": 39
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L39"
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 39
+            }
           },
           {
             "id": "def-server.LensServerPlugin.start",
@@ -1540,7 +1846,10 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L59"
+                "source": {
+                  "path": "x-pack/plugins/lens/server/plugin.tsx",
+                  "lineNumber": 59
+                }
               },
               {
                 "type": "Object",
@@ -1556,12 +1865,18 @@
                   }
                 ],
                 "description": [],
-                "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L59"
+                "source": {
+                  "path": "x-pack/plugins/lens/server/plugin.tsx",
+                  "lineNumber": 59
+                }
               }
             ],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L59"
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 59
+            }
           },
           {
             "id": "def-server.LensServerPlugin.stop",
@@ -1574,10 +1889,16 @@
             "children": [],
             "tags": [],
             "returnComment": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L66"
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 66
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L31",
+        "source": {
+          "path": "x-pack/plugins/lens/server/plugin.tsx",
+          "lineNumber": 31
+        },
         "initialIsOpen": false
       }
     ],
@@ -1596,7 +1917,10 @@
             "type": "Object",
             "label": "usageCollection",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L22",
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 22
+            },
             "signature": [
               "Pick<",
               {
@@ -1615,7 +1939,10 @@
             "type": "CompoundType",
             "label": "taskManager",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L23",
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 23
+            },
             "signature": [
               {
                 "pluginId": "taskManager",
@@ -1628,7 +1955,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L21",
+        "source": {
+          "path": "x-pack/plugins/lens/server/plugin.tsx",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       },
       {
@@ -1644,7 +1974,10 @@
             "type": "CompoundType",
             "label": "taskManager",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L27",
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 27
+            },
             "signature": [
               {
                 "pluginId": "taskManager",
@@ -1662,7 +1995,10 @@
             "type": "Object",
             "label": "data",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L28",
+            "source": {
+              "path": "x-pack/plugins/lens/server/plugin.tsx",
+              "lineNumber": 28
+            },
             "signature": [
               {
                 "pluginId": "data",
@@ -1674,7 +2010,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/server/plugin.tsx#L26",
+        "source": {
+          "path": "x-pack/plugins/lens/server/plugin.tsx",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       }
     ],
@@ -1696,7 +2035,10 @@
         "children": [],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L16",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 16
+        },
         "initialIsOpen": false
       },
       {
@@ -1716,12 +2058,18 @@
               "string | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L20"
+            "source": {
+              "path": "x-pack/plugins/lens/common/constants.ts",
+              "lineNumber": 20
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -1741,12 +2089,18 @@
               "string | undefined"
             ],
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L24"
+            "source": {
+              "path": "x-pack/plugins/lens/common/constants.ts",
+              "lineNumber": 24
+            }
           }
         ],
         "tags": [],
         "returnComment": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       }
     ],
@@ -1774,13 +2128,19 @@
             "type": "Array",
             "label": "buckets",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L9",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 9
+            },
             "signature": [
               "{ key: KeyType; count: number; }[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/lens/common/api.ts",
+          "lineNumber": 8
+        },
         "initialIsOpen": false
       },
       {
@@ -1796,7 +2156,10 @@
             "type": "string",
             "label": "fromDate",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -1804,10 +2167,16 @@
             "type": "string",
             "label": "toDate",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L17"
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 17
+            }
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -1823,7 +2192,10 @@
             "type": "string",
             "label": "indexPatternTitle",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L11"
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 11
+            }
           },
           {
             "tags": [],
@@ -1831,13 +2203,19 @@
             "type": "Array",
             "label": "existingFieldNames",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L12",
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 12
+            },
             "signature": [
               "string[]"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 10
+        },
         "initialIsOpen": false
       },
       {
@@ -1863,7 +2241,10 @@
             "type": "number",
             "label": "totalDocuments",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L28",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 28
+            },
             "signature": [
               "number | undefined"
             ]
@@ -1874,7 +2255,10 @@
             "type": "number",
             "label": "sampledDocuments",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L30",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 30
+            },
             "signature": [
               "number | undefined"
             ]
@@ -1885,7 +2269,10 @@
             "type": "number",
             "label": "sampledValues",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L33",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 33
+            },
             "signature": [
               "number | undefined"
             ]
@@ -1896,7 +2283,10 @@
             "type": "Object",
             "label": "histogram",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L35",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 35
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -1914,7 +2304,10 @@
             "type": "Object",
             "label": "topValues",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L36",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 36
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -1927,7 +2320,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L26",
+        "source": {
+          "path": "x-pack/plugins/lens/common/api.ts",
+          "lineNumber": 26
+        },
         "initialIsOpen": false
       },
       {
@@ -1943,7 +2339,10 @@
             "type": "number",
             "label": "count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L16"
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 16
+            }
           },
           {
             "tags": [],
@@ -1951,7 +2350,10 @@
             "type": "Object",
             "label": "histogram",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L17",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 17
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -1969,7 +2371,10 @@
             "type": "Object",
             "label": "topValues",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L18",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 18
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -1982,7 +2387,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L15",
+        "source": {
+          "path": "x-pack/plugins/lens/common/api.ts",
+          "lineNumber": 15
+        },
         "initialIsOpen": false
       },
       {
@@ -2015,7 +2423,10 @@
             "type": "Object",
             "label": "meta",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L25",
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 25
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -2027,7 +2438,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L24",
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 24
+        },
         "initialIsOpen": false
       },
       {
@@ -2060,13 +2474,19 @@
             "type": "string",
             "label": "indexRefName",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L21",
+            "source": {
+              "path": "x-pack/plugins/lens/common/types.ts",
+              "lineNumber": 21
+            },
             "signature": [
               "string | undefined"
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/types.ts#L20",
+        "source": {
+          "path": "x-pack/plugins/lens/common/types.ts",
+          "lineNumber": 20
+        },
         "initialIsOpen": false
       },
       {
@@ -2082,7 +2502,10 @@
             "type": "number",
             "label": "count",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L22"
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 22
+            }
           },
           {
             "tags": [],
@@ -2090,7 +2513,10 @@
             "type": "Object",
             "label": "topValues",
             "description": [],
-            "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L23",
+            "source": {
+              "path": "x-pack/plugins/lens/common/api.ts",
+              "lineNumber": 23
+            },
             "signature": [
               {
                 "pluginId": "lens",
@@ -2103,7 +2529,10 @@
             ]
           }
         ],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/api.ts#L21",
+        "source": {
+          "path": "x-pack/plugins/lens/common/api.ts",
+          "lineNumber": 21
+        },
         "initialIsOpen": false
       }
     ],
@@ -2115,7 +2544,10 @@
         "type": "string",
         "label": "APP_ID",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L9",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 9
+        },
         "signature": [
           "\"lens\""
         ],
@@ -2127,7 +2559,10 @@
         "type": "string",
         "label": "BASE_API_URL",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L13",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 13
+        },
         "signature": [
           "\"/api/lens\""
         ],
@@ -2139,7 +2574,10 @@
         "type": "string",
         "label": "DOC_TYPE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L11",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 11
+        },
         "signature": [
           "\"lens\""
         ],
@@ -2151,7 +2589,10 @@
         "type": "string",
         "label": "LENS_EDIT_BY_VALUE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L14",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 14
+        },
         "signature": [
           "\"edit_by_value\""
         ],
@@ -2163,7 +2604,10 @@
         "type": "string",
         "label": "LENS_EMBEDDABLE_TYPE",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L10",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 10
+        },
         "signature": [
           "\"lens\""
         ],
@@ -2175,7 +2619,10 @@
         "type": "string",
         "label": "NOT_INTERNATIONALIZED_PRODUCT_NAME",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L12",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 12
+        },
         "signature": [
           "\"Lens Visualizations\""
         ],
@@ -2187,7 +2634,10 @@
         "type": "string",
         "label": "PLUGIN_ID",
         "description": [],
-        "source": "https://github.com/elastic/kibana/tree/master/x-pack/plugins/lens/common/constants.ts#L8",
+        "source": {
+          "path": "x-pack/plugins/lens/common/constants.ts",
+          "lineNumber": 8
+        },
         "signature": [
           "\"lens\""
         ],
