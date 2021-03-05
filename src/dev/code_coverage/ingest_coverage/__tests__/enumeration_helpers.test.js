@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { tryPath } from './enumeration_helpers';
+import { tryPath } from '../team_assignment/enumeration_helpers';
 
 describe(`enumeration helper fns`, () => {
   describe(`tryPath`, () => {
