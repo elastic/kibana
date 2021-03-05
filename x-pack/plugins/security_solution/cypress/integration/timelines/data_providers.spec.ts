@@ -29,7 +29,7 @@ import { HOSTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 
 describe('timeline data providers', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
