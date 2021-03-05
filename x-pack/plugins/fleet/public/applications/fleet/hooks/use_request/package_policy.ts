@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { sendRequest, useRequest } from './use_request';
 import { packagePolicyRouteService } from '../../services';
-import {
+import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
 } from '../../types';
-import {
+import type {
   DeletePackagePoliciesRequest,
   DeletePackagePoliciesResponse,
   GetPackagePoliciesRequest,
   GetPackagePoliciesResponse,
   GetOnePackagePolicyResponse,
 } from '../../../../../common/types/rest_spec';
+
+import { sendRequest, useRequest } from './use_request';
 
 export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
   return sendRequest<CreatePackagePolicyResponse>({
