@@ -40,7 +40,7 @@ interface Props {
   selectedAuthProviders?: string[];
   availableAuthProviders?: string[];
   elasticsearchRoles: string[];
-  disabled: boolean;
+  disabled?: boolean;
   multipleAuthProvidersConfig: boolean;
   handleAttributeSelectorChange(value: string, elasticsearchRole: string): void;
   handleAttributeValueChange(value: string): void;
