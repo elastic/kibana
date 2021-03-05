@@ -118,7 +118,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
     openDeleteModal({
       onDelete: onDeleteSpy,
       ctx: { indexPattern: indexPatternMock },
-      fieldNames: ['a', 'b', 'c'],
+      fieldName: ['a', 'b', 'c'],
     });
 
     expect(openModal).toHaveBeenCalled();

@@ -25,8 +25,8 @@ export interface OpenFieldDeleteModalOptions {
   ctx: {
     indexPattern: IndexPattern;
   };
-  onDelete?: () => void;
-  fieldNames: string[];
+  onDelete?: (fieldNames: string[]) => void;
+  fieldName: string | string[];
 }
 
 interface Dependencies {
@@ -46,9 +46,10 @@ export const getFieldDeleteModalOpener = ({
 
   const openDeleteModal = ({
     onDelete,
-    fieldNames,
+    fieldName,
     ctx: { indexPattern },
   }: OpenFieldDeleteModalOptions): CloseEditor => {
+    const fieldsToDelete = Array.isArray(fieldName) ? fieldName : [fieldName];
     const closeModal = () => {
       if (overlayRef) {
         overlayRef.close();
@@ -59,21 +60,21 @@ export const getFieldDeleteModalOpener = ({
     const onConfirmDelete = async () => {
       closeModal();
 
-      await removeFields(fieldNames, indexPattern, {
+      await removeFields(fieldsToDelete, indexPattern, {
         indexPatternService,
         usageCollection,
         notifications,
       });
 
       if (onDelete) {
-        onDelete();
+        onDelete(fieldsToDelete);
       }
     };
 
     overlayRef = overlays.openModal(
       toMountPoint(
         <DeleteFieldModal
-          fieldsToDelete={fieldNames}
+          fieldsToDelete={fieldsToDelete}
           closeModal={closeModal}
           confirmDelete={onConfirmDelete}
         />
