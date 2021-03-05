@@ -379,10 +379,11 @@ export const UserActionTree = React.memo(
                   return comments;
                 }
 
-                const ruleId = comment?.rule?.id ?? manualAlertsData[alertId]?.rule?.id?.[0] ?? '';
+                const ruleId =
+                  comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? '';
                 const ruleName =
                   comment?.rule?.name ??
-                  manualAlertsData[alertId]?.rule?.name?.[0] ??
+                  manualAlertsData[alertId]?.signal?.rule?.name?.[0] ??
                   i18n.UNKNOWN_RULE;
 
                 return [
