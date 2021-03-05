@@ -14114,7 +14114,7 @@
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/types/models/epm.ts#L234"
         },
         "signature": [
-          "\"text\" | \"password\" | \"integer\" | \"bool\" | \"yaml\""
+          "\"string\" | \"text\" | \"password\" | \"integer\" | \"bool\" | \"yaml\""
         ],
         "initialIsOpen": false
       },
