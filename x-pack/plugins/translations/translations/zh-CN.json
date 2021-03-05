@@ -19905,7 +19905,6 @@
     "xpack.snapshotRestore.policyValidation.invalidNegativeDeleteAfterErrorMessage": "“在指定时间后删除”不能为负。",
     "xpack.snapshotRestore.policyValidation.invalidNegativeMaxCountErrorMessage": "“最大计数”不能为负。",
     "xpack.snapshotRestore.policyValidation.invalidNegativeMinCountErrorMessage": "“最小计数”不能为负。",
-    "xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage": "策略“{policyName}”已与此存储库关联。",
     "xpack.snapshotRestore.policyValidation.nameRequiredErroMessage": "策略名称必填。",
     "xpack.snapshotRestore.policyValidation.repositoryRequiredErrorMessage": "存储库必填。",
     "xpack.snapshotRestore.policyValidation.scheduleRequiredErrorMessage": "计划必填。",
