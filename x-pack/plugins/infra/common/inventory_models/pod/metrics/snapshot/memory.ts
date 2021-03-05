@@ -8,7 +8,6 @@
 import { MetricsUIAggregation } from '../../../types';
 
 export const memory: MetricsUIAggregation = {
-  memory: { avg: { field: 'kubernetes.pod.memory.usage.node.pct' } },
   memory_with_limit: {
     avg: {
       field: 'kubernetes.pod.memory.usage.limit.pct',
