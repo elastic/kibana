@@ -190,6 +190,7 @@ kibana_vars=(
     xpack.event_log.indexEntries
     xpack.event_log.logEntries
     xpack.fleet.agents.elasticsearch.host
+    xpack.fleet.agents.fleetServerEnabled
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
     xpack.fleet.registryUrl
