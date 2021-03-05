@@ -87,7 +87,7 @@ const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFie
 const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) => {
   const pathBrowserField = getBrowserFieldPath(field, browserFields);
   const browserField = get(pathBrowserField, browserFields);
-  if (browserField != null && browserField.subType) {
+  if (browserField != null && browserField.subType.nested) {
     return true;
   }
   return false;
@@ -114,7 +114,7 @@ const buildQueryMatch = (
               : escapeQueryValue(dataProvider.queryMatch.value)
           }`
       : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-      ? convertNestedFieldExistToQuery(dataProvider.queryMatch.field, browserFields)
+      ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
       : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 
