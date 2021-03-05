@@ -47,20 +47,30 @@ export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCall
 export const confirmDiscardOrKeepUnsavedChanges = (
   overlays: OverlayStart
 ): Promise<DiscardOrKeepSelection> => {
+  const titleId = 'confirmDiscardOrKeepTitle';
+  const descriptionId = 'confirmDiscardOrKeepDescription';
+
   return new Promise((resolve) => {
     const session = overlays.openModal(
       toMountPoint(
         <EuiFocusTrap clickOutsideDisables={true} initialFocus={'.discardConfirmKeepButton'}>
           <EuiOutsideClickDetector onOutsideClick={() => session.close()}>
-            <div role="dialog">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              aria-describedby={descriptionId}
+            >
               <EuiModalHeader data-test-subj="dashboardDiscardConfirm">
                 <EuiModalHeaderTitle>
-                  {leaveEditModeConfirmStrings.getLeaveEditModeTitle()}
+                  <h2 id={titleId}>{leaveEditModeConfirmStrings.getLeaveEditModeTitle()}</h2>
                 </EuiModalHeaderTitle>
               </EuiModalHeader>
 
               <EuiModalBody>
-                <EuiText>{leaveEditModeConfirmStrings.getLeaveEditModeSubtitle()}</EuiText>
+                <EuiText>
+                  <p id={descriptionId}>{leaveEditModeConfirmStrings.getLeaveEditModeSubtitle()}</p>
+                </EuiText>
               </EuiModalBody>
 
               <EuiModalFooter>
@@ -109,6 +119,9 @@ export const confirmCreateWithUnsaved = (
   startBlankCallback: () => void,
   contineCallback: () => void
 ) => {
+  const titleId = 'confirmDiscardOrKeepTitle';
+  const descriptionId = 'confirmDiscardOrKeepDescription';
+
   const session = overlays.openModal(
     toMountPoint(
       <EuiFocusTrap
@@ -116,13 +129,22 @@ export const confirmCreateWithUnsaved = (
         initialFocus={'.dashboardCreateConfirmContinueButton'}
       >
         <EuiOutsideClickDetector onOutsideClick={() => session.close()}>
-          <div role="dialog">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            aria-describedby={descriptionId}
+          >
             <EuiModalHeader data-test-subj="dashboardCreateConfirm">
-              <EuiModalHeaderTitle>{createConfirmStrings.getCreateTitle()}</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>
+                <h2 id={titleId}>{createConfirmStrings.getCreateTitle()}</h2>
+              </EuiModalHeaderTitle>
             </EuiModalHeader>
 
             <EuiModalBody>
-              <EuiText>{createConfirmStrings.getCreateSubtitle()}</EuiText>
+              <EuiText>
+                <p id={descriptionId}>{createConfirmStrings.getCreateSubtitle()}</p>
+              </EuiText>
             </EuiModalBody>
 
             <EuiModalFooter>

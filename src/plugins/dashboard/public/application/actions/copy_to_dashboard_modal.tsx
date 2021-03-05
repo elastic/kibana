@@ -68,21 +68,29 @@ export function CopyToDashboardModal({
     });
   }, [dashboardOption, embeddable, selectedDashboard, stateTransfer, closeModal]);
 
+  const titleId = 'copyToDashboardTitle';
+  const descriptionId = 'copyToDashboardDescription';
+
   return (
     <EuiFocusTrap clickOutsideDisables={true}>
       <EuiOutsideClickDetector onOutsideClick={closeModal}>
-        <div role="dialog">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          aria-describedby={descriptionId}
+        >
           <PresentationUtilContext>
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                {dashboardCopyToDashboardAction.getDisplayName()}
+                <h2 id={titleId}>{dashboardCopyToDashboardAction.getDisplayName()}</h2>
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
             <EuiModalBody>
               <>
                 <EuiText>
-                  <p>{dashboardCopyToDashboardAction.getDescription()}</p>
+                  <p id={descriptionId}>{dashboardCopyToDashboardAction.getDescription()}</p>
                 </EuiText>
                 <EuiSpacer />
                 <EuiFormRow hasChildLabel={false}>
