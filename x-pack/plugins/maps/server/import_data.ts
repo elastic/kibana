@@ -13,7 +13,6 @@ import {
   ImportFailure,
   Settings,
   Mappings,
-  IngestPipelineWrapper,
 } from '../common';
 import { IndexPatternsService } from '../../../../src/plugins/data/common';
 
@@ -29,16 +28,12 @@ export function importDataProvider(
     index: string,
     settings: Settings,
     mappings: Mappings,
-    ingestPipeline: IngestPipelineWrapper,
     data: InputData
   ): Promise<ImportResponse> {
     let createdIndex;
-    let createdPipelineId;
     const docCount = data.length;
 
     try {
-      const { id: pipelineId, pipeline } = ingestPipeline;
-
       if (id === undefined) {
         // first chunk of data, create the index and id to return
         id = generateId();
@@ -48,23 +43,13 @@ export function importDataProvider(
         if (createdIndex) {
           await createIndexPattern(index);
         }
-
-        // create the pipeline if one has been supplied
-        if (pipelineId !== undefined) {
-          const resp = await createPipeline(pipelineId, pipeline);
-          if (resp.acknowledged !== true) {
-            throw resp;
-          }
-        }
-        createdPipelineId = pipelineId;
       } else {
         createdIndex = index;
-        createdPipelineId = pipelineId;
       }
 
       let failures: ImportFailure[] = [];
       if (data.length) {
-        const resp = await indexData(index, createdPipelineId, data);
+        const resp = await indexData(index, data);
         if (resp.success === false) {
           if (resp.ingestError) {
             // all docs failed, abort
@@ -72,6 +57,7 @@ export function importDataProvider(
           } else {
             // some docs failed.
             // still report success but with a list of failures
+            logger.warn(`Error: some documents failed to index. ${resp.failures}`);
             failures = resp.failures || [];
           }
         }
@@ -81,7 +67,6 @@ export function importDataProvider(
         success: true,
         id,
         index: createdIndex,
-        pipelineId: createdPipelineId,
         docCount,
         failures,
       };
@@ -90,7 +75,6 @@ export function importDataProvider(
         success: false,
         id: id!,
         index: createdIndex,
-        pipelineId: createdPipelineId,
         error: error.body !== undefined ? error.body : error,
         docCount,
         ingestError: error.ingestError,
@@ -130,7 +114,7 @@ export function importDataProvider(
     }
   }
 
-  async function indexData(index: string, pipelineId: string, data: InputData) {
+  async function indexData(index: string, data: InputData) {
     try {
       const body = [];
       for (let i = 0; i < data.length; i++) {
@@ -139,10 +123,6 @@ export function importDataProvider(
       }
 
       const settings: Settings = { index, body };
-      if (pipelineId !== undefined) {
-        settings.pipeline = pipelineId;
-      }
-
       const { body: resp } = await asCurrentUser.bulk(settings);
       if (resp.errors) {
         throw resp;
@@ -173,11 +153,6 @@ export function importDataProvider(
         ingestError,
       };
     }
-  }
-
-  async function createPipeline(id: string, pipeline: any) {
-    const { body } = await asCurrentUser.ingest.putPipeline({ id, body: pipeline });
-    return body;
   }
 
   function getFailures(items: any[], data: InputData): ImportFailure[] {

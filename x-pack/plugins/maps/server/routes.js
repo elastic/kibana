@@ -590,7 +590,7 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
     }
   );
 
-  async function importData(core, id, index, settings, mappings, ingestPipeline, data) {
+  async function importData(core, id, index, settings, mappings, data) {
     const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
       core.savedObjects.client,
       core.elasticsearch.client.asCurrentUser
@@ -600,7 +600,7 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
       indexPatternsService,
       logger
     );
-    return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
+    return importDataFunc(id, index, settings, mappings, data);
   }
 
   router.post(
@@ -614,36 +614,21 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
           index: schema.string(),
           data: schema.arrayOf(schema.any()),
           settings: schema.maybe(schema.any()),
-          /** Mappings */
           mappings: schema.any(),
-          /** Ingest pipeline definition */
-          ingestPipeline: schema.object({
-            id: schema.maybe(schema.string()),
-            pipeline: schema.maybe(schema.any()),
-          }),
         }),
       },
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: 104857600,
+          maxBytes: 1048576,
         },
-        tags: ['access:maps:index'],
       },
     },
     async (context, request, response) => {
       try {
         const { id } = request.query;
-        const { index, data, settings, mappings, ingestPipeline } = request.body;
-        const result = await importData(
-          context.core,
-          id,
-          index,
-          settings,
-          mappings,
-          ingestPipeline,
-          data
-        );
+        const { index, data, settings, mappings } = request.body;
+        const result = await importData(context.core, id, index, settings, mappings, data);
         return response.ok({ body: result });
       } catch (error) {
         logger.error(`Error processing geo point/shape request: ${error.message}.`);
