@@ -141,10 +141,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(statusBody[body.id].current_status.status).to.eql('failed');
-          expect(
-            statusBody[body.id].current_status.last_failure_message.includes(
-              'Bulk Indexing of signals failed: Error: The nested depth of the query exceeds the maximum nested depth for bool queries set in [indices.query.bool.max_nested_depth] Please update the indices.query.bool.max_nested_depth property in your Elasticsearch config file (default is 20)'
-            )
+          expect(statusBody[body.id].current_status.last_failure_message).to.contain(
+            'Bulk Indexing of signals failed: Error: The nested depth of the query exceeds the maximum nested depth for bool queries set in [indices.query.bool.max_nested_depth] Please update the indices.query.bool.max_nested_depth property in your Elasticsearch config file (default is 20)'
           );
         });
 

@@ -116,28 +116,29 @@ export const singleSearchAfter = async ({
       };
     } else if (exc.statusCode === 400) {
       // added this code to handle https://github.com/elastic/kibana/issues/93333
+      let rootCause;
       try {
-        const rootCause = JSON.parse(exc.response).error;
-        if (rootCause != null) {
-          let causedByObject = rootCause.caused_by;
-          let reason;
-          while (causedByObject != null) {
-            reason = causedByObject.reason;
-            causedByObject = causedByObject.caused_by;
-          }
-          if (
-            reason != null &&
-            reason.includes(
-              'The nested depth of the query exceeds the maximum nested depth for bool queries set in [indices.query.bool.max_nested_depth]'
-            )
-          ) {
-            throw new Error(
-              `${reason} Please update the indices.query.bool.max_nested_depth property in your Elasticsearch config file (default is 20)`
-            );
-          }
-        }
+        rootCause = JSON.parse(exc.response).error;
       } catch (e) {
         logger.error(buildRuleMessage(`[-] singleSearchAfter could not parse error: ${e.message}`));
+      }
+      if (rootCause != null) {
+        let causedByObject = rootCause.caused_by;
+        let reason;
+        while (causedByObject != null) {
+          reason = causedByObject.reason;
+          causedByObject = causedByObject.caused_by;
+        }
+        if (
+          reason != null &&
+          reason.includes(
+            'The nested depth of the query exceeds the maximum nested depth for bool queries set in [indices.query.bool.max_nested_depth]'
+          )
+        ) {
+          throw new Error(
+            `${reason} Please update the indices.query.bool.max_nested_depth property in your Elasticsearch config file (default is 20)`
+          );
+        }
       }
     }
     throw exc;
