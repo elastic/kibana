@@ -88,8 +88,9 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
-  const policy = getPolicyByName(policies, attemptToURIDecode(policyName))?.policy ?? defaultPolicy;
-  const isNewPolicy = !policy;
+  const maybePolicy = getPolicyByName(policies, attemptToURIDecode(policyName))?.policy;
+  const isNewPolicy = !maybePolicy;
+  const policy = maybePolicy ?? defaultPolicy;
 
   return (
     <EditPolicyContextProvider
