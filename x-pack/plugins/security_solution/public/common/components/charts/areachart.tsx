@@ -62,6 +62,15 @@ const checkIfAnyValidSeriesExist = (
 ): data is ChartSeriesData[] =>
   Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const axisStyle = {
+  tickLine: {
+    visible: false,
+  },
+  tickLabel: {
+    padding: 3,
+  },
+};
+
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = ({
   data,
@@ -111,23 +120,10 @@ export const AreaChartBaseComponent = ({
           position={Position.Bottom}
           showOverlappingTicks={false}
           tickFormat={xTickFormatter}
-          style={{
-            tickLine: {
-              visible: false,
-            },
-          }}
+          style={axisStyle}
         />
 
-        <Axis
-          id={yAxisId}
-          position={Position.Left}
-          style={{
-            tickLine: {
-              visible: false,
-            },
-          }}
-          tickFormat={yTickFormatter}
-        />
+        <Axis id={yAxisId} position={Position.Left} style={axisStyle} tickFormat={yTickFormatter} />
       </Chart>
     </div>
   ) : null;
