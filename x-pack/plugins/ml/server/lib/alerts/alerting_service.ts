@@ -489,13 +489,11 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      * Return the result of an alert condition execution.
      *
      * @param params - Alert params
-     * @param publicBaseUrl
      * @param startedAt
      * @param previousStartedAt
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
-      publicBaseUrl: string | undefined,
       startedAt: Date,
       previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
@@ -518,7 +516,6 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
         ...result,
         name: result.alertInstanceKey,
         anomalyExplorerUrl,
-        kibanaBaseUrl: publicBaseUrl!,
       };
 
       return executionResult;
