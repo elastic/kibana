@@ -8,7 +8,6 @@
     "declarationMap": true
   },
   "include": [
-    "../../../node_modules/@types/react-syntax-highlighter/**/*",
     "../../../typings/**/*",
     "__fixtures__/**/*",
     "canvas_plugin_src/**/*",
@@ -20,19 +19,19 @@
     "storybook/**/*",
     "tasks/mocks/*",
     "types/**/*",
-    "**/*.json"
+    "**/*.json",
   ],
   "exclude": [
-    // these files are too large and upset tsc, so we exclude them
-    "server/sample_data/*.json",
-    "canvas_plugin_src/functions/server/demodata/*.json",
-    "shareable_runtime/test/workpads/*.json"
+      // these files are too large and upset tsc, so we exclude them
+     "server/sample_data/*.json",
+     "canvas_plugin_src/functions/server/demodata/*.json",
+     "shareable_runtime/test/workpads/*.json",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/bfetch/tsconfig.json" },
+    { "path": "../../../src/plugins/bfetch/tsconfig.json"},
     { "path": "../../../src/plugins/charts/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json"},
     { "path": "../../../src/plugins/discover/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/expressions/tsconfig.json" },
@@ -48,6 +47,6 @@
     { "path": "../features/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
-    { "path": "../reporting/tsconfig.json" }
+    { "path": "../reporting/tsconfig.json" },
   ]
 }
