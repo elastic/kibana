@@ -55,7 +55,7 @@ export class IndexPatternDatasource {
           storage: new Storage(localStorage),
           data,
           charts,
-          indexPatternFieldEditor
+          indexPatternFieldEditor,
         });
       }) as Promise<Datasource>;
     });
