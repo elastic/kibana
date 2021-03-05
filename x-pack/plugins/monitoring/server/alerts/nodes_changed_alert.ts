@@ -18,14 +18,14 @@ import {
   AlertInstanceState,
   AlertNodesChangedState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   ALERT_NODES_CHANGED,
   LEGACY_ALERT_DETAILS,
   INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
