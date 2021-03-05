@@ -11,7 +11,6 @@ import {
   Logger,
   KibanaRequest,
   SavedObjectsClientContract,
-  ISavedObjectsRepository,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
@@ -57,7 +56,7 @@ export interface ClusterDetails {
 export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
   esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  soClient: SavedObjectsClientContract;
   kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
 }
 

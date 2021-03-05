@@ -34,7 +34,7 @@ import {
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { validateExpression } from './validation';
-import { parseDuration } from '../../../../alerts/common';
+import { parseDuration } from '../../../../alerting/common';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
@@ -270,7 +270,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.queryPrompt"
-            defaultMessage="Define the ES query"
+            defaultMessage="Define the Elasticsearch query"
           />
         </h5>
       </EuiTitle>
@@ -281,7 +281,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.queryPrompt.label"
-            defaultMessage="ES query"
+            defaultMessage="Elasticsearch query"
           />
         }
         isInvalid={errors.esQuery.length > 0}
@@ -290,7 +290,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.queryPrompt.help"
-              defaultMessage="ES Query DSL documentation"
+              defaultMessage="Elasticsearch Query DSL documentation"
             />
           </EuiLink>
         }
@@ -302,7 +302,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           theme="github"
           data-test-subj="queryJsonEditor"
           aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
-            defaultMessage: 'ES query editor',
+            defaultMessage: 'Elasticsearch query editor',
           })}
           value={xJson}
           onChange={(xjson: string) => {
