@@ -647,7 +647,9 @@
             "section": "def-server.ActionResult",
             "text": "ActionResult"
           },
-          "<Record<string, unknown>>>; delete: ({ id }: { id: string; }) => Promise<{}>; create: ({ action: { actionTypeId, name, config, secrets }, }: CreateOptions) => Promise<",
+          "<Record<string, unknown>>>; delete: ({ id }: { id: string; }) => Promise<{}>; create: ({ action: { actionTypeId, name, config, secrets }, }: ",
+          "CreateOptions",
+          ") => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -655,23 +657,15 @@
             "section": "def-server.ActionResult",
             "text": "ActionResult"
           },
-          "<Record<string, unknown>>>; update: ({ id, action }: UpdateOptions) => Promise<",
+          "<Record<string, unknown>>>; update: ({ id, action }: ",
+          "UpdateOptions",
+          ") => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
             "section": "def-server.ActionResult",
             "text": "ActionResult"
-          },
-          "<Record<string, unknown>>>; execute: ({ actionId, params, source, }: Pick<",
-          "ExecuteOptions",
-          "<unknown>, \"source\" | \"params\" | \"actionId\">) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionTypeExecutorResult",
-            "text": "ActionTypeExecutorResult"
           }
         ],
         "initialIsOpen": false
@@ -1071,8 +1065,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 94,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L94"
+                "lineNumber": 86,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L86"
               }
             }
           ],
@@ -1080,15 +1074,15 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 88,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L88"
+            "lineNumber": 80,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L80"
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 87,
-        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L87"
+        "lineNumber": 79,
+        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L79"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1119,8 +1113,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 99,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L99"
+                "lineNumber": 91,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L91"
               }
             },
             {
@@ -1138,15 +1132,15 @@
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 99,
-                    "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L99"
+                    "lineNumber": 91,
+                    "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L91"
                   }
                 }
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 99,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L99"
+                "lineNumber": 91,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L91"
               }
             }
           ],
@@ -1154,8 +1148,8 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 99,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L99"
+            "lineNumber": 91,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L91"
           }
         },
         {
@@ -1177,8 +1171,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 101,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L101"
+                "lineNumber": 93,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L93"
               }
             },
             {
@@ -1191,8 +1185,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 102,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L102"
+                "lineNumber": 94,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L94"
               }
             },
             {
@@ -1210,15 +1204,15 @@
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 103,
-                    "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L103"
+                    "lineNumber": 95,
+                    "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L95"
                   }
                 }
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 103,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L103"
+                "lineNumber": 95,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L95"
               }
             }
           ],
@@ -1226,8 +1220,8 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 100,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L100"
+            "lineNumber": 92,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L92"
           }
         },
         {
@@ -1272,8 +1266,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 105,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L105"
+                "lineNumber": 97,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L97"
               }
             }
           ],
@@ -1281,8 +1275,8 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 105,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L105"
+            "lineNumber": 97,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L97"
           }
         },
         {
@@ -1327,8 +1321,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 106,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L106"
+                "lineNumber": 98,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L98"
               }
             }
           ],
@@ -1336,8 +1330,8 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 106,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L106"
+            "lineNumber": 98,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L98"
           }
         },
         {
@@ -1348,8 +1342,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 107,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L107"
+            "lineNumber": 99,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L99"
           },
           "signature": [
             {
@@ -1381,8 +1375,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 109,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L109"
+                "lineNumber": 101,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L101"
               }
             },
             {
@@ -1395,8 +1389,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 110,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L110"
+                "lineNumber": 102,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L102"
               }
             },
             {
@@ -1409,8 +1403,8 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 111,
-                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L111"
+                "lineNumber": 103,
+                "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L103"
               }
             }
           ],
@@ -1418,15 +1412,15 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 108,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L108"
+            "lineNumber": 100,
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L100"
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 98,
-        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L98"
+        "lineNumber": 90,
+        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/actions/server/plugin.ts#L90"
       },
       "lifecycle": "start",
       "initialIsOpen": true
