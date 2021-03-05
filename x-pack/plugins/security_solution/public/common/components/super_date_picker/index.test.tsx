@@ -79,7 +79,8 @@ const timepickerRanges = [
   },
 ];
 
-describe('SIEM Super Date Picker', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/93735
+describe.skip('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
