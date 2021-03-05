@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { errors as historyErrors } from '../../../services/history';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
@@ -48,12 +49,26 @@ export const useSendCurrentRequestToES = () => {
         try {
           history.addToHistory(path, method, data);
         } catch (e) {
-          // Best effort, but notify the user.
-          notifications.toasts.addError(e, {
-            title: i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
-              defaultMessage: 'Could not save request to history.',
-            }),
+          const errorTitle = i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
+            defaultMessage: 'Could not save request to Console history.',
           });
+          if (historyErrors.isQuoteExceeded(e)) {
+            notifications.toasts.addError(e, {
+              title: errorTitle,
+              toastMessage: i18n.translate(
+                'console.notification.error.historyQuotaReachedMessage',
+                {
+                  defaultMessage:
+                    'Request history is full. Please clear history in order to continue saving new requests.',
+                }
+              ),
+            });
+          } else {
+            // Best effort, but still notify the user.
+            notifications.toasts.addError(e, {
+              title: errorTitle,
+            });
+          }
         }
       });
 
