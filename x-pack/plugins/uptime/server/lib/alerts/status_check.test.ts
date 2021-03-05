@@ -18,11 +18,11 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-} from '../../../../alerts/server';
+} from '../../../../alerting/server';
 import { UMServerLibs } from '../lib';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { alertsMock, AlertServicesMock } from '../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../alerting/server/mocks';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { makePing } from '../../../common/runtime_types/ping';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
@@ -50,7 +50,7 @@ const bootstrapDependencies = (customRequests?: any) => {
  * This function aims to provide an easy way to give mock props that will
  * reduce boilerplate for tests.
  * @param params the params received at alert creation time
- * @param services the core services provided by kibana/alerts platforms
+ * @param services the core services provided by kibana/alerting platforms
  * @param state the state the alert maintains
  */
 const mockOptions = (

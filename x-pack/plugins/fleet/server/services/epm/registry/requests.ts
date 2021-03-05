@@ -8,9 +8,11 @@
 import fetch, { FetchError, Response } from 'node-fetch';
 import type { RequestInit } from 'node-fetch';
 import pRetry from 'p-retry';
+
 import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
@@ -26,7 +28,7 @@ async function registryFetch(url: string) {
     const message = `'${status} ${statusText}' error response from package registry at ${
       resUrl || url
     }`;
-    const responseError = new RegistryResponseError(message);
+    const responseError = new RegistryResponseError(message, status);
 
     throw new pRetry.AbortError(responseError);
   }

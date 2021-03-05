@@ -21,12 +21,13 @@ import {
 } from '../../../test_utils';
 
 import { TrustedAppsGrid } from '.';
+import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiSize: '16px',
   },
-};
+});
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
