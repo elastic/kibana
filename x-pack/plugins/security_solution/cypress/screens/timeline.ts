@@ -118,8 +118,6 @@ export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
 
-export const TIMELINE_ADD_FIELD_BUTTON = '[data-test-subj="addField"]';
-
 export const TIMELINE_DATA_PROVIDERS_EMPTY =
   '[data-test-subj="dataProviders"] [data-test-subj="empty"]';
 

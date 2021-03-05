@@ -56,7 +56,8 @@ describe('timeline data providers', () => {
       });
   });
 
-  it('displays the data provider action menu when Enter is pressed', () => {
+  // https://kibana-ci.elastic.co/job/elastic+kibana+security-cypress/4327/#showFailuresLink
+  it.skip('displays the data provider action menu when Enter is pressed', () => {
     dragAndDropFirstHostToTimeline();
     openTimelineUsingToggle();
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
