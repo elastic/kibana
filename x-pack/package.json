@@ -44,7 +44,6 @@
     "@kbn/config-schema": "link:../packages/kbn-config-schema",
     "@kbn/i18n": "link:../packages/kbn-i18n",
     "@kbn/interpreter": "link:../packages/kbn-interpreter",
-    "@kbn/ml-utils": "link:../packages/kbn-ml-utils",
     "@kbn/ui-framework": "link:../packages/kbn-ui-framework"
   }
 }
