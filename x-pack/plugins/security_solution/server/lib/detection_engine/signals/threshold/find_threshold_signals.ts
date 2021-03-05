@@ -10,18 +10,17 @@ import { set } from '@elastic/safer-lodash-set';
 import {
   Threshold,
   TimestampOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
-import { singleSearchAfter } from './single_search_after';
-
+} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
-import { Logger } from '../../../../../../../src/core/server';
-import { SignalSearchResponse } from './types';
-import { BuildRuleMessage } from './rule_messages';
+} from '../../../../../../alerts/server';
+import { Logger } from '../../../../../../../../src/core/server';
+import { BuildRuleMessage } from '../rule_messages';
+import { singleSearchAfter } from '../single_search_after';
+import { SignalSearchResponse } from '../types';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -50,27 +49,52 @@ export const findThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
-  const topHitsAgg = {
-    top_hits: {
-      sort: [
-        {
-          [timestampOverride ?? '@timestamp']: {
-            order: 'desc',
+  // Leaf aggregations used below
+  const leafAggs = {
+    top_threshold_hits: {
+      top_hits: {
+        sort: [
+          {
+            [timestampOverride ?? '@timestamp']: {
+              order: 'desc',
+            },
           },
-        },
-      ],
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-      ],
-      size: 1,
+        ],
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
+        size: 1,
+      },
     },
+    ...(threshold.cardinality?.length
+      ? {
+          cardinality_count: {
+            cardinality: {
+              field: threshold.cardinality[0].field,
+            },
+          },
+          cardinality_check: {
+            bucket_selector: {
+              buckets_path: {
+                cardinalityCount: 'cardinality_count',
+              },
+              script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
+            },
+          },
+        }
+      : {}),
   };
 
   const thresholdFields = normalizeThresholdField(threshold.field);
 
+  // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
+  // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
+  // 2) return the latest hit for each bucket so that we can persist the timestamp of the event in the
+  // `original_time` of the signal. This will be used for dupe mitigation purposes by the detection
+  // engine.
   const aggregations = thresholdFields.length
     ? thresholdFields.reduce((acc, field, i) => {
         const aggPath = [...Array(i + 1).keys()]
@@ -86,60 +110,21 @@ export const findThresholdSignals = async ({
           },
         });
         if (i === (thresholdFields.length ?? 0) - 1) {
-          if (threshold.cardinality?.length) {
-            set(acc, `${aggPath}['aggs']`, {
-              top_threshold_hits: topHitsAgg,
-              cardinality_count: {
-                cardinality: {
-                  field: threshold.cardinality[0].field,
-                },
-              },
-              cardinality_check: {
-                bucket_selector: {
-                  buckets_path: {
-                    cardinalityCount: 'cardinality_count',
-                  },
-                  script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
-                },
-              },
-            });
-          } else {
-            set(acc, `${aggPath}['aggs']`, {
-              top_threshold_hits: topHitsAgg,
-            });
-          }
+          set(acc, `${aggPath}['aggs']`, leafAggs);
         }
         return acc;
       }, {})
     : {
+        // No threshold grouping fields provided
         threshold_0: {
           terms: {
             script: {
-              source: '""',
+              source: '""', // Group everything in the same bucket
               lang: 'painless',
             },
             min_doc_count: threshold.value,
           },
-          aggs: {
-            top_threshold_hits: topHitsAgg,
-            ...(threshold.cardinality?.length
-              ? {
-                  cardinality_count: {
-                    cardinality: {
-                      field: threshold.cardinality[0].field,
-                    },
-                  },
-                  cardinality_check: {
-                    bucket_selector: {
-                      buckets_path: {
-                        cardinalityCount: 'cardinality_count',
-                      },
-                      script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
-                    },
-                  },
-                }
-              : {}),
-          },
+          aggs: leafAggs,
         },
       };
 
