@@ -17,7 +17,7 @@ export const MoreLessSection: FunctionComponent<Props> = ({ align = 'left', chil
 
   const buttonLabel = isContentVisible
     ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.lessButtonLabel', {
-        defaultMessage: 'Less options',
+        defaultMessage: 'Fewer options',
       })
     : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.moreButtonLabel', {
         defaultMessage: 'More options',
