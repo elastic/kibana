@@ -8,6 +8,7 @@
 import { Location } from 'history';
 import React from 'react';
 import { keyBy } from 'lodash';
+import { useParams } from 'react-router-dom';
 import { IUrlParams } from '../../../../../context/url_params_context/types';
 import {
   IWaterfall,
@@ -29,6 +30,8 @@ export function WaterfallContainer({
   waterfall,
   exceedsMax,
 }: Props) {
+  const { serviceName } = useParams<{ serviceName: string }>();
+
   if (!waterfall) {
     return null;
   }
@@ -71,9 +74,15 @@ export function WaterfallContainer({
     item.color = color;
   });
 
+  // default to serviceName if value is empty, e.g. for transactions (which don't
+  // have span.type or span.subtype)
+  const legendsWithFallbackLabel = displayedLegends.map((legend) => {
+    return { ...legend, value: !legend.value ? serviceName : legend.value };
+  });
+
   return (
     <div>
-      <WaterfallLegends legends={displayedLegends} type={colorBy} />
+      <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
       <Waterfall
         location={location}
         waterfallItemId={urlParams.waterfallItemId}

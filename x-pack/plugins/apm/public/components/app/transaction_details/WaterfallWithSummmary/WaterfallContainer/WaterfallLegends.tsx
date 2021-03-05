@@ -35,14 +35,6 @@ const LEGEND_LABELS = {
     }
   ),
 };
-
-const TRANSACTION_LABEL = i18n.translate(
-  'xpack.apm.transactionDetails.spanTypeTransactionLabel',
-  {
-    defaultMessage: 'Transaction',
-  }
-);
-
 export function WaterfallLegends({ legends, type }: Props) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -55,10 +47,7 @@ export function WaterfallLegends({ legends, type }: Props) {
         <EuiFlexGroup direction="row" gutterSize="s">
           {legends.map((legend) => (
             <EuiFlexItem grow={false} key={legend.value}>
-              <Legend
-                color={legend.color}
-                text={legend.value || TRANSACTION_LABEL}
-              />
+              <Legend color={legend.color} text={legend.value} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
