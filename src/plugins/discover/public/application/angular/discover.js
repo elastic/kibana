@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
@@ -24,7 +23,6 @@ import {
 import { getSortArray } from './doc_table';
 import indexTemplateLegacy from './discover_legacy.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import { discoverResponseHandler } from './response_handler';
 import {
   getAngularModule,
   getHeaderActionMenuMounter,
@@ -34,7 +32,6 @@ import {
   getUrlTracker,
   redirectWhenMissing,
   subscribeWithScope,
-  tabifyAggResponse,
 } from '../../kibana_services';
 import {
   getRootBreadcrumbs,
@@ -518,11 +515,6 @@ function discoverController($route, $scope, Promise) {
         })()
       );
 
-      if (getTimeField()) {
-        setupVisualization();
-        $scope.updateTime();
-      }
-
       init.complete = true;
       if (shouldSearchOnPageLoad()) {
         refetch$.next();
@@ -549,7 +541,6 @@ function discoverController($route, $scope, Promise) {
 
     $scope
       .updateDataSource()
-      .then(setupVisualization)
       .then(function () {
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest({ searchSessionId });
@@ -570,49 +561,10 @@ function discoverController($route, $scope, Promise) {
       });
   };
 
-  function getDimensions(aggs, timeRange) {
-    const [metric, agg] = aggs;
-    agg.params.timeRange = timeRange;
-    const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
-    agg.buckets.setBounds(bounds);
-
-    const { esUnit, esValue } = agg.buckets.getInterval();
-    return {
-      x: {
-        accessor: 0,
-        label: agg.makeLabel(),
-        format: agg.toSerializedFieldFormat(),
-        params: {
-          date: true,
-          interval: moment.duration(esValue, esUnit),
-          intervalESValue: esValue,
-          intervalESUnit: esUnit,
-          format: agg.buckets.getScaledDateFormat(),
-          bounds: agg.buckets.getBounds(),
-        },
-      },
-      y: {
-        accessor: 1,
-        format: metric.toSerializedFieldFormat(),
-        label: metric.makeLabel(),
-      },
-    };
-  }
-
   function onResults(resp) {
     inspectorRequest
       .stats(getResponseInspectorStats(resp, $scope.volatileSearchSource))
       .ok({ json: resp });
-
-    if (getTimeField() && !$scope.state.hideChart) {
-      const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
-      $scope.volatileSearchSource.rawResponse = resp;
-      $scope.histogramData = discoverResponseHandler(
-        tabifiedData,
-        getDimensions($scope.opts.chartAggConfigs.aggs, $scope.timeRange)
-      );
-      $scope.updateTime();
-    }
 
     $scope.hits = resp.hits.total;
     $scope.rows = resp.hits.hits;
@@ -697,42 +649,6 @@ function discoverController($route, $scope, Promise) {
     });
     return Promise.resolve();
   };
-
-  async function setupVisualization() {
-    // If no timefield has been specified we don't create a histogram of messages
-    if (!getTimeField() || $scope.state.hideChart) return;
-    const { interval: histogramInterval } = $scope.state;
-
-    const visStateAggs = [
-      {
-        type: 'count',
-        schema: 'metric',
-      },
-      {
-        type: 'date_histogram',
-        schema: 'segment',
-        params: {
-          field: getTimeField(),
-          interval: histogramInterval,
-          timeRange: timefilter.getTime(),
-        },
-      },
-    ];
-    $scope.opts.chartAggConfigs = data.search.aggs.createAggConfigs(
-      $scope.indexPattern,
-      visStateAggs
-    );
-
-    $scope.volatileSearchSource.onRequestStart((searchSource, options) => {
-      if (!$scope.opts.chartAggConfigs) return;
-      return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
-    });
-
-    $scope.volatileSearchSource.setField('aggs', function () {
-      if (!$scope.opts.chartAggConfigs) return;
-      return $scope.opts.chartAggConfigs.toDsl();
-    });
-  }
 
   addHelpMenuToAppChrome(chrome);
 

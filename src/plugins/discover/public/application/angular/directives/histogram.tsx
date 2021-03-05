@@ -7,7 +7,7 @@
  */
 
 import moment, { unitOfTime } from 'moment-timezone';
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -27,7 +27,7 @@ import {
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription, combineLatest } from 'rxjs';
-import { getServices } from '../../../kibana_services';
+import { getServices, IndexPattern, tabifyAggResponse } from '../../../kibana_services';
 import { Chart as IChart } from '../helpers/point_series';
 import {
   CurrentTime,
@@ -35,6 +35,10 @@ import {
   getAdjustedInterval,
   renderEndzoneTooltip,
 } from '../../../../../charts/public';
+import { discoverResponseHandler } from '../response_handler';
+import { SearchSource } from '../../../../../data/common/search/search_source';
+import { AggConfigs } from '../../../../../data/common/search/aggs';
+import { DataPublicPluginStart } from '../../../../../data/public';
 
 export interface DiscoverHistogramProps {
   chartData: IChart;
@@ -54,6 +58,147 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   } else {
     return uiSettings.get('dateFormat:tz', 'Browser');
   }
+}
+
+function setupVisualization({
+  data,
+  interval,
+  timeField,
+  timeRange,
+  indexPattern,
+  searchSource,
+}: {
+  data: DataPublicPluginStart;
+  interval: any;
+  timeField: string;
+  timeRange: any;
+  indexPattern: IndexPattern;
+  searchSource: SearchSource;
+}) {
+  const visStateAggs = [
+    {
+      type: 'count',
+      schema: 'metric',
+    },
+    {
+      type: 'date_histogram',
+      schema: 'segment',
+      params: {
+        field: timeField,
+        interval,
+        timeRange,
+      },
+    },
+  ];
+
+  const chartAggConfigs = data.search.aggs.createAggConfigs(indexPattern, visStateAggs);
+
+  searchSource.onRequestStart((sSource, options) => {
+    return chartAggConfigs.onSearchRequestStart(sSource, options);
+  });
+
+  searchSource.setField('aggs', function () {
+    if (!chartAggConfigs) return;
+    return chartAggConfigs.toDsl();
+  });
+
+  return { searchSource, chartAggConfigs };
+}
+
+function getDimensions(aggs: any, timeRange: any, timefilter: any) {
+  const [metric, agg] = aggs;
+  agg.params.timeRange = timeRange;
+  const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
+  agg.buckets.setBounds(bounds);
+
+  const { esUnit, esValue } = agg.buckets.getInterval();
+  return {
+    x: {
+      accessor: 0,
+      label: agg.makeLabel(),
+      format: agg.toSerializedFieldFormat(),
+      params: {
+        date: true,
+        interval: moment.duration(esValue, esUnit),
+        intervalESValue: esValue,
+        intervalESUnit: esUnit,
+        format: agg.buckets.getScaledDateFormat(),
+        bounds: agg.buckets.getBounds(),
+      },
+    },
+    y: {
+      accessor: 1,
+      format: metric.toSerializedFieldFormat(),
+      label: metric.makeLabel(),
+    },
+  };
+}
+
+async function fetch(
+  volatileSearchSource: SearchSource,
+  abortController: AbortController,
+  chartAggConfigs: AggConfigs,
+  timeRange: any,
+  timeFilter: any
+) {
+  try {
+    const response = await volatileSearchSource.fetch({
+      abortSignal: abortController.signal,
+    });
+    return onResults(response, chartAggConfigs, timeRange, timeFilter);
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') return;
+  }
+}
+
+function onResults(resp: any, chartAggConfigs: any, timeRange: any, timeFilter: any) {
+  const tabifiedData = tabifyAggResponse(chartAggConfigs, resp);
+
+  return discoverResponseHandler(
+    tabifiedData,
+    getDimensions(chartAggConfigs.aggs, timeRange, timeFilter)
+  );
+}
+
+export function DiscoverHistogramData(props: any) {
+  const [chartData, setChartData] = useState<undefined | any>(undefined);
+  const [abortController, setAbortController] = useState<undefined | AbortController>(undefined);
+  useEffect(() => {
+    if (abortController) abortController.abort();
+    const newAbortController = new AbortController();
+    const searchSource = props.searchSource.clone();
+
+    const { chartAggConfigs } = setupVisualization({
+      data: props.data,
+      interval: props.interval,
+      timeField: props.timeField,
+      timeRange: props.timeRange,
+      indexPattern: props.indexPattern,
+      searchSource,
+    });
+
+    fetch(
+      searchSource,
+      // @ts-ignore
+      newAbortController,
+      chartAggConfigs,
+      // @ts-ignore
+      timeRange,
+      props.timeFilter
+    ).then((result: any) => setChartData(result));
+    setAbortController(newAbortController);
+  }, [
+    props.data,
+    props.interval,
+    props.timeField,
+    props.timeRange,
+    props.timeFilter,
+    props.indexPattern,
+    abortController,
+    props.searchSource,
+  ]);
+
+  return <DiscoverHistogram {...props} chartData={chartData} />;
 }
 
 export class DiscoverHistogram extends Component<DiscoverHistogramProps, DiscoverHistogramState> {
