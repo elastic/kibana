@@ -14,34 +14,36 @@ describe('getThresholdBucketFilters', () => {
       thresholdSignalHistory: sampleThresholdSignalHistory(),
       timestampOverride: undefined,
     });
-    expect(result).toEqual({
-      filters: [
-        {
-          bool: {
-            must_not: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        '@timestamp': {
-                          lte: '2021-02-16T17:37:34.275Z',
-                        },
+    expect(result).toEqual([
+      {
+        bool: {
+          must_not: [
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        lte: '2020-12-17T16:28:00.000Z',
                       },
                     },
-                    {
-                      term: {
-                        'host.name': 'a hostname',
-                      },
+                  },
+                  {
+                    term: {
+                      'host.name': 'garden-gnomes',
                     },
-                  ],
-                },
+                  },
+                  {
+                    term: {
+                      'source.ip': '127.0.0.1',
+                    },
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
-      ],
-      searchErrors: [],
-    });
+      },
+    ]);
   });
 });
