@@ -17,44 +17,74 @@ describe('transformActionVariables', () => {
     expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
-          "description": "The id of the alert.",
-          "name": "alertId",
+          "description": "The ID of the rule.",
+          "name": "rule.id",
         },
         Object {
-          "description": "The name of the alert.",
-          "name": "alertName",
+          "description": "The name of the rule.",
+          "name": "rule.name",
         },
         Object {
-          "description": "The spaceId of the alert.",
+          "description": "The space ID of the rule.",
           "name": "spaceId",
         },
         Object {
-          "description": "The tags of the alert.",
+          "description": "The tags of the rule.",
           "name": "tags",
         },
         Object {
-          "description": "The date the alert scheduled the action.",
+          "description": "The date the rule scheduled the action.",
           "name": "date",
         },
         Object {
-          "description": "The alert instance id that scheduled actions for the alert.",
-          "name": "alertInstanceId",
+          "description": "The ID of the alert that scheduled actions for the rule.",
+          "name": "rule.alertId",
         },
         Object {
-          "description": "The alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroup",
+          "description": "The action group of the alert that scheduled actions for the rule.",
+          "name": "rule.alertActionGroup",
         },
         Object {
-          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
-          "name": "alertActionSubgroup",
+          "description": "The action subgroup of the alert that scheduled actions for the rule.",
+          "name": "rule.alertActionSubGroup",
         },
         Object {
-          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroupName",
+          "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
+          "name": "rule.alertActionGroupName",
         },
         Object {
           "description": "The configured server.publicBaseUrl value or empty string if not configured.",
           "name": "kibanaBaseUrl",
+        },
+        Object {
+          "deprecated": true,
+          "description": "This has been deprecated in favor of rule.id.",
+          "name": "alertId",
+        },
+        Object {
+          "deprecated": true,
+          "description": "This has been deprecated in favor of rule.name.",
+          "name": "alertName",
+        },
+        Object {
+          "deprecated": true,
+          "description": "This has been deprecated in favor of rule.alertId.",
+          "name": "alertInstanceId",
+        },
+        Object {
+          "deprecated": true,
+          "description": "This has been deprecated in favor of rule.alertActionGroup.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "deprecated": true,
+          "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+          "name": "alertActionGroupName",
+        },
+        Object {
+          "deprecated": true,
+          "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
+          "name": "alertActionSubGroup",
         },
       ]
     `);
@@ -70,57 +100,87 @@ describe('transformActionVariables', () => {
       params: [],
     });
     expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": "The id of the alert.",
-          "name": "alertId",
-        },
-        Object {
-          "description": "The name of the alert.",
-          "name": "alertName",
-        },
-        Object {
-          "description": "The spaceId of the alert.",
-          "name": "spaceId",
-        },
-        Object {
-          "description": "The tags of the alert.",
-          "name": "tags",
-        },
-        Object {
-          "description": "The date the alert scheduled the action.",
-          "name": "date",
-        },
-        Object {
-          "description": "The alert instance id that scheduled actions for the alert.",
-          "name": "alertInstanceId",
-        },
-        Object {
-          "description": "The alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroup",
-        },
-        Object {
-          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
-          "name": "alertActionSubgroup",
-        },
-        Object {
-          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroupName",
-        },
-        Object {
-          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
-          "name": "kibanaBaseUrl",
-        },
-        Object {
-          "description": "foo-description",
-          "name": "context.foo",
-        },
-        Object {
-          "description": "bar-description",
-          "name": "context.bar",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "description": "The ID of the rule.",
+            "name": "rule.id",
+          },
+          Object {
+            "description": "The name of the rule.",
+            "name": "rule.name",
+          },
+          Object {
+            "description": "The space ID of the rule.",
+            "name": "spaceId",
+          },
+          Object {
+            "description": "The tags of the rule.",
+            "name": "tags",
+          },
+          Object {
+            "description": "The date the rule scheduled the action.",
+            "name": "date",
+          },
+          Object {
+            "description": "The ID of the alert that scheduled actions for the rule.",
+            "name": "rule.alertId",
+          },
+          Object {
+            "description": "The action group of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionGroup",
+          },
+          Object {
+            "description": "The action subgroup of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionSubGroup",
+          },
+          Object {
+            "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionGroupName",
+          },
+          Object {
+            "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+            "name": "kibanaBaseUrl",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.id.",
+            "name": "alertId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.name.",
+            "name": "alertName",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertId.",
+            "name": "alertInstanceId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionGroup.",
+            "name": "alertActionGroup",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+            "name": "alertActionGroupName",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
+            "name": "alertActionSubGroup",
+          },
+          Object {
+            "description": "foo-description",
+            "name": "context.foo",
+          },
+          Object {
+            "description": "bar-description",
+            "name": "context.bar",
+          },
+        ]
+      `);
   });
 
   test('should return correct variables when no context provided', async () => {
@@ -133,57 +193,87 @@ describe('transformActionVariables', () => {
       params: [],
     });
     expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": "The id of the alert.",
-          "name": "alertId",
-        },
-        Object {
-          "description": "The name of the alert.",
-          "name": "alertName",
-        },
-        Object {
-          "description": "The spaceId of the alert.",
-          "name": "spaceId",
-        },
-        Object {
-          "description": "The tags of the alert.",
-          "name": "tags",
-        },
-        Object {
-          "description": "The date the alert scheduled the action.",
-          "name": "date",
-        },
-        Object {
-          "description": "The alert instance id that scheduled actions for the alert.",
-          "name": "alertInstanceId",
-        },
-        Object {
-          "description": "The alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroup",
-        },
-        Object {
-          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
-          "name": "alertActionSubgroup",
-        },
-        Object {
-          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroupName",
-        },
-        Object {
-          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
-          "name": "kibanaBaseUrl",
-        },
-        Object {
-          "description": "foo-description",
-          "name": "state.foo",
-        },
-        Object {
-          "description": "bar-description",
-          "name": "state.bar",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "description": "The ID of the rule.",
+            "name": "rule.id",
+          },
+          Object {
+            "description": "The name of the rule.",
+            "name": "rule.name",
+          },
+          Object {
+            "description": "The space ID of the rule.",
+            "name": "spaceId",
+          },
+          Object {
+            "description": "The tags of the rule.",
+            "name": "tags",
+          },
+          Object {
+            "description": "The date the rule scheduled the action.",
+            "name": "date",
+          },
+          Object {
+            "description": "The ID of the alert that scheduled actions for the rule.",
+            "name": "rule.alertId",
+          },
+          Object {
+            "description": "The action group of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionGroup",
+          },
+          Object {
+            "description": "The action subgroup of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionSubGroup",
+          },
+          Object {
+            "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionGroupName",
+          },
+          Object {
+            "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+            "name": "kibanaBaseUrl",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.id.",
+            "name": "alertId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.name.",
+            "name": "alertName",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertId.",
+            "name": "alertInstanceId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionGroup.",
+            "name": "alertActionGroup",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+            "name": "alertActionGroupName",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
+            "name": "alertActionSubGroup",
+          },
+          Object {
+            "description": "foo-description",
+            "name": "state.foo",
+          },
+          Object {
+            "description": "bar-description",
+            "name": "state.bar",
+          },
+        ]
+      `);
   });
 
   test('should return correct variables when both context and state provided', async () => {
@@ -199,69 +289,99 @@ describe('transformActionVariables', () => {
       params: [{ name: 'fooP', description: 'fooP-description' }],
     });
     expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": "The id of the alert.",
-          "name": "alertId",
-        },
-        Object {
-          "description": "The name of the alert.",
-          "name": "alertName",
-        },
-        Object {
-          "description": "The spaceId of the alert.",
-          "name": "spaceId",
-        },
-        Object {
-          "description": "The tags of the alert.",
-          "name": "tags",
-        },
-        Object {
-          "description": "The date the alert scheduled the action.",
-          "name": "date",
-        },
-        Object {
-          "description": "The alert instance id that scheduled actions for the alert.",
-          "name": "alertInstanceId",
-        },
-        Object {
-          "description": "The alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroup",
-        },
-        Object {
-          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
-          "name": "alertActionSubgroup",
-        },
-        Object {
-          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroupName",
-        },
-        Object {
-          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
-          "name": "kibanaBaseUrl",
-        },
-        Object {
-          "description": "fooC-description",
-          "name": "context.fooC",
-        },
-        Object {
-          "description": "barC-description",
-          "name": "context.barC",
-        },
-        Object {
-          "description": "fooP-description",
-          "name": "params.fooP",
-        },
-        Object {
-          "description": "fooS-description",
-          "name": "state.fooS",
-        },
-        Object {
-          "description": "barS-description",
-          "name": "state.barS",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "description": "The ID of the rule.",
+            "name": "rule.id",
+          },
+          Object {
+            "description": "The name of the rule.",
+            "name": "rule.name",
+          },
+          Object {
+            "description": "The space ID of the rule.",
+            "name": "spaceId",
+          },
+          Object {
+            "description": "The tags of the rule.",
+            "name": "tags",
+          },
+          Object {
+            "description": "The date the rule scheduled the action.",
+            "name": "date",
+          },
+          Object {
+            "description": "The ID of the alert that scheduled actions for the rule.",
+            "name": "rule.alertId",
+          },
+          Object {
+            "description": "The action group of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionGroup",
+          },
+          Object {
+            "description": "The action subgroup of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionSubGroup",
+          },
+          Object {
+            "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionGroupName",
+          },
+          Object {
+            "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+            "name": "kibanaBaseUrl",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.id.",
+            "name": "alertId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.name.",
+            "name": "alertName",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertId.",
+            "name": "alertInstanceId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionGroup.",
+            "name": "alertActionGroup",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+            "name": "alertActionGroupName",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
+            "name": "alertActionSubGroup",
+          },
+          Object {
+            "description": "fooC-description",
+            "name": "context.fooC",
+          },
+          Object {
+            "description": "barC-description",
+            "name": "context.barC",
+          },
+          Object {
+            "description": "fooP-description",
+            "name": "params.fooP",
+          },
+          Object {
+            "description": "fooS-description",
+            "name": "state.fooS",
+          },
+          Object {
+            "description": "barS-description",
+            "name": "state.barS",
+          },
+        ]
+      `);
   });
 
   test('should return useWithTripleBracesInTemplates with action variables if specified', () => {
@@ -283,72 +403,102 @@ describe('transformActionVariables', () => {
       ],
     });
     expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": "The id of the alert.",
-          "name": "alertId",
-        },
-        Object {
-          "description": "The name of the alert.",
-          "name": "alertName",
-        },
-        Object {
-          "description": "The spaceId of the alert.",
-          "name": "spaceId",
-        },
-        Object {
-          "description": "The tags of the alert.",
-          "name": "tags",
-        },
-        Object {
-          "description": "The date the alert scheduled the action.",
-          "name": "date",
-        },
-        Object {
-          "description": "The alert instance id that scheduled actions for the alert.",
-          "name": "alertInstanceId",
-        },
-        Object {
-          "description": "The alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroup",
-        },
-        Object {
-          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
-          "name": "alertActionSubgroup",
-        },
-        Object {
-          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
-          "name": "alertActionGroupName",
-        },
-        Object {
-          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
-          "name": "kibanaBaseUrl",
-        },
-        Object {
-          "description": "fooC-description",
-          "name": "context.fooC",
-          "useWithTripleBracesInTemplates": true,
-        },
-        Object {
-          "description": "barC-description",
-          "name": "context.barC",
-        },
-        Object {
-          "description": "fooP-description",
-          "name": "params.fooP",
-          "useWithTripleBracesInTemplates": true,
-        },
-        Object {
-          "description": "fooS-description",
-          "name": "state.fooS",
-        },
-        Object {
-          "description": "barS-description",
-          "name": "state.barS",
-          "useWithTripleBracesInTemplates": true,
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "description": "The ID of the rule.",
+            "name": "rule.id",
+          },
+          Object {
+            "description": "The name of the rule.",
+            "name": "rule.name",
+          },
+          Object {
+            "description": "The space ID of the rule.",
+            "name": "spaceId",
+          },
+          Object {
+            "description": "The tags of the rule.",
+            "name": "tags",
+          },
+          Object {
+            "description": "The date the rule scheduled the action.",
+            "name": "date",
+          },
+          Object {
+            "description": "The ID of the alert that scheduled actions for the rule.",
+            "name": "rule.alertId",
+          },
+          Object {
+            "description": "The action group of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionGroup",
+          },
+          Object {
+            "description": "The action subgroup of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionSubGroup",
+          },
+          Object {
+            "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
+            "name": "rule.alertActionGroupName",
+          },
+          Object {
+            "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+            "name": "kibanaBaseUrl",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.id.",
+            "name": "alertId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.name.",
+            "name": "alertName",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertId.",
+            "name": "alertInstanceId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionGroup.",
+            "name": "alertActionGroup",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+            "name": "alertActionGroupName",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
+            "name": "alertActionSubGroup",
+          },
+          Object {
+            "description": "fooC-description",
+            "name": "context.fooC",
+            "useWithTripleBracesInTemplates": true,
+          },
+          Object {
+            "description": "barC-description",
+            "name": "context.barC",
+          },
+          Object {
+            "description": "fooP-description",
+            "name": "params.fooP",
+            "useWithTripleBracesInTemplates": true,
+          },
+          Object {
+            "description": "fooS-description",
+            "name": "state.fooS",
+          },
+          Object {
+            "description": "barS-description",
+            "name": "state.barS",
+            "useWithTripleBracesInTemplates": true,
+          },
+        ]
+      `);
   });
 });
 
