@@ -28,17 +28,38 @@ NOTE: The sum of all the *Other* fields can equal more than 100% by a small amou
 
 For specific information about *Lens* visualization, review to the frequently asked questions. 
 
-// [float]
-// [[how-are-pie-chart-sliced-sized]]
-// ===== How are pie chart slices sized?
+[float]
+[[is-it-possible-to-inspect-elasticsearch-queries]]
+===== Is it possible to inspect {es} queries?
 
-// [float]
-// [[how-does-the-percentage-chart-calculate-percentages]]
-// ===== How does the percentage chart calculate percentages?
+At the moment it is not possible to inspect the Elasticsearch query for a *Lens* visualization.
 
-// [float]
-// [[how-is-the-y-axis-of-multiple-layers-merged-in-a-chart]]
-// ===== How is the y-axis of multiple layers merged in a chart?
+[float]
+[[is-it-possible-to-sort-dimensions-in-a-chart]]
+===== Is it possible to sort dimensions in a chart?
+
+At the moment it is not possible to sort how dimensions are rendered in a chart.
+
+[float]
+[[is-it-possible-to-use-saved-serches-in-lens]]
+===== Is it possible to use saved searches in Lens?
+
+At the moment it is not possible to use saved searched in Lens.
+
+[float]
+[[how-does-the-percentage-chart-calculate-percentages]]
+===== How does the percentage chart calculate percentages?
+
+Percentage charts are a useful visualization to compare part (one or multiple) to the whole, similar to the filter ratio concept.
+In the Lens editor this type of chart can be used for bucketed aggregations and time series.
+
+The percentages for each value are computed, for each bucket, with the division between the metric for the value and the metric of all documents. This means that for a date histogram the percentage is computed for each single time bucket.
+Note that if a bucket has a total of 0 documents, then the percentage chart will show 0%, not a 100% value.
+
+When using a bucketed metric like `Top values`, it is very convenient to show the<<what-is-the-other-category, `Other` field>> for a percentage chart (enabled by default), in order to not mislead the final result with the wrong ratio.
+
+[role="screenshot"]
+image::images/lens_area_percentage.png[Lens Area percentage]
 
 [float]
 [[can-i-show-value-labels-for-my-chart]]
@@ -87,29 +108,44 @@ NOTE: `Other` is always at the bottom of the sorting, no matter the direction.
 ===== Is it possible to decrease or increase the number of suggestions?
 
 At the moment it is not possible to either increase or reduce the number of suggestions in the *Lens* editor.
-// Can we point to the hide/show issue?
-
-// [float]
-// [[how-can-i-include-documents-without-the-field-in-the-operation]]
-// ===== How can I include documents without the field in the operation?
-
-// [float]
-// [[what-is-the-other-category]]
-// ===== What is the "Other" category?
 
 [float]
-[[is-it-possible-to-inspect-elasticsearch-queries]]
-===== Is it possible to inspect {es} queries?
+[[what-is-the-other-category]]
+===== What is the "Other" category?
 
-At the moment it is not possible to inspect the Elasticsearch query for a *Lens* visualization.
+The "Other" category is a special category that contains all the documents that do not match any of the given criteria or filters. This is useful to compare a value, or multiple values, to a whole.
+This option is enabled by default using bucketed aggregations as `Top values`.
 
-// [float]
-// [[is-it-possible-to-sort-dimensions-in-a-chart]]
-// ===== Is it possible to sort dimensions in a chart?
+It can be disabled via the `Advanced` > `Group other values as "Other"`.
 
-// [float]
-// [[what-elasticsearch-aggregations-are-renamed-as-lens-functions]]
-// ===== What {es} aggregations are renamed as Lens functions?
+[float]
+[[how-can-i-include-documents-without-the-field-in-the-operation]]
+===== How can I include documents without the field in the operation?
 
-// Show a table here like the aggregation-reference in Kibana guide
+By default Lens will only retrieve aggregation results from all document that contain the specified field for the dimension configuration. Sometimes it can be useful to compare the current value to the whole document set, including documents that do not contain the specific field.
 
+For this reason, for bucketed aggregations like `Top values`, it is possible to enable the option `Include documents without this field`, in the `Advanced` dropdown within the dimension configuration panel.
+
+[role="screenshot"]
+image::images/lens_bucketed_aggregation_advanced_dropdown.png[Lens Advanced options for bucketed aggregations]
+
+[float]
+[[is-it-possible-to-select-color-for-specific-bar-or-point]]
+===== Is it possible to select color for specific bar or point?
+
+At the moment it is not possible to select a color for a specific bar or point.
+It is possible to select a color for the series, when there's a single one, or a palette for multiple series.
+
+[float]
+[[why-field-is-shown-as-empty-when-there-s-data]]
+===== Why field is shown as empty when there's data?
+
+For sparse datasets it is possible that a field is marked as empty even if it has data within the given filters: 
+Lens samples the first 500 documents for the given filters set to establish whether the field has data or it is empty.
+
+The field is still usable in the visualization and if it contains data it will be correctly visualized.
+
+In this case the search field box and the field filters can be useful to work with all fields in this case:
+
+[role="screenshot"]
+image::images/lens_fields_indexpattern.png[Lens fields list can be filtered]
