@@ -235,18 +235,6 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
     public getOpenRequestDetailResponseButton() {
       return testSubjects.find('inspectorRequestDetailResponse');
     }
-
-    public async getCodeEditorValue() {
-      let request: string = '';
-
-      await retry.try(async () => {
-        request = await browser.execute(
-          () => (window as any).MonacoEnvironment.monaco.editor.getModels()[0].getValue() as string
-        );
-      });
-
-      return request;
-    }
   }
 
   return new Inspector();

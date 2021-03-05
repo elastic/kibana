@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
 
@@ -27,7 +28,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       await testSubjects.click('inspectorRequestDetailResponse');
-      const responseBody = await inspector.getCodeEditorValue();
+      const responseBody = await monacoEditor.getCodeEditorValue();
       await inspector.close();
       return JSON.parse(responseBody);
     }
