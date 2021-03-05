@@ -7,7 +7,7 @@ Graph shows only up in the side bar if your server is running on a platinum or t
 ## Common commands
 
 * Run tests `yarn test:jest x-pack/plugins/graph --watch`
-* Run type check `node scripts/type_check.js --project=x-pack/tsconfig.json`
+* Run type check `node scripts/type_check.js --project=x-pack/plugins/graph/tsconfig.json`
 * Run linter `node scripts/eslint.js x-pack/plugins/graph`
 * Run functional tests (make sure to stop dev server)
   * Server `cd x-pack && node ./scripts/functional_tests_server.js`
