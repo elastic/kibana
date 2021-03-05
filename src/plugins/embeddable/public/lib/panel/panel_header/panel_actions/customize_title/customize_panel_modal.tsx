@@ -66,13 +66,15 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
   };
 
   public render() {
+    const titleId = 'customizePanelModalTitle';
+
     return (
       <EuiFocusTrap clickOutsideDisables={true} initialFocus={'.panelTitleInputText'}>
         <EuiOutsideClickDetector onOutsideClick={this.props.cancel}>
-          <div role="dialog">
+          <div role="dialog" aria-modal="true" aria-labelledby={titleId}>
             <EuiModalHeader>
               <EuiModalHeaderTitle data-test-subj="customizePanelTitle">
-                Customize panel
+                <h2 id={titleId}>Customize panel</h2>
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
