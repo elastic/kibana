@@ -31,8 +31,11 @@
     "**/test_helpers/*",
     "**/test_utils/*",
     "**/*/test_utils.ts",
-    "**/*/test_helpers.ts",
     "**/*/test_helper.tsx",
+    "**/*/test_helpers.ts",
+    "**/*/test_helpers.tsx",
+    // apm uses non-standard file casing
+    "**/*/testHelpers.tsx",
 
     // stubs
     "**/*/stubs.ts",
@@ -43,6 +46,5 @@
   "types": [
     "node",
     "flot",
-    "jest-styled-components"
   ]
 }

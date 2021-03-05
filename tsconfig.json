@@ -76,8 +76,11 @@
     "x-pack/plugins/**/test_helpers/*",
     "x-pack/plugins/**/test_utils/*",
     "x-pack/plugins/**/*/test_utils.ts",
-    "x-pack/plugins/**/*/test_helpers.ts",
     "x-pack/plugins/**/*/test_helper.tsx",
+    "x-pack/plugins/**/*/test_helpers.ts",
+    "x-pack/plugins/**/*/test_helpers.tsx",
+    // apm uses non-standard file casing
+    "x-pack/plugins/**/*/testHelpers.tsx",
 
     // stubs
     "x-pack/plugins/**/*/stubs.ts",
