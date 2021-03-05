@@ -1,20 +1,27 @@
 [[discover-view-single-document]]
-=== View single document
+== View single document
 
 When you expand an entry in Discover's document table, you can click on 
 **View single document** to open it in a separate view.
 
 [role="screenshot"]
-image::images/discover-view-single-document-1.png[Discover document table with expanded document]
+image::images/discover-view-single-doc-link.png[Discover document table with expanded document]
 
-The main purpose of this view is sharing or bookmarking a link to this selected document.
-Note that the link is valid only for the time the document is available in Elasticsearch.
+There are two tabular views of the selected document available. **Table** displays the document's fields row by row.
+**JSON** (JavaScript Object Notation) allows you to take a look at how the document is returned from Elasticsearch.
 
 [role="screenshot"]
-image::images/discover-view-single-document-2.png[Discover document table with expanded document]
+image::images/discover-view-single-document.png[Discover single document view]
 
-The functionality provided by this view is similar to the expanded view in the 
-main section, except you can't create filters or toggle columns.
+The main purpose of this view is sharing or bookmarking a link to the selected document.
+The link is valid for the time the document is available in Elasticsearch.
+
+This view is extendable, so you can add custom views of a document by creating 
+<<external-plugin-development, your own plugins>>.
+
+
+
+
 
 
 
