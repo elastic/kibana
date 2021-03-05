@@ -19,6 +19,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
 
   const PageObjects = getPageObjects([
+    'common',
     'header',
     'timePicker',
     'common',
@@ -752,6 +753,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const fieldAncestor = await input.findByXpath('./../../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       expect(focusedElementText).to.eql(name);
+    },
+
+    async waitForVisualization() {
+      async function getRenderingCount() {
+        const visualizationContainer = await testSubjects.find('lnsVisualizationContainer');
+        const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
+        return Number(renderingCount);
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('rendering count to stabilize', async () => {
+        const firstCount = await getRenderingCount();
+
+        await PageObjects.common.sleep(1000);
+
+        const secondCount = await getRenderingCount();
+
+        return firstCount === secondCount;
+      });
     },
   });
 }
