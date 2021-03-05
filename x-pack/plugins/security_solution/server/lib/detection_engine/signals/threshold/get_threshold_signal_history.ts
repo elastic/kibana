@@ -11,7 +11,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../../alerts/server';
+} from '../../../../../../alerting/server';
 import { Logger } from '../../../../../../../../src/core/server';
 import { ThresholdSignalHistory } from '../types';
 import { BuildRuleMessage } from '../rule_messages';

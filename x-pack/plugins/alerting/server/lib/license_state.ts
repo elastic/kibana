@@ -102,7 +102,7 @@ export class LicenseState {
         showAppLink: true,
         enableAppLink: false,
         message: i18n.translate(
-          'xpack.alerts.serverSideErrors.unavailableLicenseInformationErrorMessage',
+          'xpack.alerting.serverSideErrors.unavailableLicenseInformationErrorMessage',
           {
             defaultMessage:
               'Alerts is unavailable - license information is not available at this time.',
@@ -169,7 +169,7 @@ export class LicenseState {
     switch (check.reason) {
       case 'unavailable':
         throw new AlertTypeDisabledError(
-          i18n.translate('xpack.alerts.serverSideErrors.unavailableLicenseErrorMessage', {
+          i18n.translate('xpack.alerting.serverSideErrors.unavailableLicenseErrorMessage', {
             defaultMessage:
               'Alert type {alertTypeId} is disabled because license information is not available at this time.',
             values: {
@@ -180,7 +180,7 @@ export class LicenseState {
         );
       case 'expired':
         throw new AlertTypeDisabledError(
-          i18n.translate('xpack.alerts.serverSideErrors.expirerdLicenseErrorMessage', {
+          i18n.translate('xpack.alerting.serverSideErrors.expirerdLicenseErrorMessage', {
             defaultMessage:
               'Alert type {alertTypeId} is disabled because your {licenseType} license has expired.',
             values: { alertTypeId: alertType.id, licenseType: this.license!.type },
@@ -189,7 +189,7 @@ export class LicenseState {
         );
       case 'invalid':
         throw new AlertTypeDisabledError(
-          i18n.translate('xpack.alerts.serverSideErrors.invalidLicenseErrorMessage', {
+          i18n.translate('xpack.alerting.serverSideErrors.invalidLicenseErrorMessage', {
             defaultMessage:
               'Alert {alertTypeId} is disabled because it requires a {licenseType} license. Go to License Management to view upgrade options.',
             values: {

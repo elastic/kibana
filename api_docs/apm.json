@@ -362,9 +362,9 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.alerts",
+                    "id": "def-server.APMPlugin.setup.plugins.alerting",
                     "type": "Object",
-                    "label": "alerts",
+                    "label": "alerting",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
@@ -373,9 +373,9 @@
                     },
                     "signature": [
                       {
-                        "pluginId": "alerts",
+                        "pluginId": "alerting",
                         "scope": "server",
-                        "docId": "kibAlertsPluginApi",
+                        "docId": "kibAlertingPluginApi",
                         "section": "def-server.PluginSetupContract",
                         "text": "PluginSetupContract"
                       },
