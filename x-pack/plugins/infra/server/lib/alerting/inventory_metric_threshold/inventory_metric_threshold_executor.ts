@@ -16,8 +16,8 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroup,
-} from '../../../../../alerts/common';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
+} from '../../../../../alerting/common';
+import { AlertExecutorOptions } from '../../../../../alerting/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';

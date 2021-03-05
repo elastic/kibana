@@ -37,7 +37,7 @@ export class AlertNavigationRegistry {
   public registerDefault(consumer: string, handler: AlertNavigationHandler) {
     if (this.hasDefaultHandler(consumer)) {
       throw new Error(
-        i18n.translate('xpack.alerts.alertNavigationRegistry.register.duplicateDefaultError', {
+        i18n.translate('xpack.alerting.alertNavigationRegistry.register.duplicateDefaultError', {
           defaultMessage: 'Default Navigation within "{consumer}" is already registered.',
           values: {
             consumer,
@@ -55,7 +55,7 @@ export class AlertNavigationRegistry {
   public register(consumer: string, alertType: AlertType, handler: AlertNavigationHandler) {
     if (this.hasTypedHandler(consumer, alertType)) {
       throw new Error(
-        i18n.translate('xpack.alerts.alertNavigationRegistry.register.duplicateNavigationError', {
+        i18n.translate('xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError', {
           defaultMessage:
             'Navigation for Alert type "{alertType}" within "{consumer}" is already registered.',
           values: {
@@ -79,7 +79,7 @@ export class AlertNavigationRegistry {
     }
 
     throw new Error(
-      i18n.translate('xpack.alerts.alertNavigationRegistry.get.missingNavigationError', {
+      i18n.translate('xpack.alerting.alertNavigationRegistry.get.missingNavigationError', {
         defaultMessage:
           'Navigation for Alert type "{alertType}" within "{consumer}" is not registered.',
         values: {
