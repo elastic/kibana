@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function InspectorProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const renderable = getService('renderable');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
