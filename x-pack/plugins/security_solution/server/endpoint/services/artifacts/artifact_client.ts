@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
   InternalArtifactCreateSchema,
 } from '../../schemas/artifacts';
+import { Artifact, ArtifactsInterface } from '../../../../../fleet/server';
 
-export class ArtifactClient {
+export interface EndpointArtifactClientInterface {
+  getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema>>;
+  createArtifact(
+    artifact: InternalArtifactCompleteSchema
+  ): Promise<SavedObject<InternalArtifactCompleteSchema>>;
+  deleteArtifact(id: string): Promise<void>;
+}
+
+export class ArtifactClient implements EndpointArtifactClientInterface {
   private savedObjectsClient: SavedObjectsClientContract;
 
   constructor(savedObjectsClient: SavedObjectsClientContract) {
@@ -40,6 +51,44 @@ export class ArtifactClient {
   }
 
   public async deleteArtifact(id: string) {
-    return this.savedObjectsClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, id);
+    await this.savedObjectsClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, id);
+  }
+}
+
+export class EndpointArtifactClient implements EndpointArtifactClientInterface {
+  constructor(private fleetArtifacts: ArtifactsInterface) {}
+
+  private parseArtifactId(id: string): Pick<Artifact, 'decodedSha256' | 'identifier'> {
+    const idPieces = id.split('-');
+
+    return {
+      decodedSha256: idPieces.pop()!,
+      identifier: idPieces.join('-'),
+    };
+  }
+
+  async getArtifact(id: string) {
+    const { decodedSha256, identifier } = this.parseArtifactId(id);
+    const artifacts = await this.fleetArtifacts.listArtifacts({
+      kuery: `decodedSha256: "${decodedSha256}" AND identifier: "${identifier}"`,
+      perPage: 1,
+    });
+
+    // FIXME:PT change method signature so that it returns back only the `InternalArtifactCompleteSchema`
+    return ({
+      attributes: artifacts.items[0],
+    } as unknown) as SavedObject<InternalArtifactCompleteSchema>;
+  }
+
+  async createArtifact(
+    artifact: InternalArtifactCompleteSchema
+  ): Promise<SavedObject<InternalArtifactCompleteSchema>> {
+    // FIXME:PT implement method
+    // Artifact `.body` is compressed/encoded. We need it decoded and as a string
+  }
+
+  async deleteArtifact(id: string) {
+    const artifactId = (await this.getArtifact(id))?.id;
+    return this.fleetArtifacts.deleteArtifact(artifactId);
   }
 }

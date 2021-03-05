@@ -87,6 +87,7 @@ export class FleetArtifactsClient implements ArtifactsInterface {
       body: newArtifactData,
       refresh: 'wait_for',
     });
+
     return response;
   }
 
