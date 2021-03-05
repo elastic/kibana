@@ -7423,7 +7423,6 @@
     "xpack.features.ossFeatures.visualizeShortUrlSubFeatureName": "短い URL",
     "xpack.features.savedObjectsManagementFeatureName": "保存されたオブジェクトの管理",
     "xpack.features.visualizeFeatureName": "可視化",
-    "xpack.fileUpload.enterIndexName": "インデックス名を入力",
     "xpack.fileUpload.httpService.fetchError": "フェッチ実行エラー：{error}",
     "xpack.fileUpload.httpService.noUrl": "URLが指定されていません",
     "xpack.fileUpload.indexNameReqField": "インデックス名、必須フィールド",
