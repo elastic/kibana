@@ -39,20 +39,22 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     };
 
     const savedObjectsClient = context.core.savedObjects.client;
-    const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
+    const uiSettings = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
     const dataPluginStart = await reporting.getDataService();
-    const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(
-      uiSettingsClient
-    );
+    const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
+    const [es, searchSourceStart] = await Promise.all([
+      (await reporting.getEsClient()).asScoped(req),
+      await dataPluginStart.search.searchSource.asScoped(req),
+    ]);
     const clients = {
-      uiSettings: uiSettingsClient,
+      uiSettings,
       data: dataPluginStart.search.asScoped(req),
-      es: (await reporting.getEsClient()).asScoped(req),
+      es,
     };
     const dependencies = {
       fieldFormatsRegistry,
-      searchSourceStart: await dataPluginStart.search.searchSource.asScoped(req),
+      searchSourceStart,
     };
     const cancellationToken = new CancellationToken();
 

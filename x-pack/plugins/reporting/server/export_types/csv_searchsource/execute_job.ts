@@ -24,19 +24,22 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
     const encryptionKey = config.get('encryptionKey');
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
-    const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
+    const uiSettings = await reporting.getUiSettingsClient(fakeRequest, logger);
     const dataPluginStart = await reporting.getDataService();
-    const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(
-      uiSettingsClient
-    );
+    const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
+
+    const [es, searchSourceStart] = await Promise.all([
+      (await reporting.getEsClient()).asScoped(fakeRequest),
+      await dataPluginStart.search.searchSource.asScoped(fakeRequest),
+    ]);
 
     const clients = {
-      uiSettings: uiSettingsClient,
+      uiSettings,
       data: dataPluginStart.search.asScoped(fakeRequest),
-      es: (await reporting.getEsClient()).asScoped(fakeRequest),
+      es,
     };
     const dependencies = {
-      searchSourceStart: await dataPluginStart.search.searchSource.asScoped(fakeRequest),
+      searchSourceStart,
       fieldFormatsRegistry,
     };
 
