@@ -23,6 +23,11 @@ const nodeInfo = {
     publish_address: 'https://1.1.1.1:9200',
   },
   name: 'node1',
+  settings: {
+    script: {
+      allowed_types: 'both',
+    },
+  },
 };
 
 describe('calculateStatus', () => {
@@ -169,6 +174,11 @@ describe('calculateStatus', () => {
                 },
                 "ip": "1.1.1.1",
                 "name": "node1",
+                "settings": Object {
+                  "script": Object {
+                    "allowed_types": "both",
+                  },
+                },
                 "version": "1.1.1",
               },
             ],
@@ -187,6 +197,11 @@ describe('calculateStatus', () => {
                 },
                 "ip": "1.1.1.1",
                 "name": "node1",
+                "settings": Object {
+                  "script": Object {
+                    "allowed_types": "both",
+                  },
+                },
                 "version": "1.1.1",
               },
             ],

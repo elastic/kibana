@@ -21,45 +21,77 @@ const KIBANA_VERSION = '5.1.0';
 const createEsSuccess = elasticsearchClientMock.createSuccessTransportRequestPromise;
 const createEsError = elasticsearchClientMock.createErrorTransportRequestPromise;
 
-function createNodes(...versions: string[]): NodesInfo {
-  const nodes = {} as any;
-  versions
-    .map((version) => {
+interface Node {
+  version: string;
+  script: 'none' | 'inline' | 'both';
+}
+
+function createNodes(...nodes: Node[]): NodesInfo {
+  const nodesInfo = { nodes: {} as any };
+  nodes
+    .map(({ version, script }) => {
       return {
         version,
         http: {
           publish_address: 'http_address',
         },
         ip: 'ip',
+        settings: {
+          script: {
+            allowed_types: script,
+          },
+        },
       };
     })
     .forEach((node, i) => {
-      nodes[`node-${i}`] = node;
+      nodesInfo.nodes[`node-${i}`] = node;
     });
 
-  return { nodes };
+  return nodesInfo;
 }
 
 describe('mapNodesVersionCompatibility', () => {
-  function createNodesInfoWithoutHTTP(version: string): NodesInfo {
-    return { nodes: { 'node-without-http': { version, ip: 'ip' } } } as any;
+  function createNodesInfoWithoutHTTP(node: Node): NodesInfo {
+    return {
+      nodes: {
+        'node-without-http': {
+          version: node.version,
+          ip: 'ip',
+          settings: { script: { allowed_types: node.script } },
+        },
+      },
+    } as any;
   }
 
-  it('returns isCompatible=true with a single node that matches', async () => {
-    const nodesInfo = createNodes('5.1.0');
+  it('returns isCompatible=true with a single node that matches version and script "both"', async () => {
+    const nodesInfo = createNodes({ version: '5.1.0', script: 'both' });
+    const result = await mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
+    expect(result.isCompatible).toBe(true);
+  });
+
+  it('returns isCompatible=true with a single node that matches version and script "inline"', async () => {
+    const nodesInfo = createNodes({ version: '5.1.0', script: 'inline' });
     const result = await mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
     expect(result.isCompatible).toBe(true);
   });
 
   it('returns isCompatible=true with multiple nodes that satisfy', async () => {
-    const nodesInfo = createNodes('5.1.0', '5.2.0', '5.1.1-Beta1');
+    const nodesInfo = createNodes(
+      { version: '5.1.0', script: 'both' },
+      { version: '5.2.0', script: 'inline' },
+      { version: '5.1.1-Beta1', script: 'both' }
+    );
     const result = await mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
     expect(result.isCompatible).toBe(true);
   });
 
   it('returns isCompatible=false for a single node that is out of date', () => {
     // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
-    const nodesInfo = createNodes('5.1.0', '5.2.0', '5.0.0');
+    const nodesInfo = createNodes(
+      { version: '5.1.0', script: 'both' },
+      { version: '5.2.0', script: 'both' },
+      { version: '5.0.0', script: 'both' }
+    );
     const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
     expect(result.isCompatible).toBe(false);
     expect(result.message).toMatchInlineSnapshot(
@@ -67,18 +99,56 @@ describe('mapNodesVersionCompatibility', () => {
     );
   });
 
-  it('returns isCompatible=false for an incompatible node without http publish address', async () => {
-    const nodesInfo = createNodesInfoWithoutHTTP('6.1.1');
+  it('returns isCompatible=false for a single node that has script "none"', () => {
+    const nodesInfo = createNodes(
+      { version: '5.1.0', script: 'none' },
+      { version: '5.1.0', script: 'both' }
+    );
     const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
     expect(result.isCompatible).toBe(false);
     expect(result.message).toMatchInlineSnapshot(
-      `"This version of Kibana (v5.1.0) is incompatible with the following Elasticsearch nodes in your cluster: v6.1.1 @ undefined (ip)"`
+      `"Kibana requires Elasticsearch inline scripts. The following nodes have inline scripts disabled: v5.1.0 @ http_address (ip)"`
+    );
+  });
+
+  it('returns isCompatible=false for a node that is out of date and a node that has script "none"', () => {
+    const nodesInfo = createNodes(
+      { version: '5.1.0', script: 'none' }, // Scripts disabled
+      { version: '5.0.0', script: 'both' } // Too old
+    );
+    const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
+    expect(result.isCompatible).toBe(false);
+    expect(result.message).toMatchInlineSnapshot(`
+      "Kibana requires Elasticsearch inline scripts. The following nodes have inline scripts disabled: v5.1.0 @ http_address (ip)
+      This version of Kibana (v5.1.0) is incompatible with the following Elasticsearch nodes in your cluster: v5.0.0 @ http_address (ip)"
+    `);
+  });
+
+  it('returns isCompatible=false for an out of date node without http publish address', async () => {
+    const nodesInfo = createNodesInfoWithoutHTTP({ version: '6.1.1', script: 'both' });
+    const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
+    expect(result.isCompatible).toBe(false);
+    expect(result.message).toMatchInlineSnapshot(
+      `"This version of Kibana (v5.1.0) is incompatible with the following Elasticsearch nodes in your cluster: v6.1.1 @ (ip)"`
+    );
+  });
+
+  it(`returns isCompatible=false for a script's disabled node without http publish address`, async () => {
+    const nodesInfo = createNodesInfoWithoutHTTP({ version: '5.1.0', script: 'none' });
+    const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
+    expect(result.isCompatible).toBe(false);
+    expect(result.message).toMatchInlineSnapshot(
+      `"Kibana requires Elasticsearch inline scripts. The following nodes have inline scripts disabled: v5.1.0 @ (ip)"`
     );
   });
 
   it('returns isCompatible=true for outdated nodes when ignoreVersionMismatch=true', async () => {
     // 5.0.0 ES is too old to work with a 5.1.0 version of Kibana.
-    const nodesInfo = createNodes('5.1.0', '5.2.0', '5.0.0');
+    const nodesInfo = createNodes(
+      { version: '5.1.0', script: 'both' },
+      { version: '5.2.0', script: 'both' },
+      { version: '5.0.0', script: 'both' }
+    );
     const ignoreVersionMismatch = true;
     const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, ignoreVersionMismatch);
     expect(result.isCompatible).toBe(true);
@@ -88,7 +158,8 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('returns isCompatible=true with a message if a node is only off by a patch version', () => {
-    const result = mapNodesVersionCompatibility(createNodes('5.1.1'), KIBANA_VERSION, false);
+    const nodesInfo = createNodes({ version: '5.1.1', script: 'both' });
+    const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
     expect(result.isCompatible).toBe(true);
     expect(result.message).toMatchInlineSnapshot(
       `"You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.1.1 @ http_address (ip)"`
@@ -96,10 +167,11 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('returns isCompatible=true with a message if a node is only off by a patch version and without http publish address', async () => {
-    const result = mapNodesVersionCompatibility(createNodes('5.1.1'), KIBANA_VERSION, false);
+    const nodesInfo = createNodesInfoWithoutHTTP({ version: '5.1.1', script: 'both' });
+    const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
     expect(result.isCompatible).toBe(true);
     expect(result.message).toMatchInlineSnapshot(
-      `"You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.1.1 @ http_address (ip)"`
+      `"You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.1.1 @ (ip)"`
     );
   });
 });
@@ -122,14 +194,26 @@ describe('pollEsNodesVersion', () => {
     internalClient.nodes.info.mockImplementationOnce(() => createEsError(error));
   };
 
-  it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {
+  it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
     expect.assertions(3);
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
 
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
+    nodeInfosSuccessOnce(
+      createNodes(
+        { version: '5.1.0', script: 'both' },
+        { version: '5.2.0', script: 'both' },
+        { version: '5.0.0', script: 'both' }
+      )
+    );
     nodeInfosErrorOnce('mock request error');
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
+    nodeInfosSuccessOnce(
+      createNodes(
+        { version: '5.1.0', script: 'both' },
+        { version: '5.2.0', script: 'both' },
+        { version: '5.1.1-Beta1', script: 'both' }
+      )
+    );
 
     pollEsNodesVersion({
       internalClient,
@@ -150,7 +234,11 @@ describe('pollEsNodesVersion', () => {
 
   it('returns compatibility results', (done) => {
     expect.assertions(1);
-    const nodes = createNodes('5.1.0', '5.2.0', '5.0.0');
+    const nodes = createNodes(
+      { version: '5.1.0', script: 'both' },
+      { version: '5.2.0', script: 'both' },
+      { version: '5.0.0', script: 'both' }
+    );
 
     nodeInfosSuccessOnce(nodes);
 
@@ -173,12 +261,48 @@ describe('pollEsNodesVersion', () => {
 
   it('only emits if the node versions changed since the previous poll', (done) => {
     expect.assertions(4);
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
-    nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
-    nodeInfosSuccessOnce(createNodes('5.1.1', '5.2.0', '5.0.0')); // emit
-    nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // emit
-    nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
-    nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
+    nodeInfosSuccessOnce(
+      createNodes(
+        { version: '5.1.0', script: 'both' },
+        { version: '5.2.0', script: 'both' },
+        { version: '5.0.0', script: 'both' }
+      )
+    ); // emit
+    nodeInfosSuccessOnce(
+      createNodes(
+        { version: '5.0.0', script: 'both' },
+        { version: '5.1.0', script: 'both' },
+        { version: '5.2.0', script: 'both' }
+      )
+    ); // ignore, same versions, different ordering
+    nodeInfosSuccessOnce(
+      createNodes(
+        { version: '5.1.1', script: 'both' },
+        { version: '5.2.0', script: 'both' },
+        { version: '5.20.0', script: 'both' }
+      )
+    ); // emit
+    nodeInfosSuccessOnce(
+      createNodes(
+        { version: '5.1.1', script: 'both' },
+        { version: '5.1.2', script: 'both' },
+        { version: '5.1.3', script: 'both' }
+      )
+    ); // emit
+    nodeInfosSuccessOnce(
+      createNodes(
+        { version: '5.1.1', script: 'both' },
+        { version: '5.1.2', script: 'both' },
+        { version: '5.1.3', script: 'both' }
+      )
+    ); // ignore
+    nodeInfosSuccessOnce(
+      createNodes(
+        { version: '5.0.0', script: 'both' },
+        { version: '5.1.0', script: 'both' },
+        { version: '5.2.0', script: 'both' }
+      )
+    ); // emit, different from previous version
 
     pollEsNodesVersion({
       internalClient,
@@ -200,11 +324,23 @@ describe('pollEsNodesVersion', () => {
 
     // @ts-expect-error we need to return an incompatible type to use the testScheduler here
     internalClient.nodes.info.mockReturnValueOnce([
-      { body: createNodes('5.1.0', '5.2.0', '5.0.0') },
+      {
+        body: createNodes(
+          { version: '5.1.0', script: 'both' },
+          { version: '5.2.0', script: 'both' },
+          { version: '5.0.0', script: 'both' }
+        ),
+      },
     ]);
     // @ts-expect-error we need to return an incompatible type to use the testScheduler here
     internalClient.nodes.info.mockReturnValueOnce([
-      { body: createNodes('5.1.1', '5.2.0', '5.0.0') },
+      {
+        body: createNodes(
+          { version: '5.1.1', script: 'both' },
+          { version: '5.2.0', script: 'both' },
+          { version: '5.0.0', script: 'both' }
+        ),
+      },
     ]);
 
     getTestScheduler().run(({ expectObservable }) => {
@@ -220,12 +356,20 @@ describe('pollEsNodesVersion', () => {
 
       expectObservable(esNodesCompatibility$).toBe(expected, {
         a: mapNodesVersionCompatibility(
-          createNodes('5.1.0', '5.2.0', '5.0.0'),
+          createNodes(
+            { version: '5.1.0', script: 'both' },
+            { version: '5.2.0', script: 'both' },
+            { version: '5.0.0', script: 'both' }
+          ),
           KIBANA_VERSION,
           false
         ),
         b: mapNodesVersionCompatibility(
-          createNodes('5.1.1', '5.2.0', '5.0.0'),
+          createNodes(
+            { version: '5.1.1', script: 'both' },
+            { version: '5.2.0', script: 'both' },
+            { version: '5.0.0', script: 'both' }
+          ),
           KIBANA_VERSION,
           false
         ),
@@ -241,11 +385,23 @@ describe('pollEsNodesVersion', () => {
 
       internalClient.nodes.info.mockReturnValueOnce(
         // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-        of({ body: createNodes('5.1.0', '5.2.0', '5.0.0') }).pipe(delay(100))
+        of({
+          body: createNodes(
+            { version: '5.1.0', script: 'both' },
+            { version: '5.2.0', script: 'both' },
+            { version: '5.0.0', script: 'both' }
+          ),
+        }).pipe(delay(100))
       );
       internalClient.nodes.info.mockReturnValueOnce(
         // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-        of({ body: createNodes('5.1.1', '5.2.0', '5.0.0') }).pipe(delay(100))
+        of({
+          body: createNodes(
+            { version: '5.1.1', script: 'both' },
+            { version: '5.2.0', script: 'both' },
+            { version: '5.0.0', script: 'both' }
+          ),
+        }).pipe(delay(100))
       );
 
       const esNodesCompatibility$ = pollEsNodesVersion({
@@ -258,12 +414,20 @@ describe('pollEsNodesVersion', () => {
 
       expectObservable(esNodesCompatibility$).toBe(expected, {
         a: mapNodesVersionCompatibility(
-          createNodes('5.1.0', '5.2.0', '5.0.0'),
+          createNodes(
+            { version: '5.1.0', script: 'both' },
+            { version: '5.2.0', script: 'both' },
+            { version: '5.0.0', script: 'both' }
+          ),
           KIBANA_VERSION,
           false
         ),
         b: mapNodesVersionCompatibility(
-          createNodes('5.1.1', '5.2.0', '5.0.0'),
+          createNodes(
+            { version: '5.1.1', script: 'both' },
+            { version: '5.2.0', script: 'both' },
+            { version: '5.0.0', script: 'both' }
+          ),
           KIBANA_VERSION,
           false
         ),

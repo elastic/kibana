@@ -11,6 +11,7 @@
  * that defined in Kibana's package.json.
  */
 
+import os from 'os';
 import { timer, of, from, Observable } from 'rxjs';
 import { map, distinctUntilChanged, catchError, exhaustMap } from 'rxjs/operators';
 import {
@@ -35,6 +36,11 @@ interface NodeInfo {
     publish_address: string;
   };
   name: string;
+  settings: {
+    script: {
+      allowed_types: string;
+    };
+  };
 }
 
 export interface NodesInfo {
@@ -52,7 +58,7 @@ export interface NodesVersionCompatibility {
 }
 
 function getHumanizedNodeName(node: NodeInfo) {
-  const publishAddress = node?.http?.publish_address + ' ' || '';
+  const publishAddress = node?.http?.publish_address ? node.http.publish_address + ' ' : '';
   return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
 }
 
@@ -75,8 +81,13 @@ export function mapNodesVersionCompatibility(
     .map((key) => nodesInfo.nodes[key])
     .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
 
-  // Aggregate incompatible ES nodes.
-  const incompatibleNodes = nodes.filter(
+  // Aggregate nodes that have scripts disabled
+  const incompatibleNodesWithScriptsDisabled = nodes.filter(
+    (node) => node.settings.script.allowed_types === 'none'
+  );
+
+  // Aggregate incompatible version ES nodes.
+  const incompatibleVersionNodes = nodes.filter(
     (node) => !esVersionCompatibleWithKibana(node.version, kibanaVersion)
   );
 
@@ -84,31 +95,49 @@ export function mapNodesVersionCompatibility(
   // if ES and Kibana versions are not the same as long as they are not
   // incompatible, but we should warn about it.
   // Ignore version qualifiers https://github.com/elastic/elasticsearch/issues/36859
-  const warningNodes = nodes.filter((node) => !esVersionEqualsKibana(node.version, kibanaVersion));
+  const warningVersionNodes = nodes.filter(
+    (node) => !esVersionEqualsKibana(node.version, kibanaVersion)
+  );
 
-  // Note: If incompatible and warning nodes are present `message` only contains
+  const messages = [];
+  if (incompatibleNodesWithScriptsDisabled.length > 0) {
+    const incompatibleNodeNames = incompatibleNodesWithScriptsDisabled
+      .map((node) => node.name)
+      .join(', ');
+    messages.push(
+      `Kibana requires Elasticsearch inline scripts. The following nodes have inline scripts disabled: ${incompatibleNodeNames}`
+    );
+  }
+
+  // Note: If incompatible and warning nodes are present `messages` only contains
   // an incompatibility notice.
-  let message;
-  if (incompatibleNodes.length > 0) {
-    const incompatibleNodeNames = incompatibleNodes.map((node) => node.name).join(', ');
+  if (incompatibleVersionNodes.length > 0) {
+    const incompatibleNodeNames = incompatibleVersionNodes.map((node) => node.name).join(', ');
     if (ignoreVersionMismatch) {
-      message = `Ignoring version incompatibility between Kibana v${kibanaVersion} and the following Elasticsearch nodes: ${incompatibleNodeNames}`;
+      messages.push(
+        `Ignoring version incompatibility between Kibana v${kibanaVersion} and the following Elasticsearch nodes: ${incompatibleNodeNames}`
+      );
     } else {
-      message = `This version of Kibana (v${kibanaVersion}) is incompatible with the following Elasticsearch nodes in your cluster: ${incompatibleNodeNames}`;
+      messages.push(
+        `This version of Kibana (v${kibanaVersion}) is incompatible with the following Elasticsearch nodes in your cluster: ${incompatibleNodeNames}`
+      );
     }
-  } else if (warningNodes.length > 0) {
-    const warningNodeNames = warningNodes.map((node) => node.name).join(', ');
-    message =
+  } else if (warningVersionNodes.length > 0) {
+    const warningNodeNames = warningVersionNodes.map((node) => node.name).join(', ');
+    messages.push(
       `You're running Kibana ${kibanaVersion} with some different versions of ` +
-      'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
-      `version to prevent compatibility issues: ${warningNodeNames}`;
+        'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
+        `version to prevent compatibility issues: ${warningNodeNames}`
+    );
   }
 
   return {
-    isCompatible: ignoreVersionMismatch || incompatibleNodes.length === 0,
-    message,
-    incompatibleNodes,
-    warningNodes,
+    isCompatible:
+      incompatibleNodesWithScriptsDisabled.length === 0 &&
+      (ignoreVersionMismatch || incompatibleVersionNodes.length === 0),
+    message: messages.join(os.EOL),
+    incompatibleNodes: [...incompatibleNodesWithScriptsDisabled, ...incompatibleVersionNodes],
+    warningNodes: warningVersionNodes,
     kibanaVersion,
   };
 }
@@ -137,7 +166,12 @@ export const pollEsNodesVersion = ({
     exhaustMap(() => {
       return from(
         internalClient.nodes.info<NodesInfo>({
-          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+          filter_path: [
+            'nodes.*.version',
+            'nodes.*.http.publish_address',
+            'nodes.*.ip',
+            'nodes.*.settings.script',
+          ],
         })
       ).pipe(
         map(({ body }) => body),
