@@ -14,7 +14,7 @@ import {
 } from '../../../server/lib/alerting/inventory_metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { AlertTypeParams } from '../../../../alerts/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 import { validateMetricThreshold } from './components/validation';
 
 interface InventoryMetricAlertTypeParams extends AlertTypeParams {
