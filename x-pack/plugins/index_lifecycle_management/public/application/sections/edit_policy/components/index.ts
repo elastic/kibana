@@ -8,11 +8,18 @@
 export { LearnMoreLink } from './learn_more_link';
 export { OptionalLabel } from './optional_label';
 export { PolicyJsonFlyout } from './policy_json_flyout';
-export { ToggleFieldWithDescribedFormRow } from './described_form_row';
 export { FieldLoadingError } from './field_loading_error';
 export { Timeline } from './timeline';
 export { FormErrorsCallout } from './form_errors_callout';
 export { PhaseFooter } from './phase_footer';
 export { InfinityIcon } from './infinity_icon';
-export * from './phases';
 export { RollupWizard } from './rollup_wizard';
+
+export {
+  ToggleFieldWithDescribedFormRow,
+  DescribedFormRow,
+  DescribedFormRowProps,
+  DescribedFormRowSwitchProps,
+} from './described_form_row';
+
+export * from './phases';

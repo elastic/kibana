@@ -24,7 +24,7 @@ import {
   useFormData,
 } from '../../../../../../../shared_imports';
 
-import { DescribedFormRow } from '../../../../../components';
+import { DescribedFormRow } from '../../../../components';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfigurationIssues, UseField } from '../../../../form';

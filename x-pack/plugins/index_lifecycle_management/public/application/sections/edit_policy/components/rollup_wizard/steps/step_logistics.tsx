@@ -24,7 +24,7 @@ import {
 
 import { loadPolicies } from '../../../../../services/api';
 
-import { DescribedFormRow } from '../../../../components';
+import { DescribedFormRow } from '../../../components';
 
 import { StepFields } from '../rollup_wizard';
 

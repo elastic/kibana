@@ -13,7 +13,7 @@ import {
   DescribedFormRow,
   DescribedFormRowProps,
   DescribedFormRowSwitchProps,
-} from '../../../components';
+} from './described_form_row';
 
 type Props = Omit<DescribedFormRowProps, 'switchProps'> & {
   switchProps: Omit<DescribedFormRowSwitchProps, 'label'> & { path: string };

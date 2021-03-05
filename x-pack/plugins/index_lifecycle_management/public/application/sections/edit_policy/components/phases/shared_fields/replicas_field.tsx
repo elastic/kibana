@@ -13,7 +13,7 @@ import { NumericField } from '../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField } from '../../../form';
 
-import { DescribedFormRow } from '../../../../components';
+import { DescribedFormRow } from '../../../components';
 
 interface Props {
   phase: 'warm' | 'cold';

@@ -12,7 +12,7 @@ import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../shared_imports';
 
-import { DescribedFormRow } from '../../../../components';
+import { DescribedFormRow } from '../../../components';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField } from '../../../form';
