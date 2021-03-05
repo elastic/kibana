@@ -18,7 +18,7 @@ export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
   error?: Error;
-  loading: boolean;
+  loading?: boolean;
 }
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
