@@ -7,6 +7,7 @@
 
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+
 import { outputService, appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
