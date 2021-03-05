@@ -31,8 +31,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { RollupAction } from '../../../../common/types';
-
 import { TextField, useForm, useFormData } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
