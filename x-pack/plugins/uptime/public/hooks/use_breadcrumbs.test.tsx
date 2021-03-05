@@ -11,7 +11,7 @@ import { Route } from 'react-router-dom';
 import { mountWithRouter, MountWithReduxProvider } from '../lib/helper/mocks';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { UptimeUrlParams, getSupportedUrlParams,  } from '../lib/helper';
+import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 
 describe('useBreadcrumbs', () => {

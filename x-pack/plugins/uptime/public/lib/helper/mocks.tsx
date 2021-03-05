@@ -202,7 +202,6 @@ export const shallowWithRouterRedux = (component: ReactElement, customHistory?: 
   return helperWithRouter(shallowWithIntl, component, customHistory, true);
 };
 
-
 export const mountWithRouter = (component: ReactElement, customHistory?: MemoryHistory) => {
   return helperWithRouter(mountWithIntl, component, customHistory);
 };
@@ -218,7 +217,7 @@ export const mountWithRouterRedux = (
     true,
     options?.storeState
   );
-}
+};
 
 const getHistoryFromUrl = (url: Url) => {
   if (typeof url === 'string') {
