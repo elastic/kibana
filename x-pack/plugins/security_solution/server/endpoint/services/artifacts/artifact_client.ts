@@ -110,7 +110,9 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
   }
 
   async deleteArtifact(id: string) {
-    const artifactId = (await this.getArtifact(id))?.id;
+    // Ignoring the `id` not being in the type until we can refactor the types in endpoint.
+    // @ts-ignore
+    const artifactId = (await this.getArtifact(id)).attributes?.id;
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }
 }
