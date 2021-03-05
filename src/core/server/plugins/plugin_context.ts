@@ -136,7 +136,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       auth: {
         get: deps.http.auth.get,
         isAuthenticated: deps.http.auth.isAuthenticated,
-        isEnabled: deps.http.auth.isEnabled,
       },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,

@@ -129,7 +129,6 @@ export class HttpServer {
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
-        isEnabled: () => this.authRegistered,
       },
       getAuthHeaders: this.authRequestHeaders.get,
       getServerInfo: () => ({

@@ -44,9 +44,6 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   const templateInterpolator = new BootstrapTemplateInterpolator();
 
   const isAuthenticated = (request: KibanaRequest) => {
-    if (!auth.isEnabled()) {
-      return true;
-    }
     const { status: authStatus } = auth.get(request);
     // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
     return authStatus !== 'unauthenticated';

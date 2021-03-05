@@ -226,24 +226,6 @@ describe('http service', () => {
         expect(authenticate).not.toHaveBeenCalled();
       });
     });
-
-    describe('#isEnabled()', () => {
-      it('returns true if auth has been registered', async () => {
-        const { http } = await root.setup();
-        const { registerAuth, auth } = http;
-
-        registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-        expect(auth.isEnabled()).toBe(true);
-      });
-
-      it('returns false if auth has not been registered', async () => {
-        const { http } = await root.setup();
-        const { auth } = http;
-
-        expect(auth.isEnabled()).toBe(false);
-      });
-    });
   });
 
   describe('legacy server', () => {

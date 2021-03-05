@@ -66,11 +66,9 @@ const createAuthMock = () => {
   const mock: AuthMocked = {
     get: jest.fn(),
     isAuthenticated: jest.fn(),
-    isEnabled: jest.fn(),
   };
   mock.get.mockReturnValue({ status: AuthStatus.authenticated, state: {} });
   mock.isAuthenticated.mockReturnValue(true);
-  mock.isEnabled.mockReturnValue(true);
   return mock;
 };
 
@@ -133,7 +131,6 @@ const createSetupContractMock = () => {
     auth: {
       get: internalMock.auth.get,
       isAuthenticated: internalMock.auth.isAuthenticated,
-      isEnabled: internalMock.auth.isEnabled,
     },
     getServerInfo: internalMock.getServerInfo,
   };
