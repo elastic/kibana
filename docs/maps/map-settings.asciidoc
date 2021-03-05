@@ -12,7 +12,7 @@ To access these settings, click *Map settings* in the application toolbar.
 Set the map background color.
 
 *Show scale*::
-Enable to display the map scale.
+When enabled, display the map scale.
 
 [float]
 [[maps-settings-navigation]]
