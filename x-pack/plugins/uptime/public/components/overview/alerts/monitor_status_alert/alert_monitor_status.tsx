@@ -20,7 +20,7 @@ export interface AlertMonitorStatusProps {
   hasFilters: boolean;
   isOldAlert: boolean;
   snapshotCount: number;
-  snapshotLoading: boolean;
+  snapshotLoading?: boolean;
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
   timerange: {
