@@ -2389,6 +2389,8 @@ export class SearchSource {
     fetch$(options?: ISearchOptions): import("rxjs").Observable<import("elasticsearch").SearchResponse<any>>;
     // @deprecated
     fetch(options?: ISearchOptions): Promise<import("elasticsearch").SearchResponse<any>>;
+    // (undocumented)
+    flatten(): Record<string, any>;
     getField<K extends keyof SearchSourceFields>(field: K, recurse?: boolean): SearchSourceFields[K];
     getFields(): SearchSourceFields;
     getId(): string;

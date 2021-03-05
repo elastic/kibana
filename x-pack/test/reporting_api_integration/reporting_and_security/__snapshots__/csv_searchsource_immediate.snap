@@ -15,7 +15,7 @@ exports[`Reporting APIs CSV generation from SearchSource date formatting Formatt
 `;
 
 exports[`Reporting APIs CSV generation from SearchSource date formatting With filters and timebased data, custom timezone (Phoenix) 1`] = `
-"\\"'@timestamp\\",clientip,extension
+"\\"@timestamp\\",clientip,extension
 \\"Sep 20, 2015 @ 03:26:48.725\\",\\"74.214.76.90\\",jpg
 \\"Sep 20, 2015 @ 03:26:48.540\\",\\"146.86.123.109\\",jpg
 \\"Sep 20, 2015 @ 03:26:48.353\\",\\"233.126.159.144\\",jpg
@@ -75,7 +75,7 @@ exports[`Reporting APIs CSV generation from SearchSource date formatting With fi
 `;
 
 exports[`Reporting APIs CSV generation from SearchSource date formatting With filters and timebased data, default to UTC 1`] = `
-"\\"'@timestamp\\",clientip,extension
+"\\"@timestamp\\",clientip,extension
 \\"Sep 20, 2015 @ 10:26:48.725\\",\\"74.214.76.90\\",jpg
 \\"Sep 20, 2015 @ 10:26:48.540\\",\\"146.86.123.109\\",jpg
 \\"Sep 20, 2015 @ 10:26:48.353\\",\\"233.126.159.144\\",jpg
@@ -135,7 +135,7 @@ exports[`Reporting APIs CSV generation from SearchSource date formatting With fi
 `;
 
 exports[`Reporting APIs CSV generation from SearchSource date formatting With filters and timebased data, explicit UTC format 1`] = `
-"\\"'@timestamp\\",clientip,extension
+"\\"@timestamp\\",clientip,extension
 \\"Sep 20, 2015 @ 10:26:48.725\\",\\"74.214.76.90\\",jpg
 \\"Sep 20, 2015 @ 10:26:48.540\\",\\"146.86.123.109\\",jpg
 \\"Sep 20, 2015 @ 10:26:48.353\\",\\"233.126.159.144\\",jpg
