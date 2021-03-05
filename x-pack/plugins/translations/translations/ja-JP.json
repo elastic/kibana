@@ -4384,7 +4384,6 @@
     "visTypeTimeseries.timeSeries.chartLine.stepsLabel": "ステップ",
     "visTypeTimeseries.timeSeries.cloneSeriesTooltip": "数列のクローンを作成",
     "visTypeTimeseries.timeseries.dataTab.dataButtonLabel": "データ",
-    "visTypeTimeseries.timeSeries.defaultPaletteLabel": "既定のパレット",
     "visTypeTimeseries.timeSeries.deleteSeriesTooltip": "数列を削除",
     "visTypeTimeseries.timeSeries.gradientLabel": "グラデーション",
     "visTypeTimeseries.timeSeries.hideInLegendLabel": "凡例で非表示",

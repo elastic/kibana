@@ -9,6 +9,7 @@
 import React from 'react';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { EuiColorPalettePicker } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { rainbowColors } from '../lib/rainbow_colors';
 import { computeGradientFinalColor } from '../lib/compute_gradient_final_color';
 import { PALETTES } from '../../../common/types';
@@ -42,7 +43,9 @@ export function PalettePicker({ activePalette, palettes, setPalette, color }: Pa
           }),
         {
           value: PALETTES.GRADIENT,
-          title: 'Gradient',
+          title: i18n.translate('visTypeTimeseries.timeSeries.gradientLabel', {
+            defaultMessage: 'Gradient',
+          }),
           type: 'fixed',
           palette: palettes
             .get('custom')
@@ -50,7 +53,9 @@ export function PalettePicker({ activePalette, palettes, setPalette, color }: Pa
         },
         {
           value: PALETTES.RAINBOW,
-          title: 'Rainbow',
+          title: i18n.translate('visTypeTimeseries.timeSeries.rainbowLabel', {
+            defaultMessage: 'Rainbow',
+          }),
           type: 'fixed',
           palette: palettes
             .get('custom')

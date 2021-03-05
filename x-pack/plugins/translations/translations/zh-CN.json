@@ -4389,7 +4389,6 @@
     "visTypeTimeseries.timeSeries.chartLine.stepsLabel": "步长",
     "visTypeTimeseries.timeSeries.cloneSeriesTooltip": "克隆序列",
     "visTypeTimeseries.timeseries.dataTab.dataButtonLabel": "数据",
-    "visTypeTimeseries.timeSeries.defaultPaletteLabel": "默认调色板",
     "visTypeTimeseries.timeSeries.deleteSeriesTooltip": "删除序列",
     "visTypeTimeseries.timeSeries.gradientLabel": "渐变",
     "visTypeTimeseries.timeSeries.hideInLegendLabel": "在图例中隐藏",
