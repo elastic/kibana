@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { URL } from 'url';
+
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
-import { URL } from 'url';
+
 import { KibanaAssetType } from '../../../types';
 import type {
   AssetsGroupedByServiceByType,
@@ -26,9 +28,7 @@ import {
   getPackageInfo,
   setPackageInfo,
 } from '../archive';
-import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from '../streams';
-import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import {
   PackageKeyInvalidError,
@@ -36,6 +36,9 @@ import {
   PackageCacheError,
   RegistryResponseError,
 } from '../../../errors';
+
+import { fetchUrl, getResponse, getResponseStream } from './requests';
+import { getRegistryUrl } from './registry_url';
 
 export interface SearchParams {
   category?: CategoryId;
