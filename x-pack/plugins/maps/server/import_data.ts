@@ -17,6 +17,16 @@ import {
 import { IndexPatternsService } from '../../../../src/plugins/data/common';
 
 export type InputData = any[];
+interface BodySettings {
+  [key: string]: any;
+}
+
+const DEFAULT_SETTINGS = { number_of_shards: 1 };
+const DEFAULT_MAPPINGS = {
+  _meta: {
+    created_by: INDEX_META_DATA_CREATED_BY,
+  },
+};
 
 export function importDataProvider(
   { asCurrentUser }: IScopedClusterClient,
@@ -26,7 +36,6 @@ export function importDataProvider(
   async function importData(
     id: string | undefined,
     index: string,
-    settings: Settings,
     mappings: Mappings,
     data: InputData
   ): Promise<ImportResponse> {
@@ -38,7 +47,7 @@ export function importDataProvider(
         // first chunk of data, create the index and id to return
         id = generateId();
 
-        await createIndex(index, settings, mappings);
+        await createIndex(index, mappings);
         createdIndex = index;
         if (createdIndex) {
           await createIndexPattern(index);
@@ -83,19 +92,14 @@ export function importDataProvider(
     }
   }
 
-  async function createIndex(index: string, settings: Settings, mappings: Mappings) {
-    const body: { mappings: Mappings; settings?: Settings } = {
+  async function createIndex(index: string, mappings: Mappings) {
+    const body: { mappings: Mappings; settings: BodySettings } = {
       mappings: {
-        _meta: {
-          created_by: INDEX_META_DATA_CREATED_BY,
-        },
-        properties: mappings.properties,
+        ...DEFAULT_MAPPINGS,
+        ...mappings,
       },
+      settings: DEFAULT_SETTINGS,
     };
-
-    if (settings && Object.keys(settings).length) {
-      body.settings = settings;
-    }
 
     await asCurrentUser.indices.create({ index, body });
   }
