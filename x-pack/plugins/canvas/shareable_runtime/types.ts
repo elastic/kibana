@@ -6,8 +6,6 @@
  */
 
 import { RefObject } from 'react';
-// @ts-expect-error Unlinked Webpack Type
-import ContainerStyle from 'types/interpreter';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
@@ -52,7 +50,7 @@ export interface CanvasRenderable {
   state: 'ready' | 'error';
   value: {
     as: string;
-    containerStyle: ContainerStyle;
+    containerStyle: any;
     css: string;
     type: 'render';
     value: any;
