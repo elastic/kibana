@@ -1,3 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderTemplate interpolates templateData into string template 1`] = `
+"
 function kbnBundlesLoader() {
   var modules = {};
 
@@ -7,7 +11,7 @@ function kbnBundlesLoader() {
 
   function define(key, bundleRequire, bundleModuleKey) {
     if (has(key)) {
-      throw new Error('__kbnBundles__ already has a module defined for "' + key + '"');
+      throw new Error('__kbnBundles__ already has a module defined for \\"' + key + '\\"');
     }
 
     modules[key] = {
@@ -18,7 +22,7 @@ function kbnBundlesLoader() {
 
   function get(key) {
     if (!has(key)) {
-      throw new Error('__kbnBundles__ does not have a module defined for "' + key + '"');
+      throw new Error('__kbnBundles__ does not have a module defined for \\"' + key + '\\"');
     }
 
     return modules[key].bundleRequire(modules[key].bundleModuleKey);
@@ -29,8 +33,8 @@ function kbnBundlesLoader() {
 
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
-window.__kbnThemeTag__ = "{{themeTag}}";
-window.__kbnPublicPath__ = {{publicPathMap}};
+window.__kbnThemeTag__ = \\"v7\\";
+window.__kbnPublicPath__ = {\\"foo\\": \\"bar\\"};
 window.__kbnBundles__ = kbnBundlesLoader();
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
@@ -38,7 +42,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   legacyBrowserError.style.display = 'flex';
 } else {
   if (!window.__kbnCspNotEnforced__ && window.console) {
-    window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
+    window.console.log(\\"^ A single error about an inline script not firing due to content security policy is expected!\\");
   }
   var loadingMessage = document.getElementById('kbn_loading_message');
   loadingMessage.style.display = 'flex';
@@ -59,7 +63,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       document.body.innerHTML = err.outerHTML;
     }
 
-    var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]')
+    var stylesheetTarget = document.querySelector('head meta[name=\\"add-styles-here\\"]')
     function loadStyleSheet(url, cb) {
       var dom = document.createElement('link');
       dom.rel = 'stylesheet';
@@ -70,10 +74,9 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       document.head.insertBefore(dom, stylesheetTarget);
     }
 
-    var scriptsTarget = document.querySelector('head meta[name="add-scripts-here"]')
+    var scriptsTarget = document.querySelector('head meta[name=\\"add-scripts-here\\"]')
     function loadScript(url, cb) {
       var dom = document.createElement('script');
-      {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
       dom.async = false;
       dom.src = url;
       dom.addEventListener('error', failure);
@@ -102,11 +105,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     }
 
     load([
-      {{#each jsDependencyPaths}}
-        '{{this}}',
-      {{/each}}
+      '/js-1','/js-2'
     ], function () {
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });
   }
 }
+  "
+`;

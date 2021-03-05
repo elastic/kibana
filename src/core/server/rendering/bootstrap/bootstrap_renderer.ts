@@ -13,7 +13,7 @@ import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
 import { HttpAuth, KibanaRequest } from '../../http';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
-import { BootstrapTemplateInterpolator } from './template_interpolator';
+import { renderTemplate } from './render_template';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
@@ -41,8 +41,6 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   uiPlugins,
   auth,
 }) => {
-  const templateInterpolator = new BootstrapTemplateInterpolator();
-
   const isAuthenticated = (request: KibanaRequest) => {
     const { status: authStatus } = auth.get(request);
     // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
@@ -89,7 +87,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       ),
     });
 
-    const body = await templateInterpolator.interpolate({
+    const body = renderTemplate({
       themeTag,
       jsDependencyPaths,
       publicPathMap,
