@@ -7,6 +7,7 @@
 
 import type { IRouter, RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+
 import { PLUGIN_ID, SETTINGS_API_ROUTES } from '../../constants';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';

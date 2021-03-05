@@ -20,6 +20,7 @@ import {
   StringFormatEditor,
   TruncateFormatEditor,
   UrlFormatEditor,
+  HistogramFormatEditor,
 } from '../components';
 
 /**
@@ -47,6 +48,7 @@ export class FormatEditorService {
       StringFormatEditor,
       TruncateFormatEditor,
       UrlFormatEditor,
+      HistogramFormatEditor,
     ];
 
     const fieldFormatEditorsSetup = this.fieldFormatEditors.setup(defaultFieldFormatEditors);
