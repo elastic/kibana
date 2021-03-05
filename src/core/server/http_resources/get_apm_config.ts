@@ -10,21 +10,14 @@ import agent from 'elastic-apm-node';
 // @ts-expect-error apm module is a js file outside of core (need to split APM/rum configuration)
 import { getConfig } from '../../../apm';
 
-let apmActive: boolean;
-const isApmActive = () => {
-  if (apmActive === undefined) {
-    apmActive = getConfig()?.active;
-  }
-  return apmActive;
-};
-
 export const getApmConfig = (requestPath: string) => {
-  if (!isApmActive()) {
+  const baseConfig = getConfig('kibana-frontend');
+  if (!baseConfig?.active) {
     return null;
   }
 
   const config: Record<string, any> = {
-    ...getConfig('kibana-frontend'),
+    ...baseConfig,
     pageLoadTransactionName: requestPath,
   };
 
