@@ -31,7 +31,7 @@ import { streamToBuffer } from '../streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import {
-  PackageVersionInvalidError,
+  PackageKeyInvalidError,
   PackageNotFoundError,
   PackageCacheError,
   RegistryResponseError,
@@ -55,13 +55,13 @@ export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: stri
   // this will return an empty string if `indexOf` returns -1
   const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
   if (pkgName === '') {
-    throw new Error('Package key parsing failed: package name was empty');
+    throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
   }
 
   // this will return the entire string if `indexOf` return -1
   const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
   if (!semverValid(pkgVersion)) {
-    throw new PackageVersionInvalidError(
+    throw new PackageKeyInvalidError(
       'Package key parsing failed: package version was not a valid semver'
     );
   }
