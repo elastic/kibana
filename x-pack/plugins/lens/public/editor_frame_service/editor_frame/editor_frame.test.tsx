@@ -7,6 +7,19 @@
 
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
+
+// Tests are executed in a jsdom environment who does not have sizing methods,
+// thus the AutoSizer will always compute a 0x0 size space
+// Mock the AutoSizer inside EuiSelectable (Chart Switch) and return some dimensions > 0
+jest.mock('react-virtualized-auto-sizer', () => {
+  return function (props: {
+    children: (dimensions: { width: number; height: number }) => React.ReactNode;
+  }) {
+    const { children, ...otherProps } = props;
+    return <div {...otherProps}>{children({ width: 100, height: 100 })}</div>;
+  };
+});
+
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame } from './editor_frame';
@@ -83,6 +96,7 @@ describe('editor_frame', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+          groupLabel: 'testVisGroup',
         },
       ],
     };
@@ -94,6 +108,7 @@ describe('editor_frame', () => {
           icon: 'empty',
           id: 'testVis2',
           label: 'TEST2',
+          groupLabel: 'testVis2Group',
         },
       ],
     };
@@ -1372,6 +1387,7 @@ describe('editor_frame', () => {
             icon: 'empty',
             id: 'testVis3',
             label: 'TEST3',
+            groupLabel: 'testVis3Group',
           },
         ],
         getSuggestions: () => [

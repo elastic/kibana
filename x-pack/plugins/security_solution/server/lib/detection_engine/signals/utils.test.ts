@@ -662,8 +662,8 @@ describe('utils', () => {
           return;
         }
         expect(moment(item.to).diff(moment(item.from), 's')).toEqual(13);
-        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(-10);
-        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(-10);
+        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(10);
+        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
     });
@@ -814,6 +814,7 @@ describe('utils', () => {
       const res = await hasTimestampFields(
         false,
         timestampField,
+        'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
         ['myfa*'],
@@ -854,6 +855,7 @@ describe('utils', () => {
       const res = await hasTimestampFields(
         false,
         timestampField,
+        'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
         ['myfa*'],
@@ -863,6 +865,60 @@ describe('utils', () => {
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+
+    test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: [],
+          fields: {},
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        'Endpoint Security',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['logs-endpoint.alerts-*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+
+    test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: [],
+          fields: {},
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        'NOT Endpoint Security',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['logs-endpoint.alerts-*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
     });

@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSuperSelect } from '@
 
 import { i18n } from '@kbn/i18n';
 
-import { TEXT } from '../../../../shared/constants/field_types';
+import { GEOLOCATION, TEXT } from '../../../../shared/constants/field_types';
 import { SchemaTypes } from '../../../../shared/types';
 
 import { BoostIcon } from '../boost_icon';
@@ -68,6 +68,8 @@ const BASE_OPTIONS = [
 const filterInvalidOptions = (value: BoostType, type: SchemaTypes) => {
   // Proximity and Functional boost types are not valid for text fields
   if (type === TEXT && [BoostType.Proximity, BoostType.Functional].includes(value)) return false;
+  // Value and Functional boost types are not valid for geolocation fields
+  if (type === GEOLOCATION && [BoostType.Functional, BoostType.Value].includes(value)) return false;
   return true;
 };
 

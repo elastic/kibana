@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import mime from 'mime-types';
 import path from 'path';
-import { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
-import {
+
+import type { TypeOf } from '@kbn/config-schema';
+import mime from 'mime-types';
+import type { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
+
+import type {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
@@ -33,7 +35,6 @@ import {
   GetStatsRequestSchema,
 } from '../../types';
 import {
-  BulkInstallResponse,
   bulkInstallPackages,
   getCategories,
   getPackages,
@@ -47,6 +48,7 @@ import {
   getInstallationObject,
   getInstallation,
 } from '../../services/epm/packages';
+import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';

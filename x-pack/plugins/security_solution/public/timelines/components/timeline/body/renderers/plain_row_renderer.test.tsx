@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../common/ecs';
@@ -42,11 +40,7 @@ describe('plain_row_renderer', () => {
       data: mockDatum,
       timelineId: 'test',
     });
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <span>{children}</span>
-      </ThemeProvider>
-    );
+    const wrapper = mount(<span>{children}</span>);
     expect(wrapper.text()).toEqual('');
   });
 });
