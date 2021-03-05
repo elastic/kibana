@@ -62,7 +62,7 @@ export function extractPanelsReferences(
 
     const newPanel = convertPanelStateToSavedDashboardPanel(embeddable, panel.version);
     result.push({
-      panel: newPanel,
+      panel: { ...panel, ...newPanel },
       references,
     });
   }
