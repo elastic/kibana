@@ -23,6 +23,17 @@ interface State {
 export class Failures extends Component<Props, State> {
   state: State = { page: 0 };
 
+  _renderPaginationControl() {
+    return this.props.failedDocs.length > PAGE_SIZE ? (
+      <EuiPagination
+        pageCount={Math.floor(this.props.failedDocs.length / PAGE_SIZE)}
+        activePage={this.state.page}
+        onPageClick={(page) => this.setState({ page })}
+        compressed
+      />
+    ) : null;
+  }
+
   render() {
     const lastDocIndex = this.props.failedDocs.length - 1;
     const startIndex = this.state.page * PAGE_SIZE;
@@ -39,12 +50,7 @@ export class Failures extends Component<Props, State> {
         paddingSize="m"
       >
         <div className="failure-list">
-          <EuiPagination
-            pageCount={Math.floor(this.props.failedDocs.length / PAGE_SIZE)}
-            activePage={this.state.page}
-            onPageClick={(page) => this.setState({ page })}
-            compressed
-          />
+          {this._renderPaginationControl()}
           {this.props.failedDocs.slice(startIndex, endIndex).map(({ item, reason, doc }) => (
             <div key={item}>
               <div className="error-message">
