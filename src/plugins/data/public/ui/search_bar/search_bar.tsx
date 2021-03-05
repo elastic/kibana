@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
+import { EuiIconProps } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
@@ -23,7 +24,6 @@ import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
-import { QueryInputCommonProps } from '../query_string_input/query_string_input';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -35,9 +35,12 @@ interface SearchBarInjectedDeps {
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
-export type SearchBarOwnProps = QueryInputCommonProps & {
+export interface SearchBarOwnProps {
+  indexPatterns?: IIndexPattern[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
+  screenTitle?: string;
+  dataTestSubj?: string;
   // Togglers
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -51,6 +54,7 @@ export type SearchBarOwnProps = QueryInputCommonProps & {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
+  query?: Query;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -65,7 +69,13 @@ export type SearchBarOwnProps = QueryInputCommonProps & {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
-};
+
+  placeholder?: string;
+  isClearable?: boolean;
+  iconType?: EuiIconProps['type'];
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
+}
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
 
@@ -374,7 +384,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryBar = (
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
-          query={this.state.query!}
+          query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
@@ -432,7 +442,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               className="globalFilterGroup__filterBar"
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
-              indexPatterns={this.props.indexPatterns! as IIndexPattern[]}
+              indexPatterns={this.props.indexPatterns!}
               appName={this.services.appName}
             />
           </div>

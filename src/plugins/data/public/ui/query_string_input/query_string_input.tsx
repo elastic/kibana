@@ -6,27 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, createRef, RefObject } from 'react';
+import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import classNames from 'classnames';
 import {
-  EuiButton,
-  EuiFieldText,
+  EuiTextArea,
+  EuiOutsideClickDetector,
+  PopoverAnchorPosition,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
+  EuiLink,
+  htmlIdGenerator,
+  EuiPortal,
   EuiIcon,
   EuiIconProps,
-  EuiLink,
-  EuiOutsideClickDetector,
-  EuiPortal,
-  EuiTextArea,
-  htmlIdGenerator,
-  PopoverAnchorPosition,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { compact, debounce, isEqual, isFunction } from 'lodash';
+import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
@@ -35,21 +34,31 @@ import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { fromUser, getQueryLog, matchPairs, PersistedLog, toUser } from '../../query';
+import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 
-export interface QueryInputCommonProps {
-  query: Query;
+export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
+  query: Query;
   disableAutoFocus?: boolean;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
-  placeholder?: string;
-  iconType?: EuiIconProps['type'];
-  isClearable?: boolean;
-  disableLanguageSwitcher?: boolean;
   screenTitle?: string;
+  prepend?: any;
+  persistedLog?: PersistedLog;
+  bubbleSubmitEvent?: boolean;
+  placeholder?: string;
+  disableLanguageSwitcher?: boolean;
+  languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
+  onBlur?: () => void;
+  onChange?: (query: Query) => void;
+  onChangeQueryInputFocus?: (isFocused: boolean) => void;
+  onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
+  size?: SuggestionsListSize;
+  className?: string;
+  isInvalid?: boolean;
+  isClearable?: boolean;
+  iconType?: EuiIconProps['type'];
 
   /**
    * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
@@ -57,22 +66,7 @@ export interface QueryInputCommonProps {
    */
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
-  autoSubmit?: boolean;
-  storageKey?: string;
-  isInvalid?: boolean;
 }
-
-export type QueryStringInputProps = QueryInputCommonProps & {
-  persistedLog?: PersistedLog;
-  bubbleSubmitEvent?: boolean;
-  languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
-  onBlur?: () => void;
-  onChange?: (query: Query) => void;
-  onChangeQueryInputFocus?: (isFocused: boolean) => void;
-  onSubmit?: (query: Query) => void;
-  size?: SuggestionsListSize;
-  className?: string;
-};
 
 interface Props extends QueryStringInputProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;

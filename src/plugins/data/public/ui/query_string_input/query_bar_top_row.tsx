@@ -17,15 +17,17 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSuperDatePicker,
+  EuiFieldText,
   prettyDuration,
+  EuiIconProps,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, TimeRange, TimeHistoryContract, Query } from '../..';
+import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, toMountPoint, withKibana } from '../../../../kibana_react/public';
-import QueryStringInputUI, { QueryInputCommonProps } from './query_string_input';
+import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
@@ -33,11 +35,17 @@ import { NoDataPopover } from './no_data_popover';
 const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
-export type QueryBarTopRowProps = QueryInputCommonProps & {
+export interface QueryBarTopRowProps {
+  query?: Query;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  dataTestSubj?: string;
+  disableAutoFocus?: boolean;
+  screenTitle?: string;
+  indexPatterns?: Array<IIndexPattern | string>;
   isLoading?: boolean;
+  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
@@ -50,7 +58,12 @@ export type QueryBarTopRowProps = QueryInputCommonProps & {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
-};
+  iconType?: EuiIconProps['type'];
+  placeholder?: string;
+  isClearable?: boolean;
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
+}
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
