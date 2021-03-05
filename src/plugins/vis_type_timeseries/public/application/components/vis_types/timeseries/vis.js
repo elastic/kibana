@@ -132,7 +132,7 @@ class TimeseriesVisualization extends Component {
   };
 
   render() {
-    const { model, visData, onBrush } = this.props;
+    const { model, visData, onBrush, syncColors } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -226,6 +226,7 @@ class TimeseriesVisualization extends Component {
           xAxisLabel={getAxisLabelString(interval)}
           xAxisFormatter={this.xAxisFormatter(interval)}
           annotations={this.prepareAnnotations()}
+          syncColors={syncColors}
         />
       </div>
     );

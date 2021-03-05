@@ -53,6 +53,7 @@ export const getTimeseriesVisRenderer: (deps: {
           handlers={handlers}
           model={config.visParams}
           visData={config.visData as TimeseriesVisData}
+          syncColors={config.syncColors}
           uiState={handlers.uiState! as PersistedState}
         />
       </VisualizationContainer>,

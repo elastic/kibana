@@ -54,4 +54,5 @@ export interface TimeseriesVisProps {
   uiState: PersistedState;
   visData: TimeseriesVisData;
   getConfig: IUiSettingsClient['get'];
+  syncColors: boolean;
 }

@@ -25,6 +25,7 @@ interface TimeseriesVisualizationProps {
   model: TimeseriesVisParams;
   visData: TimeseriesVisData;
   uiState: PersistedState;
+  syncColors: boolean;
 }
 
 function TimeseriesVisualization({
@@ -34,6 +35,7 @@ function TimeseriesVisualization({
   handlers,
   uiState,
   getConfig,
+  syncColors,
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
     (gte: string, lte: string) => {
@@ -91,6 +93,7 @@ function TimeseriesVisualization({
         uiState={uiState}
         onBrush={onBrush}
         onUiState={handleUiState}
+        syncColors={syncColors}
       />
     );
   }

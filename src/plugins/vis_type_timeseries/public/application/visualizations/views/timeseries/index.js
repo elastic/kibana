@@ -61,6 +61,7 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter,
   annotations,
+  syncColors,
 }) => {
   const chartRef = useRef();
   const [palettesRegistry, setPalettesRegistry] = useState(null);
@@ -147,12 +148,13 @@ export const TimeSeries = ({
           maxDepth: 1,
           totalSeries: seriesById.length,
           behindText: false,
+          syncColors,
         },
         paletteParams
       );
       return outputColor || null;
     },
-    [palettesRegistry, series]
+    [palettesRegistry, series, syncColors]
   );
 
   return (
