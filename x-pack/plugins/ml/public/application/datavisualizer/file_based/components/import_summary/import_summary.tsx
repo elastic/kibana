@@ -8,7 +8,8 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
-import { EuiSpacer, EuiDescriptionList, EuiCallOut, EuiAccordion } from '@elastic/eui';
+import { EuiSpacer, EuiDescriptionList, EuiCallOut } from '@elastic/eui';
+import { Failures } from './failures';
 
 interface Props {
   index: string;
@@ -93,36 +94,6 @@ export const ImportSummary: FC<Props> = ({
         </React.Fragment>
       )}
     </React.Fragment>
-  );
-};
-
-interface FailuresProps {
-  failedDocs: DocFailure[];
-}
-
-const Failures: FC<FailuresProps> = ({ failedDocs }) => {
-  return (
-    <EuiAccordion
-      id="failureList"
-      buttonContent={
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importSummary.failedDocumentsButtonLabel"
-          defaultMessage="Failed documents"
-        />
-      }
-      paddingSize="m"
-    >
-      <div className="failure-list">
-        {failedDocs.map(({ item, reason, doc }) => (
-          <div key={item}>
-            <div className="error-message">
-              {item}: {reason}
-            </div>
-            <div>{JSON.stringify(doc)}</div>
-          </div>
-        ))}
-      </div>
-    </EuiAccordion>
   );
 };
 
