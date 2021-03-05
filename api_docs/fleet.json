@@ -13488,7 +13488,7 @@
           "lineNumber": 234
         },
         "signature": [
-          "\"text\" | \"password\" | \"integer\" | \"bool\" | \"yaml\""
+          "\"string\" | \"text\" | \"password\" | \"integer\" | \"bool\" | \"yaml\""
         ],
         "initialIsOpen": false
       },
