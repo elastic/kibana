@@ -648,16 +648,30 @@ export function XYChart({
             layersAlreadyFormatted
           );
 
-          // For date histogram chart type, we're getting the rows that represent intervals without data.
-          // To not display them in the legend, they need to be filtered out.
-          const rows = tableConverted.rows.filter(
-            (row) =>
-              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
-              !(
-                splitAccessor &&
-                typeof row[splitAccessor] === 'undefined' &&
-                typeof row[accessor] === 'undefined'
-              )
+          const isStacked = seriesType.includes('stacked');
+          const isPercentage = seriesType.includes('percentage');
+          const isBarChart = seriesType.includes('bar');
+          const enableHistogramMode =
+            isHistogram &&
+            (isStacked || !splitAccessor) &&
+            (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
+
+          // Percentage charts require to fill missing buckets in order to work properly,
+          // while waiting from a elastic-chart fix: https://github.com/elastic/elastic-charts/issues/1053
+          const rows = ensureMissingBucketsAreCovered(
+            // For date histogram chart type, we're getting the rows that represent intervals without data.
+            // To not display them in the legend, they need to be filtered out.
+            tableConverted.rows.filter(
+              (row) =>
+                !(xAccessor && typeof row[xAccessor] === 'undefined') &&
+                !(
+                  splitAccessor &&
+                  typeof row[splitAccessor] === 'undefined' &&
+                  typeof row[accessor] === 'undefined'
+                )
+            ),
+            { xAccessor, yAccessor: accessor, splitAccessor },
+            { isHistogram: enableHistogramMode, isPercentage }
           );
 
           if (!xAccessor) {
@@ -674,7 +688,7 @@ export function XYChart({
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
-            stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
+            stackAccessors: isStacked ? [xAccessor as string] : [],
             id: `${splitAccessor}-${accessor}`,
             xAccessor: xAccessor || 'unifiedX',
             yAccessors: [accessor],
@@ -710,13 +724,8 @@ export function XYChart({
               );
             },
             groupId: yAxis?.groupId,
-            enableHistogramMode:
-              isHistogram &&
-              (seriesType.includes('stacked') || !splitAccessor) &&
-              (seriesType.includes('stacked') ||
-                !seriesType.includes('bar') ||
-                !chartHasMoreThanOneBarSeries),
-            stackMode: seriesType.includes('percentage') ? StackMode.Percentage : undefined,
+            enableHistogramMode,
+            stackMode: isPercentage ? StackMode.Percentage : undefined,
             timeZone,
             areaSeriesStyle: {
               point: {
@@ -830,4 +839,52 @@ function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
 
 function assertNever(x: never): never {
   throw new Error('Unexpected series type: ' + x);
+}
+
+function ensureMissingBucketsAreCovered(
+  rows: Datatable['rows'],
+  {
+    xAccessor,
+    yAccessor,
+    splitAccessor,
+  }: Record<'xAccessor' | 'yAccessor' | 'splitAccessor', string | undefined>,
+  { isHistogram, isPercentage }: Record<string, boolean>
+) {
+  // This is an expensive task, so avoid to run unless it's strictly necessary
+  if (!isHistogram || !isPercentage) {
+    return rows;
+  }
+  if (!splitAccessor || !yAccessor || !xAccessor) {
+    return rows;
+  }
+  // At this point we're sure it's a histogram chart with a percentage
+  const missingBucketsLookup = new Map();
+  const splitValues = new Set();
+  for (const row of rows) {
+    const bucketContent = missingBucketsLookup.get(row[xAccessor]) || new Set();
+    bucketContent.add(row[splitAccessor]);
+    // avoid to unnecessary sets
+    if (!missingBucketsLookup.get(row[xAccessor])) {
+      missingBucketsLookup.set(row[xAccessor], bucketContent);
+    }
+    splitValues.add(row[splitAccessor]);
+  }
+  // make a shallow copy to not mess up the original one
+  const filledRows = [...rows];
+  // now iterate again and append 0-value entries to table rows for all missing splitAccessors
+  for (const row of rows) {
+    const bucketContent = missingBucketsLookup.get(row[xAccessor]);
+    if (splitValues.size > bucketContent.size) {
+      for (const splitValue of splitValues) {
+        if (!bucketContent.has(splitValue)) {
+          filledRows.push({
+            [xAccessor]: row[xAccessor],
+            [splitAccessor]: splitValue,
+            [yAccessor]: 0,
+          });
+        }
+      }
+    }
+  }
+  return filledRows;
 }
