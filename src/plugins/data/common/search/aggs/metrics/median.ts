@@ -43,7 +43,12 @@ export const getMedianMetricAgg = () => {
         type: 'field',
         filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.HISTOGRAM],
         write(agg, output) {
-          output.params.field = agg.getParam('field').name;
+          const fld = agg.getParam('field');
+          if (fld.scripted) {
+            output.params.script = { source: fld.script, lang: fld.language };
+          } else {
+            output.params.field = agg.getParam('field').name;
+          }
           output.params.percents = [50];
         },
       },
