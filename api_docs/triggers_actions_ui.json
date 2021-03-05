@@ -900,9 +900,9 @@
             "label": "group",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerts/common/alert.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L44"
             }
           },
           {
@@ -912,9 +912,9 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerts/common/alert.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L45"
             }
           },
           {
@@ -924,9 +924,9 @@
             "label": "actionTypeId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerts/common/alert.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L46"
             }
           },
           {
@@ -936,9 +936,9 @@
             "label": "params",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerts/common/alert.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L47"
             },
             "signature": [
               {
@@ -952,9 +952,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerts/common/alert.ts#L43"
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L43"
         },
         "initialIsOpen": false
       },
@@ -1304,9 +1304,9 @@
             "signature": [
               "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
@@ -1359,9 +1359,9 @@
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -1615,9 +1615,9 @@
           },
           {
             "tags": [],
-            "id": "def-public.TriggersAndActionsUiServices.alerts",
+            "id": "def-public.TriggersAndActionsUiServices.alerting",
             "type": "Object",
-            "label": "alerts",
+            "label": "alerting",
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -1626,9 +1626,9 @@
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "public",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-public.PluginStartContract",
                 "text": "PluginStartContract"
               },
@@ -2119,17 +2119,17 @@
         },
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<ActionGroupIds> & { conditions?: T | undefined; isRequired?: false | undefined; } | ",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
@@ -2151,17 +2151,17 @@
         "signature": [
           "{ enabled: boolean; id: string; name: string; params: Record<string, unknown>; actions: AlertAction[]; muteAll: boolean; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
           "; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: ",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.AlertExecutionStatus",
             "text": "AlertExecutionStatus"
           },
@@ -2243,9 +2243,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerts/common/alert.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L12"
         },
         "signature": [
           "{ [x: string]: unknown; }"

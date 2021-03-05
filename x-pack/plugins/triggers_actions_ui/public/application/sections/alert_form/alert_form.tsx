@@ -40,7 +40,7 @@ import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
-} from '../../../../../alerts/common/parse_duration';
+} from '../../../../../alerting/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { AlertReducerAction, InitialAlert } from './alert_reducer';
 import {
@@ -61,7 +61,7 @@ import {
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerts/common';
+} from '../../../../../alerting/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
