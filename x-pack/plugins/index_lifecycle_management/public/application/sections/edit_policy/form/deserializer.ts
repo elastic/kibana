@@ -41,7 +41,7 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
-      rollupEnabled: Boolean(hot?.actions.rollup),
+      rollupEnabled: Boolean(cold?.actions.rollup),
     },
     delete: {
       enabled: Boolean(deletePhase),

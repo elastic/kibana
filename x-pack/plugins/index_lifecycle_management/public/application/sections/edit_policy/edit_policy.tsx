@@ -69,11 +69,13 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   const [isShowingPolicyJsonFlyout, setIsShowingPolicyJsonFlyout] = useState(false);
   const {
     isNewPolicy,
-    policy: currentPolicy,
+    policy: originalPolicy,
     existingPolicies,
     policyName,
     currentView,
   } = useEditPolicyContext();
+
+  const [currentPolicy, setCurrentPolicy] = useState(() => cloneDeep(originalPolicy));
 
   const serializer = useMemo(() => {
     return createSerializer(isNewPolicy ? undefined : currentPolicy);
@@ -361,17 +363,14 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
           onDone={(rollupAction) => {
             const fieldPath = `phases.${currentView.phase}.actions.rollup`;
             const rollupField = form.getFields()[fieldPath];
-            const defaultValue = cloneDeep({
+            const newCurrentPolicy = cloneDeep({
               ...currentPolicy,
               name: originalPolicyName,
             });
 
-            set(defaultValue, fieldPath, rollupAction);
+            set(newCurrentPolicy, fieldPath, rollupAction);
 
-            form.reset({
-              resetValues: false,
-              defaultValue,
-            });
+            setCurrentPolicy(newCurrentPolicy);
 
             rollupField.setValue(rollupAction);
             const { search } = history.location;
