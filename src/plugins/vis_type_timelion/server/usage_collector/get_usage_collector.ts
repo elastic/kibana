@@ -39,12 +39,6 @@ export const getStats = async (
   soClient: SavedObjectsClientContract | ISavedObjectsRepository,
   index: string
 ): Promise<TimelionUsage | undefined> => {
-  const indexPatterns = await soClient.find<IndexPatternSavedObjectAttrs>({
-    type: 'index-pattern',
-    perPage: 10000,
-    fields: ['title', 'fields'],
-  });
-
   const timelionUsage = {
     timelion_use_scripted_fields_90_days_total: 0,
   };
@@ -88,14 +82,19 @@ export const getStats = async (
       const indexes = extractIndexesFromExpression(visState.params.expression);
 
       for (const indexPatternTitle of indexes) {
-        const foundIndexPattern = indexPatterns.saved_objects.find(
-          (indexPattern) => indexPattern.attributes.title === indexPatternTitle
-        );
+        const indexPattern = await soClient.find<IndexPatternSavedObjectAttrs>({
+          type: 'index-pattern',
+          perPage: 10000,
+          fields: ['title', 'fields'],
+          searchFields: ['title'],
+          search: indexPatternTitle,
+        });
 
-        if (foundIndexPattern) {
-          const scriptedFields = JSON.parse(foundIndexPattern.attributes.fields).filter(
+        if (indexPattern.saved_objects.length) {
+          const scriptedFields = JSON.parse(indexPattern.saved_objects[0].attributes.fields).filter(
             (field: IFieldType) => field.scripted
           );
+
           const isScriptedFieldInExpression = scriptedFields.some((field: IFieldType) =>
             visState.params.expression.includes(field.name)
           );
