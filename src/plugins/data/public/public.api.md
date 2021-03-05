@@ -2438,11 +2438,6 @@ export interface SearchSourceFields {
     // (undocumented)
     parent?: SearchSourceFields;
     // (undocumented)
-    pit?: {
-        id: string;
-        keep_alive?: string;
-    };
-    // (undocumented)
     query?: Query;
     // Warning: (ae-forgotten-export) The symbol "EsQuerySearchAfter" needs to be exported by the entry point index.d.ts
     //

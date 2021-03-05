@@ -439,10 +439,6 @@ export class SearchSource {
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
-      case 'scroll':
-        return addToBody(key, val); // TODO: should be addParam (same as trackTotalHits)
-      case 'scrollId':
-        return addToBody('scroll_id', val);
       default:
         return addToBody(key, val);
     }

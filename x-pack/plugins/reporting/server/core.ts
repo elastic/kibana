@@ -185,6 +185,7 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
+  // NOTE: Uses the Legacy API
   public getElasticsearchService() {
     return this.getPluginSetupDeps().elasticsearch;
   }

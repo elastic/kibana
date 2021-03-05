@@ -100,8 +100,7 @@ export interface SearchSourceFields {
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
-  scroll?: string;
-  scrollId?: string[];
+
   parent?: SearchSourceFields;
 }
 
