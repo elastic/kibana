@@ -17,7 +17,7 @@ import {
 import { OpenFieldEditorOptions } from './open_editor';
 import { OpenFieldDeleteModalOptions } from './open_delete_modal';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
-import { DeleteProviderProps } from './components/delete_field_provider';
+import { DeleteFieldProviderProps } from './components';
 
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
@@ -30,7 +30,7 @@ export interface PluginStart {
   userPermissions: {
     editIndexPattern: () => boolean;
   };
-  DeleteRuntimeFieldProvider: FunctionComponent<DeleteProviderProps>;
+  DeleteRuntimeFieldProvider: FunctionComponent<DeleteFieldProviderProps>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

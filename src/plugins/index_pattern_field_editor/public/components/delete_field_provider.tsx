@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 
-import { IndexPattern } from '../../shared_imports';
-import { OpenFieldDeleteModalOptions } from '../../open_delete_modal';
-import { CloseEditor } from '../../types';
+import { IndexPattern } from '../shared_imports';
+import { OpenFieldDeleteModalOptions } from '../open_delete_modal';
+import { CloseEditor } from '../types';
 
 type DeleteFieldFunc = (fieldName: string | string[]) => void;
 export interface Props {
@@ -19,13 +19,17 @@ export interface Props {
   onDelete?: (fieldNames: string[]) => void;
 }
 
-export const getDeleteProvider = (
+export const getDeleteFieldProvider = (
   modalOpener: (options: OpenFieldDeleteModalOptions) => CloseEditor
 ): React.FunctionComponent<Props> => {
   return React.memo(({ indexPattern, children, onDelete }: Props) => {
+    const closeModal = useRef<CloseEditor | null>(null);
     const deleteFields = useCallback(
       async (fieldName: string | string[]) => {
-        modalOpener({
+        if (closeModal.current) {
+          closeModal.current();
+        }
+        closeModal.current = modalOpener({
           ctx: {
             indexPattern,
           },
@@ -35,6 +39,14 @@ export const getDeleteProvider = (
       },
       [onDelete, indexPattern]
     );
+
+    useEffect(() => {
+      return () => {
+        if (closeModal.current) {
+          closeModal.current();
+        }
+      };
+    }, []);
 
     return <>{children(deleteFields)}</>;
   });

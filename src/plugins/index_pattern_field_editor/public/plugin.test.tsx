@@ -144,7 +144,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
   test('should return a handler to close the modal', async () => {
     const { openDeleteModal } = await plugin.start(coreStart, pluginStart);
 
-    const closeModal = openDeleteModal({ fieldNames: ['a'], ctx: { indexPattern: {} as any } });
+    const closeModal = openDeleteModal({ fieldName: ['a'], ctx: { indexPattern: {} as any } });
     expect(typeof closeModal).toBe('function');
   });
 

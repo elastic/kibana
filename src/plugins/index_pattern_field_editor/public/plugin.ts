@@ -11,7 +11,7 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getFieldEditorOpener } from './open_editor';
 import { FormatEditorService } from './service';
-import { getDeleteProvider } from './components/delete_provider';
+import { getDeleteFieldProvider } from './components/delete_field_provider';
 import { getFieldDeleteModalOpener } from './open_delete_modal';
 
 export class IndexPatternFieldEditorPlugin
@@ -53,7 +53,7 @@ export class IndexPatternFieldEditorPlugin
           return capabilities.management.kibana.indexPatterns;
         },
       },
-      DeleteRuntimeFieldProvider: getDeleteProvider(openDeleteModal),
+      DeleteRuntimeFieldProvider: getDeleteFieldProvider(openDeleteModal),
     };
   }
 
