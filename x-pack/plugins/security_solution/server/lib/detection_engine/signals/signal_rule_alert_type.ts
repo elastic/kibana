@@ -212,12 +212,7 @@ export const signalRulesAlertType = ({
             () =>
               tryCatch(
                 () =>
-                  hasReadIndexPrivileges(
-                    privileges.body,
-                    logger,
-                    buildRuleMessage,
-                    ruleStatusService
-                  ),
+                  hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
                 toError
               ),
             chain((wroteStatus) =>

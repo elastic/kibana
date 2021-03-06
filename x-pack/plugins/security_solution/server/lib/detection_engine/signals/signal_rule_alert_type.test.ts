@@ -198,25 +198,23 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should set a warning for when rules cannot read ALL provided indices', async () => {
-      (checkPrivileges as jest.Mock).mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          username: 'elastic',
-          has_all_requested: false,
-          cluster: {},
-          index: {
-            'myfa*': {
-              read: true,
-            },
-            'anotherindex*': {
-              read: true,
-            },
-            'some*': {
-              read: false,
-            },
+      (checkPrivileges as jest.Mock).mockResolvedValueOnce({
+        username: 'elastic',
+        has_all_requested: false,
+        cluster: {},
+        index: {
+          'myfa*': {
+            read: true,
           },
-          application: {},
-        })
-      );
+          'anotherindex*': {
+            read: true,
+          },
+          'some*': {
+            read: false,
+          },
+        },
+        application: {},
+      });
       payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
       await alert.executor(payload);
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
@@ -250,22 +248,20 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('should set a failure status for when rules cannot read ANY provided indices', async () => {
-      (checkPrivileges as jest.Mock).mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          username: 'elastic',
-          has_all_requested: false,
-          cluster: {},
-          index: {
-            'myfa*': {
-              read: false,
-            },
-            'some*': {
-              read: false,
-            },
+      (checkPrivileges as jest.Mock).mockResolvedValueOnce({
+        username: 'elastic',
+        has_all_requested: false,
+        cluster: {},
+        index: {
+          'myfa*': {
+            read: false,
           },
-          application: {},
-        })
-      );
+          'some*': {
+            read: false,
+          },
+        },
+        application: {},
+      });
       payload.params.index = ['some*', 'myfa*'];
       await alert.executor(payload);
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();

@@ -66,7 +66,7 @@ describe('healthRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const esClient = elasticsearchServiceMock.createScopedClusterClient();
-    esClient.asCurrentUser.transport.request.mockReturnValue(
+    esClient.asInternalUser.transport.request.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({})
     );
 
@@ -76,7 +76,7 @@ describe('healthRoute', () => {
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
 
-    expect(esClient.asCurrentUser.transport.request.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(esClient.asInternalUser.transport.request.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "transport.request",
         Object {

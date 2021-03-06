@@ -154,19 +154,21 @@ export const hasTimestampFields = async (
 export const checkPrivileges = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
-): Promise<ApiResponse<Privilege>> =>
-  (services.scopedClusterClient.transport.request({
-    path: '/_security/user/_has_privileges',
-    method: 'POST',
-    body: {
-      index: [
-        {
-          names: indices ?? [],
-          privileges: ['read'],
-        },
-      ],
-    },
-  }) as unknown) as Promise<ApiResponse<Privilege>>;
+): Promise<Privilege> =>
+  (
+    await services.scopedClusterClient.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: indices ?? [],
+            privileges: ['read'],
+          },
+        ],
+      },
+    })
+  ).body as Privilege;
 
 export const getNumCatchupIntervals = ({
   gap,
