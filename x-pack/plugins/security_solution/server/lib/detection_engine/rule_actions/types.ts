@@ -9,6 +9,8 @@ import { get } from 'lodash/fp';
 import { SavedObject, SavedObjectAttributes, SavedObjectsFindResponse } from 'kibana/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 
+export { RuleAlertAction };
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleActionsAttributes extends Record<string, any> {
   ruleAlertId: string;

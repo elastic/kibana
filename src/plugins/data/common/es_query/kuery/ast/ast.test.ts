@@ -69,6 +69,26 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('should not nest same-level "and"', () => {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+        nodeTypes.function.buildNode('is', null, 'baz'),
+      ]);
+      const actual = fromKueryExpression('foo and bar and baz');
+      expect(actual).toEqual(expected);
+    });
+
+    test('should not nest same-level "or"', () => {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+        nodeTypes.function.buildNode('is', null, 'baz'),
+      ]);
+      const actual = fromKueryExpression('foo or bar or baz');
+      expect(actual).toEqual(expected);
+    });
+
     test('should support negation of queries with a "not" prefix', () => {
       const expected = nodeTypes.function.buildNode(
         'not',
@@ -84,13 +104,11 @@ describe('kuery AST API', () => {
     test('"and" should have a higher precedence than "or"', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode('and', [
-            nodeTypes.function.buildNode('is', null, 'bar'),
-            nodeTypes.function.buildNode('is', null, 'baz'),
-          ]),
-          nodeTypes.function.buildNode('is', null, 'qux'),
+        nodeTypes.function.buildNode('and', [
+          nodeTypes.function.buildNode('is', null, 'bar'),
+          nodeTypes.function.buildNode('is', null, 'baz'),
         ]),
+        nodeTypes.function.buildNode('is', null, 'qux'),
       ]);
       const actual = fromKueryExpression('foo or bar and baz or qux');
       expect(actual).toEqual(expected);

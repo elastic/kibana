@@ -7,8 +7,10 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import type { SavedObject } from 'kibana/server';
+
 import type { Agent, AgentPolicy } from '../../types';
 import { AgentReassignmentError } from '../../errors';
+
 import { reassignAgent, reassignAgents } from './reassign';
 
 const agentInManagedSO = {

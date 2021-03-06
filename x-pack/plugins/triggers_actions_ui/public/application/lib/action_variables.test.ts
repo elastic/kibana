@@ -7,7 +7,7 @@
 
 import { AlertType, ActionVariables } from '../../types';
 import { transformActionVariables } from './action_variables';
-import { ALERTS_FEATURE_ID } from '../../../../alerts/common';
+import { ALERTS_FEATURE_ID } from '../../../../alerting/common';
 
 beforeEach(() => jest.resetAllMocks());
 
