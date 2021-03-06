@@ -6550,10 +6550,10 @@ address@1.1.2, address@^1.0.1:
   resolved "https://registry.yarnpkg.com/address/-/address-1.1.2.tgz#bf1116c9c758c51b7a933d296b72c221ed9428b6"
   integrity sha512-aT6camzM4xEA54YVJYSqxz1kv4IHnQZRtThJJHhUMRExaU5spC7jX5ugSwTaTgJliIgs4VhZOk7htClvQ/LmRA==
 
-adm-zip@0.4.16:
-  version "0.4.16"
-  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.4.16.tgz#cf4c508fdffab02c269cbc7f471a875f05570365"
-  integrity sha512-TFi4HBKSGfIKsK5YCkKaaFG2m4PEDyViZmEwof3MTIgzimHLto6muaHVpbrljdIvIrFZzEq/p4nafOeLcYegrg==
+adm-zip@0.5.3:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.3.tgz#f5ac6b2507f4418e2691c0feb6f130b4b90d7643"
+  integrity sha512-zsoTXEwRNCxBzRHLENFLuecCcwzzXiEhWo1r3GP68iwi8Q/hW2RrqgeY1nfJ/AhNQNWnZq/4v0TbfMsUkI+TYw==
 
 after-all-results@^2.0.0:
   version "2.0.0"
@@ -14415,12 +14415,12 @@ gaze@^1.0.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@^1.21.0:
-  version "1.21.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.21.0.tgz#1f04780ebfb451ffd08fa8fddc25cc26e37ac4a2"
-  integrity sha512-NamdJwGIWpPiafKQIvGman95BBi/SBqHddRXAnIEpFNFCFToTW0sEA0nUckMKCBNn1DVIcLfULfyFq/sTn9bkA==
+geckodriver@^1.21.2:
+  version "1.22.2"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.22.2.tgz#e0904bed50a1d2abaa24597d4ae43eb6662f9d72"
+  integrity sha512-xcf1OLfHqNX4+wQhj4weu2gtiwtPnV8yEEKvLkC8GuFtUc5WjOGodV/2pHiYJjCSJRQfsmIgY5Xs1zaJf/OGFA==
   dependencies:
-    adm-zip "0.4.16"
+    adm-zip "0.5.3"
     bluebird "3.7.2"
     got "5.6.0"
     https-proxy-agent "5.0.0"

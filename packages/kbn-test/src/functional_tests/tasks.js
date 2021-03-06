@@ -95,6 +95,8 @@ export async function runTests(options) {
       try {
         es = await runElasticsearch({ config, options: opts });
         await runKibanaServer({ procs, config, options: opts });
+        // workaround until https://github.com/elastic/kibana/issues/89828 is addressed
+        await delay(5000);
         await runFtr({ configPath, options: opts });
       } finally {
         try {
@@ -159,4 +161,8 @@ async function silence(log, milliseconds) {
       take(1)
     )
     .toPromise();
+}
+
+async function delay(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
 }

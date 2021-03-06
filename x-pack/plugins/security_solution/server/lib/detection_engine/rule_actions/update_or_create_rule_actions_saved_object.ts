@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertServices } from '../../../../../alerts/server';
+import { AlertServices } from '../../../../../alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { getRuleActionsSavedObject } from './get_rule_actions_saved_object';
 import { createRuleActionsSavedObject } from './create_rule_actions_saved_object';
