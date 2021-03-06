@@ -525,13 +525,16 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setFieldScript(script: string) {
       log.debug('set script = ' + script);
-      await (
-        await (await testSubjects.find('formatRow')).findAllByCssSelector(
-          '[data-test-subj="toggle"]'
-        )
-      )[0].click();
-      await browser.pressKeys(browser.keys.TAB);
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
+      const formatRow = await testSubjects.find('formatRow');
+      const formatRowToggle = (
+        await formatRow.findAllByCssSelector('[data-test-subj="toggle"]')
+      )[0];
+
+      await formatRowToggle.click();
+      const getMonacoTextArea = async () => (await formatRow.findAllByCssSelector('textarea'))[0];
+      retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
+      const monacoTextArea = await getMonacoTextArea();
+      await monacoTextArea.focus();
       browser.pressKeys(script);
     }
 
