@@ -530,7 +530,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setFieldScript(script: string) {
       log.debug('set script = ' + script);
-      const formatRow = await testSubjects.find('formatRow');
+      const formatRow = await testSubjects.find('valueRow');
       const formatRowToggle = (
         await formatRow.findAllByCssSelector('[data-test-subj="toggle"]')
       )[0];
