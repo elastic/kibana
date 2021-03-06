@@ -49,7 +49,7 @@ export const getDatasetForField = async (
     },
   };
 
-  const { body: response } = await client<EventDatasetHit>(params);
+  const response = await client<EventDatasetHit>(params);
 
   if (response.hits.total.value === 0) {
     return null;

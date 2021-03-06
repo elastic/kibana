@@ -102,7 +102,7 @@ export async function executeEsQueryFactory(
     boundaryNameField?: string;
     indexQuery?: Query;
   },
-  { esClient }: { esClient: ElasticsearchClient },
+  esClient: ElasticsearchClient,
   log: Logger,
   shapesFilters: Record<string, unknown>
 ) {
