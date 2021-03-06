@@ -9,6 +9,7 @@ import * as mocks from './test_mocks';
 import { Comparator, Aggregators, MetricExpressionParams } from './types';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { previewMetricThresholdAlert } from './preview_metric_threshold_alert';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('Previewing the metric threshold alert type', () => {
@@ -165,25 +166,32 @@ describe('Previewing the metric threshold alert type', () => {
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
 
-elasticsearchClientMock
-  .createScopedClusterClient()
-  .asCurrentUser.search.mockImplementation(({ body }: any) => {
-    const metric = body.query.bool.filter[1]?.exists.field;
-    if (body.aggs.groupings) {
-      if (body.aggs.groupings.composite.after) {
-        return mocks.compositeEndResponse;
-      }
-      return mocks.basicCompositePreviewResponse;
+services.scopedClusterClient.search.mockImplementation((params?: any): any => {
+  const metric = params?.body.query.bool.filter[1]?.exists.field;
+  if (params?.body.aggs.groupings) {
+    if (params?.body.aggs.groupings.composite.after) {
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(
+        mocks.compositeEndResponse
+      );
     }
-    if (metric === 'test.metric.2') {
-      return mocks.alternateMetricPreviewResponse;
-    }
-    if (metric === 'test.metric.3') {
-      return mocks.repeatingMetricPreviewResponse;
-    }
-    return mocks.basicMetricPreviewResponse;
-  });
-services.scopedClusterClient.search.mockImplementation(searchMock(body));
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.basicCompositePreviewResponse
+    );
+  }
+  if (metric === 'test.metric.2') {
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.alternateMetricPreviewResponse
+    );
+  }
+  if (metric === 'test.metric.3') {
+    return elasticsearchClientMock.createSuccessTransportRequestPromise(
+      mocks.repeatingMetricPreviewResponse
+    );
+  }
+  return elasticsearchClientMock.createSuccessTransportRequestPromise(
+    mocks.basicMetricPreviewResponse
+  );
+});
 
 const baseCriterion = {
   aggType: Aggregators.AVERAGE,
