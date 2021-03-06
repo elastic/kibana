@@ -25,8 +25,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23"
+              "lineNumber": 23
             }
           }
         ],
@@ -41,8 +40,7 @@
         "label": "TrackApplicationView",
         "source": {
           "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx#L23"
+          "lineNumber": 23
         },
         "tags": [
           "Link",
@@ -62,8 +60,7 @@
         "description": [],
         "source": {
           "path": "node_modules/@kbn/analytics/target/types/metrics/index.d.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/7.xnode_modules/@kbn/analytics/target/types/metrics/index.d.ts#L10"
+          "lineNumber": 10
         },
         "signature": [
           "METRIC_TYPE"
@@ -88,8 +85,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 35,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/public/plugin.tsx#L35"
+            "lineNumber": 35
           },
           "signature": [
             "{ ApplicationUsageTrackingProvider: React.FC<{}>; }"
@@ -103,8 +99,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 38,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/public/plugin.tsx#L38"
+            "lineNumber": 38
           },
           "signature": [
             "(appName: string, type: ",
@@ -115,8 +110,7 @@
       ],
       "source": {
         "path": "src/plugins/usage_collection/public/plugin.tsx",
-        "lineNumber": 34,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/public/plugin.tsx#L34"
+        "lineNumber": 34
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -136,8 +130,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/usage_collection/public/plugin.tsx",
-            "lineNumber": 42,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/public/plugin.tsx#L42"
+            "lineNumber": 42
           },
           "signature": [
             "(appName: string, type: ",
@@ -148,8 +141,7 @@
       ],
       "source": {
         "path": "src/plugins/usage_collection/public/plugin.tsx",
-        "lineNumber": 41,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/public/plugin.tsx#L41"
+        "lineNumber": 41
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -182,8 +174,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 144,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L144"
+              "lineNumber": 144
             },
             "signature": [
               {
@@ -204,8 +195,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 145,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L145"
+              "lineNumber": 145
             }
           },
           {
@@ -216,8 +206,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 146,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L146"
+              "lineNumber": 146
             },
             "signature": [
               "Function | undefined"
@@ -231,8 +220,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 147,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L147"
+              "lineNumber": 147
             },
             "signature": [
               {
@@ -253,8 +241,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 148,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L148"
+              "lineNumber": 148
             },
             "signature": [
               "() => boolean | Promise<boolean>"
@@ -279,8 +266,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/usage_collection/server/collector/collector.ts",
-                  "lineNumber": 155,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L155"
+                  "lineNumber": 155
                 }
               },
               {
@@ -300,28 +286,23 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/usage_collection/server/collector/collector.ts",
-                  "lineNumber": 156,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L156"
+                  "lineNumber": 156
                 }
               }
             ],
             "tags": [
-              "private",
-              "link",
-              "link"
+              "private"
             ],
             "returnComment": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 154,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L154"
+              "lineNumber": 154
             }
           }
         ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 143,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L143"
+          "lineNumber": 143
         },
         "initialIsOpen": false
       }
@@ -343,15 +324,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/usage_collection/server/collector/collector.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L33"
+              "lineNumber": 33
             }
           }
         ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L32"
+          "lineNumber": 32
         },
         "initialIsOpen": false
       }
@@ -366,8 +345,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L27"
+          "lineNumber": 27
         },
         "signature": [
           "\"boolean\" | \"date\" | \"text\" | \"keyword\" | \"long\" | \"double\" | \"short\" | \"integer\" | \"byte\" | \"float\""
@@ -375,18 +353,19 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.MakeSchemaFrom",
+        "id": "def-server.CollectorFetchContext",
         "type": "Type",
-        "label": "MakeSchemaFrom",
+        "label": "CollectorFetchContext",
         "tags": [],
-        "description": [],
+        "description": [
+          "\nThe context for the `fetch` method: It includes the most commonly used clients in the collectors (ES and SO clients).\nBoth are scoped based on the request and the context:\n- When users are requesting a sample of data, it is scoped to their role to avoid exposing data they shouldn't read\n- When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user\n"
+        ],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 50,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L50"
+          "lineNumber": 64
         },
         "signature": [
-          "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: 'array'; items: RecursiveMakeSchemaFrom<U>; } : RecursiveMakeSchemaFrom<Required<Base>[Key]>; }"
+          "{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract; } & (WithKibanaRequest extends true ? { kibanaRequest?: KibanaRequest<unknown, unknown, unknown, any> | undefined; } : {})"
         ],
         "initialIsOpen": false
       },
@@ -398,8 +377,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 111,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L111"
+          "lineNumber": 111
         },
         "signature": [
           "{ type: string; init?: Function | undefined; isReady: () => Promise<boolean> | boolean; schema?: MakeSchemaFrom<TFetchReturn> | undefined; fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>; } : { extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest> | undefined; })"
@@ -407,52 +385,17 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.UsageCollectorOptions",
+        "id": "def-server.MakeSchemaFrom",
         "type": "Type",
-        "label": "UsageCollectorOptions",
+        "label": "MakeSchemaFrom",
         "tags": [],
         "description": [],
         "source": {
-          "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/usage_collector.ts#L13"
-        },
-        "signature": [
-          "{ type: string; init?: Function | undefined; isReady: () => boolean | Promise<boolean>; schema?: ",
-          {
-            "pluginId": "usageCollection",
-            "scope": "server",
-            "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.MakeSchemaFrom",
-            "text": "MakeSchemaFrom"
-          },
-          "<TFetchReturn> | undefined; fetch: ",
-          "CollectorFetchMethod",
-          "<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: ",
-          "CollectorOptionsFetchExtendedContext",
-          "<WithKibanaRequest>; } : { extendFetchContext?: ",
-          "CollectorOptionsFetchExtendedContext",
-          "<WithKibanaRequest> | undefined; }) & Required<Pick<CollectorOptions<TFetchReturn, boolean, {}>, \"schema\">>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.CollectorFetchContext",
-        "type": "Type",
-        "label": "CollectorFetchContext",
-        "tags": [
-          "remark"
-        ],
-        "description": [
-          "\nThe context for the `fetch` method: It includes the most commonly used clients in the collectors (ES and SO clients).\nBoth are scoped based on the request and the context:\n- When users are requesting a sample of data, it is scoped to their role to avoid exposing data they shouldn't read\n- When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user\n"
-        ],
-        "source": {
           "path": "src/plugins/usage_collection/server/collector/collector.ts",
-          "lineNumber": 64,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/collector/collector.ts#L64"
+          "lineNumber": 50
         },
         "signature": [
-          "{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract; } & (WithKibanaRequest extends true ? { kibanaRequest?: KibanaRequest<unknown, unknown, unknown, any> | undefined; } : {})"
+          "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: 'array'; items: RecursiveMakeSchemaFrom<U>; } : RecursiveMakeSchemaFrom<Required<Base>[Key]>; }"
         ],
         "initialIsOpen": false
       },
@@ -464,8 +407,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/usage_collection/server/plugin.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/usage_collection/server/plugin.ts#L21"
+          "lineNumber": 21
         },
         "signature": [
           "{ makeStatsCollector: <TFetchReturn, WithKibanaRequest, ExtraOptions>(options: ",
@@ -502,6 +444,35 @@
             "section": "def-server.Collector",
             "text": "Collector"
           }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.UsageCollectorOptions",
+        "type": "Type",
+        "label": "UsageCollectorOptions",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "{ type: string; init?: Function | undefined; isReady: () => boolean | Promise<boolean>; schema?: ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.MakeSchemaFrom",
+            "text": "MakeSchemaFrom"
+          },
+          "<TFetchReturn> | undefined; fetch: ",
+          "CollectorFetchMethod",
+          "<WithKibanaRequest, TFetchReturn, ExtraOptions>; } & ExtraOptions & (WithKibanaRequest extends true ? { extendFetchContext: ",
+          "CollectorOptionsFetchExtendedContext",
+          "<WithKibanaRequest>; } : { extendFetchContext?: ",
+          "CollectorOptionsFetchExtendedContext",
+          "<WithKibanaRequest> | undefined; }) & Required<Pick<CollectorOptions<TFetchReturn, boolean, {}>, \"schema\">>"
         ],
         "initialIsOpen": false
       }

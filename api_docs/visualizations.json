@@ -3,6 +3,327 @@
   "client": {
     "classes": [
       {
+        "id": "def-public.PersistedState",
+        "type": "Class",
+        "tags": [],
+        "label": "PersistedState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.PersistedState",
+            "text": "PersistedState"
+          },
+          " extends ",
+          "EventEmitter"
+        ],
+        "children": [
+          {
+            "id": "def-public.PersistedState.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Any",
+                "label": "value",
+                "isRequired": true,
+                "signature": [
+                  "any"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 40
+                }
+              },
+              {
+                "type": "CompoundType",
+                "label": "path",
+                "isRequired": false,
+                "signature": [
+                  "string | string[] | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 40
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 40
+            }
+          },
+          {
+            "id": "def-public.PersistedState.get",
+            "type": "Function",
+            "label": "get",
+            "signature": [
+              "(key?: string | string[] | undefined, defaultValue?: any) => any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "CompoundType",
+                "label": "key",
+                "isRequired": false,
+                "signature": [
+                  "string | string[] | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 57
+                }
+              },
+              {
+                "type": "Any",
+                "label": "defaultValue",
+                "isRequired": true,
+                "signature": [
+                  "any"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 57
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 57
+            }
+          },
+          {
+            "id": "def-public.PersistedState.set",
+            "type": "Function",
+            "label": "set",
+            "signature": [
+              "(key: any, value?: any) => this"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Any",
+                "label": "key",
+                "isRequired": true,
+                "signature": [
+                  "any"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 66
+                }
+              },
+              {
+                "type": "Any",
+                "label": "value",
+                "isRequired": true,
+                "signature": [
+                  "any"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 66
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 66
+            }
+          },
+          {
+            "id": "def-public.PersistedState.setSilent",
+            "type": "Function",
+            "label": "setSilent",
+            "signature": [
+              "(key: any, value?: any) => this | undefined"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Any",
+                "label": "key",
+                "isRequired": true,
+                "signature": [
+                  "any"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 74
+                }
+              },
+              {
+                "type": "Any",
+                "label": "value",
+                "isRequired": true,
+                "signature": [
+                  "any"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 74
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 74
+            }
+          },
+          {
+            "id": "def-public.PersistedState.clearAllKeys",
+            "type": "Function",
+            "label": "clearAllKeys",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 82
+            }
+          },
+          {
+            "id": "def-public.PersistedState.reset",
+            "type": "Function",
+            "label": "reset",
+            "signature": [
+              "(path: string | string[]) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "CompoundType",
+                "label": "path",
+                "isRequired": true,
+                "signature": [
+                  "string | string[]"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 88
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 88
+            }
+          },
+          {
+            "id": "def-public.PersistedState.getChanges",
+            "type": "Function",
+            "label": "getChanges",
+            "signature": [
+              "() => any"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 105
+            }
+          },
+          {
+            "id": "def-public.PersistedState.toJSON",
+            "type": "Function",
+            "label": "toJSON",
+            "signature": [
+              "() => any"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 109
+            }
+          },
+          {
+            "id": "def-public.PersistedState.toString",
+            "type": "Function",
+            "label": "toString",
+            "signature": [
+              "() => string"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 113
+            }
+          },
+          {
+            "id": "def-public.PersistedState.fromString",
+            "type": "Function",
+            "label": "fromString",
+            "signature": [
+              "(input: string) => this"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "input",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+                  "lineNumber": 117
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+              "lineNumber": 117
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
+          "lineNumber": 32
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.Vis",
         "type": "Class",
         "tags": [],
@@ -27,8 +348,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L74"
+              "lineNumber": 74
             },
             "signature": [
               {
@@ -49,8 +369,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L75"
+              "lineNumber": 75
             },
             "signature": [
               "string | undefined"
@@ -64,8 +383,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L76"
+              "lineNumber": 76
             }
           },
           {
@@ -76,8 +394,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L77"
+              "lineNumber": 77
             }
           },
           {
@@ -88,8 +405,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 78,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L78"
+              "lineNumber": 78
             },
             "signature": [
               "TVisParams"
@@ -104,8 +420,7 @@
             "label": "data",
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L79"
+              "lineNumber": 79
             }
           },
           {
@@ -116,8 +431,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L81"
+              "lineNumber": 81
             },
             "signature": [
               {
@@ -148,8 +462,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/visualizations/public/vis.ts",
-                  "lineNumber": 83,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L83"
+                  "lineNumber": 83
                 }
               },
               {
@@ -168,8 +481,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/visualizations/public/vis.ts",
-                  "lineNumber": 83,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L83"
+                  "lineNumber": 83
                 }
               }
             ],
@@ -177,8 +489,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L83"
+              "lineNumber": 83
             }
           },
           {
@@ -248,8 +559,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/visualizations/public/vis.ts",
-                  "lineNumber": 108,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L108"
+                  "lineNumber": 108
                 }
               }
             ],
@@ -257,8 +567,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L108"
+              "lineNumber": 108
             }
           },
           {
@@ -290,8 +599,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 157,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L157"
+              "lineNumber": 157
             }
           },
           {
@@ -314,8 +622,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 171,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L171"
+              "lineNumber": 171
             }
           },
           {
@@ -331,395 +638,18 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 189,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L189"
+              "lineNumber": 189
             }
           }
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis.ts",
-          "lineNumber": 73,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L73"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PersistedState",
-        "type": "Class",
-        "tags": [],
-        "label": "PersistedState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.PersistedState",
-            "text": "PersistedState"
-          },
-          " extends ",
-          "EventEmitter"
-        ],
-        "children": [
-          {
-            "id": "def-public.PersistedState.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Any",
-                "label": "value",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L40"
-                }
-              },
-              {
-                "type": "CompoundType",
-                "label": "path",
-                "isRequired": false,
-                "signature": [
-                  "string | string[] | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L40"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L40"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.get",
-            "type": "Function",
-            "label": "get",
-            "signature": [
-              "(key?: string | string[] | undefined, defaultValue?: any) => any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "CompoundType",
-                "label": "key",
-                "isRequired": false,
-                "signature": [
-                  "string | string[] | undefined"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 57,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L57"
-                }
-              },
-              {
-                "type": "Any",
-                "label": "defaultValue",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 57,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L57"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L57"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.set",
-            "type": "Function",
-            "label": "set",
-            "signature": [
-              "(key: any, value?: any) => this"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Any",
-                "label": "key",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 66,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L66"
-                }
-              },
-              {
-                "type": "Any",
-                "label": "value",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 66,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L66"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L66"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.setSilent",
-            "type": "Function",
-            "label": "setSilent",
-            "signature": [
-              "(key: any, value?: any) => this | undefined"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Any",
-                "label": "key",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 74,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L74"
-                }
-              },
-              {
-                "type": "Any",
-                "label": "value",
-                "isRequired": true,
-                "signature": [
-                  "any"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 74,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L74"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L74"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.clearAllKeys",
-            "type": "Function",
-            "label": "clearAllKeys",
-            "signature": [
-              "() => void"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 82,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L82"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.reset",
-            "type": "Function",
-            "label": "reset",
-            "signature": [
-              "(path: string | string[]) => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "CompoundType",
-                "label": "path",
-                "isRequired": true,
-                "signature": [
-                  "string | string[]"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 88,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L88"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L88"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.getChanges",
-            "type": "Function",
-            "label": "getChanges",
-            "signature": [
-              "() => any"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L105"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.toJSON",
-            "type": "Function",
-            "label": "toJSON",
-            "signature": [
-              "() => any"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 109,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L109"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.toString",
-            "type": "Function",
-            "label": "toString",
-            "signature": [
-              "() => string"
-            ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 113,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L113"
-            }
-          },
-          {
-            "id": "def-public.PersistedState.fromString",
-            "type": "Function",
-            "label": "fromString",
-            "signature": [
-              "(input: string) => this"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "input",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-                  "lineNumber": 117,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L117"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-              "lineNumber": 117,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L117"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
-          "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/persisted_state/persisted_state.ts#L32"
+          "lineNumber": 73
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
-      {
-        "id": "def-public.VisualizationContainer",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n}",
-            "isRequired": true,
-            "signature": [
-              "VisualizationContainerProps"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/components/visualization_container.tsx#L23"
-            }
-          }
-        ],
-        "signature": [
-          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, }: VisualizationContainerProps) => JSX.Element"
-        ],
-        "description": [],
-        "label": "VisualizationContainer",
-        "source": {
-          "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/components/visualization_container.tsx#L23"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.getVisSchemas",
         "type": "Function",
@@ -741,8 +671,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L45"
+              "lineNumber": 45
             }
           },
           {
@@ -761,8 +690,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L46"
+              "lineNumber": 46
             }
           }
         ],
@@ -790,8 +718,7 @@
         "label": "getVisSchemas",
         "source": {
           "path": "src/plugins/visualizations/public/vis_schemas.ts",
-          "lineNumber": 44,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L44"
+          "lineNumber": 44
         },
         "tags": [],
         "returnComment": [],
@@ -832,8 +759,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/legacy/vis_update_state.d.ts#L11"
+              "lineNumber": 11
             }
           }
         ],
@@ -841,117 +767,59 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/legacy/vis_update_state.d.ts#L11"
+          "lineNumber": 11
         },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.VisualizationContainer",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Object",
+            "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n}",
+            "isRequired": true,
+            "signature": [
+              "VisualizationContainerProps"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
+              "lineNumber": 23
+            }
+          }
+        ],
+        "signature": [
+          "({ \"data-test-subj\": dataTestSubj, className, children, handlers, showNoResult, }: VisualizationContainerProps) => JSX.Element"
+        ],
+        "description": [],
+        "label": "VisualizationContainer",
+        "source": {
+          "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
+          "lineNumber": 23
+        },
+        "tags": [],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
-        "id": "def-public.VisTypeAlias",
+        "id": "def-public.ISavedVis",
         "type": "Interface",
-        "label": "VisTypeAlias",
+        "label": "ISavedVis",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.VisTypeAlias.aliasPath",
+            "id": "def-public.ISavedVis.id",
             "type": "string",
-            "label": "aliasPath",
+            "label": "id",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L35"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeAlias.aliasApp",
-            "type": "string",
-            "label": "aliasApp",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L36"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeAlias.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L37"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeAlias.title",
-            "type": "string",
-            "label": "title",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L38"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeAlias.icon",
-            "type": "string",
-            "label": "icon",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L39"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeAlias.promotion",
-            "type": "CompoundType",
-            "label": "promotion",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L40"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeAlias.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L41"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeAlias.note",
-            "type": "string",
-            "label": "note",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L42"
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 31
             },
             "signature": [
               "string | undefined"
@@ -959,754 +827,116 @@
           },
           {
             "tags": [],
-            "id": "def-public.VisTypeAlias.getSupportedTriggers",
-            "type": "Function",
-            "label": "getSupportedTriggers",
+            "id": "def-public.ISavedVis.title",
+            "type": "string",
+            "label": "title",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L43"
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 32
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ISavedVis.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 33
             },
             "signature": [
-              "(() => string[]) | undefined"
+              "string | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.VisTypeAlias.stage",
-            "type": "CompoundType",
-            "label": "stage",
+            "id": "def-public.ISavedVis.visState",
+            "type": "Object",
+            "label": "visState",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L44"
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 34
             },
             "signature": [
               {
                 "pluginId": "visualizations",
                 "scope": "public",
                 "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisualizationStage",
-                "text": "VisualizationStage"
+                "section": "def-public.SavedVisState",
+                "text": "SavedVisState"
               }
             ]
           },
           {
             "tags": [],
-            "id": "def-public.VisTypeAlias.appExtensions",
+            "id": "def-public.ISavedVis.searchSourceFields",
             "type": "Object",
-            "label": "appExtensions",
+            "label": "searchSourceFields",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L46"
-            },
-            "signature": [
-              "{ [appName: string]: unknown; visualizations: ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisualizationsAppExtension",
-                "text": "VisualizationsAppExtension"
-              },
-              "; } | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L34"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.VisTypeDefinition",
-        "type": "Interface",
-        "label": "VisTypeDefinition",
-        "signature": [
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisTypeDefinition",
-            "text": "VisTypeDefinition"
-          },
-          "<TVisParams>"
-        ],
-        "description": [
-          "\nA visualization type definition representing a spec of one specific type of \"classical\"\nvisualizations (i.e. not Lens visualizations)."
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.name",
-            "type": "string",
-            "label": "name",
-            "description": [
-              "\nVisualization unique name"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 83,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L83"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.title",
-            "type": "string",
-            "label": "title",
-            "description": [
-              "\nIt is the displayed text on the wizard and the vis listing"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 87,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L87"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.description",
-            "type": "string",
-            "label": "description",
-            "description": [
-              "\nIf given, it will be diplayed on the wizard vis card as the main description."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 91,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L91"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.note",
-            "type": "string",
-            "label": "note",
-            "description": [
-              "\nIf given, it will be diplayed on the wizard vis card as a note in italic."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 95,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L95"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.getSupportedTriggers",
-            "type": "Function",
-            "label": "getSupportedTriggers",
-            "description": [
-              "\nIf given, it will return the supported triggers for this vis."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 99,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L99"
-            },
-            "signature": [
-              "(() => string[]) | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.getUsedIndexPattern",
-            "type": "Function",
-            "label": "getUsedIndexPattern",
-            "description": [
-              "\nSome visualizations are created without SearchSource and may change the used indexes during the visualization configuration.\nUsing this method we can rewrite the standard mechanism for getting used indexes"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L105"
-            },
-            "signature": [
-              "((visParams: ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.VisParams",
-                "text": "VisParams"
-              },
-              ") => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              },
-              "[] | Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              },
-              "[]>) | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.isAccessible",
-            "type": "CompoundType",
-            "label": "isAccessible",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L107"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.icon",
-            "type": "CompoundType",
-            "label": "icon",
-            "description": [
-              "\nIt is the visualization icon, displayed on the wizard."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L111"
-            },
-            "signature": [
-              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.image",
-            "type": "string",
-            "label": "image",
-            "description": [
-              "\nExcept from an icon, an image can be passed"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 115,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L115"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "default"
-            ],
-            "id": "def-public.VisTypeDefinition.stage",
-            "type": "CompoundType",
-            "label": "stage",
-            "description": [
-              "\nDescribes the visualization stage"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 120,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L120"
-            },
-            "signature": [
-              "\"experimental\" | \"beta\" | \"production\" | undefined"
-            ]
-          },
-          {
-            "tags": [
-              "default"
-            ],
-            "id": "def-public.VisTypeDefinition.group",
-            "type": "CompoundType",
-            "label": "group",
-            "description": [
-              "\nDescribes the experience group that the visualization belongs.\nIt can be on tools, aggregation based or promoted group."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 126,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L126"
-            },
-            "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisGroups",
-                "text": "VisGroups"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.titleInWizard",
-            "type": "string",
-            "label": "titleInWizard",
-            "description": [
-              "\nIf given, it will be displayed on the wizard instead of the title.\nWe use it because we want to differentiate the vis title from the\nway it is presented on the wizard"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L132"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.requiresSearch",
-            "type": "CompoundType",
-            "label": "requiresSearch",
-            "description": [
-              "\nThe flag is necessary for aggregation based visualizations.\nWhen \"true\", an additional step on the vis creation wizard will be provided\nwith the selection of a search source - an index pattern or a saved search."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 138,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L138"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.hierarchicalData",
-            "type": "CompoundType",
-            "label": "hierarchicalData",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 139,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L139"
-            },
-            "signature": [
-              "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.inspectorAdapters",
-            "type": "CompoundType",
-            "label": "inspectorAdapters",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 140,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L140"
-            },
-            "signature": [
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              " | (() => ",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ") | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.getInfoMessage",
-            "type": "Function",
-            "label": "getInfoMessage",
-            "description": [
-              "\nWhen specified this visualization is deprecated. This function\nshould return a ReactElement that will render a deprecation warning.\nIt will be shown in the editor when editing/creating visualizations\nof this type."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 147,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L147"
-            },
-            "signature": [
-              "((vis: ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.Vis",
-                "text": "Vis"
-              },
-              "<",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.VisParams",
-                "text": "VisParams"
-              },
-              ">) => React.ReactNode) | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.toExpressionAst",
-            "type": "Function",
-            "label": "toExpressionAst",
-            "description": [
-              "\nShould be provided to expand base visualization expression with\ncustom exprsesion chain, including render expression.\nExplicit renderer should be registered in expressions plugin to render your visualization."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 153,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L153"
-            },
-            "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisToExpressionAst",
-                "text": "VisToExpressionAst"
-              },
-              "<TVisParams>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.setup",
-            "type": "Function",
-            "label": "setup",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 155,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L155"
-            },
-            "signature": [
-              "((vis: ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.Vis",
-                "text": "Vis"
-              },
-              "<TVisParams>) => Promise<",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.Vis",
-                "text": "Vis"
-              },
-              "<TVisParams>>) | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.hidden",
-            "type": "CompoundType",
-            "label": "hidden",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 156,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L156"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.options",
-            "type": "Object",
-            "label": "options",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L158"
-            },
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.VisTypeOptions",
-                "text": "VisTypeOptions"
-              },
-              "> | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.editorConfig",
-            "type": "CompoundType",
-            "label": "editorConfig",
-            "description": [
-              "\nConfig for the default editor.\nCustom editor can be specified."
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 164,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L164"
-            },
-            "signature": [
-              "DefaultEditorConfig<TVisParams> | CustomEditorConfig"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisTypeDefinition.visConfig",
-            "type": "Object",
-            "label": "visConfig",
-            "description": [
-              "\nHave the \"defaults\" prop with default params for a visualization.\nTODO: ideally should have next type: { defaults: TVisParams } , but currently\nhave incosistencies in legacy visLib visualizations"
-            ],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 170,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L170"
-            },
-            "signature": [
-              "Record<string, any>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 79,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L79"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Schema",
-        "type": "Interface",
-        "label": "Schema",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Schema.aggFilter",
-            "type": "Array",
-            "label": "aggFilter",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L36"
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.group",
-            "type": "CompoundType",
-            "label": "group",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L37"
-            },
-            "signature": [
-              "node_modules/utility-types/dist/utility-types",
-              "$Values<Readonly<{ Buckets: \"buckets\"; Metrics: \"metrics\"; None: \"none\"; }>>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.max",
-            "type": "number",
-            "label": "max",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L38"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.min",
-            "type": "number",
-            "label": "min",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L39"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L40"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.params",
-            "type": "Array",
-            "label": "params",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L41"
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 35
             },
             "signature": [
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggParam",
-                "text": "AggParam"
+                "section": "def-common.SearchSourceFields",
+                "text": "SearchSourceFields"
               },
-              "[]"
+              " | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.Schema.title",
+            "id": "def-public.ISavedVis.uiStateJSON",
             "type": "string",
-            "label": "title",
+            "label": "uiStateJSON",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L42"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.defaults",
-            "type": "Unknown",
-            "label": "defaults",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L43"
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 36
             },
             "signature": [
-              "unknown"
+              "string | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.Schema.hideCustomLabel",
-            "type": "CompoundType",
-            "label": "hideCustomLabel",
+            "id": "def-public.ISavedVis.savedSearchRefName",
+            "type": "string",
+            "label": "savedSearchRefName",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L44"
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 37
             },
             "signature": [
-              "boolean | undefined"
+              "string | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.Schema.mustBeFirst",
-            "type": "CompoundType",
-            "label": "mustBeFirst",
+            "id": "def-public.ISavedVis.savedSearchId",
+            "type": "string",
+            "label": "savedSearchId",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L45"
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 38
             },
             "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.aggSettings",
-            "type": "Any",
-            "label": "aggSettings",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L46"
-            },
-            "signature": [
-              "any"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.disabled",
-            "type": "CompoundType",
-            "label": "disabled",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L47"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Schema.tooltip",
-            "type": "CompoundType",
-            "label": "tooltip",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L48"
-            },
-            "signature": [
-              "React.ReactNode"
+              "string | undefined"
             ]
           }
         ],
         "source": {
-          "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L35"
+          "path": "src/plugins/visualizations/public/types.ts",
+          "lineNumber": 30
         },
         "initialIsOpen": false
       },
@@ -1725,8 +955,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L30"
+              "lineNumber": 30
             },
             "signature": [
               {
@@ -1747,8 +976,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L31"
+              "lineNumber": 31
             },
             "signature": [
               {
@@ -1769,8 +997,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L32"
+              "lineNumber": 32
             },
             "signature": [
               {
@@ -1786,8 +1013,379 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L29"
+          "lineNumber": 29
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedVisState",
+        "type": "Interface",
+        "label": "SavedVisState",
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.SavedVisState",
+            "text": "SavedVisState"
+          },
+          "<TVisParams>"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedVisState.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/common/types.ts",
+              "lineNumber": 17
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedVisState.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/common/types.ts",
+              "lineNumber": 18
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedVisState.params",
+            "type": "Uncategorized",
+            "label": "params",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/common/types.ts",
+              "lineNumber": 19
+            },
+            "signature": [
+              "TVisParams"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedVisState.aggs",
+            "type": "Array",
+            "label": "aggs",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/common/types.ts",
+              "lineNumber": 20
+            },
+            "signature": [
+              "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IAggType",
+                "text": "IAggType"
+              },
+              "; }, \"type\"> & Pick<{ type: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IAggType",
+                "text": "IAggType"
+              },
+              "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualizations/common/types.ts",
+          "lineNumber": 16
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Schema",
+        "type": "Interface",
+        "label": "Schema",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Schema.aggFilter",
+            "type": "Array",
+            "label": "aggFilter",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.group",
+            "type": "CompoundType",
+            "label": "group",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 37
+            },
+            "signature": [
+              "node_modules/utility-types/dist/utility-types",
+              "$Values<Readonly<{ Buckets: \"buckets\"; Metrics: \"metrics\"; None: \"none\"; }>>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.max",
+            "type": "number",
+            "label": "max",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 38
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.min",
+            "type": "number",
+            "label": "min",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 39
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 40
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.params",
+            "type": "Array",
+            "label": "params",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 41
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParam",
+                "text": "AggParam"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 42
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.defaults",
+            "type": "Unknown",
+            "label": "defaults",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 43
+            },
+            "signature": [
+              "unknown"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.hideCustomLabel",
+            "type": "CompoundType",
+            "label": "hideCustomLabel",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 44
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.mustBeFirst",
+            "type": "CompoundType",
+            "label": "mustBeFirst",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 45
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.aggSettings",
+            "type": "Any",
+            "label": "aggSettings",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 46
+            },
+            "signature": [
+              "any"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.disabled",
+            "type": "CompoundType",
+            "label": "disabled",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 47
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Schema.tooltip",
+            "type": "CompoundType",
+            "label": "tooltip",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 48
+            },
+            "signature": [
+              "React.ReactNode"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualizations/public/vis_types/types.ts",
+          "lineNumber": 35
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SchemaConfig",
+        "type": "Interface",
+        "label": "SchemaConfig",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SchemaConfig.accessor",
+            "type": "number",
+            "label": "accessor",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_schemas.ts",
+              "lineNumber": 22
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SchemaConfig.label",
+            "type": "string",
+            "label": "label",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_schemas.ts",
+              "lineNumber": 23
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SchemaConfig.format",
+            "type": "Object",
+            "label": "format",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_schemas.ts",
+              "lineNumber": 24
+            },
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<Record<string, any>>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SchemaConfig.params",
+            "type": "Object",
+            "label": "params",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_schemas.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              "SchemaConfigParams"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SchemaConfig.aggType",
+            "type": "string",
+            "label": "aggType",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_schemas.ts",
+              "lineNumber": 26
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualizations/public/vis_schemas.ts",
+          "lineNumber": 21
         },
         "initialIsOpen": false
       },
@@ -1806,8 +1404,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L43"
+              "lineNumber": 43
             },
             "signature": [
               "string | undefined"
@@ -1821,8 +1418,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L44"
+              "lineNumber": 44
             }
           },
           {
@@ -1833,8 +1429,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L45"
+              "lineNumber": 45
             },
             "signature": [
               "string | undefined"
@@ -1848,8 +1443,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L46"
+              "lineNumber": 46
             }
           },
           {
@@ -1860,8 +1454,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L47"
+              "lineNumber": 47
             },
             "signature": [
               {
@@ -1881,8 +1474,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L48"
+              "lineNumber": 48
             },
             "signature": [
               "any"
@@ -1896,8 +1488,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L49"
+              "lineNumber": 49
             },
             "signature": [
               {
@@ -1912,8 +1503,7 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis.ts",
-          "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L42"
+          "lineNumber": 42
         },
         "initialIsOpen": false
       },
@@ -1932,8 +1522,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L36"
+              "lineNumber": 36
             },
             "signature": [
               "string | undefined"
@@ -1947,8 +1536,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L37"
+              "lineNumber": 37
             },
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
@@ -1986,8 +1574,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L38"
+              "lineNumber": 38
             },
             "signature": [
               {
@@ -2007,8 +1594,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L39"
+              "lineNumber": 39
             },
             "signature": [
               "string | undefined"
@@ -2017,8 +1603,7 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L35"
+          "lineNumber": 35
         },
         "initialIsOpen": false
       },
@@ -2037,8 +1622,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L53"
+              "lineNumber": 53
             },
             "signature": [
               "string | undefined"
@@ -2052,8 +1636,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L54"
+              "lineNumber": 54
             },
             "signature": [
               {
@@ -2074,8 +1657,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L55"
+              "lineNumber": 55
             },
             "signature": [
               {
@@ -2096,8 +1678,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L56"
+              "lineNumber": 56
             },
             "signature": [
               "Pick<",
@@ -2119,8 +1700,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L57"
+              "lineNumber": 57
             },
             "signature": [
               "string | undefined"
@@ -2129,391 +1709,267 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis.ts",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis.ts#L52"
+          "lineNumber": 52
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.VisualizeInput",
+        "id": "def-public.VisEditorOptionsProps",
         "type": "Interface",
-        "label": "VisualizeInput",
+        "label": "VisEditorOptionsProps",
         "signature": [
           {
             "pluginId": "visualizations",
             "scope": "public",
             "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
+            "section": "def-public.VisEditorOptionsProps",
+            "text": "VisEditorOptionsProps"
           },
-          " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          }
+          "<VisParamType>"
         ],
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.VisualizeInput.vis",
+            "id": "def-public.VisEditorOptionsProps.aggs",
             "type": "Object",
-            "label": "vis",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/visualize_embeddable.ts#L58"
-            },
-            "signature": [
-              "{ colors?: { [key: string]: string; } | undefined; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisualizeInput.savedVis",
-            "type": "Object",
-            "label": "savedVis",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/visualize_embeddable.ts#L61"
-            },
-            "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.SerializedVis",
-                "text": "SerializedVis"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisualizeInput.table",
-            "type": "Unknown",
-            "label": "table",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/visualize_embeddable.ts#L62"
-            },
-            "signature": [
-              "unknown"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisualizeInput.query",
-            "type": "Object",
-            "label": "query",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/visualize_embeddable.ts#L63"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisualizeInput.filters",
-            "type": "Array",
-            "label": "filters",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/visualize_embeddable.ts#L64"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisualizeInput.timeRange",
-            "type": "Object",
-            "label": "timeRange",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/visualize_embeddable.ts#L65"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
-          "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/visualize_embeddable.ts#L57"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SchemaConfig",
-        "type": "Interface",
-        "label": "SchemaConfig",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SchemaConfig.accessor",
-            "type": "number",
-            "label": "accessor",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L22"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SchemaConfig.label",
-            "type": "string",
-            "label": "label",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L23"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SchemaConfig.format",
-            "type": "Object",
-            "label": "format",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L24"
-            },
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<Record<string, any>>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SchemaConfig.params",
-            "type": "Object",
-            "label": "params",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L25"
-            },
-            "signature": [
-              "SchemaConfigParams"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SchemaConfig.aggType",
-            "type": "string",
-            "label": "aggType",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/vis_schemas.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L26"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/public/vis_schemas.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_schemas.ts#L21"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ISavedVis",
-        "type": "Interface",
-        "label": "ISavedVis",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ISavedVis.id",
-            "type": "string",
-            "label": "id",
+            "label": "aggs",
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L31"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ISavedVis.title",
-            "type": "string",
-            "label": "title",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L32"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ISavedVis.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L33"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ISavedVis.visState",
-            "type": "Object",
-            "label": "visState",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L34"
-            },
-            "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.SavedVisState",
-                "text": "SavedVisState"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ISavedVis.searchSourceFields",
-            "type": "Object",
-            "label": "searchSourceFields",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L35"
+              "lineNumber": 55
             },
             "signature": [
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
+                "section": "def-common.AggConfigs",
+                "text": "AggConfigs"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisEditorOptionsProps.hasHistogramAgg",
+            "type": "boolean",
+            "label": "hasHistogramAgg",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 56
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisEditorOptionsProps.isTabSelected",
+            "type": "boolean",
+            "label": "isTabSelected",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 57
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisEditorOptionsProps.stateParams",
+            "type": "Uncategorized",
+            "label": "stateParams",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 58
+            },
+            "signature": [
+              "VisParamType"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisEditorOptionsProps.vis",
+            "type": "Object",
+            "label": "vis",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 59
+            },
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
               },
-              " | undefined"
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ">"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.ISavedVis.uiStateJSON",
-            "type": "string",
-            "label": "uiStateJSON",
+            "id": "def-public.VisEditorOptionsProps.uiState",
+            "type": "Object",
+            "label": "uiState",
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L36"
+              "lineNumber": 60
             },
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.PersistedState",
+                "text": "PersistedState"
+              }
             ]
           },
           {
-            "tags": [],
-            "id": "def-public.ISavedVis.savedSearchRefName",
-            "type": "string",
-            "label": "savedSearchRefName",
+            "id": "def-public.VisEditorOptionsProps.setValue",
+            "type": "Function",
+            "label": "setValue",
+            "signature": [
+              "<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]) => void"
+            ],
             "description": [],
+            "children": [
+              {
+                "type": "Uncategorized",
+                "label": "paramName",
+                "isRequired": true,
+                "signature": [
+                  "T"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/types.ts",
+                  "lineNumber": 61
+                }
+              },
+              {
+                "type": "Uncategorized",
+                "label": "value",
+                "isRequired": true,
+                "signature": [
+                  "VisParamType[T]"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/types.ts",
+                  "lineNumber": 61
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
             "source": {
               "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L37"
-            },
-            "signature": [
-              "string | undefined"
-            ]
+              "lineNumber": 61
+            }
           },
           {
-            "tags": [],
-            "id": "def-public.ISavedVis.savedSearchId",
-            "type": "string",
-            "label": "savedSearchId",
+            "id": "def-public.VisEditorOptionsProps.setValidity",
+            "type": "Function",
+            "label": "setValidity",
+            "signature": [
+              "(isValid: boolean) => void"
+            ],
             "description": [],
+            "children": [
+              {
+                "type": "boolean",
+                "label": "isValid",
+                "isRequired": true,
+                "signature": [
+                  "boolean"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/types.ts",
+                  "lineNumber": 62
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
             "source": {
               "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L38"
-            },
+              "lineNumber": 62
+            }
+          },
+          {
+            "id": "def-public.VisEditorOptionsProps.setTouched",
+            "type": "Function",
+            "label": "setTouched",
             "signature": [
-              "string | undefined"
-            ]
+              "(isTouched: boolean) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "boolean",
+                "label": "isTouched",
+                "isRequired": true,
+                "signature": [
+                  "boolean"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualizations/public/types.ts",
+                  "lineNumber": 63
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/types.ts",
+              "lineNumber": 63
+            }
           }
         ],
         "source": {
           "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L30"
+          "lineNumber": 54
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.VisParams",
+        "type": "Interface",
+        "label": "VisParams",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-public.VisParams.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/common/types.ts",
+              "lineNumber": 13
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualizations/common/types.ts",
+          "lineNumber": 12
         },
         "initialIsOpen": false
       },
@@ -2551,8 +2007,7 @@
         "children": [],
         "source": {
           "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 41,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L41"
+          "lineNumber": 41
         },
         "initialIsOpen": false
       },
@@ -2571,8 +2026,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L44"
+              "lineNumber": 44
             },
             "signature": [
               "Pick<",
@@ -2594,8 +2048,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L45"
+              "lineNumber": 45
             },
             "signature": [
               "any"
@@ -2609,8 +2062,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L46"
+              "lineNumber": 46
             },
             "signature": [
               "AbortSignal | undefined"
@@ -2619,100 +2071,485 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L43"
+          "lineNumber": 43
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.VisEditorOptionsProps",
+        "id": "def-public.VisTypeAlias",
         "type": "Interface",
-        "label": "VisEditorOptionsProps",
-        "signature": [
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisEditorOptionsProps",
-            "text": "VisEditorOptionsProps"
-          },
-          "<VisParamType>"
-        ],
+        "label": "VisTypeAlias",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.VisEditorOptionsProps.aggs",
-            "type": "Object",
-            "label": "aggs",
+            "id": "def-public.VisTypeAlias.aliasPath",
+            "type": "string",
+            "label": "aliasPath",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L55"
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 35
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.aliasApp",
+            "type": "string",
+            "label": "aliasApp",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 36
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 37
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 38
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.icon",
+            "type": "string",
+            "label": "icon",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 39
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.promotion",
+            "type": "CompoundType",
+            "label": "promotion",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 40
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 41
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.note",
+            "type": "string",
+            "label": "note",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 42
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.getSupportedTriggers",
+            "type": "Function",
+            "label": "getSupportedTriggers",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 43
+            },
+            "signature": [
+              "(() => string[]) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeAlias.stage",
+            "type": "CompoundType",
+            "label": "stage",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 44
             },
             "signature": [
               {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggConfigs",
-                "text": "AggConfigs"
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisualizationStage",
+                "text": "VisualizationStage"
               }
             ]
           },
           {
             "tags": [],
-            "id": "def-public.VisEditorOptionsProps.hasHistogramAgg",
-            "type": "boolean",
-            "label": "hasHistogramAgg",
+            "id": "def-public.VisTypeAlias.appExtensions",
+            "type": "Object",
+            "label": "appExtensions",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L56"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisEditorOptionsProps.isTabSelected",
-            "type": "boolean",
-            "label": "isTabSelected",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L57"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.VisEditorOptionsProps.stateParams",
-            "type": "Uncategorized",
-            "label": "stateParams",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L58"
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 46
             },
             "signature": [
-              "VisParamType"
+              "{ [appName: string]: unknown; visualizations: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisualizationsAppExtension",
+                "text": "VisualizationsAppExtension"
+              },
+              "; } | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+          "lineNumber": 34
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.VisTypeDefinition",
+        "type": "Interface",
+        "label": "VisTypeDefinition",
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisTypeDefinition",
+            "text": "VisTypeDefinition"
+          },
+          "<TVisParams>"
+        ],
+        "description": [
+          "\nA visualization type definition representing a spec of one specific type of \"classical\"\nvisualizations (i.e. not Lens visualizations)."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.name",
+            "type": "string",
+            "label": "name",
+            "description": [
+              "\nVisualization unique name"
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 83
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.title",
+            "type": "string",
+            "label": "title",
+            "description": [
+              "\nIt is the displayed text on the wizard and the vis listing"
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 87
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.description",
+            "type": "string",
+            "label": "description",
+            "description": [
+              "\nIf given, it will be diplayed on the wizard vis card as the main description."
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 91
+            },
+            "signature": [
+              "string | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.VisEditorOptionsProps.vis",
-            "type": "Object",
-            "label": "vis",
-            "description": [],
+            "id": "def-public.VisTypeDefinition.note",
+            "type": "string",
+            "label": "note",
+            "description": [
+              "\nIf given, it will be diplayed on the wizard vis card as a note in italic."
+            ],
             "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L59"
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 95
             },
             "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.getSupportedTriggers",
+            "type": "Function",
+            "label": "getSupportedTriggers",
+            "description": [
+              "\nIf given, it will return the supported triggers for this vis."
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 99
+            },
+            "signature": [
+              "(() => string[]) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.getUsedIndexPattern",
+            "type": "Function",
+            "label": "getUsedIndexPattern",
+            "description": [
+              "\nSome visualizations are created without SearchSource and may change the used indexes during the visualization configuration.\nUsing this method we can rewrite the standard mechanism for getting used indexes"
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 105
+            },
+            "signature": [
+              "((visParams: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              },
+              "[] | Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              },
+              "[]>) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.isAccessible",
+            "type": "CompoundType",
+            "label": "isAccessible",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 107
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.icon",
+            "type": "CompoundType",
+            "label": "icon",
+            "description": [
+              "\nIt is the visualization icon, displayed on the wizard."
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 111
+            },
+            "signature": [
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.image",
+            "type": "string",
+            "label": "image",
+            "description": [
+              "\nExcept from an icon, an image can be passed"
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 115
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [
+              "default"
+            ],
+            "id": "def-public.VisTypeDefinition.stage",
+            "type": "CompoundType",
+            "label": "stage",
+            "description": [
+              "\nDescribes the visualization stage"
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 120
+            },
+            "signature": [
+              "\"experimental\" | \"beta\" | \"production\" | undefined"
+            ]
+          },
+          {
+            "tags": [
+              "default"
+            ],
+            "id": "def-public.VisTypeDefinition.group",
+            "type": "CompoundType",
+            "label": "group",
+            "description": [
+              "\nDescribes the experience group that the visualization belongs.\nIt can be on tools, aggregation based or promoted group."
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 126
+            },
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisGroups",
+                "text": "VisGroups"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.titleInWizard",
+            "type": "string",
+            "label": "titleInWizard",
+            "description": [
+              "\nIf given, it will be displayed on the wizard instead of the title.\nWe use it because we want to differentiate the vis title from the\nway it is presented on the wizard"
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 132
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.requiresSearch",
+            "type": "CompoundType",
+            "label": "requiresSearch",
+            "description": [
+              "\nThe flag is necessary for aggregation based visualizations.\nWhen \"true\", an additional step on the vis creation wizard will be provided\nwith the selection of a search source - an index pattern or a saved search."
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 138
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.hierarchicalData",
+            "type": "CompoundType",
+            "label": "hierarchicalData",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 139
+            },
+            "signature": [
+              "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.inspectorAdapters",
+            "type": "CompoundType",
+            "label": "inspectorAdapters",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 140
+            },
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              " | (() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ") | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.getInfoMessage",
+            "type": "Function",
+            "label": "getInfoMessage",
+            "description": [
+              "\nWhen specified this visualization is deprecated. This function\nshould return a ReactElement that will render a deprecation warning.\nIt will be shown in the editor when editing/creating visualizations\nof this type."
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 147
+            },
+            "signature": [
+              "((vis: ",
               {
                 "pluginId": "visualizations",
                 "scope": "public",
@@ -2728,145 +2565,134 @@
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
-              ">"
+              ">) => React.ReactNode) | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.VisEditorOptionsProps.uiState",
-            "type": "Object",
-            "label": "uiState",
-            "description": [],
+            "id": "def-public.VisTypeDefinition.toExpressionAst",
+            "type": "Function",
+            "label": "toExpressionAst",
+            "description": [
+              "\nShould be provided to expand base visualization expression with\ncustom exprsesion chain, including render expression.\nExplicit renderer should be registered in expressions plugin to render your visualization."
+            ],
             "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L60"
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 153
             },
             "signature": [
               {
                 "pluginId": "visualizations",
                 "scope": "public",
                 "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.PersistedState",
-                "text": "PersistedState"
-              }
+                "section": "def-public.VisToExpressionAst",
+                "text": "VisToExpressionAst"
+              },
+              "<TVisParams>"
             ]
           },
           {
-            "id": "def-public.VisEditorOptionsProps.setValue",
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.setup",
             "type": "Function",
-            "label": "setValue",
-            "signature": [
-              "<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]) => void"
-            ],
+            "label": "setup",
             "description": [],
-            "children": [
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 155
+            },
+            "signature": [
+              "((vis: ",
               {
-                "type": "Uncategorized",
-                "label": "paramName",
-                "isRequired": true,
-                "signature": [
-                  "T"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 61,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L61"
-                }
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
               },
+              "<TVisParams>) => Promise<",
               {
-                "type": "Uncategorized",
-                "label": "value",
-                "isRequired": true,
-                "signature": [
-                  "VisParamType[T]"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 61,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L61"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L61"
-            }
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
+              },
+              "<TVisParams>>) | undefined"
+            ]
           },
           {
-            "id": "def-public.VisEditorOptionsProps.setValidity",
-            "type": "Function",
-            "label": "setValidity",
-            "signature": [
-              "(isValid: boolean) => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "boolean",
-                "label": "isValid",
-                "isRequired": true,
-                "signature": [
-                  "boolean"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 62,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L62"
-                }
-              }
-            ],
             "tags": [],
-            "returnComment": [],
+            "id": "def-public.VisTypeDefinition.hidden",
+            "type": "CompoundType",
+            "label": "hidden",
+            "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L62"
-            }
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 156
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
           },
           {
-            "id": "def-public.VisEditorOptionsProps.setTouched",
-            "type": "Function",
-            "label": "setTouched",
-            "signature": [
-              "(isTouched: boolean) => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "boolean",
-                "label": "isTouched",
-                "isRequired": true,
-                "signature": [
-                  "boolean"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/visualizations/public/types.ts",
-                  "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L63"
-                }
-              }
-            ],
             "tags": [],
-            "returnComment": [],
+            "id": "def-public.VisTypeDefinition.options",
+            "type": "Object",
+            "label": "options",
+            "description": [],
             "source": {
-              "path": "src/plugins/visualizations/public/types.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L63"
-            }
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 158
+            },
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisTypeOptions",
+                "text": "VisTypeOptions"
+              },
+              "> | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.editorConfig",
+            "type": "CompoundType",
+            "label": "editorConfig",
+            "description": [
+              "\nConfig for the default editor.\nCustom editor can be specified."
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 164
+            },
+            "signature": [
+              "DefaultEditorConfig<TVisParams> | CustomEditorConfig"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisTypeDefinition.visConfig",
+            "type": "Object",
+            "label": "visConfig",
+            "description": [
+              "\nHave the \"defaults\" prop with default params for a visualization.\nTODO: ideally should have next type: { defaults: TVisParams } , but currently\nhave incosistencies in legacy visLib visualizations"
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/types.ts",
+              "lineNumber": 170
+            },
+            "signature": [
+              "Record<string, any>"
+            ]
           }
         ],
         "source": {
-          "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L54"
+          "path": "src/plugins/visualizations/public/vis_types/types.ts",
+          "lineNumber": 79
         },
         "initialIsOpen": false
       },
@@ -2885,8 +2711,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L14"
+              "lineNumber": 14
             }
           },
           {
@@ -2897,8 +2722,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L15"
+              "lineNumber": 15
             },
             "signature": [
               "string | undefined"
@@ -2912,8 +2736,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L16"
+              "lineNumber": 16
             },
             "signature": [
               "string | undefined"
@@ -2927,8 +2750,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L17"
+              "lineNumber": 17
             }
           },
           {
@@ -2939,8 +2761,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L18"
+              "lineNumber": 18
             }
           },
           {
@@ -2951,8 +2772,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L19"
+              "lineNumber": 19
             },
             "signature": [
               {
@@ -2972,8 +2792,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L20"
+              "lineNumber": 20
             }
           },
           {
@@ -2984,8 +2803,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L21"
+              "lineNumber": 21
             }
           },
           {
@@ -2996,8 +2814,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L22"
+              "lineNumber": 22
             },
             "signature": [
               "string | undefined"
@@ -3011,8 +2828,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L23"
+              "lineNumber": 23
             },
             "signature": [
               "(() => string[]) | undefined"
@@ -3026,8 +2842,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L24"
+              "lineNumber": 24
             }
           },
           {
@@ -3038,8 +2853,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               "string | undefined"
@@ -3048,141 +2862,150 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L13"
+          "lineNumber": 13
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.SavedVisState",
+        "id": "def-public.VisualizeInput",
         "type": "Interface",
-        "label": "SavedVisState",
+        "label": "VisualizeInput",
         "signature": [
           {
             "pluginId": "visualizations",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.SavedVisState",
-            "text": "SavedVisState"
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
           },
-          "<TVisParams>"
+          " extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          }
         ],
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.SavedVisState.title",
-            "type": "string",
-            "label": "title",
+            "id": "def-public.VisualizeInput.vis",
+            "type": "Object",
+            "label": "vis",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L17"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedVisState.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L18"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedVisState.params",
-            "type": "Uncategorized",
-            "label": "params",
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L19"
+              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+              "lineNumber": 58
             },
             "signature": [
-              "TVisParams"
+              "{ colors?: { [key: string]: string; } | undefined; } | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.SavedVisState.aggs",
+            "id": "def-public.VisualizeInput.savedVis",
+            "type": "Object",
+            "label": "savedVis",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+              "lineNumber": 61
+            },
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.SerializedVis",
+                "text": "SerializedVis"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeInput.table",
+            "type": "Unknown",
+            "label": "table",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+              "lineNumber": 62
+            },
+            "signature": [
+              "unknown"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeInput.query",
+            "type": "Object",
+            "label": "query",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+              "lineNumber": 63
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeInput.filters",
             "type": "Array",
-            "label": "aggs",
+            "label": "filters",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L20"
+              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+              "lineNumber": 64
             },
             "signature": [
-              "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializableState",
-                "text": "SerializableState"
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
               },
-              " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAggType",
-                "text": "IAggType"
-              },
-              "; }, \"type\"> & Pick<{ type: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAggType",
-                "text": "IAggType"
-              },
-              "; }, never>, \"type\" | \"enabled\" | \"id\" | \"schema\" | \"params\">[]"
+              "[] | undefined"
             ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L16"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.VisParams",
-        "type": "Interface",
-        "label": "VisParams",
-        "description": [],
-        "tags": [],
-        "children": [
+          },
           {
-            "id": "def-public.VisParams.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
             "tags": [],
+            "id": "def-public.VisualizeInput.timeRange",
+            "type": "Object",
+            "label": "timeRange",
             "description": [],
             "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L13"
+              "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+              "lineNumber": 65
             },
             "signature": [
-              "any"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
             ]
           }
         ],
         "source": {
-          "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L12"
+          "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.ts",
+          "lineNumber": 57
         },
         "initialIsOpen": false
       }
@@ -3196,136 +3019,24 @@
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/types.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/types.ts#L23"
+          "lineNumber": 23
         },
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
-        "tags": [],
-        "id": "def-public.VISUALIZE_EMBEDDABLE_TYPE",
-        "type": "string",
-        "label": "VISUALIZE_EMBEDDABLE_TYPE",
-        "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/embeddable/constants.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/constants.ts#L9"
-        },
-        "signature": [
-          "\"visualization\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.VisualizeEmbeddableFactoryContract",
+        "id": "def-public.ExpressionValueVisDimension",
         "type": "Type",
-        "label": "VisualizeEmbeddableFactoryContract",
+        "label": "ExpressionValueVisDimension",
         "tags": [],
         "description": [],
         "source": {
-          "path": "src/plugins/visualizations/public/index.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/index.ts#L30"
+          "path": "src/plugins/visualizations/public/expression_functions/vis_dimension.ts",
+          "lineNumber": 23
         },
         "signature": [
-          "{ readonly type: \"visualization\"; create: (input: ",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          " & { savedVis?: ",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.SerializedVis",
-            "text": "SerializedVis"
-          },
-          " | undefined; }, parent?: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
-          },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.VisualizeEmbeddableContract",
-        "type": "Type",
-        "label": "VisualizeEmbeddableContract",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/visualizations/public/index.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/index.ts#L31"
-        },
-        "signature": [
-          "{ readonly type: \"visualization\"; readonly id: string; destroy: () => void; readonly parent?: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IContainer",
-            "text": "IContainer"
-          },
-          "<{}, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerInput",
-            "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
-          },
-          "> | undefined; render: (domNode: HTMLElement) => Promise<void>; getDescription: () => string; getInspectorAdapters: () => ",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          " | undefined; openInspector: () => ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          }
+          "{ type: \"vis_dimension\"; } & { accessor: number | DatatableColumn; format: {    id?: string;    params: Record<string, any>;}; }"
         ],
         "initialIsOpen": false
       },
@@ -3337,8 +3048,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/types.ts",
-          "lineNumber": 49,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/types.ts#L49"
+          "lineNumber": 49
         },
         "signature": [
           "(vis: ",
@@ -3385,11 +3095,25 @@
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts#L11"
+          "lineNumber": 11
         },
         "signature": [
           "\"experimental\" | \"beta\" | \"production\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.VISUALIZE_EMBEDDABLE_TYPE",
+        "type": "string",
+        "label": "VISUALIZE_EMBEDDABLE_TYPE",
+        "description": [],
+        "source": {
+          "path": "src/plugins/visualizations/public/embeddable/constants.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"visualization\""
         ],
         "initialIsOpen": false
       },
@@ -3401,8 +3125,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/common/constants.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/constants.ts#L9"
+          "lineNumber": 9
         },
         "signature": [
           "\"visualize:enableLabs\""
@@ -3410,18 +3133,110 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-public.ExpressionValueVisDimension",
+        "id": "def-public.VisualizeEmbeddableContract",
         "type": "Type",
-        "label": "ExpressionValueVisDimension",
+        "label": "VisualizeEmbeddableContract",
         "tags": [],
         "description": [],
         "source": {
-          "path": "src/plugins/visualizations/public/expression_functions/vis_dimension.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/expression_functions/vis_dimension.ts#L23"
+          "path": "src/plugins/visualizations/public/index.ts",
+          "lineNumber": 31
         },
         "signature": [
-          "{ type: \"vis_dimension\"; } & { accessor: number | DatatableColumn; format: {    id?: string;    params: Record<string, any>;}; }"
+          "{ readonly type: \"visualization\"; readonly id: string; destroy: () => void; readonly parent?: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IContainer",
+            "text": "IContainer"
+          },
+          "<{}, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerInput",
+            "text": "ContainerInput"
+          },
+          "<{}>, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerOutput",
+            "text": "ContainerOutput"
+          },
+          "> | undefined; render: (domNode: HTMLElement) => Promise<void>; getDescription: () => string; getInspectorAdapters: () => ",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          " | undefined; openInspector: () => ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.OverlayRef",
+            "text": "OverlayRef"
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.VisualizeEmbeddableFactoryContract",
+        "type": "Type",
+        "label": "VisualizeEmbeddableFactoryContract",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/visualizations/public/index.ts",
+          "lineNumber": 30
+        },
+        "signature": [
+          "{ readonly type: \"visualization\"; create: (input: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          " & { savedVis?: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.SerializedVis",
+            "text": "SerializedVis"
+          },
+          " | undefined; }, parent?: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IContainer",
+            "text": "IContainer"
+          },
+          "<{}, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerInput",
+            "text": "ContainerInput"
+          },
+          "<{}>, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ContainerOutput",
+            "text": "ContainerOutput"
+          }
         ],
         "initialIsOpen": false
       }
@@ -3440,8 +3255,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/embeddable/events.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/events.ts#L21"
+              "lineNumber": 21
             },
             "signature": [
               "\"FILTER_TRIGGER\""
@@ -3455,8 +3269,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/embeddable/events.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/events.ts#L22"
+              "lineNumber": 22
             },
             "signature": [
               "\"SELECT_RANGE_TRIGGER\""
@@ -3470,8 +3283,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/embeddable/events.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/events.ts#L23"
+              "lineNumber": 23
             },
             "signature": [
               "\"VALUE_CLICK_TRIGGER\""
@@ -3485,8 +3297,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/embeddable/events.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/events.ts#L24"
+              "lineNumber": 24
             },
             "signature": [
               "\"ROW_CLICK_TRIGGER\""
@@ -3497,8 +3308,7 @@
         "label": "VIS_EVENT_TO_TRIGGER",
         "source": {
           "path": "src/plugins/visualizations/public/embeddable/events.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/embeddable/events.ts#L20"
+          "lineNumber": 20
         },
         "initialIsOpen": false
       }
@@ -3515,8 +3325,7 @@
       ],
       "source": {
         "path": "src/plugins/visualizations/public/plugin.ts",
-        "lineNumber": 74,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/plugin.ts#L74"
+        "lineNumber": 74
       },
       "signature": [
         "{ createBaseVisualization: <TVisParams>(config: ",
@@ -3584,8 +3393,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 77,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/plugin.ts#L77"
+            "lineNumber": 77
           },
           "signature": [
             {
@@ -3614,8 +3422,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 78,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/plugin.ts#L78"
+            "lineNumber": 78
           },
           "signature": [
             "(visType: string, visState: ",
@@ -3653,8 +3460,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 79,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/plugin.ts#L79"
+            "lineNumber": 79
           },
           "signature": [
             "(savedVis: ",
@@ -3683,8 +3489,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 80,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/plugin.ts#L80"
+            "lineNumber": 80
           },
           "signature": [
             "(vis: ",
@@ -3713,8 +3518,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 81,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/plugin.ts#L81"
+            "lineNumber": 81
           },
           "signature": [
             "typeof ",
@@ -3735,8 +3539,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/visualizations/public/plugin.ts",
-            "lineNumber": 82,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/plugin.ts#L82"
+            "lineNumber": 82
           },
           "signature": [
             "{ createVisEmbeddableFromObject: (vis: ",
@@ -3784,8 +3587,7 @@
       ],
       "source": {
         "path": "src/plugins/visualizations/public/plugin.ts",
-        "lineNumber": 76,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/public/plugin.ts#L76"
+        "lineNumber": 76
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -3803,36 +3605,6 @@
     "classes": [],
     "functions": [],
     "interfaces": [
-      {
-        "id": "def-common.VisParams",
-        "type": "Interface",
-        "label": "VisParams",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-common.VisParams.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L13"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L12"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-common.SavedVisState",
         "type": "Interface",
@@ -3858,8 +3630,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L17"
+              "lineNumber": 17
             }
           },
           {
@@ -3870,8 +3641,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L18"
+              "lineNumber": 18
             }
           },
           {
@@ -3882,8 +3652,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L19"
+              "lineNumber": 19
             },
             "signature": [
               "TVisParams"
@@ -3897,8 +3666,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
@@ -3931,8 +3699,35 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L16"
+          "lineNumber": 16
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.VisParams",
+        "type": "Interface",
+        "label": "VisParams",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-common.VisParams.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualizations/common/types.ts",
+              "lineNumber": 13
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualizations/common/types.ts",
+          "lineNumber": 12
         },
         "initialIsOpen": false
       },
@@ -3962,8 +3757,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L24"
+              "lineNumber": 24
             }
           },
           {
@@ -3974,8 +3768,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               "{ searchSourceJSON: string; }"
@@ -3989,8 +3782,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L28"
+              "lineNumber": 28
             }
           },
           {
@@ -4001,8 +3793,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L29"
+              "lineNumber": 29
             }
           },
           {
@@ -4013,8 +3804,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L30"
+              "lineNumber": 30
             }
           },
           {
@@ -4025,15 +3815,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/common/types.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L31"
+              "lineNumber": 31
             }
           }
         ],
         "source": {
           "path": "src/plugins/visualizations/common/types.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/visualizations/common/types.ts#L23"
+          "lineNumber": 23
         },
         "initialIsOpen": false
       }

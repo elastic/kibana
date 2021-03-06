@@ -29,8 +29,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/saved_searches.ts#L18"
+              "lineNumber": 18
             }
           }
         ],
@@ -38,75 +37,170 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/saved_searches.ts#L18"
+          "lineNumber": 18
         },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
-        "id": "def-public.SavedSearch",
+        "id": "def-public.DiscoverUrlGeneratorState",
         "type": "Interface",
-        "label": "SavedSearch",
+        "label": "DiscoverUrlGeneratorState",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.SavedSearch.id",
+            "id": "def-public.DiscoverUrlGeneratorState.savedSearchId",
             "type": "string",
-            "label": "id",
-            "description": [],
+            "label": "savedSearchId",
+            "description": [
+              "\nOptionally set saved search ID."
+            ],
             "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L15"
-            }
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 26
+            },
+            "signature": [
+              "string | undefined"
+            ]
           },
           {
             "tags": [],
-            "id": "def-public.SavedSearch.title",
+            "id": "def-public.DiscoverUrlGeneratorState.indexPatternId",
             "type": "string",
-            "label": "title",
-            "description": [],
+            "label": "indexPatternId",
+            "description": [
+              "\nOptionally set index pattern ID."
+            ],
             "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L16"
-            }
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 31
+            },
+            "signature": [
+              "string | undefined"
+            ]
           },
           {
             "tags": [],
-            "id": "def-public.SavedSearch.searchSource",
+            "id": "def-public.DiscoverUrlGeneratorState.timeRange",
             "type": "Object",
-            "label": "searchSource",
-            "description": [],
+            "label": "timeRange",
+            "description": [
+              "\nOptionally set the time range in the time picker."
+            ],
             "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L17"
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 36
             },
             "signature": [
               {
                 "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              }
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.SavedSearch.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
+            "id": "def-public.DiscoverUrlGeneratorState.refreshInterval",
+            "type": "Object",
+            "label": "refreshInterval",
+            "description": [
+              "\nOptionally set the refresh interval."
+            ],
             "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L18"
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 41
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DiscoverUrlGeneratorState.filters",
+            "type": "Array",
+            "label": "filters",
+            "description": [
+              "\nOptionally apply filters."
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 46
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DiscoverUrlGeneratorState.query",
+            "type": "Object",
+            "label": "query",
+            "description": [
+              "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 52
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DiscoverUrlGeneratorState.useHash",
+            "type": "CompoundType",
+            "label": "useHash",
+            "description": [
+              "\nIf not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines\nwhether to hash the data in the url to avoid url length issues."
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 58
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.DiscoverUrlGeneratorState.searchSessionId",
+            "type": "string",
+            "label": "searchSessionId",
+            "description": [
+              "\nBackground search session id"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 63
             },
             "signature": [
               "string | undefined"
@@ -114,110 +208,31 @@
           },
           {
             "tags": [],
-            "id": "def-public.SavedSearch.columns",
+            "id": "def-public.DiscoverUrlGeneratorState.columns",
             "type": "Array",
             "label": "columns",
-            "description": [],
+            "description": [
+              "\nColumns displayed in the table"
+            ],
             "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L19"
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 68
             },
             "signature": [
-              "string[]"
+              "string[] | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.SavedSearch.sort",
-            "type": "Array",
-            "label": "sort",
-            "description": [],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L20"
-            },
-            "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SortOrder",
-                "text": "SortOrder"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedSearch.grid",
-            "type": "Object",
-            "label": "grid",
-            "description": [],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L21"
-            },
-            "signature": [
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.DiscoverGridSettings",
-                "text": "DiscoverGridSettings"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedSearch.destroy",
-            "type": "Function",
-            "label": "destroy",
-            "description": [],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L22"
-            },
-            "signature": [
-              "() => void"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedSearch.save",
-            "type": "Function",
-            "label": "save",
-            "description": [],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L23"
-            },
-            "signature": [
-              "(saveOptions: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectSaveOpts",
-                "text": "SavedObjectSaveOpts"
-              },
-              ") => Promise<string>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedSearch.lastSavedTitle",
+            "id": "def-public.DiscoverUrlGeneratorState.interval",
             "type": "string",
-            "label": "lastSavedTitle",
-            "description": [],
+            "label": "interval",
+            "description": [
+              "\nUsed interval of the histogram"
+            ],
             "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L24"
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 73
             },
             "signature": [
               "string | undefined"
@@ -225,92 +240,40 @@
           },
           {
             "tags": [],
-            "id": "def-public.SavedSearch.copyOnSave",
-            "type": "CompoundType",
-            "label": "copyOnSave",
-            "description": [],
+            "id": "def-public.DiscoverUrlGeneratorState.sort",
+            "type": "Array",
+            "label": "sort",
+            "description": [
+              "\nArray of the used sorting [[field,direction],...]"
+            ],
             "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L25"
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 77
             },
             "signature": [
-              "boolean | undefined"
+              "string[][] | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.SavedSearch.hideChart",
-            "type": "CompoundType",
-            "label": "hideChart",
-            "description": [],
+            "id": "def-public.DiscoverUrlGeneratorState.savedQuery",
+            "type": "string",
+            "label": "savedQuery",
+            "description": [
+              "\nid of the used saved query"
+            ],
             "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L26"
+              "path": "src/plugins/discover/public/url_generator.ts",
+              "lineNumber": 81
             },
             "signature": [
-              "boolean | undefined"
+              "string | undefined"
             ]
           }
         ],
         "source": {
-          "path": "src/plugins/discover/public/saved_searches/types.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L14"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SavedSearchLoader",
-        "type": "Interface",
-        "label": "SavedSearchLoader",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SavedSearchLoader.get",
-            "type": "Function",
-            "label": "get",
-            "description": [],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L29"
-            },
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "discover",
-                "scope": "public",
-                "docId": "kibDiscoverPluginApi",
-                "section": "def-public.SavedSearch",
-                "text": "SavedSearch"
-              },
-              ">"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SavedSearchLoader.urlFor",
-            "type": "Function",
-            "label": "urlFor",
-            "description": [],
-            "source": {
-              "path": "src/plugins/discover/public/saved_searches/types.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L30"
-            },
-            "signature": [
-              "(id: string) => string"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/discover/public/saved_searches/types.ts",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/saved_searches/types.ts#L28"
+          "path": "src/plugins/discover/public/url_generator.ts",
+          "lineNumber": 22
         },
         "initialIsOpen": false
       },
@@ -369,15 +332,266 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L35"
+              "lineNumber": 35
             }
           }
         ],
         "source": {
           "path": "src/plugins/discover/public/application/embeddable/types.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L34"
+          "lineNumber": 34
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedSearch",
+        "type": "Interface",
+        "label": "SavedSearch",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 15
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.title",
+            "type": "string",
+            "label": "title",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 16
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.searchSource",
+            "type": "Object",
+            "label": "searchSource",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 17
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSource",
+                "text": "SearchSource"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 18
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.columns",
+            "type": "Array",
+            "label": "columns",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 19
+            },
+            "signature": [
+              "string[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.sort",
+            "type": "Array",
+            "label": "sort",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 20
+            },
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.SortOrder",
+                "text": "SortOrder"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.grid",
+            "type": "Object",
+            "label": "grid",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 21
+            },
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverGridSettings",
+                "text": "DiscoverGridSettings"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.destroy",
+            "type": "Function",
+            "label": "destroy",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              "() => void"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.save",
+            "type": "Function",
+            "label": "save",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 23
+            },
+            "signature": [
+              "(saveOptions: ",
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectSaveOpts",
+                "text": "SavedObjectSaveOpts"
+              },
+              ") => Promise<string>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.lastSavedTitle",
+            "type": "string",
+            "label": "lastSavedTitle",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 24
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.copyOnSave",
+            "type": "CompoundType",
+            "label": "copyOnSave",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearch.hideChart",
+            "type": "CompoundType",
+            "label": "hideChart",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 26
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/discover/public/saved_searches/types.ts",
+          "lineNumber": 14
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SavedSearchLoader",
+        "type": "Interface",
+        "label": "SavedSearchLoader",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SavedSearchLoader.get",
+            "type": "Function",
+            "label": "get",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              ">"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SavedSearchLoader.urlFor",
+            "type": "Function",
+            "label": "urlFor",
+            "description": [],
+            "source": {
+              "path": "src/plugins/discover/public/saved_searches/types.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              "(id: string) => string"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/discover/public/saved_searches/types.ts",
+          "lineNumber": 28
         },
         "initialIsOpen": false
       },
@@ -413,8 +627,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L20"
+              "lineNumber": 20
             },
             "signature": [
               {
@@ -434,8 +647,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L21"
+              "lineNumber": 21
             },
             "signature": [
               {
@@ -456,8 +668,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L22"
+              "lineNumber": 22
             },
             "signature": [
               {
@@ -478,8 +689,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L23"
+              "lineNumber": 23
             },
             "signature": [
               "boolean | undefined"
@@ -493,8 +703,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L24"
+              "lineNumber": 24
             },
             "signature": [
               "string[] | undefined"
@@ -508,8 +717,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/discover/public/application/embeddable/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               {
@@ -525,255 +733,7 @@
         ],
         "source": {
           "path": "src/plugins/discover/public/application/embeddable/types.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/types.ts#L19"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.DiscoverUrlGeneratorState",
-        "type": "Interface",
-        "label": "DiscoverUrlGeneratorState",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.savedSearchId",
-            "type": "string",
-            "label": "savedSearchId",
-            "description": [
-              "\nOptionally set saved search ID."
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L26"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.indexPatternId",
-            "type": "string",
-            "label": "indexPatternId",
-            "description": [
-              "\nOptionally set index pattern ID."
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L31"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.timeRange",
-            "type": "Object",
-            "label": "timeRange",
-            "description": [
-              "\nOptionally set the time range in the time picker."
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L36"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.refreshInterval",
-            "type": "Object",
-            "label": "refreshInterval",
-            "description": [
-              "\nOptionally set the refresh interval."
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L41"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.filters",
-            "type": "Array",
-            "label": "filters",
-            "description": [
-              "\nOptionally apply filters."
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L46"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.query",
-            "type": "Object",
-            "label": "query",
-            "description": [
-              "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L52"
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.useHash",
-            "type": "CompoundType",
-            "label": "useHash",
-            "description": [
-              "\nIf not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines\nwhether to hash the data in the url to avoid url length issues."
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L58"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.searchSessionId",
-            "type": "string",
-            "label": "searchSessionId",
-            "description": [
-              "\nBackground search session id"
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L63"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.columns",
-            "type": "Array",
-            "label": "columns",
-            "description": [
-              "\nColumns displayed in the table"
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L68"
-            },
-            "signature": [
-              "string[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.interval",
-            "type": "string",
-            "label": "interval",
-            "description": [
-              "\nUsed interval of the histogram"
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L73"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.sort",
-            "type": "Array",
-            "label": "sort",
-            "description": [
-              "\nArray of the used sorting [[field,direction],...]"
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 77,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L77"
-            },
-            "signature": [
-              "string[][] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverUrlGeneratorState.savedQuery",
-            "type": "string",
-            "label": "savedQuery",
-            "description": [
-              "\nid of the used saved query"
-            ],
-            "source": {
-              "path": "src/plugins/discover/public/url_generator.ts",
-              "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L81"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/discover/public/url_generator.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L22"
+          "lineNumber": 19
         },
         "initialIsOpen": false
       }
@@ -782,33 +742,31 @@
     "misc": [
       {
         "tags": [],
-        "id": "def-public.SEARCH_EMBEDDABLE_TYPE",
-        "type": "string",
-        "label": "SEARCH_EMBEDDABLE_TYPE",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/public/application/embeddable/constants.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/application/embeddable/constants.ts#L9"
-        },
-        "signature": [
-          "\"search\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
         "id": "def-public.DISCOVER_APP_URL_GENERATOR",
         "type": "string",
         "label": "DISCOVER_APP_URL_GENERATOR",
         "description": [],
         "source": {
           "path": "src/plugins/discover/public/url_generator.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/url_generator.ts#L20"
+          "lineNumber": 20
         },
         "signature": [
           "\"DISCOVER_APP_URL_GENERATOR\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.SEARCH_EMBEDDABLE_TYPE",
+        "type": "string",
+        "label": "SEARCH_EMBEDDABLE_TYPE",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/public/application/embeddable/constants.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"search\""
         ],
         "initialIsOpen": false
       }
@@ -831,8 +789,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/discover/public/plugin.ts",
-            "lineNumber": 75,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/plugin.ts#L75"
+            "lineNumber": 75
           },
           "signature": [
             "{ addDocView(docViewRaw: ",
@@ -857,8 +814,7 @@
       ],
       "source": {
         "path": "src/plugins/discover/public/plugin.ts",
-        "lineNumber": 74,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/plugin.ts#L74"
+        "lineNumber": 74
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -878,8 +834,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/discover/public/plugin.ts",
-            "lineNumber": 86,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/plugin.ts#L86"
+            "lineNumber": 86
           },
           "signature": [
             {
@@ -901,8 +856,7 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.ts",
-            "lineNumber": 104,
-            "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/plugin.ts#L104"
+            "lineNumber": 104
           },
           "signature": [
             {
@@ -918,8 +872,7 @@
       ],
       "source": {
         "path": "src/plugins/discover/public/plugin.ts",
-        "lineNumber": 85,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/public/plugin.ts#L85"
+        "lineNumber": 85
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -941,113 +894,16 @@
     "misc": [
       {
         "tags": [],
-        "id": "def-common.DEFAULT_COLUMNS_SETTING",
-        "type": "string",
-        "label": "DEFAULT_COLUMNS_SETTING",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L9"
-        },
-        "signature": [
-          "\"defaultColumns\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.SAMPLE_SIZE_SETTING",
-        "type": "string",
-        "label": "SAMPLE_SIZE_SETTING",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L10"
-        },
-        "signature": [
-          "\"discover:sampleSize\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
         "id": "def-common.AGGS_TERMS_SIZE_SETTING",
         "type": "string",
         "label": "AGGS_TERMS_SIZE_SETTING",
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L11"
+          "lineNumber": 11
         },
         "signature": [
           "\"discover:aggs:terms:size\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.SORT_DEFAULT_ORDER_SETTING",
-        "type": "string",
-        "label": "SORT_DEFAULT_ORDER_SETTING",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L12"
-        },
-        "signature": [
-          "\"discover:sort:defaultOrder\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.SEARCH_ON_PAGE_LOAD_SETTING",
-        "type": "string",
-        "label": "SEARCH_ON_PAGE_LOAD_SETTING",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L13"
-        },
-        "signature": [
-          "\"discover:searchOnPageLoad\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.DOC_HIDE_TIME_COLUMN_SETTING",
-        "type": "string",
-        "label": "DOC_HIDE_TIME_COLUMN_SETTING",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L14"
-        },
-        "signature": [
-          "\"doc_table:hideTimeColumn\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.FIELDS_LIMIT_SETTING",
-        "type": "string",
-        "label": "FIELDS_LIMIT_SETTING",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L15"
-        },
-        "signature": [
-          "\"fields:popularLimit\""
         ],
         "initialIsOpen": false
       },
@@ -1059,8 +915,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L16"
+          "lineNumber": 16
         },
         "signature": [
           "\"context:defaultSize\""
@@ -1075,8 +930,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L17"
+          "lineNumber": 17
         },
         "signature": [
           "\"context:step\""
@@ -1091,11 +945,40 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L18"
+          "lineNumber": 18
         },
         "signature": [
           "\"context:tieBreakerFields\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.DEFAULT_COLUMNS_SETTING",
+        "type": "string",
+        "label": "DEFAULT_COLUMNS_SETTING",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"defaultColumns\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.DOC_HIDE_TIME_COLUMN_SETTING",
+        "type": "string",
+        "label": "DOC_HIDE_TIME_COLUMN_SETTING",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 14
+        },
+        "signature": [
+          "\"doc_table:hideTimeColumn\""
         ],
         "initialIsOpen": false
       },
@@ -1107,11 +990,25 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L19"
+          "lineNumber": 19
         },
         "signature": [
           "\"doc_table:legacy\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.FIELDS_LIMIT_SETTING",
+        "type": "string",
+        "label": "FIELDS_LIMIT_SETTING",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 15
+        },
+        "signature": [
+          "\"fields:popularLimit\""
         ],
         "initialIsOpen": false
       },
@@ -1123,11 +1020,25 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L20"
+          "lineNumber": 20
         },
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.SAMPLE_SIZE_SETTING",
+        "type": "string",
+        "label": "SAMPLE_SIZE_SETTING",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 10
+        },
+        "signature": [
+          "\"discover:sampleSize\""
         ],
         "initialIsOpen": false
       },
@@ -1139,11 +1050,40 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/discover/common/index.ts#L21"
+          "lineNumber": 21
         },
         "signature": [
           "\"discover:searchFieldsFromSource\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.SEARCH_ON_PAGE_LOAD_SETTING",
+        "type": "string",
+        "label": "SEARCH_ON_PAGE_LOAD_SETTING",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "\"discover:searchOnPageLoad\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.SORT_DEFAULT_ORDER_SETTING",
+        "type": "string",
+        "label": "SORT_DEFAULT_ORDER_SETTING",
+        "description": [],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 12
+        },
+        "signature": [
+          "\"discover:sort:defaultOrder\""
         ],
         "initialIsOpen": false
       }
