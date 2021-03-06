@@ -1638,7 +1638,7 @@
           "deprecated"
         ],
         "description": [
-          "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
+          "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
         ],
         "source": {
           "path": "src/core/public/application/types.ts",

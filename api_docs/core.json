@@ -4242,7 +4242,7 @@
             "type": "string",
             "label": "actionPath",
             "description": [
-              "The path (without the basePath) that the user should be redirect to to address this warning."
+              "The path (without the basePath) that the user should be redirect to address this warning."
             ],
             "source": {
               "path": "src/core/server/saved_objects/import/types.ts",

@@ -751,7 +751,7 @@
         "type": "string",
         "label": "tagFeatureId",
         "description": [
-          "\nThe id of the tagging feature as registered to to `features` plugin"
+          "\nThe id of the tagging feature as registered to `features` plugin"
         ],
         "source": {
           "path": "x-pack/plugins/saved_objects_tagging/common/constants.ts",
