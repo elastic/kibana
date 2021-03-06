@@ -231,7 +231,7 @@ export interface RegistryElasticsearch {
   'index_template.mappings'?: object;
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml';
+export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
 // EPR types this as `[]map[string]interface{}`
 // which means the official/possible type is Record<string, any>
 // but we effectively only see this shape
