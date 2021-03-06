@@ -983,8 +983,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 221,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L221"
+              "lineNumber": 216,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L216"
             }
           },
           {
@@ -995,8 +995,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 222,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L222"
+              "lineNumber": 217,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L217"
             }
           },
           {
@@ -1007,8 +1007,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 223,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L223"
+              "lineNumber": 218,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L218"
             }
           },
           {
@@ -1019,8 +1019,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 224,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L224"
+              "lineNumber": 219,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L219"
             },
             "signature": [
               "string | ((docLinks: ",
@@ -1042,8 +1042,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 225,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L225"
+              "lineNumber": 220,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L220"
             },
             "signature": [
               "(alertParams: Params) => ",
@@ -1064,8 +1064,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 226,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L226"
+              "lineNumber": 221,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L221"
             },
             "signature": [
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<",
@@ -1087,8 +1087,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 229,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L229"
+              "lineNumber": 224,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L224"
             }
           },
           {
@@ -1099,8 +1099,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 230,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L230"
+              "lineNumber": 225,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L225"
             },
             "signature": [
               "string | undefined"
@@ -1109,8 +1109,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 220,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L220"
+          "lineNumber": 215,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L215"
         },
         "initialIsOpen": false
       },
@@ -1229,8 +1229,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 203,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L203"
+              "lineNumber": 198,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L198"
             },
             "signature": [
               "Params"
@@ -1244,8 +1244,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 204,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L204"
+              "lineNumber": 199,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L199"
             }
           },
           {
@@ -1256,8 +1256,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 205,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L205"
+              "lineNumber": 200,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L200"
             }
           },
           {
@@ -1268,8 +1268,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 206,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L206"
+              "lineNumber": 201,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L201"
             },
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
@@ -1283,8 +1283,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 207,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L207"
+              "lineNumber": 202,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L202"
             },
             "signature": [
               "<Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void"
@@ -1298,8 +1298,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 208,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L208"
+              "lineNumber": 203,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L203"
             },
             "signature": [
               "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
@@ -1321,8 +1321,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 212,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L212"
+              "lineNumber": 207,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L207"
             },
             "signature": [
               {
@@ -1342,8 +1342,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 213,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L213"
+              "lineNumber": 208,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L208"
             }
           },
           {
@@ -1354,8 +1354,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 214,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L214"
+              "lineNumber": 209,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L209"
             },
             "signature": [
               {
@@ -1376,8 +1376,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 215,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L215"
+              "lineNumber": 210,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L210"
             },
             "signature": [
               "MetaData | undefined"
@@ -1391,8 +1391,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 216,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L216"
+              "lineNumber": 211,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L211"
             },
             "signature": [
               {
@@ -1412,8 +1412,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 217,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L217"
+              "lineNumber": 212,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L212"
             },
             "signature": [
               {
@@ -1428,8 +1428,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 198,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L198"
+          "lineNumber": 193,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L193"
         },
         "initialIsOpen": false
       },
@@ -1448,8 +1448,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 110,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L110"
+              "lineNumber": 111,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L111"
             },
             "signature": [
               "Record<string, any>"
@@ -1458,62 +1458,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 109,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L109"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ActionVariable",
-        "type": "Interface",
-        "label": "ActionVariable",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ActionVariable.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 156,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L156"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ActionVariable.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 157,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L157"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ActionVariable.useWithTripleBracesInTemplates",
-            "type": "CompoundType",
-            "label": "useWithTripleBracesInTemplates",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L158"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 155,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L155"
+          "lineNumber": 110,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L110"
         },
         "initialIsOpen": false
       },
@@ -1532,8 +1478,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 234,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L234"
+              "lineNumber": 229,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L229"
             },
             "signature": [
               "any"
@@ -1542,8 +1488,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 233,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L233"
+          "lineNumber": 228,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L228"
         },
         "initialIsOpen": false
       },
@@ -2060,8 +2006,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 66,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L66"
+          "lineNumber": 67,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L67"
         },
         "initialIsOpen": false
       },
@@ -2145,8 +2091,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L33"
+          "lineNumber": 34,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L34"
         },
         "signature": [
           "{ enabled: boolean; id: string; name: string; params: Record<string, unknown>; actions: AlertAction[]; muteAll: boolean; tags: string[]; alertTypeId: string; consumer: string; schedule: ",
@@ -2177,8 +2123,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 51,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L51"
+          "lineNumber": 52,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L52"
         },
         "signature": [
           "{ get: (id: string) => ActionTypeModel<ActionConnector, ActionParams, any>; register: (objectType: ActionTypeModel<ActionConnector, ActionParams, any>) => void; list: () => ActionTypeModel<ActionConnector, ActionParams, any>[]; has: (id: string) => boolean; }"
@@ -2193,8 +2139,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 55,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L55"
+          "lineNumber": 56,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L56"
         },
         "signature": [
           "{ get: (id: string) => AlertTypeModel<Record<string, unknown>>; register: (objectType: AlertTypeModel<Record<string, unknown>>) => void; list: () => AlertTypeModel<Record<string, unknown>>[]; has: (id: string) => boolean; }"
@@ -2209,8 +2155,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 166,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L166"
+          "lineNumber": 161,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L161"
         },
         "signature": [
           "AsActionVariables<\"params\" | \"state\"> & Partial<AsActionVariables<\"context\">>"
@@ -2225,8 +2171,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 142,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L142"
+          "lineNumber": 143,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/triggers_actions_ui/public/types.ts#L143"
         },
         "signature": [
           "PreConfiguredActionConnector",
