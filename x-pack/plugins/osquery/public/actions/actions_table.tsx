@@ -66,7 +66,7 @@ const ActionsTableComponent = () => {
 
       if (columnId === 'action_id') {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        const linkProps = useRouterNavigate(`/live_query/queries/${value}`);
+        const linkProps = useRouterNavigate(`/live_query/${value}`);
         return <EuiLink {...linkProps}>{value}</EuiLink>;
       }
 

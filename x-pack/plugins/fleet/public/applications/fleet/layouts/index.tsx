@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { DefaultLayout } from './default';
+export { Container, DefaultLayout, Nav, Wrapper } from './default';
 export { WithHeaderLayout, WithHeaderLayoutProps } from './with_header';
 export { WithoutHeaderLayout } from './without_header';

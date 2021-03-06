@@ -21,7 +21,7 @@ const QueryAgentResultsComponent = () => {
       <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
         {
           // @ts-expect-error update types
-          data?.actionDetails._source?.data.commands[0].query
+          data?.actionDetails._source?.data?.query
         }
       </EuiCodeBlock>
       <EuiSpacer />

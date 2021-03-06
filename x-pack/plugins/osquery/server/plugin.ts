@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionTypeExecutorResult } from '../../actions/server/types';
+// import { curry } from 'lodash';
+// import { ActionTypeExecutorResult } from '../../actions/server/types';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -20,7 +19,7 @@ import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
-import { initSavedObjects } from './saved_objects';
+// import { initSavedObjects } from './saved_objects';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
 
@@ -50,15 +49,15 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       config: (): Promise<ConfigType> => Promise.resolve(config),
     };
 
-    initSavedObjects(core.savedObjects);
+    // initSavedObjects(core.savedObjects);
     defineRoutes(router, osqueryContext);
 
-    plugins.actions.registerType({
-      id: '.osquery',
-      name: 'Osquery',
-      minimumLicenseRequired: 'gold',
-      executor: curry(executor)({}),
-    });
+    // plugins.actions.registerType({
+    //   id: '.osquery',
+    //   name: 'Osquery',
+    //   minimumLicenseRequired: 'gold',
+    //   executor: curry(executor)({}),
+    // });
 
     core.getStartServices().then(([, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
@@ -91,7 +90,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 }
 
-// @ts-expect-error update types
-async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<unknown>> {
-  return { status: 'ok', data: {}, actionId: execOptions.actionId };
-}
+// async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<unknown>> {
+//   return { status: 'ok', data: {}, actionId: execOptions.actionId };
+// }

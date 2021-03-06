@@ -107,7 +107,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       if (columnId === 'status') {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const linkProps = useRouterNavigate(
-          `/live_query/queries/${actionId}/results/${value.fields.agent_id[0]}`
+          `/live_query/${actionId}/results/${value.fields.agent_id[0]}`
         );
 
         return (
@@ -149,9 +149,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
         const agentName = agent?.local_metadata.host.name;
 
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        const linkProps = useRouterNavigate(
-          `/live_query/queries/${actionId}/results/${agentIdValue}`
-        );
+        const linkProps = useRouterNavigate(`/live_query/${actionId}/results/${agentIdValue}`);
         return (
           <EuiLink {...linkProps}>{`(${agent?.local_metadata.os.name}) ${agentName}`}</EuiLink>
         );

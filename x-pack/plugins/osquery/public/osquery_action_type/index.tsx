@@ -19,13 +19,13 @@ export function getActionType(): ActionTypeModel {
     id: '.osquery',
     iconClass: 'logoOsquery',
     selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.selectMessageText',
+      'xpack.osquery.components.builtinActionTypes.exampleAction.selectMessageText',
       {
         defaultMessage: 'Example Action is used to show how to create new action type UI.',
       }
     ),
     actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.actionTypeTitle',
+      'xpack.osquery.components.builtinActionTypes.exampleAction.actionTypeTitle',
       {
         defaultMessage: 'Example Action',
       }
@@ -40,7 +40,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.config.someConnectorField) {
         errors.someConnectorField.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSomeConnectorFieldeText',
+            'xpack.osquery.components.builtinActionTypes.error.requiredSomeConnectorFieldeText',
             {
               defaultMessage: 'SomeConnectorField is required.',
             }
@@ -58,7 +58,7 @@ export function getActionType(): ActionTypeModel {
       if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredExampleMessageText',
+            'xpack.osquery.components.builtinActionTypes.error.requiredExampleMessageText',
             {
               defaultMessage: 'Message is required.',
             }

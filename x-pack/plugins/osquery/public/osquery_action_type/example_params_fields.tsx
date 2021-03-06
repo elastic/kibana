@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable react-perf/jsx-no-new-function-as-prop, react/jsx-no-bind */
+
 import React, { Fragment } from 'react';
 import { EuiTextArea } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -20,7 +22,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
   index,
   errors,
 }) => {
-  console.error('actionParams', actionParams, index, errors);
+  // console.error('actionParams', actionParams, index, errors);
   const { message } = actionParams;
   return (
     <Fragment>

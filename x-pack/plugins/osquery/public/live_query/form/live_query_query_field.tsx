@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
-import { EuiCodeBlock, EuiSuperSelect, EuiText, EuiSpacer } from '@elastic/eui';
+// import { find } from 'lodash/fp';
+// import { EuiCodeBlock, EuiSuperSelect, EuiText, EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useQuery } from 'react-query';
+// import { useQuery } from 'react-query';
 
 import { FieldHook } from '../../shared_imports';
-import { useKibana } from '../../common/lib/kibana';
+// import { useKibana } from '../../common/lib/kibana';
 import { OsqueryEditor } from '../../editor';
 
 interface LiveQueryQueryFieldProps {
@@ -22,47 +22,47 @@ interface LiveQueryQueryFieldProps {
 }
 
 const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ field }) => {
-  const { http } = useKibana().services;
-  const { data } = useQuery('savedQueryList', () =>
-    http.get('/internal/osquery/saved_query', {
-      query: {
-        pageIndex: 0,
-        pageSize: 100,
-        sortField: 'updated_at',
-        sortDirection: 'desc',
-      },
-    })
-  );
+  // const { http } = useKibana().services;
+  // const { data } = useQuery('savedQueryList', () =>
+  //   http.get('/internal/osquery/saved_query', {
+  //     query: {
+  //       pageIndex: 0,
+  //       pageSize: 100,
+  //       sortField: 'updated_at',
+  //       sortDirection: 'desc',
+  //     },
+  //   })
+  // );
 
-  const queryOptions =
-    // @ts-expect-error update types
-    data?.saved_objects.map((savedQuery) => ({
-      value: savedQuery,
-      inputDisplay: savedQuery.attributes.name,
-      dropdownDisplay: (
-        <>
-          <strong>{savedQuery.attributes.name}</strong>
-          <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">{savedQuery.attributes.description}</p>
-          </EuiText>
-          <EuiCodeBlock language="sql" fontSize="s" paddingSize="s">
-            {savedQuery.attributes.query}
-          </EuiCodeBlock>
-        </>
-      ),
-    })) ?? [];
+  // const queryOptions =
+  //   // @ts-expect-error update types
+  //   data?.saved_objects.map((savedQuery) => ({
+  //     value: savedQuery,
+  //     inputDisplay: savedQuery.attributes.name,
+  //     dropdownDisplay: (
+  //       <>
+  //         <strong>{savedQuery.attributes.name}</strong>
+  //         <EuiText size="s" color="subdued">
+  //           <p className="euiTextColor--subdued">{savedQuery.attributes.description}</p>
+  //         </EuiText>
+  //         <EuiCodeBlock language="sql" fontSize="s" paddingSize="s">
+  //           {savedQuery.attributes.query}
+  //         </EuiCodeBlock>
+  //       </>
+  //     ),
+  //   })) ?? [];
 
   const { value, setValue } = field;
 
-  const handleSavedQueryChange = useCallback(
-    (newValue) => {
-      setValue({
-        id: newValue.id,
-        query: newValue.attributes.query,
-      });
-    },
-    [setValue]
-  );
+  // const handleSavedQueryChange = useCallback(
+  //   (newValue) => {
+  //     setValue({
+  //       id: newValue.id,
+  //       query: newValue.attributes.query,
+  //     });
+  //   },
+  //   [setValue]
+  // );
 
   const handleEditorChange = useCallback(
     (newValue) => {
@@ -76,12 +76,12 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ fiel
 
   return (
     <>
-      <EuiSuperSelect
+      {/* <EuiSuperSelect
         valueOfSelected={find(['id', value.id], data?.saved_objects)}
         options={queryOptions}
         onChange={handleSavedQueryChange}
       />
-      <EuiSpacer />
+      <EuiSpacer /> */}
       <OsqueryEditor defaultValue={value.query} onChange={handleEditorChange} />
     </>
   );
