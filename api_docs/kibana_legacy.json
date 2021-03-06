@@ -35,8 +35,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/plugin.ts",
-                  "lineNumber": 15,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L15"
+                  "lineNumber": 15
                 }
               }
             ],
@@ -44,8 +43,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/plugin.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L15"
+              "lineNumber": 15
             }
           },
           {
@@ -98,8 +96,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/plugin.ts",
-                  "lineNumber": 17,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L17"
+                  "lineNumber": 17
                 }
               }
             ],
@@ -107,8 +104,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/plugin.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L17"
+              "lineNumber": 17
             }
           },
           {
@@ -152,8 +148,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/plugin.ts",
-                  "lineNumber": 21,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L21"
+                  "lineNumber": 21
                 }
               }
             ],
@@ -161,15 +156,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/plugin.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L21"
+              "lineNumber": 21
             }
           }
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/plugin.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L14"
+          "lineNumber": 14
         },
         "initialIsOpen": false
       },
@@ -188,8 +181,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L12"
+              "lineNumber": 12
             },
             "signature": [
               {
@@ -229,8 +221,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 16,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L16"
+                  "lineNumber": 16
                 }
               }
             ],
@@ -238,8 +229,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L16"
+              "lineNumber": 16
             }
           },
           {
@@ -256,8 +246,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 26,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L26"
+                  "lineNumber": 26
                 }
               }
             ],
@@ -268,8 +257,7 @@
             "label": "onChange",
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L26"
+              "lineNumber": 26
             },
             "tags": [],
             "returnComment": []
@@ -294,8 +282,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 30,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L30"
+                  "lineNumber": 30
                 }
               }
             ],
@@ -321,8 +308,7 @@
             "label": "add",
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L30"
+              "lineNumber": 30
             },
             "tags": [],
             "returnComment": []
@@ -347,8 +333,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 31,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L31"
+                  "lineNumber": 31
                 }
               }
             ],
@@ -367,8 +352,7 @@
             "label": "remove",
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L31"
+              "lineNumber": 31
             },
             "tags": [],
             "returnComment": []
@@ -393,8 +377,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L32"
+                  "lineNumber": 32
                 }
               }
             ],
@@ -420,8 +403,7 @@
             "label": "addSuccess",
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L32"
+              "lineNumber": 32
             },
             "tags": [],
             "returnComment": []
@@ -446,8 +428,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 33,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L33"
+                  "lineNumber": 33
                 }
               }
             ],
@@ -473,8 +454,7 @@
             "label": "addWarning",
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L33"
+              "lineNumber": 33
             },
             "tags": [],
             "returnComment": []
@@ -499,8 +479,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 34,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L34"
+                  "lineNumber": 34
                 }
               }
             ],
@@ -526,8 +505,7 @@
             "label": "addDanger",
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L34"
+              "lineNumber": 34
             },
             "tags": [],
             "returnComment": []
@@ -546,8 +524,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L35"
+                  "lineNumber": 35
                 }
               },
               {
@@ -566,8 +543,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L35"
+                  "lineNumber": 35
                 }
               }
             ],
@@ -593,8 +569,7 @@
             "label": "addError",
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L35"
+              "lineNumber": 35
             },
             "tags": [],
             "returnComment": []
@@ -602,446 +577,12 @@
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/toasts/toast_notifications.ts#L11"
+          "lineNumber": 11
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
-      {
-        "tags": [],
-        "id": "def-public.initAngularBootstrap",
-        "type": "Function",
-        "label": "initAngularBootstrap",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular_bootstrap/index.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular_bootstrap/index.ts#L15"
-        },
-        "signature": [
-          "() => void"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PaginateDirectiveProvider",
-        "type": "Function",
-        "label": "PaginateDirectiveProvider",
-        "signature": [
-          "($parse: any, $compile: any) => any"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Any",
-            "label": "$parse",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/paginate/paginate.d.ts#L9"
-            }
-          },
-          {
-            "type": "Any",
-            "label": "$compile",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/paginate/paginate.d.ts#L9"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/paginate/paginate.d.ts#L9"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PaginateControlsDirectiveProvider",
-        "type": "Function",
-        "label": "PaginateControlsDirectiveProvider",
-        "signature": [
-          "() => any"
-        ],
-        "description": [],
-        "children": [],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/paginate/paginate.d.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PromiseServiceCreator",
-        "type": "Function",
-        "label": "PromiseServiceCreator",
-        "signature": [
-          "($q: unknown, $timeout: unknown) => (fn: unknown) => unknown"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Unknown",
-            "label": "$q",
-            "isRequired": true,
-            "signature": [
-              "unknown"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/promises.d.ts#L9"
-            }
-          },
-          {
-            "type": "Unknown",
-            "label": "$timeout",
-            "isRequired": true,
-            "signature": [
-              "unknown"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/promises.d.ts#L9"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/promises.d.ts#L9"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.watchMultiDecorator",
-        "type": "Function",
-        "label": "watchMultiDecorator",
-        "signature": [
-          "($provide: unknown) => void"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Unknown",
-            "label": "$provide",
-            "isRequired": true,
-            "signature": [
-              "unknown"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/watch_multi.d.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/watch_multi.d.ts#L9"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular/watch_multi.d.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/watch_multi.d.ts#L9"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.createTopNavHelper",
-        "type": "Function",
-        "label": "createTopNavHelper",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts#L14"
-        },
-        "signature": [
-          "(options: unknown) => angular.Injectable<angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.loadKbnTopNavDirectives",
-        "type": "Function",
-        "label": "loadKbnTopNavDirectives",
-        "signature": [
-          "(navUi: unknown) => void"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Unknown",
-            "label": "navUi",
-            "isRequired": true,
-            "signature": [
-              "unknown"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts#L17"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts#L17"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.subscribeWithScope",
-        "type": "Function",
-        "label": "subscribeWithScope",
-        "signature": [
-          "($scope: angular.IScope, observable: ",
-          "Observable",
-          "<T>, observer: ",
-          "NextObserver",
-          "<T> | ",
-          "ErrorObserver",
-          "<T> | ",
-          "CompletionObserver",
-          "<T> | undefined, fatalError: FatalErrorFn | undefined) => ",
-          "Subscription"
-        ],
-        "description": [
-          "\nSubscribe to an observable at a $scope, ensuring that the digest cycle\nis run for subscriber hooks and routing errors to fatalError if not handled."
-        ],
-        "children": [
-          {
-            "type": "Object",
-            "label": "$scope",
-            "isRequired": true,
-            "signature": [
-              "angular.IScope"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts#L40"
-            }
-          },
-          {
-            "type": "Object",
-            "label": "observable",
-            "isRequired": true,
-            "signature": [
-              "Observable",
-              "<T>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts#L41"
-            }
-          },
-          {
-            "type": "CompoundType",
-            "label": "observer",
-            "isRequired": false,
-            "signature": [
-              "NextObserver",
-              "<T> | ",
-              "ErrorObserver",
-              "<T> | ",
-              "CompletionObserver",
-              "<T> | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts#L42"
-            }
-          },
-          {
-            "type": "Function",
-            "label": "fatalError",
-            "isRequired": false,
-            "signature": [
-              "FatalErrorFn | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts#L43"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
-          "lineNumber": 39,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts#L39"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.configureAppAngularModule",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "angularModule",
-            "isRequired": true,
-            "signature": [
-              "angular.IModule"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L63"
-            }
-          },
-          {
-            "id": "def-public.configureAppAngularModule.newPlatform",
-            "type": "Object",
-            "label": "newPlatform",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-public.configureAppAngularModule.newPlatform.core",
-                "type": "Object",
-                "label": "core",
-                "description": [],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-                  "lineNumber": 65,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L65"
-                },
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
-                ]
-              },
-              {
-                "tags": [],
-                "id": "def-public.configureAppAngularModule.newPlatform.env",
-                "type": "Object",
-                "label": "env",
-                "description": [],
-                "source": {
-                  "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-                  "lineNumber": 66,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L66"
-                },
-                "signature": [
-                  "{ mode: Readonly<",
-                  "EnvironmentMode",
-                  ">; packageInfo: Readonly<",
-                  "PackageInfo",
-                  ">; }"
-                ]
-              }
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L64"
-            }
-          },
-          {
-            "type": "boolean",
-            "label": "isLocalAngular",
-            "isRequired": true,
-            "signature": [
-              "boolean"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L71"
-            }
-          },
-          {
-            "type": "Function",
-            "label": "getHistory",
-            "isRequired": false,
-            "signature": [
-              "(() => ",
-              "History",
-              "<any>) | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L72"
-            }
-          }
-        ],
-        "signature": [
-          "(angularModule: angular.IModule, newPlatform: { core: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
-          "; readonly env: { mode: Readonly<",
-          "EnvironmentMode",
-          ">; packageInfo: Readonly<",
-          "PackageInfo",
-          ">; }; }, isLocalAngular: boolean, getHistory?: (() => ",
-          "History",
-          "<any>) | undefined) => void"
-        ],
-        "description": [],
-        "label": "configureAppAngularModule",
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-          "lineNumber": 62,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L62"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.$setupXsrfRequestInterceptor",
         "type": "Function",
@@ -1056,8 +597,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 136,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L136"
+              "lineNumber": 136
             }
           }
         ],
@@ -1068,210 +608,10 @@
         "label": "$setupXsrfRequestInterceptor",
         "source": {
           "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-          "lineNumber": 136,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L136"
+          "lineNumber": 136
         },
         "tags": [],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.formatESMsg",
-        "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "err",
-            "isRequired": true,
-            "signature": [
-              "string | Record<string, any>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts#L18"
-            }
-          }
-        ],
-        "signature": [
-          "(err: string | Record<string, any>) => string | undefined"
-        ],
-        "description": [
-          "\nUtilize the extended error information returned from elasticsearch"
-        ],
-        "label": "formatESMsg",
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts#L18"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.formatMsg",
-        "type": "Function",
-        "label": "formatMsg",
-        "signature": [
-          "(err: string | Record<string, any>, source: string) => string"
-        ],
-        "description": [
-          "\nFormats the error message from an error object, extended elasticsearch\nobject or simple string; prepends optional second parameter to the message"
-        ],
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "err",
-            "isRequired": true,
-            "signature": [
-              "string | Record<string, any>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_msg.ts#L21"
-            }
-          },
-          {
-            "type": "string",
-            "label": "source",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [
-              "- Prefix for message indicating source (optional)"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_msg.ts#L21"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_msg.ts#L21"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.formatStack",
-        "type": "Function",
-        "label": "formatStack",
-        "signature": [
-          "(err: Record<string, any>) => any"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Object",
-            "label": "err",
-            "isRequired": true,
-            "signature": [
-              "Record<string, any>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/lib/format_stack.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_stack.ts#L12"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/notify/lib/format_stack.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_stack.ts#L12"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.isAngularHttpError",
-        "type": "Function",
-        "label": "isAngularHttpError",
-        "signature": [
-          "(error: any) => boolean"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Any",
-            "label": "error",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts#L14"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts#L14"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.formatAngularHttpError",
-        "type": "Function",
-        "label": "formatAngularHttpError",
-        "signature": [
-          "(error: ",
-          {
-            "pluginId": "kibanaLegacy",
-            "scope": "public",
-            "docId": "kibKibanaLegacyPluginApi",
-            "section": "def-public.AngularHttpError",
-            "text": "AngularHttpError"
-          },
-          ") => string"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Object",
-            "label": "error",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "kibanaLegacy",
-                "scope": "public",
-                "docId": "kibKibanaLegacyPluginApi",
-                "section": "def-public.AngularHttpError",
-                "text": "AngularHttpError"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts#L24"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts#L24"
-        },
         "initialIsOpen": false
       },
       {
@@ -1315,8 +655,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts#L17"
+              "lineNumber": 17
             }
           },
           {
@@ -1336,8 +675,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts#L18"
+              "lineNumber": 18
             }
           },
           {
@@ -1350,8 +688,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts#L19"
+              "lineNumber": 19
             }
           }
         ],
@@ -1359,59 +696,7 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/add_fatal_error.ts#L16"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PrivateProvider",
-        "type": "Function",
-        "label": "PrivateProvider",
-        "signature": [
-          "() => angular.IServiceProvider"
-        ],
-        "description": [],
-        "children": [],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/private.d.ts#L13"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.registerListenEventListener",
-        "type": "Function",
-        "label": "registerListenEventListener",
-        "signature": [
-          "($rootScope: unknown) => void"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Unknown",
-            "label": "$rootScope",
-            "isRequired": true,
-            "signature": [
-              "unknown"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts#L9"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts#L9"
+          "lineNumber": 16
         },
         "initialIsOpen": false
       },
@@ -1438,8 +723,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_legacy/public/utils/system_api.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/system_api.ts#L19"
+              "lineNumber": 19
             }
           }
         ],
@@ -1451,8 +735,349 @@
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/utils/system_api.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/system_api.ts#L19"
+          "lineNumber": 19
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.configureAppAngularModule",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Object",
+            "label": "angularModule",
+            "isRequired": true,
+            "signature": [
+              "angular.IModule"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 63
+            }
+          },
+          {
+            "id": "def-public.configureAppAngularModule.newPlatform",
+            "type": "Object",
+            "label": "newPlatform",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.configureAppAngularModule.newPlatform.core",
+                "type": "Object",
+                "label": "core",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                  "lineNumber": 65
+                },
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-public.configureAppAngularModule.newPlatform.env",
+                "type": "Object",
+                "label": "env",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+                  "lineNumber": 66
+                },
+                "signature": [
+                  "{ mode: Readonly<",
+                  "EnvironmentMode",
+                  ">; packageInfo: Readonly<",
+                  "PackageInfo",
+                  ">; }"
+                ]
+              }
+            ],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 64
+            }
+          },
+          {
+            "type": "boolean",
+            "label": "isLocalAngular",
+            "isRequired": true,
+            "signature": [
+              "boolean"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 71
+            }
+          },
+          {
+            "type": "Function",
+            "label": "getHistory",
+            "isRequired": false,
+            "signature": [
+              "(() => ",
+              "History",
+              "<any>) | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+              "lineNumber": 72
+            }
+          }
+        ],
+        "signature": [
+          "(angularModule: angular.IModule, newPlatform: { core: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreStart",
+            "text": "CoreStart"
+          },
+          "; readonly env: { mode: Readonly<",
+          "EnvironmentMode",
+          ">; packageInfo: Readonly<",
+          "PackageInfo",
+          ">; }; }, isLocalAngular: boolean, getHistory?: (() => ",
+          "History",
+          "<any>) | undefined) => void"
+        ],
+        "description": [],
+        "label": "configureAppAngularModule",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
+          "lineNumber": 62
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.createTopNavHelper",
+        "type": "Function",
+        "label": "createTopNavHelper",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+          "lineNumber": 14
+        },
+        "signature": [
+          "(options: unknown) => angular.Injectable<angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.formatAngularHttpError",
+        "type": "Function",
+        "label": "formatAngularHttpError",
+        "signature": [
+          "(error: ",
+          {
+            "pluginId": "kibanaLegacy",
+            "scope": "public",
+            "docId": "kibKibanaLegacyPluginApi",
+            "section": "def-public.AngularHttpError",
+            "text": "AngularHttpError"
+          },
+          ") => string"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Object",
+            "label": "error",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "kibanaLegacy",
+                "scope": "public",
+                "docId": "kibKibanaLegacyPluginApi",
+                "section": "def-public.AngularHttpError",
+                "text": "AngularHttpError"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+              "lineNumber": 24
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+          "lineNumber": 24
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.formatESMsg",
+        "type": "Function",
+        "children": [
+          {
+            "type": "CompoundType",
+            "label": "err",
+            "isRequired": true,
+            "signature": [
+              "string | Record<string, any>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts",
+              "lineNumber": 18
+            }
+          }
+        ],
+        "signature": [
+          "(err: string | Record<string, any>) => string | undefined"
+        ],
+        "description": [
+          "\nUtilize the extended error information returned from elasticsearch"
+        ],
+        "label": "formatESMsg",
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_es_msg.ts",
+          "lineNumber": 18
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.formatMsg",
+        "type": "Function",
+        "label": "formatMsg",
+        "signature": [
+          "(err: string | Record<string, any>, source: string) => string"
+        ],
+        "description": [
+          "\nFormats the error message from an error object, extended elasticsearch\nobject or simple string; prepends optional second parameter to the message"
+        ],
+        "children": [
+          {
+            "type": "CompoundType",
+            "label": "err",
+            "isRequired": true,
+            "signature": [
+              "string | Record<string, any>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+              "lineNumber": 21
+            }
+          },
+          {
+            "type": "string",
+            "label": "source",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [
+              "- Prefix for message indicating source (optional)"
+            ],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+              "lineNumber": 21
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_msg.ts",
+          "lineNumber": 21
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.formatStack",
+        "type": "Function",
+        "label": "formatStack",
+        "signature": [
+          "(err: Record<string, any>) => any"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Object",
+            "label": "err",
+            "isRequired": true,
+            "signature": [
+              "Record<string, any>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_stack.ts",
+              "lineNumber": 12
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_stack.ts",
+          "lineNumber": 12
+        },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.initAngularBootstrap",
+        "type": "Function",
+        "label": "initAngularBootstrap",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular_bootstrap/index.ts",
+          "lineNumber": 15
+        },
+        "signature": [
+          "() => void"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.isAngularHttpError",
+        "type": "Function",
+        "label": "isAngularHttpError",
+        "signature": [
+          "(error: any) => boolean"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Any",
+            "label": "error",
+            "isRequired": true,
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+              "lineNumber": 14
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+          "lineNumber": 14
         },
         "initialIsOpen": false
       },
@@ -1479,8 +1104,7 @@
             ],
             "source": {
               "path": "src/plugins/kibana_legacy/public/utils/system_api.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/system_api.ts#L35"
+              "lineNumber": 35
             }
           }
         ],
@@ -1492,8 +1116,309 @@
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/utils/system_api.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/system_api.ts#L35"
+          "lineNumber": 35
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.loadKbnTopNavDirectives",
+        "type": "Function",
+        "label": "loadKbnTopNavDirectives",
+        "signature": [
+          "(navUi: unknown) => void"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Unknown",
+            "label": "navUi",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+              "lineNumber": 17
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
+          "lineNumber": 17
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PaginateControlsDirectiveProvider",
+        "type": "Function",
+        "label": "PaginateControlsDirectiveProvider",
+        "signature": [
+          "() => any"
+        ],
+        "description": [],
+        "children": [],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+          "lineNumber": 10
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PaginateDirectiveProvider",
+        "type": "Function",
+        "label": "PaginateDirectiveProvider",
+        "signature": [
+          "($parse: any, $compile: any) => any"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Any",
+            "label": "$parse",
+            "isRequired": true,
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "type": "Any",
+            "label": "$compile",
+            "isRequired": true,
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+              "lineNumber": 9
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/paginate/paginate.d.ts",
+          "lineNumber": 9
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PrivateProvider",
+        "type": "Function",
+        "label": "PrivateProvider",
+        "signature": [
+          "() => angular.IServiceProvider"
+        ],
+        "description": [],
+        "children": [],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
+          "lineNumber": 13
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PromiseServiceCreator",
+        "type": "Function",
+        "label": "PromiseServiceCreator",
+        "signature": [
+          "($q: unknown, $timeout: unknown) => (fn: unknown) => unknown"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Unknown",
+            "label": "$q",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "type": "Unknown",
+            "label": "$timeout",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
+              "lineNumber": 9
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/promises.d.ts",
+          "lineNumber": 9
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.registerListenEventListener",
+        "type": "Function",
+        "label": "registerListenEventListener",
+        "signature": [
+          "($rootScope: unknown) => void"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Unknown",
+            "label": "$rootScope",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts",
+              "lineNumber": 9
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/utils/register_listen_event_listener.d.ts",
+          "lineNumber": 9
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.subscribeWithScope",
+        "type": "Function",
+        "label": "subscribeWithScope",
+        "signature": [
+          "($scope: angular.IScope, observable: ",
+          "Observable",
+          "<T>, observer: ",
+          "NextObserver",
+          "<T> | ",
+          "ErrorObserver",
+          "<T> | ",
+          "CompletionObserver",
+          "<T> | undefined, fatalError: FatalErrorFn | undefined) => ",
+          "Subscription"
+        ],
+        "description": [
+          "\nSubscribe to an observable at a $scope, ensuring that the digest cycle\nis run for subscriber hooks and routing errors to fatalError if not handled."
+        ],
+        "children": [
+          {
+            "type": "Object",
+            "label": "$scope",
+            "isRequired": true,
+            "signature": [
+              "angular.IScope"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+              "lineNumber": 40
+            }
+          },
+          {
+            "type": "Object",
+            "label": "observable",
+            "isRequired": true,
+            "signature": [
+              "Observable",
+              "<T>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+              "lineNumber": 41
+            }
+          },
+          {
+            "type": "CompoundType",
+            "label": "observer",
+            "isRequired": false,
+            "signature": [
+              "NextObserver",
+              "<T> | ",
+              "ErrorObserver",
+              "<T> | ",
+              "CompletionObserver",
+              "<T> | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+              "lineNumber": 42
+            }
+          },
+          {
+            "type": "Function",
+            "label": "fatalError",
+            "isRequired": false,
+            "signature": [
+              "FatalErrorFn | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+              "lineNumber": 43
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/subscribe_with_scope.ts",
+          "lineNumber": 39
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.watchMultiDecorator",
+        "type": "Function",
+        "label": "watchMultiDecorator",
+        "signature": [
+          "($provide: unknown) => void"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Unknown",
+            "label": "$provide",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/kibana_legacy/public/angular/watch_multi.d.ts",
+              "lineNumber": 9
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/angular/watch_multi.d.ts",
+          "lineNumber": 9
         },
         "initialIsOpen": false
       }
@@ -1514,8 +1439,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L29"
+              "lineNumber": 29
             },
             "signature": [
               "string | ((...args: any[]) => void) | undefined"
@@ -1529,8 +1453,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L30"
+              "lineNumber": 30
             },
             "signature": [
               "string | undefined"
@@ -1544,8 +1467,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L31"
+              "lineNumber": 31
             },
             "signature": [
               "((...args: any[]) => void) | undefined"
@@ -1559,8 +1481,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L32"
+              "lineNumber": 32
             },
             "signature": [
               "boolean | undefined"
@@ -1574,8 +1495,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L33"
+              "lineNumber": 33
             },
             "signature": [
               "boolean | undefined"
@@ -1589,8 +1509,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L34"
+              "lineNumber": 34
             },
             "signature": [
               "boolean | undefined"
@@ -1604,8 +1523,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L35"
+              "lineNumber": 35
             },
             "signature": [
               "object | undefined"
@@ -1619,8 +1537,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L36"
+              "lineNumber": 36
             },
             "signature": [
               "string | undefined"
@@ -1634,8 +1551,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L37"
+              "lineNumber": 37
             },
             "signature": [
               "((...args: any[]) => ",
@@ -1651,8 +1567,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L38"
+              "lineNumber": 38
             },
             "signature": [
               "string | undefined"
@@ -1661,8 +1576,7 @@
         ],
         "source": {
           "path": "src/plugins/kibana_legacy/public/angular/angular_config.tsx",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/angular_config.tsx#L28"
+          "lineNumber": 28
         },
         "initialIsOpen": false
       }
@@ -1670,36 +1584,17 @@
     "enums": [],
     "misc": [
       {
-        "id": "def-public.KibanaLegacySetup",
+        "id": "def-public.AngularHttpError",
         "type": "Type",
-        "label": "KibanaLegacySetup",
+        "label": "AngularHttpError",
         "tags": [],
         "description": [],
         "source": {
-          "path": "src/plugins/kibana_legacy/public/plugin.ts",
-          "lineNumber": 45,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L45"
+          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
+          "lineNumber": 12
         },
         "signature": [
-          "{}"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.KibanaLegacyStart",
-        "type": "Type",
-        "label": "KibanaLegacyStart",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/plugin.ts",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/plugin.ts#L46"
-        },
-        "signature": [
-          "{ dashboardConfig: ",
-          "DashboardConfig",
-          "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+          "IHttpResponse<{ message: string; }>"
         ],
         "initialIsOpen": false
       },
@@ -1711,40 +1606,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/angular/kbn_top_nav.d.ts#L11"
-        },
-        "signature": [
-          "angular.Injectable<angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.AngularHttpError",
-        "type": "Type",
-        "label": "AngularHttpError",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/notify/lib/format_angular_http_error.ts#L12"
-        },
-        "signature": [
-          "IHttpResponse<{ message: string; }>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.KbnAccessibleClickProvider",
-        "type": "CompoundType",
-        "label": "KbnAccessibleClickProvider",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_legacy/public/utils/kbn_accessible_click.d.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/kbn_accessible_click.d.ts#L11"
+          "lineNumber": 11
         },
         "signature": [
           "angular.Injectable<angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>>"
@@ -1759,11 +1621,57 @@
         "description": [],
         "source": {
           "path": "src/plugins/kibana_legacy/public/utils/private.d.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/kibana_legacy/public/utils/private.d.ts#L11"
+          "lineNumber": 11
         },
         "signature": [
           "(provider: (...injectable: any[]) => T) => T"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.KbnAccessibleClickProvider",
+        "type": "CompoundType",
+        "label": "KbnAccessibleClickProvider",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/utils/kbn_accessible_click.d.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "angular.Injectable<angular.IDirectiveFactory<angular.IScope, JQLite, angular.IAttributes, angular.IController>>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.KibanaLegacySetup",
+        "type": "Type",
+        "label": "KibanaLegacySetup",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/plugin.ts",
+          "lineNumber": 45
+        },
+        "signature": [
+          "{}"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.KibanaLegacyStart",
+        "type": "Type",
+        "label": "KibanaLegacyStart",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_legacy/public/plugin.ts",
+          "lineNumber": 46
+        },
+        "signature": [
+          "{ dashboardConfig: ",
+          "DashboardConfig",
+          "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
         ],
         "initialIsOpen": false
       }

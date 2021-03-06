@@ -3,6 +3,83 @@
   "client": {
     "classes": [
       {
+        "id": "def-public.KibanaURL",
+        "type": "Class",
+        "tags": [],
+        "label": "KibanaURL",
+        "description": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.KibanaURL.path",
+            "type": "string",
+            "label": "path",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/kibana_url.ts",
+              "lineNumber": 12
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.KibanaURL.appName",
+            "type": "string",
+            "label": "appName",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/kibana_url.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.KibanaURL.appPath",
+            "type": "string",
+            "label": "appPath",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/kibana_url.ts",
+              "lineNumber": 14
+            }
+          },
+          {
+            "id": "def-public.KibanaURL.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "path",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/share/public/kibana_url.ts",
+                  "lineNumber": 16
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/share/public/kibana_url.ts",
+              "lineNumber": 16
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/share/public/kibana_url.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.UrlGeneratorsService",
         "type": "Class",
         "tags": [],
@@ -44,8 +121,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_service.ts#L30"
+              "lineNumber": 30
             }
           },
           {
@@ -89,8 +165,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                  "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_service.ts#L32"
+                  "lineNumber": 32
                 }
               }
             ],
@@ -98,8 +173,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_service.ts#L32"
+              "lineNumber": 32
             }
           },
           {
@@ -142,8 +216,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                  "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_service.ts#L45"
+                  "lineNumber": 45
                 }
               }
             ],
@@ -151,8 +224,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_service.ts#L45"
+              "lineNumber": 45
             }
           },
           {
@@ -168,103 +240,84 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-              "lineNumber": 52,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_service.ts#L52"
+              "lineNumber": 52
             }
           }
         ],
         "source": {
           "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_service.ts#L25"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.KibanaURL",
-        "type": "Class",
-        "tags": [],
-        "label": "KibanaURL",
-        "description": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.KibanaURL.path",
-            "type": "string",
-            "label": "path",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/kibana_url.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/kibana_url.ts#L12"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.KibanaURL.appName",
-            "type": "string",
-            "label": "appName",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/kibana_url.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/kibana_url.ts#L13"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.KibanaURL.appPath",
-            "type": "string",
-            "label": "appPath",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/kibana_url.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/kibana_url.ts#L14"
-            }
-          },
-          {
-            "id": "def-public.KibanaURL.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "path",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/share/public/kibana_url.ts",
-                  "lineNumber": 16,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/kibana_url.ts#L16"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/share/public/kibana_url.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/kibana_url.ts#L16"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/plugins/share/public/kibana_url.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/kibana_url.ts#L11"
+          "lineNumber": 25
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
+      {
+        "id": "def-public.downloadFileAs",
+        "type": "Function",
+        "label": "downloadFileAs",
+        "signature": [
+          "(filename: string, payload: ",
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.DownloadableContent",
+            "text": "DownloadableContent"
+          },
+          ") => Promise<void>"
+        ],
+        "description": [
+          "\nConvenient method to use for a single file download\n**Note**: for multiple files use the downloadMultipleAs method, do not iterate with this method here"
+        ],
+        "children": [
+          {
+            "type": "string",
+            "label": "filename",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [
+              "full name of the file"
+            ],
+            "source": {
+              "path": "src/plugins/share/public/lib/download_as.ts",
+              "lineNumber": 23
+            }
+          },
+          {
+            "type": "CompoundType",
+            "label": "payload",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.DownloadableContent",
+                "text": "DownloadableContent"
+              }
+            ],
+            "description": [
+              "either a Blob content, or a Record with a stringified content and type"
+            ],
+            "source": {
+              "path": "src/plugins/share/public/lib/download_as.ts",
+              "lineNumber": 23
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [
+          "a Promise that resolves when the download has been correctly started"
+        ],
+        "source": {
+          "path": "src/plugins/share/public/lib/download_as.ts",
+          "lineNumber": 23
+        },
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.downloadMultipleAs",
         "type": "Function",
@@ -304,8 +357,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/lib/download_as.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/lib/download_as.ts#L34"
+              "lineNumber": 34
             }
           }
         ],
@@ -315,112 +367,12 @@
         ],
         "source": {
           "path": "src/plugins/share/public/lib/download_as.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/lib/download_as.ts#L34"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.downloadFileAs",
-        "type": "Function",
-        "label": "downloadFileAs",
-        "signature": [
-          "(filename: string, payload: ",
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.DownloadableContent",
-            "text": "DownloadableContent"
-          },
-          ") => Promise<void>"
-        ],
-        "description": [
-          "\nConvenient method to use for a single file download\n**Note**: for multiple files use the downloadMultipleAs method, do not iterate with this method here"
-        ],
-        "children": [
-          {
-            "type": "string",
-            "label": "filename",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [
-              "full name of the file"
-            ],
-            "source": {
-              "path": "src/plugins/share/public/lib/download_as.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/lib/download_as.ts#L23"
-            }
-          },
-          {
-            "type": "CompoundType",
-            "label": "payload",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.DownloadableContent",
-                "text": "DownloadableContent"
-              }
-            ],
-            "description": [
-              "either a Blob content, or a Record with a stringified content and type"
-            ],
-            "source": {
-              "path": "src/plugins/share/public/lib/download_as.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/lib/download_as.ts#L23"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [
-          "a Promise that resolves when the download has been correctly started"
-        ],
-        "source": {
-          "path": "src/plugins/share/public/lib/download_as.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/lib/download_as.ts#L23"
+          "lineNumber": 34
         },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-public.UrlGeneratorStateMapping",
-        "type": "Interface",
-        "label": "UrlGeneratorStateMapping",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-public.UrlGeneratorStateMapping.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L27"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L21"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.ShareContext",
         "type": "Interface",
@@ -438,8 +390,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L24"
+              "lineNumber": 24
             }
           },
           {
@@ -450,8 +401,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               "string | undefined"
@@ -467,8 +417,7 @@
             ],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L35"
+              "lineNumber": 35
             }
           },
           {
@@ -479,8 +428,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L36"
+              "lineNumber": 36
             },
             "signature": [
               "{ [key: string]: unknown; }"
@@ -494,8 +442,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L37"
+              "lineNumber": 37
             }
           },
           {
@@ -506,8 +453,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L38"
+              "lineNumber": 38
             },
             "signature": [
               "() => void"
@@ -521,8 +467,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L39"
+              "lineNumber": 39
             },
             "signature": [
               "((anonymousUserCapabilities: ",
@@ -539,8 +484,110 @@
         ],
         "source": {
           "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L23"
+          "lineNumber": 23
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ShareContextMenuPanelItem",
+        "type": "Interface",
+        "label": "ShareContextMenuPanelItem",
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.ShareContextMenuPanelItem",
+            "text": "ShareContextMenuPanelItem"
+          },
+          " extends Pick<",
+          "EuiContextMenuPanelItemDescriptorEntry",
+          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
+        ],
+        "description": [],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ShareContextMenuPanelItem.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/types.ts",
+              "lineNumber": 50
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ShareContextMenuPanelItem.sortOrder",
+            "type": "number",
+            "label": "sortOrder",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/types.ts",
+              "lineNumber": 51
+            },
+            "signature": [
+              "number | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/share/public/types.ts",
+          "lineNumber": 48
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ShareMenuItem",
+        "type": "Interface",
+        "label": "ShareMenuItem",
+        "description": [],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ShareMenuItem.shareMenuItem",
+            "type": "Object",
+            "label": "shareMenuItem",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/types.ts",
+              "lineNumber": 60
+            },
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShareContextMenuPanelItem",
+                "text": "ShareContextMenuPanelItem"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ShareMenuItem.panel",
+            "type": "Object",
+            "label": "panel",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/types.ts",
+              "lineNumber": 61
+            },
+            "signature": [
+              "EuiContextMenuPanelDescriptor"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/share/public/types.ts",
+          "lineNumber": 59
         },
         "initialIsOpen": false
       },
@@ -561,8 +608,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L72"
+              "lineNumber": 72
             }
           },
           {
@@ -573,8 +619,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L74"
+              "lineNumber": 74
             },
             "signature": [
               "(context: ",
@@ -599,61 +644,7 @@
         ],
         "source": {
           "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 71,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L71"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ShareMenuItem",
-        "type": "Interface",
-        "label": "ShareMenuItem",
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ShareMenuItem.shareMenuItem",
-            "type": "Object",
-            "label": "shareMenuItem",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L60"
-            },
-            "signature": [
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.ShareContextMenuPanelItem",
-                "text": "ShareContextMenuPanelItem"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ShareMenuItem.panel",
-            "type": "Object",
-            "label": "panel",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L61"
-            },
-            "signature": [
-              "EuiContextMenuPanelDescriptor"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 59,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L59"
+          "lineNumber": 71
         },
         "initialIsOpen": false
       },
@@ -692,8 +683,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 88,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L88"
+              "lineNumber": 88
             },
             "signature": [
               "HTMLElement"
@@ -707,8 +697,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 89,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L89"
+              "lineNumber": 89
             }
           },
           {
@@ -719,8 +708,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 90,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L90"
+              "lineNumber": 90
             }
           },
           {
@@ -731,8 +719,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 91,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L91"
+              "lineNumber": 91
             },
             "signature": [
               {
@@ -748,251 +735,7 @@
         ],
         "source": {
           "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 87,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L87"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ShareContextMenuPanelItem",
-        "type": "Interface",
-        "label": "ShareContextMenuPanelItem",
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.ShareContextMenuPanelItem",
-            "text": "ShareContextMenuPanelItem"
-          },
-          " extends Pick<",
-          "EuiContextMenuPanelItemDescriptorEntry",
-          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
-        ],
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ShareContextMenuPanelItem.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 50,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L50"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ShareContextMenuPanelItem.sortOrder",
-            "type": "number",
-            "label": "sortOrder",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/types.ts",
-              "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L51"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/share/public/types.ts",
-          "lineNumber": 48,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/types.ts#L48"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.UrlGeneratorState",
-        "type": "Interface",
-        "label": "UrlGeneratorState",
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorState",
-            "text": "UrlGeneratorState"
-          },
-          "<S, I, MS>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.UrlGeneratorState.State",
-            "type": "Uncategorized",
-            "label": "State",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L16"
-            },
-            "signature": [
-              "S"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UrlGeneratorState.MigratedId",
-            "type": "Uncategorized",
-            "label": "MigratedId",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L17"
-            },
-            "signature": [
-              "I | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UrlGeneratorState.MigratedState",
-            "type": "Uncategorized",
-            "label": "MigratedState",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L18"
-            },
-            "signature": [
-              "MS | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.UrlGeneratorsDefinition",
-        "type": "Interface",
-        "label": "UrlGeneratorsDefinition",
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorsDefinition",
-            "text": "UrlGeneratorsDefinition"
-          },
-          "<Id>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.UrlGeneratorsDefinition.id",
-            "type": "Uncategorized",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L31"
-            },
-            "signature": [
-              "Id"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UrlGeneratorsDefinition.createUrl",
-            "type": "Function",
-            "label": "createUrl",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L32"
-            },
-            "signature": [
-              "((state: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"State\"]) => Promise<string>) | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UrlGeneratorsDefinition.isDeprecated",
-            "type": "CompoundType",
-            "label": "isDeprecated",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L33"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.UrlGeneratorsDefinition.migrate",
-            "type": "Function",
-            "label": "migrate",
-            "description": [],
-            "source": {
-              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L34"
-            },
-            "signature": [
-              "((state: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"State\"]) => Promise<{ state: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"MigratedState\"]; id: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"MigratedId\"]; }>) | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L30"
+          "lineNumber": 87
         },
         "initialIsOpen": false
       },
@@ -1021,8 +764,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_contract.ts#L12"
+              "lineNumber": 12
             },
             "signature": [
               "Id"
@@ -1062,8 +804,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-                  "lineNumber": 13,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_contract.ts#L13"
+                  "lineNumber": 13
                 }
               }
             ],
@@ -1071,8 +812,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_contract.ts#L13"
+              "lineNumber": 13
             }
           },
           {
@@ -1083,8 +823,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_contract.ts#L14"
+              "lineNumber": 14
             }
           },
           {
@@ -1137,8 +876,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-                  "lineNumber": 16,
-                  "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_contract.ts#L16"
+                  "lineNumber": 16
                 }
               }
             ],
@@ -1146,15 +884,219 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_contract.ts#L15"
+              "lineNumber": 15
             }
           }
         ],
         "source": {
           "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_contract.ts#L11"
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.UrlGeneratorsDefinition",
+        "type": "Interface",
+        "label": "UrlGeneratorsDefinition",
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.UrlGeneratorsDefinition",
+            "text": "UrlGeneratorsDefinition"
+          },
+          "<Id>"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.UrlGeneratorsDefinition.id",
+            "type": "Uncategorized",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+              "lineNumber": 31
+            },
+            "signature": [
+              "Id"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UrlGeneratorsDefinition.createUrl",
+            "type": "Function",
+            "label": "createUrl",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+              "lineNumber": 32
+            },
+            "signature": [
+              "((state: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.UrlGeneratorStateMapping",
+                "text": "UrlGeneratorStateMapping"
+              },
+              "[Id][\"State\"]) => Promise<string>) | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UrlGeneratorsDefinition.isDeprecated",
+            "type": "CompoundType",
+            "label": "isDeprecated",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+              "lineNumber": 33
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UrlGeneratorsDefinition.migrate",
+            "type": "Function",
+            "label": "migrate",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+              "lineNumber": 34
+            },
+            "signature": [
+              "((state: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.UrlGeneratorStateMapping",
+                "text": "UrlGeneratorStateMapping"
+              },
+              "[Id][\"State\"]) => Promise<{ state: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.UrlGeneratorStateMapping",
+                "text": "UrlGeneratorStateMapping"
+              },
+              "[Id][\"MigratedState\"]; id: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.UrlGeneratorStateMapping",
+                "text": "UrlGeneratorStateMapping"
+              },
+              "[Id][\"MigratedId\"]; }>) | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+          "lineNumber": 30
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.UrlGeneratorState",
+        "type": "Interface",
+        "label": "UrlGeneratorState",
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "public",
+            "docId": "kibSharePluginApi",
+            "section": "def-public.UrlGeneratorState",
+            "text": "UrlGeneratorState"
+          },
+          "<S, I, MS>"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.UrlGeneratorState.State",
+            "type": "Uncategorized",
+            "label": "State",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+              "lineNumber": 16
+            },
+            "signature": [
+              "S"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UrlGeneratorState.MigratedId",
+            "type": "Uncategorized",
+            "label": "MigratedId",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+              "lineNumber": 17
+            },
+            "signature": [
+              "I | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UrlGeneratorState.MigratedState",
+            "type": "Uncategorized",
+            "label": "MigratedState",
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+              "lineNumber": 18
+            },
+            "signature": [
+              "MS | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.UrlGeneratorStateMapping",
+        "type": "Interface",
+        "label": "UrlGeneratorStateMapping",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-public.UrlGeneratorStateMapping.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+          "lineNumber": 21
         },
         "initialIsOpen": false
       }
@@ -1169,8 +1111,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/share/common/constants.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/common/constants.ts#L10"
+          "lineNumber": 10
         },
         "signature": [
           "\"csv:quoteValues\""
@@ -1185,27 +1126,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/share/common/constants.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/common/constants.ts#L9"
+          "lineNumber": 9
         },
         "signature": [
           "\"csv:separator\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.UrlGeneratorId",
-        "type": "Type",
-        "label": "UrlGeneratorId",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/url_generators/url_generator_definition.ts#L9"
-        },
-        "signature": [
-          "string"
         ],
         "initialIsOpen": false
       },
@@ -1217,11 +1141,25 @@
         "description": [],
         "source": {
           "path": "src/plugins/share/public/lib/download_as.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/lib/download_as.ts#L13"
+          "lineNumber": 13
         },
         "signature": [
           "{ content: string; type: string; } | Blob"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.UrlGeneratorId",
+        "type": "Type",
+        "label": "UrlGeneratorId",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "string"
         ],
         "initialIsOpen": false
       }
@@ -1237,8 +1175,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 56,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/plugin.ts#L56"
+        "lineNumber": 56
       },
       "signature": [
         "{ register: (shareMenuProvider: ",
@@ -1264,8 +1201,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/share/public/plugin.ts",
-        "lineNumber": 61,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/public/plugin.ts#L61"
+        "lineNumber": 61
       },
       "signature": [
         "{ toggleShareContextMenu: (options: ",
@@ -1296,8 +1232,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/share/common/constants.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/common/constants.ts#L10"
+          "lineNumber": 10
         },
         "signature": [
           "\"csv:quoteValues\""
@@ -1312,8 +1247,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/share/common/constants.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/share/common/constants.ts#L9"
+          "lineNumber": 9
         },
         "signature": [
           "\"csv:separator\""
