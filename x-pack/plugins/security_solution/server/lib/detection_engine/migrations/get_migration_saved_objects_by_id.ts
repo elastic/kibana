@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+
 import { SavedObjectsClientContract } from 'src/core/server';
-import { findMigrationSavedObjects } from './find_migration_saved_objects';
-import { signalsMigrationType } from './saved_objects';
-import { SignalsMigrationSO } from './saved_objects_schema';
+import { validateEither } from '../../../../common/validate';
+import { signalsMigrationSOClient } from './saved_objects_client';
+import { SignalsMigrationSO, signalsMigrationSOs } from './saved_objects_schema';
 
 /**
  * Retrieves a list of migrations SOs by their ID
@@ -26,13 +29,16 @@ export const getMigrationSavedObjectsById = async ({
 }: {
   ids: string[];
   soClient: SavedObjectsClientContract;
-}): Promise<SignalsMigrationSO[]> =>
-  findMigrationSavedObjects({
-    soClient,
-    options: {
-      search: ids.map((id) => `${signalsMigrationType}:${id}`).join(' OR '),
-      rootSearchFields: ['_id'],
-      sortField: 'updated',
-      sortOrder: 'desc',
-    },
-  });
+}): Promise<SignalsMigrationSO[]> => {
+  const client = signalsMigrationSOClient(soClient);
+  const objects = ids.map((id) => ({ id }));
+
+  return pipe(
+    await client.bulkGet(objects),
+    (so) => validateEither(signalsMigrationSOs, so.saved_objects),
+    fold(
+      (e) => Promise.reject(e),
+      (a) => Promise.resolve(a)
+    )
+  );
+};
