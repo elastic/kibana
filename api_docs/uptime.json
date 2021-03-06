@@ -31,8 +31,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/uptime/server/kibana.index.ts#L28"
+              "lineNumber": 28
             }
           },
           {
@@ -51,8 +50,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/uptime/server/kibana.index.ts#L28"
+              "lineNumber": 28
             }
           }
         ],
@@ -67,8 +65,7 @@
         "label": "initServerWithKibana",
         "source": {
           "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-          "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/uptime/server/kibana.index.ts#L28"
+          "lineNumber": 28
         },
         "tags": [],
         "returnComment": [],
@@ -102,8 +99,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/uptime/server/kibana.index.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               "(options: ",
@@ -120,8 +116,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/uptime/server/kibana.index.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/uptime/server/kibana.index.ts#L24"
+          "lineNumber": 24
         },
         "initialIsOpen": false
       }

@@ -25,8 +25,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/console/server/types.ts",
-        "lineNumber": 13,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/console/server/types.ts#L13"
+        "lineNumber": 13
       },
       "signature": [
         "{ addExtensionSpecFilePath: (path: string) => void; }"
@@ -44,8 +43,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/console/server/types.ts",
-        "lineNumber": 18,
-        "link": "https://github.com/elastic/kibana/tree/7.xsrc/plugins/console/server/types.ts#L18"
+        "lineNumber": 18
       },
       "signature": [
         "{ addProcessorDefinition: (processor: any) => void; }"
