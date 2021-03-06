@@ -7,7 +7,7 @@
 
 import * as mocks from './test_mocks';
 import { Comparator, Aggregators, MetricExpressionParams } from './types';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { previewMetricThresholdAlert } from './preview_metric_threshold_alert';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 

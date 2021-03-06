@@ -24,7 +24,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
-} from '../../../../alerts/common';
+} from '../../../../alerting/common';
 
 const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_DETECTION];
 
@@ -41,10 +41,10 @@ export type AnomalyDetectionAlertContext = {
 } & AlertInstanceContext;
 
 export function registerAnomalyDetectionAlertType({
-  alerts,
+  alerting,
   mlSharedServices,
 }: RegisterAlertParams) {
-  alerts.registerType<
+  alerting.registerType<
     MlAnomalyDetectionAlertParams,
     AlertTypeState,
     AlertInstanceState,

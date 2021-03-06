@@ -15,7 +15,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../alerts/server';
+} from '../../../../alerting/server';
 
 export function alertingEsClient<TParams extends ESSearchRequest>(
   services: AlertServices<

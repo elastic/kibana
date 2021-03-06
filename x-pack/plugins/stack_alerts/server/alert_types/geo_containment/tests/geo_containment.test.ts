@@ -10,7 +10,7 @@ import sampleJsonResponse from './es_sample_response.json';
 import sampleJsonResponseWithNesting from './es_sample_response_with_nesting.json';
 import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_containment';
 import { OTHER_CATEGORY } from '../es_query_builder';
-import { alertsMock } from '../../../../../alerts/server/mocks';
+import { alertsMock } from '../../../../../alerting/server/mocks';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';

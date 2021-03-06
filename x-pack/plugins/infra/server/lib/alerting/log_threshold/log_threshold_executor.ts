@@ -17,7 +17,7 @@ import {
   AlertInstanceState,
   ActionGroup,
   ActionGroupIdsOf,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import {
   AlertStates,
   Comparator,

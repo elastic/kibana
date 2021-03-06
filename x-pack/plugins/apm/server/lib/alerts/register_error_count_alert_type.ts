@@ -15,7 +15,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
-} from '../../../../alerts/server';
+} from '../../../../alerting/server';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
@@ -33,7 +33,7 @@ import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
-  alerts: AlertingPlugin['setup'];
+  alerting: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -48,10 +48,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
 
 export function registerErrorCountAlertType({
-  alerts,
+  alerting,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType<
+  alerting.registerType<
     TypeOf<typeof paramsSchema>,
     AlertTypeState,
     AlertInstanceState,

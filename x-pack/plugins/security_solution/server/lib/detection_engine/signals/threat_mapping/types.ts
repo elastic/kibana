@@ -27,7 +27,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../../alerts/server';
+} from '../../../../../../alerting/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';

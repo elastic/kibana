@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import { AlertServices } from '../../../../alerts/server';
+import { AlertServices } from '../../../../alerting/server';
 import {
   ActionGroupId,
   GEO_CONTAINMENT_ID,

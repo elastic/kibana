@@ -22,7 +22,7 @@ import {
   AlertInstanceState,
   AlertServices,
   parseDuration,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
@@ -84,7 +84,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   } else if (
     indexesWithReadPrivileges.length === 0 &&
@@ -96,7 +96,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return false;
@@ -124,7 +124,7 @@ export const hasTimestampFields = async (
         : ''
     }`;
     logger.error(buildRuleMessage(errorString.trimEnd()));
-    await ruleStatusService.warning(errorString.trimEnd());
+    await ruleStatusService.partialFailure(errorString.trimEnd());
     return true;
   } else if (
     !wroteStatus &&
@@ -145,7 +145,7 @@ export const hasTimestampFields = async (
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return wroteStatus;
