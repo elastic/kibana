@@ -164,9 +164,7 @@ describe('rules_notification_alert_type', () => {
         },
       },
     };
-    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(value)
-    );
+    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue(value as ApiResponse);
     const ruleAlert = getResult();
     alertServices.savedObjectsClient.get.mockResolvedValue({
       id: 'id',
