@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 
 export const getAllCompositeData = async <
@@ -13,15 +13,15 @@ export const getAllCompositeData = async <
   Bucket = {},
   Options extends object = {}
 >(
-  esClientCallSearch: (
+  esClientSearch: (
     options: Options
-  ) => TransportRequestPromise<ApiResponse<InfraDatabaseSearchResponse<{}, Aggregation>>>,
+  ) => Promise<ApiResponse<InfraDatabaseSearchResponse<{}, Aggregation>>>,
   options: Options,
   bucketSelector: (response: InfraDatabaseSearchResponse<{}, Aggregation>) => Bucket[],
   onAfterKey: (options: Options, response: InfraDatabaseSearchResponse<{}, Aggregation>) => Options,
   previousBuckets: Bucket[] = []
 ): Promise<Bucket[]> => {
-  const { body: response } = await esClientCallSearch(options);
+  const { body: response } = await esClientSearch(options);
 
   // Nothing available, return the previous buckets.
   if (response.hits.total.value === 0) {
@@ -43,7 +43,7 @@ export const getAllCompositeData = async <
   // There is possibly more data, concat previous and current buckets and call ourselves recursively.
   const newOptions = onAfterKey(options, response);
   return getAllCompositeData(
-    esClientCallSearch,
+    esClientSearch,
     newOptions,
     bucketSelector,
     onAfterKey,

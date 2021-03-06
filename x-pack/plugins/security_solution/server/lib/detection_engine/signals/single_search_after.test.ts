@@ -14,6 +14,8 @@ import { singleSearchAfter } from './single_search_after';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { ShardError } from '../../types';
 import { buildRuleMessageFactory } from './rule_messages';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -29,7 +31,9 @@ describe('singleSearchAfter', () => {
   });
 
   test('if singleSearchAfter works without a given sort id', async () => {
-    mockService.callCluster.mockResolvedValue(sampleDocSearchResultsNoSortId());
+    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
+    );
     const { searchResult } = await singleSearchAfter({
       searchAfterSortId: undefined,
       index: [],
@@ -46,7 +50,9 @@ describe('singleSearchAfter', () => {
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
   test('if singleSearchAfter returns an empty failure array', async () => {
-    mockService.callCluster.mockResolvedValue(sampleDocSearchResultsNoSortId());
+    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
+    );
     const { searchErrors } = await singleSearchAfter({
       searchAfterSortId: undefined,
       index: [],
@@ -80,22 +86,24 @@ describe('singleSearchAfter', () => {
         },
       },
     ];
-    mockService.callCluster.mockResolvedValue({
-      took: 10,
-      timed_out: false,
-      _shards: {
-        total: 10,
-        successful: 10,
-        failed: 1,
-        skipped: 0,
-        failures: errors,
-      },
-      hits: {
-        total: 100,
-        max_score: 100,
-        hits: [],
-      },
-    });
+    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        took: 10,
+        timed_out: false,
+        _shards: {
+          total: 10,
+          successful: 10,
+          failed: 1,
+          skipped: 0,
+          failures: errors,
+        },
+        hits: {
+          total: 100,
+          max_score: 100,
+          hits: [],
+        },
+      })
+    );
     const { searchErrors } = await singleSearchAfter({
       searchAfterSortId: undefined,
       index: [],
@@ -115,7 +123,11 @@ describe('singleSearchAfter', () => {
   });
   test('if singleSearchAfter works with a given sort id', async () => {
     const searchAfterSortId = '1234567891111';
-    mockService.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        sampleDocSearchResultsWithSortId()
+      )
+    );
     const { searchResult } = await singleSearchAfter({
       searchAfterSortId,
       index: [],
@@ -133,9 +145,9 @@ describe('singleSearchAfter', () => {
   });
   test('if singleSearchAfter throws error', async () => {
     const searchAfterSortId = '1234567891111';
-    mockService.callCluster.mockImplementation(async () => {
-      throw Error('Fake Error');
-    });
+    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Fake Error'))
+    );
     await expect(
       singleSearchAfter({
         searchAfterSortId,

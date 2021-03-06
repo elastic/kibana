@@ -17,6 +17,8 @@ import {
   sampleEmptyDocSearchResults,
 } from '../signals/__mocks__/es_results';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 jest.mock('./build_signals_query');
 
 describe('rules_notification_alert_type', () => {
@@ -70,7 +72,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
 
       await alert.executor(payload);
 
@@ -94,7 +100,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
 
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
@@ -118,7 +128,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
 
@@ -143,7 +157,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
 
@@ -165,7 +183,9 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleEmptyDocSearchResults());
+      alertServices.scopedClusterClient.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+      );
 
       await alert.executor(payload);
 
@@ -180,7 +200,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsNoSortIdNoVersion());
+      alertServices.scopedClusterClient.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsNoSortIdNoVersion()
+        )
+      );
 
       await alert.executor(payload);
 

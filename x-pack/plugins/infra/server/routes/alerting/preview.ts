@@ -26,7 +26,6 @@ import { InfraBackendLibs } from '../../lib/infra_types';
 import { assertHasInfraMlPlugins } from '../../utils/request_context';
 
 export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) => {
-  const { callWithRequest } = framework;
   framework.registerRoute(
     {
       method: 'post',
