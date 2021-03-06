@@ -1415,7 +1415,7 @@ export class AlertsClient {
     );
     if (invalidActionGroups.length) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerts.alertsClient.validateActions.invalidGroups', {
+        i18n.translate('xpack.alerting.alertsClient.validateActions.invalidGroups', {
           defaultMessage: 'Invalid action groups: {groups}',
           values: {
             groups: invalidActionGroups.join(', '),
@@ -1493,7 +1493,7 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   const parsedDate = parseIsoOrRelativeDate(dateString);
   if (parsedDate === undefined) {
     throw Boom.badRequest(
-      i18n.translate('xpack.alerts.alertsClient.invalidDate', {
+      i18n.translate('xpack.alerting.alertsClient.invalidDate', {
         defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
         values: {
           field: propertyName,

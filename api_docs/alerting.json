@@ -1,5 +1,5 @@
 {
-  "id": "alerts",
+  "id": "alerting",
   "client": {
     "classes": [],
     "functions": [],
@@ -21,16 +21,16 @@
           "label": "registerNavigation",
           "description": [],
           "source": {
-            "path": "x-pack/plugins/alerts/public/plugin.ts",
+            "path": "x-pack/plugins/alerting/public/plugin.ts",
             "lineNumber": 15,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/public/plugin.ts#L15"
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/public/plugin.ts#L15"
           },
           "signature": [
             "(consumer: string, alertType: string, handler: ",
             {
-              "pluginId": "alerts",
+              "pluginId": "alerting",
               "scope": "public",
-              "docId": "kibAlertsPluginApi",
+              "docId": "kibAlertingPluginApi",
               "section": "def-public.AlertNavigationHandler",
               "text": "AlertNavigationHandler"
             },
@@ -44,16 +44,16 @@
           "label": "registerDefaultNavigation",
           "description": [],
           "source": {
-            "path": "x-pack/plugins/alerts/public/plugin.ts",
+            "path": "x-pack/plugins/alerting/public/plugin.ts",
             "lineNumber": 20,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/public/plugin.ts#L20"
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/public/plugin.ts#L20"
           },
           "signature": [
             "(consumer: string, handler: ",
             {
-              "pluginId": "alerts",
+              "pluginId": "alerting",
               "scope": "public",
-              "docId": "kibAlertsPluginApi",
+              "docId": "kibAlertingPluginApi",
               "section": "def-public.AlertNavigationHandler",
               "text": "AlertNavigationHandler"
             },
@@ -62,9 +62,9 @@
         }
       ],
       "source": {
-        "path": "x-pack/plugins/alerts/public/plugin.ts",
+        "path": "x-pack/plugins/alerting/public/plugin.ts",
         "lineNumber": 14,
-        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/public/plugin.ts#L14"
+        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/public/plugin.ts#L14"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -83,24 +83,24 @@
           "label": "getNavigation",
           "description": [],
           "source": {
-            "path": "x-pack/plugins/alerts/public/plugin.ts",
+            "path": "x-pack/plugins/alerting/public/plugin.ts",
             "lineNumber": 23,
-            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/public/plugin.ts#L23"
+            "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/public/plugin.ts#L23"
           },
           "signature": [
             "(alertId: string) => Promise<",
             {
-              "pluginId": "alerts",
+              "pluginId": "alerting",
               "scope": "common",
-              "docId": "kibAlertsPluginApi",
+              "docId": "kibAlertingPluginApi",
               "section": "def-common.AlertUrlNavigation",
               "text": "AlertUrlNavigation"
             },
             " | ",
             {
-              "pluginId": "alerts",
+              "pluginId": "alerting",
               "scope": "common",
-              "docId": "kibAlertsPluginApi",
+              "docId": "kibAlertingPluginApi",
               "section": "def-common.AlertStateNavigation",
               "text": "AlertStateNavigation"
             },
@@ -109,9 +109,9 @@
         }
       ],
       "source": {
-        "path": "x-pack/plugins/alerts/public/plugin.ts",
+        "path": "x-pack/plugins/alerting/public/plugin.ts",
         "lineNumber": 22,
-        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/public/plugin.ts#L22"
+        "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/public/plugin.ts#L22"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -138,18 +138,18 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L14"
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L14"
         },
         "initialIsOpen": false
       }
@@ -169,9 +169,9 @@
             "label": "name",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 106,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L106"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L106"
             }
           },
           {
@@ -181,9 +181,9 @@
             "label": "description",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L107"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L107"
             }
           },
           {
@@ -193,9 +193,9 @@
             "label": "useWithTripleBracesInTemplates",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L108"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L108"
             },
             "signature": [
               "boolean | undefined"
@@ -203,9 +203,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/types.ts",
+          "path": "x-pack/plugins/alerting/server/types.ts",
           "lineNumber": 105,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L105"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L105"
         },
         "initialIsOpen": false
       },
@@ -215,9 +215,9 @@
         "label": "AlertType",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "server",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-server.AlertType",
             "text": "AlertType"
           },
@@ -233,9 +233,9 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L132"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L132"
             }
           },
           {
@@ -245,9 +245,9 @@
             "label": "name",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 133,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L133"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L133"
             }
           },
           {
@@ -257,16 +257,16 @@
             "label": "validate",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 134,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L134"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L134"
             },
             "signature": [
               "{ params?: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.AlertTypeParamsValidator",
                 "text": "AlertTypeParamsValidator"
               },
@@ -280,15 +280,15 @@
             "label": "actionGroups",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 137,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L137"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L137"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -302,9 +302,9 @@
             "label": "defaultActionGroupId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 138,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L138"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L138"
             },
             "signature": [
               "ActionGroupIds"
@@ -317,15 +317,15 @@
             "label": "recoveryActionGroup",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 139,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L139"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L139"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -339,23 +339,23 @@
             "label": "executor",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 140,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L140"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L140"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.ExecutorType",
                 "text": "ExecutorType"
               },
               "<Params, State, InstanceState, InstanceContext, ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.WithoutReservedActionGroups",
                 "text": "WithoutReservedActionGroups"
               },
@@ -369,9 +369,9 @@
             "label": "producer",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 151,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L151"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L151"
             }
           },
           {
@@ -381,32 +381,32 @@
             "label": "actionVariables",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 152,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L152"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L152"
             },
             "signature": [
               "{ context?: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; state?: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; params?: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.ActionVariable",
                 "text": "ActionVariable"
               },
@@ -420,9 +420,9 @@
             "label": "minimumLicenseRequired",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 157,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L157"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L157"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -430,9 +430,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/types.ts",
+          "path": "x-pack/plugins/alerting/server/types.ts",
           "lineNumber": 124,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L124"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L124"
         },
         "initialIsOpen": false
       },
@@ -442,9 +442,9 @@
         "label": "ActionGroup",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
@@ -460,9 +460,9 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L26"
             },
             "signature": [
               "ActionGroupIds"
@@ -475,16 +475,16 @@
             "label": "name",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L27"
             }
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_type.ts",
+          "path": "x-pack/plugins/alerting/common/alert_type.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L25"
         },
         "initialIsOpen": false
       },
@@ -502,15 +502,15 @@
             "label": "setup",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 231,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L231"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L231"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.PluginSetupContract",
                 "text": "PluginSetupContract"
               }
@@ -523,15 +523,15 @@
             "label": "start",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 232,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L232"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L232"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.PluginStartContract",
                 "text": "PluginStartContract"
               }
@@ -539,9 +539,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/types.ts",
+          "path": "x-pack/plugins/alerting/server/types.ts",
           "lineNumber": 230,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L230"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L230"
         },
         "initialIsOpen": false
       },
@@ -551,9 +551,9 @@
         "label": "AlertExecutorOptions",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "server",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-server.AlertExecutorOptions",
             "text": "AlertExecutorOptions"
           },
@@ -569,9 +569,9 @@
             "label": "alertId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 91,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L91"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L91"
             }
           },
           {
@@ -581,9 +581,9 @@
             "label": "startedAt",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L92"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L92"
             },
             "signature": [
               "Date"
@@ -596,9 +596,9 @@
             "label": "previousStartedAt",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 93,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L93"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L93"
             },
             "signature": [
               "Date | null"
@@ -611,15 +611,15 @@
             "label": "services",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 94,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L94"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L94"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.AlertServices",
                 "text": "AlertServices"
               },
@@ -633,9 +633,9 @@
             "label": "params",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 95,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L95"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L95"
             },
             "signature": [
               "Params"
@@ -648,9 +648,9 @@
             "label": "state",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 96,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L96"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L96"
             },
             "signature": [
               "State"
@@ -663,9 +663,9 @@
             "label": "spaceId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L97"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L97"
             }
           },
           {
@@ -675,9 +675,9 @@
             "label": "namespace",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 98,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L98"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L98"
             },
             "signature": [
               "string | undefined"
@@ -690,9 +690,9 @@
             "label": "name",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 99,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L99"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L99"
             }
           },
           {
@@ -702,9 +702,9 @@
             "label": "tags",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L100"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L100"
             },
             "signature": [
               "string[]"
@@ -717,9 +717,9 @@
             "label": "createdBy",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L101"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L101"
             },
             "signature": [
               "string | null"
@@ -732,9 +732,9 @@
             "label": "updatedBy",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L102"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L102"
             },
             "signature": [
               "string | null"
@@ -742,9 +742,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/types.ts",
+          "path": "x-pack/plugins/alerting/server/types.ts",
           "lineNumber": 84,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L84"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L84"
         },
         "initialIsOpen": false
       },
@@ -754,9 +754,9 @@
         "label": "AlertServices",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "server",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-server.AlertServices",
             "text": "AlertServices"
           },
@@ -773,16 +773,16 @@
             "label": "alertInstanceFactory",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L79"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L79"
             },
             "signature": [
               "(id: string) => Pick<",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.AlertInstance",
                 "text": "AlertInstance"
               },
@@ -791,9 +791,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/types.ts",
+          "path": "x-pack/plugins/alerting/server/types.ts",
           "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L74"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L74"
         },
         "initialIsOpen": false
       },
@@ -813,16 +813,16 @@
             "label": "getAlertsClient",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L47"
             },
             "signature": [
               "() => ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.AlertsClient",
                 "text": "AlertsClient"
               }
@@ -835,16 +835,16 @@
             "label": "listTypes",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L48"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L48"
             },
             "signature": [
               "() => Set<",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.RegistryAlertType",
                 "text": "RegistryAlertType"
               },
@@ -858,16 +858,16 @@
             "label": "getFrameworkHealth",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/types.ts",
+              "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L49"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L49"
             },
             "signature": [
               "() => Promise<",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertsHealth",
                 "text": "AlertsHealth"
               },
@@ -876,9 +876,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/types.ts",
+          "path": "x-pack/plugins/alerting/server/types.ts",
           "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L46"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L46"
         },
         "initialIsOpen": false
       },
@@ -896,9 +896,9 @@
             "signature": [
               "<Params extends Record<string, unknown> = Record<string, unknown>, State extends Record<string, unknown> = Record<string, unknown>, InstanceState extends { [x: string]: unknown; } = { [x: string]: unknown; }, InstanceContext extends { [x: string]: unknown; } = { [x: string]: unknown; }, ActionGroupIds extends string = never, RecoveryActionGroupId extends string = never>(alertType: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.AlertType",
                 "text": "AlertType"
               },
@@ -912,9 +912,9 @@
                 "isRequired": true,
                 "signature": [
                   {
-                    "pluginId": "alerts",
+                    "pluginId": "alerting",
                     "scope": "server",
-                    "docId": "kibAlertsPluginApi",
+                    "docId": "kibAlertingPluginApi",
                     "section": "def-server.AlertType",
                     "text": "AlertType"
                   },
@@ -922,25 +922,25 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "x-pack/plugins/alerts/server/plugin.ts",
+                  "path": "x-pack/plugins/alerting/server/plugin.ts",
                   "lineNumber": 112,
-                  "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/plugin.ts#L112"
+                  "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/plugin.ts#L112"
                 }
               }
             ],
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/plugin.ts",
+              "path": "x-pack/plugins/alerting/server/plugin.ts",
               "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/plugin.ts#L104"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/plugin.ts#L104"
             }
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/plugin.ts",
+          "path": "x-pack/plugins/alerting/server/plugin.ts",
           "lineNumber": 103,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/plugin.ts#L103"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/plugin.ts#L103"
         },
         "initialIsOpen": false
       },
@@ -958,16 +958,16 @@
             "label": "listTypes",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/plugin.ts",
+              "path": "x-pack/plugins/alerting/server/plugin.ts",
               "lineNumber": 124,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/plugin.ts#L124"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/plugin.ts#L124"
             },
             "signature": [
               "() => Set<",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.RegistryAlertType",
                 "text": "RegistryAlertType"
               },
@@ -989,9 +989,9 @@
               },
               "<unknown, unknown, unknown, any>) => Pick<",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "server",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-server.AlertsClient",
                 "text": "AlertsClient"
               },
@@ -1015,18 +1015,18 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "x-pack/plugins/alerts/server/plugin.ts",
+                  "path": "x-pack/plugins/alerting/server/plugin.ts",
                   "lineNumber": 125,
-                  "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/plugin.ts#L125"
+                  "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/plugin.ts#L125"
                 }
               }
             ],
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/plugin.ts",
+              "path": "x-pack/plugins/alerting/server/plugin.ts",
               "lineNumber": 125,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/plugin.ts#L125"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/plugin.ts#L125"
             }
           },
           {
@@ -1036,16 +1036,16 @@
             "label": "getFrameworkHealth",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/plugin.ts",
+              "path": "x-pack/plugins/alerting/server/plugin.ts",
               "lineNumber": 126,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/plugin.ts#L126"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/plugin.ts#L126"
             },
             "signature": [
               "() => Promise<",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertsHealth",
                 "text": "AlertsHealth"
               },
@@ -1054,9 +1054,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/plugin.ts",
+          "path": "x-pack/plugins/alerting/server/plugin.ts",
           "lineNumber": 123,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/plugin.ts#L123"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/plugin.ts#L123"
         },
         "initialIsOpen": false
       },
@@ -1066,9 +1066,9 @@
         "label": "FindResult",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "server",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-server.FindResult",
             "text": "FindResult"
           },
@@ -1084,9 +1084,9 @@
             "label": "page",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/alerts_client/alerts_client.ts",
+              "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
               "lineNumber": 131,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/alerts_client/alerts_client.ts#L131"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/alerts_client/alerts_client.ts#L131"
             }
           },
           {
@@ -1096,9 +1096,9 @@
             "label": "perPage",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/alerts_client/alerts_client.ts",
+              "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
               "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/alerts_client/alerts_client.ts#L132"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/alerts_client/alerts_client.ts#L132"
             }
           },
           {
@@ -1108,9 +1108,9 @@
             "label": "total",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/alerts_client/alerts_client.ts",
+              "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
               "lineNumber": 133,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/alerts_client/alerts_client.ts#L133"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/alerts_client/alerts_client.ts#L133"
             }
           },
           {
@@ -1120,16 +1120,16 @@
             "label": "data",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/server/alerts_client/alerts_client.ts",
+              "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
               "lineNumber": 134,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/alerts_client/alerts_client.ts#L134"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/alerts_client/alerts_client.ts#L134"
             },
             "signature": [
               "Pick<",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
@@ -1138,9 +1138,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/server/alerts_client/alerts_client.ts",
+          "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
           "lineNumber": 130,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/alerts_client/alerts_client.ts#L130"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/alerts_client/alerts_client.ts#L130"
         },
         "initialIsOpen": false
       }
@@ -1154,16 +1154,16 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/server/index.ts",
+          "path": "x-pack/plugins/alerting/server/index.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/index.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/index.ts#L15"
         },
         "signature": [
           "{ get: <Params>({ id, }: { id: string; }) => Promise<Pick<",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.Alert",
             "text": "Alert"
           },
@@ -1171,9 +1171,9 @@
           "CreateOptions",
           "<Params>) => Promise<",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.Alert",
             "text": "Alert"
           },
@@ -1181,9 +1181,9 @@
           "FindOptions",
           " | undefined; }) => Promise<",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "server",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-server.FindResult",
             "text": "FindResult"
           }
@@ -1197,9 +1197,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_type.ts",
+          "path": "x-pack/plugins/alerting/common/alert_type.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L30"
         },
         "signature": [
           "T extends ActionGroup<infer groups> ? groups : T extends Readonly<ActionGroup<infer groups>> ? groups : never"
@@ -1213,9 +1213,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 40,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L40"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L40"
         },
         "signature": [
           "SavedObjectAttributes"
@@ -1229,9 +1229,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L11"
         },
         "signature": [
           "{ [x: string]: unknown; }"
@@ -1245,9 +1245,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L12"
         },
         "signature": [
           "{ [x: string]: unknown; }"
@@ -1261,9 +1261,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/server/types.ts",
+          "path": "x-pack/plugins/alerting/server/types.ts",
           "lineNumber": 190,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/types.ts#L190"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/types.ts#L190"
         },
         "signature": [
           "Pick<Alert<Params>, \"id\"> & Partial<Pick<Alert<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"apiKey\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>"
@@ -1277,9 +1277,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance.ts#L25"
         },
         "signature": [
           "{ [x: string]: unknown; }"
@@ -1293,9 +1293,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance.ts#L28"
         },
         "signature": [
           "{ [x: string]: unknown; }"
@@ -1309,9 +1309,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/server/alert_instance/alert_instance.ts",
+          "path": "x-pack/plugins/alerting/server/alert_instance/alert_instance.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/server/alert_instance/alert_instance.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/server/alert_instance/alert_instance.ts#L30"
         },
         "signature": [
           "{ getState: () => State; replaceState: (state: State) => AlertInstance<State, Context, ActionGroupIds>; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => AlertInstance<State, Context, ActionGroupIds>; scheduleActionsWithSubGroup: (actionGroup: ActionGroupIds, subgroup: string, context?: Context) => AlertInstance<State, Context, ActionGroupIds>; }"
@@ -1331,25 +1331,25 @@
         "signature": [
           "(customRecoveryGroup: ",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<RecoveryActionGroupId> | undefined) => [",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
           "<",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.ReservedActionGroups",
             "text": "ReservedActionGroups"
           },
@@ -1363,9 +1363,9 @@
             "isRequired": false,
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -1373,18 +1373,18 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
+              "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/builtin_action_groups.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/builtin_action_groups.ts#L31"
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
+          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/builtin_action_groups.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/builtin_action_groups.ts#L30"
         },
         "initialIsOpen": false
       },
@@ -1406,9 +1406,9 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/disabled_action_groups.ts",
+              "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/disabled_action_groups.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/disabled_action_groups.ts#L19"
             }
           },
           {
@@ -1420,18 +1420,18 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/disabled_action_groups.ts",
+              "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/disabled_action_groups.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/disabled_action_groups.ts#L20"
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/disabled_action_groups.ts",
+          "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/disabled_action_groups.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/disabled_action_groups.ts#L18"
         },
         "initialIsOpen": false
       },
@@ -1453,18 +1453,18 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_notify_when_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_notify_when_type.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_notify_when_type.ts#L15"
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_notify_when_type.ts",
+          "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
           "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_notify_when_type.ts#L15"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_notify_when_type.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -1486,18 +1486,18 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L14"
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L14"
         },
         "initialIsOpen": false
       },
@@ -1519,18 +1519,18 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L30"
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L30"
         },
         "initialIsOpen": false
       },
@@ -1552,18 +1552,18 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L34"
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
           "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L34"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L34"
         },
         "initialIsOpen": false
       },
@@ -1585,18 +1585,18 @@
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+              "path": "x-pack/plugins/alerting/common/parse_duration.ts",
               "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L39"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L39"
             }
           }
         ],
         "tags": [],
         "returnComment": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/parse_duration.ts",
+          "path": "x-pack/plugins/alerting/common/parse_duration.ts",
           "lineNumber": 39,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/parse_duration.ts#L39"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/parse_duration.ts#L39"
         },
         "initialIsOpen": false
       }
@@ -1616,9 +1616,9 @@
             "label": "isSufficientlySecure",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/index.ts",
+              "path": "x-pack/plugins/alerting/common/index.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/index.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/index.ts#L22"
             }
           },
           {
@@ -1628,9 +1628,9 @@
             "label": "hasPermanentEncryptionKey",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/index.ts",
+              "path": "x-pack/plugins/alerting/common/index.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/index.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/index.ts#L23"
             }
           },
           {
@@ -1640,15 +1640,15 @@
             "label": "alertingFrameworkHeath",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/index.ts",
+              "path": "x-pack/plugins/alerting/common/index.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/index.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/index.ts#L24"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertsHealth",
                 "text": "AlertsHealth"
               }
@@ -1656,9 +1656,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/index.ts",
+          "path": "x-pack/plugins/alerting/common/index.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/index.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/index.ts#L21"
         },
         "initialIsOpen": false
       },
@@ -1668,9 +1668,9 @@
         "label": "IntervalSchedule",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
@@ -1687,16 +1687,16 @@
             "label": "interval",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L15"
             }
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L14"
         },
         "initialIsOpen": false
       },
@@ -1714,9 +1714,9 @@
             "label": "status",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L32"
             },
             "signature": [
               "\"unknown\" | \"error\" | \"pending\" | \"ok\" | \"active\""
@@ -1729,9 +1729,9 @@
             "label": "lastExecutionDate",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L33"
             },
             "signature": [
               "Date"
@@ -1744,16 +1744,16 @@
             "label": "error",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L34"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L34"
             },
             "signature": [
               "{ reason: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertExecutionStatusErrorReasons",
                 "text": "AlertExecutionStatusErrorReasons"
               },
@@ -1762,9 +1762,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L31"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L31"
         },
         "initialIsOpen": false
       },
@@ -1782,9 +1782,9 @@
             "label": "group",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L44"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L44"
             }
           },
           {
@@ -1794,9 +1794,9 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L45"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L45"
             }
           },
           {
@@ -1806,9 +1806,9 @@
             "label": "actionTypeId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L46"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L46"
             }
           },
           {
@@ -1818,9 +1818,9 @@
             "label": "params",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L47"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L47"
             },
             "signature": [
               {
@@ -1834,9 +1834,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L43"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L43"
         },
         "initialIsOpen": false
       },
@@ -1854,9 +1854,9 @@
             "label": "alertExecutionStatus",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 51,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L51"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L51"
             },
             "signature": [
               "{ [status: string]: number; }"
@@ -1864,9 +1864,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 50,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L50"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L50"
         },
         "initialIsOpen": false
       },
@@ -1876,9 +1876,9 @@
         "label": "Alert",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.Alert",
             "text": "Alert"
           },
@@ -1894,9 +1894,9 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 55,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L55"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L55"
             }
           },
           {
@@ -1906,9 +1906,9 @@
             "label": "enabled",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L56"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L56"
             }
           },
           {
@@ -1918,9 +1918,9 @@
             "label": "name",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L57"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L57"
             }
           },
           {
@@ -1930,9 +1930,9 @@
             "label": "tags",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L58"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L58"
             },
             "signature": [
               "string[]"
@@ -1945,9 +1945,9 @@
             "label": "alertTypeId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 59,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L59"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L59"
             }
           },
           {
@@ -1957,9 +1957,9 @@
             "label": "consumer",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L60"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L60"
             }
           },
           {
@@ -1969,15 +1969,15 @@
             "label": "schedule",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L61"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L61"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.IntervalSchedule",
                 "text": "IntervalSchedule"
               }
@@ -1990,15 +1990,15 @@
             "label": "actions",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L62"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L62"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertAction",
                 "text": "AlertAction"
               },
@@ -2012,9 +2012,9 @@
             "label": "params",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L63"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L63"
             },
             "signature": [
               "Params"
@@ -2027,9 +2027,9 @@
             "label": "scheduledTaskId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L64"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L64"
             },
             "signature": [
               "string | undefined"
@@ -2042,9 +2042,9 @@
             "label": "createdBy",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L65"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L65"
             },
             "signature": [
               "string | null"
@@ -2057,9 +2057,9 @@
             "label": "updatedBy",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L66"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L66"
             },
             "signature": [
               "string | null"
@@ -2072,9 +2072,9 @@
             "label": "createdAt",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L67"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L67"
             },
             "signature": [
               "Date"
@@ -2087,9 +2087,9 @@
             "label": "updatedAt",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L68"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L68"
             },
             "signature": [
               "Date"
@@ -2102,9 +2102,9 @@
             "label": "apiKey",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 69,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L69"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L69"
             },
             "signature": [
               "string | null"
@@ -2117,9 +2117,9 @@
             "label": "apiKeyOwner",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L70"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L70"
             },
             "signature": [
               "string | null"
@@ -2132,9 +2132,9 @@
             "label": "throttle",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L71"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L71"
             },
             "signature": [
               "string | null"
@@ -2147,9 +2147,9 @@
             "label": "notifyWhen",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L72"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L72"
             },
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null"
@@ -2162,9 +2162,9 @@
             "label": "muteAll",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L73"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L73"
             }
           },
           {
@@ -2174,9 +2174,9 @@
             "label": "mutedInstanceIds",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L74"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L74"
             },
             "signature": [
               "string[]"
@@ -2189,15 +2189,15 @@
             "label": "executionStatus",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L75"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L75"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertExecutionStatus",
                 "text": "AlertExecutionStatus"
               }
@@ -2205,9 +2205,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L54"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L54"
         },
         "initialIsOpen": false
       },
@@ -2225,16 +2225,16 @@
             "label": "decryptionHealth",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 87,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L87"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L87"
             },
             "signature": [
               "{ status: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.HealthStatus",
                 "text": "HealthStatus"
               },
@@ -2248,16 +2248,16 @@
             "label": "executionHealth",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 91,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L91"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L91"
             },
             "signature": [
               "{ status: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.HealthStatus",
                 "text": "HealthStatus"
               },
@@ -2271,16 +2271,16 @@
             "label": "readHealth",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert.ts",
+              "path": "x-pack/plugins/alerting/common/alert.ts",
               "lineNumber": 95,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L95"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L95"
             },
             "signature": [
               "{ status: ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.HealthStatus",
                 "text": "HealthStatus"
               },
@@ -2289,9 +2289,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 86,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L86"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L86"
         },
         "initialIsOpen": false
       },
@@ -2301,9 +2301,9 @@
         "label": "AlertType",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.AlertType",
             "text": "AlertType"
           },
@@ -2319,9 +2319,9 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L15"
             }
           },
           {
@@ -2331,9 +2331,9 @@
             "label": "name",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L16"
             }
           },
           {
@@ -2343,15 +2343,15 @@
             "label": "actionGroups",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L17"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -2365,15 +2365,15 @@
             "label": "recoveryActionGroup",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L18"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.ActionGroup",
                 "text": "ActionGroup"
               },
@@ -2387,9 +2387,9 @@
             "label": "actionVariables",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L19"
             },
             "signature": [
               "string[]"
@@ -2402,9 +2402,9 @@
             "label": "defaultActionGroupId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L20"
             },
             "signature": [
               "ActionGroupIds"
@@ -2417,9 +2417,9 @@
             "label": "producer",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L21"
             }
           },
           {
@@ -2429,9 +2429,9 @@
             "label": "minimumLicenseRequired",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L22"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -2439,9 +2439,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_type.ts",
+          "path": "x-pack/plugins/alerting/common/alert_type.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -2451,9 +2451,9 @@
         "label": "ActionGroup",
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
@@ -2469,9 +2469,9 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L26"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L26"
             },
             "signature": [
               "ActionGroupIds"
@@ -2484,16 +2484,16 @@
             "label": "name",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_type.ts",
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
               "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L27"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L27"
             }
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_type.ts",
+          "path": "x-pack/plugins/alerting/common/alert_type.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L25"
         },
         "initialIsOpen": false
       },
@@ -2511,16 +2511,16 @@
             "label": "path",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_navigation.ts",
+              "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
               "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_navigation.ts#L11"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_navigation.ts#L11"
             }
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_navigation.ts",
+          "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
           "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_navigation.ts#L10"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_navigation.ts#L10"
         },
         "initialIsOpen": false
       },
@@ -2538,9 +2538,9 @@
             "label": "state",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_navigation.ts",
+              "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_navigation.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_navigation.ts#L14"
             },
             "signature": [
               {
@@ -2554,9 +2554,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_navigation.ts",
+          "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_navigation.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_navigation.ts#L13"
         },
         "initialIsOpen": false
       },
@@ -2574,9 +2574,9 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L12"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L12"
             }
           },
           {
@@ -2586,9 +2586,9 @@
             "label": "name",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L13"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L13"
             }
           },
           {
@@ -2598,9 +2598,9 @@
             "label": "tags",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L14"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L14"
             },
             "signature": [
               "string[]"
@@ -2613,9 +2613,9 @@
             "label": "alertTypeId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L15"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L15"
             }
           },
           {
@@ -2625,9 +2625,9 @@
             "label": "consumer",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L16"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L16"
             }
           },
           {
@@ -2637,9 +2637,9 @@
             "label": "muteAll",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L17"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L17"
             }
           },
           {
@@ -2649,9 +2649,9 @@
             "label": "throttle",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L18"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L18"
             },
             "signature": [
               "string | null"
@@ -2664,9 +2664,9 @@
             "label": "enabled",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L19"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L19"
             }
           },
           {
@@ -2676,9 +2676,9 @@
             "label": "statusStartDate",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L20"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L20"
             }
           },
           {
@@ -2688,9 +2688,9 @@
             "label": "statusEndDate",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L21"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L21"
             }
           },
           {
@@ -2700,15 +2700,15 @@
             "label": "status",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L22"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L22"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertStatusValues",
                 "text": "AlertStatusValues"
               }
@@ -2721,9 +2721,9 @@
             "label": "lastRun",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L23"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L23"
             },
             "signature": [
               "string | undefined"
@@ -2736,9 +2736,9 @@
             "label": "errorMessages",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L24"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L24"
             },
             "signature": [
               "{ date: string; message: string; }[]"
@@ -2751,16 +2751,16 @@
             "label": "instances",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L25"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L25"
             },
             "signature": [
               "Record<string, ",
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertInstanceStatus",
                 "text": "AlertInstanceStatus"
               },
@@ -2769,9 +2769,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -2789,15 +2789,15 @@
             "label": "status",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L29"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L29"
             },
             "signature": [
               {
-                "pluginId": "alerts",
+                "pluginId": "alerting",
                 "scope": "common",
-                "docId": "kibAlertsPluginApi",
+                "docId": "kibAlertingPluginApi",
                 "section": "def-common.AlertInstanceStatusValues",
                 "text": "AlertInstanceStatusValues"
               }
@@ -2810,9 +2810,9 @@
             "label": "muted",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L30"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L30"
             }
           },
           {
@@ -2822,9 +2822,9 @@
             "label": "actionGroupId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L31"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L31"
             },
             "signature": [
               "string | undefined"
@@ -2837,9 +2837,9 @@
             "label": "actionSubgroup",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L32"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L32"
             },
             "signature": [
               "string | undefined"
@@ -2852,9 +2852,9 @@
             "label": "activeStartDate",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+              "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
               "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L33"
+              "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L33"
             },
             "signature": [
               "string | undefined"
@@ -2862,9 +2862,9 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L28"
         },
         "initialIsOpen": false
       }
@@ -2877,9 +2877,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L23"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L23"
         },
         "initialIsOpen": false
       },
@@ -2890,9 +2890,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 80,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L80"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L80"
         },
         "initialIsOpen": false
       }
@@ -2905,9 +2905,9 @@
         "label": "BASE_ALERT_API_PATH",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/index.ts",
+          "path": "x-pack/plugins/alerting/common/index.ts",
           "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/index.ts#L27"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/index.ts#L27"
         },
         "signature": [
           "\"/api/alerts\""
@@ -2921,9 +2921,9 @@
         "label": "ALERTS_FEATURE_ID",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/index.ts",
+          "path": "x-pack/plugins/alerting/common/index.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/index.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/index.ts#L28"
         },
         "signature": [
           "\"alerts\""
@@ -2937,9 +2937,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L11"
         },
         "signature": [
           "{ [x: string]: unknown; }"
@@ -2953,9 +2953,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L12"
         },
         "signature": [
           "{ [x: string]: unknown; }"
@@ -2969,9 +2969,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L21"
         },
         "signature": [
           "\"unknown\" | \"error\" | \"pending\" | \"ok\" | \"active\""
@@ -2985,9 +2985,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 40,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L40"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L40"
         },
         "signature": [
           "SavedObjectAttributes"
@@ -3001,9 +3001,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 41,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L41"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L41"
         },
         "signature": [
           "undefined | null | string | number | false | true | ",
@@ -3021,9 +3021,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 78,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L78"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L78"
         },
         "signature": [
           "{ enabled: boolean; id: string; name: string; params: Params; actions: AlertAction[]; muteAll: boolean; tags: string[]; alertTypeId: string; consumer: string; schedule: IntervalSchedule; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: AlertExecutionStatus; }"
@@ -3037,9 +3037,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_type.ts",
+          "path": "x-pack/plugins/alerting/common/alert_type.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_type.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_type.ts#L30"
         },
         "signature": [
           "T extends ActionGroup<infer groups> ? groups : T extends Readonly<ActionGroup<infer groups>> ? groups : never"
@@ -3053,9 +3053,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
           "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance.ts#L22"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance.ts#L22"
         },
         "signature": [
           "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; }"
@@ -3069,9 +3069,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance.ts#L25"
         },
         "signature": [
           "{ [x: string]: unknown; }"
@@ -3085,9 +3085,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance.ts#L28"
         },
         "signature": [
           "{ [x: string]: unknown; }"
@@ -3101,9 +3101,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
           "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance.ts#L34"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance.ts#L34"
         },
         "signature": [
           "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }"
@@ -3117,9 +3117,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_task_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
           "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_task_instance.ts#L18"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_task_instance.ts#L18"
         },
         "signature": [
           "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }"
@@ -3133,9 +3133,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_task_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
           "lineNumber": 28,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_task_instance.ts#L28"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_task_instance.ts#L28"
         },
         "signature": [
           "{ alertId: string; } & { spaceId?: string | undefined; }"
@@ -3149,23 +3149,23 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_navigation.ts",
+          "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
           "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_navigation.ts#L16"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_navigation.ts#L16"
         },
         "signature": [
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.AlertUrlNavigation",
             "text": "AlertUrlNavigation"
           },
           " | ",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.AlertStateNavigation",
             "text": "AlertStateNavigation"
           }
@@ -3179,9 +3179,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
           "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L8"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L8"
         },
         "signature": [
           "\"OK\" | \"Active\" | \"Error\""
@@ -3195,9 +3195,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance_summary.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance_summary.ts",
           "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance_summary.ts#L9"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance_summary.ts#L9"
         },
         "signature": [
           "\"OK\" | \"Active\""
@@ -3211,9 +3211,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
+          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
           "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/builtin_action_groups.ts#L11"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/builtin_action_groups.ts#L11"
         },
         "signature": [
           "\"default\""
@@ -3227,9 +3227,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
+          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/builtin_action_groups.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/builtin_action_groups.ts#L13"
         },
         "signature": [
           "\"recovered\""
@@ -3243,9 +3243,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
+          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
           "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/builtin_action_groups.ts#L21"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/builtin_action_groups.ts#L21"
         },
         "signature": [
           "RecoveryActionGroupId | \"recovered\""
@@ -3259,9 +3259,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
+          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
           "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/builtin_action_groups.ts#L25"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/builtin_action_groups.ts#L25"
         },
         "signature": [
           "ActionGroupIds extends ReservedActionGroups<RecoveryActionGroupId> ? never : ActionGroupIds"
@@ -3275,9 +3275,9 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_notify_when_type.ts",
+          "path": "x-pack/plugins/alerting/common/alert_notify_when_type.ts",
           "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_notify_when_type.ts#L13"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_notify_when_type.ts#L13"
         },
         "signature": [
           "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
@@ -3293,9 +3293,9 @@
         "label": "AlertExecutionStatusValues",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert.ts",
+          "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert.ts#L20"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert.ts#L20"
         },
         "signature": [
           "readonly [\"ok\", \"active\", \"error\", \"pending\", \"unknown\"]"
@@ -3309,9 +3309,9 @@
         "label": "rawAlertInstance",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_instance.ts",
           "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_instance.ts#L30"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_instance.ts#L30"
         },
         "signature": [
           "PartialC",
@@ -3333,9 +3333,9 @@
         "label": "alertStateSchema",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_task_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
           "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_task_instance.ts#L12"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_task_instance.ts#L12"
         },
         "signature": [
           "PartialC",
@@ -3357,9 +3357,9 @@
         "label": "alertParamsSchema",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/alert_task_instance.ts",
+          "path": "x-pack/plugins/alerting/common/alert_task_instance.ts",
           "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/alert_task_instance.ts#L20"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/alert_task_instance.ts#L20"
         },
         "signature": [
           "IntersectionC",
@@ -3381,16 +3381,16 @@
         "label": "RecoveredActionGroup",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/builtin_action_groups.ts",
+          "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/builtin_action_groups.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/builtin_action_groups.ts#L14"
         },
         "signature": [
           "Readonly<",
           {
-            "pluginId": "alerts",
+            "pluginId": "alerting",
             "scope": "common",
-            "docId": "kibAlertsPluginApi",
+            "docId": "kibAlertingPluginApi",
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
@@ -3405,9 +3405,9 @@
         "label": "DisabledActionTypeIdsForActionGroup",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/alerts/common/disabled_action_groups.ts",
+          "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
           "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerts/common/disabled_action_groups.ts#L14"
+          "link": "https://github.com/elastic/kibana/tree/7.xx-pack/plugins/alerting/common/disabled_action_groups.ts#L14"
         },
         "signature": [
           "Map<string, string[]>"

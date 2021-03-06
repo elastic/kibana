@@ -16,7 +16,7 @@ export const handleDisabledApiKeysError: RequestHandlerWrapper = (handler) => {
       if (isApiKeyDisabledError(e)) {
         return response.badRequest({
           body: new Error(
-            i18n.translate('xpack.alerts.api.error.disabledApiKeys', {
+            i18n.translate('xpack.alerting.api.error.disabledApiKeys', {
               defaultMessage: 'Alerting relies upon API keys which appear to be disabled',
             })
           ),

@@ -122,7 +122,7 @@ export class MonitoringPlugin
     const serverInfo = core.http.getServerInfo();
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      plugins.alerts?.registerType(alert.getAlertType());
+      plugins.alerting?.registerType(alert.getAlertType());
     }
 
     // Register collector objects for stats to show up in the APIs
@@ -323,7 +323,7 @@ export class MonitoringPlugin
             getActionTypeRegistry: () => context.actions?.listTypes(),
             getAlertsClient: () => {
               try {
-                return plugins.alerts.getAlertsClientWithRequest(req);
+                return plugins.alerting.getAlertsClientWithRequest(req);
               } catch (err) {
                 // If security is disabled, this call will throw an error unless a certain config is set for dist builds
                 return null;

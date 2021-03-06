@@ -22,7 +22,7 @@ import {
   AlertInstanceState,
   AlertServices,
   parseDuration,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
