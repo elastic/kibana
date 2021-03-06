@@ -8,7 +8,6 @@
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import {
   isTooManyBucketsPreviewException,
@@ -105,10 +104,10 @@ const getData = async (
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput
 ) => {
-  const client = <Hit = {}, Aggregation = undefined>(
+  const client = async <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
-  ): TransportRequestPromise<ApiResponse<InfraDatabaseSearchResponse<Hit, Aggregation>>> =>
-    esClient.search(options);
+  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
+    (await esClient.search(options)).body as InfraDatabaseSearchResponse<Hit, Aggregation>;
 
   const metrics = [
     metric === 'custom' ? (customMetric as SnapshotCustomMetricInput) : { type: metric },

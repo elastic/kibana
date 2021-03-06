@@ -9,6 +9,7 @@ import * as mocks from './test_mocks';
 import { Comparator, Aggregators, MetricExpressionParams } from './types';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { previewMetricThresholdAlert } from './preview_metric_threshold_alert';
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('Previewing the metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
@@ -163,22 +164,26 @@ describe('Previewing the metric threshold alert type', () => {
 });
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
-  const metric = body.query.bool.filter[1]?.exists.field;
-  if (body.aggs.groupings) {
-    if (body.aggs.groupings.composite.after) {
-      return mocks.compositeEndResponse;
+
+elasticsearchClientMock
+  .createScopedClusterClient()
+  .asCurrentUser.search.mockImplementation(({ body }: any) => {
+    const metric = body.query.bool.filter[1]?.exists.field;
+    if (body.aggs.groupings) {
+      if (body.aggs.groupings.composite.after) {
+        return mocks.compositeEndResponse;
+      }
+      return mocks.basicCompositePreviewResponse;
     }
-    return mocks.basicCompositePreviewResponse;
-  }
-  if (metric === 'test.metric.2') {
-    return mocks.alternateMetricPreviewResponse;
-  }
-  if (metric === 'test.metric.3') {
-    return mocks.repeatingMetricPreviewResponse;
-  }
-  return mocks.basicMetricPreviewResponse;
-});
+    if (metric === 'test.metric.2') {
+      return mocks.alternateMetricPreviewResponse;
+    }
+    if (metric === 'test.metric.3') {
+      return mocks.repeatingMetricPreviewResponse;
+    }
+    return mocks.basicMetricPreviewResponse;
+  });
+services.scopedClusterClient.search.mockImplementation(searchMock(body));
 
 const baseCriterion = {
   aggType: Aggregators.AVERAGE,

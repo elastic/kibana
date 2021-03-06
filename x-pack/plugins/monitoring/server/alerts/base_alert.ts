@@ -234,7 +234,7 @@ export class BaseAlert {
     );
 
     const useCallCluster =
-      Globals.app.monitoringCluster?.callAsInternalUser || services.callCluster;
+      Globals.app.monitoringCluster?.callAsInternalUser || services.scopedClusterClient;
     const callCluster = async (
       endpoint: string,
       clientParams?: Record<string, unknown>,
