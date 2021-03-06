@@ -3,9 +3,11 @@
     "Elastic"
   ],
   "description": "Identifies registry modifications related to the Windows Security Support Provider (SSP) configuration. Adversaries may abuse this to establish persistence in an environment.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -47,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

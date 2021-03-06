@@ -14,7 +14,6 @@ import React, {
   useState,
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LocalUIFilterName } from '../../../common/ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -31,15 +30,13 @@ export interface TimeRange {
 }
 
 function useUiFilters(params: IUrlParams): UIFilters {
-  const { kuery, environment, ...urlParams } = params;
   const localUiFilters = mapValues(
-    pickKeys(urlParams, ...localUIFilterNames),
+    pickKeys(params, ...localUIFilterNames),
     (val) => (val ? val.split(',') : [])
   ) as Partial<Record<LocalUIFilterName, string[]>>;
 
   return useDeepObjectIdentity({
-    kuery,
-    environment: environment || ENVIRONMENT_ALL.value,
+    environment: params.environment,
     ...localUiFilters,
   });
 }

@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Connection to Commonly Abused Web Services",
-  "query": "network where network.protocol == \"dns\" and\n             /* Add new WebSvc domains here */\n              wildcard(dns.question.name, \"*.githubusercontent.*\",\n                                          \"*.pastebin.*\",\n                                          \"*drive.google.*\",\n                                          \"*docs.live.*\",\n                                          \"*api.dropboxapi.*\",\n                                          \"*dropboxusercontent.*\",\n                                          \"*onedrive.*\",\n                                          \"*4shared.*\",\n                                          \"*.file.io\",\n                                          \"*filebin.net\",\n                                          \"*slack-files.com\",\n                                          \"*ghostbin.*\",\n                                          \"*ngrok.*\",\n                                          \"*portmap.*\",\n                                          \"*serveo.net\",\n                                          \"*localtunnel.me\",\n                                          \"*pagekite.me\",\n                                          \"*localxpose.io\",\n                                          \"*notabug.org\"\n                      ) and\n                          /* Insert noisy false positives here */\n              not process.name in (\"MicrosoftEdgeCP.exe\",\n                                    \"MicrosoftEdge.exe\",\n                                    \"iexplore.exe\",\n                                    \"chrome.exe\",\n                                    \"msedge.exe\",\n                                    \"opera.exe\",\n                                    \"firefox.exe\",\n                                    \"Dropbox.exe\",\n                                    \"slack.exe\",\n                                    \"svchost.exe\",\n                                    \"thunderbird.exe\",\n                                    \"outlook.exe\",\n                                    \"OneDrive.exe\")\n",
+  "query": "network where network.protocol == \"dns\" and\n    /* Add new WebSvc domains here */\n    dns.question.name :\n    (\n        \"*.githubusercontent.*\",\n        \"*.pastebin.*\",\n        \"*drive.google.*\",\n        \"*docs.live.*\",\n        \"*api.dropboxapi.*\",\n        \"*dropboxusercontent.*\",\n        \"*onedrive.*\",\n        \"*4shared.*\",\n        \"*.file.io\",\n        \"*filebin.net\",\n        \"*slack-files.com\",\n        \"*ghostbin.*\",\n        \"*ngrok.*\",\n        \"*portmap.*\",\n        \"*serveo.net\",\n        \"*localtunnel.me\",\n        \"*pagekite.me\",\n        \"*localxpose.io\",\n        \"*notabug.org\"\n    ) and\n    /* Insert noisy false positives here */\n    not process.name :\n    (\n        \"MicrosoftEdgeCP.exe\",\n        \"MicrosoftEdge.exe\",\n        \"iexplore.exe\",\n        \"chrome.exe\",\n        \"msedge.exe\",\n        \"opera.exe\",\n        \"firefox.exe\",\n        \"Dropbox.exe\",\n        \"slack.exe\",\n        \"svchost.exe\",\n        \"thunderbird.exe\",\n        \"outlook.exe\",\n        \"OneDrive.exe\"\n    )\n",
   "risk_score": 21,
   "rule_id": "66883649-f908-4a5b-a1e0-54090a1d3a32",
   "severity": "low",
@@ -41,5 +42,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

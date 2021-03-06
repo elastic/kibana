@@ -148,6 +148,10 @@ export default ({ getService }: FtrProviderContext): void => {
         type: CommentType.alert,
         index: 'test-index',
         alertId: 'test-id',
+        rule: {
+          id: 'id',
+          name: 'name',
+        },
       };
 
       for (const attribute of ['alertId', 'index']) {
@@ -176,6 +180,10 @@ export default ({ getService }: FtrProviderContext): void => {
             [attribute]: attribute,
             alertId: 'test-id',
             index: 'test-index',
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
           })
           .expect(400);
       }
@@ -296,6 +304,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             alertId: alert._id,
             index: alert._index,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
             type: CommentType.alert,
           })
           .expect(200);
@@ -346,6 +358,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             alertId: alert._id,
             index: alert._index,
+            rule: {
+              id: 'id',
+              name: 'name',
+            },
             type: CommentType.alert,
           })
           .expect(200);
@@ -377,13 +393,13 @@ export default ({ getService }: FtrProviderContext): void => {
         // create another sub case just to make sure we get the right comments
         await createSubCase({ supertest, actionID });
         await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`)
+          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send(postCommentUserReq)
           .expect(200);
 
         const { body: subCaseComments }: { body: CommentsResponse } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseID=${caseInfo.subCase!.id}`)
+          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseId=${caseInfo.subCases![0].id}`)
           .send()
           .expect(200);
         expect(subCaseComments.total).to.be(2);

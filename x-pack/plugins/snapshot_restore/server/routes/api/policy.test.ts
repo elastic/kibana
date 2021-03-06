@@ -97,8 +97,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
         jest.fn().mockRejectedValueOnce(new Error()), // Call to 'sr.policies'
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -140,8 +139,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -174,8 +172,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -286,8 +283,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [{}, jest.fn().mockRejectedValueOnce(new Error())];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -315,8 +311,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -372,8 +367,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -398,8 +392,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 });

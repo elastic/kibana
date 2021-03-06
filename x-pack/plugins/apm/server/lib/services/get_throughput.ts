@@ -10,7 +10,11 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -20,6 +24,8 @@ import { Setup } from '../helpers/setup_request';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
+  environment?: string;
+  kuery?: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
   setup: Setup;
@@ -29,6 +35,8 @@ interface Options {
 }
 
 function fetcher({
+  environment,
+  kuery,
   searchAggregatedTransactions,
   serviceName,
   setup,
@@ -41,11 +49,12 @@ function fetcher({
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
   const params = {

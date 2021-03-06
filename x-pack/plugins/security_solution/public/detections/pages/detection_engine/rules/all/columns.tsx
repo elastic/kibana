@@ -34,14 +34,15 @@ import {
   editRuleAction,
   exportRulesAction,
 } from './actions';
-import { Action } from './reducer';
+import { RulesTableAction } from '../../../../containers/detection_engine/rules/rules_table';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 
 export const getActions = (
-  dispatch: React.Dispatch<Action>,
+  dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
   reFetchRules: () => Promise<void>,
@@ -67,6 +68,7 @@ export const getActions = (
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
+    'data-test-subj': 'duplicateRuleAction',
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: !actionsPrivileges ? (
@@ -112,7 +114,7 @@ export type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType
 export type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
 type FormatUrl = (path: string) => string;
 interface GetColumns {
-  dispatch: React.Dispatch<Action>;
+  dispatch: React.Dispatch<RulesTableAction>;
   dispatchToaster: Dispatch<ActionToaster>;
   formatUrl: FormatUrl;
   history: H.History;
@@ -200,7 +202,7 @@ export const getColumns = ({
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
@@ -397,7 +399,7 @@ export const getMonitoringColumns = (
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );

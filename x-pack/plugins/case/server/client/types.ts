@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
@@ -13,13 +13,13 @@ import {
   CasesPatchRequest,
   CasesResponse,
   CaseStatuses,
-  CollectionWithSubCaseResponse,
   CommentRequest,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
   CaseUserActionsResponse,
   User,
 } from '../../common/api';
+import { AlertInfo } from '../common';
 import {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
@@ -47,18 +47,16 @@ export interface CaseClientAddComment {
 }
 
 export interface CaseClientUpdateAlertsStatus {
-  ids: string[];
-  status: CaseStatuses;
-  indices: Set<string>;
+  alerts: UpdateAlertRequest[];
 }
 
 export interface CaseClientGetAlerts {
-  ids: string[];
-  indices: Set<string>;
+  alertsInfo: AlertInfo[];
 }
 
 export interface CaseClientGetUserActions {
   caseId: string;
+  subCaseId?: string;
 }
 
 export interface MappingsClient {
@@ -76,6 +74,7 @@ export interface CaseClientFactoryArguments {
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
+  logger: Logger;
 }
 
 export interface ConfigureFields {
@@ -85,10 +84,19 @@ export interface ConfigureFields {
 }
 
 /**
+ * Defines the fields necessary to update an alert's status.
+ */
+export interface UpdateAlertRequest {
+  id: string;
+  index: string;
+  status: CaseStatuses;
+}
+
+/**
  * This represents the interface that other plugins can access.
  */
 export interface CaseClient {
-  addComment(args: CaseClientAddComment): Promise<CollectionWithSubCaseResponse>;
+  addComment(args: CaseClientAddComment): Promise<CaseResponse>;
   create(theCase: CasePostRequest): Promise<CaseResponse>;
   get(args: CaseClientGet): Promise<CaseResponse>;
   getAlerts(args: CaseClientGetAlerts): Promise<CaseClientGetAlertsResponse>;

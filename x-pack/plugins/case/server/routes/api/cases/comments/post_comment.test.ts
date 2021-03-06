@@ -68,6 +68,10 @@ describe('POST comment', () => {
         type: CommentType.alert,
         alertId: 'test-id',
         index: 'test-index',
+        rule: {
+          id: 'rule-id',
+          name: 'rule-name',
+        },
       },
     });
 

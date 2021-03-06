@@ -26,7 +26,7 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
 } from '../../../common/constants';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   AggDescriptor,
   ESTermSourceDescriptor,
@@ -77,7 +77,7 @@ export interface ILayer {
   canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
-  isDataLoaded(): boolean;
+  isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getType(): string | undefined;
@@ -400,7 +400,11 @@ export class AbstractLayer implements ILayer {
   }
 
   isLayerLoading(): boolean {
-    return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+    const areTilesLoading =
+      typeof this._descriptor.__areTilesLoaded !== 'undefined'
+        ? !this._descriptor.__areTilesLoaded
+        : false;
+    return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
   isLoadingBounds() {
@@ -446,7 +450,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-  isDataLoaded(): boolean {
+  isInitialDataLoadComplete(): boolean {
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }

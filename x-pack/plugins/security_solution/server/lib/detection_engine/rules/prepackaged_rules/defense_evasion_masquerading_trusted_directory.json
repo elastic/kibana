@@ -6,13 +6,14 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Program Files Directory Masquerading",
   "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n /* capture both fake program files directory in process executable as well as if passed in process args as a dll*/\n  process.args : (\"C:\\\\*Program*Files*\\\\*\", \"C:\\\\*Program*Files*\\\\*\") and\n  not process.args : (\"C:\\\\Program Files\\\\*\", \"C:\\\\Program Files (x86)\\\\*\")\n",
-  "risk_score": 43,
+  "risk_score": 47,
   "rule_id": "32c5cf9c-2ef8-4e87-819e-5ccb7cd18b14",
   "severity": "medium",
   "tags": [
@@ -41,5 +42,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

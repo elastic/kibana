@@ -84,6 +84,10 @@ describe('rule helpers', () => {
         threshold: {
           field: ['host.name'],
           value: '50',
+          cardinality: {
+            field: ['process.name'],
+            value: '2',
+          },
         },
         threatIndex: [],
         threatMapping: [],
@@ -116,7 +120,6 @@ describe('rule helpers', () => {
         severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
-        threatIndicatorPath: '',
         timestampOverride: 'event.ingested',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };

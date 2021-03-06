@@ -6,6 +6,7 @@
   "false_positives": [
     "NATed servers that process email traffic may false and should be excluded from this rule as this is expected behavior for them. Consumer and personal devices may send email traffic to remote Internet destinations. In this case, such devices or networks can be excluded from this rule if this is expected behavior."
   ],
+  "from": "now-9m",
   "index": [
     "filebeat-*",
     "packetbeat-*",
@@ -53,5 +54,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

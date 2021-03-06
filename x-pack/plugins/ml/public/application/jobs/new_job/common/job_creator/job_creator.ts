@@ -36,6 +36,7 @@ import {
   SHARED_RESULTS_INDEX_NAME,
 } from '../../../../../../common/constants/new_job';
 import { collectAggs } from './util/general';
+import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
@@ -65,6 +66,7 @@ export class JobCreator {
   protected _scriptFields: Field[] = [];
   protected _runtimeFields: Field[] = [];
   protected _runtimeMappings: RuntimeMappings | null = null;
+  protected _filterRuntimeMappingsOnSave: boolean = true;
   protected _aggregationFields: Field[] = [];
   protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
@@ -546,7 +548,8 @@ export class JobCreator {
 
   public async createDatafeed(): Promise<object> {
     try {
-      return await mlJobService.saveNewDatafeed(this._datafeed_config, this._job_config.job_id);
+      const tempDatafeed = this._getDatafeedWithFilteredRuntimeMappings();
+      return await mlJobService.saveNewDatafeed(tempDatafeed, this._job_config.job_id);
     } catch (error) {
       throw error;
     }
@@ -557,6 +560,23 @@ export class JobCreator {
     const jobRunner = new JobRunner(this);
     await jobRunner.startDatafeed();
     return jobRunner;
+  }
+
+  private _getDatafeedWithFilteredRuntimeMappings(): Datafeed {
+    if (this._filterRuntimeMappingsOnSave === false) {
+      return this._datafeed_config;
+    }
+
+    const { runtime_mappings: filteredRuntimeMappings } = filterRuntimeMappings(
+      this._job_config,
+      this._datafeed_config
+    );
+
+    return {
+      ...this._datafeed_config,
+      runtime_mappings:
+        Object.keys(filteredRuntimeMappings).length > 0 ? filteredRuntimeMappings : undefined,
+    };
   }
 
   public subscribeToProgress(func: ProgressSubscriber) {
@@ -643,6 +663,14 @@ export class JobCreator {
 
   public get formattedDatafeedJson() {
     return JSON.stringify(this._datafeed_config, null, 2);
+  }
+
+  public set filterRuntimeMappingsOnSave(filter: boolean) {
+    this._filterRuntimeMappingsOnSave = filter;
+  }
+
+  public get filterRuntimeMappingsOnSave(): boolean {
+    return this._filterRuntimeMappingsOnSave;
   }
 
   protected _initPerPartitionCategorization() {

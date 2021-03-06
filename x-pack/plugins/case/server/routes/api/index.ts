@@ -14,7 +14,10 @@ import { initPushCaseApi } from './cases/push_case';
 import { initGetReportersApi } from './cases/reporters/get_reporters';
 import { initGetCasesStatusApi } from './cases/status/get_status';
 import { initGetTagsApi } from './cases/tags/get_tags';
-import { initGetAllUserActionsApi } from './cases/user_actions/get_all_user_actions';
+import {
+  initGetAllCaseUserActionsApi,
+  initGetAllSubCaseUserActionsApi,
+} from './cases/user_actions/get_all_user_actions';
 
 import { initDeleteCommentApi } from './cases/comments/delete_comment';
 import { initDeleteAllCommentsApi } from './cases/comments/delete_all_comments';
@@ -52,7 +55,8 @@ export function initCaseApi(deps: RouteDeps) {
   initPatchCasesApi(deps);
   initPostCaseApi(deps);
   initPushCaseApi(deps);
-  initGetAllUserActionsApi(deps);
+  initGetAllCaseUserActionsApi(deps);
+  initGetAllSubCaseUserActionsApi(deps);
   // Sub cases
   initGetSubCaseApi(deps);
   initPatchSubCasesApi(deps);

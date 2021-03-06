@@ -26,7 +26,7 @@ export const registerGetRoute = ({
         if (isEsError(err)) {
           return response.customError({ statusCode: err.statusCode, body: err });
         }
-        return response.internalError({ body: err });
+        throw err;
       }
     })
   );

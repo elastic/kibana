@@ -95,7 +95,7 @@ export function TransactionDetails({
           <h1>{transactionName}</h1>
         </EuiTitle>
       </ApmHeader>
-      <SearchBar showTimeComparison showCorrelations />
+      <SearchBar showCorrelations />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
           <ChartPointerEventContextProvider>

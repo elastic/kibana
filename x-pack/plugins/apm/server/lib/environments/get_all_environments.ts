@@ -31,8 +31,8 @@ export async function getAllEnvironments({
   includeMissing?: boolean;
 }) {
   const spanName = serviceName
-    ? 'get_all_environments_for_all_services'
-    : 'get_all_environments_for_service';
+    ? 'get_all_environments_for_service'
+    : 'get_all_environments_for_all_services';
   return withApmSpan(spanName, async () => {
     const { apmEventClient, config } = setup;
     const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];

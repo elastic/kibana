@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from 'src/core/server';
+import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
+
+import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
+import type { EncryptedSavedObjectsService } from '../crypto';
+import { EncryptionError } from '../crypto';
 import { EncryptionErrorOperation } from '../crypto/encryption_error';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { EncryptedSavedObjectsService, EncryptionError } from '../crypto';
+import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
-import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
-import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
-import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
-
-jest.mock('../../../../../src/core/server/saved_objects/service/lib/utils', () => {
+jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(
-    '../../../../../src/core/server/saved_objects/service/lib/utils'
+    'src/core/server/saved_objects/service/lib/utils'
   );
   return {
     SavedObjectsUtils: {

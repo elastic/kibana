@@ -60,7 +60,7 @@ export const buildMatchedIndicator = ({
 
     return {
       ...indicator,
-      matched: { atomic, field: query.field, type },
+      matched: { atomic, field: query.field, id: query.id, index: query.index, type },
     };
   });
 
@@ -91,6 +91,10 @@ export const enrichSignalThreatMatches = async (
     if (!isObject(threat)) {
       throw new Error(`Expected threat field to be an object, but found: ${threat}`);
     }
+    // We are not using INDICATOR_DESTINATION_PATH here because the code above
+    // and below make assumptions about its current value, 'threat.indicator',
+    // and making this code dynamic on an arbitrary path would introduce several
+    // new issues.
     const existingIndicatorValue = get(signalHit._source, 'threat.indicator') ?? [];
     const existingIndicators = [existingIndicatorValue].flat(); // ensure indicators is an array
 
@@ -105,14 +109,15 @@ export const enrichSignalThreatMatches = async (
       },
     };
   });
-  /* eslint-disable require-atomic-updates */
-  signals.hits.hits = enrichedSignals;
-  if (isObject(signals.hits.total)) {
-    signals.hits.total.value = enrichedSignals.length;
-  } else {
-    signals.hits.total = enrichedSignals.length;
-  }
-  /* eslint-enable require-atomic-updates */
 
-  return signals;
+  return {
+    ...signals,
+    hits: {
+      ...signals.hits,
+      hits: enrichedSignals,
+      total: isObject(signals.hits.total)
+        ? { ...signals.hits.total, value: enrichedSignals.length }
+        : enrichedSignals.length,
+    },
+  };
 };

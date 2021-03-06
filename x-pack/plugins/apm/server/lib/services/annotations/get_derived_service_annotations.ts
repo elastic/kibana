@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { isNumber } from 'lodash';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
@@ -40,7 +39,7 @@ export async function getDerivedServiceAnnotations({
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),
-      ...getEnvironmentUiFilterES(environment),
+      ...environmentQuery(environment),
     ];
 
     const versions =
@@ -57,7 +56,7 @@ export async function getDerivedServiceAnnotations({
             size: 0,
             query: {
               bool: {
-                filter: [...filter, { range: rangeFilter(start, end) }],
+                filter: [...filter, ...rangeQuery(start, end)],
               },
             },
             aggs: {
@@ -86,25 +85,23 @@ export async function getDerivedServiceAnnotations({
               ],
             },
             body: {
-              size: 0,
+              size: 1,
               query: {
                 bool: {
                   filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
                 },
               },
-              aggs: {
-                first_seen: {
-                  min: {
-                    field: '@timestamp',
-                  },
-                },
+              sort: {
+                '@timestamp': 'desc',
               },
             },
           });
 
-          const firstSeen = response.aggregations?.first_seen.value;
+          const firstSeen = new Date(
+            response.hits.hits[0]._source['@timestamp']
+          ).getTime();
 
-          if (!isNumber(firstSeen)) {
+          if (!isFiniteNumber(firstSeen)) {
             throw new Error(
               'First seen for version was unexpectedly undefined or null.'
             );

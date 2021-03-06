@@ -64,15 +64,25 @@ export function groupFields(
     } else if (field.type !== '_source') {
       // do not show unmapped fields unless explicitly specified
       // do not add subfields to this list
-      if ((field.type !== 'unknown' || showUnmappedFields) && !isSubfield) {
+      if (useNewFieldsApi && (field.type !== 'unknown' || showUnmappedFields) && !isSubfield) {
+        result.unpopular.push(field);
+      } else if (!useNewFieldsApi) {
         result.unpopular.push(field);
       }
     }
   }
-  // add columns, that are not part of the index pattern, to be removeable
+  // add selected columns, that are not part of the index pattern, to be removeable
   for (const column of columns) {
-    if (!result.selected.find((field) => field.name === column)) {
-      result.selected.push({ name: column, displayName: column } as IndexPatternField);
+    const tmpField = {
+      name: column,
+      displayName: column,
+      type: 'unknown_selected',
+    } as IndexPatternField;
+    if (
+      !result.selected.find((field) => field.name === column) &&
+      isFieldFiltered(tmpField, fieldFilterState, fieldCounts)
+    ) {
+      result.selected.push(tmpField);
     }
   }
   result.selected.sort((a, b) => {

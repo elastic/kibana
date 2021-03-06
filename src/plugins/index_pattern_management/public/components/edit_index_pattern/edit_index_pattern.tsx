@@ -26,8 +26,6 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
-import { IndexPatternTableItem } from '../types';
-import { getIndexPatterns } from '../utils';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -62,7 +60,6 @@ export const EditIndexPattern = withRouter(
       uiSettings,
       indexPatternManagementStart,
       overlays,
-      savedObjects,
       chrome,
       data,
     } = useKibana<IndexPatternManagmentContext>().services;
@@ -97,11 +94,7 @@ export const EditIndexPattern = withRouter(
     const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
-          const indexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-            savedObjects.client,
-            uiSettings.get('defaultIndex'),
-            indexPatternManagementStart
-          );
+          const indexPatterns = await data.indexPatterns.getIdsWithTitle();
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;

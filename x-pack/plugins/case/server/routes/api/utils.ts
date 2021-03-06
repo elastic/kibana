@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { badRequest, boomify, isBoom } from '@hapi/boom';
+import { isEmpty } from 'lodash';
+import { badRequest, Boom, boomify, isBoom } from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -44,6 +45,8 @@ import {
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase } from './types';
+import { AlertInfo } from '../../common';
+import { isCaseError } from '../../common/error';
 
 export const transformNewSubCase = ({
   createdAt,
@@ -109,54 +112,50 @@ export const getAlertIds = (comment: CommentRequest): string[] => {
   return [];
 };
 
-/**
- * This structure holds the alert IDs and indices found from multiple alert comments
- */
-export interface AlertInfo {
-  ids: string[];
-  indices: Set<string>;
-}
+const getIDsAndIndicesAsArrays = (
+  comment: CommentRequestAlertType
+): { ids: string[]; indices: string[] } => {
+  return {
+    ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
+    indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+  };
+};
 
-const accumulateIndicesAndIDs = (comment: CommentAttributes, acc: AlertInfo): AlertInfo => {
-  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
-    acc.ids.push(...getAlertIds(comment));
-    acc.indices.add(comment.index);
+/**
+ * This functions extracts the ids and indices from an alert comment. It enforces that the alertId and index are either
+ * both strings or string arrays that are the same length. If they are arrays they represent a 1-to-1 mapping of
+ * id existing in an index at each position in the array. This is not ideal. Ideally an alert comment request would
+ * accept an array of objects like this: Array<{id: string; index: string; ruleName: string ruleID: string}> instead.
+ *
+ * To reformat the alert comment request requires a migration and a breaking API change.
+ */
+const getAndValidateAlertInfoFromComment = (comment: CommentRequest): AlertInfo[] => {
+  if (!isCommentRequestTypeAlertOrGenAlert(comment)) {
+    return [];
   }
-  return acc;
+
+  const { ids, indices } = getIDsAndIndicesAsArrays(comment);
+
+  if (ids.length !== indices.length) {
+    return [];
+  }
+
+  return ids.map((id, index) => ({ id, index: indices[index] }));
 };
 
 /**
  * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
  */
-export const getAlertIndicesAndIDs = (comments: CommentAttributes[] | undefined): AlertInfo => {
+export const getAlertInfoFromComments = (comments: CommentRequest[] | undefined): AlertInfo[] => {
   if (comments === undefined) {
-    return { ids: [], indices: new Set<string>() };
+    return [];
   }
 
-  return comments.reduce(
-    (acc: AlertInfo, comment) => {
-      return accumulateIndicesAndIDs(comment, acc);
-    },
-    { ids: [], indices: new Set<string>() }
-  );
-};
-
-/**
- * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alert saved objects.
- */
-export const getAlertIndicesAndIDsFromSO = (
-  comments: SavedObjectsFindResponse<CommentAttributes> | undefined
-): AlertInfo => {
-  if (comments === undefined) {
-    return { ids: [], indices: new Set<string>() };
-  }
-
-  return comments.saved_objects.reduce(
-    (acc: AlertInfo, comment) => {
-      return accumulateIndicesAndIDs(comment.attributes, acc);
-    },
-    { ids: [], indices: new Set<string>() }
-  );
+  return comments.reduce((acc: AlertInfo[], comment) => {
+    const alertInfo = getAndValidateAlertInfoFromComment(comment);
+    acc.push(...alertInfo);
+    return acc;
+  }, []);
 };
 
 export const transformNewComment = ({
@@ -180,9 +179,19 @@ export const transformNewComment = ({
   };
 };
 
+/**
+ * Transforms an error into the correct format for a kibana response.
+ */
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
-  const options = { statusCode: error.statusCode ?? 500 };
-  const boom = isBoom(error) ? error : boomify(error, options);
+  let boom: Boom;
+
+  if (isCaseError(error)) {
+    boom = error.boomify();
+  } else {
+    const options = { statusCode: error.statusCode ?? 500 };
+    boom = isBoom(error) ? error : boomify(error, options);
+  }
+
   return {
     body: boom,
     headers: boom.output.headers as { [key: string]: string },
@@ -249,12 +258,14 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
   subCases,
+  subCaseIds,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
   subCases?: SubCaseResponse[];
+  subCaseIds?: string[];
 }): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
@@ -264,6 +275,7 @@ export const flattenCaseSavedObject = ({
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
+  subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
 });
 
 export const flattenSubCaseSavedObject = ({
@@ -362,5 +374,47 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
+    const { ids, indices } = getIDsAndIndicesAsArrays(comment);
+
+    /**
+     * The alertId and index field must either be both of type string or they must both be string[] and be the same length.
+     * Having a one-to-one relationship between the id and index of an alert avoids accidentally updating or
+     * retrieving the wrong alert. Elasticsearch only guarantees that the _id (the field we use for alertId) to be
+     * unique within a single index. So if we attempt to update or get a specific alert across multiple indices we could
+     * update or receive the wrong one.
+     *
+     * Consider the situation where we have a alert1 with _id = '100' in index 'my-index-awesome' and also in index
+     *  'my-index-hi'.
+     * If we attempt to update the status of alert1 using an index pattern like `my-index-*` or even providing multiple
+     * indices, there's a chance we'll accidentally update too many alerts.
+     *
+     * This check doesn't enforce that the API request has the correct alert ID to index relationship it just guards
+     * against accidentally making a request like:
+     * {
+     *  alertId: [1,2,3],
+     *  index: awesome,
+     * }
+     *
+     * Instead this requires the requestor to provide:
+     * {
+     *  alertId: [1,2,3],
+     *  index: [awesome, awesome, awesome]
+     * }
+     *
+     * Ideally we'd change the format of the comment request to be an array of objects like:
+     * {
+     *  alerts: [{id: 1, index: awesome}, {id: 2, index: awesome}]
+     * }
+     *
+     * But we'd need to also implement a migration because the saved object document currently stores the id and index
+     * in separate fields.
+     */
+    if (ids.length !== indices.length) {
+      throw badRequest(
+        `Received an alert comment with ids and indices arrays of different lengths ids: ${JSON.stringify(
+          ids
+        )} indices: ${JSON.stringify(indices)}`
+      );
+    }
   }
 };

@@ -6,7 +6,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -16,7 +17,7 @@
     "https://voidsec.com/cve-2020-1337-printdemon-is-dead-long-live-printdemon/",
     "https://www.thezdi.com/blog/2020/7/8/cve-2020-1300-remote-code-execution-through-microsoft-windows-cab-files"
   ],
-  "risk_score": 74,
+  "risk_score": 73,
   "rule_id": "5bb4a95d-5a08-48eb-80db-4c3a63ec78a8",
   "severity": "high",
   "tags": [
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

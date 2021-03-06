@@ -51,12 +51,8 @@ export function registerDeleteRoute(deps: RouteDependencies) {
       },
     },
     licensePreRoutingFactory(deps, async (ctx, request, response) => {
-      try {
-        const results = await deleteWatches(ctx.watcher!.client, request.body.watchIds);
-        return response.ok({ body: { results } });
-      } catch (e) {
-        return response.internalError({ body: e });
-      }
+      const results = await deleteWatches(ctx.watcher!.client, request.body.watchIds);
+      return response.ok({ body: { results } });
     })
   );
 }

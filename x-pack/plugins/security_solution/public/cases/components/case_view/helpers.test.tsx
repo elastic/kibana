@@ -8,7 +8,7 @@
 import { AssociationType, CommentType } from '../../../../../case/common/api';
 import { Comment } from '../../containers/types';
 
-import { getRuleIdsFromComments, buildAlertsQuery } from './helpers';
+import { getManualAlertIdsWithNoRuleId, buildAlertsQuery } from './helpers';
 
 const comments: Comment[] = [
   {
@@ -19,6 +19,10 @@ const comments: Comment[] = [
     id: 'comment-id',
     createdAt: '2020-02-19T23:06:33.798Z',
     createdBy: { username: 'elastic' },
+    rule: {
+      id: null,
+      name: null,
+    },
     pushedAt: null,
     pushedBy: null,
     updatedAt: null,
@@ -35,6 +39,10 @@ const comments: Comment[] = [
     createdBy: { username: 'elastic' },
     pushedAt: null,
     pushedBy: null,
+    rule: {
+      id: 'rule-id-2',
+      name: 'rule-name-2',
+    },
     updatedAt: null,
     updatedBy: null,
     version: 'WzQ3LDFc',
@@ -42,9 +50,9 @@ const comments: Comment[] = [
 ];
 
 describe('Case view helpers', () => {
-  describe('getRuleIdsFromComments', () => {
-    it('it returns the rules ids from the comments', () => {
-      expect(getRuleIdsFromComments(comments)).toEqual(['alert-id-1', 'alert-id-2']);
+  describe('getAlertIdsFromComments', () => {
+    it('it returns the alert id from the comments where rule is not defined', () => {
+      expect(getManualAlertIdsWithNoRuleId(comments)).toEqual(['alert-id-1']);
     });
   });
 
@@ -54,13 +62,13 @@ describe('Case view helpers', () => {
         query: {
           bool: {
             filter: {
-              bool: {
-                should: [{ match: { _id: 'alert-id-1' } }, { match: { _id: 'alert-id-2' } }],
-                minimum_should_match: 1,
+              ids: {
+                values: ['alert-id-1', 'alert-id-2'],
               },
             },
           },
         },
+        size: 10000,
       });
     });
   });

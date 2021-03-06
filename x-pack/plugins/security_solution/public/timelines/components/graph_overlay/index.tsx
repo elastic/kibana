@@ -30,8 +30,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { sourcererSelectors } from '../../../common/store';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 import {
@@ -169,14 +168,12 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     globalFullScreen,
   ]);
 
-  let sourcereScope = SourcererScopeName.default;
-  if ([TimelineId.detectionsRulesDetailsPage, TimelineId.detectionsPage].includes(timelineId)) {
-    sourcereScope = SourcererScopeName.detections;
-  } else if (timelineId === TimelineId.active) {
-    sourcereScope = SourcererScopeName.timeline;
-  }
+  const existingIndexNamesSelector = useMemo(
+    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+    []
+  );
+  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
 
-  const { selectedPatterns } = useSourcererScope(sourcereScope);
   return (
     <OverlayContainer
       data-test-subj="overlayContainer"
@@ -200,7 +197,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
         <StyledResolver
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
-          indices={selectedPatterns}
+          indices={existingIndexNames}
           shouldUpdate={shouldUpdate}
           filters={{ from, to }}
         />

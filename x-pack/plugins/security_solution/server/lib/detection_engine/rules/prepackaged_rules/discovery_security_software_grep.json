@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the use of the grep command to discover known third-party macOS and Linux security tools, such as Antivirus or Host Firewall details.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Security Software Discovery via Grep",
+  "query": "event.category : process and event.type : (start or process_started) and process.name : grep and process.args : (\"Little Snitch\" or Avast* or Avira* or ESET* or esets_* or BlockBlock or 360* or LuLu or KnockKnock* or kav or KIS or RTProtectionDaemon or Malware* or VShieldScanner or WebProtection or webinspectord or McAfee* or isecespd* or macmnsvc* or masvc or kesl or avscan or guard or rtvscand or symcfgd or scmdaemon or symantec or elastic-endpoint )",
+  "risk_score": 47,
+  "rule_id": "870aecc0-cea4-4110-af3f-e02e9b373655",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Linux",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1518",
+          "name": "Software Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1518/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}
