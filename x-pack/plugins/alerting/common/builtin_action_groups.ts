@@ -13,7 +13,7 @@ export type DefaultActionGroupId = 'default';
 export type RecoveredActionGroupId = typeof RecoveredActionGroup['id'];
 export const RecoveredActionGroup: Readonly<ActionGroup<'recovered'>> = Object.freeze({
   id: 'recovered',
-  name: i18n.translate('xpack.alerts.builtinActionGroups.recovered', {
+  name: i18n.translate('xpack.alerting.builtinActionGroups.recovered', {
     defaultMessage: 'Recovered',
   }),
 });
