@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiSpacer, EuiForm } from '@elastic/eui';
+import { EuiSpacer, EuiForm, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
 import { JobSelectorControl } from './job_selector';
@@ -116,6 +116,22 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
+      <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'}>
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge
+            label={i18n.translate('xpack.ml.anomalyDetectionAlert.betaBadgeLabel', {
+              defaultMessage: 'Beta',
+            })}
+            tooltipContent={i18n.translate(
+              'xpack.ml.anomalyDetectionAlert.betaBadgeTooltipContent',
+              {
+                defaultMessage: `Anomaly detection alerts are a beta feature. We'd love to hear your feedback.`,
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <JobSelectorControl
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
