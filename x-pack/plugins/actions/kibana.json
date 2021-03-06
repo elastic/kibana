@@ -4,7 +4,14 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "actions"],
-  "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "eventLog", "features"],
+  "requiredPlugins": [
+    "licensing", 
+    "taskManager", 
+    "encryptedSavedObjects", 
+    "eventLog", 
+    "features", 
+    "connectorsNetworking"
+  ],
   "optionalPlugins": ["usageCollection", "spaces", "security"],
   "ui": false
 }

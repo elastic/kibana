@@ -51,6 +51,7 @@ import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { PluginSetupContract as ConnectorsNetworkingSetup } from '../../connectors_networking/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   setupSavedObjects,
@@ -111,6 +112,7 @@ export interface ActionsPluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
+  connectorsNetworking: ConnectorsNetworkingSetup;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -174,9 +176,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       isESOCanEncrypt: this.isESOCanEncrypt,
     });
 
+    const connectorsNetworkingClient = plugins.connectorsNetworking.getClient();
+
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
-    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
+    const actionsConfigUtils = getActionsConfigurationUtilities(
+      this.actionsConfig,
+      connectorsNetworkingClient
+    );
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
       this.preconfiguredActions.push({

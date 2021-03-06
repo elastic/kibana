@@ -11,6 +11,8 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import { ConnectorsNetworkingClient } from '../../connectors_networking/server';
+
 import { ActionsConfig } from './config';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings } from './types';
@@ -37,6 +39,7 @@ export interface ActionsConfigurationUtilities {
   ensureActionTypeEnabled: (actionType: string) => void;
   isRejectUnauthorizedCertificatesEnabled: () => boolean;
   getProxySettings: () => undefined | ProxySettings;
+  connectorsNetworkingClient: ConnectorsNetworkingClient;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -99,7 +102,8 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
 }
 
 export function getActionsConfigurationUtilities(
-  config: ActionsConfig
+  config: ActionsConfig,
+  connectorsNetworkingClient: ConnectorsNetworkingClient
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
@@ -108,6 +112,7 @@ export function getActionsConfigurationUtilities(
     isHostnameAllowed,
     isUriAllowed,
     isActionTypeEnabled,
+    connectorsNetworkingClient,
     getProxySettings: () => getProxySettingsFromConfig(config),
     isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
     ensureUriAllowed(uri: string) {

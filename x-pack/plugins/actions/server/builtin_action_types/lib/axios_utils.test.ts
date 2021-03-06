@@ -67,11 +67,12 @@ describe('request', () => {
       proxyRejectUnauthorizedCertificates: true,
       proxyUrl: 'https://localhost:1212',
     });
-    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
+    const url = 'http://testProxy';
+    const { httpAgent, httpsAgent } = await getCustomAgents(configurationUtilities, logger, url);
 
     const res = await request({
       axios,
-      url: 'http://testProxy',
+      url,
       logger,
       configurationUtilities,
     });

@@ -30,8 +30,11 @@ export const request = async <T = unknown>({
   validateStatus?: (status: number) => boolean;
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
-  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
+  const { httpAgent, httpsAgent } = await getCustomAgents(configurationUtilities, logger, url);
 
+  logger.debug(
+    `axios using httpsAgent options for "${url}": ${JSON.stringify(httpsAgent?.options)}`
+  );
   return await axios(url, {
     ...rest,
     method,
