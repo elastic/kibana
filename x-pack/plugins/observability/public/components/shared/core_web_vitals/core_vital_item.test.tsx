@@ -31,9 +31,9 @@ describe('CoreVitalItem', () => {
 
     expect(getByText(title)).toBeInTheDocument();
     expect(getByText(value)).toBeInTheDocument();
-    expect(getByText('Good (85%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (10%)')).toBeInTheDocument();
-    expect(getByText('Poor (5%)')).toBeInTheDocument();
+    expect(getByText(/Good.85%./)).toBeInTheDocument();
+    expect(getByText(/Needs improvement.10%./)).toBeInTheDocument();
+    expect(getByText(/Poor.5%./)).toBeInTheDocument();
   });
 
   it('renders loading state when loading is truthy', () => {
