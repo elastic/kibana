@@ -46,7 +46,7 @@ const ActionsTableComponent = () => {
   const { isLoading: actionsLoading, data: actionsData } = useAllActions({
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
-    direction: Direction.asc,
+    direction: Direction.desc,
     sortField: '@timestamp',
   });
 

@@ -12,7 +12,7 @@ import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 export const buildActionsQuery = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filterQuery,
-  // sort,
+  sort,
   pagination: { cursorStart, querySize },
 }: AgentsRequestOptions): ISearchRequestParams => {
   // const filter = [...createQueryFilterClauses(filterQuery)];
@@ -34,13 +34,13 @@ export const buildActionsQuery = ({
       size: querySize,
       track_total_hits: true,
       fields: ['*'],
-      // sort: [
-      //   {
-      //     [sort.field]: {
-      //       order: [sort.direction],
-      //     },
-      //   },
-      // ],
+      sort: [
+        {
+          [sort.field]: {
+            order: sort.direction,
+          },
+        },
+      ],
     },
   };
 

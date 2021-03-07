@@ -27,7 +27,7 @@ export const OsqueryAppComponent = () => {
               <EuiTabs display="condensed">
                 <EuiTab isSelected={section === 'overview'} {...useRouterNavigate('overview')}>
                   <FormattedMessage
-                    id="xpack.fleet.appNavigation.overviewLinkText"
+                    id="xpack.osquery.appNavigation.overviewLinkText"
                     defaultMessage="Overview"
                   />
                 </EuiTab>

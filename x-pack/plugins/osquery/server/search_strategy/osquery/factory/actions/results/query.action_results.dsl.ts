@@ -12,7 +12,7 @@ import { createQueryFilterClauses } from '../../../../../../common/utils/build_q
 export const buildActionResultsQuery = ({
   actionId,
   filterQuery,
-  // sort,
+  sort,
   pagination: { activePage, querySize },
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const filter = [
@@ -26,21 +26,32 @@ export const buildActionResultsQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: '.fleet-actions-results',
+    index: '.fleet-actions-results*',
     ignoreUnavailable: true,
     body: {
+      aggs: {
+        responses: {
+          terms: {
+            script: {
+              lang: 'painless',
+              source:
+                "if (doc.error.value.length() > 0) { return 'error' } else { return 'success' }",
+            },
+          },
+        },
+      },
       query: { bool: { filter } },
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,
       fields: ['*'],
-      // sort: [
-      //   {
-      //     [sort.field]: {
-      //       order: [sort.direction],
-      //     },
-      //   },
-      // ],
+      sort: [
+        {
+          [sort.field]: {
+            order: sort.direction,
+          },
+        },
+      ],
     },
   };
 

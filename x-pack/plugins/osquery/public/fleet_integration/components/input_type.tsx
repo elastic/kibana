@@ -9,7 +9,7 @@
 
 /* eslint-disable react-perf/jsx-no-new-array-as-prop */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import produce from 'immer';
 import { EuiRadioGroup } from '@elastic/eui';
 
@@ -26,7 +26,6 @@ export const ScheduledQueryInputType = ({ data, handleChange }) => {
     },
   ];
 
-  // @ts-expect-error update types
   const onChange = useCallback(
     (optionId: string) => {
       // @ts-expect-error update types
