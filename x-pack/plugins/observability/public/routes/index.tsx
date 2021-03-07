@@ -12,6 +12,7 @@ import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
+import { ExploratoryView } from '../components/shared/Exploratory_view/exploratory_view';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -55,6 +56,26 @@ export const routes = {
   '/overview': {
     handler: ({ query }: any) => {
       return <OverviewPage routeParams={{ query }} />;
+    },
+    params: {
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+        refreshPaused: jsonRt.pipe(t.boolean),
+        refreshInterval: jsonRt.pipe(t.number),
+      }),
+    },
+    breadcrumb: [
+      {
+        text: i18n.translate('xpack.observability.overview.breadcrumb', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ],
+  },
+  '/exploratory-view': {
+    handler: ({ query }: any) => {
+      return <ExploratoryView />;
     },
     params: {
       query: t.partial({

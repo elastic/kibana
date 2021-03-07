@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -20,24 +20,42 @@ import {
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
+import { LensPublicStart } from '../../lens/public';
 
 export interface ObservabilityPluginSetup {
   dashboard: { register: typeof registerDataHandler };
 }
 
-export interface ObservabilityPluginSetupDeps {
-  home?: HomePublicPluginSetup;
+export interface ObservabilityClientPluginsSetup {
   data: DataPublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
-export type ObservabilityPluginStart = void;
+export interface ObservabilityClientPluginsStart {
+  home?: HomePublicPluginSetup;
+  data: DataPublicPluginStart;
+  lens: LensPublicStart;
+}
 
-export class Plugin implements PluginClass<ObservabilityPluginSetup, ObservabilityPluginStart> {
+export type ObservabilityClientSetup = void;
+export type ObservabilityClientStart = void;
+
+export class Plugin
+  implements
+    PluginClass<
+      ObservabilityClientSetup,
+      ObservabilityClientStart,
+      ObservabilityClientPluginsSetup,
+      ObservabilityClientPluginsStart
+    > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ObservabilityPluginSetupDeps) {
+  public setup(
+    core: CoreSetup<ObservabilityClientPluginsStart>,
+    plugins: ObservabilityClientPluginsSetup
+  ) {
     core.application.register({
       id: 'observability-overview',
       title: 'Overview',
@@ -51,9 +69,9 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, startPlugins] = await core.getStartServices();
 
-        return renderApp(coreStart, plugins, params);
+        return renderApp(coreStart, startPlugins, params);
       },
     });
 

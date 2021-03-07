@@ -18,5 +18,6 @@
     { "path": "../alerts/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../translations/tsconfig.json" }
+    { "path": "../lens/tsconfig.json" }
   ]
 }
