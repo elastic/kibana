@@ -40,11 +40,8 @@ import {
   WrappedSignalHit,
 } from './types';
 import {
-  getGapBetweenRuns,
   getListsClient,
   getExceptions,
-  getGapMaxCatchupRatio,
-  MAX_RULE_GAP_RATIO,
   wrapSignal,
   createErrorsFromShard,
   createSearchAfterReturnType,
@@ -54,14 +51,18 @@ import {
   hasTimestampFields,
   hasReadIndexPrivileges,
   makeFloatString,
+  getRuleRangeTuples,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
-import { findThresholdSignals } from './find_threshold_signals';
+import {
+  bulkCreateThresholdSignals,
+  getThresholdBucketFilters,
+  getThresholdSignalHistory,
+  findThresholdSignals,
+} from './threshold';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
-import { getThresholdBucketFilters } from './threshold_get_bucket_filters';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -235,29 +236,24 @@ export const signalRulesAlertType = ({
       } catch (exc) {
         logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
       }
-
-      const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
-      if (gap != null && gap.asMilliseconds() > 0) {
-        const fromUnit = from[from.length - 1];
-        const { ratio } = getGapMaxCatchupRatio({
-          logger,
-          buildRuleMessage,
-          previousStartedAt,
-          ruleParamsFrom: from,
-          interval,
-          unit: fromUnit,
-        });
-        if (ratio && ratio >= MAX_RULE_GAP_RATIO) {
-          const gapString = gap.humanize();
-          const gapMessage = buildRuleMessage(
-            `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
-            'Consider increasing your look behind time or adding more Kibana instances.'
-          );
-          logger.warn(gapMessage);
-
-          hasError = true;
-          await ruleStatusService.error(gapMessage, { gap: gapString });
-        }
+      const { tuples, remainingGap } = getRuleRangeTuples({
+        logger,
+        previousStartedAt,
+        from,
+        to,
+        interval,
+        maxSignals,
+        buildRuleMessage,
+      });
+      if (remainingGap.asMilliseconds() > 0) {
+        const gapString = remainingGap.humanize();
+        const gapMessage = buildRuleMessage(
+          `${gapString} (${remainingGap.asMilliseconds()}ms) were not queried between this rule execution and the last execution, so signals may have been missed.`,
+          'Consider increasing your look behind time or adding more Kibana instances.'
+        );
+        logger.warn(gapMessage);
+        hasError = true;
+        await ruleStatusService.error(gapMessage, { gap: gapString });
       }
       try {
         const { listClient, exceptionsClient } = getListsClient({
@@ -378,101 +374,110 @@ export const signalRulesAlertType = ({
           ]);
         } else if (isThresholdRule(type) && threshold) {
           if (hasLargeValueItem(exceptionItems ?? [])) {
-            await ruleStatusService.warning(
+            await ruleStatusService.partialFailure(
               'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
             );
             wroteWarningStatus = true;
           }
           const inputIndex = await getInputIndex(services, version, index);
 
-          const {
-            filters: bucketFilters,
-            searchErrors: previousSearchErrors,
-          } = await getThresholdBucketFilters({
-            indexPattern: [outputIndex],
-            from,
-            to,
-            services,
-            logger,
-            ruleId,
-            bucketByFields: normalizeThresholdField(threshold.field),
-            timestampOverride,
-            buildRuleMessage,
-          });
-
-          const esFilter = await getFilter({
-            type,
-            filters: filters ? filters.concat(bucketFilters) : bucketFilters,
-            language,
-            query,
-            savedId,
-            services,
-            index: inputIndex,
-            lists: exceptionItems ?? [],
-          });
-
-          const {
-            searchResult: thresholdResults,
-            searchErrors,
-            searchDuration: thresholdSearchDuration,
-          } = await findThresholdSignals({
-            inputIndexPattern: inputIndex,
-            from,
-            to,
-            services,
-            logger,
-            filter: esFilter,
-            threshold,
-            timestampOverride,
-            buildRuleMessage,
-          });
-
-          const {
-            success,
-            bulkCreateDuration,
-            createdItemsCount,
-            createdItems,
-            errors,
-          } = await bulkCreateThresholdSignals({
-            actions,
-            throttle,
-            someResult: thresholdResults,
-            ruleParams: params,
-            filter: esFilter,
-            services,
-            logger,
-            id: alertId,
-            inputIndexPattern: inputIndex,
-            signalsIndex: outputIndex,
-            timestampOverride,
-            startedAt,
-            name,
-            createdBy,
-            createdAt,
-            updatedBy,
-            updatedAt,
-            interval,
-            enabled,
-            refresh,
-            tags,
-            buildRuleMessage,
-          });
-
-          result = mergeReturns([
-            result,
-            createSearchAfterReturnTypeFromResponse({
-              searchResult: thresholdResults,
+          for (const tuple of tuples) {
+            const {
+              thresholdSignalHistory,
+              searchErrors: previousSearchErrors,
+            } = await getThresholdSignalHistory({
+              indexPattern: [outputIndex],
+              from: tuple.from.toISOString(),
+              to: tuple.to.toISOString(),
+              services,
+              logger,
+              ruleId,
+              bucketByFields: normalizeThresholdField(threshold.field),
               timestampOverride,
-            }),
-            createSearchAfterReturnType({
+              buildRuleMessage,
+            });
+
+            const bucketFilters = await getThresholdBucketFilters({
+              thresholdSignalHistory,
+              timestampOverride,
+            });
+
+            const esFilter = await getFilter({
+              type,
+              filters: filters ? filters.concat(bucketFilters) : bucketFilters,
+              language,
+              query,
+              savedId,
+              services,
+              index: inputIndex,
+              lists: exceptionItems ?? [],
+            });
+
+            const {
+              searchResult: thresholdResults,
+              searchErrors,
+              searchDuration: thresholdSearchDuration,
+            } = await findThresholdSignals({
+              inputIndexPattern: inputIndex,
+              from: tuple.from.toISOString(),
+              to: tuple.to.toISOString(),
+              services,
+              logger,
+              filter: esFilter,
+              threshold,
+              timestampOverride,
+              buildRuleMessage,
+            });
+
+            const {
               success,
-              errors: [...errors, ...previousSearchErrors, ...searchErrors],
-              createdSignalsCount: createdItemsCount,
-              createdSignals: createdItems,
-              bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
-              searchAfterTimes: [thresholdSearchDuration],
-            }),
-          ]);
+              bulkCreateDuration,
+              createdItemsCount,
+              createdItems,
+              errors,
+            } = await bulkCreateThresholdSignals({
+              actions,
+              throttle,
+              someResult: thresholdResults,
+              ruleParams: params,
+              filter: esFilter,
+              services,
+              logger,
+              id: alertId,
+              inputIndexPattern: inputIndex,
+              signalsIndex: outputIndex,
+              timestampOverride,
+              startedAt,
+              from: tuple.from.toDate(),
+              name,
+              createdBy,
+              createdAt,
+              updatedBy,
+              updatedAt,
+              interval,
+              enabled,
+              refresh,
+              tags,
+              thresholdSignalHistory,
+              buildRuleMessage,
+            });
+
+            result = mergeReturns([
+              result,
+              createSearchAfterReturnTypeFromResponse({
+                searchResult: thresholdResults,
+                timestampOverride,
+              }),
+              createSearchAfterReturnType({
+                success,
+                errors: [...errors, ...previousSearchErrors, ...searchErrors],
+                createdSignalsCount: createdItemsCount,
+                createdSignals: createdItems,
+                bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+                searchAfterTimes: [thresholdSearchDuration],
+              }),
+            ]);
+          }
         } else if (isThreatMatchRule(type)) {
           if (
             threatQuery == null ||
@@ -491,6 +496,7 @@ export const signalRulesAlertType = ({
           }
           const inputIndex = await getInputIndex(services, version, index);
           result = await createThreatSignals({
+            tuples,
             threatMapping,
             query,
             inputIndex,
@@ -501,8 +507,6 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             exceptionItems: exceptionItems ?? [],
-            gap,
-            previousStartedAt,
             listClient,
             logger,
             eventsTelemetry,
@@ -543,8 +547,7 @@ export const signalRulesAlertType = ({
           });
 
           result = await searchAfterAndBulkCreate({
-            gap,
-            previousStartedAt,
+            tuples,
             listClient,
             exceptionsList: exceptionItems ?? [],
             ruleParams: params,
@@ -574,7 +577,7 @@ export const signalRulesAlertType = ({
             throw new Error('EQL query rule must have a query defined');
           }
           if (hasLargeValueItem(exceptionItems ?? [])) {
-            await ruleStatusService.warning(
+            await ruleStatusService.partialFailure(
               'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
             );
             wroteWarningStatus = true;
