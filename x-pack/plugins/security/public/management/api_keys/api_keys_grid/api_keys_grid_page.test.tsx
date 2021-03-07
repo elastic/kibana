@@ -140,12 +140,12 @@ describe('APIKeysGridPage', () => {
     getByText(/Could not load API keys/);
   });
 
-  it('creates user when submitting form and redirects back', async () => {
+  it('creates API key when submitting form, redirects back and displays base64', async () => {
     const history = createMemoryHistory({ initialEntries: ['/create'] });
     coreStart.http.get.mockResolvedValue([{ name: 'superuser' }]);
-    coreStart.http.post.mockResolvedValue({ api_key: 's3Cr3t_aP1-K3Y=' });
+    coreStart.http.post.mockResolvedValue({ id: '1D', api_key: 'AP1_K3Y' });
 
-    const { findByRole, findByText } = render(
+    const { findByRole, findByDisplayValue } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage
           apiKeysAPIClient={apiClientMock}
@@ -176,6 +176,6 @@ describe('APIKeysGridPage', () => {
       expect(history.location.pathname).toBe('/');
     });
 
-    await findByText('s3Cr3t_aP1-K3Y=');
+    await findByDisplayValue(btoa('1D:AP1_K3Y'));
   });
 });

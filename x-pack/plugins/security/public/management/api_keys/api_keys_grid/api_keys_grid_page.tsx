@@ -7,21 +7,23 @@
 
 import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import {
-  EuiHealth,
+  EuiBadge,
   EuiButton,
-  EuiButtonIcon,
   EuiButtonEmpty,
-  EuiShowFor,
-  EuiHideFor,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
+  EuiHideFor,
+  EuiIcon,
   EuiInMemoryTable,
   EuiPageContent,
-  EuiIcon,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiShowFor,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -41,7 +43,7 @@ import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/pu
 import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { Breadcrumb } from '../../../components/breadcrumb';
-import { CopyCodeField } from '../../../components/copy_code_field';
+import { SelectableCodeField } from '../../../components/code_field';
 import type { APIKeysAPIClient, CreateApiKeyResponse } from '../api_keys_api_client';
 import { PermissionDenied } from './permission_denied';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
@@ -61,7 +63,7 @@ interface State {
   isAdmin: boolean;
   canManage: boolean;
   areApiKeysEnabled: boolean;
-  apiKeys: ApiKey[];
+  apiKeys: Array<ApiKey & { base64: string }>;
   selectedItems: ApiKey[];
   error: any;
   createdApiKey?: CreateApiKeyResponse;
@@ -174,6 +176,8 @@ export class APIKeysGridPage extends Component<Props, State> {
       );
     }
 
+    const concatenated = `${this.state.createdApiKey?.id}:${this.state.createdApiKey?.api_key}`;
+
     return (
       <EuiPageContent>
         <EuiPageContentHeader>
@@ -217,21 +221,77 @@ export class APIKeysGridPage extends Component<Props, State> {
             <EuiCallOut
               color="success"
               iconType="check"
-              title={i18n.translate(
-                'xpack.security.accountManagement.createApiKey.successMessage',
-                {
-                  defaultMessage: "Created API key '{name}'",
-                  values: { name: this.state.createdApiKey.name },
-                }
-              )}
+              title={i18n.translate('xpack.security.management.apiKeys.createSuccessMessage', {
+                defaultMessage: "Created API key '{name}'",
+                values: { name: this.state.createdApiKey.name },
+              })}
             >
               <p>
                 <FormattedMessage
-                  id="xpack.security.accountManagement.createApiKey.successDescription"
+                  id="xpack.security.management.apiKeys.successDescription"
                   defaultMessage="Copy this key now. You will not be able to see it again."
                 />
               </p>
-              <CopyCodeField value={this.state.createdApiKey.api_key} />
+              <SelectableCodeField
+                options={[
+                  {
+                    key: 'base64',
+                    value: btoa(concatenated),
+                    icon: 'empty',
+                    label: i18n.translate('xpack.security.management.apiKeys.base64Label', {
+                      defaultMessage: 'Base64',
+                    }),
+                    description: i18n.translate(
+                      'xpack.security.management.apiKeys.base64Description',
+                      {
+                        defaultMessage: 'Format used to authenticate with Elasticsearch.',
+                      }
+                    ),
+                  },
+                  {
+                    key: 'json',
+                    value: JSON.stringify(this.state.createdApiKey),
+                    icon: 'empty',
+                    label: i18n.translate('xpack.security.management.apiKeys.jsonLabel', {
+                      defaultMessage: 'JSON',
+                    }),
+                    description: i18n.translate(
+                      'xpack.security.management.apiKeys.jsonDescription',
+                      {
+                        defaultMessage: 'Full API response.',
+                      }
+                    ),
+                  },
+                  {
+                    key: 'beats',
+                    value: concatenated,
+                    icon: 'logoBeats',
+                    label: i18n.translate('xpack.security.management.apiKeys.beatsLabel', {
+                      defaultMessage: 'Beats',
+                    }),
+                    description: i18n.translate(
+                      'xpack.security.management.apiKeys.beatsDescription',
+                      {
+                        defaultMessage: 'Format used to configure Beats.',
+                      }
+                    ),
+                  },
+                  {
+                    key: 'logstash',
+                    value: concatenated,
+                    icon: 'logoLogstash',
+                    label: i18n.translate('xpack.security.management.apiKeys.logstashLabel', {
+                      defaultMessage: 'Logstash',
+                    }),
+                    description: i18n.translate(
+                      'xpack.security.management.apiKeys.logstashDescription',
+                      {
+                        defaultMessage: 'Format used to configure Logstash.',
+                      }
+                    ),
+                  },
+                ]}
+              />
             </EuiCallOut>
             <EuiSpacer />
           </>
@@ -323,7 +383,16 @@ export class APIKeysGridPage extends Component<Props, State> {
               ).map((username) => {
                 return {
                   value: username,
-                  view: username,
+                  view: (
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="user" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText>{username}</EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ),
                 };
               }),
             },
@@ -385,11 +454,19 @@ export class APIKeysGridPage extends Component<Props, State> {
   };
 
   private getColumnConfig = () => {
-    const { isAdmin, isLoadingTable } = this.state;
+    const { isAdmin, isLoadingTable, createdApiKey } = this.state;
 
     let config: Array<EuiBasicTableColumn<ApiKey>> = [];
 
     config = config.concat([
+      {
+        field: 'base64',
+        name: i18n.translate('xpack.security.management.apiKeys.table.base64ColumnName', {
+          defaultMessage: 'API key',
+        }),
+        sortable: true,
+        render: (base64: String) => <EuiCode>{base64}</EuiCode>,
+      },
       {
         field: 'name',
         name: i18n.translate('xpack.security.management.apiKeys.table.nameColumnName', {
@@ -412,21 +489,11 @@ export class APIKeysGridPage extends Component<Props, State> {
               <EuiFlexItem grow={false}>
                 <EuiIcon type="user" />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiText>{username}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
-        },
-        {
-          field: 'realm',
-          name: i18n.translate('xpack.security.management.apiKeys.table.realmColumnName', {
-            defaultMessage: 'Realm',
-          }),
-          sortable: true,
-          mobileOptions: {
-            show: false,
-          },
         },
       ]);
     }
@@ -438,9 +505,21 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Created',
         }),
         sortable: true,
-        render: (expiration: number) => (
-          <EuiToolTip content={moment(expiration).format(DATE_FORMAT)}>
-            <span>{moment(expiration).fromNow()}</span>
+        mobileOptions: {
+          show: false,
+        },
+        render: (creation: string, item: ApiKey) => (
+          <EuiToolTip content={moment(creation).format(DATE_FORMAT)}>
+            {item.id === createdApiKey?.id ? (
+              <EuiBadge color="secondary">
+                <FormattedMessage
+                  id="xpack.security.management.apiKeys.table.createdBadge"
+                  defaultMessage="Just now"
+                />
+              </EuiBadge>
+            ) : (
+              <span>{moment(creation).fromNow()}</span>
+            )}
           </EuiToolTip>
         ),
       },
@@ -602,7 +681,12 @@ export class APIKeysGridPage extends Component<Props, State> {
     try {
       const { isAdmin } = this.state;
       const { apiKeys } = await this.props.apiKeysAPIClient.getApiKeys(isAdmin);
-      this.setState({ apiKeys });
+      this.setState({
+        apiKeys: apiKeys.map((apiKey) => ({
+          ...apiKey,
+          base64: `${btoa(apiKey.id).substr(0, 8)}...`,
+        })),
+      });
     } catch (e) {
       this.setState({ error: e });
     }
