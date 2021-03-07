@@ -19,6 +19,7 @@
     // mocks
     "**/__mocks__/*",
     "**/mock/*",
+    "**/mocks/*",
     "**/*/mock.ts",
     "**/*/mocks.ts",
     "**/*/mocks.tsx",

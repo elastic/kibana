@@ -31,6 +31,7 @@
     // mocks
     "src/**/__mocks__/*",
     "src/**/mock/*",
+    "src/**/mocks/*",
     "src/**/*/mock.ts",
     "src/**/*/mocks.ts",
     "src/**/*/mocks.tsx",
@@ -64,6 +65,7 @@
     // mocks
     "x-pack/plugins/**/__mocks__/*",
     "x-pack/plugins/**/mock/*",
+    "x-pack/plugins/**/mocks/*",
     "x-pack/plugins/**/*/mock.ts",
     "x-pack/plugins/**/*/mocks.ts",
     "x-pack/plugins/**/*/mocks.tsx",
