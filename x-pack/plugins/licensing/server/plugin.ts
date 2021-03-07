@@ -32,7 +32,6 @@ import { FeatureUsageService } from './services';
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
-import { getPluginStatus$ } from './plugin_status';
 
 function normalizeServerLicense(license: RawLicense): PublicLicense {
   return {
@@ -81,7 +80,7 @@ function sign({
  * current Kibana instance.
  */
 export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
-  private stop$ = new Subject<void>();
+  private stop$ = new Subject();
   private readonly logger: Logger;
   private readonly config: LicenseConfigType;
   private loggingSubscription?: Subscription;
@@ -127,8 +126,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       client,
       pollingFrequency.asMilliseconds()
     );
-
-    core.status.set(getPluginStatus$(license$, this.stop$.asObservable()));
 
     core.http.registerRouteHandlerContext(
       'licensing',
