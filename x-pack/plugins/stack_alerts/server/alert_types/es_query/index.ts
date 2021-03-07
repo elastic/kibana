@@ -11,10 +11,10 @@ import { getAlertType } from './alert_type';
 
 interface RegisterParams {
   logger: Logger;
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, alerts } = params;
-  alerts.registerType(getAlertType(logger));
+  const { logger, alerting } = params;
+  alerting.registerType(getAlertType(logger));
 }

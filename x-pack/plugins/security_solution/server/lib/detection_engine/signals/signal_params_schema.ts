@@ -41,10 +41,13 @@ export const signalSchema = schema.object({
   threat: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threshold: schema.maybe(
     schema.object({
-      // Can be an empty string or empty array
-      field: schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      // Can be an empty string (pre-7.12) or empty array (7.12+)
+      field: schema.nullable(
+        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 3 })])
+      ),
       // Always required
       value: schema.number(),
+      // Can be null (pre-7.12) or empty array (7.12+)
       cardinality: schema.nullable(
         schema.arrayOf(
           schema.object({
