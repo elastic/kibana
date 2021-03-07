@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SearchResponse } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { Logger } from 'src/core/server';
 import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchResponse } from 'elasticsearch';
 import {
   Query,
   IIndexPattern,

@@ -6,8 +6,9 @@
  */
 
 import _ from 'lodash';
-import { Logger, SearchResponse } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchResponse } from 'elasticsearch';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices } from '../../../../alerting/server';
 import {

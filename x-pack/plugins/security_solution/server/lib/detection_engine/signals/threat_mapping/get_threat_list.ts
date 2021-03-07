@@ -6,7 +6,7 @@
  */
 
 import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import {
   GetSortWithTieBreakerOptions,
@@ -53,7 +53,7 @@ export const getThreatList = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
-  const { body: response } = await esClient.search({
+  const { body: response } = await esClient.search<SearchResponse<ThreatListItem>>({
     body: {
       query: queryFilter,
       fields: [
@@ -76,7 +76,7 @@ export const getThreatList = async ({
   });
 
   logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
-  return response as SearchResponse<ThreatListItem>;
+  return response;
 };
 
 /**

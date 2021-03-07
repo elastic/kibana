@@ -12,7 +12,7 @@ import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_cont
 import { OTHER_CATEGORY } from '../es_query_builder';
 import { alertsMock } from '../../../../../alerting/server/mocks';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
-import { SearchResponse } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
 describe('geo_containment', () => {
   describe('transformResults', () => {
