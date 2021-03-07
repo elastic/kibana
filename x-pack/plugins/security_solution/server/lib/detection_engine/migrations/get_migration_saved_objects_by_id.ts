@@ -13,6 +13,14 @@ import { validateEither } from '../../../../common/validate';
 import { signalsMigrationSOClient } from './saved_objects_client';
 import { SignalsMigrationSO, signalsMigrationSOs } from './saved_objects_schema';
 
+class MigrationResponseError extends Error {
+  public readonly statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
+
 /**
  * Retrieves a list of migrations SOs by their ID
  *
@@ -32,10 +40,16 @@ export const getMigrationSavedObjectsById = async ({
 }): Promise<SignalsMigrationSO[]> => {
   const client = signalsMigrationSOClient(soClient);
   const objects = ids.map((id) => ({ id }));
+  const { saved_objects: migrations } = await client.bulkGet(objects);
+  const error = migrations.find((migration) => migration.error)?.error;
+
+  if (error) {
+    throw new MigrationResponseError(error.message, error.statusCode);
+  }
 
   return pipe(
-    await client.bulkGet(objects),
-    (so) => validateEither(signalsMigrationSOs, so.saved_objects),
+    migrations,
+    (ms) => validateEither(signalsMigrationSOs, ms),
     fold(
       (e) => Promise.reject(e),
       (a) => Promise.resolve(a)

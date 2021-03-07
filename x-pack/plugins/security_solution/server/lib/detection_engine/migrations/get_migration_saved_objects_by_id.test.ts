@@ -6,7 +6,10 @@
  */
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
+import {
+  getSignalsMigrationSavedObjectMock,
+  getSignalsMigrationSavedObjectErrorMock,
+} from './saved_objects_schema.mock';
 import { getMigrationSavedObjectsById } from './get_migration_saved_objects_by_id';
 
 describe('getMigrationSavedObjectsById', () => {
@@ -34,6 +37,19 @@ describe('getMigrationSavedObjectsById', () => {
     soClient.bulkGet.mockRejectedValue(error);
 
     return expect(getMigrationSavedObjectsById({ ids, soClient })).rejects.toThrow(error);
+  });
+
+  it('throws a 404 error if the response includes a 404', async () => {
+    soClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        // @ts-expect-error stubbing our SO call
+        getSignalsMigrationSavedObjectErrorMock({ statusCode: 404, message: 'not found' }),
+      ],
+    });
+
+    return expect(getMigrationSavedObjectsById({ ids, soClient })).rejects.toThrow(
+      expect.objectContaining({ statusCode: 404 })
+    );
   });
 
   it('rejects if response is invalid', () => {
