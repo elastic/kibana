@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export async function fetchAvailableCcs(callCluster: any): Promise<string[]> {
+import { ElasticsearchClient } from 'kibana/server';
+
+export async function fetchAvailableCcs(esClient: ElasticsearchClient): Promise<string[]> {
   const availableCcs = [];
-  const response = await callCluster('cluster.remoteInfo');
+  const { body: response } = await esClient.cluster.remoteInfo();
   for (const remoteName in response) {
     if (!response.hasOwnProperty(remoteName)) {
       continue;

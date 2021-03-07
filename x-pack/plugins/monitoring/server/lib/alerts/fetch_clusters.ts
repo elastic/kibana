@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster } from '../../../common/types/alerts';
 
@@ -16,7 +17,7 @@ interface RangeFilter {
 }
 
 export async function fetchClusters(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   index: string,
   rangeFilter: RangeFilter = { timestamp: { gte: 'now-2m' } }
 ): Promise<AlertCluster[]> {
@@ -49,7 +50,7 @@ export async function fetchClusters(
     },
   };
 
-  const response = await callCluster('search', params);
+  const response = await esClient.search(params);
   return get(response, 'hits.hits', []).map((hit: any) => {
     const clusterName: string =
       get(hit, '_source.cluster_settings.cluster.metadata.display_name') ||
