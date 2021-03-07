@@ -1547,6 +1547,183 @@
     ],
     "interfaces": [
       {
+        "id": "def-server.IScopedSearchClient",
+        "type": "Interface",
+        "label": "IScopedSearchClient",
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.IScopedSearchClient",
+            "text": "IScopedSearchClient"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchClient",
+            "text": "ISearchClient"
+          }
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.IScopedSearchClient.saveSession",
+            "type": "Function",
+            "label": "saveSession",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/types.ts",
+              "lineNumber": 90
+            },
+            "signature": [
+              "(sessionId: string, attributes: Partial<unknown>) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "common",
+                "docId": "kibCorePluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown> | undefined>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IScopedSearchClient.getSession",
+            "type": "Function",
+            "label": "getSession",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/types.ts",
+              "lineNumber": 91
+            },
+            "signature": [
+              "(sessionId: string) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "common",
+                "docId": "kibCorePluginApi",
+                "section": "def-common.SavedObject",
+                "text": "SavedObject"
+              },
+              "<unknown>>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IScopedSearchClient.findSessions",
+            "type": "Function",
+            "label": "findSessions",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/types.ts",
+              "lineNumber": 92
+            },
+            "signature": [
+              "(options: Pick<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
+              ", \"filter\" | \"fields\" | \"searchAfter\" | \"search\" | \"page\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\" | \"pit\">) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              },
+              "<unknown>>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IScopedSearchClient.updateSession",
+            "type": "Function",
+            "label": "updateSession",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/types.ts",
+              "lineNumber": 93
+            },
+            "signature": [
+              "(sessionId: string, attributes: Partial<unknown>) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<unknown>>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IScopedSearchClient.cancelSession",
+            "type": "Function",
+            "label": "cancelSession",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/types.ts",
+              "lineNumber": 94
+            },
+            "signature": [
+              "(sessionId: string) => Promise<{}>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IScopedSearchClient.deleteSession",
+            "type": "Function",
+            "label": "deleteSession",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/types.ts",
+              "lineNumber": 95
+            },
+            "signature": [
+              "(sessionId: string) => Promise<{}>"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IScopedSearchClient.extendSession",
+            "type": "Function",
+            "label": "extendSession",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/types.ts",
+              "lineNumber": 96
+            },
+            "signature": [
+              "(sessionId: string, expires: Date) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<unknown>>"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/server/search/types.ts",
+          "lineNumber": 89
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.ISearchSessionService",
         "type": "Interface",
         "label": "ISearchSessionService",

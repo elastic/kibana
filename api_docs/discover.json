@@ -40,6 +40,25 @@
           "lineNumber": 18
         },
         "initialIsOpen": false
+      },
+      {
+        "id": "def-public.loadSharingDataHelpers",
+        "type": "Function",
+        "label": "loadSharingDataHelpers",
+        "signature": [
+          "() => Promise<typeof ",
+          "src/plugins/discover/public/application/helpers/get_sharing_data",
+          ">"
+        ],
+        "description": [],
+        "children": [],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/discover/public/shared/index.ts",
+          "lineNumber": 12
+        },
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
