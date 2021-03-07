@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, SearchResponse } from 'kibana/server';
 import { Logger } from 'src/core/server';
 import { ApiResponse } from '@elastic/elasticsearch';
 import {
@@ -109,7 +109,7 @@ export async function executeEsQueryFactory(
   return async (
     gteDateTime: Date | null,
     ltDateTime: Date | null
-  ): Promise<ApiResponse<unknown> | undefined> => {
+  ): Promise<ApiResponse<SearchResponse<unknown>> | undefined> => {
     let esFormattedQuery;
     if (indexQuery) {
       const gteEpochDateTime = gteDateTime ? new Date(gteDateTime).getTime() : null;
@@ -193,7 +193,7 @@ export async function executeEsQueryFactory(
       },
     };
 
-    let esResult: ApiResponse<Record<string, unknown>> | undefined;
+    let esResult: ApiResponse<SearchResponse<unknown>> | undefined;
     try {
       ({ body: esResult } = await esClient.search(esQuery));
     } catch (err) {

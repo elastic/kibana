@@ -27,6 +27,7 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter) => {
 
       try {
         const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client;
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient) {
@@ -39,7 +40,7 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter) => {
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
           try {
-            const indexVersion = await getIndexVersion(clusterClient.callAsCurrentUser, index);
+            const indexVersion = await getIndexVersion(esClient.asCurrentUser, index);
             mappingOutdated = isOutdated({
               current: indexVersion,
               target: SIGNALS_TEMPLATE_VERSION,

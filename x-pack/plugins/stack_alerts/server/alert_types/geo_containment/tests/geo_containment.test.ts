@@ -12,8 +12,7 @@ import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_cont
 import { OTHER_CATEGORY } from '../es_query_builder';
 import { alertsMock } from '../../../../../alerting/server/mocks';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { SearchResponse } from 'kibana/server';
 
 describe('geo_containment', () => {
   describe('transformResults', () => {
@@ -21,7 +20,7 @@ describe('geo_containment', () => {
     const geoField = 'location';
     it('should correctly transform expected results', async () => {
       const transformedResults = transformResults(
-        elasticsearchClientMock.createApiResponse({ body: sampleJsonResponse }),
+        (sampleJsonResponse as unknown) as SearchResponse<unknown>,
         dateField,
         geoField
       );
@@ -79,7 +78,7 @@ describe('geo_containment', () => {
     const nestedGeoField = 'geo.coords.location';
     it('should correctly transform expected results if fields are nested', async () => {
       const transformedResults = transformResults(
-        elasticsearchClientMock.createApiResponse({ body: sampleJsonResponseWithNesting }),
+        (sampleJsonResponseWithNesting as unknown) as SearchResponse<unknown>,
         nestedDateField,
         nestedGeoField
       );

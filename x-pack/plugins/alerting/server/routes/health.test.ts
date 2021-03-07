@@ -78,7 +78,6 @@ describe('healthRoute', () => {
 
     expect(esClient.asInternalUser.transport.request.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "transport.request",
         Object {
           "method": "GET",
           "path": "/_xpack/usage",
