@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { PageContent } from '../../public/application/components/page_content';
+import { PageContent } from '../../../public/application/components/page_content';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
