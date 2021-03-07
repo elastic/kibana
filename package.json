@@ -206,7 +206,7 @@
     "github-markdown-css": "^2.10.0",
     "glob": "^7.1.2",
     "glob-all": "^3.2.1",
-    "globby": "^8.0.1",
+    "globby": "^10.0.0",
     "graphql": "^0.13.2",
     "graphql-fields": "^1.0.2",
     "graphql-tag": "^2.10.3",
