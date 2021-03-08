@@ -34,14 +34,14 @@ Dashboards support many types of panels, and provide several editors that you ca
 | <<enhance-dashboards,Tools>>
 | Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
 
-| <<save-your-search,Saved search from *Discover*>>
+| <<save-your-search,Saved search from Discover>>
 | Display a saved search table from <<discover, *Discover*>>. The table results are not aggregated.
 
-| <<logs-app,*Log stream*>>
+| <<logs-app,Log stream>>
 | Display a table of live streaming logs.
 
-| <<xpack-ml-anomalies,*ML Anomaly Swim Lane*>>
-| Display the results from <<xpack-ml, machine learning>> anomaly detection jobs.
+| <<xpack-ml-anomalies,ML Anomaly Swim Lane>>
+| Display the results from machine learning anomaly detection jobs.
 
 |===
 
@@ -82,10 +82,11 @@ Begin with an empty dashboard, or open an existing dashboard.
 * To open an existing dashboard, click the dashboard *Title* you want to open.
 
 [float]
-[[create-panels-with-lens]]
+[[add-panels]]
 === Add panels
 
-To add panels to the dashboard, use one of the editors to create the panel, or add an existing panel.
+To add panels to the dashboard, use one of the editors to create the panel, 
+add a panel from the *Visualize Library*, a table of live streaming logs, or the results from a machine learning anomaly detection job.
 
 [float]
 [[create-panels-with-lens]]
@@ -95,13 +96,15 @@ To create panels, use one of the editors, then add the panel to the dashboard.
 
 . On the dashboard, click *Create panel*.
 
-. On the *New visualization* window, click the editor you want to use. 
+. On the *New visualization* window, click the editor you want to use. *Lens* is recommended for most users.
 
-. To create the panel, configure the options in the editor.
+. To create the panel, configure the editor options.
 
 . To add the panel to the dashboard, choose one of the following options:
 
-* To save the panel in the *Visualize Library*, click *Save to Library*, configure the options, then click *Save and return*.
+* To save the panel to the *Visualize Library*, click *Save to Library*, configure the options, then click *Save and return*.
++
+When panels are saved in the *Visualize Library*, the panel displays image:dashboard/images/visualize-library-icon.png[Visualize Library icon] in the header.
 
 * To add the panel to the dashboard without saving to the *Visualize Library*, click *Save and return*.
 
@@ -109,26 +112,43 @@ To create panels, use one of the editors, then add the panel to the dashboard.
 [[add-panels-from-the-library]]
 ==== Add panels from the library
 
-Add panels that you've already created.
+Add panels that you've already created from the *Visualize Library*, 
 
 . On the dashboard, click *Add from library*.
 
-. On the *Add from library* flyout, then use one of the following options:
+. On the *Add from library* flyout, click the panels you want to add to the dashboard.
 
-* Click the panel you want to add to the dashboard, then click *X* to close the flyout.
+. To close the flyout, click *X*.
 +
 When a panel contains a stored query, both queries are applied.
 
-* To add a table of live streaming logs, click *Create new*, then select *Log stream*.
+. To unlink the panel from the *Visualize Library*, open the panel menu, then click *More > Unlink from library*.
 
-. To add 
+[float]
+[[add-a-table-of-live-streaming-logs]]
+==== Add a logs panel
 
+Add a panel that displays a table of live streaming logs.
+
+. On the dashboard, click *Add from library*.
+
+. On the *Add from library* flyout, click *Create new*, then select *Log stream*.
+
+[float]
+[[add-machine-learning-results]]
+==== Add machine learning results
+
+Add a panel that displays the results from machine learning anomaly detection jobs.
+
+. On the dashboard, click *Add from library*.
+
+. On the *Add from library* flyout, click *Create new*, then select *ML Anomaly Swim Lane*.
 
 [float]
 [[arrange-panels]]
 [[moving-containers]]
 [[resizing-containers]]
-=== Arrange panels
+=== Arrange the panels
 
 To compare the data in the panels, arrange the panels on the dashboard, or remove the panel from the dashboard.
 
@@ -138,56 +158,99 @@ To compare the data in the panels, arrange the panels on the dashboard, or remov
 
 * To resize, click the resize control, then drag to the new dimensions.
 
+* To maximize the panel to fullscreen, open the panel menu, then click *More > Maximize panel*.
+
 * To delete, open the panel menu, then select *Delete from dashboard*.
 
 . To save your changes, click *Save* in the toolbar.
 
 [float]
+[[apply-design-options]]
+=== Apply design options
+
+Apply a set of design options to the entire dashboard.
+
+. From the toolbar, click *Edit > Options*.
+
+. Select the following options:
+
+* *Use margins between panels* &mdash; Specifies a margin of space between each panel.
+
+* *Show panel titles* &mdash; Specifies the appearance of titles in the header of each panel.
+
+* *Sync color pallettes across panels* &mdash; Specifies the color pallette that is applied to all panels.
+
+[float]
 [[search-or-filter-your-data]]
 === Search or filter your data
 
-{kib} provides you with several ways to search your data and apply {es} filters. You can combine the filters with any panel-specific
-filters to display the data want to you see.
+{kib} provides you with several ways to search your data and apply {es} filters. You can combine the filters with any panel
+filter to display the data want to you see.
 
-[role="screenshot"]
-image::dashboard/images/dashboard-filters.png[Labeled interface with semi-structured search, time filter, and additional filters]
+[float]
+[[semi-structured-search]]
+==== Semi-structured search
 
-Semi-structured search::
-  Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>.
-  Type a search term to match across all fields, or begin typing a field name to
-  get prompted with field names and operators you can use to build a structured query. 
-  For example, in the sample web logs data, this query displays data only for the US:
+Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>.
+Type a search term to match across all fields, or begin typing a field name to
+get prompted with field names and operators you can use to build a structured query. 
 
-  . Enter `g`, then select *geo.source*.
-  . Select *equals some value* and *US*, then click *Update*.
-  . For a more complex search, try:
+For example, in the sample web logs data, the following query displays data only for the US:
+
+. Enter `g`, then select *geo.source*.
+
+. Select *equals some value* and *US*, then click *Update*.
+
+. For a more complex search, try:
 
 [source,text]
 -------------------
 geo.src : "US" and url.keyword : "https://www.elastic.co/downloads/beats/metricbeat"
 -------------------
 
-Time filter::
-  Dashboards have a global time filter that restricts the data that displays, but individual panels can
-  override the global time filter.
-  
-  . To update the time filter, add a panel that displays time on the x-axis.
+[float]
+[[time-filter]]
+==== Time filter
 
-  . Open the panel menu, then select *More > Customize time range*.
-
-  . On the *Customize panel time range* window, specify the new time range, then click *Add to panel*.
+The <<set-time-filter,time filter>> restrict the data that appears on the dashboard, but you can override the time filter with panel filters.
   
+. To update the time filter, add a panel that displays time-based data along the x-axis.
+
+. Open the panel menu, then select *More > Customize time range*.
+
+. On the *Customize panel time range* window, specify the time range, then click *Add to panel*.
++
 [role="screenshot"]
 image:images/time_range_per_panel.gif[Time range per dashboard panel]
 
-Additional filters with AND::
-  Add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, using a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL]. 
-  When you use more than one index pattern on a dashboard, the filter editor allows you to filter only one dashboard.
-  To dynamically add filters, click a series on a dashboard. For example, to filter the dashboard to display only ios data:
-  . Click *Add filter*.
-  . Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
-  . *Save* the filter.
-  . To remove the filter, click *x*.
+[float]
+[[additional-filters-with-and]]
+==== Additional filters with AND
+
+Add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, use a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL]. 
+When you use more than one index pattern on a dashboard, the filter editor allows you to filter only one dashboard.
+
+For example, to filter the dashboard to display only ios data:
+
+. Click *Add filter*.
+
+. Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
+
+. *Save* the filter.
+
+. To remove the filter, click *x*.
+
+[float]
+[[add-dynamic-filters]]
+==== Add dynamic filters
+
+When you see data in a panel that you want to use as a filter, you can dynamically create the filter. To dynamically add filters, click the data in a panel.
+
+. Click the data in the panel. 
+
+. Select filters you want to apply to all of the dashboard panels, then click *Apply*.
+
+. To remove the filters, click *x*.
 
 [float]
 [[clone-panels]]
@@ -204,31 +267,50 @@ dashboard.
 [role="screenshot"]
 image:images/clone_panel.gif[clone panel]
 +
-{kib} automatically saves the cloned panel in *Visualize*. To access the cloned panel, open the main menu, then click *Visualize*.
+To access the cloned panel, open the main menu, then click *Visualize Library*.
+
+[float]
+[[copy-to-dashboard]]
+=== Copy panels
+
+To add a panel to another dashboard, copy the panel.
+
+. Open the panel menu, then select *More > Copy to dashboard*.
+
+. On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
 
 [float]
 [[explore-the-underlying-data]]
 === Explore the underlying documents
 
-Dashboard panels have a shortcut to view the underlying documents in *Discover*. Open the panel menu,
-then click *Explore underlying data*. *Discover* will be opened with the same time range and filters as the panel.
+View the underlying documents in a panel, or in a data series. 
 
+TIP: *Explore underlying data* is supported only for visualization panels with a single index pattern.
+
+To view the underlying documents in the panel: 
+
+. Open the panel menu.
+
+. Click *Explore underlying data*.
++
+*Discover* opens with the same time range and filters as the panel.
++
 [role="screenshot"]
 image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
 
-A second shortcut is disabled by default, and creates a new interaction when clicking on a chart.
-This shortcut is similar to a <<drilldowns, drilldown>>, but can show you data for only one series.
-To enable the chart interactivity shortcut, add the following to kibana.yml:
+To view the underlying documents in a data series:
 
+. In kibana.yml, add the following:
++
 ["source","yml"]
 -----------
 xpack.discoverEnhanced.actions.exploreDataInChart.enabled: true
 -----------
 
+. Open the dashboard, then click on the data series you want to view. 
++
 [role="screenshot"]
 image::images/explore_data_in_chart.png[Explore underlying data from chart]
-
-TIP: *Explore underlying data* is available only for visualization panels with a single index pattern.
 
 [float]
 [[download-csv]]
@@ -238,18 +320,22 @@ Download panel data in a CSV file. You can download most panels in a CSV file, b
 for *Lens* panels.
 
 [role="xpack"]
-Lens::
+To download *Lens* panel data in a CSV file:
+
 Open the *Lens* panel menu, then select *More > Download as CSV*.
-+
+
 [role="screenshot"]
 image::images/download_csv_context_menu.png[Download as CSV from panel context menu]
 
-All panels::
-  . Open the panel menu, then select *Inspect*.
+To download all other panel data in a CSV file:
 
-  . Click *Download CSV*, then select the CSV type from the dropdown. The *Formatted CSV* contains
-    human-readable dates and numbers, while the *Unformatted* option is for computer use.
+. Open the panel menu, then select *Inspect*.
 
+. Click *Download CSV*, then select the CSV type from the dropdown:
+* *Formatted CSV* &mdash; Contains human-readable dates and numbers.
+
+* *Unformatted* &mdash; Best used for computer use.
++
 [role="screenshot"]
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
