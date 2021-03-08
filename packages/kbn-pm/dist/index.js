@@ -209,7 +209,7 @@ async function run(argv) {
     },
     default: {
       cache: true,
-      'force-install': true,
+      'force-install': false,
       offline: false,
       validate: true
     },
@@ -8921,9 +8921,6 @@ const BootstrapCommand = {
     // That way non bazel projects could depend on bazel projects but not the other way around
     // That is only intended during the migration process while non Bazel projects are not removed at all.
     //
-    // Until we have our first package build within Bazel we will always need to directly call the yarn rule
-    // otherwise yarn install won't trigger as we don't have any npm dependency within Bazel
-    // TODO: Change CLI default in order to not force install as soon as we have our first Bazel package being built
 
     if (forceInstall) {
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
@@ -22976,11 +22973,11 @@ class Project {
 
   ensureValidProjectDependency(project) {
     const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
+    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}/npm_module`));
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
     const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
-    //  do not allow child projects to hold dependencies
+    //  do not allow child projects to hold dependencies, unless they are meant to be published externally
 
     if (versionInPackageJson === expectedVersionInPackageJson || versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg) {
       return;

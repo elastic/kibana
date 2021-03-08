@@ -1397,7 +1397,7 @@
     utility-types "^3.10.0"
     uuid "^3.3.2"
 
-"@elastic/datemath@link:packages/elastic-datemath":
+"@elastic/datemath@link:bazel/bin/packages/elastic-datemath/npm_module":
   version "0.0.0"
   uid ""
 

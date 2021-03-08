@@ -1,5 +1,8 @@
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
+PKG_BASE_NAME = "elastic-datemath"
+PKG_REQUIRE_NAME = "@elastic/datemath"
+
 SOURCE_FILES = [
   "index.js",
 ]
@@ -15,27 +18,30 @@ filegroup(
   srcs = glob(SRCS),
 )
 
+NPM_MODULE_EXTRA_FILES = [
+  "package.json",
+  "readme",
+]
+
 DEPS = [
   "@npm//moment",
 ]
 
 js_library(
-  name = "elastic-datemath",
+  name = PKG_BASE_NAME,
   srcs = [
     ":srcs",
   ],
   deps = DEPS,
-  package_name = "@elastic/datemath",
+  package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
 pkg_npm(
   name = "npm_module",
-  srcs = [
-    ":srcs",
-  ],
+  srcs = NPM_MODULE_EXTRA_FILES,
   deps = [
-    ":elastic-datemath",
+    ":%s" % PKG_BASE_NAME,
   ]
 )
 
