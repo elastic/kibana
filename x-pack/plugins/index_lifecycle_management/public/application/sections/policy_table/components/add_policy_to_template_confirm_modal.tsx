@@ -282,7 +282,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
                   all indices which match the index template."
           />{' '}
           <LearnMoreLink
-            docPath="indices-templates.html"
+            docPath="index-templates.html"
             text={
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexTemplatesLink"
