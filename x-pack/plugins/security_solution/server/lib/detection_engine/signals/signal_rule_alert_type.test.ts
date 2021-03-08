@@ -7,9 +7,14 @@
 
 import moment from 'moment';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
+import {
+  getResult,
+  getMlResult,
+  getThresholdResult,
+  getEqlResult,
+} from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { getListsClient, getExceptions, sortExceptionItems, checkPrivileges } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -24,6 +29,7 @@ import { getListClientMock } from '../../../../../lists/server/services/lists/li
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -101,7 +107,7 @@ describe('rules_notification_alert_type', () => {
       find: jest.fn(),
       goingToRun: jest.fn(),
       error: jest.fn(),
-      warning: jest.fn(),
+      partialFailure: jest.fn(),
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getListsClient as jest.Mock).mockReturnValue({
@@ -205,9 +211,33 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Missing required read privileges on the following indices: ["some*"]'
+      );
+    });
+
+    it('should set a warning when exception list for threshold rule contains value list exceptions', async () => {
+      (getExceptions as jest.Mock).mockReturnValue([
+        getExceptionListItemSchemaMock({ entries: [getEntryListMock()] }),
+      ]);
+      payload = getPayload(getThresholdResult(), alertServices);
+      await alert.executor(payload);
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+        'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
+      );
+    });
+
+    it('should set a warning when exception list for EQL rule contains value list exceptions', async () => {
+      (getExceptions as jest.Mock).mockReturnValue([
+        getExceptionListItemSchemaMock({ entries: [getEntryListMock()] }),
+      ]);
+      payload = getPayload(getEqlResult(), alertServices);
+      await alert.executor(payload);
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+        'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
       );
     });
 
@@ -228,8 +258,8 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*'];
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]'
       );
     });

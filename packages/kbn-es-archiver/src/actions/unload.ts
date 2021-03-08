@@ -10,7 +10,8 @@ import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import { Client } from '@elastic/elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import {

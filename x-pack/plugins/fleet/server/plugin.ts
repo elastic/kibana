@@ -21,6 +21,7 @@ import {
   KibanaRequest,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
@@ -29,6 +30,14 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import {
+  EsAssetReference,
+  FleetConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
+import { CloudSetup } from '../../cloud/server';
+
 import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -56,12 +65,6 @@ import {
   registerAppRoutes,
 } from './routes';
 import {
-  EsAssetReference,
-  FleetConfigType,
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../common';
-import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
@@ -78,7 +81,6 @@ import {
   listAgents,
   getAgent,
 } from './services/agents';
-import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
@@ -297,10 +299,7 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
     agentCheckinState.start();
 
-    if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
-      // Break the promise chain, the error handling is done in startFleetServerSetup
-      startFleetServerSetup();
-    }
+    startFleetServerSetup();
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),

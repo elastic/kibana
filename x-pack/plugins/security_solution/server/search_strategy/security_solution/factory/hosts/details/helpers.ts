@@ -9,7 +9,7 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { toStringArray } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
 
 import { HostAggEsItem, HostBuckets, HostValue } from '../../../../../lib/hosts/types';
 
@@ -42,7 +42,11 @@ export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
       if (fieldName === '_id') {
         return set('_id', fieldValue, flattenedFields);
       }
-      return set(fieldName, toStringArray(fieldValue), flattenedFields);
+      return set(
+        fieldName,
+        toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+        flattenedFields
+      );
     }
     return flattenedFields;
   }, {});

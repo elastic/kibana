@@ -6,17 +6,22 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'src/core/server';
-import {
+import type { SavedObjectsClientContract } from 'src/core/server';
+
+import { ElasticsearchAssetType } from '../../../../types';
+import type {
   RegistryDataStream,
-  ElasticsearchAssetType,
   TemplateRef,
   RegistryElasticsearch,
   InstallablePackage,
+  CallESAsCurrentUser,
 } from '../../../../types';
-import { CallESAsCurrentUser } from '../../../../types';
-import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
+import { loadFieldsFromYaml, processFields } from '../../fields/field';
+import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
+import { getAsset, getPathParts } from '../../archive';
+import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
+
 import {
   generateMappings,
   generateTemplateName,
@@ -24,8 +29,6 @@ import {
   getTemplate,
   getTemplatePriority,
 } from './template';
-import { getAsset, getPathParts } from '../../archive';
-import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
 export const installTemplates = async (
   installablePackage: InstallablePackage,
@@ -297,7 +300,8 @@ export async function installTemplate({
   packageVersion: string;
   packageName: string;
 }): Promise<TemplateRef> {
-  const mappings = generateMappings(processFields(fields));
+  const validFields = processFields(fields);
+  const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
@@ -359,6 +363,7 @@ export async function installTemplate({
   const template = getTemplate({
     type: dataStream.type,
     templateIndexPattern,
+    fields: validFields,
     mappings,
     pipelineName,
     packageName,

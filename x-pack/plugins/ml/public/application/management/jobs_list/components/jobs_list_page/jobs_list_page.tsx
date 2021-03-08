@@ -23,6 +23,7 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
+import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 import { PLUGIN_ID } from '../../../../../../common/constants/app';
 import { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public/';
 
@@ -67,7 +68,7 @@ function usePageState<T extends ListingPageUrlState>(
   return [pageState, updateState];
 }
 
-const EmptyFunctionComponent: React.FC = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 function useTabs(isMlEnabledInSpace: boolean, spacesApi: SpacesPluginStart | undefined): Tab[] {
   const [adPageState, updateAdPageState] = usePageState(getDefaultAnomalyDetectionJobsListState());
@@ -147,6 +148,11 @@ export const JobsListPage: FC<{
     check();
   }, []);
 
+  const ContextWrapper = useCallback(
+    spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spacesApi]
+  );
+
   if (initialized === false) {
     return null;
   }
@@ -184,8 +190,6 @@ export const JobsListPage: FC<{
   if (accessDenied) {
     return <AccessDeniedPage />;
   }
-
-  const ContextWrapper = spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent;
 
   return (
     <RedirectAppLinks application={coreStart.application}>
