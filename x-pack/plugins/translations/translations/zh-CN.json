@@ -8263,12 +8263,7 @@
     "xpack.features.ossFeatures.visualizeCreateShortUrlPrivilegeName": "创建短 URL",
     "xpack.features.ossFeatures.visualizeShortUrlSubFeatureName": "短 URL",
     "xpack.features.savedObjectsManagementFeatureName": "已保存对象管理",
-<<<<<<< HEAD
-    "xpack.features.visualizeFeatureName": "Visualize",
-=======
     "xpack.features.visualizeFeatureName": "Visualize 库",
-    "xpack.fileUpload.enterIndexName": "输入索引名称",
->>>>>>> 8de91b506e68532778ba6a29fdfb1f326d78f04d
     "xpack.fileUpload.httpService.fetchError": "执行提取时出错：{error}",
     "xpack.fileUpload.httpService.noUrl": "未提供 URL",
     "xpack.fileUpload.indexNameReqField": "索引名称，必填字段",

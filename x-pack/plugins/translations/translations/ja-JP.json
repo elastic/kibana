@@ -8193,12 +8193,7 @@
     "xpack.features.ossFeatures.visualizeCreateShortUrlPrivilegeName": "短い URL を作成",
     "xpack.features.ossFeatures.visualizeShortUrlSubFeatureName": "短い URL",
     "xpack.features.savedObjectsManagementFeatureName": "保存されたオブジェクトの管理",
-<<<<<<< HEAD
-    "xpack.features.visualizeFeatureName": "可視化",
-=======
     "xpack.features.visualizeFeatureName": "Visualizeライブラリ",
-    "xpack.fileUpload.enterIndexName": "インデックス名を入力",
->>>>>>> 8de91b506e68532778ba6a29fdfb1f326d78f04d
     "xpack.fileUpload.httpService.fetchError": "フェッチ実行エラー：{error}",
     "xpack.fileUpload.httpService.noUrl": "URLが指定されていません",
     "xpack.fileUpload.indexNameReqField": "インデックス名、必須フィールド",
