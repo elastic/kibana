@@ -98,7 +98,7 @@ export const createPrepackagedRules = async (
   maxTimelineImportExportSize: number,
   exceptionsClient?: ExceptionListClient
 ): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
-  const clusterClient = context.core.elasticsearch.legacy.client;
+  const esClient = context.core.elasticsearch.client;
   const savedObjectsClient = context.core.savedObjects.client;
   const exceptionsListClient =
     context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
@@ -118,7 +118,7 @@ export const createPrepackagedRules = async (
   const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
   if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-    const signalsIndexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);
+    const signalsIndexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
     if (!signalsIndexExists) {
       throw new PrepackagedRulesError(
         `Pre-packaged rules cannot be installed until the signals index is created: ${signalsIndex}`,

@@ -77,7 +77,7 @@ export const importRulesRoute = (
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
@@ -101,7 +101,7 @@ export const importRulesRoute = (
           });
         }
         const signalsIndex = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);
+        const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
         if (!indexExists) {
           return siemResponse.error({
             statusCode: 400,

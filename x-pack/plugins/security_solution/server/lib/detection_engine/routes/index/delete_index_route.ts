@@ -38,16 +38,16 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
+
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const callCluster = clusterClient.callAsCurrentUser;
         const index = siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(callCluster, index);
+        const indexExists = await getIndexExists(esClient, index);
 
         if (!indexExists) {
           return siemResponse.error({
@@ -55,14 +55,14 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
             body: `index: "${index}" does not exist`,
           });
         } else {
-          await deleteAllIndex(callCluster, `${index}-*`);
-          const policyExists = await getPolicyExists(callCluster, index);
+          await deleteAllIndex(esClient, `${index}-*`);
+          const policyExists = await getPolicyExists(esClient, index);
           if (policyExists) {
-            await deletePolicy(callCluster, index);
+            await deletePolicy(esClient, index);
           }
-          const templateExists = await getTemplateExists(callCluster, index);
+          const templateExists = await getTemplateExists(esClient, index);
           if (templateExists) {
-            await deleteTemplate(callCluster, index);
+            await deleteTemplate(esClient, index);
           }
           return response.ok({ body: { acknowledged: true } });
         }
