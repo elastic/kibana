@@ -44,16 +44,20 @@ Import and export also work well when you have a large number
 of objects to update and want to batch the process.
 
 [float]
-==== Compatibility across versions and downgrades
+==== Compatibility across versions
 
-We do not guarantee compatibility of a Saved Object exported from newer Kibana version and imported to older Kibana version:
+With each release, {kib} introduces changes to the way saved objects are stored. When importing a saved object, {kib} will run the necessary migrations to ensure that the imported saved objects are compatible with the current version.
 
-* New functionalities (e.g. a new Visualization type or new options in existing visualizations) cannot be reproduced in previous versions
-* The exported format of Saved Objects can change without notice and it is guaranteed to work only when reimported on the same (or more recent) Kibana version
+However, saved objects can only be imported into a newer minor on the same or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
 
-Kibana automatically performs a Saved Object migration at every upgrade (even minor versions) due to format changes, new features or fixes.
-
-The official process to perform a Kibana downgrade is to restore a snapshot of the Kibana indices taken before the upgrade. Please **always** snapshot all the Kibana indices prior upgrading.
+|=======
+| Exporting version | Importing version | Compatible?
+| 6.7.0 | 6.8.1 | Yes
+| 6.8.1 | 7.3.0 | Yes
+| 7.3.0 | 7.11.1 | Yes
+| 7.11.1 | 7.6.0 | No
+| 6.8.1 | 8.0.0 | No
+|=======
 
 [float]
 ==== Import
