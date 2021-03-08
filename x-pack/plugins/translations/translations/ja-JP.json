@@ -20871,8 +20871,6 @@
     "xpack.transform.wizard.nextStepButton": "次へ",
     "xpack.transform.wizard.previousStepButton": "前へ",
     "xpack.triggersActionsUI.actionVariables.dateLabel": "アラートがアクションをスケジュールした日付。",
-    "xpack.triggersActionsUI.actionVariables.spaceIdLabel": "アラートのスペース ID。",
-    "xpack.triggersActionsUI.actionVariables.tagsLabel": "アラートのタグ。",
     "xpack.triggersActionsUI.alerts.breadcrumbTitle": "アラート",
     "xpack.triggersActionsUI.appName": "アラートとアクション",
     "xpack.triggersActionsUI.case.configureCases.mappingFieldSummary": "まとめ",
