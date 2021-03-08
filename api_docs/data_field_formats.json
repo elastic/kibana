@@ -3459,8 +3459,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 80,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L80"
+              "lineNumber": 83,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L83"
             },
             "signature": [
               "({ kind: boolean; text: string; } | { kind: string; text: string; })[]"
@@ -3479,8 +3479,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 82,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L82"
+              "lineNumber": 85,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L85"
             }
           },
           {
@@ -3497,8 +3497,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/string.ts",
-                  "lineNumber": 102,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L102"
+                  "lineNumber": 105,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L105"
                 }
               }
             ],
@@ -3509,8 +3509,8 @@
             "label": "textConvert",
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L102"
+              "lineNumber": 105,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/field_formats/converters/string.ts#L105"
             },
             "tags": [],
             "returnComment": []
