@@ -12,8 +12,10 @@ import {
 } from '../../../../../__mocks__';
 import '../../../../__mocks__/engine_logic.mock';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { ReactWrapper } from 'enzyme';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { nextTick } from '@kbn/test/jest';
 
 export const runActionColumnTests = (wrapper: ReactWrapper) => {
