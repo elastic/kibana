@@ -289,7 +289,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -399,7 +399,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -509,7 +509,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -617,7 +617,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -763,7 +763,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -898,7 +898,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -1049,7 +1049,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -1159,7 +1159,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,

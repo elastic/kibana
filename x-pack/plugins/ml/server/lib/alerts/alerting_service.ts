@@ -10,12 +10,7 @@ import rison from 'rison-node';
 import { ElasticsearchClient } from 'kibana/server';
 import moment from 'moment';
 import { Duration } from 'moment/moment';
-import {
-  getEntityFieldName,
-  getEntityFieldValue,
-  AnomalyResultType,
-  ANOMALY_RESULT_TYPE,
-} from '@kbn/ml-utils';
+import { AnomalyRecordDoc, AnomalyResultType, ANOMALY_RESULT_TYPE } from '@kbn/ml-utils';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -31,7 +26,6 @@ import {
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
-import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
 import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
 
 /**
@@ -252,18 +246,10 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
   };
 
   /**
-   * Provides unique key for the anomaly result.
+   * Provides a key for alert instance.
    */
-  const getAlertInstanceKey = (source: any): string => {
-    let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
-    if (source.result_type === ANOMALY_RESULT_TYPE.INFLUENCER) {
-      alertInstanceKey += `_${source.influencer_field_name}_${source.influencer_field_value}`;
-    } else if (source.result_type === ANOMALY_RESULT_TYPE.RECORD) {
-      const fieldName = getEntityFieldName(source);
-      const fieldValue = getEntityFieldValue(source);
-      alertInstanceKey += `_${source.detector_index}_${source.function}_${fieldName}_${fieldValue}`;
-    }
-    return alertInstanceKey;
+  const getAlertInstanceKey = (source: AnomalyRecordDoc): string => {
+    return source.job_id;
   };
 
   /**
@@ -298,8 +284,10 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      */
     const lookBackTimeInterval = `${Math.max(
       // Double the max bucket span
-      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2,
-      checkIntervalGap ? checkIntervalGap.asSeconds() : 0
+      Math.round(
+        resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2
+      ),
+      checkIntervalGap ? Math.round(checkIntervalGap.asSeconds()) : 0
     )}s`;
 
     const jobIds = jobsResponse.map((v) => v.job_id);
@@ -500,15 +488,11 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      * Return the result of an alert condition execution.
      *
      * @param params - Alert params
-     * @param publicBaseUrl
-     * @param alertId - Alert ID
      * @param startedAt
      * @param previousStartedAt
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
-      publicBaseUrl: string | undefined,
-      alertId: string,
       startedAt: Date,
       previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
@@ -531,59 +515,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
         ...result,
         name: result.alertInstanceKey,
         anomalyExplorerUrl,
-        kibanaBaseUrl: publicBaseUrl!,
       };
-
-      let kibanaEventLogCount = 0;
-      try {
-        // Check kibana-event-logs for presence of this alert instance
-        const kibanaLogResults = await esClient.count({
-          index: '.kibana-event-log-*',
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'kibana.alerting.action_group_id': {
-                        value: ANOMALY_SCORE_MATCH_GROUP_ID,
-                      },
-                    },
-                  },
-                  {
-                    term: {
-                      'kibana.alerting.instance_id': {
-                        value: executionResult.name,
-                      },
-                    },
-                  },
-                  {
-                    nested: {
-                      path: 'kibana.saved_objects',
-                      query: {
-                        term: {
-                          'kibana.saved_objects.id': {
-                            value: alertId,
-                          },
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-
-        kibanaEventLogCount = kibanaLogResults.body.count;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Unable to check kibana event logs', e);
-      }
-
-      if (kibanaEventLogCount > 0) {
-        return;
-      }
 
       return executionResult;
     },

@@ -7,7 +7,7 @@
 
 import { ANOMALY_RESULT_TYPE } from '@kbn/ml-utils/src/constants/anomalies';
 import { AnomalyResultType } from '@kbn/ml-utils/src/types/anomalies';
-import { AlertTypeParams } from '../../../alerts/common';
+import { AlertTypeParams } from '../../../alerting/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
