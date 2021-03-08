@@ -6,7 +6,7 @@
  */
 
 import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerts/server';
+import { AlertsClient } from '../../../../../alerting/server';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
 
