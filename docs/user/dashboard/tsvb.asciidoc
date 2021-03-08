@@ -1,10 +1,8 @@
 [[TSVB]]
 === TSVB
 
-*TSVB* supports <<aggregation-reference, most {es} metric aggregations>>, multiple visualization types, custom functions,
-and some math. To use *TSVB*, you must have a date field. 
-
-TIP: With *TSVB*, you can visualize the data from multiple series, but only *Timelion* can perform math across layers.
+*TSVB* enables you to visualize the data from multiple data series, supports <<aggregation-reference, 
+most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. To use *TSVB*, you must have a date field. 
 
 [role="screenshot"]
 image::visualize/images/tsvb-screenshot.png[TSVB overview]
@@ -118,7 +116,7 @@ All chart types except *Time Series*::
   the sum of all 10 bars and output a single Y value per X value. This is often confused
   with the overall sum function, which outputs a single Y value per unique series.
 
-Math::
+*Math*::
   The math context is able to do simple and advanced calculations per series.
   This function must always be the last metric in the series.
 
@@ -168,10 +166,22 @@ image::images/tsvb_clone_series.png[Clone Series action]
 [float]
 ===== How do I calculate a month over month change?
   
-This is not fully supported in *TSVB*, but there is a special case that is supported _if_ the *TSVB*
-time filter is set to 3 months or more _and_ the *Interval* is `1m`. Use the `derivative`
-to get the absolute monthly change. To convert to a percent, add the *Math* function with the 
-`params.current / (params.current - params.derivative)` formula, then select *Percent* from the *Data Formatter* dropdown.
+The ability to calculate a month over month change is not fully supported in *TSVB*, but there is a special case that is supported _if_ the *TSVB*
+time filter is set to 3 months or more _and_ the *Interval* is `1m`.
+
+. Set the <<set-time-filter, time filter>> to *Last 90 days* or more.
+
+. Click *Panel options*, then enter `1m` in the *Interval* field.
+
+. To get the absolute monthly change, create a series with the *Derivative* aggregation.
+
+. To convert to a percent, create a series with the *Math* function. 
+
+.. In the *Expression field*, enter the following:
++
+`params.current / (params.current - params.derivative)`.
+
+.. Click *Options*, then select *Percent* from the *Data Formatter* dropdown.
 
 For other types of month over month calculations, use <<create-panels-with-timelion, Timelion>> or <<vega, Vega>>.
 
