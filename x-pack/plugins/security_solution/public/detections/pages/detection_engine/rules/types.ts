@@ -6,7 +6,7 @@
  */
 
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { AlertAction } from '../../../../../../alerts/common';
+import { AlertAction } from '../../../../../../alerting/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
