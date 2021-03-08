@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  Feature,
-  Point,
-  MultiPoint,
-  LineString,
-  MultiLineString,
-  Polygon,
-  MultiPolygon,
-} from 'geojson';
+import { Feature, Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { JSONLoader, loadInBatches } from './loaders';
@@ -71,7 +63,8 @@ export class GeoJsonImporter extends Importer {
         this._geometryTypesMap.has('LineString') ||
         this._geometryTypesMap.has('MultiLineString') ||
         this._geometryTypesMap.has('Polygon') ||
-        this._geometryTypesMap.has('MultiPolygon'),
+        this._geometryTypesMap.has('MultiPolygon') ||
+        this._geometryTypesMap.has('GeometryCollection'),
     };
   }
 
@@ -266,23 +259,12 @@ export function toEsDocs(
   const esDocs = [];
   for (let i = 0; i < features.length; i++) {
     const feature = features[i];
-    const geometry = feature.geometry as
-      | Point
-      | MultiPoint
-      | LineString
-      | MultiLineString
-      | Polygon
-      | MultiPolygon;
-    const coordinates =
-      geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
-        ? {
-            type: geometry.type.toLowerCase(),
-            coordinates: geometry.coordinates,
-          }
-        : geometry.coordinates;
     const properties = feature.properties ? feature.properties : {};
     esDocs.push({
-      coordinates,
+      coordinates:
+        geoFieldType === ES_FIELD_TYPES.GEO_SHAPE
+          ? feature.geometry
+          : (feature.geometry as Point).coordinates,
       ...properties,
     });
   }

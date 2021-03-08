@@ -20,7 +20,10 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicy: any;
     let packagePolicy: any;
-
+    before(async () => {
+      await getService('esArchiver').load('empty_kibana');
+      await getService('esArchiver').load('fleet/empty_fleet_server');
+    });
     before(async function () {
       let agentPolicyResponse = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -78,6 +81,10 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ packagePolicyIds: [packagePolicy.id] });
+    });
+    after(async () => {
+      await getService('esArchiver').unload('empty_kibana');
+      await getService('esArchiver').unload('fleet/empty_fleet_server');
     });
 
     it('should fail on managed agent policies', async function () {
