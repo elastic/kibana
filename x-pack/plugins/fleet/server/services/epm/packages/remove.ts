@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import Boom from '@hapi/boom';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -13,7 +13,6 @@ import { ElasticsearchAssetType } from '../../../types';
 import type {
   AssetReference,
   AssetType,
-  CallESAsCurrentUser,
   EsAssetReference,
   KibanaAssetReference,
   Installation,
@@ -32,9 +31,9 @@ import { getInstallation, savedObjectTypes } from './index';
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey, callCluster } = options;
+  const { savedObjectsClient, pkgkey, esClient } = options;
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installation = await getInstallation({ savedObjectsClient, pkgName });
@@ -55,7 +54,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, savedObjectsClient, callCluster);
+  await deleteAssets(installation, savedObjectsClient, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -88,17 +87,17 @@ function deleteKibanaAssets(
   });
 }
 
-function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallESAsCurrentUser) {
+function deleteESAssets(installedObjects: EsAssetReference[], esClient: ElasticsearchClient) {
   return installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
     if (assetType === ElasticsearchAssetType.ingestPipeline) {
-      return deletePipeline(callCluster, id);
+      return deletePipeline(esClient, id);
     } else if (assetType === ElasticsearchAssetType.indexTemplate) {
-      return deleteTemplate(callCluster, id);
+      return deleteTemplate(esClient, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
-      return deleteTransforms(callCluster, [id]);
+      return deleteTransforms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
-      return deleteIlms(callCluster, [id]);
+      return deleteIlms(esClient, [id]);
     }
   });
 }
@@ -106,12 +105,12 @@ function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallE
 async function deleteAssets(
   { installed_es: installedEs, installed_kibana: installedKibana }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
 
   const deletePromises: Array<Promise<unknown>> = [
-    ...deleteESAssets(installedEs, callCluster),
+    ...deleteESAssets(installedEs, esClient),
     ...deleteKibanaAssets(installedKibana, savedObjectsClient),
   ];
 
@@ -125,25 +124,11 @@ async function deleteAssets(
   }
 }
 
-async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): Promise<void> {
+async function deleteTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*') {
     try {
-      const callClusterParams: {
-        method: string;
-        path: string;
-        ignore: number[];
-      } = {
-        method: 'DELETE',
-        path: `/_index_template/${name}`,
-        ignore: [404],
-      };
-      // This uses the catch-all endpoint 'transport.request' because there is no
-      // convenience endpoint using the new _index_template API yet.
-      // The existing convenience endpoint `indices.putTemplate` only sends to _template,
-      // which does not support v2 templates.
-      // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-      await callCluster('transport.request', callClusterParams);
+      await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
     } catch {
       throw new Error(`error deleting template ${name}`);
     }

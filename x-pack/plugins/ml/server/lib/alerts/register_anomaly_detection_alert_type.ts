@@ -24,7 +24,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
-} from '../../../../alerts/common';
+} from '../../../../alerting/common';
 
 const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_DETECTION];
 
@@ -38,15 +38,13 @@ export type AnomalyDetectionAlertContext = {
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
   anomalyExplorerUrl: string;
-  kibanaBaseUrl: string;
 } & AlertInstanceContext;
 
 export function registerAnomalyDetectionAlertType({
-  alerts,
+  alerting,
   mlSharedServices,
-  publicBaseUrl,
 }: RegisterAlertParams) {
-  alerts.registerType<
+  alerting.registerType<
     MlAnomalyDetectionAlertParams,
     AlertTypeState,
     AlertInstanceState,
@@ -129,13 +127,7 @@ export function registerAnomalyDetectionAlertType({
         services.savedObjectsClient,
         fakeRequest
       );
-      const executionResult = await execute(
-        params,
-        publicBaseUrl,
-        alertId,
-        startedAt,
-        previousStartedAt
-      );
+      const executionResult = await execute(params, startedAt, previousStartedAt);
 
       if (executionResult) {
         const alertInstanceName = executionResult.name;
