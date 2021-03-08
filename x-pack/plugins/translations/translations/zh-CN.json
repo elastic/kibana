@@ -8640,7 +8640,6 @@
     "xpack.fleet.epm.loadingIntegrationErrorTitle": "加载集成详情时出错",
     "xpack.fleet.epm.packageDetails.integrationList.agentCount": "代理",
     "xpack.fleet.epm.packageDetails.integrationList.agentPolicy": "代理策略",
-    "xpack.fleet.epm.packageDetails.integrationList.description": "描述",
     "xpack.fleet.epm.packageDetails.integrationList.loadingPoliciesMessage": "正在加载集成策略……",
     "xpack.fleet.epm.packageDetails.integrationList.name": "集成",
     "xpack.fleet.epm.packageDetails.integrationList.updatedAt": "上次更新时间",
