@@ -27,7 +27,11 @@ interface CreateTestDefinition {
   tests: CreateTests;
 }
 
-export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function createTestSuiteFactory(
+  esArchiver: any,
+  supertest: SuperTest<any>,
+  kibanaServer: any
+) {
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -68,8 +72,24 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     { user = {}, spaceId, tests }: CreateTestDefinition
   ) => {
     describeFn(description, () => {
-      beforeEach(() => esArchiver.load('saved_objects/spaces'));
-      afterEach(() => esArchiver.unload('saved_objects/spaces'));
+      // beforeEach(() => esArchiver.load('saved_objects/spaces'));
+      // afterEach(() => esArchiver.unload('saved_objects/spaces'));
+      beforeEach(async () => {
+        await Promise.all([
+          kibanaServer.importExport.load('spaces_default', { space: 'default' }),
+          kibanaServer.importExport.load('spaces_space_1', { space: 'space_1' }),
+          kibanaServer.importExport.load('spaces_space_2', { space: 'space_2' }),
+        ]);
+      });
+      afterEach(async () => {
+        //   await kibanaServer.savedObjects.clean({
+        //     types: ['config', 'sharedtype', 'index-pattern', 'dashboard'],
+        //   })
+        // await kibanaServer.importExport.unload('spaces_default', { space: 'default' });
+        // await kibanaServer.importExport.unload('spaces_space_1', { space: 'space_1' });
+        // await kibanaServer.importExport.unload('spaces_space_2', { space: 'space_2' });
+        await esArchiver.emptyKibanaIndex();
+      });
 
       getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
         it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {

@@ -1,0 +1,11 @@
+{"attributes":{"buildNum":9007199254740991},"coreMigrationVersion":"8.0.0","id":"8.0.0","migrationVersion":{"config":"7.9.0"},"references":[],"sort":[1615213812733,52],"type":"config","updated_at":"2021-03-08T14:30:12.733Z","version":"WzgxLDFd"}
+{"attributes":{"title":"A shared saved-object in all spaces"},"id":"all_spaces","references":[],"sort":[1506020356270,89],"type":"sharedtype","updated_at":"2017-09-21T18:59:16.270Z","version":"WzU0LDFd"}
+{"attributes":{"title":"A shared saved-object in one space"},"id":"conflict_1_space_2","originId":"conflict_1","references":[],"sort":[1506020356270,92],"type":"sharedtype","updated_at":"2017-09-21T18:59:16.270Z","version":"WzU3LDFd"}
+{"attributes":{"title":"A shared saved-object in all spaces"},"id":"conflict_2_all","originId":"conflict_2","references":[],"sort":[1506020356270,96],"type":"sharedtype","updated_at":"2017-09-21T18:59:16.270Z","version":"WzYxLDFd"}
+{"attributes":{"title":"A shared saved-object in one space"},"id":"conflict_2_space_2","originId":"conflict_2","references":[],"sort":[1506020356270,95],"type":"sharedtype","updated_at":"2017-09-21T18:59:16.270Z","version":"WzYwLDFd"}
+{"attributes":{"title":"A shared saved-object in the default and space_2 spaces"},"id":"default_and_space_2","references":[],"sort":[1506020356270,86],"type":"sharedtype","updated_at":"2017-09-21T18:59:16.270Z","version":"WzUxLDFd"}
+{"attributes":{"title":"A shared saved-object in the default, space_1, and space_2 spaces"},"id":"each_space","references":[],"sort":[1506020356270,88],"type":"sharedtype","updated_at":"2017-09-21T18:59:16.270Z","version":"WzUzLDFd"}
+{"attributes":{"description":"Space 2","title":"This is the second test space"},"id":"my_dashboard","references":[],"sort":[1506019756270,57],"type":"dashboard","updated_at":"2017-09-21T18:49:16.270Z","version":"WzM0LDFd"}
+{"attributes":{"title":"A shared saved-object in the space_1 and space_2 spaces"},"id":"space_1_and_space_2","references":[],"sort":[1506020356270,87],"type":"sharedtype","updated_at":"2017-09-21T18:59:16.270Z","version":"WzUyLDFd"}
+{"attributes":{"title":"A shared saved-object in one space"},"id":"space_2_only","references":[],"sort":[1506020356270,84],"type":"sharedtype","updated_at":"2017-09-21T18:59:16.270Z","version":"WzQ5LDFd"}
+{"exportedCount":10,"missingRefCount":0,"missingReferences":[]}
