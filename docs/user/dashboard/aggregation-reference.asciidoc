@@ -4,8 +4,6 @@
 Each panel type in {kib} supports different features and {ref}/search-aggregations.html[{es} aggregations].
 This reference can help simplify the comparison if you need a specific feature.
 
-NOTE: {kib} is unable to perform aggregations across fields that contain nested objects, except *Vega*, which supports custom queries. 
-
 [float]
 [[chart-types]]
 === Supported panel types by editor
@@ -94,6 +92,54 @@ NOTE: {kib} is unable to perform aggregations across fields that contain nested 
 
 | Tag cloud
 ^| X
+|
+|
+|
+^| X
+
+|===
+
+[float]
+[[editor-features]]
+=== Editor features
+
+To decide the best editor to use, compare the capabilities of each editor.
+
+[options="header"]
+|===
+
+| Type | Aggregation-based | Lens | TSVB | Timelion | Vega
+
+| Math on aggregated data
+|
+|
+^| X
+^| X
+^| X
+
+| Visualize two indices
+|
+^| X
+^| X
+^| X
+^| X
+
+| Math across indices
+|
+|
+|
+^| X
+^| X
+
+| Custom {es} queries
+|
+|
+|
+|
+^| X
+
+| Aggregations across fields that contain nested objects
+|
 |
 |
 |
@@ -304,48 +350,6 @@ For information about {es} pipeline aggregations, refer to {ref}/search-aggregat
 ^| X
 ^| X
 | 
-^| X
-
-|===
-
-[float]
-[[other-features]]
-=== Other features
-
-This comparison is meant for users who are not sure about the panel type to
-build an advanced visualization.
-
-[options="header"]
-|===
-
-| Type | Aggregation-based | Lens | TSVB | Timelion | Vega
-
-| Math on aggregated data
-|
-|
-^| X
-^| X
-^| X
-
-| Visualize two indices
-|
-^| X
-^| X
-^| X
-^| X
-
-| Math across indices
-|
-|
-|
-^| X
-^| X
-
-| Custom {es} queries
-|
-|
-|
-|
 ^| X
 
 |===
