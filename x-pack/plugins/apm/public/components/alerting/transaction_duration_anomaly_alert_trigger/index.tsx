@@ -8,7 +8,7 @@
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ANOMALY_SEVERITY } from '@kbn/ml-utils/src/constants/anomalies';
+import { ANOMALY_SEVERITY } from '@kbn/ml-utils/target/constants/anomalies';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { ServiceAlertTrigger } from '../service_alert_trigger';

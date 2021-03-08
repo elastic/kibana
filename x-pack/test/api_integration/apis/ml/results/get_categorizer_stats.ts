@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AnomalyCategorizerStatsDoc } from '@kbn/ml-utils/src/types/anomalies';
+import { AnomalyCategorizerStatsDoc } from '@kbn/ml-utils/target/types/anomalies';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';

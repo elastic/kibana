@@ -10,7 +10,7 @@ import { ValuesType } from 'utility-types';
 import {
   ANOMALY_SEVERITY,
   ANOMALY_THRESHOLD,
-} from '@kbn/ml-utils/src/constants/anomalies';
+} from '@kbn/ml-utils/target/constants/anomalies';
 import { ActionGroup } from '../../alerting/common';
 
 export enum AlertType {
