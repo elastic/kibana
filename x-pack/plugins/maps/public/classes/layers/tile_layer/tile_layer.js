@@ -117,8 +117,4 @@ export class TileLayer extends AbstractLayer {
   getLayerTypeIconName() {
     return 'grid';
   }
-
-  isLayerLoading() {
-    return false;
-  }
 }
