@@ -25,6 +25,7 @@ import rumJsIcon from './icons/rumjs.svg';
 import darkPhpIcon from './icons/php_dark.svg';
 import darkRumJsIcon from './icons/rumjs_dark.svg';
 import rustIcon from './icons/rust.svg';
+import darkRustIcon from './icons/rust_dark.svg';
 
 const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
