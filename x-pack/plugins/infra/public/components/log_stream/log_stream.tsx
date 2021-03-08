@@ -13,7 +13,7 @@ import { LogEntryCursor } from '../../../common/log_entry';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
-import { useLogStream } from '../../containers/logs/log_stream';
+import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
@@ -61,7 +61,7 @@ export interface LogStreamProps {
   sourceId?: string;
   startTimestamp: number;
   endTimestamp: number;
-  query?: string | Query;
+  query?: string | Query | BuiltEsQuery;
   center?: LogEntryCursor;
   highlight?: string;
   height?: string | number;
