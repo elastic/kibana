@@ -131,6 +131,46 @@ describe('PreviewQuery', () => {
     ).toBeTruthy();
   });
 
+  test('it renders preview button enabled if query exists', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'host.name:"foo"', language: 'kql' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
+  });
+
+  test('it renders preview button enabled if no query exists but filters do exist', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: '', language: 'kql' }, filters: [{ meta: {}, query: {} }] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
+  });
+
   test('it renders query histogram when rule type is query and preview button clicked', () => {
     const wrapper = mount(
       <TestProviders>

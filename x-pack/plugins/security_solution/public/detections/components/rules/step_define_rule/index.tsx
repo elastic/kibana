@@ -508,7 +508,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               ruleType={ruleType}
               index={index}
               query={formQuery}
-              isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
+              isDisabled={!isQueryBarValid || index.length === 0}
               threshold={thresholdFormValue}
             />
           </>
