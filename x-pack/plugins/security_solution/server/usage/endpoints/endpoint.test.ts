@@ -25,7 +25,7 @@ describe('test security solution endpoint telemetry', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockEndpointAppContext: EndpointAppContext;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let getFleetSavedObjectsMetadataSpy: jest.SpyInstance<
+  let getEndpointIntegratedFleetMetadataSpy: jest.SpyInstance<
     Promise<{ agents: Agent[]; total: number; page: number; perPage: number } | undefined>
   >;
   let getLatestFleetEndpointEventSpy: jest.SpyInstance<
@@ -34,7 +34,10 @@ describe('test security solution endpoint telemetry', () => {
 
   beforeAll(() => {
     getLatestFleetEndpointEventSpy = jest.spyOn(fleetSavedObjects, 'getLatestFleetEndpointEvent');
-    getFleetSavedObjectsMetadataSpy = jest.spyOn(fleetSavedObjects, 'getFleetSavedObjectsMetadata');
+    getEndpointIntegratedFleetMetadataSpy = jest.spyOn(
+      fleetSavedObjects,
+      'getEndpointIntegratedFleetMetadata'
+    );
     mockSavedObjectsClient = savedObjectsClientMock.create();
     mockEndpointAppContext = createMockEndpointAppContext();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -63,7 +66,7 @@ describe('test security solution endpoint telemetry', () => {
 
   describe('when a request for endpoint agents fails', () => {
     it('should return an empty object', async () => {
-      getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+      getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
         Promise.reject(Error('No agents for you'))
       );
 
@@ -72,14 +75,14 @@ describe('test security solution endpoint telemetry', () => {
         mockEndpointAppContext,
         mockEsClient
       );
-      expect(getFleetSavedObjectsMetadataSpy).toHaveBeenCalled();
+      expect(getEndpointIntegratedFleetMetadataSpy).toHaveBeenCalled();
       expect(endpointUsage).toEqual({});
     });
   });
 
   describe('when an agent has not been installed', () => {
     it('should return the default shape if no agents are found', async () => {
-      getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+      getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
         Promise.resolve({ agents: [], total: 0, perPage: 0, page: 0 })
       );
 
@@ -88,7 +91,7 @@ describe('test security solution endpoint telemetry', () => {
         mockEndpointAppContext,
         mockEsClient
       );
-      expect(getFleetSavedObjectsMetadataSpy).toHaveBeenCalled();
+      expect(getEndpointIntegratedFleetMetadataSpy).toHaveBeenCalled();
       expect(endpointUsage).toEqual({
         total_installed: 0,
         active_within_last_24_hours: 0,
@@ -107,7 +110,7 @@ describe('test security solution endpoint telemetry', () => {
   describe('when agent(s) have been installed', () => {
     describe('when a request for events has failed', () => {
       it('should show only one endpoint installed but it is inactive', async () => {
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse())
         );
         getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -143,7 +146,7 @@ describe('test security solution endpoint telemetry', () => {
 
     describe('when a request for events is successful', () => {
       it('should show one endpoint installed but endpoint has failed to run', async () => {
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse())
         );
         getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -177,7 +180,7 @@ describe('test security solution endpoint telemetry', () => {
       });
 
       it('should show two endpoints installed but both endpoints have failed to run', async () => {
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse(false))
         );
         getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -215,7 +218,7 @@ describe('test security solution endpoint telemetry', () => {
         twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
         const twoDaysAgoISOString = twoDaysAgo.toISOString();
 
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse(false, twoDaysAgoISOString))
         );
         getLatestFleetEndpointEventSpy.mockImplementation(
@@ -249,7 +252,7 @@ describe('test security solution endpoint telemetry', () => {
       });
 
       it('should show one endpoint installed and endpoint is running', async () => {
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse())
         );
         getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -284,7 +287,7 @@ describe('test security solution endpoint telemetry', () => {
 
       describe('malware policy', () => {
         it('should have failed to enable', async () => {
-          getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+          getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
             Promise.resolve(mockFleetObjectsResponse())
           );
           getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -320,7 +323,7 @@ describe('test security solution endpoint telemetry', () => {
         });
 
         it('should be enabled successfully', async () => {
-          getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+          getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
             Promise.resolve(mockFleetObjectsResponse())
           );
           getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -354,7 +357,7 @@ describe('test security solution endpoint telemetry', () => {
         });
 
         it('should be disabled successfully', async () => {
-          getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+          getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
             Promise.resolve(mockFleetObjectsResponse())
           );
           getLatestFleetEndpointEventSpy.mockImplementation(() =>

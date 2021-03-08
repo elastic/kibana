@@ -8,33 +8,29 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { AgentService } from '../../../../fleet/server';
 import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
-import {
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-} from './../../../../fleet/common/constants/agent';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE } from './../../../../fleet/common/constants/agent';
 import { defaultPackages as FleetDefaultPackages } from '../../../../fleet/common';
 
 export const FLEET_ENDPOINT_PACKAGE_CONSTANT = FleetDefaultPackages.Endpoint;
 
-export const getFleetSavedObjectsMetadata = async (
-  savedObjectsClient: SavedObjectsClientContract,
+export const getEndpointIntegratedFleetMetadata = async (
   agentService: AgentService | undefined,
   esClient: ElasticsearchClient
 ) => {
-  const agentData = await agentService?.listAgents(savedObjectsClient, esClient, {
-    showInactive: true,
+  return agentService?.listAgents(esClient, {
+    kuery: `(packages : ${FLEET_ENDPOINT_PACKAGE_CONSTANT})`,
     perPage: 10000,
+    showInactive: false,
     sortField: 'enrolled_at',
     sortOrder: 'desc',
-    kuery: `${AGENT_SAVED_OBJECT_TYPE}.attributes.packages: ${FLEET_ENDPOINT_PACKAGE_CONSTANT}`,
   });
-  return agentData;
 };
 
 /*
   TODO: AS OF 7.13, this access will no longer work due to the enabling of fleet server. An alternative route will have
-  to be discussed to retrieve the policy data we need. Currently it's only `malware`, but the hope is to add more,
-  so a more scalable solution will be desirable.
+  to be discussed to retrieve the policy data we need, as well as when the endpoint was last active, which is obtained
+  via the last endpoint 'check in' event that was sent to fleet. Also, the only policy currently tracked is `malware`,
+  but the hope is to add more, so a better/more scalable solution would be desirable.
 */
 
 export const getLatestFleetEndpointEvent = async (

@@ -10,7 +10,10 @@ import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server
 import { SavedObject } from './../../../../../../src/core/types/saved_objects';
 import { Agent, NewAgentEvent } from './../../../../fleet/common/types/models/agent';
 import { AgentMetadata } from '../../../../fleet/common/types/models/agent';
-import { getFleetSavedObjectsMetadata, getLatestFleetEndpointEvent } from './fleet_saved_objects';
+import {
+  getEndpointIntegratedFleetMetadata,
+  getLatestFleetEndpointEvent,
+} from './fleet_saved_objects';
 import { EndpointAppContext } from '../../endpoint/types';
 
 export interface AgentOSMetadataTelemetry {
@@ -208,7 +211,7 @@ export const getEndpointTelemetryFromFleet = async (
   let endpointAgents;
   const agentService = endpointAppContext.service.getAgentService();
   try {
-    const response = await getFleetSavedObjectsMetadata(soClient, agentService, esClient);
+    const response = await getEndpointIntegratedFleetMetadata(agentService, esClient);
     endpointAgents = response?.agents ?? [];
   } catch (error) {
     // Better to provide an empty object rather than default telemetry as this better informs us of an error
