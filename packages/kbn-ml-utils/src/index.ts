@@ -40,3 +40,4 @@ export {
   Influencer,
   PartitionFieldsType,
 } from './types/anomalies';
+export { HitsTotalRelation, SearchResponse7, HITS_TOTAL_RELATION } from './types/es_client';

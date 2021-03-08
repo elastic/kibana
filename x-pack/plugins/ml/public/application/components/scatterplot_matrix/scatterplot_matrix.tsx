@@ -21,10 +21,10 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import type { SearchResponse7 } from '@kbn/ml-utils';
 
 import { extractErrorMessage } from '../../../../common';
 import { stringHash } from '../../../../common/util/string_utils';
-import type { SearchResponse7 } from '../../../../common/types/es_client';
 import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
 
 import { useMlApiContext } from '../../contexts/kibana';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { HitsTotalRelation, SearchResponse7, HITS_TOTAL_RELATION } from './types/es_client';
 export { ChartData } from './types/field_histograms';
 export { composeValidators, patternValidator } from './util/validators';
 export { extractErrorMessage } from './util/errors';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchResponse7 } from '../../../../common/types/es_client';
+import type { SearchResponse7 } from '@kbn/ml-utils';
 import { extractErrorMessage } from '../../../../common/util/errors';
 
 import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';

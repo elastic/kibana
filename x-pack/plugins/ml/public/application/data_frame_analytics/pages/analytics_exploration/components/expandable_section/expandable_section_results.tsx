@@ -9,6 +9,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { HITS_TOTAL_RELATION } from '@kbn/ml-utils';
 
 import { EuiDataGridColumn, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -18,7 +19,6 @@ import {
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../../../../common/util/analytics_utils';
-import { HITS_TOTAL_RELATION } from '../../../../../../../common/types/es_client';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';

@@ -9,8 +9,9 @@ import { Dispatch, SetStateAction } from 'react';
 
 import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
+import type { HitsTotalRelation } from '@kbn/ml-utils';
+
 import { Dictionary } from '../../../../common/types/common';
-import { HitsTotalRelation } from '../../../../common/types/es_client';
 import { ChartData } from '../../../../common/types/field_histograms';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';

@@ -9,6 +9,8 @@ import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
+import type { SearchResponse7 } from '@kbn/ml-utils';
+
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
@@ -26,7 +28,6 @@ import {
   UseIndexDataReturnType,
   getProcessedFields,
 } from '../../../../components/data_grid';
-import type { SearchResponse7 } from '../../../../../../common/types/es_client';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';

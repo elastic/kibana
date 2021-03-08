@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { SearchResponse7 } from '@kbn/ml-utils';
 import { IScopedClusterClient } from 'kibana/server';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
@@ -18,7 +19,6 @@ import {
 } from '../../../common/constants/validation';
 import { getDependentVar } from '../../../common/util/analytics_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
-import { SearchResponse7 } from '../../../common';
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
 
 interface MissingAgg {

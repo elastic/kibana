@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { HITS_TOTAL_RELATION } from '@kbn/ml-utils';
 
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
@@ -18,7 +19,7 @@ import type { PreviewMappingsProperties } from '../../../common/api_schemas/tran
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
-import { RenderCellValue, UseIndexDataReturnType, HITS_TOTAL_RELATION } from '../../shared_imports';
+import { RenderCellValue, UseIndexDataReturnType } from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';

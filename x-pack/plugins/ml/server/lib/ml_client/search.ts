@@ -6,12 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+import type { SearchResponse7 } from '@kbn/ml-utils';
 import { IScopedClusterClient } from 'kibana/server';
 import { RequestParams, ApiResponse } from '@elastic/elasticsearch';
 
 import { JobSavedObjectService } from '../../saved_objects';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import type { SearchResponse7 } from '../../../common/types/es_client';
 import type { JobType } from '../../../common/types/saved_objects';
 
 export function searchProvider(

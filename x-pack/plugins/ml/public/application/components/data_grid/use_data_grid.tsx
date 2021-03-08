@@ -8,8 +8,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
+import { HITS_TOTAL_RELATION } from '@kbn/ml-utils';
 
-import { HITS_TOTAL_RELATION } from '../../../../common/types/es_client';
 import { ChartData } from '../../../../common/types/field_histograms';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common';

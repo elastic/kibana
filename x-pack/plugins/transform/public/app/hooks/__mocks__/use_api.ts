@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SearchResponse7 } from '@kbn/ml-utils';
+
 import { HttpFetchError } from 'kibana/public';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
@@ -37,7 +39,6 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../../common/api_schemas/update_transforms';
 
-import type { SearchResponse7 } from '../../../../common/shared_imports';
 import { EsIndex } from '../../../../common/types/es_index';
 
 import type { SavedSearchQuery } from '../use_search_items';

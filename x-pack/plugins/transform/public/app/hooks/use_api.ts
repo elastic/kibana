@@ -7,6 +7,8 @@
 
 import { useMemo } from 'react';
 
+import type { SearchResponse7 } from '@kbn/ml-utils';
+
 import { HttpFetchError } from 'kibana/public';
 
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
@@ -43,7 +45,6 @@ import type { GetTransformsStatsResponseSchema } from '../../../common/api_schem
 import { TransformId } from '../../../common/types/transform';
 import { API_BASE_PATH } from '../../../common/constants';
 import { EsIndex } from '../../../common/types/es_index';
-import type { SearchResponse7 } from '../../../common/shared_imports';
 
 import { useAppDependencies } from '../app_dependencies';
 
