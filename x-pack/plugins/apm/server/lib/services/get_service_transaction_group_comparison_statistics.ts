@@ -20,10 +20,7 @@ import {
   kqlQuery,
 } from '../../../server/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
-import {
-  offsetPreviousPeriodCoordinates,
-  offsetXCoordinate,
-} from '../../utils/offset_previous_period_coordinate';
+import { offsetPreviousPeriodCoordinates } from '../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
