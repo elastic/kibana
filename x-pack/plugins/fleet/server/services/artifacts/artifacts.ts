@@ -6,20 +6,32 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import { deflate } from 'zlib';
+import { promisify } from 'util';
 import uuid from 'uuid';
-import { Artifact, ArtifactElasticsearchProperties, NewArtifact } from './types';
+import { createHash } from 'crypto';
+import {
+  Artifact,
+  ArtifactElasticsearchProperties,
+  ArtifactEncodedMetadata,
+  ArtifactsClientCreateOptions,
+  NewArtifact,
+} from './types';
 import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
+import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { esSearchHitToArtifact } from './mappings';
 import { isElasticsearchItemNotFoundError } from './utils';
 import { ArtifactsElasticsearchError } from './errors';
+import { ListWithKuery } from '../../types';
+
+const deflateAsync = promisify(deflate);
 
 export const getArtifact = async (
   esClient: ElasticsearchClient,
   id: string
 ): Promise<Artifact | undefined> => {
   try {
-    const esData = await this.esClient.get<ESSearchHit<ArtifactElasticsearchProperties>>({
+    const esData = await esClient.get<ESSearchHit<ArtifactElasticsearchProperties>>({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
       id,
     });
@@ -61,8 +73,59 @@ export const createArtifact = async (
   }
 };
 
-export const deleteArtifact = async (esClient: ElasticsearchClient): Promise<void> => {};
+export const deleteArtifact = async (esClient: ElasticsearchClient, id: string): Promise<void> => {
+  await esClient.delete({
+    index: FLEET_SERVER_ARTIFACTS_INDEX,
+    id,
+  });
+};
 
 export const listArtifacts = async (
-  esClient: ElasticsearchClient
-): Promise<ListResult<Artifact>> => {};
+  esClient: ElasticsearchClient,
+  options: ListWithKuery
+): Promise<ListResult<Artifact>> => {
+  const { perPage = 20, page = 1, kuery = '', sortField = 'created', sortOrder = 'asc' } = options;
+
+  try {
+    const searchResult = await esClient.search<
+      ESSearchResponse<ArtifactElasticsearchProperties, {}>
+    >({
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      sort: `${sortField}:${sortOrder}`,
+      q: kuery,
+      from: (page - 1) * perPage,
+      size: perPage,
+    });
+
+    return {
+      items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
+      page,
+      perPage,
+      total: searchResult.body.hits.total.value,
+    };
+  } catch (e) {
+    throw new ArtifactsElasticsearchError(e);
+  }
+};
+
+export const generateArtifactContentHash = (content: string): string => {
+  return createHash('sha256').update(content).digest('hex');
+};
+
+export const encodeArtifactContent = async (
+  content: ArtifactsClientCreateOptions['content']
+): Promise<ArtifactEncodedMetadata> => {
+  const decodedContentBuffer = Buffer.from(content);
+  const encodedContentButter = await deflateAsync(decodedContentBuffer);
+
+  const encodedArtifact: ArtifactEncodedMetadata = {
+    compressionAlgorithm: 'zlib',
+    decodedSha256: generateArtifactContentHash(decodedContentBuffer.toString()),
+    decodedSize: decodedContentBuffer.byteLength,
+    encodedSha256: generateArtifactContentHash(encodedContentButter.toString()),
+    encodedSize: encodedContentButter.byteLength,
+    body: encodedContentButter.toString('base64'),
+  };
+
+  return encodedArtifact;
+};

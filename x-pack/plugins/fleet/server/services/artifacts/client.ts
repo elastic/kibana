@@ -4,30 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createHash } from 'crypto';
-import { deflate } from 'zlib';
-import { promisify } from 'util';
 import { ElasticsearchClient } from 'kibana/server';
 import {
   Artifact,
   ArtifactsClientCreateOptions,
-  ArtifactElasticsearchProperties,
   ArtifactEncodedMetadata,
   ArtifactsClientInterface,
   NewArtifact,
 } from './types';
-import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
-import {
-  esSearchHitToArtifact,
-  kueryToArtifactsElasticsearchQuery,
-  relativeDownloadUrlFromArtifact,
-} from './mappings';
-import { ArtifactAccessDeniedError, ArtifactsElasticsearchError } from './errors';
+import { ListResult } from '../../../common';
+import { relativeDownloadUrlFromArtifact } from './mappings';
+import { ArtifactAccessDeniedError } from './errors';
 import { ListWithKuery } from '../../types';
-import { createArtifact, getArtifact } from './artifacts';
-
-const deflateAsync = promisify(deflate);
+import {
+  createArtifact,
+  deleteArtifact,
+  encodeArtifactContent,
+  generateArtifactContentHash,
+  getArtifact,
+  listArtifacts,
+} from './artifacts';
 
 /**
  * Exposes an interface for access artifacts from within the context of an integration (`packageName`)
@@ -81,67 +77,28 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     const artifact = await this.getArtifact(id);
 
     if (artifact) {
-      await this.esClient.delete({
-        index: FLEET_SERVER_ARTIFACTS_INDEX,
-        id,
-      });
+      await deleteArtifact(this.esClient, id);
     }
   }
 
-  async listArtifacts(options: ListWithKuery): Promise<ListResult<Artifact>> {
-    const {
-      perPage = 20,
-      page = 1,
-      kuery = '',
-      sortField = 'created',
-      sortOrder = 'asc',
-    } = options;
+  async listArtifacts({ kuery, ...options }: ListWithKuery): Promise<ListResult<Artifact>> {
+    // All filtering for artifacts should be bound to the `packageName`, so we insert
+    // that into the KQL value and use `AND` to add the defined `kuery` (if any) to it.
+    const filter = `(packageName: "${this.packageName}")${kuery ? ` AND ${kuery}` : ''}`;
 
-    try {
-      const searchResult = await this.esClient.search<
-        ESSearchResponse<ArtifactElasticsearchProperties, {}>
-      >({
-        index: FLEET_SERVER_ARTIFACTS_INDEX,
-        body: {
-          query: {
-            ...kueryToArtifactsElasticsearchQuery(this.packageName, kuery),
-          },
-          sort: [{ [sortField]: sortOrder }],
-        },
-        from: (page - 1) * perPage,
-        size: perPage,
-      });
-
-      return {
-        items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
-        page,
-        perPage,
-        total: searchResult.body.hits.total.value,
-      };
-    } catch (e) {
-      throw new ArtifactsElasticsearchError(e);
-    }
+    return listArtifacts(this.esClient, {
+      ...options,
+      kuery: filter,
+    });
   }
 
   generateHash(content: string): string {
-    return createHash('sha256').update(content).digest('hex');
+    return generateArtifactContentHash(content);
   }
 
   async encodeContent(
     content: ArtifactsClientCreateOptions['content']
   ): Promise<ArtifactEncodedMetadata> {
-    const decodedContentBuffer = Buffer.from(content);
-    const encodedContentButter = await deflateAsync(decodedContentBuffer);
-
-    const encodedArtifact: ArtifactEncodedMetadata = {
-      compressionAlgorithm: 'zlib',
-      decodedSha256: this.generateHash(decodedContentBuffer.toString()),
-      decodedSize: decodedContentBuffer.byteLength,
-      encodedSha256: this.generateHash(encodedContentButter.toString()),
-      encodedSize: encodedContentButter.byteLength,
-      body: encodedContentButter.toString('base64'),
-    };
-
-    return encodedArtifact;
+    return encodeArtifactContent(content);
   }
 }
