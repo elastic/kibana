@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { DatatableColumn } from 'src/plugins/expressions/public';
 import {
   SuggestionRequest,
   Visualization,
@@ -29,6 +30,7 @@ export interface ColumnState {
   transposable?: boolean;
   originalColumnId?: string;
   originalName?: string;
+  bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
   alignment?: 'left' | 'right' | 'center';
 }
 
@@ -178,29 +180,6 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     return {
       groups: [
         {
-          groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
-            defaultMessage: 'Split columns',
-          }),
-          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
-            defaultMessage:
-              "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
-          }),
-          layerId: state.layerId,
-          accessors: sortedColumns
-            .filter(
-              (c) =>
-                datasource!.getOperationForColumnId(c)?.isBucketed &&
-                state.columns.find((col) => col.columnId === c)?.isTransposed
-            )
-            .map((accessor) => ({ columnId: accessor })),
-          supportsMoreColumns: true,
-          filterOperations: (op) => op.isBucketed,
-          dataTestSubj: 'lnsDatatable_columns',
-          enableDimensionEditor: true,
-          hideGrouping: true,
-        },
-        {
           groupId: 'rows',
           groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
             defaultMessage: 'Split rows',
@@ -225,6 +204,31 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           dataTestSubj: 'lnsDatatable_rows',
           enableDimensionEditor: true,
           hideGrouping: true,
+          nestingOrder: 1,
+        },
+        {
+          groupId: 'columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
+            defaultMessage: 'Split columns',
+          }),
+          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
+            defaultMessage:
+              "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
+          }),
+          layerId: state.layerId,
+          accessors: sortedColumns
+            .filter(
+              (c) =>
+                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                state.columns.find((col) => col.columnId === c)?.isTransposed
+            )
+            .map((accessor) => ({ columnId: accessor })),
+          supportsMoreColumns: true,
+          filterOperations: (op) => op.isBucketed,
+          dataTestSubj: 'lnsDatatable_columns',
+          enableDimensionEditor: true,
+          hideGrouping: true,
+          nestingOrder: 0,
         },
         {
           groupId: 'metrics',

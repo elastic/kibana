@@ -718,9 +718,19 @@ export function reorderByGroups(
   // if column grouping is disabled, keep bucket aggregations in the same order as the groups
   // if grouping is known
   if (hidesColumnGrouping) {
+    const orderedVisualizationGroups = [...visualizationGroups];
+    orderedVisualizationGroups.sort((group1, group2) => {
+      if (typeof group1.nestingOrder === undefined) {
+        return -1;
+      }
+      if (typeof group2.nestingOrder === undefined) {
+        return 1;
+      }
+      return group1.nestingOrder! - group2.nestingOrder!;
+    });
     const columnGroupIndex: Record<string, number> = {};
     updatedColumnOrder.forEach((columnId) => {
-      columnGroupIndex[columnId] = visualizationGroups.findIndex(
+      columnGroupIndex[columnId] = orderedVisualizationGroups.findIndex(
         (group) =>
           (columnId === addedColumnId && group.groupId === targetGroup) ||
           group.accessors.some((acc) => acc.columnId === columnId)

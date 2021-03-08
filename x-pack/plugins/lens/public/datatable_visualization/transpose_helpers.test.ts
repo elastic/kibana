@@ -163,6 +163,9 @@ describe('transpose_helpes', () => {
       expect(row['C---metric1']).toEqual(36 + index * 2 + 1);
       expect(row['C---metric2']).toEqual(36 + index * 2 + 2);
     });
+
+    // visible name should use separator
+    expect(table.columns[2].name).toEqual(`A › metric1`);
   });
 
   it('should transpose table by two columns', () => {

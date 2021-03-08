@@ -6,12 +6,14 @@
  */
 
 import type { FieldFormat } from 'src/plugins/data/public';
-import type { Datatable, DatatableRow } from 'src/plugins/expressions';
+import type { Datatable, DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 
 import { Args } from './expression';
 import { ColumnState } from './visualization';
 
 const TRANSPOSE_SEPARATOR = '---';
+
+const TRANSPOSE_VISUAL_SEPARATOR = '›';
 
 export function getTransposeId(value: string, columnId: string) {
   return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
@@ -52,7 +54,7 @@ export function transposeTable(
       const datatableColumnIndex = firstTable.columns.findIndex((c) => c.id === transposedColumnId);
       const datatableColumn = firstTable.columns[datatableColumnIndex];
       const transposedColumnFormatter = formatters[datatableColumn.id];
-      const uniqueValues = getUniqueValues(
+      const { uniqueValues, uniqueRawValues } = getUniqueValues(
         firstTable,
         transposedColumnFormatter,
         transposedColumnId
@@ -63,7 +65,15 @@ export function transposeTable(
       );
       firstTable.columns.splice(datatableColumnIndex, 1);
 
-      transposeColumns(args, bucketsColumnArgs, metricsColumnArgs, firstTable, uniqueValues);
+      transposeColumns(
+        args,
+        bucketsColumnArgs,
+        metricsColumnArgs,
+        firstTable,
+        uniqueValues,
+        uniqueRawValues,
+        datatableColumn
+      );
       transposeRows(
         firstTable,
         bucketsColumnArgs,
@@ -122,12 +132,14 @@ function updateColumnArgs(
  * @param columnId column
  */
 function getUniqueValues(table: Datatable, formatter: FieldFormat, columnId: string) {
-  const values = new Set<string>();
+  const values = new Map<string, unknown>();
   table.rows.forEach((row) => {
-    values.add(formatter.convert(row[columnId]));
+    const rawValue = row[columnId];
+    values.set(formatter.convert(row[columnId]), rawValue);
   });
-  const uniqueValues = [...values.values()];
-  return uniqueValues;
+  const uniqueValues = [...values.keys()];
+  const uniqueRawValues = [...values.values()];
+  return { uniqueValues, uniqueRawValues };
 }
 
 /**
@@ -142,7 +154,9 @@ function transposeColumns(
   bucketsColumnArgs: Array<ColumnState & { type: 'lens_datatable_column' }>,
   metricColumns: Array<ColumnState & { type: 'lens_datatable_column' }>,
   firstTable: Datatable,
-  uniqueValues: string[]
+  uniqueValues: string[],
+  uniqueRawValues: unknown[],
+  transposingDatatableColumn: DatatableColumn
 ) {
   const columnGroups = metricColumns.map((metricColumn) => {
     const originalDatatableColumn = firstTable.columns.find((c) => c.id === metricColumn.columnId)!;
@@ -150,7 +164,7 @@ function transposeColumns(
       return {
         ...originalDatatableColumn,
         id: getTransposeId(uniqueValue, metricColumn.columnId),
-        name: `${uniqueValue} ${originalDatatableColumn.name}`,
+        name: `${uniqueValue} ${TRANSPOSE_VISUAL_SEPARATOR} ${originalDatatableColumn.name}`,
       };
     });
     firstTable.columns.splice(
@@ -158,12 +172,19 @@ function transposeColumns(
       1,
       ...datatableColumns
     );
-    return uniqueValues.map((uniqueValue) => {
+    return uniqueValues.map((uniqueValue, valueIndex) => {
       return {
         ...metricColumn,
         columnId: getTransposeId(uniqueValue, metricColumn.columnId),
         originalColumnId: metricColumn.originalColumnId || metricColumn.columnId,
         originalName: metricColumn.originalName || originalDatatableColumn.name,
+        bucketValues: [
+          ...(metricColumn.bucketValues || []),
+          {
+            originalBucketColumn: transposingDatatableColumn,
+            value: uniqueRawValues[valueIndex],
+          },
+        ],
       };
     });
   });

@@ -406,6 +406,10 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
    * will render the extra tab for the dimension editor
    */
   enableDimensionEditor?: boolean;
+  // if the visual order of dimension groups diverges from the intended nesting order, this property specifies the position of
+  // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
+  // orders are always higher in the hierarchy than non-specified ones.
+  nestingOrder?: number;
 };
 
 interface VisualizationDimensionChangeProps<T> {

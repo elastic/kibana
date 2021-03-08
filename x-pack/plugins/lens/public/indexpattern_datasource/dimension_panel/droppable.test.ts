@@ -851,6 +851,59 @@ describe('IndexPatternDimensionEditorPanel', () => {
         });
       });
 
+      it('appends the dropped column in the right place respecting custom nestingOrder', () => {
+        // config:
+        // a:
+        // b: col1, col2, col3
+        // c: col4
+        // dragging field into newCol in group a
+        const draggingBytesField = {
+          field: { type: 'number', name: 'bytes', aggregatable: true },
+          indexPatternId: 'foo',
+          id: 'bar',
+          humanData: {
+            label: '',
+          },
+        };
+
+        onDrop({
+          ...defaultProps,
+          droppedItem: draggingBytesField,
+          columnId: 'newCol',
+          filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+          groupId: 'a',
+          dimensionGroups: [
+            // a and b are ordered in reverse visually, but nesting order keeps them in place for column order
+            { ...dimensionGroups[1], nestingOrder: 1 },
+            { ...dimensionGroups[0], nestingOrder: 0 },
+            { ...dimensionGroups[2] },
+          ],
+          dropType: 'field_add',
+        });
+
+        expect(setState).toBeCalledTimes(1);
+        expect(setState).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: {
+              ...testState.layers.first,
+              columnOrder: ['newCol', 'col1', 'col2', 'col3', 'col4'],
+              columns: {
+                newCol: expect.objectContaining({
+                  dataType: 'number',
+                  sourceField: 'bytes',
+                }),
+                col1: testState.layers.first.columns.col1,
+                col2: testState.layers.first.columns.col2,
+                col3: testState.layers.first.columns.col3,
+                col4: testState.layers.first.columns.col4,
+              },
+              incompleteColumns: {},
+            },
+          },
+        });
+      });
+
       it('copies column to the bottom of the current group', () => {
         // config:
         // a: col1

@@ -12,7 +12,7 @@ import {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import type { Datatable, DatatableColumnMeta } from 'src/plugins/expressions';
+import type { Datatable, DatatableColumn, DatatableColumnMeta } from 'src/plugins/expressions';
 import type { FormatFactory } from '../../types';
 import { ColumnConfig } from './table_basic';
 
@@ -24,6 +24,10 @@ export const createGridColumns = (
     value: unknown,
     colIndex: number,
     rowIndex: number,
+    negate?: boolean
+  ) => void,
+  handleTransposedColumnClick: (
+    bucketValues: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>,
     negate?: boolean
   ) => void,
   isReadOnly: boolean,
@@ -139,10 +143,8 @@ export const createGridColumns = (
         ]
       : undefined;
 
-    const hasTransposedColumns = columnConfig.columns.some(({ originalColumnId }) =>
-      Boolean(originalColumnId)
-    );
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
+    const isTransposed = Boolean(columnArgs?.originalColumnId);
     const initialWidth = columnArgs?.width;
     const isHidden = columnArgs?.hidden;
     const originalColumnId = columnArgs?.originalColumnId;
@@ -161,7 +163,7 @@ export const createGridColumns = (
         'data-test-subj': 'lensDatatableResetWidth',
         isDisabled: initialWidth == null,
       });
-      if (!hasTransposedColumns) {
+      if (!isTransposed) {
         additionalActions.push({
           color: 'text',
           size: 'xs',
@@ -172,6 +174,29 @@ export const createGridColumns = (
           }),
           'data-test-subj': 'lensDatatableHide',
           isDisabled: !isHidden && visibleColumns.length <= 1,
+        });
+      } else if (columnArgs?.bucketValues) {
+        const bucketValues = columnArgs?.bucketValues;
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, false),
+          iconType: 'plusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
+            defaultMessage: 'Filter',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
+
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, true),
+          iconType: 'minusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
+            defaultMessage: 'Filter out',
+          }),
+          'data-test-subj': 'lensDatatableHide',
         });
       }
     }

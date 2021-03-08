@@ -21,6 +21,7 @@ export function TableDimensionEditor(
   const column = state.columns.find(({ columnId }) => accessor === columnId);
 
   if (!column) return null;
+  if (column.isTransposed) return null;
 
   // either read config state or use same logic as chart itself
   const currentAlignment =

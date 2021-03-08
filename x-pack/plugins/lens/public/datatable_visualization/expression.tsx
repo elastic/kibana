@@ -7,6 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
@@ -35,6 +36,7 @@ export interface Args {
 
 export interface DatatableProps {
   data: LensMultiTable;
+  untransposedData?: LensMultiTable;
   args: Args;
 }
 
@@ -79,6 +81,7 @@ export const getDatatable = ({
     },
   },
   fn(data, args, context) {
+    let untransposedData: LensMultiTable | undefined;
     // do the sorting at this level to propagate it also at CSV download
     const [firstTable] = Object.values(data.tables);
     const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
@@ -90,6 +93,8 @@ export const getDatatable = ({
 
     const hasTransposedColumns = args.columns.some((c) => c.isTransposed);
     if (hasTransposedColumns) {
+      // store original shape of data separately
+      untransposedData = cloneDeep(data);
       // transposes table and args inplace
       transposeTable(args, firstTable, formatters);
     }
@@ -128,6 +133,7 @@ export const getDatatable = ({
       as: 'lens_datatable_renderer',
       value: {
         data,
+        untransposedData,
         args,
       },
     };

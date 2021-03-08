@@ -429,6 +429,7 @@ export function LayerPanel(
                   core: props.core,
                   columnId: activeId,
                   groupId: activeGroup.groupId,
+                  hideGrouping: activeGroup.hideGrouping,
                   filterOperations: activeGroup.filterOperations,
                   dimensionGroups: groups,
                   setState: (

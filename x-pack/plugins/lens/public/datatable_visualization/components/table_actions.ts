@@ -6,8 +6,8 @@
  */
 
 import type { EuiDataGridSorting } from '@elastic/eui';
-import type { Datatable } from 'src/plugins/expressions';
-import type { LensFilterEvent } from '../../types';
+import type { Datatable, DatatableColumn } from 'src/plugins/expressions';
+import type { LensFilterEvent, LensMultiTable } from '../../types';
 import type {
   LensGridDirection,
   LensResizeAction,
@@ -89,6 +89,39 @@ export const createGridFilterHandler = (
         table: tableRef.current,
       },
     ],
+    timeFieldName,
+  };
+
+  onClickValue(desanitizeFilterContext(data));
+};
+
+export const createTransposeColumnFilterHandler = (
+  onClickValue: (data: LensFilterEvent['data']) => void,
+  untransposedDataRef: React.MutableRefObject<LensMultiTable | undefined>
+) => (
+  bucketValues: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>,
+  negate: boolean = false
+) => {
+  if (!untransposedDataRef.current) return;
+  const originalTable = Object.values(untransposedDataRef.current.tables)[0];
+  const timeField = bucketValues.find(
+    ({ originalBucketColumn }) => originalBucketColumn.meta.type === 'date'
+  )?.originalBucketColumn;
+  const isDate = Boolean(timeField);
+  const timeFieldName = negate && isDate ? undefined : timeField?.meta?.field;
+
+  const data: LensFilterEvent['data'] = {
+    negate,
+    data: bucketValues.map(({ originalBucketColumn, value }) => {
+      const columnIndex = originalTable.columns.findIndex((c) => c.id === originalBucketColumn.id);
+      const rowIndex = originalTable.rows.findIndex((r) => r[originalBucketColumn.id] === value);
+      return {
+        row: rowIndex,
+        column: columnIndex,
+        value,
+        table: originalTable,
+      };
+    }),
     timeFieldName,
   };
 
