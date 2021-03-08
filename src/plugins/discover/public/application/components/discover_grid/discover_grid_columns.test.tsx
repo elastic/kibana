@@ -27,7 +27,7 @@ describe('Discover grid columns ', function () {
           "cellActions": undefined,
           "display": undefined,
           "id": "extension",
-          "isSortable": undefined,
+          "isSortable": false,
           "schema": "kibana-json",
         },
         Object {
@@ -42,7 +42,7 @@ describe('Discover grid columns ', function () {
           "cellActions": undefined,
           "display": undefined,
           "id": "message",
-          "isSortable": undefined,
+          "isSortable": false,
           "schema": "kibana-json",
         },
       ]
@@ -67,7 +67,7 @@ describe('Discover grid columns ', function () {
           "cellActions": undefined,
           "display": undefined,
           "id": "extension",
-          "isSortable": undefined,
+          "isSortable": false,
           "schema": "kibana-json",
         },
         Object {
@@ -79,7 +79,7 @@ describe('Discover grid columns ', function () {
           "cellActions": undefined,
           "display": undefined,
           "id": "message",
-          "isSortable": undefined,
+          "isSortable": false,
           "schema": "kibana-json",
         },
       ]
@@ -105,7 +105,7 @@ describe('Discover grid columns ', function () {
           "display": "Time (timestamp)",
           "id": "timestamp",
           "initialWidth": 180,
-          "isSortable": undefined,
+          "isSortable": false,
           "schema": "kibana-json",
         },
         Object {
@@ -120,7 +120,7 @@ describe('Discover grid columns ', function () {
           "cellActions": undefined,
           "display": undefined,
           "id": "extension",
-          "isSortable": undefined,
+          "isSortable": false,
           "schema": "kibana-json",
         },
         Object {
@@ -135,7 +135,7 @@ describe('Discover grid columns ', function () {
           "cellActions": undefined,
           "display": undefined,
           "id": "message",
-          "isSortable": undefined,
+          "isSortable": false,
           "schema": "kibana-json",
         },
       ]

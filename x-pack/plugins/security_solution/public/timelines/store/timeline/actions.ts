@@ -17,7 +17,7 @@ import {
 import { SerializedFilterQuery } from '../../../common/store/types';
 
 import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
-import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import { FieldsEqlOptions, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
   TimelineExpandedDetail,
@@ -289,3 +289,9 @@ export const toggleModalSaveTimeline = actionCreator<{
   id: string;
   showModalSaveTimeline: boolean;
 }>('TOGGLE_MODAL_SAVE_TIMELINE');
+
+export const updateEqlOptions = actionCreator<{
+  id: string;
+  field: FieldsEqlOptions;
+  value: string | null;
+}>('UPDATE_EQL_OPTIONS_TIMELINE');

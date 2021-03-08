@@ -208,11 +208,11 @@ export class MlServerPlugin
       () => this.isMlReady
     );
 
-    if (plugins.alerts) {
+    if (plugins.alerting) {
       registerMlAlerts({
-        alerts: plugins.alerts,
+        alerting: plugins.alerting,
+        logger: this.log,
         mlSharedServices: sharedServices,
-        publicBaseUrl: coreSetup.http.basePath.publicBaseUrl,
       });
     }
 

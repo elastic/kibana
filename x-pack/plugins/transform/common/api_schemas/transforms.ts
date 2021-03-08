@@ -14,7 +14,7 @@ import type { PivotAggDict } from '../types/pivot_aggs';
 import type { PivotGroupByDict } from '../types/pivot_group_by';
 import type { TransformId, TransformPivotConfig } from '../types/transform';
 
-import { transformStateSchema } from './common';
+import { transformStateSchema, runtimeMappingsSchema } from './common';
 
 // GET transforms
 export const getTransformsRequestSchema = schema.arrayOf(
@@ -65,6 +65,7 @@ export const settingsSchema = schema.object({
 });
 
 export const sourceSchema = schema.object({
+  runtime_mappings: runtimeMappingsSchema,
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });

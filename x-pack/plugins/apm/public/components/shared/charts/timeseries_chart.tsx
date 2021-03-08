@@ -24,7 +24,6 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
@@ -32,7 +31,6 @@ import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { unit } from '../../../style/variables';
@@ -78,14 +76,13 @@ export function TimeseriesChart({
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
-  const { urlParams } = useUrlParams();
   const theme = useTheme();
   const chartTheme = useChartTheme();
 
-  const { start, end } = urlParams;
+  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
-  const min = moment.utc(start).valueOf();
-  const max = moment.utc(end).valueOf();
+  const min = Math.min(...xValues);
+  const max = Math.max(...xValues);
 
   const xFormatter = niceTimeFormatter([min, max]);
 

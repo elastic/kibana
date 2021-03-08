@@ -10,6 +10,7 @@ import { Dictionary } from '../../../common/types/common';
 import { EsFieldName } from '../../../common/types/fields';
 import { GenericAgg } from '../../../common/types/pivot_group_by';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { PivotAggsConfigWithUiSupport } from './pivot_aggs';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
@@ -116,4 +117,8 @@ export function getEsAggFromGroupByConfig(groupByConfig: GroupByConfigBase): Gen
   return {
     [agg]: esAgg,
   };
+}
+
+export function isPivotAggConfigWithUiSupport(arg: any): arg is PivotAggsConfigWithUiSupport {
+  return arg.hasOwnProperty('agg') && arg.hasOwnProperty('field');
 }

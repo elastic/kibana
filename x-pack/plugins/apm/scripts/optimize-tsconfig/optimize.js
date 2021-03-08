@@ -16,6 +16,7 @@ const { omit } = require('lodash');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
+const unlink = promisify(fs.unlink);
 
 const {
   xpackRoot,
@@ -72,12 +73,18 @@ async function setIgnoreChanges() {
   }
 }
 
+async function deleteApmTsConfig() {
+  await unlink(path.resolve(kibanaRoot, 'x-pack/plugins/apm', 'tsconfig.json'));
+}
+
 async function optimizeTsConfig() {
   await unoptimizeTsConfig();
 
   await prepareParentTsConfigs();
 
   await addApmFilesToXpackTsConfig();
+
+  await deleteApmTsConfig();
 
   await setIgnoreChanges();
   // eslint-disable-next-line no-console

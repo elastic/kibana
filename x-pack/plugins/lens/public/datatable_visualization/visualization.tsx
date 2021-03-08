@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
@@ -23,6 +23,7 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  alignment?: 'left' | 'right' | 'center';
 }
 
 export interface SortingState {
@@ -36,6 +37,10 @@ export interface DatatableVisualizationState {
   sorting?: SortingState;
 }
 
+const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
+  defaultMessage: 'Table',
+});
+
 export const datatableVisualization: Visualization<DatatableVisualizationState> = {
   id: 'lnsDatatable',
 
@@ -43,8 +48,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     {
       id: 'lnsDatatable',
       icon: LensIconChartDatatable,
-      label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
+      label: visualizationLabel,
+      groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
+        defaultMessage: 'Tabular and single value',
       }),
     },
   ],
@@ -67,9 +73,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   getDescription() {
     return {
       icon: LensIconChartDatatable,
-      label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
-      }),
+      label: visualizationLabel,
     };
   },
 
@@ -264,6 +268,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     columnId: [column.columnId],
                     hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
                     width: typeof column.width === 'undefined' ? [] : [column.width],
+                    alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                   },
                 },
               ],

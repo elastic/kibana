@@ -111,35 +111,38 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
           )}
           <MyOverflowContainer grow={6}>
             <EuiFlexGroup gutterSize="s" direction="column">
-              {entries.map((item, index) => (
-                <EuiFlexItem key={`${exceptionId}-${index}`} grow={1}>
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
-                    {item.nested === 'child' && <MyBeautifulLine grow={false} />}
-                    <MyOverflowContainer grow={1}>
-                      <BuilderEntryItem
-                        entry={item}
-                        indexPattern={indexPattern}
-                        listType={listType}
-                        showLabel={
-                          exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
-                        }
-                        onChange={handleEntryChange}
-                        setErrorsExist={setErrorsExist}
-                        onlyShowListOperators={onlyShowListOperators}
-                        ruleType={ruleType}
+              {entries.map((item, index) => {
+                const key = (item as typeof item & { id?: string }).id ?? `${index}`;
+                return (
+                  <EuiFlexItem key={key} grow={1}>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
+                      {item.nested === 'child' && <MyBeautifulLine grow={false} />}
+                      <MyOverflowContainer grow={1}>
+                        <BuilderEntryItem
+                          entry={item}
+                          indexPattern={indexPattern}
+                          listType={listType}
+                          showLabel={
+                            exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
+                          }
+                          onChange={handleEntryChange}
+                          setErrorsExist={setErrorsExist}
+                          onlyShowListOperators={onlyShowListOperators}
+                          ruleType={ruleType}
+                        />
+                      </MyOverflowContainer>
+                      <BuilderEntryDeleteButtonComponent
+                        entries={exceptionItem.entries}
+                        isOnlyItem={isOnlyItem}
+                        entryIndex={item.entryIndex}
+                        exceptionItemIndex={exceptionItemIndex}
+                        nestedParentIndex={item.parent != null ? item.parent.parentIndex : null}
+                        onDelete={handleDeleteEntry}
                       />
-                    </MyOverflowContainer>
-                    <BuilderEntryDeleteButtonComponent
-                      entries={exceptionItem.entries}
-                      isOnlyItem={isOnlyItem}
-                      entryIndex={item.entryIndex}
-                      exceptionItemIndex={exceptionItemIndex}
-                      nestedParentIndex={item.parent != null ? item.parent.parentIndex : null}
-                      onDelete={handleDeleteEntry}
-                    />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              ))}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                );
+              })}
             </EuiFlexGroup>
           </MyOverflowContainer>
         </EuiFlexGroup>

@@ -6,7 +6,6 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { Duration } from 'moment';
 
 import { ListClient } from '../../../../../../lists/server';
 import {
@@ -21,23 +20,25 @@ import {
   ThreatLanguageOrUndefined,
   ConcurrentSearches,
   ItemsPerSearch,
+  ThreatIndicatorPathOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../../alerts/server';
+} from '../../../../../../alerting/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
+import { RuleRangeTuple, SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
+  tuples: RuleRangeTuple[];
   threatMapping: ThreatMapping;
   query: string;
   inputIndex: string[];
@@ -47,8 +48,6 @@ export interface CreateThreatSignalsOptions {
   savedId: string | undefined;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
-  gap: Duration | null;
-  previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
@@ -70,6 +69,7 @@ export interface CreateThreatSignalsOptions {
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
   threatIndex: ThreatIndex;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
   name: string;
   concurrentSearches: ConcurrentSearches;
@@ -77,6 +77,7 @@ export interface CreateThreatSignalsOptions {
 }
 
 export interface CreateThreatSignalOptions {
+  tuples: RuleRangeTuple[];
   threatMapping: ThreatMapping;
   threatEnrichment: SignalsEnrichment;
   query: string;
@@ -87,8 +88,6 @@ export interface CreateThreatSignalOptions {
   savedId: string | undefined;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
-  gap: Duration | null;
-  previousStartedAt: Date | null;
   listClient: ListClient;
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
@@ -200,6 +199,7 @@ export interface SortWithTieBreaker {
 
 export interface ThreatMatchNamedQuery {
   id: string;
+  index: string;
   field: string;
   value: string;
 }
@@ -214,6 +214,7 @@ export interface BuildThreatEnrichmentOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: PartialFilter[];
   threatIndex: ThreatIndex;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
 }

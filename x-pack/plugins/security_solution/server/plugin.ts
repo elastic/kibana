@@ -26,7 +26,7 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/s
 import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
-} from '../../alerts/server';
+} from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -76,9 +76,10 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
+import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 
 export interface SetupPlugins {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
@@ -92,7 +93,7 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
-  alerts: AlertPluginStartContract;
+  alerting: AlertPluginStartContract;
   data: DataPluginStart;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
@@ -197,9 +198,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
-    registerResolverRoutes(router, endpointContext);
+    registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
-    registerTrustedAppsRoutes(router, endpointContext);
+    registerTrustedAppsRoutes(router);
     registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({
@@ -263,7 +264,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    if (plugins.alerts != null) {
+    if (plugins.alerting != null) {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         eventsTelemetry: this.telemetryEventsSender,
@@ -276,11 +277,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       if (isAlertExecutor(signalRuleType)) {
-        plugins.alerts.registerType(signalRuleType);
+        plugins.alerting.registerType(signalRuleType);
       }
 
       if (isNotificationAlertExecutor(ruleNotificationType)) {
-        plugins.alerts.registerType(ruleNotificationType);
+        plugins.alerting.registerType(ruleNotificationType);
       }
     }
 
@@ -304,6 +305,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
+      const securitySolutionTimelineEqlSearchStrategy = securitySolutionTimelineEqlSearchStrategyProvider(
+        depsStart.data
+      );
       const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
 
       plugins.data.search.registerSearchStrategy(
@@ -317,6 +321,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineSearchStrategy',
         securitySolutionTimelineSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionTimelineEqlSearchStrategy',
+        securitySolutionTimelineEqlSearchStrategy
       );
     });
 
@@ -372,7 +380,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentPolicyService: plugins.fleet?.agentPolicyService,
       appClientFactory: this.appClientFactory,
       security: this.setupPlugins!.security!,
-      alerts: plugins.alerts,
+      alerting: plugins.alerting,
       config: this.config!,
       logger: this.logger,
       manifestManager,

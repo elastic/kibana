@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
+import React, { useMemo, useCallback, useContext } from 'react';
+import { DragDrop, DragDropIdentifier, DragContext } from '../../../drag_drop';
+
 import {
   Datasource,
   VisualizationDimensionGroupConfig,
@@ -41,12 +42,10 @@ export function DraggableDimensionButton({
   group,
   onDrop,
   children,
-  dragDropContext,
   layerDatasourceDropProps,
   layerDatasource,
   registerNewButtonRef,
 }: {
-  dragDropContext: DragContextState;
   layerId: string;
   groupIndex: number;
   layerIndex: number;
@@ -64,12 +63,18 @@ export function DraggableDimensionButton({
   columnId: string;
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
 }) {
-  const dropType = layerDatasource.getDropTypes({
+  const { dragging } = useContext(DragContext);
+
+  const dropProps = layerDatasource.getDropProps({
     ...layerDatasourceDropProps,
+    dragging,
     columnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
   });
+
+  const dropType = dropProps?.dropType;
+  const nextLabel = dropProps?.nextLabel;
 
   const value = useMemo(
     () => ({
@@ -82,9 +87,10 @@ export function DraggableDimensionButton({
         label,
         groupLabel: group.groupLabel,
         position: accessorIndex + 1,
+        nextLabel: nextLabel || '',
       },
     }),
-    [columnId, group.groupId, accessorIndex, layerId, dropType, label, group.groupLabel]
+    [columnId, group.groupId, accessorIndex, layerId, dropType, label, group.groupLabel, nextLabel]
   );
 
   // todo: simplify by id and use drop targets?
@@ -101,6 +107,11 @@ export function DraggableDimensionButton({
     columnId,
   ]);
 
+  const handleOnDrop = React.useCallback(
+    (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
+    [value, onDrop]
+  );
+
   return (
     <div
       ref={registerNewButtonRefMemoized}
@@ -112,13 +123,11 @@ export function DraggableDimensionButton({
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
-        dragType={isDraggedOperation(dragDropContext.dragging) ? 'move' : 'copy'}
+        dragType={isDraggedOperation(dragging) ? 'move' : 'copy'}
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
-        onDrop={(drag: DragDropIdentifier, selectedDropType?: DropType) =>
-          onDrop(drag, value, selectedDropType)
-        }
+        onDrop={handleOnDrop}
       >
         {children}
       </DragDrop>

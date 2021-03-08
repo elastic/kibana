@@ -1672,7 +1672,11 @@ describe('Response factory', () => {
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
-      expect(result.body.message).toBe('reason');
+      expect(result.body).toEqual({
+        error: 'Internal Server Error',
+        message: 'reason',
+        statusCode: 500,
+      });
       expect(loggingSystemMock.collect(logger).error).toHaveLength(0);
     });
 

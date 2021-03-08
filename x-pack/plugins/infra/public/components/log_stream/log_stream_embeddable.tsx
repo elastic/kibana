@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import { CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from 'kibana/public';
-
-import { I18nProvider } from '@kbn/i18n/react';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
-import { Query, TimeRange } from '../../../../../../src/plugins/data/public';
+import { Subscription } from 'rxjs';
+import { Query, TimeRange, esQuery, Filter } from '../../../../../../src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { CoreProviders } from '../../apps/common_providers';
+import { InfraClientStartDeps } from '../../types';
 import { datemathToEpochMillis } from '../../utils/datemath';
 import { LazyLogStreamWrapper } from './lazy_log_stream_wrapper';
 
 export const LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
 
 export interface LogStreamEmbeddableInput extends EmbeddableInput {
+  filters: Filter[];
   timeRange: TimeRange;
   query: Query;
 }
@@ -31,13 +32,17 @@ export interface LogStreamEmbeddableInput extends EmbeddableInput {
 export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
   public readonly type = LOG_STREAM_EMBEDDABLE;
   private node?: HTMLElement;
+  private subscription: Subscription;
 
   constructor(
-    private services: CoreStart,
+    private core: CoreStart,
+    private pluginDeps: InfraClientStartDeps,
     initialInput: LogStreamEmbeddableInput,
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);
+
+    this.subscription = this.getInput$().subscribe(() => this.renderComponent());
   }
 
   public render(node: HTMLElement) {
@@ -49,44 +54,43 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     this.renderComponent();
   }
 
-  public reload() {
-    this.renderComponent();
-  }
-
   public destroy() {
     super.destroy();
+    this.subscription.unsubscribe();
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
   }
+
+  public async reload() {}
 
   private renderComponent() {
     if (!this.node) {
       return;
     }
 
+    const parsedQuery = esQuery.buildEsQuery(undefined, this.input.query, this.input.filters);
+
     const startTimestamp = datemathToEpochMillis(this.input.timeRange.from);
-    const endTimestamp = datemathToEpochMillis(this.input.timeRange.to);
+    const endTimestamp = datemathToEpochMillis(this.input.timeRange.to, 'up');
 
     if (!startTimestamp || !endTimestamp) {
       return;
     }
 
     ReactDOM.render(
-      <I18nProvider>
+      <CoreProviders core={this.core} plugins={this.pluginDeps}>
         <EuiThemeProvider>
-          <KibanaContextProvider services={this.services}>
-            <div style={{ width: '100%' }}>
-              <LazyLogStreamWrapper
-                startTimestamp={startTimestamp}
-                endTimestamp={endTimestamp}
-                height="100%"
-                query={this.input.query}
-              />
-            </div>
-          </KibanaContextProvider>
+          <div style={{ width: '100%' }}>
+            <LazyLogStreamWrapper
+              startTimestamp={startTimestamp}
+              endTimestamp={endTimestamp}
+              height="100%"
+              query={parsedQuery}
+            />
+          </div>
         </EuiThemeProvider>
-      </I18nProvider>,
+      </CoreProviders>,
       this.node
     );
   }

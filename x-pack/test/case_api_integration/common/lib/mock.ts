@@ -8,6 +8,7 @@
 import {
   CommentSchemaType,
   ContextTypeGeneratedAlertType,
+  createAlertsString,
   isCommentGeneratedAlert,
   transformConnectorComment,
 } from '../../../../plugins/case/server/connectors';
@@ -25,7 +26,6 @@ import {
   CaseClientPostRequest,
   SubCaseResponse,
   AssociationType,
-  CollectionWithSubCaseResponse,
   SubCasesFindResponse,
   CommentRequest,
 } from '../../../../plugins/case/common/api';
@@ -70,12 +70,15 @@ export const postCommentUserReq: CommentRequestUserType = {
 export const postCommentAlertReq: CommentRequestAlertType = {
   alertId: 'test-id',
   index: 'test-index',
+  rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: CommentType.alert,
 };
 
 export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
-  alerts: [{ _id: 'test-id' }, { _id: 'test-id2' }],
-  index: 'test-index',
+  alerts: createAlertsString([
+    { _id: 'test-id', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
+    { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
+  ]),
   type: CommentType.generatedAlert,
 };
 
@@ -155,18 +158,17 @@ export const subCaseResp = ({
 
 interface FormattedCollectionResponse {
   caseInfo: Partial<CaseResponse>;
-  subCase?: Partial<SubCaseResponse>;
+  subCases?: Array<Partial<SubCaseResponse>>;
   comments?: Array<Partial<CommentResponse>>;
 }
 
-export const formatCollectionResponse = (
-  caseInfo: CollectionWithSubCaseResponse
-): FormattedCollectionResponse => {
+export const formatCollectionResponse = (caseInfo: CaseResponse): FormattedCollectionResponse => {
+  const subCase = removeServerGeneratedPropertiesFromSubCase(caseInfo.subCases?.[0]);
   return {
     caseInfo: removeServerGeneratedPropertiesFromCaseCollection(caseInfo),
-    subCase: removeServerGeneratedPropertiesFromSubCase(caseInfo.subCase),
+    subCases: subCase ? [subCase] : undefined,
     comments: removeServerGeneratedPropertiesFromComments(
-      caseInfo.subCase?.comments ?? caseInfo.comments
+      caseInfo.subCases?.[0].comments ?? caseInfo.comments
     ),
   };
 };
@@ -183,10 +185,10 @@ export const removeServerGeneratedPropertiesFromSubCase = (
 };
 
 export const removeServerGeneratedPropertiesFromCaseCollection = (
-  config: Partial<CollectionWithSubCaseResponse>
-): Partial<CollectionWithSubCaseResponse> => {
+  config: Partial<CaseResponse>
+): Partial<CaseResponse> => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { closed_at, created_at, updated_at, version, subCase, ...rest } = config;
+  const { closed_at, created_at, updated_at, version, subCases, ...rest } = config;
   return rest;
 };
 

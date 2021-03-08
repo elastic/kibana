@@ -63,6 +63,16 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
           },
         },
       },
+      rule: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          name: {
+            type: 'keyword',
+          },
+        },
+      },
       updated_at: {
         type: 'date',
       },

@@ -163,7 +163,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.Completed]: {
     button: {
       color: 'subdued',
-      iconType: 'clock',
+      iconType: 'check',
       'aria-label': i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
         defaultMessage: 'Search session complete',
       }),

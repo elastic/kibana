@@ -21,7 +21,14 @@ import {
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
 } from './constants';
-import { BaseBoost, Boost, BoostType, SearchSettings } from './types';
+import {
+  BaseBoost,
+  Boost,
+  BoostFunction,
+  BoostOperation,
+  BoostType,
+  SearchSettings,
+} from './types';
 import {
   filterIfTerm,
   parseBoostCenter,
@@ -32,7 +39,7 @@ import {
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
   schema: Schema;
-  schemaConflicts: SchemaConflicts;
+  schemaConflicts?: SchemaConflicts;
 }
 
 interface RelevanceTuningActions {
@@ -44,7 +51,6 @@ interface RelevanceTuningActions {
   setResultsLoading(resultsLoading: boolean): boolean;
   clearSearchResults(): void;
   resetSearchSettingsState(): void;
-  dismissSchemaConflictCallout(): void;
   initializeRelevanceTuning(): void;
   getSearchResults(): void;
   setSearchSettingsResponse(searchSettings: SearchSettings): { searchSettings: SearchSettings };
@@ -82,7 +88,7 @@ interface RelevanceTuningActions {
     name: string,
     boostIndex: number,
     optionType: keyof BaseBoost,
-    value: string
+    value: BoostOperation | BoostFunction
   ): {
     name: string;
     boostIndex: number;
@@ -100,7 +106,6 @@ interface RelevanceTuningValues {
   filteredSchemaFields: string[];
   filteredSchemaFieldsWithConflicts: string[];
   schemaConflicts: SchemaConflicts;
-  showSchemaConflictCallout: boolean;
   engineHasSchemaFields: boolean;
   filterInputValue: string;
   query: string;
@@ -123,7 +128,6 @@ export const RelevanceTuningLogic = kea<
     setResultsLoading: (resultsLoading) => resultsLoading,
     clearSearchResults: true,
     resetSearchSettingsState: true,
-    dismissSchemaConflictCallout: true,
     initializeRelevanceTuning: true,
     getSearchResults: true,
     setSearchSettingsResponse: (searchSettings) => ({
@@ -176,13 +180,7 @@ export const RelevanceTuningLogic = kea<
     schemaConflicts: [
       {},
       {
-        onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts,
-      },
-    ],
-    showSchemaConflictCallout: [
-      true,
-      {
-        dismissSchemaConflictCallout: () => false,
+        onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts || {},
       },
     ],
     filterInputValue: [
@@ -323,6 +321,12 @@ export const RelevanceTuningLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
         actions.onSearchSettingsError();
+      } finally {
+        const { invalidBoosts, unsearchedUnconfirmedFields } = EngineLogic.values.engine;
+        if (invalidBoosts || unsearchedUnconfirmedFields) {
+          // Re-fetch engine data so that any navigation flags are updated dynamically
+          EngineLogic.actions.initializeEngine();
+        }
       }
     },
     resetSearchSettings: async () => {
@@ -497,7 +501,11 @@ export const RelevanceTuningLogic = kea<
       const { searchSettings } = values;
       const { boosts } = searchSettings;
       const updatedBoosts = cloneDeep(boosts[name]);
-      updatedBoosts[boostIndex][optionType] = value;
+      if (optionType === 'operation') {
+        updatedBoosts[boostIndex][optionType] = value as BoostOperation;
+      } else {
+        updatedBoosts[boostIndex][optionType] = value as BoostFunction;
+      }
 
       actions.setSearchSettings({
         ...searchSettings,

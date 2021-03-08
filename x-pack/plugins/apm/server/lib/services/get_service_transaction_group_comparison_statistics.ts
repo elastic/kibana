@@ -14,7 +14,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../server/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
@@ -31,6 +35,8 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupComparisonStatistics({
+  environment,
+  kuery,
   serviceName,
   transactionNames,
   setup,
@@ -39,6 +45,8 @@ export async function getServiceTransactionGroupComparisonStatistics({
   transactionType,
   latencyAggregationType,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionNames: string[];
   setup: Setup & SetupTimeRange;
@@ -60,7 +68,7 @@ export async function getServiceTransactionGroupComparisonStatistics({
   return withApmSpan(
     'get_service_transaction_group_comparison_statistics',
     async () => {
-      const { apmEventClient, start, end, esFilter } = setup;
+      const { apmEventClient, start, end } = setup;
       const { intervalString } = getBucketSize({ start, end, numBuckets });
 
       const field = getTransactionDurationFieldForAggregatedTransactions(
@@ -82,11 +90,12 @@ export async function getServiceTransactionGroupComparisonStatistics({
               filter: [
                 { term: { [SERVICE_NAME]: serviceName } },
                 { term: { [TRANSACTION_TYPE]: transactionType } },
-                { range: rangeFilter(start, end) },
                 ...getDocumentTypeFilterForAggregatedTransactions(
                   searchAggregatedTransactions
                 ),
-                ...esFilter,
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+                ...kqlQuery(kuery),
               ],
             },
           },

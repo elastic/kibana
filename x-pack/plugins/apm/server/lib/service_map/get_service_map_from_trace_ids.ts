@@ -6,7 +6,10 @@
  */
 
 import { find, uniqBy } from 'lodash';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../common/environment_filter_values';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -41,7 +44,7 @@ export function getConnections({
               return false;
             }
 
-            if (!environment) {
+            if (!environment || environment === ENVIRONMENT_ALL.value) {
               return true;
             }
 

@@ -21,7 +21,7 @@ export const ALL_TIMELINES_PANEL_TITLE = i18n.translate(
 export const ALL_TIMELINES_IMPORT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timelines.allTimelines.importTimelineTitle',
   {
-    defaultMessage: 'Import Timeline',
+    defaultMessage: 'Import',
   }
 );
 

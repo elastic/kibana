@@ -104,6 +104,17 @@ const SavedFilterRuntimeType = runtimeTypes.partial({
 });
 
 /*
+ *  eqlOptionsQuery -> filterQuery Types
+ */
+const EqlOptionsRuntimeType = runtimeTypes.partial({
+  eventCategoryField: unionWithNullType(runtimeTypes.string),
+  query: unionWithNullType(runtimeTypes.string),
+  tiebreakerField: unionWithNullType(runtimeTypes.string),
+  timestampField: unionWithNullType(runtimeTypes.string),
+  size: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
+});
+
+/*
  *  kqlQuery -> filterQuery Types
  */
 const SavedKueryFilterQueryRuntimeType = runtimeTypes.partial({
@@ -180,10 +191,13 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
 >;
 
 export enum RowRendererId {
+  alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
+  library = 'library',
   netflow = 'netflow',
   plain = 'plain',
+  registry = 'registry',
   suricata = 'suricata',
   system = 'system',
   system_dns = 'system_dns',
@@ -243,6 +257,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
+  eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
   eventType: unionWithNullType(runtimeTypes.string),
   excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
@@ -410,13 +425,14 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
 
-export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
+export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom' | 'eql';
 
 export enum TimelineTabs {
   query = 'query',
   graph = 'graph',
   notes = 'notes',
   pinned = 'pinned',
+  eql = 'eql',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

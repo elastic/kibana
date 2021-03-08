@@ -40,7 +40,7 @@ import {
   createGridSortingConfig,
 } from './table_actions';
 
-const DataContext = React.createContext<DataContextType>({});
+export const DataContext = React.createContext<DataContextType>({});
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -192,6 +192,21 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ]
   );
 
+  const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
+    const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
+    columnConfig.columns.forEach((column) => {
+      if (column.alignment) {
+        alignmentMap[column.columnId] = column.alignment;
+      } else {
+        const isNumeric =
+          firstLocalTable.columns.find((dataColumn) => dataColumn.id === column.columnId)?.meta
+            .type === 'number';
+        alignmentMap[column.columnId] = isNumeric ? 'right' : 'left';
+      }
+    });
+    return alignmentMap;
+  }, [firstLocalTable, columnConfig]);
+
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
       return [];
@@ -259,6 +274,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         value={{
           table: firstLocalTable,
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
+          alignments,
         }}
       >
         <EuiDataGrid

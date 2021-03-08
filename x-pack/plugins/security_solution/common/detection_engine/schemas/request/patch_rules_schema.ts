@@ -57,6 +57,7 @@ import {
   threat_filters,
   threat_mapping,
   threat_language,
+  threat_indicator_path,
 } from '../types/threat_mapping';
 import { listArrayOrUndefined } from '../types/lists';
 
@@ -112,6 +113,7 @@ export const patchRulesSchema = t.exact(
     threat_filters,
     threat_mapping,
     threat_language,
+    threat_indicator_path,
     concurrent_searches,
     items_per_search,
   })

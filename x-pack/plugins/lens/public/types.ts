@@ -189,9 +189,12 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
-  getDropTypes: (
-    props: DatasourceDimensionDropProps<T> & { groupId: string }
-  ) => DropType | undefined;
+  getDropProps: (
+    props: DatasourceDimensionDropProps<T> & {
+      groupId: string;
+      dragging: DragContextState['dragging'];
+    }
+  ) => { dropType: DropType; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   updateStateOnCloseDimension?: (props: {
     layerId: string;
@@ -278,9 +281,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
-export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
-  dragDropContext: DragContextState;
-};
+export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
 
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
@@ -310,7 +311,6 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   columnId: string;
   state: T;
   setState: StateSetter<T>;
-  dragDropContext: DragContextState;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
@@ -516,6 +516,10 @@ export interface VisualizationType {
    * Optional label used in chart type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
+  /**
+   * The group the visualization belongs to
+   */
+  groupLabel: string;
 }
 
 export interface Visualization<T = unknown> {

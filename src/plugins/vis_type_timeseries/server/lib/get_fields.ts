@@ -47,7 +47,6 @@ export async function getFields(
       ),
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
-    getSavedObjectsClient: () => requestContext.core.savedObjects.client,
     getEsShardTimeout: async () => {
       return await framework.globalConfig$
         .pipe(

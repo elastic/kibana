@@ -50,7 +50,7 @@ interface PanelValues extends EmbeddableInput {
   savedObjectId?: string;
 }
 
-interface ContextValues {
+export interface ContextValues {
   panel: PanelValues;
 }
 

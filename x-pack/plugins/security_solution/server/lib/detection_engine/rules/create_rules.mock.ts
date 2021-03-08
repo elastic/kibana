@@ -6,7 +6,7 @@
  */
 
 import { CreateRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 
 export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],
@@ -48,6 +48,7 @@ export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   itemsPerSearch: undefined,
   threatQuery: undefined,
   threatIndex: undefined,
+  threatIndicatorPath: undefined,
   threshold: undefined,
   timestampOverride: undefined,
   to: 'now',
@@ -94,6 +95,7 @@ export const getCreateMlRulesOptionsMock = (): CreateRulesOptions => ({
   threat: [],
   threatFilters: undefined,
   threatIndex: undefined,
+  threatIndicatorPath: undefined,
   threatMapping: undefined,
   threatQuery: undefined,
   threatLanguage: undefined,

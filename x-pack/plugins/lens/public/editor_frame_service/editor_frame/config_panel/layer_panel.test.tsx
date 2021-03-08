@@ -28,6 +28,7 @@ const defaultContext = {
   setDragging: jest.fn(),
   setActiveDropTarget: () => {},
   activeDropTarget: undefined,
+  dropTargetsByOrder: undefined,
   keyboardMode: false,
   setKeyboardMode: () => {},
   setA11yMessage: jest.fn(),
@@ -81,6 +82,7 @@ describe('LayerPanel', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+          groupLabel: 'testVisGroup',
         },
       ],
     };
@@ -93,6 +95,7 @@ describe('LayerPanel', () => {
           icon: 'empty',
           id: 'testVis2',
           label: 'TEST2',
+          groupLabel: 'testVis2Group',
         },
       ],
     };
@@ -440,7 +443,10 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockDatasource.getDropTypes.mockReturnValue('field_add');
+      mockDatasource.getDropProps.mockReturnValue({
+        dropType: 'field_add',
+        nextLabel: '',
+      });
 
       const draggingField = {
         field: { name: 'dragged' },
@@ -459,11 +465,9 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      expect(mockDatasource.getDropTypes).toHaveBeenCalledWith(
+      expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingField,
-          }),
+          dragging: draggingField,
         })
       );
 
@@ -471,9 +475,7 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingField,
-          }),
+          droppedItem: draggingField,
         })
       );
     });
@@ -492,8 +494,8 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockDatasource.getDropTypes.mockImplementation(({ columnId }) =>
-        columnId !== 'a' ? 'field_replace' : undefined
+      mockDatasource.getDropProps.mockImplementation(({ columnId }) =>
+        columnId !== 'a' ? { dropType: 'field_replace', nextLabel: '' } : undefined
       );
 
       const draggingField = {
@@ -513,7 +515,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      expect(mockDatasource.getDropTypes).toHaveBeenCalledWith(
+      expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'a' })
       );
 
@@ -554,7 +556,10 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockDatasource.getDropTypes.mockReturnValue('replace_compatible');
+      mockDatasource.getDropProps.mockReturnValue({
+        dropType: 'replace_compatible',
+        nextLabel: '',
+      });
 
       const draggingOperation = {
         layerId: 'first',
@@ -574,11 +579,9 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      expect(mockDatasource.getDropTypes).toHaveBeenCalledWith(
+      expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          dragging: draggingOperation,
         })
       );
 
@@ -587,9 +590,7 @@ describe('LayerPanel', () => {
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'b',
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          droppedItem: draggingOperation,
         })
       );
 
@@ -598,9 +599,7 @@ describe('LayerPanel', () => {
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'newid',
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          droppedItem: draggingOperation,
         })
       );
     });

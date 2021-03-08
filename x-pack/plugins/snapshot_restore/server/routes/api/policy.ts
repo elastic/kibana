@@ -51,7 +51,7 @@ export function registerPolicyRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -92,7 +92,7 @@ export function registerPolicyRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -131,7 +131,7 @@ export function registerPolicyRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -167,7 +167,7 @@ export function registerPolicyRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -222,7 +222,7 @@ export function registerPolicyRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -263,7 +263,7 @@ export function registerPolicyRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -323,7 +323,7 @@ export function registerPolicyRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

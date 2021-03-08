@@ -212,6 +212,11 @@ export const mockGlobalState: State = {
         itemsPerPage: 5,
         dataProviders: [],
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+        },
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
         expandedDetail: {},

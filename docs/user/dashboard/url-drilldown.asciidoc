@@ -256,7 +256,7 @@ Note:
 | *Range selection*
 | event.from +
 event.to
-| `from` and `to` values of selected range. Depending on your data, could be either a date or number. +
+| `from` and `to` values of the selected range as numbers. +
 Tip: Consider using <<helpers, date>> helper for date formatting.
 
 |

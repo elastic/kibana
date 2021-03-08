@@ -77,6 +77,11 @@ const basicTimeline: TimelineModel = {
   },
   deletedEventIds: [],
   description: '',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: '',
+    timestampField: '@timestamp',
+  },
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
   expandedDetail: {},

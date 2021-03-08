@@ -6,15 +6,17 @@
  */
 
 import Boom, { isBoom } from '@hapi/boom';
-import {
+import { KibanaRequest } from 'src/core/server';
+import type {
   RequestHandlerContext,
-  KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'src/core/server';
 import { errors as LegacyESErrors } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+
 import { appContextService } from '../services';
+
 import {
   IngestManagerError,
   RegistryError,
@@ -22,6 +24,7 @@ import {
   AgentPolicyNameExistsError,
   PackageUnsupportedMediaTypeError,
   ConcurrentInstallOperationError,
+  AgentNotFoundError,
 } from './index';
 
 type IngestErrorHandler = (
@@ -75,6 +78,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   }
   if (error instanceof ConcurrentInstallOperationError) {
     return 409; // Conflict
+  }
+  if (error instanceof AgentNotFoundError) {
+    return 404;
   }
   return 400; // Bad Request
 };

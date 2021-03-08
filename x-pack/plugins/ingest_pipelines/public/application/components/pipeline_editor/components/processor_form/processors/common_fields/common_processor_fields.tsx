@@ -38,6 +38,7 @@ const ignoreFailureConfig: FieldConfig<any> = {
 };
 
 const ifConfig: FieldConfig = {
+  serializer: from.emptyStringToUndefined,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
     defaultMessage: 'Condition (optional)',
   }),
@@ -48,6 +49,7 @@ const ifConfig: FieldConfig = {
 };
 
 const tagConfig: FieldConfig = {
+  serializer: from.emptyStringToUndefined,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldLabel', {
     defaultMessage: 'Tag (optional)',
   }),

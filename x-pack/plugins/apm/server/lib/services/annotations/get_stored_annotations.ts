@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { unwrapEsResponse } from '../../../../../observability/server';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import {
+  unwrapEsResponse,
+  WrappedElasticsearchClientError,
+} from '../../../../../observability/server';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
@@ -33,18 +36,18 @@ export function getStoredAnnotations({
   logger: Logger;
 }): Promise<Annotation[]> {
   return withApmSpan('get_stored_annotations', async () => {
+    const { start, end } = setup;
+
     const body = {
       size: 50,
       query: {
         bool: {
           filter: [
-            {
-              range: rangeFilter(setup.start, setup.end),
-            },
             { term: { 'annotation.type': 'deployment' } },
             { term: { tags: 'apm' } },
             { term: { [SERVICE_NAME]: serviceName } },
-            ...getEnvironmentUiFilterES(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
           ],
         },
       },
@@ -72,15 +75,22 @@ export function getStoredAnnotations({
     } catch (error) {
       // index is only created when an annotation has been indexed,
       // so we should handle this error gracefully
-      if (error.body?.error?.type === 'index_not_found_exception') {
-        return [];
-      }
+      if (
+        error instanceof WrappedElasticsearchClientError &&
+        error.originalError instanceof ResponseError
+      ) {
+        const type = error.originalError.body.error.type;
 
-      if (error.body?.error?.type === 'security_exception') {
-        logger.warn(
-          `Unable to get stored annotations due to a security exception. Please make sure that the user has 'indices:data/read/search' permissions for ${annotationsClient.index}`
-        );
-        return [];
+        if (type === 'index_not_found_exception') {
+          return [];
+        }
+
+        if (type === 'security_exception') {
+          logger.warn(
+            `Unable to get stored annotations due to a security exception. Please make sure that the user has 'indices:data/read/search' permissions for ${annotationsClient.index}`
+          );
+          return [];
+        }
       }
 
       throw error;

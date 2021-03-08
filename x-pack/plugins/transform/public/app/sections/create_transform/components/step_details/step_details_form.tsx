@@ -118,7 +118,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         const previewRequest = getPreviewTransformRequestBody(
           searchItems.indexPattern.title,
           pivotQuery,
-          partialPreviewRequest
+          partialPreviewRequest,
+          stepDefineState.runtimeMappings
         );
 
         const transformPreview = await api.getTransformsPreview(previewRequest);

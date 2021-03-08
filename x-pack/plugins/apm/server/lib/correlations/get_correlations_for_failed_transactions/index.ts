@@ -13,12 +13,17 @@ import {
 } from '../process_significant_term_aggs';
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -30,12 +35,16 @@ import {
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getCorrelationsForFailedTransactions({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
   fieldNames,
   setup,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -43,11 +52,13 @@ export async function getCorrelationsForFailedTransactions({
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_correlations_for_failed_transactions', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
 
     const backgroundFilters: ESFilter[] = [
-      ...esFilter,
-      { range: rangeFilter(start, end) },
+      { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
+      ...kqlQuery(kuery),
     ];
 
     if (serviceName) {
@@ -82,7 +93,14 @@ export async function getCorrelationsForFailedTransactions({
                   significant_terms: {
                     size: 10,
                     field: fieldName,
-                    background_filter: { bool: { filter: backgroundFilters } },
+                    background_filter: {
+                      bool: {
+                        filter: backgroundFilters,
+                        must_not: {
+                          term: { [EVENT_OUTCOME]: EventOutcome.failure },
+                        },
+                      },
+                    },
                   },
                 },
               };
@@ -97,19 +115,12 @@ export async function getCorrelationsForFailedTransactions({
       return {};
     }
 
-    const failedTransactionCount =
-      response.aggregations?.failed_transactions.doc_count;
-    const totalTransactionCount = response.hits.total.value;
-    const avgErrorRate = (failedTransactionCount / totalTransactionCount) * 100;
     const sigTermAggs = omit(
       response.aggregations?.failed_transactions,
       'doc_count'
     );
 
-    const topSigTerms = processSignificantTermAggs({
-      sigTermAggs,
-      thresholdPercentage: avgErrorRate,
-    });
+    const topSigTerms = processSignificantTermAggs({ sigTermAggs });
     return getErrorRateTimeSeries({ setup, backgroundFilters, topSigTerms });
   });
 }
@@ -125,7 +136,7 @@ export async function getErrorRateTimeSeries({
 }) {
   return withApmSpan('get_error_rate_timeseries', async () => {
     const { start, end, apmEventClient } = setup;
-    const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
+    const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
 
     if (isEmpty(topSigTerms)) {
       return {};

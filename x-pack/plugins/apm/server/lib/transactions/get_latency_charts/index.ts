@@ -13,7 +13,11 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -31,6 +35,8 @@ export type LatencyChartsSearchResponse = PromiseReturnType<
 >;
 
 function searchLatency({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -38,6 +44,8 @@ function searchLatency({
   searchAggregatedTransactions,
   latencyAggregationType,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -50,11 +58,12 @@ function searchLatency({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
   if (transactionName) {
@@ -102,6 +111,8 @@ function searchLatency({
 }
 
 export function getLatencyTimeseries({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -109,6 +120,8 @@ export function getLatencyTimeseries({
   searchAggregatedTransactions,
   latencyAggregationType,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -118,6 +131,8 @@ export function getLatencyTimeseries({
 }) {
   return withApmSpan('get_latency_charts', async () => {
     const response = await searchLatency({
+      environment,
+      kuery,
       serviceName,
       transactionType,
       transactionName,

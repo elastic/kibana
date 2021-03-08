@@ -11,12 +11,14 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
   EuiButtonEmpty,
+  EuiAccordion,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
+import { useBreakPoints } from '../../../../hooks/use_break_points';
 
 interface Props {
   filterNames: LocalUIFilterName[];
@@ -45,16 +47,20 @@ function LocalUIFilters({
 
   const hasValues = filters.some((filter) => filter.value.length > 0);
 
-  return (
+  const { isSmall } = useBreakPoints();
+
+  const title = (
+    <EuiTitle size="s">
+      <h3>
+        {i18n.translate('xpack.apm.localFiltersTitle', {
+          defaultMessage: 'Filters',
+        })}
+      </h3>
+    </EuiTitle>
+  );
+
+  const content = (
     <>
-      <EuiTitle size="s">
-        <h3>
-          {i18n.translate('xpack.apm.localFiltersTitle', {
-            defaultMessage: 'Filters',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       {children}
       {filters.map((filter) => {
         return (
@@ -88,6 +94,18 @@ function LocalUIFilters({
           </ButtonWrapper>
         </>
       ) : null}
+    </>
+  );
+
+  return isSmall ? (
+    <EuiAccordion id={'uxFilterAccordion'} buttonContent={title}>
+      {content}
+    </EuiAccordion>
+  ) : (
+    <>
+      {title}
+      <EuiSpacer size="s" />
+      {content}
     </>
   );
 }

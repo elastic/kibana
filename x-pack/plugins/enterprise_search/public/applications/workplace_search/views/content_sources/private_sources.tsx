@@ -20,9 +20,9 @@ import noSharedSourcesIcon from '../../assets/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
+import { toSentenceSerial } from '../../utils';
 
 import {
-  AND,
   PRIVATE_LINK_TITLE,
   PRIVATE_HEADER_TITLE,
   PRIVATE_HEADER_DESCRIPTION,
@@ -122,13 +122,6 @@ export const PrivateSources: React.FC = () => {
     <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
   );
 
-  const groupsSentence =
-    groups.length === 1
-      ? `${groups}`
-      : `${groups.slice(0, groups.length - 1).join(', ')}${
-          groups.length === 2 ? '' : ','
-        } ${AND} ${groups.slice(-1)}`;
-
   const sharedSourcesSection = (
     <ContentSection
       title={PRIVATE_SHARED_SOURCES_TITLE}
@@ -137,7 +130,11 @@ export const PrivateSources: React.FC = () => {
           <FormattedMessage
             id="xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description"
             defaultMessage="You have access to the following sources through {newline}the {groups, plural, one {group} other {groups}} {groupsSentence}."
-            values={{ groups: groups.length, groupsSentence, newline: <br /> }}
+            values={{
+              groups: groups.length,
+              groupsSentence: toSentenceSerial(groups),
+              newline: <br />,
+            }}
           />
         )
       }

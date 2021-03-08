@@ -115,7 +115,10 @@ export class DataPublicPlugin
     );
 
     return {
-      autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
+      autocomplete: this.autocomplete.setup(core, {
+        timefilter: queryService.timefilter,
+        usageCollection,
+      }),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -195,10 +198,7 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
-      trackUiMetric: this.usageCollection?.reportUiCounter.bind(
-        this.usageCollection,
-        'data_plugin'
-      ),
+      usageCollection: this.usageCollection,
     });
 
     return {

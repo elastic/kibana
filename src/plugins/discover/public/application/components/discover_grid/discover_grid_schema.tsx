@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiDataGridPopoverContents } from '@elastic/eui';
-import { geoPoint, kibanaJSON } from './constants';
+import { kibanaJSON } from './constants';
 import { KBN_FIELD_TYPES } from '../../../../../data/common';
 
 export function getSchemaByKbnType(kbnType: string | undefined) {
@@ -24,8 +24,6 @@ export function getSchemaByKbnType(kbnType: string | undefined) {
       return 'string';
     case KBN_FIELD_TYPES.DATE:
       return 'datetime';
-    case KBN_FIELD_TYPES.GEO_POINT:
-      return geoPoint;
     default:
       return kibanaJSON;
   }
@@ -43,15 +41,6 @@ export function getSchemaDetectors() {
       icon: '',
       color: '',
     },
-    {
-      type: geoPoint,
-      detector() {
-        return 0; // this schema is always explicitly defined
-      },
-      sortTextAsc: '',
-      sortTextDesc: '',
-      icon: 'tokenGeo',
-    },
   ];
 }
 
@@ -60,9 +49,6 @@ export function getSchemaDetectors() {
  */
 export function getPopoverContents(): EuiDataGridPopoverContents {
   return {
-    [geoPoint]: ({ children }) => {
-      return <span className="geo-point">{children}</span>;
-    },
     [kibanaJSON]: ({ children }) => {
       return (
         <EuiCodeBlock isCopyable language="json" paddingSize="none" transparentBackground={true}>

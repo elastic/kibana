@@ -105,5 +105,6 @@ export const EventDetailsPanel = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
+    deepEqual(prevProps.expandedEvent, nextProps.expandedEvent) &&
     prevProps.timelineId === nextProps.timelineId
 );

@@ -22,7 +22,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional field config */
   database_file: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v === 'GeoLite2-City.mmdb' ? undefined : v),
+    serializer: (v) => (v === 'GeoLite2-City.mmdb' || v === '' ? undefined : v),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.databaseFileLabel', {
       defaultMessage: 'Database file (optional)',
     }),

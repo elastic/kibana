@@ -99,6 +99,10 @@ describe('common utils', () => {
                   alertId: ['a', 'b', 'c'],
                   index: '',
                   type: CommentType.generatedAlert,
+                  rule: {
+                    id: 'rule-id-1',
+                    name: 'rule-name-1',
+                  },
                 },
               ],
             },
@@ -118,6 +122,10 @@ describe('common utils', () => {
                   alertId: ['a', 'b', 'c'],
                   index: '',
                   type: CommentType.alert,
+                  rule: {
+                    id: 'rule-id-1',
+                    name: 'rule-name-1',
+                  },
                 },
               ],
             },
@@ -139,6 +147,10 @@ describe('common utils', () => {
                   alertId: ['a', 'b'],
                   index: '',
                   type: CommentType.alert,
+                  rule: {
+                    id: 'rule-id-1',
+                    name: 'rule-name-1',
+                  },
                 },
                 {
                   comment: '',
@@ -164,6 +176,10 @@ describe('common utils', () => {
                   alertId: ['a', 'b'],
                   index: '',
                   type: CommentType.alert,
+                  rule: {
+                    id: 'rule-id-1',
+                    name: 'rule-name-1',
+                  },
                 },
               ],
             },
@@ -197,6 +213,10 @@ describe('common utils', () => {
                   alertId: ['a', 'b'],
                   index: '',
                   type: CommentType.alert,
+                  rule: {
+                    id: 'rule-id-1',
+                    name: 'rule-name-1',
+                  },
                 },
               ],
             },
@@ -224,6 +244,10 @@ describe('common utils', () => {
                   alertId: ['a', 'b'],
                   index: '',
                   type: CommentType.alert,
+                  rule: {
+                    id: 'rule-id-1',
+                    name: 'rule-name-1',
+                  },
                 },
               ],
             },

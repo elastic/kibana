@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ISearchSource } from 'src/plugins/data/public';
 import { getTopNavLinks } from './get_top_nav_links';
 import { inspectorPluginMock } from '../../../../../inspector/public/mocks';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
@@ -33,6 +34,7 @@ test('getTopNavLinks result', () => {
     savedSearch: savedSearchMock,
     services,
     state,
+    searchSource: {} as ISearchSource,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [

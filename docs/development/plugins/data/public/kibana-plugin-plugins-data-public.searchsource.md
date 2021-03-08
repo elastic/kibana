@@ -35,7 +35,7 @@ export declare class SearchSource
 |  [fetch(options)](./kibana-plugin-plugins-data-public.searchsource.fetch.md) |  | Fetch this source and reject the returned Promise on error |
 |  [fetch$(options)](./kibana-plugin-plugins-data-public.searchsource.fetch_.md) |  | Fetch this source from Elasticsearch, returning an observable over the response(s) |
 |  [getField(field, recurse)](./kibana-plugin-plugins-data-public.searchsource.getfield.md) |  | Gets a single field from the fields |
-|  [getFields(recurse)](./kibana-plugin-plugins-data-public.searchsource.getfields.md) |  | returns all search source fields |
+|  [getFields()](./kibana-plugin-plugins-data-public.searchsource.getfields.md) |  | returns all search source fields |
 |  [getId()](./kibana-plugin-plugins-data-public.searchsource.getid.md) |  | returns search source id |
 |  [getOwnField(field)](./kibana-plugin-plugins-data-public.searchsource.getownfield.md) |  | Get the field from our own fields, don't traverse up the chain |
 |  [getParent()](./kibana-plugin-plugins-data-public.searchsource.getparent.md) |  | Get the parent of this SearchSource  {<!-- -->undefined\|searchSource<!-- -->} |

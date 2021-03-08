@@ -20,7 +20,7 @@ import { SavedObject } from '../../../../../core/types';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { RequestAdapter } from '../../../../inspector/common/adapters/request';
 import { TopNavMenu } from '../../../../navigation/public';
-import { Query } from '../../../../data/common';
+import { ISearchSource, Query } from '../../../../data/common';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 import { Subject } from 'rxjs';
 
@@ -61,6 +61,7 @@ function getProps(): DiscoverTopNavProps {
     savedQuery: '',
     updateQuery: jest.fn(),
     onOpenInspector: jest.fn(),
+    searchSource: {} as ISearchSource,
   };
 }
 

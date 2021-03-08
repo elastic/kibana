@@ -30,9 +30,9 @@ export function alertingRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client }) => {
       try {
-        const alertingService = alertingServiceProvider(mlClient);
+        const alertingService = alertingServiceProvider(mlClient, client.asInternalUser);
 
         const result = await alertingService.preview(request.body);
 

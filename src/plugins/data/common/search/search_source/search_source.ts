@@ -59,10 +59,9 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, omit, isFunction, isEqual } from 'lodash';
+import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
-import { isObject } from 'rxjs/internal-compatibility';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
@@ -114,8 +113,13 @@ export class SearchSource {
   private readonly dependencies: SearchSourceDependencies;
 
   constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
-    this.fields = fields;
+    const { parent, ...currentFields } = fields;
+    this.fields = currentFields;
     this.dependencies = dependencies;
+
+    if (parent) {
+      this.setParent(new SearchSource(parent, dependencies));
+    }
   }
 
   /** ***
@@ -173,49 +177,7 @@ export class SearchSource {
   /**
    * returns all search source fields
    */
-  getFields(recurse = false): SearchSourceFields {
-    let thisFilter = this.fields.filter; // type is single value, array, or function
-    if (thisFilter) {
-      if (typeof thisFilter === 'function') {
-        thisFilter = thisFilter() || []; // type is single value or array
-      }
-
-      if (Array.isArray(thisFilter)) {
-        thisFilter = [...thisFilter];
-      } else {
-        thisFilter = [thisFilter];
-      }
-    } else {
-      thisFilter = [];
-    }
-
-    if (recurse) {
-      const parent = this.getParent();
-      if (parent) {
-        const parentFields = parent.getFields(recurse);
-
-        let parentFilter = parentFields.filter; // type is single value, array, or function
-        if (parentFilter) {
-          if (typeof parentFilter === 'function') {
-            parentFilter = parentFilter() || []; // type is single value or array
-          }
-
-          if (Array.isArray(parentFilter)) {
-            thisFilter.push(...parentFilter);
-          } else {
-            thisFilter.push(parentFilter);
-          }
-        }
-
-        // add combined filters to the fields
-        const thisFields = {
-          ...this.fields,
-          filter: thisFilter,
-        };
-
-        return { ...parentFields, ...thisFields };
-      }
-    }
+  getFields(): SearchSourceFields {
     return { ...this.fields };
   }
 
@@ -466,6 +428,8 @@ export class SearchSource {
         return key && data[key] == null && addToRoot(key, val);
       case 'searchAfter':
         return addToBody('search_after', val);
+      case 'trackTotalHits':
+        return addToBody('track_total_hits', val);
       case 'source':
         return addToBody('_source', val);
       case 'sort':
@@ -540,12 +504,38 @@ export class SearchSource {
     // we need to get the list of fields from an index pattern
     return fields
       .filter((fld: IndexPatternField) => filterSourceFields(fld.name))
-      .map((fld: IndexPatternField) => ({
-        field: fld.name,
-        ...((wildcardField as Record<string, string>)?.include_unmapped && {
-          include_unmapped: (wildcardField as Record<string, string>).include_unmapped,
-        }),
-      }));
+      .map((fld: IndexPatternField) => ({ field: fld.name }));
+  }
+
+  private getFieldFromDocValueFieldsOrIndexPattern(
+    docvaluesIndex: Record<string, object>,
+    fld: SearchFieldValue,
+    index?: IndexPattern
+  ) {
+    if (typeof fld === 'string') {
+      return fld;
+    }
+    const fieldName = this.getFieldName(fld);
+    const field = {
+      ...docvaluesIndex[fieldName],
+      ...fld,
+    };
+    if (!index) {
+      return field;
+    }
+    const { fields } = index;
+    const dateFields = fields.getByType('date');
+    const dateField = dateFields.find((indexPatternField) => indexPatternField.name === fieldName);
+    if (!dateField) {
+      return field;
+    }
+    const { esTypes } = dateField;
+    if (esTypes?.includes('date_nanos')) {
+      field.format = 'strict_date_optional_time_nanos';
+    } else if (esTypes?.includes('date')) {
+      field.format = 'strict_date_optional_time';
+    }
+    return field;
   }
 
   private flatten() {
@@ -657,22 +647,25 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
-        body.fields = this.getFieldsWithoutSourceFilters(index, body.fields).map(
-          (fld: SearchFieldValue) => {
-            const fieldName = this.getFieldName(fld);
-            if (Object.keys(docvaluesIndex).includes(fieldName)) {
-              // either provide the field object from computed docvalues,
-              // or merge the user-provided field with the one in docvalues
-              return typeof fld === 'string'
-                ? docvaluesIndex[fld]
-                : {
-                    ...docvaluesIndex[fieldName],
-                    ...fld,
-                  };
-            }
-            return fld;
+        const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
+        body.fields = uniqWith(
+          bodyFields.concat(filteredDocvalueFields),
+          (fld1: SearchFieldValue, fld2: SearchFieldValue) => {
+            const field1Name = this.getFieldName(fld1);
+            const field2Name = this.getFieldName(fld2);
+            return field1Name === field2Name;
           }
-        );
+        ).map((fld: SearchFieldValue) => {
+          const fieldName = this.getFieldName(fld);
+          if (Object.keys(docvaluesIndex).includes(fieldName)) {
+            // either provide the field object from computed docvalues,
+            // or merge the user-provided field with the one in docvalues
+            return typeof fld === 'string'
+              ? docvaluesIndex[fld]
+              : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
+          }
+          return fld;
+        });
       }
     } else {
       body.fields = filteredDocvalueFields;
@@ -693,9 +686,7 @@ export class SearchSource {
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
   public getSerializedFields(recurse = false) {
-    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(recurse), [
-      'size',
-    ]);
+    const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
     let serializedSearchSourceFields: SearchSourceFields = {
       ...searchSourceFields,
       index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
@@ -706,6 +697,9 @@ export class SearchSource {
         ...serializedSearchSourceFields,
         filter: filters,
       };
+    }
+    if (recurse && this.getParent()) {
+      serializedSearchSourceFields.parent = this.getParent()!.getSerializedFields(recurse);
     }
     return serializedSearchSourceFields;
   }

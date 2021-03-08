@@ -8,7 +8,7 @@
 import { EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import React, { Dispatch } from 'react';
 import * as i18n from '../translations';
-import { Action } from './reducer';
+import { RulesTableAction } from '../../../../containers/detection_engine/rules/rules_table';
 import {
   deleteRulesAction,
   duplicateRulesAction,
@@ -23,7 +23,7 @@ import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 
 interface GetBatchItems {
   closePopover: () => void;
-  dispatch: Dispatch<Action>;
+  dispatch: Dispatch<RulesTableAction>;
   dispatchToaster: Dispatch<ActionToaster>;
   hasMlPermissions: boolean;
   hasActionsPrivileges: boolean;

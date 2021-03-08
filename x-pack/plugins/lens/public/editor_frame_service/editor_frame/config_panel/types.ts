@@ -13,7 +13,6 @@ import {
   DatasourceDimensionEditorProps,
   VisualizationDimensionGroupConfig,
 } from '../../../types';
-import { DragContextState } from '../../../drag_drop';
 export interface ConfigPanelWrapperProps {
   activeDatasourceId: string;
   visualizationState: unknown;
@@ -51,7 +50,6 @@ export interface LayerPanelProps {
 
 export interface LayerDatasourceDropProps {
   layerId: string;
-  dragDropContext: DragContextState;
   state: unknown;
   setState: (newState: unknown) => void;
 }

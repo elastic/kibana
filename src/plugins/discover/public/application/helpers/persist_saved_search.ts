@@ -35,7 +35,8 @@ export async function persistSavedSearch(
     state: AppState;
   }
 ) {
-  updateSearchSource(savedSearch.searchSource, {
+  updateSearchSource({
+    persistentSearchSource: savedSearch.searchSource,
     indexPattern,
     services,
     sort: state.sort as SortOrder[],
@@ -48,7 +49,7 @@ export async function persistSavedSearch(
   if (state.grid) {
     savedSearch.grid = state.grid;
   }
-  if (state.hideChart) {
+  if (typeof state.hideChart !== 'undefined') {
     savedSearch.hideChart = state.hideChart;
   }
 
