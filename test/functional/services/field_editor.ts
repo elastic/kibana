@@ -32,7 +32,6 @@ export function FieldEditorProvider({ getService, getPageObjects }: FtrProviderC
 
       await textarea.click();
       await browser.pressKeys(script);
-      await PageObjects.common.sleep(1000);
     }
     public async save() {
       await retry.try(async () => {
