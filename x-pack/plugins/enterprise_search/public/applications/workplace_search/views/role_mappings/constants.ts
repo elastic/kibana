@@ -38,14 +38,6 @@ export const USER_ROLE_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ROLE_SELECTOR_DISABLED_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.roleMapping.roleSelectorDisabledText',
-  {
-    defaultMessage:
-      'You need at least one admin role mapping before you can create a user role mapping.',
-  }
-);
-
 export const GROUP_ASSIGNMENT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.roleMapping.groupAssignmentTitle',
   {
