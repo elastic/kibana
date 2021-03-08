@@ -1251,7 +1251,7 @@ describe('sources routes', () => {
   });
 
   describe('GET /api/workplace_search/sources/create', () => {
-    const tokenPackage = 'sEkReTZ';
+    const tokenPackage = 'some_encrypted_secrets';
 
     const mockRequest = {
       headers: {

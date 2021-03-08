@@ -408,7 +408,7 @@ describe('EnterpriseSearchRequestHandler', () => {
     it('sets the value of wsOAuthTokenPackage in a cookie', async () => {
       const mockNow = 'Thu, 04 Mar 2021 22:40:32 GMT';
       const mockInAnHour = 'Thu, 04 Mar 2021 23:40:32 GMT';
-      const tokenPackage = 'sEkReTZ';
+      const tokenPackage = 'some_encrypted_secrets';
 
       const expectedCookie = `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}; Path=/; Expires=${mockInAnHour}; SameSite=Lax; HttpOnly`;
       const sessionDataBody = {

@@ -9,7 +9,7 @@ import { ENTERPRISE_SEARCH_KIBANA_COOKIE } from '../../common/constants';
 import { getOAuthTokenPackageParams } from './get_oauth_token_package_params';
 
 describe('getOAuthTokenPackage', () => {
-  const tokenPackage = 'sEkReTZ';
+  const tokenPackage = 'some_encrypted_secrets';
   const tokenPackageCookie = `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}`;
   const tokenPackageParams = { token_package: tokenPackage };
 
