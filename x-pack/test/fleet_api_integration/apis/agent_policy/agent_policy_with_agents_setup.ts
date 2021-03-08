@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents, getSupertestWithoutAuth } from '../agents/services';
+import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../../plugins/fleet/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -74,6 +75,10 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
+    });
+    after(async () => {
+      // Wait before agent status is updated
+      return new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');

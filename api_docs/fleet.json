@@ -1764,7 +1764,33 @@
     }
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "id": "def-server.AgentNotFoundError",
+        "type": "Class",
+        "tags": [],
+        "label": "AgentNotFoundError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "server",
+            "docId": "kibFleetPluginApi",
+            "section": "def-server.AgentNotFoundError",
+            "text": "AgentNotFoundError"
+          },
+          " extends ",
+          "IngestManagerError"
+        ],
+        "children": [],
+        "source": {
+          "path": "x-pack/plugins/fleet/server/errors/index.ts",
+          "lineNumber": 34,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/errors/index.ts#L34"
+        },
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "id": "def-server.getRegistryUrl",
@@ -1824,15 +1850,7 @@
             "type": "Function",
             "label": "authenticateAgentWithAccessToken",
             "signature": [
-              "(soClient: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">, esClient: ",
+              "(esClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1863,28 +1881,6 @@
             ],
             "children": [
               {
-                "type": "Object",
-                "label": "soClient",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 54,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L54"
-                }
-              },
-              {
                 "type": "CompoundType",
                 "label": "esClient",
                 "isRequired": true,
@@ -1900,8 +1896,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 55,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L55"
+                  "lineNumber": 54,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L54"
                 }
               },
               {
@@ -1921,8 +1917,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 56,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L56"
+                  "lineNumber": 55,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L55"
                 }
               }
             ],
@@ -1939,15 +1935,7 @@
             "type": "Function",
             "label": "getAgentStatusById",
             "signature": [
-              "(soClient: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">, esClient: ",
+              "(esClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1970,28 +1958,6 @@
             ],
             "children": [
               {
-                "type": "Object",
-                "label": "soClient",
-                "isRequired": true,
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 62,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L62"
-                }
-              },
-              {
                 "type": "CompoundType",
                 "label": "esClient",
                 "isRequired": true,
@@ -2007,8 +1973,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L63"
+                  "lineNumber": 60,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L60"
                 }
               },
               {
@@ -2021,8 +1987,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/fleet/server/services/index.ts",
-                  "lineNumber": 64,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L64"
+                  "lineNumber": 60,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L60"
                 }
               }
             ],
@@ -2030,8 +1996,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 61,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L61"
+              "lineNumber": 60,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L60"
             }
           },
           {
@@ -2044,8 +2010,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 69,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L69"
+              "lineNumber": 64,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L64"
             },
             "signature": [
               "typeof ",
@@ -2261,8 +2227,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L73"
+              "lineNumber": 68,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L68"
             },
             "signature": [
               "(soClient: Pick<",
@@ -2292,8 +2258,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L74"
+              "lineNumber": 69,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L69"
             },
             "signature": [
               "(soClient: Pick<",
@@ -2323,8 +2289,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L75"
+              "lineNumber": 70,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L70"
             },
             "signature": [
               "(soClient: Pick<",
@@ -2346,8 +2312,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/services/index.ts",
-              "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L76"
+              "lineNumber": 71,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L71"
             },
             "signature": [
               "(soClient: Pick<",
@@ -2372,8 +2338,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/index.ts",
-          "lineNumber": 72,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L72"
+          "lineNumber": 67,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/index.ts#L67"
         },
         "initialIsOpen": false
       },
@@ -2591,8 +2557,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/server/index.ts",
-          "lineNumber": 75,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/index.ts#L75"
+          "lineNumber": 76,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/index.ts#L76"
         },
         "signature": [
           "any"
@@ -2607,8 +2573,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/server/services/package_policy.ts",
-          "lineNumber": 594,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/package_policy.ts#L594"
+          "lineNumber": 592,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/server/services/package_policy.ts#L592"
         },
         "signature": [
           "PackagePolicyService"
@@ -3535,8 +3501,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/index.ts",
-          "lineNumber": 39,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/types/index.ts#L39"
+          "lineNumber": 38,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/types/index.ts#L38"
         },
         "signature": [
           "<T>(o: T) => [keyof T, T[keyof T]][]"
@@ -3606,7 +3572,7 @@
               "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/types/index.ts#L15"
             },
             "signature": [
-              "{ fleetServerEnabled: boolean; enabled: boolean; tlsCheckDisabled: boolean; pollingRequestTimeout: number; maxConcurrentConnections: number; kibana: { host?: string | string[] | undefined; ca_sha256?: string | undefined; }; elasticsearch: { host?: string | undefined; ca_sha256?: string | undefined; }; agentPolicyRolloutRateLimitIntervalMs: number; agentPolicyRolloutRateLimitRequestPerInterval: number; }"
+              "{ enabled: boolean; tlsCheckDisabled: boolean; pollingRequestTimeout: number; maxConcurrentConnections: number; kibana: { host?: string | string[] | undefined; ca_sha256?: string | undefined; }; elasticsearch: { host?: string | undefined; ca_sha256?: string | undefined; }; agentPolicyRolloutRateLimitIntervalMs: number; agentPolicyRolloutRateLimitRequestPerInterval: number; }"
             ]
           }
         ],
@@ -13317,8 +13283,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/index.ts",
-          "lineNumber": 44,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/types/index.ts#L44"
+          "lineNumber": 43,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/fleet/common/types/index.ts#L43"
         },
         "signature": [
           "T[keyof T]"
