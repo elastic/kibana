@@ -78,13 +78,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal(
-        '169.228.188.120 Average of bytes'
+        '169.228.188.120 › Average of bytes'
       );
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal(
-        '78.83.247.30 Average of bytes'
+        '78.83.247.30 › Average of bytes'
       );
       expect(await PageObjects.lens.getDatatableHeaderText(3)).to.equal(
-        '226.82.228.233 Average of bytes'
+        '226.82.228.233 › Average of bytes'
       );
     });
 
