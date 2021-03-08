@@ -46,9 +46,11 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
   const [swimlaneType] = useState(initialInput?.swimlaneType ?? SWIMLANE_TYPE.VIEW_BY);
-  const [viewByExplorerFieldName, setViewByExplorerFieldName] = useState(initialInput?.viewBy);
+  const [viewByExplorerFieldName, setViewByExplorerFieldName] = useState(
+    initialInput?.viewBy ?? 'Overall'
+  );
 
-  const viewByExplorerOptions = ['', ...influencers].map((influencer) => {
+  const viewByExplorerOptions = ['Overall', ...influencers].map((influencer) => {
     return {
       value: influencer,
       text: influencer,
@@ -60,6 +62,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
   const isFormValid =
     isPanelTitleValid &&
     (swimlaneType === SWIMLANE_TYPE.OVERALL ||
+      (swimlaneType === SWIMLANE_TYPE.VIEW_BY && viewByExplorerFieldName === 'Overall') ||
       (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewByExplorerFieldName));
 
   return (
@@ -94,7 +97,12 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           </EuiFormRow>
 
           <EuiFormRow
-            label={<FormattedMessage id="xpack.ml.explorer.viewByLabel" defaultMessage="View by" />}
+            label={
+              <FormattedMessage
+                id="xpack.ml.explorer.influencerLabel"
+                defaultMessage="Influencer"
+              />
+            }
           >
             <EuiSelect
               id="selectViewBy"

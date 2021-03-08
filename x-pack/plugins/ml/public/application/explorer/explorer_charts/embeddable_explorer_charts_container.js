@@ -24,7 +24,6 @@ import {
 } from '../../util/chart_utils';
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
-import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -161,18 +160,6 @@ function ExplorerChartContainer({
         </EuiFlexItem>
       </EuiFlexGroup>
       {(() => {
-        if (chartType === CHART_TYPE.GEO_MAP) {
-          return (
-            <MlTooltipComponent>
-              {(tooltipService) => (
-                <EmbeddedMapComponentWrapper
-                  seriesConfig={series}
-                  tooltipService={tooltipService}
-                />
-              )}
-            </MlTooltipComponent>
-          );
-        }
         if (
           chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
           chartType === CHART_TYPE.POPULATION_DISTRIBUTION
@@ -181,6 +168,7 @@ function ExplorerChartContainer({
             <MlTooltipComponent>
               {(tooltipService) => (
                 <ExplorerChartDistribution
+                  timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
                   severity={severity}
