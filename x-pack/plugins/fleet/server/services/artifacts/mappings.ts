@@ -7,6 +7,7 @@
 
 import { Artifact, ArtifactElasticsearchProperties } from './types';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
+import { ARTIFACT_DOWNLOAD_RELATIVE_PATH } from './constants';
 
 export const esSearchHitToArtifact = <
   T extends Pick<ESSearchHit<ArtifactElasticsearchProperties>, '_id' | '_source'>
@@ -25,5 +26,8 @@ export const relativeDownloadUrlFromArtifact = <
   identifier,
   decodedSha256,
 }: T): string => {
-  return `/api/artifact/${identifier}/${decodedSha256}`;
+  return ARTIFACT_DOWNLOAD_RELATIVE_PATH.replace('{identifier}', identifier).replace(
+    'decodedSha256',
+    decodedSha256
+  );
 };
