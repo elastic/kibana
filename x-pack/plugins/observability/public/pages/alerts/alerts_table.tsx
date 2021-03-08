@@ -75,7 +75,7 @@ export function AlertsTable(props: AlertsTableProps) {
     <EuiBasicTable<AlertItem>
       {...props}
       isSelectable={true}
-      selection={[] as EuiTableSelectionType<AlertItem>}
+      selection={{} as EuiTableSelectionType<AlertItem>}
       columns={columns}
       pagination={{ pageIndex: 0, pageSize: 0, totalItemCount: 0 }}
     />

@@ -15,44 +15,48 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { RouteParams } from '../../routes';
 import { AlertItem, AlertsTable } from './alerts_table';
 
 /**
  * This is just a placeholder for a working search bar.
  */
-function SearchBar() {
-  return (
-    <EuiSearchBar
-      box={{
-        placeholder: '"domain": "ecommerce" AND ("service.name": "ProductCatalogService" …)',
-      }}
-      filters={[
-        {
-          type: 'field_value_toggle_group',
-          field: 'status',
-          items: [
-            {
-              value: 'open',
-              name: 'Open',
-            },
-            {
-              value: 'inProgress',
-              name: 'In progress',
-            },
-            {
-              value: 'closed',
-              name: 'Closed',
-            },
-          ],
-        },
-      ]}
-    />
-  );
-}
+// function SearchBar() {
+//   return (
+//     <EuiSearchBar
+//       box={{
+//         placeholder: '"domain": "ecommerce" AND ("service.name": "ProductCatalogService" …)',
+//       }}
+//       filters={[
+//         {
+//           type: 'field_value_toggle_group',
+//           field: 'status',
+//           items: [
+//             {
+//               value: 'open',
+//               name: 'Open',
+//             },
+//             {
+//               value: 'inProgress',
+//               name: 'In progress',
+//             },
+//             {
+//               value: 'closed',
+//               name: 'Closed',
+//             },
+//           ],
+//         },
+//       ]}
+//     />
+//   );
+// }
 
 interface AlertsPageProps {
   items?: AlertItem[];
+  routeParams: RouteParams<'/alerts'>;
 }
 
 export function AlertsPage({ items = [] }: AlertsPageProps) {
@@ -75,7 +79,12 @@ export function AlertsPage({ items = [] }: AlertsPageProps) {
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <SearchBar />
+            <SearchBar
+              indexPatterns={[]}
+              placeholder='"domain": "ecommerce" AND ("service.name": "ProductCatalogService" …)'
+              query={{ query: '', language: 'kuery' }}
+              timeHistory={new TimeHistory(new Storage(localStorage))}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertsTable items={items} />
