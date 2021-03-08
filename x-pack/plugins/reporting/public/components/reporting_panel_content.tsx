@@ -223,7 +223,17 @@ class ReportingPanelContentUi extends Component<Props, State> {
           text: toMountPoint(
             <FormattedMessage
               id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in Management"
+              defaultMessage="Track its progress in {path}"
+              values={{
+                path: (
+                  <a href={this.props.apiClient.getManagementLink()}>
+                    <FormattedMessage
+                      id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      defaultMessage="Stack Management &gt; Alerts and Insights &gt; Reporting"
+                    />
+                  </a>
+                ),
+              }}
             />
           ),
           'data-test-subj': 'queueReportSuccess',
