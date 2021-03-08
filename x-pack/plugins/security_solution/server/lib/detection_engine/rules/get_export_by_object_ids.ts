@@ -6,7 +6,7 @@
  */
 
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { AlertsClient } from '../../../../../alerts/server';
+import { AlertsClient } from '../../../../../alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../rules/types';
 import { readRules } from './read_rules';

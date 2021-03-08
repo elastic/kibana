@@ -84,7 +84,8 @@ export default function ({ getPageObjects, getService }) {
         expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
       });
 
-      it('should apply query to fit to bounds', async () => {
+      // https://github.com/elastic/kibana/issues/93718
+      it.skip('should apply query to fit to bounds', async () => {
         // Set view to other side of world so no matching results
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');

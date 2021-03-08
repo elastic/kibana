@@ -141,6 +141,51 @@ describe('AggConfig', () => {
       expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
       expect(dsl.aggs[avgConfig.id].avg).toBe(football);
     });
+
+    it('merges subAggs from #write() output to the current subaggs', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {},
+        },
+        {
+          enabled: true,
+          type: 'median',
+          schema: 'metric',
+          params: {},
+        },
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {},
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+
+      const histoConfig = ac.byName('date_histogram')[0];
+      const avgConfig = ac.byName('avg')[0];
+      const medianConfig = ac.byName('median')[0];
+      const football = {};
+
+      jest
+        .spyOn(histoConfig, 'write')
+        .mockImplementation(() => ({ params: {}, subAggs: [avgConfig] }));
+      jest.spyOn(avgConfig, 'write').mockImplementation(() => ({ params: football }));
+      jest.spyOn(medianConfig, 'write').mockImplementation(() => ({ params: football }));
+
+      (histoConfig as any).subAggs = [medianConfig];
+      const dsl = histoConfig.toDsl();
+      expect(dsl).toHaveProperty('aggs');
+      expect(dsl.aggs).toHaveProperty(avgConfig.id);
+      expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
+      expect(dsl.aggs[avgConfig.id].avg).toBe(football);
+      expect(dsl.aggs).toHaveProperty(medianConfig.id);
+      expect(dsl.aggs[medianConfig.id]).toHaveProperty('percentiles');
+      expect(dsl.aggs[medianConfig.id].percentiles).toBe(football);
+    });
   });
 
   describe('::ensureIds', () => {
