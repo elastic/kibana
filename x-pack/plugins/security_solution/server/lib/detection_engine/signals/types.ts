@@ -16,7 +16,7 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,

@@ -20,7 +20,7 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
