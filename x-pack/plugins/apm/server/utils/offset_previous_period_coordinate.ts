@@ -8,26 +8,6 @@
 import moment from 'moment';
 import { Coordinate } from '../../typings/timeseries';
 
-function getDateDiff({ start, end }: { start: number; end: number }) {
-  return moment(start).diff(moment(end));
-}
-
-export function offsetXCoordinate({
-  currentPeriodStart,
-  previousPeriodStart,
-  x,
-}: {
-  currentPeriodStart: number;
-  previousPeriodStart: number;
-  x: number;
-}) {
-  const dateOffset = getDateDiff({
-    start: currentPeriodStart,
-    end: previousPeriodStart,
-  });
-  return moment(x).add(dateOffset).valueOf();
-}
-
 export function offsetPreviousPeriodCoordinates({
   currentPeriodStart,
   previousPeriodStart,
@@ -41,13 +21,10 @@ export function offsetPreviousPeriodCoordinates({
     return [];
   }
 
-  const dateOffset = getDateDiff({
-    start: currentPeriodStart,
-    end: previousPeriodStart,
-  });
+  const dateDiff = currentPeriodStart - previousPeriodStart;
 
   return previousPeriodTimeseries.map(({ x, y }) => {
-    const offsetX = moment(x).add(dateOffset).valueOf();
+    const offsetX = moment(x).add(dateDiff).valueOf();
     return {
       x: offsetX,
       y,

@@ -20,7 +20,10 @@ import {
   kqlQuery,
 } from '../../../server/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
-import { offsetXCoordinate } from '../../utils/offset_previous_period_coordinate';
+import {
+  offsetPreviousPeriodCoordinates,
+  offsetXCoordinate,
+} from '../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -60,7 +63,7 @@ export async function getServiceTransactionGroupComparisonStatistics({
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
-  getOffsetXCoordinate?: (x: number) => number;
+  getOffsetXCoordinate?: (timeseries: Coordinate[]) => Coordinate[];
 }): Promise<
   Array<{
     transactionName: string;
@@ -153,9 +156,7 @@ export async function getServiceTransactionGroupComparisonStatistics({
       return buckets.map((bucket) => {
         const transactionName = bucket.key as string;
         const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-          x: getOffsetXCoordinate
-            ? getOffsetXCoordinate(timeseriesBucket.key)
-            : timeseriesBucket.key,
+          x: timeseriesBucket.key,
           y: getLatencyValue({
             latencyAggregationType,
             aggregation: timeseriesBucket.latency,
@@ -163,16 +164,12 @@ export async function getServiceTransactionGroupComparisonStatistics({
         }));
         const throughput = bucket.timeseries.buckets.map(
           (timeseriesBucket) => ({
-            x: getOffsetXCoordinate
-              ? getOffsetXCoordinate(timeseriesBucket.key)
-              : timeseriesBucket.key,
+            x: timeseriesBucket.key,
             y: timeseriesBucket.throughput_rate.value,
           })
         );
         const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-          x: getOffsetXCoordinate
-            ? getOffsetXCoordinate(timeseriesBucket.key)
-            : timeseriesBucket.key,
+          x: timeseriesBucket.key,
           y: calculateTransactionErrorPercentage(
             timeseriesBucket[EVENT_OUTCOME]
           ),
@@ -181,9 +178,15 @@ export async function getServiceTransactionGroupComparisonStatistics({
           bucket.transaction_group_total_duration.value || 0;
         return {
           transactionName,
-          latency,
-          throughput,
-          errorRate,
+          latency: getOffsetXCoordinate
+            ? getOffsetXCoordinate(latency)
+            : latency,
+          throughput: getOffsetXCoordinate
+            ? getOffsetXCoordinate(throughput)
+            : throughput,
+          errorRate: getOffsetXCoordinate
+            ? getOffsetXCoordinate(errorRate)
+            : errorRate,
           impact: totalDuration
             ? (transactionGroupTotalDuration * 100) / totalDuration
             : 0,
@@ -244,11 +247,11 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
           ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,
-          getOffsetXCoordinate: (x: number) =>
-            offsetXCoordinate({
+          getOffsetXCoordinate: (timeseries: Coordinate[]) =>
+            offsetPreviousPeriodCoordinates({
               currentPeriodStart: start,
               previousPeriodStart: comparisonStart,
-              x,
+              previousPeriodTimeseries: timeseries,
             }),
         })
       : [];

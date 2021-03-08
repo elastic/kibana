@@ -35,8 +35,10 @@ export type Color =
   | 'euiColorVis8'
   | 'euiColorVis9';
 
-function isEmptyTimeseries(series: Coordinate[]) {
-  return series.every((point) => point.y === null);
+function hasValidTimeseries(
+  series?: Coordinate[] | null
+): series is Coordinate[] {
+  return !!series?.some((point) => point.y !== null);
 }
 
 export function SparkPlot({
@@ -75,31 +77,20 @@ export function SparkPlot({
     width: compact ? px(unit * 3) : px(unit * 4),
   };
 
-  const SparkelineSeries = hasComparisonSeries ? LineSeries : AreaSeries;
+  const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;
 
   return (
     <EuiFlexGroup gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
-        {!series || isEmptyTimeseries(series) ? (
-          <div
-            style={{
-              ...chartSize,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
-          </div>
-        ) : (
+        {hasValidTimeseries(series) ? (
           <Chart size={chartSize}>
             <Settings
               theme={sparkplotChartTheme}
               showLegend={false}
               tooltip="none"
             />
-            <SparkelineSeries
-              id="sparkelineSeries"
+            <Sparkline
+              id="Sparkline"
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor={'x'}
@@ -121,6 +112,17 @@ export function SparkPlot({
               />
             )}
           </Chart>
+        ) : (
+          <div
+            style={{
+              ...chartSize,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
+          </div>
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>

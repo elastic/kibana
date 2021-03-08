@@ -32,6 +32,7 @@ const INITIAL_STATE = {
   transactionGroups: [],
   isAggregationAccurate: true,
   requestId: '',
+  transactionGroupsTotalItems: 0,
 };
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
@@ -96,13 +97,22 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           },
         },
       }).then((response) => {
+        const currentPageTransactionGroups = orderBy(
+          response.transactionGroups,
+          field,
+          direction
+        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+
         return {
+          ...response,
           // Everytime the primary statistics is refetched, updates the requestId making the comparison API to be refetched.
           requestId: uuid(),
-          ...response,
+          transactionGroupsTotalItems: response.transactionGroups.length,
+          transactionGroups: currentPageTransactionGroups,
         };
       });
     },
+    // comparisonType is listed as dependency even thought it is not used. This is needed to trigger the comparison api when it is changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
@@ -112,23 +122,14 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       end,
       transactionType,
       latencyAggregationType,
-      comparisonType,
       pageIndex,
       direction,
       field,
+      comparisonType,
     ]
   );
 
-  const { transactionGroups, requestId } = data;
-  const currentPageTransactionGroups = orderBy(
-    transactionGroups,
-    field,
-    direction
-  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
-
-  const transactionNames = JSON.stringify(
-    currentPageTransactionGroups.map(({ name }) => name).sort()
-  );
+  const { transactionGroups, requestId, transactionGroupsTotalItems } = data;
 
   const {
     data: transactionGroupComparisonStatistics,
@@ -136,8 +137,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   } = useFetcher(
     (callApmApi) => {
       if (
-        status !== FETCH_STATUS.LOADING &&
-        currentPageTransactionGroups.length &&
+        transactionGroupsTotalItems &&
         start &&
         end &&
         transactionType &&
@@ -156,7 +156,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               numBuckets: 20,
               transactionType,
               latencyAggregationType,
-              transactionNames,
+              transactionNames: JSON.stringify(
+                transactionGroups.map(({ name }) => name).sort()
+              ),
               comparisonStart,
               comparisonEnd,
             },
@@ -184,7 +186,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const pagination = {
     pageIndex,
     pageSize: PAGE_SIZE,
-    totalItemCount: transactionGroups.length,
+    totalItemCount: transactionGroupsTotalItems,
     hidePerPageOptions: true,
   };
 
@@ -223,11 +225,11 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
             <ServiceOverviewTableContainer
-              isEmptyAndLoading={transactionGroups.length === 0 && isLoading}
+              isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable
                 loading={isLoading}
-                items={currentPageTransactionGroups}
+                items={transactionGroups}
                 columns={columns}
                 pagination={pagination}
                 sorting={{ sort: { field, direction } }}

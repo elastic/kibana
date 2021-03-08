@@ -75,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           previousPeriod,
         } = response.body as TransactionsGroupsComparisonStatistics;
 
-        expect(Object.keys(currentPeriod)).to.be.eql(transactionNames);
+        expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
         const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
         const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
@@ -129,10 +129,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           previousPeriod,
         } = response.body as TransactionsGroupsComparisonStatistics;
 
-        expect(Object.keys(currentPeriod)).to.be.eql(transactionNames);
+        expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
-        const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
-        const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+        const currentPeriodItems = Object.values(currentPeriod);
+        const previousPeriodItems = Object.values(previousPeriod);
 
         expect(previousPeriodItems).to.be.empty();
 
@@ -200,8 +200,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns correct number of items', () => {
-          expect(Object.keys(currentPeriod)).to.be.eql(transactionNames);
-          expect(Object.keys(previousPeriod)).to.be.eql(transactionNames);
+          expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
+          expect(Object.keys(previousPeriod).sort()).to.be.eql(transactionNames.sort());
 
           transactionNames.forEach((transactionName) => {
             expect(currentPeriod[transactionName]).not.to.be.empty();
