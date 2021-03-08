@@ -7,27 +7,33 @@
 
 import { ENTERPRISE_SEARCH_KIBANA_COOKIE } from '../../common/constants';
 
-export function getOAuthTokenPackageParams(cookieHeaders: string | string[] | undefined) {
+export const getOAuthTokenPackageParams = (rawCookieHeader: string | string[] | undefined) => {
   // In the future the token package will be stored in the login session. For now it's in a cookie.
 
-  // No cookie headers? No tokens
-  if (!cookieHeaders) {
+  if (!rawCookieHeader) {
     return {};
   }
 
-  // Take any cookie headers and split the individual cookies out, e.g. "_my_cookie=chocolateChip"
-  const cookiePayloads = [cookieHeaders].flat().flatMap((rawHeader) => rawHeader.split('; '));
+  /**
+   * A request can have multiple cookie headers and each header can hold multiple cookies.
+   * Within a header, cookies are separated by '; '. Here we are splitting out the individual
+   * cookies from the header(s) and looking for the specific one that holds our token package.
+   */
 
-  // Split those raw cookies into [key, value] pairs, e.g. ["_my_cookie", "chocolateChip"]
-  const cookiePairs = cookiePayloads.map((rawCookie) => rawCookie.split('='));
+  const cookieHeaders = Array.isArray(rawCookieHeader) ? rawCookieHeader : [rawCookieHeader];
 
-  const tokenPackageCookie = cookiePairs.find((cookiePair) => {
-    return cookiePair[0] === ENTERPRISE_SEARCH_KIBANA_COOKIE;
-  });
+  let tokenPackage: string | undefined;
 
-  if (tokenPackageCookie) {
-    return { token_package: tokenPackageCookie[1] };
+  cookieHeaders
+    .flatMap((rawHeader) => rawHeader.split('; '))
+    .forEach((rawCookie) => {
+      const [cookieName, cookieValue] = rawCookie.split('=');
+      if (cookieName === ENTERPRISE_SEARCH_KIBANA_COOKIE) tokenPackage = cookieValue;
+    });
+
+  if (tokenPackage) {
+    return { token_package: tokenPackage };
   } else {
     return {};
   }
-}
+};

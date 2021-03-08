@@ -406,19 +406,18 @@ describe('EnterpriseSearchRequestHandler', () => {
 
   describe('setSessionData', () => {
     it('sets the value of wsOAuthTokenPackage in a cookie', async () => {
-      const mockNow = 'Thu, 04 Mar 2021 22:40:32 GMT';
-      const mockInAnHour = 'Thu, 04 Mar 2021 23:40:32 GMT';
       const tokenPackage = 'some_encrypted_secrets';
 
-      const expectedCookie = `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}; Path=/; Expires=${mockInAnHour}; SameSite=Lax; HttpOnly`;
+      const mockNow = 'Thu, 04 Mar 2021 22:40:32 GMT';
+      const mockInAnHour = 'Thu, 04 Mar 2021 23:40:32 GMT';
+      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => {
+        return new Date(mockNow).valueOf();
+      });
+
       const sessionDataBody = {
         _sessionData: { wsOAuthTokenPackage: tokenPackage },
         regular: 'data',
       };
-
-      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => {
-        return new Date(mockNow).valueOf();
-      });
 
       EnterpriseSearchAPI.mockReturn(sessionDataBody, { headers: JSON_HEADER });
 
@@ -426,7 +425,7 @@ describe('EnterpriseSearchRequestHandler', () => {
       await makeAPICall(requestHandler);
 
       expect(enterpriseSearchRequestHandler.headers).toEqual({
-        ['set-cookie']: expectedCookie,
+        ['set-cookie']: `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}; Path=/; Expires=${mockInAnHour}; SameSite=Lax; HttpOnly`,
         ...mockExpectedResponseHeaders,
       });
     });

@@ -26,7 +26,7 @@ describe('getOAuthTokenPackage', () => {
       expect(getOAuthTokenPackageParams(cookieHeader)).toEqual({});
     });
 
-    it('returns the token package when our cookie is the only one', async () => {
+    it('returns the token package when our cookie is the only one', () => {
       const cookieHeader = `${tokenPackageCookie}`;
 
       expect(getOAuthTokenPackageParams(cookieHeader)).toEqual(tokenPackageParams);
