@@ -135,8 +135,8 @@ describe('SIEM Super Date Picker', () => {
         expect(store.getState().inputs.global.timerange.kind).toBe('relative');
       });
 
-      test('Make Sure it is last "now-${x}h" where ${x} is in hours date', () => {
-        expect(store.getState().inputs.global.timerange.fromStr).toMatch(/^now-[0-9]+h/);
+      test('Make Sure it is last "now-${x}h" where ${x} is in hours/minutes/seconds date', () => {
+        expect(store.getState().inputs.global.timerange.fromStr).toMatch(/^now-[0-9]+/);
         expect(store.getState().inputs.global.timerange.toStr).toBe('now');
       });
 
@@ -217,7 +217,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper.update();
 
         expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toMatch(
-          /^Last\s[0-9]+\shoursToday/
+          /^Last\s[0-9]+\s(.)+Today/
         );
       });
 
