@@ -9,17 +9,18 @@ import { chunk } from 'lodash/fp';
 
 import { Filter } from '../../../../../src/plugins/data/common';
 import {
-  ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  EntryExists,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
+  ExceptionListItemSchema,
+  entriesExists,
   entriesMatch,
   entriesMatchAny,
-  entriesExists,
   entriesNested,
-  EntryExists,
-} from '../../../lists/common';
+} from '../schemas';
+
 import { BooleanFilter, NestedFilter } from './types';
 import { hasLargeValueList } from './utils';
 
@@ -83,8 +84,8 @@ export const buildExceptionFilter = ({
   const exceptionFilter: Filter = {
     meta: {
       alias: null,
-      negate: excludeExceptions,
       disabled: false,
+      negate: excludeExceptions,
     },
     query: {
       bool: {
@@ -108,8 +109,8 @@ export const buildExceptionFilter = ({
       return {
         meta: {
           alias: null,
-          negate: false,
           disabled: false,
+          negate: false,
         },
         query: {
           bool: {
@@ -124,8 +125,8 @@ export const buildExceptionFilter = ({
     return {
       meta: {
         alias: null,
-        negate: excludeExceptions,
         disabled: false,
+        negate: excludeExceptions,
       },
       query: {
         bool: {
@@ -148,6 +149,7 @@ export const buildMatchClause = (entry: EntryMatch): BooleanFilter => {
   const { field, operator, value } = entry;
   const matchClause = {
     bool: {
+      minimum_should_match: 1,
       should: [
         {
           match_phrase: {
@@ -155,7 +157,6 @@ export const buildMatchClause = (entry: EntryMatch): BooleanFilter => {
           },
         },
       ],
-      minimum_should_match: 1,
     },
   };
 
@@ -172,6 +173,7 @@ export const getBaseMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
   if (value.length === 1) {
     return {
       bool: {
+        minimum_should_match: 1,
         should: [
           {
             match_phrase: {
@@ -179,16 +181,17 @@ export const getBaseMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
             },
           },
         ],
-        minimum_should_match: 1,
       },
     };
   }
 
   return {
     bool: {
+      minimum_should_match: 1,
       should: value.map((val) => {
         return {
           bool: {
+            minimum_should_match: 1,
             should: [
               {
                 match_phrase: {
@@ -196,11 +199,9 @@ export const getBaseMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
                 },
               },
             ],
-            minimum_should_match: 1,
           },
         };
       }),
-      minimum_should_match: 1,
     },
   };
 };
@@ -220,6 +221,7 @@ export const buildExistsClause = (entry: EntryExists): BooleanFilter => {
   const { field, operator } = entry;
   const existsClause = {
     bool: {
+      minimum_should_match: 1,
       should: [
         {
           exists: {
@@ -227,7 +229,6 @@ export const buildExistsClause = (entry: EntryExists): BooleanFilter => {
           },
         },
       ],
-      minimum_should_match: 1,
     },
   };
 
