@@ -15,7 +15,7 @@ import {
   KibanaContextProvider,
   toMountPoint,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { AnomalyExplorerInitializer } from './anomaly_explorer_nitializer';
+import { AnomalyExplorerInitializer } from './anomaly_explorer_initializer';
 import { JobSelectorFlyoutContent } from '../../application/components/job_selector/job_selector_flyout';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
@@ -23,12 +23,12 @@ import { getDefaultPanelTitle } from './anomaly_explorer_embeddable';
 import { getMlGlobalServices } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
 import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
-import { AnomalySwimlaneEmbeddableInput } from '..';
+import { AnomalyExplorerEmbeddableInput } from '..';
 
 export async function resolveAnomalyExplorerUserInput(
   coreStart: CoreStart,
-  input?: AnomalySwimlaneEmbeddableInput
-): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
+  input?: AnomalyExplorerEmbeddableInput
+): Promise<Partial<AnomalyExplorerEmbeddableInput>> {
   const {
     http,
     uiSettings,
@@ -78,7 +78,7 @@ export async function resolveAnomalyExplorerUserInput(
                     defaultTitle={title}
                     influencers={influencers}
                     initialInput={input}
-                    onCreate={({ panelTitle, viewBy, swimlaneType }) => {
+                    onCreate={({ panelTitle, viewBy, swimlaneType, maxSeriesToPlot }) => {
                       modalSession.close();
 
                       resolve({
@@ -86,6 +86,7 @@ export async function resolveAnomalyExplorerUserInput(
                         title: panelTitle,
                         swimlaneType: viewBy === 'Overall' ? SWIMLANE_TYPE.OVERALL : swimlaneType,
                         viewBy,
+                        maxSeriesToPlot,
                       });
                     }}
                     onCancel={() => {

@@ -63,12 +63,14 @@ interface InfoTooltip {
   }>;
 }
 interface SeriesConfigWithMetadata extends SeriesConfig {
-  functionDescription: string;
+  functionDescription?: string;
   bucketSpanSeconds: number;
   detectorLabel: string;
   fieldName: string;
   entityFields: any[];
   infoTooltip: InfoTooltip;
+  loading?: boolean;
+  chartData?: ChartRecord[];
 }
 
 interface ChartRange {
@@ -97,11 +99,10 @@ export class AnomalyExplorerService {
     return {
       chartsPerRow: 1,
       errorMessages: undefined,
-      seriesToPlot: [],
+      seriesToPlot: [] as SeriesConfigWithMetadata[],
       // default values, will update on every re-render
       tooManyBuckets: false,
       timeFieldName: 'timestamp',
-      errorMessages: undefined,
     };
   }
 
@@ -136,11 +137,14 @@ export class AnomalyExplorerService {
     const plotPoints = Math.max(optimumNumPoints, pointsToPlotFullSelection);
     const halfPoints = Math.ceil(plotPoints / 2);
     const bounds = timeFilter.getActiveBounds();
-    const boundsMin = bounds.min.valueOf();
-
+    const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
     let chartRange: ChartRange = {
-      min: Math.max(midpointMs - halfPoints * minBucketSpanMs, boundsMin),
-      max: Math.min(midpointMs + halfPoints * minBucketSpanMs, bounds.max.valueOf()),
+      min: boundsMin
+        ? Math.max(midpointMs - halfPoints * minBucketSpanMs, boundsMin)
+        : midpointMs - halfPoints * minBucketSpanMs,
+      max: bounds?.max
+        ? Math.min(midpointMs + halfPoints * minBucketSpanMs, bounds.max.valueOf())
+        : midpointMs + halfPoints * minBucketSpanMs,
     };
 
     if (plotPoints > CHART_MAX_POINTS) {
@@ -187,7 +191,7 @@ export class AnomalyExplorerService {
     // Elasticsearch aggregation returns points at start of bucket,
     // so align the min to the length of the longest bucket.
     chartRange.min = Math.floor(chartRange.min / maxBucketSpanMs) * maxBucketSpanMs;
-    if (chartRange.min < boundsMin) {
+    if (boundsMin !== undefined && chartRange.min < boundsMin) {
       chartRange.min = chartRange.min + maxBucketSpanMs;
     }
 
@@ -284,7 +288,7 @@ export class AnomalyExplorerService {
 
     // Add extra properties used by the explorer dashboard charts.
     config.functionDescription = record.function_description;
-    config.bucketSpanSeconds = parseInterval(job.analysis_config.bucket_span).asSeconds();
+    config.bucketSpanSeconds = parseInterval(job.analysis_config.bucket_span)!.asSeconds();
 
     config.detectorLabel = record.function;
     const jobDetectors = job.analysis_config.detectors;
@@ -338,7 +342,8 @@ export class AnomalyExplorerService {
     selectedEarliestMs: number,
     selectedLatestMs: number,
     timefilter: TimefilterContract,
-    severity = 0
+    severity = 0,
+    maxSeries = 6
   ): Promise<void | AnomalyChartData> {
     const data = this.getDefaultChartsData();
 
@@ -363,7 +368,7 @@ export class AnomalyExplorerService {
     // Build the data configs of the anomalies to be displayed.
     // TODO - implement paging?
     // For now just take first 6 (or 8 if 4 charts per row).
-    const maxSeriesToPlot = Math.max(chartsPerRow * 2, 6);
+    const maxSeriesToPlot = maxSeries ?? Math.max(chartsPerRow * 2, 6);
     const recordsToPlot = allSeriesRecords.slice(0, maxSeriesToPlot);
     const hasGeoData = recordsToPlot.find(
       (record) => (record.function_description || record.function) === ML_JOB_AGGREGATION.LAT_LONG
@@ -379,7 +384,7 @@ export class AnomalyExplorerService {
       chartData: null,
     }));
 
-    const mapData = [];
+    const mapData: SeriesConfigWithMetadata[] = [];
 
     if (hasGeoData !== undefined) {
       for (let i = 0; i < seriesConfigs.length; i++) {
@@ -773,10 +778,9 @@ export class AnomalyExplorerService {
           data.seriesToPlot.push(...mapData);
         }
         return Promise.resolve(data);
-
-        // explorerService.setCharts({ ...data });
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
         console.error(error);
       });
   }

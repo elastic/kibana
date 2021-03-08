@@ -79,6 +79,7 @@ export interface AnomalyExplorerEmbeddableCustomInput {
   swimlaneType: SwimlaneType;
   viewBy?: string;
   perPage?: number;
+  maxSeriesToPlot: number;
 
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
@@ -107,3 +108,6 @@ export interface AnomalyExplorerCustomOutput {
   severity?: number;
 }
 export type AnomalyExplorerEmbeddableOutput = EmbeddableOutput & AnomalyExplorerCustomOutput;
+export interface EditExplorerPanelContext {
+  embeddable: IEmbeddable<AnomalyExplorerEmbeddableInput, AnomalyExplorerEmbeddableOutput>;
+}

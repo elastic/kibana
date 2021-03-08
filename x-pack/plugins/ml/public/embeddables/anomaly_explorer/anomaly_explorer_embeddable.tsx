@@ -15,9 +15,8 @@ import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable
 import { EmbeddableExplorerContainer } from './embeddable_explorer_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
-import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  ANOMALY_EXPLORER_EMBEDDABLE_TYPE,
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableOutput,
   AnomalyExplorerServices,
@@ -25,7 +24,7 @@ import {
 
 export const getDefaultPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
-    defaultMessage: 'ML anomaly swim lane for {jobIds}',
+    defaultMessage: 'ML anomaly explorer for {jobIds}',
     values: { jobIds: jobIds.join(', ') },
   });
 
@@ -37,7 +36,7 @@ export class AnomalyExplorerEmbeddable extends Embeddable<
 > {
   private node?: HTMLElement;
   private reload$ = new Subject();
-  public readonly type: string = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
+  public readonly type: string = ANOMALY_EXPLORER_EMBEDDABLE_TYPE;
 
   constructor(
     initialInput: AnomalyExplorerEmbeddableInput,
@@ -91,6 +90,6 @@ export class AnomalyExplorerEmbeddable extends Embeddable<
   }
 
   public supportedTriggers() {
-    return [SWIM_LANE_SELECTION_TRIGGER as typeof SWIM_LANE_SELECTION_TRIGGER];
+    return [];
   }
 }

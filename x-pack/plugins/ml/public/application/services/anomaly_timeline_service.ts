@@ -129,7 +129,6 @@ export class AnomalyTimelineService {
       interval.asSeconds()
     );
 
-    console.log('processOverallResults', overallSwimlaneData);
     // @TODO: Add back
     // eslint-disable-next-line no-console
     // console.log('Explorer overall swim lane data set:', overallSwimlaneData);
@@ -216,7 +215,6 @@ export class AnomalyTimelineService {
       return;
     }
 
-    console.log('response.results', response.results);
     const viewBySwimlaneData = this.processViewByResults(
       response.results,
       response.cardinality,
@@ -281,7 +279,7 @@ export class AnomalyTimelineService {
     }
   }
 
-  private getTimeBounds(): TimeRangeBounds {
+  public getTimeBounds(): TimeRangeBounds {
     return this._customTimeRange !== undefined
       ? this.timeFilter.calculateBounds(this._customTimeRange)
       : this.timeFilter.getBounds();

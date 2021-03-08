@@ -15,14 +15,12 @@ import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_a
 import { SWIM_LANE_SELECTION_TRIGGER, swimLaneSelectionTrigger } from './triggers';
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
-
+import { createEditExplorerPanelAction } from './edit_explorer_panel_action';
 export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
 export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
-
-export { SWIM_LANE_SELECTION_TRIGGER } from './triggers';
-
+export { SWIM_LANE_SELECTION_TRIGGER };
 /**
  * Register ML UI actions
  */
@@ -36,6 +34,7 @@ export function registerMlUiActions(
   const applyInfluencerFiltersAction = createApplyInfluencerFiltersAction(core.getStartServices);
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
+  const editExplorerPanelAction = createEditExplorerPanelAction(core.getStartServices);
 
   // Register actions
   uiActions.registerAction(editSwimlanePanelAction);
@@ -43,6 +42,7 @@ export function registerMlUiActions(
   uiActions.registerAction(applyInfluencerFiltersAction);
   uiActions.registerAction(applyTimeRangeSelectionAction);
   uiActions.registerAction(clearSelectionAction);
+  uiActions.registerAction(editExplorerPanelAction);
 
   // Assign triggers
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction.id);
@@ -50,8 +50,8 @@ export function registerMlUiActions(
 
   uiActions.registerTrigger(swimLaneSelectionTrigger);
 
-  // uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyInfluencerFiltersAction);
-  // uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyTimeRangeSelectionAction);
-  // uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, openInExplorerAction);
-  // uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
+  uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyInfluencerFiltersAction);
+  uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyTimeRangeSelectionAction);
+  uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, openInExplorerAction);
+  uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
 }

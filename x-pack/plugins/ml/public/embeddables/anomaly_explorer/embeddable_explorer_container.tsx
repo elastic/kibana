@@ -6,19 +6,13 @@
  */
 
 import React, { FC, useCallback, useState, useEffect, useMemo } from 'react';
-import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { throttle } from 'lodash';
 import { IAnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
 import { useExplorerInputResolver } from './explorer_input_resolver';
 import { useSwimlaneInputResolver } from '../anomaly_swimlane/swimlane_input_resolver';
-import { SwimlaneType } from '../../application/explorer/explorer_constants';
-import {
-  isViewBySwimLaneData,
-  SwimlaneContainer,
-} from '../../application/explorer/swimlane_container';
-import { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableOutput,
@@ -28,6 +22,8 @@ import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { ANOMALY_THRESHOLD } from '../../../common';
+
+const RESIZE_THROTTLE_TIME_MS = 500;
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
@@ -49,13 +45,12 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
   onOutputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
-  const [fromPage, setFromPage] = useState<number>(1);
+  const [fromPage] = useState<number>(1);
   const [severity, setSeverity] = useState(optionValueToThreshold(ANOMALY_THRESHOLD.MINOR));
 
   const [
     {},
     {
-      uiActions,
       data: dataServices,
       share: {
         urlGenerators: { getUrlGenerator },
@@ -64,18 +59,9 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
   ] = services;
   const { timefilter } = dataServices.query.timefilter;
 
-  const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
   const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
 
-  const [
-    swimlaneType,
-    swimlaneData,
-    perPage,
-    setPerPage,
-    timeBuckets,
-    isSwimlaneLoading,
-    error,
-  ] = useSwimlaneInputResolver(
+  const [, swimlaneData, perPage, , timeBuckets, , error] = useSwimlaneInputResolver(
     embeddableInput,
     onInputChange,
     refresh,
@@ -90,8 +76,6 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
     refresh,
     services,
     chartWidth,
-    fromPage,
-    selectedCells,
     severity.val
   );
 
@@ -103,20 +87,13 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
     });
   }, [perPage, fromPage, swimlaneData]);
 
-  const onCellsSelection = useCallback(
-    (update?: AppStateSelectedCells) => {
-      setSelectedCells(update);
-
-      if (update) {
-        uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
-          embeddable: embeddableContext,
-          data: update,
-          updateCallback: setSelectedCells.bind(null, undefined),
-        });
-      }
-    },
-    [swimlaneData, perPage, fromPage, setSelectedCells]
+  const resizeHandler = useCallback(
+    throttle((e: { width: number; height: number }) => {
+      setChartWidth(e.width);
+    }, RESIZE_THROTTLE_TIME_MS),
+    [chartWidth]
   );
+
   if (error) {
     return (
       <EuiCallOut
@@ -137,69 +114,49 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   return (
     <div
+      id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
       style={{
         width: '100%',
         overflowY: 'scroll',
         padding: '8px',
       }}
-      data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
+      data-test-subj={`mlExplorerEmbeddable_${embeddableContext.id}`}
     >
-      <SwimlaneContainer
-        id={id}
-        data-test-subj={`mlSwimLaneEmbeddable_${embeddableContext.id}`}
-        timeBuckets={timeBuckets}
-        swimlaneData={swimlaneData!}
-        swimlaneType={swimlaneType as SwimlaneType}
-        fromPage={fromPage}
-        perPage={perPage}
-        swimlaneLimit={isViewBySwimLaneData(swimlaneData) ? swimlaneData.cardinality : undefined}
-        onResize={setChartWidth}
-        selection={selectedCells}
-        onCellsSelection={onCellsSelection}
-        onPaginationChange={(update) => {
-          if (update.fromPage) {
-            setFromPage(update.fromPage);
-          }
-          if (update.perPage) {
-            setFromPage(1);
-            setPerPage(update.perPage);
-          }
-        }}
-        isLoading={isSwimlaneLoading}
-        noDataWarning={
-          <FormattedMessage
-            id="xpack.ml.swimlaneEmbeddable.noDataFound"
-            defaultMessage="No anomalies found"
-          />
-        }
-      />
-      {isExplorerLoading && (
-        <EuiText
-          textAlign={'center'}
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%,-50%)',
-          }}
-        >
-          <EuiLoadingChart size="xl" mono={true} data-test-subj="mlSwimLaneLoadingIndicator" />
-        </EuiText>
-      )}
-      {chartsData !== undefined && isExplorerLoading === false && (
-        <>
-          <EuiSpacer />
-          <ExplorerAnomaliesContainer
-            showCharts={true}
-            chartsData={chartsData}
-            severity={severity}
-            setSeverity={setSeverity}
-            mlUrlGenerator={mlUrlGenerator}
-            timeBuckets={timeBuckets}
-            timefilter={timefilter}
-          />
-        </>
-      )}
+      <EuiResizeObserver onResize={resizeHandler}>
+        {(resizeRef) => (
+          <div ref={resizeRef}>
+            {isExplorerLoading && (
+              <EuiText
+                textAlign={'center'}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%,-50%)',
+                }}
+              >
+                <EuiLoadingChart
+                  size="xl"
+                  mono={true}
+                  data-test-subj="mlSwimLaneLoadingIndicator"
+                />
+              </EuiText>
+            )}
+            {chartsData !== undefined && isExplorerLoading === false && (
+              <ExplorerAnomaliesContainer
+                id={id}
+                showCharts={true}
+                chartsData={chartsData}
+                severity={severity}
+                setSeverity={setSeverity}
+                mlUrlGenerator={mlUrlGenerator}
+                timeBuckets={timeBuckets}
+                timefilter={timefilter}
+              />
+            )}
+          </div>
+        )}
+      </EuiResizeObserver>
     </div>
   );
 };

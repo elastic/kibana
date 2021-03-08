@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 // @ts-ignore
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ExplorerChartsContainer } from './explorer_charts/embeddable_explorer_charts_container';
 import {
   SelectSeverityUI,
@@ -19,6 +20,7 @@ import type { UrlGeneratorContract } from '../../../../../../src/plugins/share/p
 import type { TimeBuckets } from '../util/time_buckets';
 import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
 interface ExplorerAnomaliesContainerProps {
+  id: string;
   chartsData: AnomalyChartData;
   showCharts: boolean;
   severity: TableSeverity;
@@ -28,6 +30,7 @@ interface ExplorerAnomaliesContainerProps {
   timefilter: TimefilterContract;
 }
 export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = ({
+  id,
   chartsData,
   showCharts,
   severity,
@@ -39,6 +42,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   return (
     <>
       <EuiFlexGroup
+        id={id}
         direction="row"
         gutterSize="l"
         responsive={true}
@@ -56,6 +60,18 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
+      {Array.isArray(chartsData.seriesToPlot) &&
+        chartsData.seriesToPlot.length === 0 &&
+        chartsData.errorMessages === undefined && (
+          <EuiText textAlign={'center'}>
+            <h4>
+              <FormattedMessage
+                id="xpack.ml.explorer.noMatchingAnomaliesFoundTitle"
+                defaultMessage="No matching anomalies found"
+              />
+            </h4>
+          </EuiText>
+        )}
       <div className="euiText explorer-charts">
         {showCharts && (
           <ExplorerChartsContainer

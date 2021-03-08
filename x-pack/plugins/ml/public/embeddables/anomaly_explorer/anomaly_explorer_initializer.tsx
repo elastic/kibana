@@ -16,6 +16,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSelect,
+  EuiFieldNumber,
   EuiFieldText,
   EuiModal,
 } from '@elastic/eui';
@@ -23,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { AnomalyExplorerEmbeddableInput } from '..';
 
+const MAX_SERIES_ALLOWED = 48;
 export interface AnomalyExplorerInitializerProps {
   defaultTitle: string;
   influencers: string[];
@@ -33,6 +35,7 @@ export interface AnomalyExplorerInitializerProps {
     panelTitle: string;
     swimlaneType: SwimlaneType;
     viewBy?: string;
+    maxSeriesToPlot?: number;
   }) => void;
   onCancel: () => void;
 }
@@ -49,6 +52,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
   const [viewByExplorerFieldName, setViewByExplorerFieldName] = useState(
     initialInput?.viewBy ?? 'Overall'
   );
+  const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(6);
 
   const viewByExplorerOptions = ['Overall', ...influencers].map((influencer) => {
     return {
@@ -113,7 +117,23 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
             />
           </EuiFormRow>
 
-          <></>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.explorer.maxSeriesToPlotLabel"
+                defaultMessage="Max series to plot"
+              />
+            }
+          >
+            <EuiFieldNumber
+              id="selectMaxSeriesToPlot"
+              name="selectMaxSeriesToPlot"
+              value={maxSeriesToPlot}
+              onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
+              min={0}
+              max={MAX_SERIES_ALLOWED}
+            />
+          </EuiFormRow>
         </EuiForm>
       </EuiModalBody>
 
@@ -131,6 +151,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
             panelTitle,
             swimlaneType,
             viewBy: viewByExplorerFieldName,
+            maxSeriesToPlot,
           })}
           fill
         >
