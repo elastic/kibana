@@ -13211,7 +13211,6 @@
     "xpack.ml.alertContext.anomalyExplorerUrlDescription": "要在 Anomaly Explorer 中打开的 URL",
     "xpack.ml.alertContext.isInterimDescription": "表示排名靠前的命中是否包含中间结果",
     "xpack.ml.alertContext.jobIdsDescription": "触发告警实例的作业 ID 的列表",
-    "xpack.ml.alertContext.kibanaBasePathUrlDescription": "Kibana 基路径",
     "xpack.ml.alertContext.scoreDescription": "异常分数",
     "xpack.ml.alertContext.timestampDescription": "异常的时间戳",
     "xpack.ml.alertContext.timestampIso8601Description": "ISO8601 格式的时间",
