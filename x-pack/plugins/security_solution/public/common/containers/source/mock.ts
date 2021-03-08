@@ -646,6 +646,42 @@ export const mockBrowserFields: BrowserFields = {
       },
     },
   },
+  nestedField: {
+    fields: {
+      'nestedField.firstAttributes': {
+        aggregatable: false,
+        category: 'nestedField',
+        description: '',
+        example: '',
+        format: '',
+        indexes: ['test-nested'],
+        name: 'nestedField.firstAttributes',
+        searchable: true,
+        type: 'string',
+        subType: {
+          nested: {
+            path: 'nestedField',
+          },
+        },
+      },
+      'nestedField.secondAttributes': {
+        aggregatable: false,
+        category: 'nestedField',
+        description: '',
+        example: '',
+        format: '',
+        indexes: ['test-nested'],
+        name: 'nestedField.secondAttributes',
+        searchable: true,
+        type: 'string',
+        subType: {
+          nested: {
+            path: 'nestedField',
+          },
+        },
+      },
+    },
+  },
 };
 
 export const mockDocValueFields: DocValueFields[] = [
