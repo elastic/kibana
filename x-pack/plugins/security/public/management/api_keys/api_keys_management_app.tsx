@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import type { History } from 'history';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
-import type { History } from 'history';
+
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import type { StartServicesAccessor, CoreStart } from '../../../../../../src/core/public';
-import type { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
+
+import type { CoreStart, StartServicesAccessor } from '../../../../../../src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import type { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import type { AuthenticationServiceSetup } from '../../authentication';
-import type { PluginStartDependencies } from '../../plugin';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
-  BreadcrumbsProvider,
   Breadcrumb,
+  BreadcrumbsProvider,
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
+import type { PluginStartDependencies } from '../../plugin';
 
 interface CreateParams {
   authc: AuthenticationServiceSetup;

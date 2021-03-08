@@ -29,27 +29,27 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { History } from 'history';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Route } from 'react-router-dom';
-import type { History } from 'history';
 import type { NotificationsStart } from 'src/core/public';
 
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
-import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableCodeField } from '../../../components/code_field';
 import type { APIKeysAPIClient, CreateApiKeyResponse } from '../api_keys_api_client';
-import { PermissionDenied } from './permission_denied';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
-import { NotEnabled } from './not_enabled';
 import { InvalidateProvider } from './invalidate_provider';
+import { NotEnabled } from './not_enabled';
+import { PermissionDenied } from './permission_denied';
 
 interface Props {
   history: History;
@@ -465,7 +465,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'API key',
         }),
         sortable: true,
-        render: (base64: String) => <EuiCode>{base64}</EuiCode>,
+        render: (base64: string) => <EuiCode>{base64}</EuiCode>,
       },
       {
         field: 'name',
@@ -545,9 +545,6 @@ export class APIKeysGridPage extends Component<Props, State> {
                 <FormattedMessage
                   id="xpack.security.management.apiKeys.table.statusExpired"
                   defaultMessage="Expired"
-                  values={{
-                    timeAgo: moment(expiration).fromNow(),
-                  }}
                 />
               </EuiHealth>
             );

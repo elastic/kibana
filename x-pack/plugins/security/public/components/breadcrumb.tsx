@@ -9,8 +9,8 @@ import type { EuiBreadcrumb } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import type { ChromeStart } from '../../../../../src/core/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface BreadcrumbsContext {
   parents: BreadcrumbProps[];

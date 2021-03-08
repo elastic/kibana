@@ -6,9 +6,9 @@
  */
 
 import type { RouteDefinitionParams } from '../';
+import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { defineGetApiKeysRoutes } from './get';
-import { defineCreateApiKeyRoutes } from './create';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { defineCheckPrivilegesRoutes } from './privileges';
 

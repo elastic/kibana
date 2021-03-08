@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React, { useEffect } from 'react';
 import {
   EuiCallOut,
   EuiFieldNumber,
@@ -22,21 +20,25 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useKibana, CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
-import type { CreateApiKeyRequest, CreateApiKeyResponse } from '../api_keys_api_client';
-import { APIKeysAPIClient } from '../api_keys_api_client';
-import type { ValidationErrors } from '../../../components/use_form';
-import { useForm } from '../../../components/use_form';
+
+import { CodeEditor, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import type { RoleDescriptors } from '../../../../common/model';
+import { DocLink } from '../../../components/doc_link';
 import type { FormFlyoutProps } from '../../../components/form_flyout';
 import { FormFlyout } from '../../../components/form_flyout';
-import { DocLink } from '../../../components/doc_link';
 import { useCurrentUser } from '../../../components/use_current_user';
+import { useForm } from '../../../components/use_form';
+import type { ValidationErrors } from '../../../components/use_form';
 import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
-import type { RoleDescriptors } from '../../../../common/model';
+import { APIKeysAPIClient } from '../api_keys_api_client';
+import type { CreateApiKeyRequest, CreateApiKeyResponse } from '../api_keys_api_client';
 
 export interface ApiKeyFormValues {
   name: string;

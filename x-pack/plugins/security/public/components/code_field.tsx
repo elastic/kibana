@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent, ReactElement } from 'react';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -21,6 +18,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { FunctionComponent, ReactElement } from 'react';
+import React from 'react';
+
+import { i18n } from '@kbn/i18n';
+
 import { useTheme } from './use_theme';
 
 export interface CodeFieldProps extends Omit<EuiFieldTextProps, 'append'> {
@@ -72,7 +74,7 @@ export interface SelectableCodeFieldOption {
 }
 
 export interface SelectableCodeFieldProps extends Omit<EuiFieldTextProps, 'value' | 'prepend'> {
-  options: Array<SelectableCodeFieldOption>;
+  options: SelectableCodeFieldOption[];
 }
 
 export const SelectableCodeField: FunctionComponent<SelectableCodeFieldProps> = (props) => {
@@ -107,8 +109,8 @@ export const SelectableCodeField: FunctionComponent<SelectableCodeFieldProps> = 
         >
           <EuiContextMenuPanel
             initialFocusedItemIndex={selectedIndex * 2}
-            items={options.reduce<Array<ReactElement>>((accumulator, option, i) => {
-              accumulator.push(
+            items={options.reduce<ReactElement[]>((items, option, i) => {
+              items.push(
                 <EuiContextMenuItem
                   key={option.key}
                   icon={option.icon}
@@ -126,11 +128,9 @@ export const SelectableCodeField: FunctionComponent<SelectableCodeFieldProps> = 
                 </EuiContextMenuItem>
               );
               if (i < options.length - 1) {
-                accumulator.push(
-                  <EuiHorizontalRule key={`${option.key}-seperator`} margin="none" />
-                );
+                items.push(<EuiHorizontalRule key={`${option.key}-seperator`} margin="none" />);
               }
-              return accumulator;
+              return items;
             }, [])}
           />
         </EuiPopover>

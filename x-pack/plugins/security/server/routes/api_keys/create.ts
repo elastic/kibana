@@ -6,9 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { wrapIntoCustomErrorResponse } from '../../errors';
+
 import type { RouteDefinitionParams } from '..';
+import { wrapIntoCustomErrorResponse } from '../../errors';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineCreateApiKeyRoutes({
   router,

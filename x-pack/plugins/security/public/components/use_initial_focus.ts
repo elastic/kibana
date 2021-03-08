@@ -6,7 +6,7 @@
  */
 
 import type { DependencyList } from 'react';
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Creates a ref for an HTML element, which will be focussed on mount.

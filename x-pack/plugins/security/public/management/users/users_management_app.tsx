@@ -21,8 +21,8 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
-  BreadcrumbsProvider,
   Breadcrumb,
+  BreadcrumbsProvider,
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';

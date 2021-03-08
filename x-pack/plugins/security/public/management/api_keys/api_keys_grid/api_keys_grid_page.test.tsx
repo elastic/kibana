@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  render,
   fireEvent,
+  render,
   waitFor,
-  within,
   waitForElementToBeRemoved,
+  within,
 } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
+import React from 'react';
+
 import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
 import { Providers } from '../api_keys_management_app';
-import { APIKeysGridPage } from './api_keys_grid_page';
 import { apiKeysAPIClientMock } from '../index.mock';
-import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
+import { APIKeysGridPage } from './api_keys_grid_page';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,

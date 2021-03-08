@@ -7,6 +7,7 @@
 
 import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+
 import { useUiSetting } from '../../../../../src/plugins/kibana_react/public';
 
 /**

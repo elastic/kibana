@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { DocLink } from '../../../components/doc_link';
 
 export interface ApiKeysEmptyPromptProps {
