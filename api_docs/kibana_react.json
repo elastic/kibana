@@ -887,7 +887,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 53
+              "lineNumber": 59
             }
           }
         ],
@@ -895,7 +895,7 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-          "lineNumber": 53
+          "lineNumber": 59
         },
         "initialIsOpen": false
       },
@@ -2066,7 +2066,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 27
+              "lineNumber": 30
             },
             "signature": [
               "string | undefined"
@@ -2080,7 +2080,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 28
+              "lineNumber": 31
             },
             "signature": [
               "boolean | undefined"
@@ -3357,7 +3357,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 35
+                  "lineNumber": 38
                 }
               }
             ],
@@ -3365,7 +3365,7 @@
             "label": "boolean",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 35
+              "lineNumber": 38
             }
           },
           {
@@ -3381,7 +3381,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 37
+                  "lineNumber": 40
                 }
               },
               {
@@ -3392,7 +3392,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 37
+                  "lineNumber": 40
                 }
               },
               {
@@ -3403,7 +3403,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 37
+                  "lineNumber": 40
                 },
                 "signature": [
                   "\"square\""
@@ -3416,7 +3416,7 @@
             "label": "conflict",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 37
+              "lineNumber": 40
             }
           },
           {
@@ -3432,7 +3432,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 38
+                  "lineNumber": 41
                 }
               }
             ],
@@ -3440,7 +3440,31 @@
             "label": "date",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 38
+              "lineNumber": 41
+            }
+          },
+          {
+            "id": "def-public.typeToEuiIconMap.date_range",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.typeToEuiIconMap.date_range.iconType",
+                "type": "string",
+                "label": "iconType",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 42
+                }
+              }
+            ],
+            "description": [],
+            "label": "date_range",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 42
             }
           },
           {
@@ -3456,7 +3480,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 39
+                  "lineNumber": 43
                 }
               }
             ],
@@ -3464,7 +3488,7 @@
             "label": "geo_point",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 39
+              "lineNumber": 43
             }
           },
           {
@@ -3480,7 +3504,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 40
+                  "lineNumber": 44
                 }
               }
             ],
@@ -3488,7 +3512,7 @@
             "label": "geo_shape",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 40
+              "lineNumber": 44
             }
           },
           {
@@ -3504,7 +3528,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 41
+                  "lineNumber": 45
                 }
               }
             ],
@@ -3512,7 +3536,31 @@
             "label": "ip",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 41
+              "lineNumber": 45
+            }
+          },
+          {
+            "id": "def-public.typeToEuiIconMap.ip_range",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.typeToEuiIconMap.ip_range.iconType",
+                "type": "string",
+                "label": "iconType",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 46
+                }
+              }
+            ],
+            "description": [],
+            "label": "ip_range",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 46
             }
           },
           {
@@ -3528,7 +3576,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 43
+                  "lineNumber": 48
                 }
               }
             ],
@@ -3538,7 +3586,7 @@
             "label": "murmur3",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 43
+              "lineNumber": 48
             }
           },
           {
@@ -3554,7 +3602,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 44
+                  "lineNumber": 49
                 }
               }
             ],
@@ -3562,7 +3610,31 @@
             "label": "number",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 44
+              "lineNumber": 49
+            }
+          },
+          {
+            "id": "def-public.typeToEuiIconMap.number_range",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.typeToEuiIconMap.number_range.iconType",
+                "type": "string",
+                "label": "iconType",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 50
+                }
+              }
+            ],
+            "description": [],
+            "label": "number_range",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 50
             }
           },
           {
@@ -3578,7 +3650,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 45
+                  "lineNumber": 51
                 }
               },
               {
@@ -3589,7 +3661,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 45
+                  "lineNumber": 51
                 }
               }
             ],
@@ -3597,7 +3669,7 @@
             "label": "_source",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 45
+              "lineNumber": 51
             }
           },
           {
@@ -3613,7 +3685,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 46
+                  "lineNumber": 52
                 }
               }
             ],
@@ -3621,7 +3693,7 @@
             "label": "string",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 46
+              "lineNumber": 52
             }
           },
           {
@@ -3637,7 +3709,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 47
+                  "lineNumber": 53
                 }
               }
             ],
@@ -3645,7 +3717,7 @@
             "label": "nested",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 47
+              "lineNumber": 53
             }
           }
         ],
@@ -3653,7 +3725,7 @@
         "label": "typeToEuiIconMap",
         "source": {
           "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-          "lineNumber": 34
+          "lineNumber": 37
         },
         "initialIsOpen": false
       }
