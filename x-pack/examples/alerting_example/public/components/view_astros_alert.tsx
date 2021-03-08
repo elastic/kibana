@@ -23,7 +23,7 @@ import {
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
 import { isEmpty } from 'lodash';
-import { Alert, AlertTaskState, BASE_ALERT_API_PATH } from '../../../../plugins/alerts/common';
+import { Alert, AlertTaskState, BASE_ALERT_API_PATH } from '../../../../plugins/alerting/common';
 import { ALERTING_EXAMPLE_APP_ID, AlwaysFiringParams } from '../../common/constants';
 
 type Props = RouteComponentProps & {

@@ -10,7 +10,7 @@
     "data",
     "dataEnhanced",
     "visTypeTimeseries",
-    "alerts",
+    "alerting",
     "triggersActionsUi"
   ],
   "optionalPlugins": ["ml", "observability", "home", "embeddable"],

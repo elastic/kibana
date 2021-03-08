@@ -118,6 +118,16 @@ export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
 
+export const TIMELINE_ADD_FIELD_BUTTON = '[data-test-subj="addField"]';
+
+export const TIMELINE_DATA_PROVIDER_FIELD = '[data-test-subj="field"]';
+
+export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
+
+export const TIMELINE_DATA_PROVIDER_VALUE = `[data-test-subj="value"]`;
+
+export const SAVE_DATA_PROVIDER_BTN = `[data-test-subj="save"]`;
+
 export const TIMELINE_DATA_PROVIDERS_EMPTY =
   '[data-test-subj="dataProviders"] [data-test-subj="empty"]';
 
