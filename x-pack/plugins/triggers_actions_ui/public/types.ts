@@ -84,6 +84,11 @@ export interface Pagination {
   size: number;
 }
 
+export interface Sorting {
+  field: string;
+  direction: string;
+}
+
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
   iconClass: string;
@@ -186,6 +191,7 @@ export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
   tagsText: string;
+  actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
 }
