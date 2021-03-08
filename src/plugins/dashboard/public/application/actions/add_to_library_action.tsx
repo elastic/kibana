@@ -36,7 +36,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   constructor(
     private deps: {
       toasts: NotificationsStart['toasts'];
-      capabilities: ApplicationStart['capabilities'];
+      canSaveVisualizations: boolean;
     }
   ) {}
 
@@ -56,7 +56,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
     return Boolean(
-      this.deps.capabilities.visualize?.save &&
+      this.deps.canSaveVisualizations &&
         !isErrorEmbeddable(embeddable) &&
         embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&

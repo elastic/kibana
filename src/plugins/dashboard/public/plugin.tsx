@@ -372,7 +372,7 @@ export class DashboardPlugin
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
       const addToLibraryAction = new AddToLibraryAction({
         toasts: notifications.toasts,
-        capabilities: application.capabilities,
+        canSaveVisualizations: Boolean(application.capabilities.visualize.save),
       });
       uiActions.registerAction(addToLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
