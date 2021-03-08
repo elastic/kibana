@@ -14,7 +14,7 @@ import {
 import { getAgentIcon } from '../../shared/AgentIcon/get_agent_icon';
 import { getSpanIcon } from '../../shared/span_icon/get_span_icon';
 
-export function iconForNode(node: cytoscape.NodeSingular, isDarkMode: boolean) {
+export function iconForNode(node: cytoscape.NodeSingular) {
   const agentName = node.data(AGENT_NAME);
   const subtype = node.data(SPAN_SUBTYPE);
   const type = node.data(SPAN_TYPE);
