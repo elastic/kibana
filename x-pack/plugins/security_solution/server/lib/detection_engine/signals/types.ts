@@ -16,7 +16,7 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
@@ -51,7 +51,7 @@ export interface SignalsStatusParams {
 
 export interface ThresholdResult {
   terms?: Array<{
-    field?: string;
+    field: string;
     value: string;
   }>;
   cardinality?: Array<{
@@ -59,6 +59,7 @@ export interface ThresholdResult {
     value: number;
   }>;
   count: number;
+  from: string;
 }
 
 export interface ThresholdSignalHistoryRecord {
@@ -71,6 +72,12 @@ export interface ThresholdSignalHistoryRecord {
 
 export interface ThresholdSignalHistory {
   [hash: string]: ThresholdSignalHistoryRecord;
+}
+
+export interface RuleRangeTuple {
+  to: moment.Moment;
+  from: moment.Moment;
+  maxSignals: number;
 }
 
 export interface SignalSource {
@@ -251,8 +258,11 @@ export interface QueryFilter {
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
 export interface SearchAfterAndBulkCreateParams {
-  gap: moment.Duration | null;
-  previousStartedAt: Date | null | undefined;
+  tuples: Array<{
+    to: moment.Moment;
+    from: moment.Moment;
+    maxSignals: number;
+  }>;
   ruleParams: RuleTypeParams;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;

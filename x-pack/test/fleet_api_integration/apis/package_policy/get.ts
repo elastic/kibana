@@ -22,6 +22,10 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;
+    before(async () => {
+      await getService('esArchiver').load('empty_kibana');
+      await getService('esArchiver').load('fleet/empty_fleet_server');
+    });
 
     before(async function () {
       if (!server.enabled) {
@@ -73,7 +77,10 @@ export default function (providerContext: FtrProviderContext) {
         .send({ packagePolicyIds: [packagePolicyId] })
         .expect(200);
     });
-
+    after(async () => {
+      await getService('esArchiver').unload('fleet/empty_fleet_server');
+      await getService('esArchiver').unload('empty_kibana');
+    });
     it('should succeed with a valid id', async function () {
       await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`).expect(200);
     });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -16,9 +15,15 @@ import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { getValues } from './helpers';
+import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiColorMediumShade: '#ece',
+  },
+});
 
 describe('unknown_column_renderer', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockDatum: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
   beforeEach(() => {
@@ -50,7 +55,7 @@ describe('unknown_column_renderer', () => {
       timelineId: 'test',
     });
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <span>{emptyColumn}</span>
       </ThemeProvider>
     );
@@ -66,7 +71,7 @@ describe('unknown_column_renderer', () => {
       timelineId: 'test',
     });
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <span>{emptyColumn}</span>
       </ThemeProvider>
     );
