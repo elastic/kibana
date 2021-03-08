@@ -120,7 +120,7 @@ number of bars.
 
 [[histogram-maxbars]]`histogram:maxBars`::
 Date histograms are not generated with more bars than the value of this property,
-scaling values when necessary.
+scaling values when necessary.  This setting affects *Lens* and *Visualize.*
 
 [[history-limit]]`history:limit`::
 In fields that have history, such as query inputs, show this many recent values.
@@ -136,7 +136,7 @@ document when displaying it.
 [[metrics-maxbuckets]]`metrics:max_buckets`::
 The maximum numbers of buckets that a single data source can return. This might
 arise when the user selects a short interval (for example, 1s) for a long time
-period (1 year).
+period (1 year). This setting affects *TSVB* only.
 
 [[query-allowleadingwildcards]]`query:allowLeadingWildcards`::
 Allows a wildcard (*) as the first character in a query clause. Only applies
