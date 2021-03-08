@@ -132,8 +132,7 @@ describe('Push case', () => {
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(caseClient.getAlerts).toHaveBeenCalledWith({
-      ids: ['test-id'],
-      indices: new Set<string>(['test-index']),
+      alertsInfo: [{ id: 'test-id', index: 'test-index' }],
     });
   });
 
