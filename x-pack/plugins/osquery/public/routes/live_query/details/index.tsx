@@ -23,7 +23,7 @@ import styled from 'styled-components';
 
 import { Direction } from '../../../../common/search_strategy';
 import { useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../shared_imports';
+import { WithHeaderLayout } from '../../../components/layouts';
 import { useActionResults } from '../../../action_results/use_action_results';
 import { useActionDetails } from '../../../actions/use_action_details';
 import { ResultTabs } from '../../../queries/edit/tabs';

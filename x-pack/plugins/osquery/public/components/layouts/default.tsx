@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// copied from x-pack/plugins/fleet/public/applications/fleet/layouts/default.tsx
-
 import styled from 'styled-components';
 
 export const Container = styled.div`

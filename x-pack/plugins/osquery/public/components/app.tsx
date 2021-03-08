@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 
-import { Container, Nav, Wrapper } from '../components/layout';
+import { Container, Nav, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
 import { useRouterNavigate } from '../common/lib/kibana';
 

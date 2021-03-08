@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
-import { WithHeaderLayout } from '../../../shared_imports';
+import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { LiveQuery } from '../../../live_query';
 

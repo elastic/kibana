@@ -18,7 +18,7 @@ import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../shared_imports';
+import { WithHeaderLayout } from '../../../components/layouts';
 import { useActionDetails } from '../../../actions/use_action_details';
 import { ResultsTable } from '../../../results/results_table';
 
