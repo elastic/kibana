@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useEffect, useState, useMemo } from 'react';
+
 import {
   createStateContainer,
   syncState,
@@ -14,6 +15,7 @@ import {
   PureTransition,
   getStateFromKbnUrl,
 } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
+
 import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
 import { AgentLogsUI, AgentLogsProps, AgentLogsState, AgentLogsUrlStateHelper } from './agent_logs';
 

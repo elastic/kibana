@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
 const ROUTE_TAG_API = 'api';
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';

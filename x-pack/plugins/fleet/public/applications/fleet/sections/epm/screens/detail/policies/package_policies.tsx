@@ -17,12 +17,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
+
 import { InstallStatus } from '../../../../../types';
 import { useLink, useUrlPagination } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { LinkAndRevision, LinkAndRevisionProps } from '../../../../../components';
 import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
 import { useGetPackageInstallStatus } from '../../../hooks';
+
 import {
   PackagePolicyAndAgentPolicy,
   usePackagePoliciesWithAgentPolicy,

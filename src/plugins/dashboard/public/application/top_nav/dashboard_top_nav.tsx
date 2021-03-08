@@ -166,7 +166,6 @@ export function DashboardTopNav({
 
       function switchViewMode() {
         dashboardStateManager.switchViewMode(newMode);
-        dashboardStateManager.restorePanels();
 
         if (savedDashboard?.id && allowByValueEmbeddables) {
           const { getFullEditPath, title, id } = savedDashboard;
@@ -480,7 +479,7 @@ export function DashboardTopNav({
     const topNav = getTopNavConfig(viewMode, dashboardTopNavActions, {
       hideWriteControls: dashboardCapabilities.hideWriteControls,
       isNewDashboard: !savedDashboard.id,
-      isDirty: dashboardStateManager.isDirty,
+      isDirty: dashboardStateManager.getIsDirty(timefilter),
       isSaveInProgress,
     });
 

@@ -5,6 +5,7 @@ Object {
   "childrenByParentId": Object {
     "mySpanIdA": Array [
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdA",
@@ -35,8 +36,13 @@ Object {
         "docType": "span",
         "duration": 481,
         "id": "mySpanIdB",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 41627,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId2",
@@ -67,8 +73,13 @@ Object {
           "docType": "span",
           "duration": 6161,
           "id": "mySpanIdA",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": undefined,
+          },
           "offset": 40498,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "parent": Object {
                 "id": "mySpanIdD",
@@ -103,8 +114,13 @@ Object {
             "docType": "transaction",
             "duration": 8634,
             "id": "myTransactionId2",
+            "legendValues": Object {
+              "serviceName": "opbeans-ruby",
+              "spanType": "",
+            },
             "offset": 39298,
             "parent": Object {
+              "color": "",
               "doc": Object {
                 "parent": Object {
                   "id": "myTransactionId1",
@@ -135,8 +151,13 @@ Object {
               "docType": "span",
               "duration": 47557,
               "id": "mySpanIdD",
+              "legendValues": Object {
+                "serviceName": "opbeans-node",
+                "spanType": undefined,
+              },
               "offset": 1754,
               "parent": Object {
+                "color": "",
                 "doc": Object {
                   "processor": Object {
                     "event": "transaction",
@@ -161,6 +182,10 @@ Object {
                 "docType": "transaction",
                 "duration": 49660,
                 "id": "myTransactionId1",
+                "legendValues": Object {
+                  "serviceName": "opbeans-node",
+                  "spanType": "",
+                },
                 "offset": 0,
                 "parent": undefined,
                 "parentId": undefined,
@@ -179,6 +204,7 @@ Object {
         "skew": 0,
       },
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdA",
@@ -209,8 +235,13 @@ Object {
         "docType": "span",
         "duration": 532,
         "id": "mySpanIdC",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 43899,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId2",
@@ -241,8 +272,13 @@ Object {
           "docType": "span",
           "duration": 6161,
           "id": "mySpanIdA",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": undefined,
+          },
           "offset": 40498,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "parent": Object {
                 "id": "mySpanIdD",
@@ -277,8 +313,13 @@ Object {
             "docType": "transaction",
             "duration": 8634,
             "id": "myTransactionId2",
+            "legendValues": Object {
+              "serviceName": "opbeans-ruby",
+              "spanType": "",
+            },
             "offset": 39298,
             "parent": Object {
+              "color": "",
               "doc": Object {
                 "parent": Object {
                   "id": "myTransactionId1",
@@ -309,8 +350,13 @@ Object {
               "docType": "span",
               "duration": 47557,
               "id": "mySpanIdD",
+              "legendValues": Object {
+                "serviceName": "opbeans-node",
+                "spanType": undefined,
+              },
               "offset": 1754,
               "parent": Object {
+                "color": "",
                 "doc": Object {
                   "processor": Object {
                     "event": "transaction",
@@ -335,6 +381,10 @@ Object {
                 "docType": "transaction",
                 "duration": 49660,
                 "id": "myTransactionId1",
+                "legendValues": Object {
+                  "serviceName": "opbeans-node",
+                  "spanType": "",
+                },
                 "offset": 0,
                 "parent": undefined,
                 "parentId": undefined,
@@ -355,6 +405,7 @@ Object {
     ],
     "mySpanIdD": Array [
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
@@ -389,8 +440,13 @@ Object {
         "docType": "transaction",
         "duration": 8634,
         "id": "myTransactionId2",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": "",
+        },
         "offset": 39298,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId1",
@@ -421,8 +477,13 @@ Object {
           "docType": "span",
           "duration": 47557,
           "id": "mySpanIdD",
+          "legendValues": Object {
+            "serviceName": "opbeans-node",
+            "spanType": undefined,
+          },
           "offset": 1754,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "processor": Object {
                 "event": "transaction",
@@ -447,6 +508,10 @@ Object {
             "docType": "transaction",
             "duration": 49660,
             "id": "myTransactionId1",
+            "legendValues": Object {
+              "serviceName": "opbeans-node",
+              "spanType": "",
+            },
             "offset": 0,
             "parent": undefined,
             "parentId": undefined,
@@ -461,6 +526,7 @@ Object {
     ],
     "myTransactionId1": Array [
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId1",
@@ -491,8 +557,13 @@ Object {
         "docType": "span",
         "duration": 47557,
         "id": "mySpanIdD",
+        "legendValues": Object {
+          "serviceName": "opbeans-node",
+          "spanType": undefined,
+        },
         "offset": 1754,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "processor": Object {
               "event": "transaction",
@@ -517,6 +588,10 @@ Object {
           "docType": "transaction",
           "duration": 49660,
           "id": "myTransactionId1",
+          "legendValues": Object {
+            "serviceName": "opbeans-node",
+            "spanType": "",
+          },
           "offset": 0,
           "parent": undefined,
           "parentId": undefined,
@@ -528,6 +603,7 @@ Object {
     ],
     "myTransactionId2": Array [
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -558,8 +634,13 @@ Object {
         "docType": "span",
         "duration": 6161,
         "id": "mySpanIdA",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 40498,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -594,8 +675,13 @@ Object {
           "docType": "transaction",
           "duration": 8634,
           "id": "myTransactionId2",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": "",
+          },
           "offset": 39298,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "parent": Object {
                 "id": "myTransactionId1",
@@ -626,8 +712,13 @@ Object {
             "docType": "span",
             "duration": 47557,
             "id": "mySpanIdD",
+            "legendValues": Object {
+              "serviceName": "opbeans-node",
+              "spanType": undefined,
+            },
             "offset": 1754,
             "parent": Object {
+              "color": "",
               "doc": Object {
                 "processor": Object {
                   "event": "transaction",
@@ -652,6 +743,10 @@ Object {
               "docType": "transaction",
               "duration": 49660,
               "id": "myTransactionId1",
+              "legendValues": Object {
+                "serviceName": "opbeans-node",
+                "spanType": "",
+              },
               "offset": 0,
               "parent": undefined,
               "parentId": undefined,
@@ -669,6 +764,7 @@ Object {
     ],
     "root": Array [
       Object {
+        "color": "",
         "doc": Object {
           "processor": Object {
             "event": "transaction",
@@ -693,6 +789,10 @@ Object {
         "docType": "transaction",
         "duration": 49660,
         "id": "myTransactionId1",
+        "legendValues": Object {
+          "serviceName": "opbeans-node",
+          "spanType": "",
+        },
         "offset": 0,
         "parent": undefined,
         "parentId": undefined,
@@ -702,6 +802,7 @@ Object {
   },
   "duration": 49660,
   "entryWaterfallTransaction": Object {
+    "color": "",
     "doc": Object {
       "processor": Object {
         "event": "transaction",
@@ -726,6 +827,10 @@ Object {
     "docType": "transaction",
     "duration": 49660,
     "id": "myTransactionId1",
+    "legendValues": Object {
+      "serviceName": "opbeans-node",
+      "spanType": "",
+    },
     "offset": 0,
     "parent": undefined,
     "parentId": undefined,
@@ -733,6 +838,7 @@ Object {
   },
   "errorItems": Array [
     Object {
+      "color": "",
       "doc": Object {
         "agent": Object {
           "name": "ruby",
@@ -765,10 +871,10 @@ Object {
         },
       },
       "docType": "error",
-      "duration": 0,
       "id": "error1",
       "offset": 25994,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "processor": Object {
             "event": "transaction",
@@ -793,6 +899,10 @@ Object {
         "docType": "transaction",
         "duration": 49660,
         "id": "myTransactionId1",
+        "legendValues": Object {
+          "serviceName": "opbeans-node",
+          "spanType": "",
+        },
         "offset": 0,
         "parent": undefined,
         "parentId": undefined,
@@ -809,6 +919,7 @@ Object {
   },
   "items": Array [
     Object {
+      "color": "",
       "doc": Object {
         "processor": Object {
           "event": "transaction",
@@ -833,12 +944,17 @@ Object {
       "docType": "transaction",
       "duration": 49660,
       "id": "myTransactionId1",
+      "legendValues": Object {
+        "serviceName": "opbeans-node",
+        "spanType": "",
+      },
       "offset": 0,
       "parent": undefined,
       "parentId": undefined,
       "skew": 0,
     },
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "myTransactionId1",
@@ -869,8 +985,13 @@ Object {
       "docType": "span",
       "duration": 47557,
       "id": "mySpanIdD",
+      "legendValues": Object {
+        "serviceName": "opbeans-node",
+        "spanType": undefined,
+      },
       "offset": 1754,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "processor": Object {
             "event": "transaction",
@@ -895,6 +1016,10 @@ Object {
         "docType": "transaction",
         "duration": 49660,
         "id": "myTransactionId1",
+        "legendValues": Object {
+          "serviceName": "opbeans-node",
+          "spanType": "",
+        },
         "offset": 0,
         "parent": undefined,
         "parentId": undefined,
@@ -904,6 +1029,7 @@ Object {
       "skew": 0,
     },
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdD",
@@ -938,8 +1064,13 @@ Object {
       "docType": "transaction",
       "duration": 8634,
       "id": "myTransactionId2",
+      "legendValues": Object {
+        "serviceName": "opbeans-ruby",
+        "spanType": "",
+      },
       "offset": 39298,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId1",
@@ -970,8 +1101,13 @@ Object {
         "docType": "span",
         "duration": 47557,
         "id": "mySpanIdD",
+        "legendValues": Object {
+          "serviceName": "opbeans-node",
+          "spanType": undefined,
+        },
         "offset": 1754,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "processor": Object {
               "event": "transaction",
@@ -996,6 +1132,10 @@ Object {
           "docType": "transaction",
           "duration": 49660,
           "id": "myTransactionId1",
+          "legendValues": Object {
+            "serviceName": "opbeans-node",
+            "spanType": "",
+          },
           "offset": 0,
           "parent": undefined,
           "parentId": undefined,
@@ -1008,6 +1148,7 @@ Object {
       "skew": 0,
     },
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "myTransactionId2",
@@ -1038,8 +1179,13 @@ Object {
       "docType": "span",
       "duration": 6161,
       "id": "mySpanIdA",
+      "legendValues": Object {
+        "serviceName": "opbeans-ruby",
+        "spanType": undefined,
+      },
       "offset": 40498,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
@@ -1074,8 +1220,13 @@ Object {
         "docType": "transaction",
         "duration": 8634,
         "id": "myTransactionId2",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": "",
+        },
         "offset": 39298,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId1",
@@ -1106,8 +1257,13 @@ Object {
           "docType": "span",
           "duration": 47557,
           "id": "mySpanIdD",
+          "legendValues": Object {
+            "serviceName": "opbeans-node",
+            "spanType": undefined,
+          },
           "offset": 1754,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "processor": Object {
                 "event": "transaction",
@@ -1132,6 +1288,10 @@ Object {
             "docType": "transaction",
             "duration": 49660,
             "id": "myTransactionId1",
+            "legendValues": Object {
+              "serviceName": "opbeans-node",
+              "spanType": "",
+            },
             "offset": 0,
             "parent": undefined,
             "parentId": undefined,
@@ -1147,6 +1307,7 @@ Object {
       "skew": 0,
     },
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
@@ -1177,8 +1338,13 @@ Object {
       "docType": "span",
       "duration": 481,
       "id": "mySpanIdB",
+      "legendValues": Object {
+        "serviceName": "opbeans-ruby",
+        "spanType": undefined,
+      },
       "offset": 41627,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -1209,8 +1375,13 @@ Object {
         "docType": "span",
         "duration": 6161,
         "id": "mySpanIdA",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 40498,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -1245,8 +1416,13 @@ Object {
           "docType": "transaction",
           "duration": 8634,
           "id": "myTransactionId2",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": "",
+          },
           "offset": 39298,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "parent": Object {
                 "id": "myTransactionId1",
@@ -1277,8 +1453,13 @@ Object {
             "docType": "span",
             "duration": 47557,
             "id": "mySpanIdD",
+            "legendValues": Object {
+              "serviceName": "opbeans-node",
+              "spanType": undefined,
+            },
             "offset": 1754,
             "parent": Object {
+              "color": "",
               "doc": Object {
                 "processor": Object {
                   "event": "transaction",
@@ -1303,6 +1484,10 @@ Object {
               "docType": "transaction",
               "duration": 49660,
               "id": "myTransactionId1",
+              "legendValues": Object {
+                "serviceName": "opbeans-node",
+                "spanType": "",
+              },
               "offset": 0,
               "parent": undefined,
               "parentId": undefined,
@@ -1321,6 +1506,7 @@ Object {
       "skew": 0,
     },
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
@@ -1351,8 +1537,13 @@ Object {
       "docType": "span",
       "duration": 532,
       "id": "mySpanIdC",
+      "legendValues": Object {
+        "serviceName": "opbeans-ruby",
+        "spanType": undefined,
+      },
       "offset": 43899,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -1383,8 +1574,13 @@ Object {
         "docType": "span",
         "duration": 6161,
         "id": "mySpanIdA",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 40498,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -1419,8 +1615,13 @@ Object {
           "docType": "transaction",
           "duration": 8634,
           "id": "myTransactionId2",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": "",
+          },
           "offset": 39298,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "parent": Object {
                 "id": "myTransactionId1",
@@ -1451,8 +1652,13 @@ Object {
             "docType": "span",
             "duration": 47557,
             "id": "mySpanIdD",
+            "legendValues": Object {
+              "serviceName": "opbeans-node",
+              "spanType": undefined,
+            },
             "offset": 1754,
             "parent": Object {
+              "color": "",
               "doc": Object {
                 "processor": Object {
                   "event": "transaction",
@@ -1477,6 +1683,10 @@ Object {
               "docType": "transaction",
               "duration": 49660,
               "id": "myTransactionId1",
+              "legendValues": Object {
+                "serviceName": "opbeans-node",
+                "spanType": "",
+              },
               "offset": 0,
               "parent": undefined,
               "parentId": undefined,
@@ -1493,6 +1703,28 @@ Object {
       },
       "parentId": "mySpanIdA",
       "skew": 0,
+    },
+  ],
+  "legends": Array [
+    Object {
+      "color": "#54B399",
+      "type": "serviceName",
+      "value": "opbeans-node",
+    },
+    Object {
+      "color": "#6092C0",
+      "type": "serviceName",
+      "value": "opbeans-ruby",
+    },
+    Object {
+      "color": "#54B399",
+      "type": "spanType",
+      "value": "",
+    },
+    Object {
+      "color": "#6092C0",
+      "type": "spanType",
+      "value": undefined,
     },
   ],
   "rootTransaction": Object {
@@ -1516,10 +1748,6 @@ Object {
       "name": "GET /api",
     },
   },
-  "serviceColors": Object {
-    "opbeans-node": "#6092c0",
-    "opbeans-ruby": "#54b399",
-  },
 }
 `;
 
@@ -1528,6 +1756,7 @@ Object {
   "childrenByParentId": Object {
     "mySpanIdA": Array [
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdA",
@@ -1558,8 +1787,13 @@ Object {
         "docType": "span",
         "duration": 481,
         "id": "mySpanIdB",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 2329,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId2",
@@ -1590,8 +1824,13 @@ Object {
           "docType": "span",
           "duration": 6161,
           "id": "mySpanIdA",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": undefined,
+          },
           "offset": 1200,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "parent": Object {
                 "id": "mySpanIdD",
@@ -1626,6 +1865,10 @@ Object {
             "docType": "transaction",
             "duration": 8634,
             "id": "myTransactionId2",
+            "legendValues": Object {
+              "serviceName": "opbeans-ruby",
+              "spanType": "",
+            },
             "offset": 0,
             "parent": undefined,
             "parentId": "mySpanIdD",
@@ -1638,6 +1881,7 @@ Object {
         "skew": 0,
       },
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdA",
@@ -1668,8 +1912,13 @@ Object {
         "docType": "span",
         "duration": 532,
         "id": "mySpanIdC",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 4601,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId2",
@@ -1700,8 +1949,13 @@ Object {
           "docType": "span",
           "duration": 6161,
           "id": "mySpanIdA",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": undefined,
+          },
           "offset": 1200,
           "parent": Object {
+            "color": "",
             "doc": Object {
               "parent": Object {
                 "id": "mySpanIdD",
@@ -1736,6 +1990,10 @@ Object {
             "docType": "transaction",
             "duration": 8634,
             "id": "myTransactionId2",
+            "legendValues": Object {
+              "serviceName": "opbeans-ruby",
+              "spanType": "",
+            },
             "offset": 0,
             "parent": undefined,
             "parentId": "mySpanIdD",
@@ -1750,6 +2008,7 @@ Object {
     ],
     "mySpanIdD": Array [
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
@@ -1784,6 +2043,10 @@ Object {
         "docType": "transaction",
         "duration": 8634,
         "id": "myTransactionId2",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": "",
+        },
         "offset": 0,
         "parent": undefined,
         "parentId": "mySpanIdD",
@@ -1792,6 +2055,7 @@ Object {
     ],
     "myTransactionId2": Array [
       Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -1822,8 +2086,13 @@ Object {
         "docType": "span",
         "duration": 6161,
         "id": "mySpanIdA",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 1200,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -1858,6 +2127,10 @@ Object {
           "docType": "transaction",
           "duration": 8634,
           "id": "myTransactionId2",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": "",
+          },
           "offset": 0,
           "parent": undefined,
           "parentId": "mySpanIdD",
@@ -1870,6 +2143,7 @@ Object {
   },
   "duration": 8634,
   "entryWaterfallTransaction": Object {
+    "color": "",
     "doc": Object {
       "parent": Object {
         "id": "mySpanIdD",
@@ -1904,6 +2178,10 @@ Object {
     "docType": "transaction",
     "duration": 8634,
     "id": "myTransactionId2",
+    "legendValues": Object {
+      "serviceName": "opbeans-ruby",
+      "spanType": "",
+    },
     "offset": 0,
     "parent": undefined,
     "parentId": "mySpanIdD",
@@ -1917,6 +2195,7 @@ Object {
   },
   "items": Array [
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdD",
@@ -1951,12 +2230,17 @@ Object {
       "docType": "transaction",
       "duration": 8634,
       "id": "myTransactionId2",
+      "legendValues": Object {
+        "serviceName": "opbeans-ruby",
+        "spanType": "",
+      },
       "offset": 0,
       "parent": undefined,
       "parentId": "mySpanIdD",
       "skew": 0,
     },
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "myTransactionId2",
@@ -1987,8 +2271,13 @@ Object {
       "docType": "span",
       "duration": 6161,
       "id": "mySpanIdA",
+      "legendValues": Object {
+        "serviceName": "opbeans-ruby",
+        "spanType": undefined,
+      },
       "offset": 1200,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
@@ -2023,6 +2312,10 @@ Object {
         "docType": "transaction",
         "duration": 8634,
         "id": "myTransactionId2",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": "",
+        },
         "offset": 0,
         "parent": undefined,
         "parentId": "mySpanIdD",
@@ -2032,6 +2325,7 @@ Object {
       "skew": 0,
     },
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
@@ -2062,8 +2356,13 @@ Object {
       "docType": "span",
       "duration": 481,
       "id": "mySpanIdB",
+      "legendValues": Object {
+        "serviceName": "opbeans-ruby",
+        "spanType": undefined,
+      },
       "offset": 2329,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -2094,8 +2393,13 @@ Object {
         "docType": "span",
         "duration": 6161,
         "id": "mySpanIdA",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 1200,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -2130,6 +2434,10 @@ Object {
           "docType": "transaction",
           "duration": 8634,
           "id": "myTransactionId2",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": "",
+          },
           "offset": 0,
           "parent": undefined,
           "parentId": "mySpanIdD",
@@ -2142,6 +2450,7 @@ Object {
       "skew": 0,
     },
     Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
@@ -2172,8 +2481,13 @@ Object {
       "docType": "span",
       "duration": 532,
       "id": "mySpanIdC",
+      "legendValues": Object {
+        "serviceName": "opbeans-ruby",
+        "spanType": undefined,
+      },
       "offset": 4601,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -2204,8 +2518,13 @@ Object {
         "docType": "span",
         "duration": 6161,
         "id": "mySpanIdA",
+        "legendValues": Object {
+          "serviceName": "opbeans-ruby",
+          "spanType": undefined,
+        },
         "offset": 1200,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -2240,6 +2559,10 @@ Object {
           "docType": "transaction",
           "duration": 8634,
           "id": "myTransactionId2",
+          "legendValues": Object {
+            "serviceName": "opbeans-ruby",
+            "spanType": "",
+          },
           "offset": 0,
           "parent": undefined,
           "parentId": "mySpanIdD",
@@ -2250,6 +2573,23 @@ Object {
       },
       "parentId": "mySpanIdA",
       "skew": 0,
+    },
+  ],
+  "legends": Array [
+    Object {
+      "color": "#54B399",
+      "type": "serviceName",
+      "value": "opbeans-ruby",
+    },
+    Object {
+      "color": "#54B399",
+      "type": "spanType",
+      "value": "",
+    },
+    Object {
+      "color": "#6092C0",
+      "type": "spanType",
+      "value": undefined,
     },
   ],
   "rootTransaction": Object {
@@ -2272,9 +2612,6 @@ Object {
       "id": "myTransactionId1",
       "name": "GET /api",
     },
-  },
-  "serviceColors": Object {
-    "opbeans-ruby": "#6092c0",
   },
 }
 `;
@@ -2335,6 +2672,7 @@ Array [
 exports[`waterfall_helpers getWaterfallItems should order items correctly 1`] = `
 Array [
   Object {
+    "color": "",
     "doc": Object {
       "service": Object {
         "name": "opbeans-java",
@@ -2350,11 +2688,16 @@ Array [
     "docType": "transaction",
     "duration": 9480,
     "id": "a",
+    "legendValues": Object {
+      "serviceName": "opbeans-java",
+      "spanType": "",
+    },
     "offset": 0,
     "parent": undefined,
     "skew": 0,
   },
   Object {
+    "color": "",
     "doc": Object {
       "parent": Object {
         "id": "a",
@@ -2376,8 +2719,13 @@ Array [
     "docType": "span",
     "duration": 4694,
     "id": "b2",
+    "legendValues": Object {
+      "serviceName": "opbeans-java",
+      "spanType": "",
+    },
     "offset": 1000,
     "parent": Object {
+      "color": "",
       "doc": Object {
         "service": Object {
           "name": "opbeans-java",
@@ -2393,6 +2741,10 @@ Array [
       "docType": "transaction",
       "duration": 9480,
       "id": "a",
+      "legendValues": Object {
+        "serviceName": "opbeans-java",
+        "spanType": "",
+      },
       "offset": 0,
       "parent": undefined,
       "skew": 0,
@@ -2401,6 +2753,7 @@ Array [
     "skew": 0,
   },
   Object {
+    "color": "",
     "doc": Object {
       "parent": Object {
         "id": "a",
@@ -2422,8 +2775,13 @@ Array [
     "docType": "span",
     "duration": 4694,
     "id": "b",
+    "legendValues": Object {
+      "serviceName": "opbeans-java",
+      "spanType": "",
+    },
     "offset": 2000,
     "parent": Object {
+      "color": "",
       "doc": Object {
         "service": Object {
           "name": "opbeans-java",
@@ -2439,6 +2797,10 @@ Array [
       "docType": "transaction",
       "duration": 9480,
       "id": "a",
+      "legendValues": Object {
+        "serviceName": "opbeans-java",
+        "spanType": "",
+      },
       "offset": 0,
       "parent": undefined,
       "skew": 0,
@@ -2447,6 +2809,7 @@ Array [
     "skew": 0,
   },
   Object {
+    "color": "",
     "doc": Object {
       "parent": Object {
         "id": "b",
@@ -2465,8 +2828,13 @@ Array [
     "docType": "transaction",
     "duration": 3581,
     "id": "c",
+    "legendValues": Object {
+      "serviceName": "opbeans-java",
+      "spanType": "",
+    },
     "offset": 3000,
     "parent": Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "a",
@@ -2488,8 +2856,13 @@ Array [
       "docType": "span",
       "duration": 4694,
       "id": "b",
+      "legendValues": Object {
+        "serviceName": "opbeans-java",
+        "spanType": "",
+      },
       "offset": 2000,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "service": Object {
             "name": "opbeans-java",
@@ -2505,6 +2878,10 @@ Array [
         "docType": "transaction",
         "duration": 9480,
         "id": "a",
+        "legendValues": Object {
+          "serviceName": "opbeans-java",
+          "spanType": "",
+        },
         "offset": 0,
         "parent": undefined,
         "skew": 0,
@@ -2516,6 +2893,7 @@ Array [
     "skew": 0,
   },
   Object {
+    "color": "",
     "doc": Object {
       "parent": Object {
         "id": "c",
@@ -2537,8 +2915,13 @@ Array [
     "docType": "span",
     "duration": 210,
     "id": "d",
+    "legendValues": Object {
+      "serviceName": "opbeans-java",
+      "spanType": "",
+    },
     "offset": 5000,
     "parent": Object {
+      "color": "",
       "doc": Object {
         "parent": Object {
           "id": "b",
@@ -2557,8 +2940,13 @@ Array [
       "docType": "transaction",
       "duration": 3581,
       "id": "c",
+      "legendValues": Object {
+        "serviceName": "opbeans-java",
+        "spanType": "",
+      },
       "offset": 3000,
       "parent": Object {
+        "color": "",
         "doc": Object {
           "parent": Object {
             "id": "a",
@@ -2580,8 +2968,13 @@ Array [
         "docType": "span",
         "duration": 4694,
         "id": "b",
+        "legendValues": Object {
+          "serviceName": "opbeans-java",
+          "spanType": "",
+        },
         "offset": 2000,
         "parent": Object {
+          "color": "",
           "doc": Object {
             "service": Object {
               "name": "opbeans-java",
@@ -2597,6 +2990,10 @@ Array [
           "docType": "transaction",
           "duration": 9480,
           "id": "a",
+          "legendValues": Object {
+            "serviceName": "opbeans-java",
+            "spanType": "",
+          },
           "offset": 0,
           "parent": undefined,
           "skew": 0,
