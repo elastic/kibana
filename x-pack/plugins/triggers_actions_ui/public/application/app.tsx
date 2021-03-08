@@ -16,7 +16,7 @@ import { Section, routeToAlertDetails } from './constants';
 import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { PluginStartContract as AlertingStart } from '../../../alerts/public';
+import { PluginStartContract as AlertingStart } from '../../../alerting/public';
 import type { SpacesPluginStart } from '../../../spaces/public';
 
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
@@ -34,7 +34,7 @@ const AlertDetailsRoute = lazy(
 export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  alerts?: AlertingStart;
+  alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
   storage?: Storage;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;

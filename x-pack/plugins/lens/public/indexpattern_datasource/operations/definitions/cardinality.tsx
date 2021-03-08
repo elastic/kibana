@@ -11,7 +11,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -70,13 +70,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format }
-          : undefined,
+      params: getFormatFromPreviousColumn(previousColumn),
     };
   },
   toEsAggsFn: (column, columnId) => {
