@@ -16562,9 +16562,9 @@ invert-kv@^1.0.0:
   integrity sha1-EEqOSqym09jNFXqO+L+rLXo//bY=
 
 io-ts@^2.0.5:
-  version "2.2.14"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.2.14.tgz#99405fab547690784d70c54a3048a44711237316"
-  integrity sha512-UWL1mdDe5YI4+/7YlrbsSwKmsECFFlWcVHT2CPGzeNODHj2qY0cibjulYfrfz5SCPoDAsjVP7vFKGcF+L10+SQ==
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.0.5.tgz#e6e3db9df8b047f9cbd6b69e7d2ad3e6437a0b13"
+  integrity sha512-pL7uUptryanI5Glv+GUv7xh+aLBjxGEDmLwmEYNSx0yOD3djK0Nw5Bt0N6BAkv9LadOUU7QKpRsLcqnTh3UlLA==
 
 iota-array@^1.0.0:
   version "1.0.0"
