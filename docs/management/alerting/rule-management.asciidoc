@@ -22,17 +22,17 @@ The *Rules* tab lists all rules in the current space, including summary informat
 The *search bar* can be used to quickly find rules by name or tag.
 
 [role="screenshot"]
-image::images/alerts-filter-by-search.png[Filtering the rules list using the search bar]
+image::images/rules-filter-by-search.png[Filtering the rules list using the search bar]
 
 The *type* dropdown lets you filter to a subset of rule types.
 
 [role="screenshot"]
-image::images/alerts-filter-by-type.png[Filtering the rules list by types of rule]
+image::images/rules-filter-by-type.png[Filtering the rules list by types of rule]
 
 The *Action type* dropdown lets you filter by the type of action used in the rule.
 
 [role="screenshot"]
-image::images/alerts-filter-by-action-type.png[Filtering the rule list by type of action]
+image::images/rules-filter-by-action-type.png[Filtering the rule list by type of action]
 
 [float]
 [[create-edit-rules]]
