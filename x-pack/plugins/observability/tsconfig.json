@@ -15,7 +15,7 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../alerts/tsconfig.json" },
+    { "path": "../alerting/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../translations/tsconfig.json" }
     { "path": "../lens/tsconfig.json" }

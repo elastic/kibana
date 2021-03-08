@@ -269,7 +269,6 @@ export class Server {
       plugins: mapToObject(pluginsStart.contracts),
     });
 
-    this.status.start();
     await this.http.start();
 
     startTransaction?.end();
