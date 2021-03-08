@@ -12,8 +12,8 @@ This allows you to view the document in two ways. **Table** displays the documen
 [role="screenshot"]
 image::images/discover-view-single-document.png[Discover single document view]
 
-The link is valid for the time the document is available in Elasticsearch. If you need another way to view single 
-documents, you can extend **Table** and **JSON** by creating <<external-plugin-development, your own plugin>>.
+If you need another way to view single documents, you can
+extend **Table** and **JSON** by creating <<external-plugin-development, your own plugin>>.
 
 
 
