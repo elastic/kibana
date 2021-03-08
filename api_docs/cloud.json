@@ -19,7 +19,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 17
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L17"
             },
             "signature": [
               "string | undefined"
@@ -33,7 +34,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 18
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L18"
             },
             "signature": [
               "string | undefined"
@@ -47,7 +49,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 19
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L19"
             },
             "signature": [
               "string | undefined"
@@ -61,7 +64,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/cloud/public/plugin.ts",
-              "lineNumber": 20
+              "lineNumber": 20,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L20"
             },
             "signature": [
               "string | undefined"
@@ -70,7 +74,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/cloud/public/plugin.ts",
-          "lineNumber": 16
+          "lineNumber": 16,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L16"
         },
         "initialIsOpen": false
       }
@@ -93,7 +98,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 32
+            "lineNumber": 32,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L32"
           },
           "signature": [
             "string | undefined"
@@ -107,7 +113,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 33
+            "lineNumber": 33,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L33"
           },
           "signature": [
             "string | undefined"
@@ -121,7 +128,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 34
+            "lineNumber": 34,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L34"
           }
         },
         {
@@ -132,7 +140,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 35
+            "lineNumber": 35,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L35"
           },
           "signature": [
             "string | undefined"
@@ -146,7 +155,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/public/plugin.ts",
-            "lineNumber": 36
+            "lineNumber": 36,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L36"
           },
           "signature": [
             "string | undefined"
@@ -155,7 +165,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/cloud/public/plugin.ts",
-        "lineNumber": 31
+        "lineNumber": 31,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/public/plugin.ts#L31"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -183,7 +194,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 19
+            "lineNumber": 19,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/server/plugin.ts#L19"
           },
           "signature": [
             "string | undefined"
@@ -197,7 +209,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 20
+            "lineNumber": 20,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/server/plugin.ts#L20"
           }
         },
         {
@@ -208,7 +221,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/cloud/server/plugin.ts",
-            "lineNumber": 21
+            "lineNumber": 21,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/server/plugin.ts#L21"
           },
           "signature": [
             "{ url?: string | undefined; secretToken?: string | undefined; }"
@@ -217,7 +231,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/cloud/server/plugin.ts",
-        "lineNumber": 18
+        "lineNumber": 18,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/cloud/server/plugin.ts#L18"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

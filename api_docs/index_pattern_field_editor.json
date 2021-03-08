@@ -31,7 +31,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 75
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L75"
             }
           },
           {
@@ -42,7 +43,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 76
+              "lineNumber": 76,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L76"
             },
             "signature": [
               {
@@ -89,7 +91,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 78
+                  "lineNumber": 78,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
                 }
               },
               {
@@ -108,7 +111,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 78
+                  "lineNumber": 78,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
                 }
               }
             ],
@@ -116,7 +120,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 78
+              "lineNumber": 78,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L78"
             }
           },
           {
@@ -133,7 +138,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                  "lineNumber": 90
+                  "lineNumber": 90,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L90"
                 }
               }
             ],
@@ -144,7 +150,8 @@
             "label": "onChange",
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 90
+              "lineNumber": 90,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L90"
             },
             "tags": [],
             "returnComment": []
@@ -162,97 +169,21 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-              "lineNumber": 99
+              "lineNumber": 99,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L99"
             }
           }
         ],
         "source": {
           "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-          "lineNumber": 71
+          "lineNumber": 71,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx#L71"
         },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
-      {
-        "id": "def-public.FieldEditorContext",
-        "type": "Interface",
-        "label": "FieldEditorContext",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.FieldEditorContext.indexPattern",
-            "type": "Object",
-            "label": "indexPattern",
-            "description": [],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-              "lineNumber": 28
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FieldEditorContext.fieldTypeToProcess",
-            "type": "CompoundType",
-            "label": "fieldTypeToProcess",
-            "description": [
-              "\nThe Kibana field type of the field to create or edit\nDefault: \"runtime\""
-            ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-              "lineNumber": 33
-            },
-            "signature": [
-              {
-                "pluginId": "indexPatternFieldEditor",
-                "scope": "public",
-                "docId": "kibIndexPatternFieldEditorPluginApi",
-                "section": "def-public.InternalFieldType",
-                "text": "InternalFieldType"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FieldEditorContext.search",
-            "type": "Object",
-            "label": "search",
-            "description": [
-              "The search service from the data plugin"
-            ],
-            "source": {
-              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-              "lineNumber": 35
-            },
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-public.ISearchStart",
-                "text": "ISearchStart"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
-          "lineNumber": 27
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.OpenFieldEditorOptions",
         "type": "Interface",
@@ -268,7 +199,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-              "lineNumber": 28
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_editor.tsx#L28"
             },
             "signature": [
               "{ indexPattern: ",
@@ -290,7 +222,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-              "lineNumber": 31
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_editor.tsx#L31"
             },
             "signature": [
               "((field: ",
@@ -312,7 +245,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-              "lineNumber": 32
+              "lineNumber": 32,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_editor.tsx#L32"
             },
             "signature": [
               "string | undefined"
@@ -321,7 +255,90 @@
         ],
         "source": {
           "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
-          "lineNumber": 27
+          "lineNumber": 27,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_editor.tsx#L27"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.FieldEditorContext",
+        "type": "Interface",
+        "label": "FieldEditorContext",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.FieldEditorContext.indexPattern",
+            "type": "Object",
+            "label": "indexPattern",
+            "description": [],
+            "source": {
+              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L28"
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FieldEditorContext.fieldTypeToProcess",
+            "type": "CompoundType",
+            "label": "fieldTypeToProcess",
+            "description": [
+              "\nThe Kibana field type of the field to create or edit\nDefault: \"runtime\""
+            ],
+            "source": {
+              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
+              "lineNumber": 33,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L33"
+            },
+            "signature": [
+              {
+                "pluginId": "indexPatternFieldEditor",
+                "scope": "public",
+                "docId": "kibIndexPatternFieldEditorPluginApi",
+                "section": "def-public.InternalFieldType",
+                "text": "InternalFieldType"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FieldEditorContext.search",
+            "type": "Object",
+            "label": "search",
+            "description": [
+              "The search service from the data plugin"
+            ],
+            "source": {
+              "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
+              "lineNumber": 35,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L35"
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-public.ISearchStart",
+                "text": "ISearchStart"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx",
+          "lineNumber": 27,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/components/field_editor_flyout_content_container.tsx#L27"
         },
         "initialIsOpen": false
       }
@@ -369,7 +386,8 @@
               "description": [],
               "source": {
                 "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-                "lineNumber": 26
+                "lineNumber": 26,
+                "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L26"
               }
             }
           ],
@@ -377,7 +395,8 @@
           "returnComment": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 26
+            "lineNumber": 26,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L26"
           }
         },
         {
@@ -388,7 +407,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 27
+            "lineNumber": 27,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L27"
           },
           "signature": [
             "{ getAll: () => typeof ",
@@ -418,7 +438,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 28
+            "lineNumber": 28,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L28"
           },
           "signature": [
             "{ editIndexPattern: () => boolean; }"
@@ -432,7 +453,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 31
+            "lineNumber": 31,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L31"
           },
           "signature": [
             "React.FunctionComponent<",
@@ -449,7 +471,8 @@
       ],
       "source": {
         "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-        "lineNumber": 25
+        "lineNumber": 25,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L25"
       },
       "lifecycle": "start",
       "initialIsOpen": true

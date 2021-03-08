@@ -34,7 +34,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 35
+                  "lineNumber": 35,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L35"
                 }
               }
             ],
@@ -42,7 +43,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 35
+              "lineNumber": 35,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L35"
             }
           },
           {
@@ -66,7 +68,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 92
+              "lineNumber": 92,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L92"
             }
           },
           {
@@ -90,7 +93,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 96
+              "lineNumber": 96,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L96"
             }
           },
           {
@@ -114,7 +118,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 101
+              "lineNumber": 101,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L101"
             }
           },
           {
@@ -137,7 +142,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 106
+              "lineNumber": 106,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L106"
             }
           },
           {
@@ -155,7 +161,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 110
+              "lineNumber": 110,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L110"
             }
           },
           {
@@ -173,7 +180,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 114
+              "lineNumber": 114,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L114"
             }
           },
           {
@@ -226,7 +234,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 121
+                  "lineNumber": 121,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L121"
                 }
               },
               {
@@ -239,7 +248,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 122
+                  "lineNumber": 122,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L122"
                 }
               }
             ],
@@ -247,7 +257,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 120
+              "lineNumber": 120,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L120"
             }
           },
           {
@@ -284,7 +295,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 149
+                  "lineNumber": 149,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L149"
                 }
               },
               {
@@ -297,7 +309,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 150
+                  "lineNumber": 150,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L150"
                 }
               }
             ],
@@ -305,7 +318,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 148
+              "lineNumber": 148,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L148"
             }
           },
           {
@@ -344,7 +358,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 167
+                  "lineNumber": 167,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L167"
                 }
               }
             ],
@@ -352,7 +367,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 167
+              "lineNumber": 167,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L167"
             }
           },
           {
@@ -391,7 +407,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 184
+                  "lineNumber": 184,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L184"
                 }
               }
             ],
@@ -399,7 +416,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 184
+              "lineNumber": 184,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L184"
             }
           },
           {
@@ -435,7 +453,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 195
+                  "lineNumber": 195,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L195"
                 }
               }
             ],
@@ -443,7 +462,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 195
+              "lineNumber": 195,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L195"
             }
           },
           {
@@ -459,7 +479,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 207
+              "lineNumber": 207,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L207"
             }
           },
           {
@@ -496,7 +517,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 212
+                  "lineNumber": 212,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L212"
                 }
               },
               {
@@ -515,7 +537,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 213
+                  "lineNumber": 213,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L213"
                 }
               },
               {
@@ -528,7 +551,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-                  "lineNumber": 214
+                  "lineNumber": 214,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L214"
                 }
               }
             ],
@@ -536,13 +560,15 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-              "lineNumber": 211
+              "lineNumber": 211,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L211"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
-          "lineNumber": 29
+          "lineNumber": 29,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/filter_manager/filter_manager.ts#L29"
         },
         "initialIsOpen": false
       },
@@ -579,7 +605,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-                  "lineNumber": 18
+                  "lineNumber": 18,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/time_history.ts#L18"
                 }
               }
             ],
@@ -587,7 +614,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 18
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/time_history.ts#L18"
             }
           },
           {
@@ -623,7 +651,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-                  "lineNumber": 29
+                  "lineNumber": 29,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/time_history.ts#L29"
                 }
               }
             ],
@@ -631,7 +660,8 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 29
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/time_history.ts#L29"
             }
           },
           {
@@ -655,18 +685,76 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-              "lineNumber": 42
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/time_history.ts#L42"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-          "lineNumber": 15
+          "lineNumber": 15,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/time_history.ts#L15"
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
+      {
+        "id": "def-public.createSavedQueryService",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Object",
+            "label": "savedObjectsClient",
+            "isRequired": true,
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SavedObjectsClient",
+                "text": "SavedObjectsClient"
+              },
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
+              "lineNumber": 21,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/saved_query_service.ts#L21"
+            }
+          }
+        ],
+        "signature": [
+          "(savedObjectsClient: Pick<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectsClient",
+            "text": "SavedObjectsClient"
+          },
+          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">) => ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.SavedQueryService",
+            "text": "SavedQueryService"
+          }
+        ],
+        "description": [],
+        "label": "createSavedQueryService",
+        "source": {
+          "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
+          "lineNumber": 20,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/saved_query_service.ts#L20"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.connectToQueryState",
         "type": "Function",
@@ -714,7 +802,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 24
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L24"
             }
           },
           {
@@ -734,7 +823,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 30
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L30"
             }
           },
           {
@@ -752,7 +842,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 32
+                  "lineNumber": 32,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L32"
                 },
                 "signature": [
                   "boolean | undefined"
@@ -766,7 +857,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 33
+                  "lineNumber": 33,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L33"
                 },
                 "signature": [
                   "boolean | undefined"
@@ -780,7 +872,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 34
+                  "lineNumber": 34,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L34"
                 },
                 "signature": [
                   "boolean | ",
@@ -802,7 +895,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-                  "lineNumber": 35
+                  "lineNumber": 35,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L35"
                 },
                 "signature": [
                   "boolean | undefined"
@@ -811,7 +905,8 @@
             ],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-              "lineNumber": 31
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L31"
             }
           }
         ],
@@ -857,105 +952,11 @@
         "label": "connectToQueryState",
         "source": {
           "path": "src/plugins/data/public/query/state_sync/connect_to_query_state.ts",
-          "lineNumber": 23
+          "lineNumber": 23,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/connect_to_query_state.ts#L23"
         },
         "tags": [],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.createSavedQueryService",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "savedObjectsClient",
-            "isRequired": true,
-            "signature": [
-              "Pick<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
-              "lineNumber": 21
-            }
-          }
-        ],
-        "signature": [
-          "(savedObjectsClient: Pick<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsClient",
-            "text": "SavedObjectsClient"
-          },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">) => ",
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-public.SavedQueryService",
-            "text": "SavedQueryService"
-          }
-        ],
-        "description": [],
-        "label": "createSavedQueryService",
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
-          "lineNumber": 20
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.getDefaultQuery",
-        "type": "Function",
-        "label": "getDefaultQuery",
-        "signature": [
-          "(language: ",
-          "QueryLanguage",
-          ") => { query: string; language: ",
-          "QueryLanguage",
-          "; }"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "language",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.QueryLanguage",
-                "text": "QueryLanguage"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/query/lib/get_default_query.ts",
-              "lineNumber": 11
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/data/public/query/lib/get_default_query.ts",
-          "lineNumber": 11
-        },
         "initialIsOpen": false
       },
       {
@@ -1005,7 +1006,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-              "lineNumber": 27
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/sync_state_with_url.ts#L27"
             }
           },
           {
@@ -1024,7 +1026,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-              "lineNumber": 28
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/sync_state_with_url.ts#L28"
             }
           }
         ],
@@ -1064,10 +1067,54 @@
         "label": "syncQueryStateWithUrl",
         "source": {
           "path": "src/plugins/data/public/query/state_sync/sync_state_with_url.ts",
-          "lineNumber": 26
+          "lineNumber": 26,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/sync_state_with_url.ts#L26"
         },
         "tags": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.getDefaultQuery",
+        "type": "Function",
+        "label": "getDefaultQuery",
+        "signature": [
+          "(language: ",
+          "QueryLanguage",
+          ") => { query: string; language: ",
+          "QueryLanguage",
+          "; }"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "CompoundType",
+            "label": "language",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.QueryLanguage",
+                "text": "QueryLanguage"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/query/lib/get_default_query.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/lib/get_default_query.ts#L11"
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/data/public/query/lib/get_default_query.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/lib/get_default_query.ts#L11"
+        },
         "initialIsOpen": false
       }
     ],
@@ -1089,7 +1136,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 15
+              "lineNumber": 15,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/types.ts#L15"
             },
             "signature": [
               {
@@ -1110,7 +1158,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/types.ts#L16"
             },
             "signature": [
               {
@@ -1131,7 +1180,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 17
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/types.ts#L17"
             },
             "signature": [
               {
@@ -1152,7 +1202,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 18
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/types.ts#L18"
             },
             "signature": [
               {
@@ -1168,59 +1219,8 @@
         ],
         "source": {
           "path": "src/plugins/data/public/query/state_sync/types.ts",
-          "lineNumber": 14
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.QueryStateChange",
-        "type": "Interface",
-        "label": "QueryStateChange",
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-public.QueryStateChange",
-            "text": "QueryStateChange"
-          },
-          " extends QueryStateChangePartial"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.QueryStateChange.appFilters",
-            "type": "CompoundType",
-            "label": "appFilters",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 26
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.QueryStateChange.globalFilters",
-            "type": "CompoundType",
-            "label": "globalFilters",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/public/query/state_sync/types.ts",
-              "lineNumber": 27
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/data/public/query/state_sync/types.ts",
-          "lineNumber": 25
+          "lineNumber": 14,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/types.ts#L14"
         },
         "initialIsOpen": false
       },
@@ -1239,7 +1239,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L16"
             }
           },
           {
@@ -1250,7 +1251,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 17
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L17"
             },
             "signature": [
               {
@@ -1265,7 +1267,8 @@
         ],
         "source": {
           "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 15
+          "lineNumber": 15,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -1284,7 +1287,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 29
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L29"
             },
             "signature": [
               "(attributes: ",
@@ -1314,7 +1318,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 33
+              "lineNumber": 33,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L33"
             },
             "signature": [
               "() => Promise<",
@@ -1336,7 +1341,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 34
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L34"
             },
             "signature": [
               "(searchText?: string | undefined, perPage?: number | undefined, activePage?: number | undefined) => Promise<{ total: number; queries: ",
@@ -1358,7 +1364,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 39
+              "lineNumber": 39,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L39"
             },
             "signature": [
               "(id: string) => Promise<",
@@ -1380,7 +1387,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 40
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L40"
             },
             "signature": [
               "(id: string) => Promise<{}>"
@@ -1394,7 +1402,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/types.ts",
-              "lineNumber": 41
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L41"
             },
             "signature": [
               "() => Promise<number>"
@@ -1403,13 +1412,85 @@
         ],
         "source": {
           "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 28
+          "lineNumber": 28,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L28"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.QueryStateChange",
+        "type": "Interface",
+        "label": "QueryStateChange",
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryStateChange",
+            "text": "QueryStateChange"
+          },
+          " extends QueryStateChangePartial"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.QueryStateChange.appFilters",
+            "type": "CompoundType",
+            "label": "appFilters",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/query/state_sync/types.ts",
+              "lineNumber": 26,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/types.ts#L26"
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.QueryStateChange.globalFilters",
+            "type": "CompoundType",
+            "label": "globalFilters",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/query/state_sync/types.ts",
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/types.ts#L27"
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/public/query/state_sync/types.ts",
+          "lineNumber": 25,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/state_sync/types.ts#L25"
         },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "id": "def-public.SavedQueryTimeFilter",
+        "type": "Type",
+        "label": "SavedQueryTimeFilter",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/public/query/saved_query/types.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/saved_query/types.ts#L11"
+        },
+        "signature": [
+          "TimeRange & { refreshInterval: RefreshInterval; }"
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.InputTimeRange",
         "type": "Type",
@@ -1418,7 +1499,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/public/query/timefilter/types.ts",
-          "lineNumber": 19
+          "lineNumber": 19,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/types.ts#L19"
         },
         "signature": [
           {
@@ -1433,6 +1515,47 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.TimefilterContract",
+        "type": "Type",
+        "label": "TimefilterContract",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/public/query/timefilter/timefilter.ts",
+          "lineNumber": 240,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/timefilter.ts#L240"
+        },
+        "signature": [
+          "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; getEnabledUpdated$: () => ",
+          "Observable",
+          "<boolean>; getTimeUpdate$: () => ",
+          "Observable",
+          "<unknown>; getRefreshIntervalUpdate$: () => ",
+          "Observable",
+          "<unknown>; getAutoRefreshFetch$: () => ",
+          "Observable",
+          "<unknown>; getFetch$: () => ",
+          "Observable"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.TimeHistoryContract",
+        "type": "Type",
+        "label": "TimeHistoryContract",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/public/query/timefilter/time_history.ts",
+          "lineNumber": 47,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/timefilter/time_history.ts#L47"
+        },
+        "signature": [
+          "{ add: (time: TimeRange) => void; get: () => TimeRange[]; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.QueryStart",
         "type": "Type",
         "label": "QueryStart",
@@ -1440,7 +1563,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/public/query/query_service.ts",
-          "lineNumber": 103
+          "lineNumber": 103,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/public/query/query_service.ts#L103"
         },
         "signature": [
           "{ addToQueryLog: (appName: string, { language, query }: ",
@@ -1479,60 +1603,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SavedQueryTimeFilter",
-        "type": "Type",
-        "label": "SavedQueryTimeFilter",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/saved_query/types.ts",
-          "lineNumber": 11
-        },
-        "signature": [
-          "TimeRange & { refreshInterval: RefreshInterval; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.TimefilterContract",
-        "type": "Type",
-        "label": "TimefilterContract",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/timefilter.ts",
-          "lineNumber": 240
-        },
-        "signature": [
-          "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; getEnabledUpdated$: () => ",
-          "Observable",
-          "<boolean>; getTimeUpdate$: () => ",
-          "Observable",
-          "<unknown>; getRefreshIntervalUpdate$: () => ",
-          "Observable",
-          "<unknown>; getAutoRefreshFetch$: () => ",
-          "Observable",
-          "<unknown>; getFetch$: () => ",
-          "Observable"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.TimeHistoryContract",
-        "type": "Type",
-        "label": "TimeHistoryContract",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "src/plugins/data/public/query/timefilter/time_history.ts",
-          "lineNumber": 47
-        },
-        "signature": [
-          "{ add: (time: TimeRange) => void; get: () => TimeRange[]; }"
-        ],
-        "initialIsOpen": false
       }
     ],
     "objects": []
@@ -1549,68 +1619,194 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-common.calculateBounds",
+        "id": "def-common.dedupFilters",
         "type": "Function",
-        "label": "calculateBounds",
-        "signature": [
-          "(timeRange: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          ", options: CalculateBoundsOptions) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRangeBounds",
-            "text": "TimeRangeBounds"
-          }
-        ],
-        "description": [],
         "children": [
           {
+            "type": "Array",
+            "label": "existingFilters",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
+              "lineNumber": 23,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/dedup_filters.ts#L23"
+            }
+          },
+          {
+            "type": "Array",
+            "label": "filters",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/dedup_filters.ts#L24"
+            }
+          },
+          {
             "type": "Object",
-            "label": "timeRange",
+            "label": "comparatorOptions",
             "isRequired": true,
             "signature": [
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
+                "section": "def-common.FilterCompareOptions",
+                "text": "FilterCompareOptions"
               }
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 17
-            }
-          },
-          {
-            "type": "Object",
-            "label": "options",
-            "isRequired": true,
-            "signature": [
-              "CalculateBoundsOptions"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 18
+              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/dedup_filters.ts#L25"
             }
           }
         ],
-        "tags": [],
-        "returnComment": [],
+        "signature": [
+          "(existingFilters: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], filters: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], comparatorOptions?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.FilterCompareOptions",
+            "text": "FilterCompareOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
+        ],
+        "description": [
+          "\nCombine 2 filter collections, removing duplicates\n"
+        ],
+        "label": "dedupFilters",
         "source": {
-          "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 16
+          "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
+          "lineNumber": 22,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/dedup_filters.ts#L22"
         },
+        "tags": [],
+        "returnComment": [
+          "An array of filters that were not in existing"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.uniqFilters",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Array",
+            "label": "filters",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
+              "lineNumber": 21,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/uniq_filters.ts#L21"
+            }
+          },
+          {
+            "type": "Any",
+            "label": "comparatorOptions",
+            "isRequired": true,
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
+              "lineNumber": 21,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/uniq_filters.ts#L21"
+            }
+          }
+        ],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], comparatorOptions?: any) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]"
+        ],
+        "description": [
+          "\nRemove duplicate filters from an array of filters\n"
+        ],
+        "label": "uniqFilters",
+        "source": {
+          "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
+          "lineNumber": 21,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/uniq_filters.ts#L21"
+        },
+        "tags": [],
+        "returnComment": [
+          "The original filters array with duplicates removed"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1642,7 +1838,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 65
+              "lineNumber": 65,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L65"
             }
           },
           {
@@ -1670,7 +1867,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 66
+              "lineNumber": 66,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L66"
             }
           },
           {
@@ -1689,7 +1887,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 67
+              "lineNumber": 67,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L67"
             }
           }
         ],
@@ -1741,7 +1940,8 @@
         "label": "compareFilters",
         "source": {
           "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 64
+          "lineNumber": 64,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L64"
         },
         "tags": [],
         "returnComment": [
@@ -1750,116 +1950,71 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.dedupFilters",
+        "id": "def-common.calculateBounds",
         "type": "Function",
+        "label": "calculateBounds",
+        "signature": [
+          "(timeRange: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", options: CalculateBoundsOptions) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRangeBounds",
+            "text": "TimeRangeBounds"
+          }
+        ],
+        "description": [],
         "children": [
           {
-            "type": "Array",
-            "label": "existingFilters",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 23
-            }
-          },
-          {
-            "type": "Array",
-            "label": "filters",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 24
-            }
-          },
-          {
             "type": "Object",
-            "label": "comparatorOptions",
+            "label": "timeRange",
             "isRequired": true,
             "signature": [
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataQueryPluginApi",
-                "section": "def-common.FilterCompareOptions",
-                "text": "FilterCompareOptions"
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
               }
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-              "lineNumber": 25
+              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L17"
+            }
+          },
+          {
+            "type": "Object",
+            "label": "options",
+            "isRequired": true,
+            "signature": [
+              "CalculateBoundsOptions"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L18"
             }
           }
         ],
-        "signature": [
-          "(existingFilters: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[], filters: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[], comparatorOptions?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.FilterCompareOptions",
-            "text": "FilterCompareOptions"
-          },
-          ") => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]"
-        ],
-        "description": [
-          "\nCombine 2 filter collections, removing duplicates\n"
-        ],
-        "label": "dedupFilters",
-        "source": {
-          "path": "src/plugins/data/common/query/filter_manager/dedup_filters.ts",
-          "lineNumber": 22
-        },
         "tags": [],
-        "returnComment": [
-          "An array of filters that were not in existing"
-        ],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/data/common/query/timefilter/get_time.ts",
+          "lineNumber": 16,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L16"
+        },
         "initialIsOpen": false
       },
       {
@@ -1902,7 +2057,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 27
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L27"
             }
           },
           {
@@ -1920,7 +2076,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 28
+                  "lineNumber": 28,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L28"
                 },
                 "signature": [
                   "Date | undefined"
@@ -1929,7 +2086,8 @@
             ],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 28
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L28"
             }
           }
         ],
@@ -1937,7 +2095,8 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 26
+          "lineNumber": 26,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -1991,7 +2150,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 38
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L38"
             }
           },
           {
@@ -2010,7 +2170,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 39
+              "lineNumber": 39,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L39"
             }
           },
           {
@@ -2028,7 +2189,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 40
+                  "lineNumber": 40,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L40"
                 },
                 "signature": [
                   "Date | undefined"
@@ -2042,7 +2204,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-                  "lineNumber": 40
+                  "lineNumber": 40,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L40"
                 },
                 "signature": [
                   "string | undefined"
@@ -2051,7 +2214,8 @@
             ],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-              "lineNumber": 40
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L40"
             }
           }
         ],
@@ -2059,46 +2223,9 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/get_time.ts",
-          "lineNumber": 37
+          "lineNumber": 37,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/get_time.ts#L37"
         },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.isQuery",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Unknown",
-            "label": "x",
-            "isRequired": true,
-            "signature": [
-              "unknown"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/is_query.ts",
-              "lineNumber": 11
-            }
-          }
-        ],
-        "signature": [
-          "(x: unknown) => x is ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          }
-        ],
-        "description": [],
-        "label": "isQuery",
-        "source": {
-          "path": "src/plugins/data/common/query/is_query.ts",
-          "lineNumber": 11
-        },
-        "tags": [],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -2115,7 +2242,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
-              "lineNumber": 11
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/is_time_range.ts#L11"
             }
           }
         ],
@@ -2133,81 +2261,51 @@
         "label": "isTimeRange",
         "source": {
           "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
-          "lineNumber": 11
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/is_time_range.ts#L11"
         },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
-        "id": "def-common.uniqFilters",
+        "id": "def-common.isQuery",
         "type": "Function",
         "children": [
           {
-            "type": "Array",
-            "label": "filters",
+            "type": "Unknown",
+            "label": "x",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
+              "unknown"
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-              "lineNumber": 21
-            }
-          },
-          {
-            "type": "Any",
-            "label": "comparatorOptions",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-              "lineNumber": 21
+              "path": "src/plugins/data/common/query/is_query.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/is_query.ts#L11"
             }
           }
         ],
         "signature": [
-          "(filters: ",
+          "(x: unknown) => x is ",
           {
             "pluginId": "data",
             "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[], comparatorOptions?: any) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]"
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          }
         ],
-        "description": [
-          "\nRemove duplicate filters from an array of filters\n"
-        ],
-        "label": "uniqFilters",
+        "description": [],
+        "label": "isQuery",
         "source": {
-          "path": "src/plugins/data/common/query/filter_manager/uniq_filters.ts",
-          "lineNumber": 21
+          "path": "src/plugins/data/common/query/is_query.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/is_query.ts#L11"
         },
         "tags": [],
-        "returnComment": [
-          "The original filters array with duplicates removed"
-        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -2227,7 +2325,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 13
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L13"
             },
             "signature": [
               "boolean | undefined"
@@ -2241,7 +2340,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 14
+              "lineNumber": 14,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L14"
             },
             "signature": [
               "boolean | undefined"
@@ -2255,7 +2355,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 15
+              "lineNumber": 15,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L15"
             },
             "signature": [
               "boolean | undefined"
@@ -2269,7 +2370,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L16"
             },
             "signature": [
               "boolean | undefined"
@@ -2283,7 +2385,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 17
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L17"
             },
             "signature": [
               "boolean | undefined"
@@ -2292,7 +2395,8 @@
         ],
         "source": {
           "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 12
+          "lineNumber": 12,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L12"
         },
         "initialIsOpen": false
       },
@@ -2311,7 +2415,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 12
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/types.ts#L12"
             }
           },
           {
@@ -2322,13 +2427,15 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 13
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/types.ts#L13"
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 11
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/types.ts#L11"
         },
         "initialIsOpen": false
       },
@@ -2347,7 +2454,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 24
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/types.ts#L24"
             },
             "signature": [
               "moment.Moment | undefined"
@@ -2361,7 +2469,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/timefilter/types.ts",
-              "lineNumber": 25
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/types.ts#L25"
             },
             "signature": [
               "moment.Moment | undefined"
@@ -2370,7 +2479,8 @@
         ],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 23
+          "lineNumber": 23,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/types.ts#L23"
         },
         "initialIsOpen": false
       }
@@ -2385,7 +2495,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/query/types.ts",
-          "lineNumber": 12
+          "lineNumber": 12,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/types.ts#L12"
         },
         "signature": [
           "{ query: string | { [key: string]: any; }; language: string; }"
@@ -2400,7 +2511,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/query/timefilter/types.ts",
-          "lineNumber": 17
+          "lineNumber": 17,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/timefilter/types.ts#L17"
         },
         "signature": [
           "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
@@ -2422,7 +2534,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 24
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L24"
             },
             "signature": [
               "true"
@@ -2436,7 +2549,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 25
+              "lineNumber": 25,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L25"
             },
             "signature": [
               "true"
@@ -2450,7 +2564,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 26
+              "lineNumber": 26,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L26"
             },
             "signature": [
               "true"
@@ -2464,7 +2579,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 27
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L27"
             },
             "signature": [
               "true"
@@ -2478,7 +2594,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-              "lineNumber": 28
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L28"
             },
             "signature": [
               "true"
@@ -2491,7 +2608,8 @@
         "label": "COMPARE_ALL_OPTIONS",
         "source": {
           "path": "src/plugins/data/common/query/filter_manager/compare_filters.ts",
-          "lineNumber": 23
+          "lineNumber": 23,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/query/filter_manager/compare_filters.ts#L23"
         },
         "initialIsOpen": false
       }

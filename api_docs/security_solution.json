@@ -52,7 +52,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 75
+                  "lineNumber": 75,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L75"
                 }
               }
             ],
@@ -60,7 +61,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 75
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L75"
             }
           },
           {
@@ -144,7 +146,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 98
+                  "lineNumber": 98,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L98"
                 }
               },
               {
@@ -163,7 +166,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 98
+                  "lineNumber": 98,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L98"
                 }
               }
             ],
@@ -171,7 +175,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 98
+              "lineNumber": 98,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L98"
             }
           },
           {
@@ -215,7 +220,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 348
+                  "lineNumber": 348,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L348"
                 }
               },
               {
@@ -234,7 +240,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 348
+                  "lineNumber": 348,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L348"
                 }
               }
             ],
@@ -242,7 +249,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 348
+              "lineNumber": 348,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L348"
             }
           },
           {
@@ -258,13 +266,15 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 393
+              "lineNumber": 393,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L393"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-          "lineNumber": 72
+          "lineNumber": 72,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/plugin.tsx#L72"
         },
         "initialIsOpen": false
       }
@@ -289,7 +299,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/security_solution/public/types.ts",
-            "lineNumber": 69
+            "lineNumber": 69,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/types.ts#L69"
           },
           "signature": [
             "() => Promise<",
@@ -306,7 +317,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/security_solution/public/types.ts",
-        "lineNumber": 68
+        "lineNumber": 68,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/types.ts#L68"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -320,7 +332,8 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/public/types.ts",
-        "lineNumber": 72
+        "lineNumber": 72,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/public/types.ts#L72"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -328,79 +341,6 @@
   },
   "server": {
     "classes": [
-      {
-        "id": "def-server.AppClient",
-        "type": "Class",
-        "tags": [],
-        "label": "AppClient",
-        "description": [],
-        "children": [
-          {
-            "id": "def-server.AppClient.Unnamed",
-            "type": "Function",
-            "label": "Constructor",
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "string",
-                "label": "spaceId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/security_solution/server/client/client.ts",
-                  "lineNumber": 13
-                }
-              },
-              {
-                "type": "Object",
-                "label": "config",
-                "isRequired": true,
-                "signature": [
-                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; packagerTaskInterval: string; validateArtifactDownloads: boolean; }>"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/security_solution/server/client/client.ts",
-                  "lineNumber": 13
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/client/client.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "id": "def-server.AppClient.getSignalsIndex",
-            "type": "Function",
-            "children": [],
-            "signature": [
-              "() => string"
-            ],
-            "description": [],
-            "label": "getSignalsIndex",
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/client/client.ts",
-              "lineNumber": 19
-            },
-            "tags": [],
-            "returnComment": []
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/client/client.ts",
-          "lineNumber": 10
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-server.Plugin",
         "type": "Class",
@@ -451,7 +391,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 144
+                  "lineNumber": 144,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L144"
                 }
               }
             ],
@@ -459,7 +400,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 144
+              "lineNumber": 144,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L144"
             }
           },
           {
@@ -536,7 +478,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 156
+                  "lineNumber": 156,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L156"
                 }
               },
               {
@@ -555,7 +498,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 156
+                  "lineNumber": 156,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L156"
                 }
               }
             ],
@@ -563,7 +507,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 156
+              "lineNumber": 156,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L156"
             }
           },
           {
@@ -607,7 +552,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 336
+                  "lineNumber": 336,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L336"
                 }
               },
               {
@@ -626,7 +572,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 336
+                  "lineNumber": 336,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L336"
                 }
               }
             ],
@@ -634,7 +581,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 336
+              "lineNumber": 336,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L336"
             }
           },
           {
@@ -650,18 +598,660 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 397
+              "lineNumber": 397,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L397"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/plugin.ts",
-          "lineNumber": 128
+          "lineNumber": 128,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L128"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.AppClient",
+        "type": "Class",
+        "tags": [],
+        "label": "AppClient",
+        "description": [],
+        "children": [
+          {
+            "id": "def-server.AppClient.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "spaceId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                  "lineNumber": 13,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/client/client.ts#L13"
+                }
+              },
+              {
+                "type": "Object",
+                "label": "config",
+                "isRequired": true,
+                "signature": [
+                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; packagerTaskInterval: string; validateArtifactDownloads: boolean; }>"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                  "lineNumber": 13,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/client/client.ts#L13"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/client/client.ts",
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/client/client.ts#L13"
+            }
+          },
+          {
+            "id": "def-server.AppClient.getSignalsIndex",
+            "type": "Function",
+            "children": [],
+            "signature": [
+              "() => string"
+            ],
+            "description": [],
+            "label": "getSignalsIndex",
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/client/client.ts",
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/client/client.ts#L19"
+            },
+            "tags": [],
+            "returnComment": []
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/client/client.ts",
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/client/client.ts#L10"
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
+      {
+        "id": "def-server.deleteTemplate",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<",
+              "IndicesDeleteTemplateParams",
+              ", unknown>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts#L12"
+            }
+          },
+          {
+            "type": "string",
+            "label": "name",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts#L13"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<",
+          "IndicesDeleteTemplateParams",
+          ", unknown>, name: string) => Promise<unknown>"
+        ],
+        "description": [],
+        "label": "deleteTemplate",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts#L11"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.deletePolicy",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<{ path: string; method: \"DELETE\"; }, unknown>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts#L11"
+            }
+          },
+          {
+            "type": "string",
+            "label": "policy",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts",
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts#L12"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<{ path: string; method: \"DELETE\"; }, unknown>, policy: string) => Promise<unknown>"
+        ],
+        "description": [],
+        "label": "deletePolicy",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts",
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts#L10"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.deleteAllIndex",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<",
+              "IndicesDeleteParams",
+              ", Promise<any>>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts#L12"
+            }
+          },
+          {
+            "type": "string",
+            "label": "pattern",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts#L13"
+            }
+          },
+          {
+            "type": "number",
+            "label": "maxAttempts",
+            "isRequired": true,
+            "signature": [
+              "number"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
+              "lineNumber": 14,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts#L14"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<",
+          "IndicesDeleteParams",
+          ", Promise<any>>, pattern: string, maxAttempts?: number) => Promise<boolean>"
+        ],
+        "description": [],
+        "label": "deleteAllIndex",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts#L11"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.setPolicy",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<{ path: string; method: \"PUT\"; body: unknown; }, unknown>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts#L11"
+            }
+          },
+          {
+            "type": "string",
+            "label": "policy",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts",
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts#L12"
+            }
+          },
+          {
+            "type": "Unknown",
+            "label": "body",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts",
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts#L13"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<{ path: string; method: \"PUT\"; body: unknown; }, unknown>, policy: string, body: unknown) => Promise<unknown>"
+        ],
+        "description": [],
+        "label": "setPolicy",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts",
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts#L10"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.setTemplate",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<",
+              "IndicesPutTemplateParams",
+              ", unknown>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts#L12"
+            }
+          },
+          {
+            "type": "string",
+            "label": "name",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts#L13"
+            }
+          },
+          {
+            "type": "Unknown",
+            "label": "body",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
+              "lineNumber": 14,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts#L14"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<",
+          "IndicesPutTemplateParams",
+          ", unknown>, name: string, body: unknown) => Promise<unknown>"
+        ],
+        "description": [],
+        "label": "setTemplate",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts#L11"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.getTemplateExists",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<",
+              "IndicesExistsTemplateParams",
+              ", boolean>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts#L12"
+            }
+          },
+          {
+            "type": "string",
+            "label": "template",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts#L13"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<",
+          "IndicesExistsTemplateParams",
+          ", boolean>, template: string) => Promise<boolean>"
+        ],
+        "description": [],
+        "label": "getTemplateExists",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts#L11"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.getPolicyExists",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<{ path: string; method: \"GET\"; }, unknown>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts#L11"
+            }
+          },
+          {
+            "type": "string",
+            "label": "policy",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts",
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts#L12"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<{ path: string; method: \"GET\"; }, unknown>, policy: string) => Promise<boolean>"
+        ],
+        "description": [],
+        "label": "getPolicyExists",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts",
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts#L10"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.createBootstrapIndex",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<{ path: string; method: \"PUT\"; body: unknown; }, boolean>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts",
+              "lineNumber": 14,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts#L14"
+            }
+          },
+          {
+            "type": "string",
+            "label": "index",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts",
+              "lineNumber": 15,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts#L15"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<{ path: string; method: \"PUT\"; body: unknown; }, boolean>, index: string) => Promise<unknown>"
+        ],
+        "description": [],
+        "label": "createBootstrapIndex",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts",
+          "lineNumber": 13,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts#L13"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.getIndexExists",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "callWithRequest",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.CallWithRequest",
+                "text": "CallWithRequest"
+              },
+              "<{ index: string; size: number; terminate_after: number; allow_no_indices: boolean; }, { _shards: { total: number; }; }>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts#L11"
+            }
+          },
+          {
+            "type": "string",
+            "label": "index",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts",
+              "lineNumber": 15,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts#L15"
+            }
+          }
+        ],
+        "signature": [
+          "(callWithRequest: ",
+          "CallWithRequest",
+          "<{ index: string; size: number; terminate_after: number; allow_no_indices: boolean; }, { _shards: { total: number; }; }>, index: string) => Promise<boolean>"
+        ],
+        "description": [],
+        "label": "getIndexExists",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts",
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts#L10"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.buildRouteValidation",
         "type": "Function",
@@ -676,7 +1266,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/utils/build_validation/route_validation.ts",
-              "lineNumber": 31
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/utils/build_validation/route_validation.ts#L31"
             }
           }
         ],
@@ -699,7 +1290,50 @@
         "label": "buildRouteValidation",
         "source": {
           "path": "x-pack/plugins/security_solution/server/utils/build_validation/route_validation.ts",
-          "lineNumber": 30
+          "lineNumber": 30,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/utils/build_validation/route_validation.ts#L30"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.transformError",
+        "type": "Function",
+        "children": [
+          {
+            "type": "CompoundType",
+            "label": "err",
+            "isRequired": true,
+            "signature": [
+              "Error & Partial<",
+              "ResponseError",
+              "<Record<string, any>, ",
+              "Context",
+              ">>"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts",
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts#L29"
+            }
+          }
+        ],
+        "signature": [
+          "(err: Error & Partial<",
+          "ResponseError",
+          "<Record<string, any>, ",
+          "Context",
+          ">>) => ",
+          "OutputError"
+        ],
+        "description": [],
+        "label": "transformError",
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts",
+          "lineNumber": 29,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts#L29"
         },
         "tags": [],
         "returnComment": [],
@@ -752,7 +1386,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts",
-              "lineNumber": 291
+              "lineNumber": 291,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts#L291"
             }
           }
         ],
@@ -784,403 +1419,8 @@
         "label": "buildSiemResponse",
         "source": {
           "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts",
-          "lineNumber": 291
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createBootstrapIndex",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ path: string; method: \"PUT\"; body: unknown; }, boolean>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts",
-              "lineNumber": 14
-            }
-          },
-          {
-            "type": "string",
-            "label": "index",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts",
-              "lineNumber": 15
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ path: string; method: \"PUT\"; body: unknown; }, boolean>, index: string) => Promise<unknown>"
-        ],
-        "description": [],
-        "label": "createBootstrapIndex",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/create_bootstrap_index.ts",
-          "lineNumber": 13
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.deleteAllIndex",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<",
-              "IndicesDeleteParams",
-              ", Promise<any>>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "type": "string",
-            "label": "pattern",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "type": "number",
-            "label": "maxAttempts",
-            "isRequired": true,
-            "signature": [
-              "number"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
-              "lineNumber": 14
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<",
-          "IndicesDeleteParams",
-          ", Promise<any>>, pattern: string, maxAttempts?: number) => Promise<boolean>"
-        ],
-        "description": [],
-        "label": "deleteAllIndex",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_all_index.ts",
-          "lineNumber": 11
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.deletePolicy",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ path: string; method: \"DELETE\"; }, unknown>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "type": "string",
-            "label": "policy",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts",
-              "lineNumber": 12
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ path: string; method: \"DELETE\"; }, unknown>, policy: string) => Promise<unknown>"
-        ],
-        "description": [],
-        "label": "deletePolicy",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_policy.ts",
-          "lineNumber": 10
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.deleteTemplate",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<",
-              "IndicesDeleteTemplateParams",
-              ", unknown>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "type": "string",
-            "label": "name",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
-              "lineNumber": 13
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<",
-          "IndicesDeleteTemplateParams",
-          ", unknown>, name: string) => Promise<unknown>"
-        ],
-        "description": [],
-        "label": "deleteTemplate",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/delete_template.ts",
-          "lineNumber": 11
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.getIndexExists",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ index: string; size: number; terminate_after: number; allow_no_indices: boolean; }, { _shards: { total: number; }; }>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "type": "string",
-            "label": "index",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts",
-              "lineNumber": 15
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ index: string; size: number; terminate_after: number; allow_no_indices: boolean; }, { _shards: { total: number; }; }>, index: string) => Promise<boolean>"
-        ],
-        "description": [],
-        "label": "getIndexExists",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_index_exists.ts",
-          "lineNumber": 10
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.getPolicyExists",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ path: string; method: \"GET\"; }, unknown>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "type": "string",
-            "label": "policy",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts",
-              "lineNumber": 12
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ path: string; method: \"GET\"; }, unknown>, policy: string) => Promise<boolean>"
-        ],
-        "description": [],
-        "label": "getPolicyExists",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_policy_exists.ts",
-          "lineNumber": 10
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.getTemplateExists",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<",
-              "IndicesExistsTemplateParams",
-              ", boolean>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "type": "string",
-            "label": "template",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
-              "lineNumber": 13
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<",
-          "IndicesExistsTemplateParams",
-          ", boolean>, template: string) => Promise<boolean>"
-        ],
-        "description": [],
-        "label": "getTemplateExists",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/get_template_exists.ts",
-          "lineNumber": 11
+          "lineNumber": 291,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts#L291"
         },
         "tags": [],
         "returnComment": [],
@@ -1207,7 +1447,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/privileges/read_privileges.ts",
-              "lineNumber": 11
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/privileges/read_privileges.ts#L11"
             }
           },
           {
@@ -1220,7 +1461,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/privileges/read_privileges.ts",
-              "lineNumber": 12
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/privileges/read_privileges.ts#L12"
             }
           }
         ],
@@ -1233,183 +1475,8 @@
         "label": "readPrivileges",
         "source": {
           "path": "x-pack/plugins/security_solution/server/lib/detection_engine/privileges/read_privileges.ts",
-          "lineNumber": 10
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.setPolicy",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<{ path: string; method: \"PUT\"; body: unknown; }, unknown>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "type": "string",
-            "label": "policy",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "type": "Unknown",
-            "label": "body",
-            "isRequired": true,
-            "signature": [
-              "unknown"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts",
-              "lineNumber": 13
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<{ path: string; method: \"PUT\"; body: unknown; }, unknown>, policy: string, body: unknown) => Promise<unknown>"
-        ],
-        "description": [],
-        "label": "setPolicy",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_policy.ts",
-          "lineNumber": 10
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.setTemplate",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Function",
-            "label": "callWithRequest",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "security",
-                "scope": "common",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-common.CallWithRequest",
-                "text": "CallWithRequest"
-              },
-              "<",
-              "IndicesPutTemplateParams",
-              ", unknown>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
-              "lineNumber": 12
-            }
-          },
-          {
-            "type": "string",
-            "label": "name",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
-              "lineNumber": 13
-            }
-          },
-          {
-            "type": "Unknown",
-            "label": "body",
-            "isRequired": true,
-            "signature": [
-              "unknown"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
-              "lineNumber": 14
-            }
-          }
-        ],
-        "signature": [
-          "(callWithRequest: ",
-          "CallWithRequest",
-          "<",
-          "IndicesPutTemplateParams",
-          ", unknown>, name: string, body: unknown) => Promise<unknown>"
-        ],
-        "description": [],
-        "label": "setTemplate",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/index/set_template.ts",
-          "lineNumber": 11
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.transformError",
-        "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "err",
-            "isRequired": true,
-            "signature": [
-              "Error & Partial<",
-              "ResponseError",
-              "<Record<string, any>, ",
-              "Context",
-              ">>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts",
-              "lineNumber": 29
-            }
-          }
-        ],
-        "signature": [
-          "(err: Error & Partial<",
-          "ResponseError",
-          "<Record<string, any>, ",
-          "Context",
-          ">>) => ",
-          "OutputError"
-        ],
-        "description": [],
-        "label": "transformError",
-        "source": {
-          "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts",
-          "lineNumber": 29
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/lib/detection_engine/privileges/read_privileges.ts#L10"
         },
         "tags": [],
         "returnComment": [],
@@ -1432,7 +1499,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/types.ts",
-              "lineNumber": 18
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/types.ts#L18"
             },
             "signature": [
               "() => ",
@@ -1448,7 +1516,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/server/types.ts",
-          "lineNumber": 17
+          "lineNumber": 17,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/types.ts#L17"
         },
         "initialIsOpen": false
       }
@@ -1463,7 +1532,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/server/config.ts",
-          "lineNumber": 43
+          "lineNumber": 43,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/config.ts#L43"
         },
         "signature": [
           "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; readonly packagerTaskInterval: string; readonly validateArtifactDownloads: boolean; }"
@@ -1481,7 +1551,8 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 105
+        "lineNumber": 105,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L105"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1495,7 +1566,8 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 107
+        "lineNumber": 107,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/server/plugin.ts#L107"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1504,37 +1576,6 @@
   "common": {
     "classes": [],
     "functions": [
-      {
-        "id": "def-common.addIdToItem",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Uncategorized",
-            "label": "item",
-            "isRequired": true,
-            "signature": [
-              "NotArray<T>"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
-              "lineNumber": 20
-            }
-          }
-        ],
-        "signature": [
-          "<T>(item: NotArray<T>) => T"
-        ],
-        "description": [],
-        "label": "addIdToItem",
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
-          "lineNumber": 20
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "id": "def-common.DefaultArray",
         "type": "Function",
@@ -1549,7 +1590,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts#L16"
             }
           }
         ],
@@ -1570,7 +1612,8 @@
         "label": "DefaultArray",
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts",
-          "lineNumber": 16
+          "lineNumber": 16,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/detection_engine/schemas/types/default_array.ts#L16"
         },
         "tags": [],
         "returnComment": [],
@@ -1590,7 +1633,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-              "lineNumber": 30
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/exact_check.ts#L30"
             }
           },
           {
@@ -1606,7 +1650,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-              "lineNumber": 31
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/exact_check.ts#L31"
             }
           }
         ],
@@ -1627,59 +1672,8 @@
         "label": "exactCheck",
         "source": {
           "path": "x-pack/plugins/security_solution/common/exact_check.ts",
-          "lineNumber": 29
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.foldLeftRight",
-        "type": "Function",
-        "label": "foldLeftRight",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 29
-        },
-        "signature": [
-          "<T>(ma: ",
-          "Either",
-          "<",
-          "Errors",
-          ", unknown>) => Message<unknown>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.formatErrors",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "errors",
-            "isRequired": true,
-            "signature": [
-              "Errors"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/format_errors.ts",
-              "lineNumber": 11
-            }
-          }
-        ],
-        "signature": [
-          "(errors: ",
-          "Errors",
-          ") => string[]"
-        ],
-        "description": [],
-        "label": "formatErrors",
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/format_errors.ts",
-          "lineNumber": 11
+          "lineNumber": 29,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/exact_check.ts#L29"
         },
         "tags": [],
         "returnComment": [],
@@ -1702,7 +1696,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-              "lineNumber": 36
+              "lineNumber": 36,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/test_utils.ts#L36"
             }
           }
         ],
@@ -1719,7 +1714,200 @@
         "label": "getPaths",
         "source": {
           "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 36
+          "lineNumber": 36,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/test_utils.ts#L36"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.foldLeftRight",
+        "type": "Function",
+        "label": "foldLeftRight",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/test_utils.ts",
+          "lineNumber": 29,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/test_utils.ts#L29"
+        },
+        "signature": [
+          "<T>(ma: ",
+          "Either",
+          "<",
+          "Errors",
+          ", unknown>) => Message<unknown>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.removeExternalLinkText",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "str",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/test_utils.ts",
+              "lineNumber": 49,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/test_utils.ts#L49"
+            }
+          }
+        ],
+        "signature": [
+          "(str: string) => string"
+        ],
+        "description": [
+          "\nConvenience utility to remove text appended to links by EUI"
+        ],
+        "label": "removeExternalLinkText",
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/test_utils.ts",
+          "lineNumber": 49,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/test_utils.ts#L49"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.validate",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Uncategorized",
+            "label": "obj",
+            "isRequired": true,
+            "signature": [
+              "object"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/validate.ts",
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/validate.ts#L16"
+            }
+          },
+          {
+            "type": "Uncategorized",
+            "label": "schema",
+            "isRequired": true,
+            "signature": [
+              "T"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/validate.ts",
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/validate.ts#L17"
+            }
+          }
+        ],
+        "signature": [
+          "<T extends ",
+          "Mixed",
+          ">(obj: object, schema: T) => [",
+          "TypeOf",
+          "<T> | null, string | null]"
+        ],
+        "description": [],
+        "label": "validate",
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/validate.ts",
+          "lineNumber": 15,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/validate.ts#L15"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.validateEither",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Uncategorized",
+            "label": "schema",
+            "isRequired": true,
+            "signature": [
+              "T"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/validate.ts",
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/validate.ts#L30"
+            }
+          },
+          {
+            "type": "Uncategorized",
+            "label": "obj",
+            "isRequired": true,
+            "signature": [
+              "A"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/validate.ts",
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/validate.ts#L31"
+            }
+          }
+        ],
+        "signature": [
+          "<T extends ",
+          "Mixed",
+          ", A extends unknown>(schema: T, obj: A) => ",
+          "Either",
+          "<Error, A>"
+        ],
+        "description": [],
+        "label": "validateEither",
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/validate.ts",
+          "lineNumber": 29,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/validate.ts#L29"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.formatErrors",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Object",
+            "label": "errors",
+            "isRequired": true,
+            "signature": [
+              "Errors"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security_solution/common/format_errors.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/format_errors.ts#L11"
+            }
+          }
+        ],
+        "signature": [
+          "(errors: ",
+          "Errors",
+          ") => string[]"
+        ],
+        "description": [],
+        "label": "formatErrors",
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/format_errors.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/format_errors.ts#L11"
         },
         "tags": [],
         "returnComment": [],
@@ -1754,7 +1942,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts",
-              "lineNumber": 13
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts#L13"
             }
           }
         ],
@@ -1797,7 +1986,8 @@
         "label": "migratePackagePolicyToV7110",
         "source": {
           "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts",
-          "lineNumber": 12
+          "lineNumber": 12,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts#L12"
         },
         "tags": [],
         "returnComment": [],
@@ -1832,7 +2022,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts",
-              "lineNumber": 14
+              "lineNumber": 14,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts#L14"
             }
           }
         ],
@@ -1875,40 +2066,41 @@
         "label": "migratePackagePolicyToV7120",
         "source": {
           "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts",
-          "lineNumber": 13
+          "lineNumber": 13,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts#L13"
         },
         "tags": [],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
-        "id": "def-common.removeExternalLinkText",
+        "id": "def-common.addIdToItem",
         "type": "Function",
         "children": [
           {
-            "type": "string",
-            "label": "str",
+            "type": "Uncategorized",
+            "label": "item",
             "isRequired": true,
             "signature": [
-              "string"
+              "NotArray<T>"
             ],
             "description": [],
             "source": {
-              "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-              "lineNumber": 49
+              "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
+              "lineNumber": 20,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/add_remove_id_to_item.ts#L20"
             }
           }
         ],
         "signature": [
-          "(str: string) => string"
+          "<T>(item: NotArray<T>) => T"
         ],
-        "description": [
-          "\nConvenience utility to remove text appended to links by EUI"
-        ],
-        "label": "removeExternalLinkText",
+        "description": [],
+        "label": "addIdToItem",
         "source": {
-          "path": "x-pack/plugins/security_solution/common/test_utils.ts",
-          "lineNumber": 49
+          "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
+          "lineNumber": 20,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/add_remove_id_to_item.ts#L20"
         },
         "tags": [],
         "returnComment": [],
@@ -1928,7 +2120,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
-              "lineNumber": 34
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/add_remove_id_to_item.ts#L34"
             }
           }
         ],
@@ -1941,103 +2134,8 @@
         "label": "removeIdFromItem",
         "source": {
           "path": "x-pack/plugins/security_solution/common/add_remove_id_to_item.ts",
-          "lineNumber": 33
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.validate",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Uncategorized",
-            "label": "obj",
-            "isRequired": true,
-            "signature": [
-              "object"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "type": "Uncategorized",
-            "label": "schema",
-            "isRequired": true,
-            "signature": [
-              "T"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 17
-            }
-          }
-        ],
-        "signature": [
-          "<T extends ",
-          "Mixed",
-          ">(obj: object, schema: T) => [",
-          "TypeOf",
-          "<T> | null, string | null]"
-        ],
-        "description": [],
-        "label": "validate",
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/validate.ts",
-          "lineNumber": 15
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.validateEither",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Uncategorized",
-            "label": "schema",
-            "isRequired": true,
-            "signature": [
-              "T"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 30
-            }
-          },
-          {
-            "type": "Uncategorized",
-            "label": "obj",
-            "isRequired": true,
-            "signature": [
-              "A"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/validate.ts",
-              "lineNumber": 31
-            }
-          }
-        ],
-        "signature": [
-          "<T extends ",
-          "Mixed",
-          ", A extends unknown>(schema: T, obj: A) => ",
-          "Either",
-          "<Error, A>"
-        ],
-        "description": [],
-        "label": "validateEither",
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/validate.ts",
-          "lineNumber": 29
+          "lineNumber": 33,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/add_remove_id_to_item.ts#L33"
         },
         "tags": [],
         "returnComment": [],
@@ -2055,7 +2153,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts",
-          "lineNumber": 24
+          "lineNumber": 24,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts#L24"
         },
         "signature": [
           "number"
@@ -2066,19 +2165,20 @@
     "objects": [
       {
         "tags": [],
-        "id": "def-common.DefaultStringArray",
+        "id": "def-common.NonEmptyString",
         "type": "Object",
-        "label": "DefaultStringArray",
+        "label": "NonEmptyString",
         "description": [
-          "\nTypes the DefaultStringArray as:\n  - If undefined, then a default array will be set\n  - If an array is sent in, then the array will be validated to ensure all elements are a string"
+          "\nTypes the NonEmptyString as:\n  - A string that is not empty"
         ],
         "source": {
-          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_string_array.ts",
-          "lineNumber": 16
+          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/non_empty_string.ts",
+          "lineNumber": 15,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/detection_engine/schemas/types/non_empty_string.ts#L15"
         },
         "signature": [
           "Type",
-          "<string[], string[] | undefined, unknown>"
+          "<string, string, unknown>"
         ],
         "initialIsOpen": false
       },
@@ -2092,11 +2192,31 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_uuid.ts",
-          "lineNumber": 19
+          "lineNumber": 19,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/detection_engine/schemas/types/default_uuid.ts#L19"
         },
         "signature": [
           "Type",
           "<string, string | undefined, unknown>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.DefaultStringArray",
+        "type": "Object",
+        "label": "DefaultStringArray",
+        "description": [
+          "\nTypes the DefaultStringArray as:\n  - If undefined, then a default array will be set\n  - If an array is sent in, then the array will be validated to ensure all elements are a string"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_string_array.ts",
+          "lineNumber": 16,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/detection_engine/schemas/types/default_string_array.ts#L16"
+        },
+        "signature": [
+          "Type",
+          "<string[], string[] | undefined, unknown>"
         ],
         "initialIsOpen": false
       },
@@ -2110,29 +2230,12 @@
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts",
-          "lineNumber": 16
+          "lineNumber": 16,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/security_solution/common/detection_engine/schemas/types/default_version_number.ts#L16"
         },
         "signature": [
           "Type",
           "<number, number | undefined, unknown>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.NonEmptyString",
-        "type": "Object",
-        "label": "NonEmptyString",
-        "description": [
-          "\nTypes the NonEmptyString as:\n  - A string that is not empty"
-        ],
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/detection_engine/schemas/types/non_empty_string.ts",
-          "lineNumber": 15
-        },
-        "signature": [
-          "Type",
-          "<string, string, unknown>"
         ],
         "initialIsOpen": false
       }

@@ -17,7 +17,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-              "lineNumber": 28
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L28"
             },
             "signature": [
               "{ [key: string]: Id; }"
@@ -36,7 +37,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                  "lineNumber": 30
+                  "lineNumber": 30,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L30"
                 },
                 "signature": [
                   "() => JSX.Element"
@@ -50,7 +52,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                  "lineNumber": 31
+                  "lineNumber": 31,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L31"
                 },
                 "signature": [
                   "() => null"
@@ -64,7 +67,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                  "lineNumber": 32
+                  "lineNumber": 32,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L32"
                 },
                 "signature": [
                   "() => null"
@@ -75,7 +79,8 @@
             "label": "defaultRegistry",
             "source": {
               "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-              "lineNumber": 29
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L29"
             }
           },
           {
@@ -87,7 +92,8 @@
             "label": "registry",
             "source": {
               "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-              "lineNumber": 35
+              "lineNumber": 35,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L35"
             }
           },
           {
@@ -103,7 +109,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                  "lineNumber": 72
+                  "lineNumber": 72,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L72"
                 },
                 "signature": [
                   "{ [key: string]: Id; }"
@@ -117,7 +124,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                  "lineNumber": 73
+                  "lineNumber": 73,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L73"
                 },
                 "signature": [
                   "(id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void"
@@ -128,7 +136,8 @@
             "label": "setup",
             "source": {
               "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-              "lineNumber": 71
+              "lineNumber": 71,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L71"
             }
           },
           {
@@ -144,7 +153,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                  "lineNumber": 77
+                  "lineNumber": 77,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L77"
                 },
                 "signature": [
                   "{ [key: string]: Id; }"
@@ -158,7 +168,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                  "lineNumber": 78
+                  "lineNumber": 78,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L78"
                 },
                 "signature": [
                   "(id: Id) => React.ComponentType<Record<string, any> | undefined>"
@@ -169,13 +180,15 @@
             "label": "start",
             "source": {
               "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-              "lineNumber": 76
+              "lineNumber": 76,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L76"
             }
           }
         ],
         "source": {
           "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-          "lineNumber": 27
+          "lineNumber": 27,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/component_registry/component_registry.ts#L27"
         },
         "initialIsOpen": false
       }
@@ -191,7 +204,8 @@
         ],
         "source": {
           "path": "src/plugins/advanced_settings/public/index.ts",
-          "lineNumber": 20
+          "lineNumber": 20,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/index.ts#L20"
         },
         "signature": [
           "React.LazyExoticComponent<typeof ",
@@ -220,7 +234,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/advanced_settings/public/types.ts",
-            "lineNumber": 16
+            "lineNumber": 16,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/types.ts#L16"
           },
           "signature": [
             "{ componentType: { [key: string]: Id; }; register: (id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void; }"
@@ -229,7 +244,8 @@
       ],
       "source": {
         "path": "src/plugins/advanced_settings/public/types.ts",
-        "lineNumber": 15
+        "lineNumber": 15,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/types.ts#L15"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -249,7 +265,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/advanced_settings/public/types.ts",
-            "lineNumber": 19
+            "lineNumber": 19,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/types.ts#L19"
           },
           "signature": [
             "{ componentType: { [key: string]: Id; }; get: (id: Id) => React.ComponentType<Record<string, any> | undefined>; }"
@@ -258,7 +275,8 @@
       ],
       "source": {
         "path": "src/plugins/advanced_settings/public/types.ts",
-        "lineNumber": 18
+        "lineNumber": 18,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/advanced_settings/public/types.ts#L18"
       },
       "lifecycle": "start",
       "initialIsOpen": true

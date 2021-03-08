@@ -19,7 +19,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/public/index.ts",
-              "lineNumber": 15
+              "lineNumber": 15,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/public/index.ts#L15"
             }
           },
           {
@@ -30,7 +31,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/public/index.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/public/index.ts#L16"
             }
           },
           {
@@ -41,7 +43,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/public/index.ts",
-              "lineNumber": 17
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/public/index.ts#L17"
             },
             "signature": [
               "{ enabled: boolean; }"
@@ -50,7 +53,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/apm/public/index.ts",
-          "lineNumber": 14
+          "lineNumber": 14,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/public/index.ts#L14"
         },
         "initialIsOpen": false
       }
@@ -66,7 +70,8 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 45
+        "lineNumber": 45,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/public/plugin.ts#L45"
       },
       "signature": [
         "void"
@@ -136,7 +141,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 61
+                  "lineNumber": 61,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L61"
                 }
               }
             ],
@@ -144,7 +150,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 61
+              "lineNumber": 61,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L61"
             }
           },
           {
@@ -212,7 +219,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 66
+                  "lineNumber": 66,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L66"
                 }
               },
               {
@@ -230,7 +238,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 68
+                      "lineNumber": 68,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L68"
                     },
                     "signature": [
                       {
@@ -250,7 +259,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 69
+                      "lineNumber": 69,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L69"
                     },
                     "signature": [
                       {
@@ -270,7 +280,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 70
+                      "lineNumber": 70,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L70"
                     },
                     "signature": [
                       {
@@ -290,7 +301,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 71
+                      "lineNumber": 71,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L71"
                     },
                     "signature": [
                       {
@@ -311,7 +323,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 72
+                      "lineNumber": 72,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L72"
                     },
                     "signature": [
                       "Pick<",
@@ -333,7 +346,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 73
+                      "lineNumber": 73,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L73"
                     },
                     "signature": [
                       {
@@ -354,7 +368,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 74
+                      "lineNumber": 74,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L74"
                     },
                     "signature": [
                       {
@@ -375,7 +390,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 75
+                      "lineNumber": 75,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L75"
                     },
                     "signature": [
                       {
@@ -396,7 +412,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 76
+                      "lineNumber": 76,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L76"
                     },
                     "signature": [
                       {
@@ -417,7 +434,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 77
+                      "lineNumber": 77,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L77"
                     },
                     "signature": [
                       {
@@ -437,7 +455,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 78
+                      "lineNumber": 78,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L78"
                     },
                     "signature": [
                       {
@@ -458,7 +477,8 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 79
+                      "lineNumber": 79,
+                      "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L79"
                     },
                     "signature": [
                       {
@@ -474,7 +494,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 67
+                  "lineNumber": 67,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L67"
                 }
               }
             ],
@@ -482,7 +503,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 65
+              "lineNumber": 65,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L65"
             }
           },
           {
@@ -518,7 +540,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 196
+                  "lineNumber": 196,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L196"
                 }
               }
             ],
@@ -526,7 +549,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 196
+              "lineNumber": 196,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L196"
             }
           },
           {
@@ -542,13 +566,15 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 215
+              "lineNumber": 215,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L215"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 58
+          "lineNumber": 58,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L58"
         },
         "initialIsOpen": false
       }
@@ -577,7 +603,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/index.ts",
-              "lineNumber": 60
+              "lineNumber": 60,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/index.ts#L60"
             }
           },
           {
@@ -598,7 +625,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/apm/server/index.ts",
-              "lineNumber": 61
+              "lineNumber": 61,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/index.ts#L61"
             }
           }
         ],
@@ -606,7 +634,8 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/apm/server/index.ts",
-          "lineNumber": 59
+          "lineNumber": 59,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/index.ts#L59"
         },
         "initialIsOpen": false
       }
@@ -621,27 +650,13 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/apm/common/processor_event.ts",
-          "lineNumber": 8
+          "lineNumber": 8,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/common/processor_event.ts#L8"
         },
         "initialIsOpen": false
       }
     ],
     "misc": [
-      {
-        "id": "def-server.APMConfig",
-        "type": "Type",
-        "label": "APMConfig",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/apm/server/index.ts",
-          "lineNumber": 56
-        },
-        "signature": [
-          "{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': SearchAggregatedTransactionSetting; 'xpack.apm.metricsInterval': number; }"
-        ],
-        "initialIsOpen": false
-      },
       {
         "id": "def-server.APMXPackConfig",
         "type": "Type",
@@ -650,10 +665,27 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/apm/server/index.ts",
-          "lineNumber": 55
+          "lineNumber": 55,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/index.ts#L55"
         },
         "signature": [
           "{ readonly enabled: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly autocreateApmIndexPattern: boolean; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: SearchAggregatedTransactionSetting; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly maxServiceEnvironments: number; readonly maxServiceSelection: number; readonly profilingEnabled: boolean; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.APMConfig",
+        "type": "Type",
+        "label": "APMConfig",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/apm/server/index.ts",
+          "lineNumber": 56,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/index.ts#L56"
+        },
+        "signature": [
+          "{ 'apm_oss.transactionIndices': string; 'apm_oss.spanIndices': string; 'apm_oss.errorIndices': string; 'apm_oss.metricsIndices': string; 'apm_oss.sourcemapIndices': string; 'apm_oss.onboardingIndices': string; 'apm_oss.indexPattern': string; 'xpack.apm.serviceMapEnabled': boolean; 'xpack.apm.serviceMapFingerprintBucketSize': number; 'xpack.apm.serviceMapTraceIdBucketSize': number; 'xpack.apm.serviceMapFingerprintGlobalBucketSize': number; 'xpack.apm.serviceMapTraceIdGlobalBucketSize': number; 'xpack.apm.serviceMapMaxTracesPerRequest': number; 'xpack.apm.ui.enabled': boolean; 'xpack.apm.maxServiceEnvironments': number; 'xpack.apm.maxServiceSelection': number; 'xpack.apm.ui.maxTraceItems': number; 'xpack.apm.ui.transactionGroupBucketSize': number; 'xpack.apm.autocreateApmIndexPattern': boolean; 'xpack.apm.telemetryCollectionEnabled': boolean; 'xpack.apm.searchAggregatedTransactions': SearchAggregatedTransactionSetting; 'xpack.apm.metricsInterval': number; }"
         ],
         "initialIsOpen": false
       }
@@ -674,7 +706,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 49
+            "lineNumber": 49,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L49"
           },
           "signature": [
             "Observable",
@@ -697,7 +730,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 50
+            "lineNumber": 50,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L50"
           },
           "signature": [
             "() => Promise<",
@@ -719,7 +753,8 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 51
+            "lineNumber": 51,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L51"
           },
           "signature": [
             "(params: { debug?: boolean | undefined; request: ",
@@ -755,7 +790,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/server/plugin.ts",
-        "lineNumber": 48
+        "lineNumber": 48,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/apm/server/plugin.ts#L48"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

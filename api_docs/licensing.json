@@ -5,6 +5,286 @@
     "functions": [],
     "interfaces": [
       {
+        "id": "def-public.LicenseFeature",
+        "type": "Interface",
+        "label": "LicenseFeature",
+        "description": [],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.LicenseFeature.isAvailable",
+            "type": "boolean",
+            "label": "isAvailable",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L27"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.LicenseFeature.isEnabled",
+            "type": "boolean",
+            "label": "isEnabled",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L28"
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 26,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L26"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PublicLicense",
+        "type": "Interface",
+        "label": "PublicLicense",
+        "description": [
+          "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
+        ],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.PublicLicense.uid",
+            "type": "string",
+            "label": "uid",
+            "description": [
+              "\nUID for license."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L40"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.PublicLicense.status",
+            "type": "CompoundType",
+            "label": "status",
+            "description": [
+              "\nThe validity status of the license."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 45,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L45"
+            },
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "common",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-common.LicenseStatus",
+                "text": "LicenseStatus"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PublicLicense.expiryDateInMillis",
+            "type": "number",
+            "label": "expiryDateInMillis",
+            "description": [
+              "\nUnix epoch of the expiration date of the license."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 50,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L50"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.PublicLicense.type",
+            "type": "CompoundType",
+            "label": "type",
+            "description": [
+              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 55,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L55"
+            },
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ]
+          },
+          {
+            "tags": [
+              "deprecated"
+            ],
+            "id": "def-public.PublicLicense.mode",
+            "type": "CompoundType",
+            "label": "mode",
+            "description": [
+              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 60,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L60"
+            },
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 36,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L36"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PublicLicenseJSON",
+        "type": "Interface",
+        "label": "PublicLicenseJSON",
+        "description": [
+          "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
+        ],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.PublicLicenseJSON.license",
+            "type": "Object",
+            "label": "license",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L75"
+            },
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "common",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-common.PublicLicense",
+                "text": "PublicLicense"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PublicLicenseJSON.features",
+            "type": "Object",
+            "label": "features",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 76,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L76"
+            },
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "licensing",
+                "scope": "common",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-common.LicenseFeature",
+                "text": "LicenseFeature"
+              },
+              "> | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.PublicLicenseJSON.signature",
+            "type": "string",
+            "label": "signature",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 77,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L77"
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 74,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L74"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.LicenseCheck",
+        "type": "Interface",
+        "label": "LicenseCheck",
+        "description": [],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.LicenseCheck.state",
+            "type": "CompoundType",
+            "label": "state",
+            "description": [
+              "\nThe state of checking the results of a license type meeting the license minimum."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 89,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L89"
+            },
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "common",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-common.LicenseCheckState",
+                "text": "LicenseCheckState"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.LicenseCheck.message",
+            "type": "string",
+            "label": "message",
+            "description": [
+              "\nA message containing the reason for a license type not being valid."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 93,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L93"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 85,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L85"
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.ILicense",
         "type": "Interface",
         "label": "ILicense",
@@ -23,7 +303,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 101
+              "lineNumber": 101,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L101"
             },
             "signature": [
               "string | undefined"
@@ -39,7 +320,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 106
+              "lineNumber": 106,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L106"
             },
             "signature": [
               "\"active\" | \"invalid\" | \"expired\" | undefined"
@@ -55,7 +337,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 111
+              "lineNumber": 111,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L111"
             }
           },
           {
@@ -68,7 +351,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 116
+              "lineNumber": 116,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L116"
             },
             "signature": [
               "number | undefined"
@@ -84,7 +368,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 121
+              "lineNumber": 121,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L121"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -102,7 +387,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 127
+              "lineNumber": 127,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L127"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -118,7 +404,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 132
+              "lineNumber": 132,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L132"
             }
           },
           {
@@ -131,7 +418,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 137
+              "lineNumber": 137,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L137"
             }
           },
           {
@@ -144,7 +432,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 142
+              "lineNumber": 142,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L142"
             },
             "signature": [
               "() => ",
@@ -167,7 +456,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 147
+              "lineNumber": 147,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L147"
             },
             "signature": [
               "string | undefined"
@@ -183,7 +473,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 152
+              "lineNumber": 152,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L152"
             },
             "signature": [
               "() => string | undefined"
@@ -212,7 +503,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 158
+                  "lineNumber": 158,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L158"
                 }
               }
             ],
@@ -220,7 +512,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 158
+              "lineNumber": 158,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L158"
             }
           },
           {
@@ -253,7 +546,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 165
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
                 }
               },
               {
@@ -268,7 +562,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 165
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
                 }
               }
             ],
@@ -276,7 +571,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 165
+              "lineNumber": 165,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
             }
           },
           {
@@ -309,7 +605,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 171
+                  "lineNumber": 171,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L171"
                 }
               }
             ],
@@ -317,277 +614,15 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 171
+              "lineNumber": 171,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L171"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 97
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.LicenseCheck",
-        "type": "Interface",
-        "label": "LicenseCheck",
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.LicenseCheck.state",
-            "type": "CompoundType",
-            "label": "state",
-            "description": [
-              "\nThe state of checking the results of a license type meeting the license minimum."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 89
-            },
-            "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseCheckState",
-                "text": "LicenseCheckState"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.LicenseCheck.message",
-            "type": "string",
-            "label": "message",
-            "description": [
-              "\nA message containing the reason for a license type not being valid."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 93
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 85
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.LicenseFeature",
-        "type": "Interface",
-        "label": "LicenseFeature",
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.LicenseFeature.isAvailable",
-            "type": "boolean",
-            "label": "isAvailable",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.LicenseFeature.isEnabled",
-            "type": "boolean",
-            "label": "isEnabled",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 28
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 26
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PublicLicense",
-        "type": "Interface",
-        "label": "PublicLicense",
-        "description": [
-          "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.PublicLicense.uid",
-            "type": "string",
-            "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 40
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.PublicLicense.status",
-            "type": "CompoundType",
-            "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 45
-            },
-            "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseStatus",
-                "text": "LicenseStatus"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.PublicLicense.expiryDateInMillis",
-            "type": "number",
-            "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 50
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.PublicLicense.type",
-            "type": "CompoundType",
-            "label": "type",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 55
-            },
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ]
-          },
-          {
-            "tags": [
-              "deprecated"
-            ],
-            "id": "def-public.PublicLicense.mode",
-            "type": "CompoundType",
-            "label": "mode",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 60
-            },
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 36
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.PublicLicenseJSON",
-        "type": "Interface",
-        "label": "PublicLicenseJSON",
-        "description": [
-          "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.PublicLicenseJSON.license",
-            "type": "Object",
-            "label": "license",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 75
-            },
-            "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.PublicLicense",
-                "text": "PublicLicense"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.PublicLicenseJSON.features",
-            "type": "Object",
-            "label": "features",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 76
-            },
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseFeature",
-                "text": "LicenseFeature"
-              },
-              "> | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.PublicLicenseJSON.signature",
-            "type": "string",
-            "label": "signature",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 77
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 74
+          "lineNumber": 97,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L97"
         },
         "initialIsOpen": false
       }
@@ -601,7 +636,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L10"
         },
         "initialIsOpen": false
       }
@@ -615,27 +651,11 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 8
+          "lineNumber": 8,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L8"
         },
         "signature": [
           "\"valid\" | \"unavailable\" | \"invalid\" | \"expired\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.LicenseStatus",
-        "type": "Type",
-        "label": "LicenseStatus",
-        "tags": [
-          "public"
-        ],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 23
-        },
-        "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
         ],
         "initialIsOpen": false
       },
@@ -649,10 +669,29 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 20
+          "lineNumber": 20,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L20"
         },
         "signature": [
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.LicenseStatus",
+        "type": "Type",
+        "label": "LicenseStatus",
+        "tags": [
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 23,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L23"
+        },
+        "signature": [
+          "\"active\" | \"invalid\" | \"expired\""
         ],
         "initialIsOpen": false
       },
@@ -668,7 +707,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 67
+          "lineNumber": 67,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L67"
         },
         "signature": [
           "{ [x: string]: LicenseFeature; }"
@@ -698,7 +738,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 19
+            "lineNumber": 19,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L19"
           },
           "signature": [
             "Observable",
@@ -738,7 +779,8 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 24
+            "lineNumber": 24,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L24"
           }
         },
         {
@@ -751,7 +793,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 28
+            "lineNumber": 28,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L28"
           },
           "signature": [
             {
@@ -766,7 +809,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/licensing/public/types.ts",
-        "lineNumber": 14
+        "lineNumber": 14,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L14"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -790,7 +834,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 36
+            "lineNumber": 36,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L36"
           },
           "signature": [
             "Observable",
@@ -828,7 +873,8 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 40
+            "lineNumber": 40,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L40"
           }
         },
         {
@@ -841,7 +887,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/public/types.ts",
-            "lineNumber": 44
+            "lineNumber": 44,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L44"
           },
           "signature": [
             {
@@ -856,7 +903,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/licensing/public/types.ts",
-        "lineNumber": 32
+        "lineNumber": 32,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/public/types.ts#L32"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -917,7 +965,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-              "lineNumber": 18
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L18"
             }
           },
           {
@@ -962,7 +1011,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-              "lineNumber": 19
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L19"
             }
           }
         ],
@@ -970,50 +1020,13 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-          "lineNumber": 17
+          "lineNumber": 17,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L17"
         },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-server.ElasticsearchError",
-        "type": "Interface",
-        "label": "ElasticsearchError",
-        "signature": [
-          {
-            "pluginId": "licensing",
-            "scope": "server",
-            "docId": "kibLicensingPluginApi",
-            "section": "def-server.ElasticsearchError",
-            "text": "ElasticsearchError"
-          },
-          " extends Error"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ElasticsearchError.status",
-            "type": "number",
-            "label": "status",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 14
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 13
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-server.FeatureUsageServiceSetup",
         "type": "Interface",
@@ -1044,7 +1057,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-                  "lineNumber": 16
+                  "lineNumber": 16,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
                 }
               },
               {
@@ -1057,7 +1071,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-                  "lineNumber": 16
+                  "lineNumber": 16,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
                 }
               }
             ],
@@ -1065,13 +1080,15 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L16"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-          "lineNumber": 12
+          "lineNumber": 12,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L12"
         },
         "initialIsOpen": false
       },
@@ -1107,7 +1124,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-                  "lineNumber": 33
+                  "lineNumber": 33,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
                 }
               },
               {
@@ -1122,7 +1140,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-                  "lineNumber": 33
+                  "lineNumber": 33,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
                 }
               }
             ],
@@ -1130,7 +1149,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-              "lineNumber": 33
+              "lineNumber": 33,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L33"
             }
           },
           {
@@ -1156,13 +1176,295 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-              "lineNumber": 38
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L38"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
-          "lineNumber": 26
+          "lineNumber": 26,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/services/feature_usage_service.ts#L26"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.LicenseFeature",
+        "type": "Interface",
+        "label": "LicenseFeature",
+        "description": [],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.LicenseFeature.isAvailable",
+            "type": "boolean",
+            "label": "isAvailable",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L27"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.LicenseFeature.isEnabled",
+            "type": "boolean",
+            "label": "isEnabled",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L28"
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 26,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L26"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.PublicLicense",
+        "type": "Interface",
+        "label": "PublicLicense",
+        "description": [
+          "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
+        ],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.PublicLicense.uid",
+            "type": "string",
+            "label": "uid",
+            "description": [
+              "\nUID for license."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L40"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.PublicLicense.status",
+            "type": "CompoundType",
+            "label": "status",
+            "description": [
+              "\nThe validity status of the license."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 45,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L45"
+            },
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "common",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-common.LicenseStatus",
+                "text": "LicenseStatus"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.PublicLicense.expiryDateInMillis",
+            "type": "number",
+            "label": "expiryDateInMillis",
+            "description": [
+              "\nUnix epoch of the expiration date of the license."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 50,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L50"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.PublicLicense.type",
+            "type": "CompoundType",
+            "label": "type",
+            "description": [
+              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 55,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L55"
+            },
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ]
+          },
+          {
+            "tags": [
+              "deprecated"
+            ],
+            "id": "def-server.PublicLicense.mode",
+            "type": "CompoundType",
+            "label": "mode",
+            "description": [
+              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 60,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L60"
+            },
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 36,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L36"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.PublicLicenseJSON",
+        "type": "Interface",
+        "label": "PublicLicenseJSON",
+        "description": [
+          "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
+        ],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.PublicLicenseJSON.license",
+            "type": "Object",
+            "label": "license",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L75"
+            },
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "common",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-common.PublicLicense",
+                "text": "PublicLicense"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.PublicLicenseJSON.features",
+            "type": "Object",
+            "label": "features",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 76,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L76"
+            },
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "licensing",
+                "scope": "common",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-common.LicenseFeature",
+                "text": "LicenseFeature"
+              },
+              "> | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.PublicLicenseJSON.signature",
+            "type": "string",
+            "label": "signature",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 77,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L77"
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 74,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L74"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.LicenseCheck",
+        "type": "Interface",
+        "label": "LicenseCheck",
+        "description": [],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.LicenseCheck.state",
+            "type": "CompoundType",
+            "label": "state",
+            "description": [
+              "\nThe state of checking the results of a license type meeting the license minimum."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 89,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L89"
+            },
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "common",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-common.LicenseCheckState",
+                "text": "LicenseCheckState"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.LicenseCheck.message",
+            "type": "string",
+            "label": "message",
+            "description": [
+              "\nA message containing the reason for a license type not being valid."
+            ],
+            "source": {
+              "path": "x-pack/plugins/licensing/common/types.ts",
+              "lineNumber": 93,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L93"
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 85,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L85"
         },
         "initialIsOpen": false
       },
@@ -1185,7 +1487,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 101
+              "lineNumber": 101,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L101"
             },
             "signature": [
               "string | undefined"
@@ -1201,7 +1504,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 106
+              "lineNumber": 106,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L106"
             },
             "signature": [
               "\"active\" | \"invalid\" | \"expired\" | undefined"
@@ -1217,7 +1521,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 111
+              "lineNumber": 111,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L111"
             }
           },
           {
@@ -1230,7 +1535,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 116
+              "lineNumber": 116,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L116"
             },
             "signature": [
               "number | undefined"
@@ -1246,7 +1552,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 121
+              "lineNumber": 121,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L121"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -1264,7 +1571,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 127
+              "lineNumber": 127,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L127"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
@@ -1280,7 +1588,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 132
+              "lineNumber": 132,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L132"
             }
           },
           {
@@ -1293,7 +1602,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 137
+              "lineNumber": 137,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L137"
             }
           },
           {
@@ -1306,7 +1616,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 142
+              "lineNumber": 142,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L142"
             },
             "signature": [
               "() => ",
@@ -1329,7 +1640,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 147
+              "lineNumber": 147,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L147"
             },
             "signature": [
               "string | undefined"
@@ -1345,7 +1657,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 152
+              "lineNumber": 152,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L152"
             },
             "signature": [
               "() => string | undefined"
@@ -1374,7 +1687,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 158
+                  "lineNumber": 158,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L158"
                 }
               }
             ],
@@ -1382,7 +1696,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 158
+              "lineNumber": 158,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L158"
             }
           },
           {
@@ -1415,7 +1730,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 165
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
                 }
               },
               {
@@ -1430,7 +1746,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 165
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
                 }
               }
             ],
@@ -1438,7 +1755,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 165
+              "lineNumber": 165,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L165"
             }
           },
           {
@@ -1471,7 +1789,8 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/licensing/common/types.ts",
-                  "lineNumber": 171
+                  "lineNumber": 171,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L171"
                 }
               }
             ],
@@ -1479,105 +1798,55 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 171
+              "lineNumber": 171,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L171"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 97
+          "lineNumber": 97,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L97"
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-server.LicenseCheck",
+        "id": "def-server.ElasticsearchError",
         "type": "Interface",
-        "label": "LicenseCheck",
-        "description": [],
-        "tags": [
-          "public"
+        "label": "ElasticsearchError",
+        "signature": [
+          {
+            "pluginId": "licensing",
+            "scope": "server",
+            "docId": "kibLicensingPluginApi",
+            "section": "def-server.ElasticsearchError",
+            "text": "ElasticsearchError"
+          },
+          " extends Error"
         ],
+        "description": [],
+        "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-server.LicenseCheck.state",
-            "type": "CompoundType",
-            "label": "state",
-            "description": [
-              "\nThe state of checking the results of a license type meeting the license minimum."
-            ],
+            "id": "def-server.ElasticsearchError.status",
+            "type": "number",
+            "label": "status",
+            "description": [],
             "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 89
+              "path": "x-pack/plugins/licensing/server/types.ts",
+              "lineNumber": 14,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L14"
             },
             "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseCheckState",
-                "text": "LicenseCheckState"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.LicenseCheck.message",
-            "type": "string",
-            "label": "message",
-            "description": [
-              "\nA message containing the reason for a license type not being valid."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 93
-            },
-            "signature": [
-              "string | undefined"
+              "number | undefined"
             ]
           }
         ],
         "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 85
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LicenseFeature",
-        "type": "Interface",
-        "label": "LicenseFeature",
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.LicenseFeature.isAvailable",
-            "type": "boolean",
-            "label": "isAvailable",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.LicenseFeature.isEnabled",
-            "type": "boolean",
-            "label": "isEnabled",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 28
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 26
+          "path": "x-pack/plugins/licensing/server/types.ts",
+          "lineNumber": 13,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L13"
         },
         "initialIsOpen": false
       },
@@ -1600,7 +1869,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 50
+              "lineNumber": 50,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L50"
             },
             "signature": [
               {
@@ -1620,7 +1890,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/licensing/server/types.ts",
-              "lineNumber": 51
+              "lineNumber": 51,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L51"
             },
             "signature": [
               {
@@ -1635,179 +1906,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/licensing/server/types.ts",
-          "lineNumber": 49
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.PublicLicense",
-        "type": "Interface",
-        "label": "PublicLicense",
-        "description": [
-          "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.PublicLicense.uid",
-            "type": "string",
-            "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 40
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.PublicLicense.status",
-            "type": "CompoundType",
-            "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 45
-            },
-            "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseStatus",
-                "text": "LicenseStatus"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.PublicLicense.expiryDateInMillis",
-            "type": "number",
-            "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 50
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.PublicLicense.type",
-            "type": "CompoundType",
-            "label": "type",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 55
-            },
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ]
-          },
-          {
-            "tags": [
-              "deprecated"
-            ],
-            "id": "def-server.PublicLicense.mode",
-            "type": "CompoundType",
-            "label": "mode",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 60
-            },
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 36
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.PublicLicenseJSON",
-        "type": "Interface",
-        "label": "PublicLicenseJSON",
-        "description": [
-          "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.PublicLicenseJSON.license",
-            "type": "Object",
-            "label": "license",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 75
-            },
-            "signature": [
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.PublicLicense",
-                "text": "PublicLicense"
-              },
-              " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.PublicLicenseJSON.features",
-            "type": "Object",
-            "label": "features",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 76
-            },
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "licensing",
-                "scope": "common",
-                "docId": "kibLicensingPluginApi",
-                "section": "def-common.LicenseFeature",
-                "text": "LicenseFeature"
-              },
-              "> | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.PublicLicenseJSON.signature",
-            "type": "string",
-            "label": "signature",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/licensing/common/types.ts",
-              "lineNumber": 77
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 74
+          "lineNumber": 49,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L49"
         },
         "initialIsOpen": false
       }
@@ -1821,7 +1921,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L10"
         },
         "initialIsOpen": false
       }
@@ -1835,7 +1936,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
-          "lineNumber": 13
+          "lineNumber": 13,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/wrap_route_with_license_check.ts#L13"
         },
         "signature": [
           "(license: ",
@@ -1852,27 +1954,11 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 8
+          "lineNumber": 8,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L8"
         },
         "signature": [
           "\"valid\" | \"unavailable\" | \"invalid\" | \"expired\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LicenseStatus",
-        "type": "Type",
-        "label": "LicenseStatus",
-        "tags": [
-          "public"
-        ],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 23
-        },
-        "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
         ],
         "initialIsOpen": false
       },
@@ -1886,10 +1972,29 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 20
+          "lineNumber": 20,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L20"
         },
         "signature": [
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.LicenseStatus",
+        "type": "Type",
+        "label": "LicenseStatus",
+        "tags": [
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/licensing/common/types.ts",
+          "lineNumber": 23,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L23"
+        },
+        "signature": [
+          "\"active\" | \"invalid\" | \"expired\""
         ],
         "initialIsOpen": false
       },
@@ -1905,7 +2010,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/licensing/common/types.ts",
-          "lineNumber": 67
+          "lineNumber": 67,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/common/types.ts#L67"
         },
         "signature": [
           "{ [x: string]: LicenseFeature; }"
@@ -1935,7 +2041,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 72
+            "lineNumber": 72,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L72"
           },
           "signature": [
             "Observable",
@@ -1975,7 +2082,8 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 77
+            "lineNumber": 77,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L77"
           }
         },
         {
@@ -1990,7 +2098,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 84
+            "lineNumber": 84,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L84"
           },
           "signature": [
             "(clusterClient: Pick<",
@@ -2032,7 +2141,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 91
+            "lineNumber": 91,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L91"
           },
           "signature": [
             {
@@ -2047,7 +2157,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/licensing/server/types.ts",
-        "lineNumber": 67
+        "lineNumber": 67,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L67"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -2071,7 +2182,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 99
+            "lineNumber": 99,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L99"
           },
           "signature": [
             "Observable",
@@ -2109,7 +2221,8 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 103
+            "lineNumber": 103,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L103"
           }
         },
         {
@@ -2122,7 +2235,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 109
+            "lineNumber": 109,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L109"
           },
           "signature": [
             "(clusterClient: Pick<",
@@ -2164,7 +2278,8 @@
           ],
           "source": {
             "path": "x-pack/plugins/licensing/server/types.ts",
-            "lineNumber": 116
+            "lineNumber": 116,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L116"
           },
           "signature": [
             {
@@ -2179,7 +2294,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/licensing/server/types.ts",
-        "lineNumber": 95
+        "lineNumber": 95,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/licensing/server/types.ts#L95"
       },
       "lifecycle": "start",
       "initialIsOpen": true

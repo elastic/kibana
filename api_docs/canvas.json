@@ -19,7 +19,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/canvas/public/index.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/canvas/public/index.ts#L16"
             },
             "signature": [
               "{ services: ",
@@ -52,7 +53,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/canvas/public/index.ts",
-          "lineNumber": 15
+          "lineNumber": 15,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/canvas/public/index.ts#L15"
         },
         "initialIsOpen": false
       }
@@ -72,7 +74,8 @@
       ],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 63
+        "lineNumber": 63,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/canvas/public/plugin.tsx#L63"
       },
       "signature": [
         "CanvasApi"
@@ -88,7 +91,8 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/canvas/public/plugin.tsx",
-        "lineNumber": 64
+        "lineNumber": 64,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/canvas/public/plugin.tsx#L64"
       },
       "signature": [
         "void"

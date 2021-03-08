@@ -4,51 +4,6 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-public.RuntimeFieldEditor",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "{ defaultValue, onChange, docLinks, ctx }",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "runtimeFields",
-                "scope": "public",
-                "docId": "kibRuntimeFieldsPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
-              "lineNumber": 22
-            }
-          }
-        ],
-        "signature": [
-          "({ defaultValue, onChange, docLinks, ctx }: ",
-          {
-            "pluginId": "runtimeFields",
-            "scope": "public",
-            "docId": "kibRuntimeFieldsPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
-          },
-          ") => JSX.Element"
-        ],
-        "description": [],
-        "label": "RuntimeFieldEditor",
-        "source": {
-          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
-          "lineNumber": 22
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-public.RuntimeFieldEditorFlyoutContent",
         "type": "Function",
         "children": [
@@ -68,7 +23,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 78
+              "lineNumber": 78,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78"
             }
           }
         ],
@@ -87,7 +43,55 @@
         "label": "RuntimeFieldEditorFlyoutContent",
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-          "lineNumber": 78
+          "lineNumber": 78,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L78"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.RuntimeFieldEditor",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Object",
+            "label": "{ defaultValue, onChange, docLinks, ctx }",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "runtimeFields",
+                "scope": "public",
+                "docId": "kibRuntimeFieldsPluginApi",
+                "section": "def-public.Props",
+                "text": "Props"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+              "lineNumber": 22,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22"
+            }
+          }
+        ],
+        "signature": [
+          "({ defaultValue, onChange, docLinks, ctx }: ",
+          {
+            "pluginId": "runtimeFields",
+            "scope": "public",
+            "docId": "kibRuntimeFieldsPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "label": "RuntimeFieldEditor",
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
+          "lineNumber": 22,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx#L22"
         },
         "tags": [],
         "returnComment": [],
@@ -95,67 +99,6 @@
       }
     ],
     "interfaces": [
-      {
-        "id": "def-public.FormState",
-        "type": "Interface",
-        "label": "FormState",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.FormState.isValid",
-            "type": "CompoundType",
-            "label": "isValid",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
-              "lineNumber": 40
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FormState.isSubmitted",
-            "type": "boolean",
-            "label": "isSubmitted",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
-              "lineNumber": 41
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.FormState.submit",
-            "type": "Function",
-            "label": "submit",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
-              "lineNumber": 42
-            },
-            "signature": [
-              "(e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined) => Promise<{ data: ",
-              {
-                "pluginId": "runtimeFields",
-                "scope": "public",
-                "docId": "kibRuntimeFieldsPluginApi",
-                "section": "def-public.RuntimeField",
-                "text": "RuntimeField"
-              },
-              "; isValid: boolean; }>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
-          "lineNumber": 39
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.Props",
         "type": "Interface",
@@ -173,7 +116,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 59
+              "lineNumber": 59,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L59"
             },
             "signature": [
               "(field: ",
@@ -197,7 +141,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 63
+              "lineNumber": 63,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L63"
             },
             "signature": [
               "() => void"
@@ -213,7 +158,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 67
+              "lineNumber": 67,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L67"
             },
             "signature": [
               {
@@ -235,7 +181,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 71
+              "lineNumber": 71,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L71"
             },
             "signature": [
               {
@@ -258,7 +205,8 @@
             ],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-              "lineNumber": 75
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L75"
             },
             "signature": [
               "{ namesNotAllowed?: string[] | undefined; existingConcreteFields?: Field[] | undefined; } | undefined"
@@ -267,7 +215,73 @@
         ],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-          "lineNumber": 55
+          "lineNumber": 55,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx#L55"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.FormState",
+        "type": "Interface",
+        "label": "FormState",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.FormState.isValid",
+            "type": "CompoundType",
+            "label": "isValid",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L40"
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FormState.isSubmitted",
+            "type": "boolean",
+            "label": "isSubmitted",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L41"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.FormState.submit",
+            "type": "Function",
+            "label": "submit",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L42"
+            },
+            "signature": [
+              "(e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined) => Promise<{ data: ",
+              {
+                "pluginId": "runtimeFields",
+                "scope": "public",
+                "docId": "kibRuntimeFieldsPluginApi",
+                "section": "def-public.RuntimeField",
+                "text": "RuntimeField"
+              },
+              "; isValid: boolean; }>"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
+          "lineNumber": 39,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx#L39"
         },
         "initialIsOpen": false
       },
@@ -286,7 +300,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
-              "lineNumber": 34
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L34"
             }
           },
           {
@@ -297,7 +312,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
-              "lineNumber": 35
+              "lineNumber": 35,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L35"
             },
             "signature": [
               "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
@@ -311,7 +327,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/runtime_fields/public/types.ts",
-              "lineNumber": 36
+              "lineNumber": 36,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L36"
             },
             "signature": [
               "{ source: string; }"
@@ -320,7 +337,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
-          "lineNumber": 33
+          "lineNumber": 33,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L33"
         },
         "initialIsOpen": false
       }
@@ -335,7 +353,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/constants.ts",
-          "lineNumber": 14
+          "lineNumber": 14,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/constants.ts#L14"
         },
         "signature": [
           "ComboBoxOption",
@@ -351,7 +370,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
-          "lineNumber": 31
+          "lineNumber": 31,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L31"
         },
         "signature": [
           "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
@@ -388,13 +408,15 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
-            "lineNumber": 18
+            "lineNumber": 18,
+            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L18"
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/runtime_fields/public/types.ts",
-        "lineNumber": 17
+        "lineNumber": 17,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/runtime_fields/public/types.ts#L17"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

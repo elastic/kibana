@@ -30,7 +30,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/beats_management/common/index.ts",
-          "lineNumber": 23
+          "lineNumber": 23,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/beats_management/common/index.ts#L23"
         },
         "signature": [
           "{ readonly enabled: boolean; readonly defaultUserRoles: string[]; readonly encryptionKey: string; readonly enrollmentTokensTtlInSeconds: number; }"
@@ -47,7 +48,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/beats_management/common/index.ts",
-          "lineNumber": 12
+          "lineNumber": 12,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/beats_management/common/index.ts#L12"
         },
         "signature": [
           "ObjectType",

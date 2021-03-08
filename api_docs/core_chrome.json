@@ -21,7 +21,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 20
+              "lineNumber": 20,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L20"
             }
           },
           {
@@ -32,7 +33,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 21
+              "lineNumber": 21,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L21"
             }
           },
           {
@@ -43,7 +45,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 22
+              "lineNumber": 22,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L22"
             },
             "signature": [
               "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
@@ -52,7 +55,8 @@
         ],
         "source": {
           "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 19
+          "lineNumber": 19,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L19"
         },
         "initialIsOpen": false
       },
@@ -73,7 +77,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 27
+              "lineNumber": 27,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L27"
             },
             "signature": [
               "string | undefined"
@@ -87,7 +92,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 28
+              "lineNumber": 28,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L28"
             },
             "signature": [
               "string | undefined"
@@ -96,77 +102,8 @@
         ],
         "source": {
           "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 26
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ChromeDocTitle",
-        "type": "Interface",
-        "label": "ChromeDocTitle",
-        "description": [
-          "\nAPIs for accessing and updating the document title.\n"
-        ],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "id": "def-public.ChromeDocTitle.change",
-            "type": "Function",
-            "label": "change",
-            "signature": [
-              "(newTitle: string | string[]) => void"
-            ],
-            "description": [
-              "\nChanges the current document title.\n"
-            ],
-            "children": [
-              {
-                "type": "CompoundType",
-                "label": "newTitle",
-                "isRequired": true,
-                "signature": [
-                  "string | string[]"
-                ],
-                "description": [
-                  "The new title to set, either a string or string array"
-                ],
-                "source": {
-                  "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
-                  "lineNumber": 45
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
-              "lineNumber": 45
-            }
-          },
-          {
-            "id": "def-public.ChromeDocTitle.reset",
-            "type": "Function",
-            "label": "reset",
-            "signature": [
-              "() => void"
-            ],
-            "description": [
-              "\nResets the document title to it's initial value.\n(meaning the one present in the title meta at application load.)"
-            ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
-              "lineNumber": 50
-            }
-          }
-        ],
-        "source": {
-          "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
-          "lineNumber": 32
+          "lineNumber": 26,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L26"
         },
         "initialIsOpen": false
       },
@@ -189,7 +126,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 49
+              "lineNumber": 49,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L49"
             }
           },
           {
@@ -202,7 +140,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 53
+              "lineNumber": 53,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L53"
             },
             "signature": [
               {
@@ -225,7 +164,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 57
+              "lineNumber": 57,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L57"
             },
             "signature": [
               "((element: HTMLDivElement) => () => void) | undefined"
@@ -234,7 +174,8 @@
         ],
         "source": {
           "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 45
+          "lineNumber": 45,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L45"
         },
         "initialIsOpen": false
       },
@@ -274,7 +215,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 86
+              "lineNumber": 86,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L86"
             },
             "signature": [
               "\"custom\""
@@ -290,7 +232,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 90
+              "lineNumber": 90,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L90"
             }
           },
           {
@@ -303,7 +246,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 94
+              "lineNumber": 94,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L94"
             },
             "signature": [
               "React.ReactNode"
@@ -312,7 +256,8 @@
         ],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 82
+          "lineNumber": 82,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L82"
         },
         "initialIsOpen": false
       },
@@ -352,7 +297,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 60
+              "lineNumber": 60,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L60"
             },
             "signature": [
               "\"discuss\""
@@ -368,13 +314,15 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 65
+              "lineNumber": 65,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L65"
             }
           }
         ],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 56
+          "lineNumber": 56,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L56"
         },
         "initialIsOpen": false
       },
@@ -414,7 +362,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 73
+              "lineNumber": 73,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L73"
             },
             "signature": [
               "\"documentation\""
@@ -430,13 +379,15 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 78
+              "lineNumber": 78,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L78"
             }
           }
         ],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 69
+          "lineNumber": 69,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L69"
         },
         "initialIsOpen": false
       },
@@ -476,7 +427,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 44
+              "lineNumber": 44,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L44"
             },
             "signature": [
               "\"github\""
@@ -492,7 +444,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 48
+              "lineNumber": 48,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L48"
             },
             "signature": [
               "string[]"
@@ -508,7 +461,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-              "lineNumber": 52
+              "lineNumber": 52,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L52"
             },
             "signature": [
               "string | undefined"
@@ -517,7 +471,8 @@
         ],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 40
+          "lineNumber": 40,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L40"
         },
         "initialIsOpen": false
       },
@@ -538,7 +493,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L16"
             },
             "signature": [
               "number | undefined"
@@ -552,7 +508,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 17
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L17"
             },
             "signature": [
               {
@@ -568,7 +525,8 @@
         ],
         "source": {
           "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-          "lineNumber": 15
+          "lineNumber": 15,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -580,6 +538,7 @@
           "\n{@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.\n"
         ],
         "tags": [
+          "example",
           "public"
         ],
         "children": [
@@ -618,7 +577,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-                  "lineNumber": 38
+                  "lineNumber": 38,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L38"
                 }
               }
             ],
@@ -626,7 +586,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 38
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L38"
             }
           },
           {
@@ -664,7 +625,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-                  "lineNumber": 40
+                  "lineNumber": 40,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L40"
                 }
               }
             ],
@@ -672,7 +634,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 40
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L40"
             }
           },
           {
@@ -710,7 +673,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-                  "lineNumber": 42
+                  "lineNumber": 42,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L42"
                 }
               }
             ],
@@ -718,13 +682,15 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-              "lineNumber": 42
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L42"
             }
           }
         ],
         "source": {
           "path": "src/core/public/chrome/nav_controls/nav_controls_service.ts",
-          "lineNumber": 36
+          "lineNumber": 36,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_controls/nav_controls_service.ts#L36"
         },
         "initialIsOpen": false
       },
@@ -747,7 +713,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 19
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L19"
             }
           },
           {
@@ -760,7 +727,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 24
+              "lineNumber": 24,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L24"
             }
           },
           {
@@ -773,7 +741,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 29
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L29"
             },
             "signature": [
               {
@@ -796,7 +765,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 34
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L34"
             }
           },
           {
@@ -809,7 +779,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 40
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L40"
             },
             "signature": [
               "string | undefined"
@@ -825,7 +796,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 45
+              "lineNumber": 45,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L45"
             },
             "signature": [
               "number | undefined"
@@ -841,7 +813,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 50
+              "lineNumber": 50,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L50"
             },
             "signature": [
               "string | undefined"
@@ -857,7 +830,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 56
+              "lineNumber": 56,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L56"
             },
             "signature": [
               "string | undefined"
@@ -873,7 +847,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 62
+              "lineNumber": 62,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L62"
             },
             "signature": [
               "string | undefined"
@@ -889,11 +864,14 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 67
+              "lineNumber": 67,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L67"
             }
           },
           {
-            "tags": [],
+            "tags": [
+              "internalRemarks"
+            ],
             "id": "def-public.ChromeNavLink.disabled",
             "type": "CompoundType",
             "label": "disabled",
@@ -902,7 +880,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 76
+              "lineNumber": 76,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L76"
             },
             "signature": [
               "boolean | undefined"
@@ -918,7 +897,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_link.ts",
-              "lineNumber": 81
+              "lineNumber": 81,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L81"
             },
             "signature": [
               "boolean | undefined"
@@ -927,7 +907,8 @@
         ],
         "source": {
           "path": "src/core/public/chrome/nav_links/nav_link.ts",
-          "lineNumber": 15
+          "lineNumber": 15,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L15"
         },
         "initialIsOpen": false
       },
@@ -967,7 +948,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 32
+              "lineNumber": 32,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L32"
             }
           },
           {
@@ -999,7 +981,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 38
+                  "lineNumber": 38,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L38"
                 }
               }
             ],
@@ -1007,7 +990,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 38
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L38"
             }
           },
           {
@@ -1033,7 +1017,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 43
+              "lineNumber": 43,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L43"
             }
           },
           {
@@ -1057,7 +1042,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 49
+                  "lineNumber": 49,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L49"
                 }
               }
             ],
@@ -1065,7 +1051,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 49
+              "lineNumber": 49,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L49"
             }
           },
           {
@@ -1089,15 +1076,19 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 59
+                  "lineNumber": 59,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L59"
                 }
               }
             ],
-            "tags": [],
+            "tags": [
+              "remarks"
+            ],
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 59
+              "lineNumber": 59,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L59"
             }
           },
           {
@@ -1137,7 +1128,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 71
+                  "lineNumber": 71,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L71"
                 }
               },
               {
@@ -1158,7 +1150,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                  "lineNumber": 71
+                  "lineNumber": 71,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L71"
                 }
               }
             ],
@@ -1168,7 +1161,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 71
+              "lineNumber": 71,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L71"
             }
           },
           {
@@ -1182,11 +1176,14 @@
               "\nEnable forced navigation mode, which will trigger a page refresh\nwhen a nav link is clicked and only the hash is updated.\n"
             ],
             "children": [],
-            "tags": [],
+            "tags": [
+              "remarks"
+            ],
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 85
+              "lineNumber": 85,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L85"
             }
           },
           {
@@ -1206,13 +1203,93 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-              "lineNumber": 90
+              "lineNumber": 90,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L90"
             }
           }
         ],
         "source": {
           "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-          "lineNumber": 28
+          "lineNumber": 28,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_links_service.ts#L28"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ChromeDocTitle",
+        "type": "Interface",
+        "label": "ChromeDocTitle",
+        "description": [
+          "\nAPIs for accessing and updating the document title.\n"
+        ],
+        "tags": [
+          "example",
+          "example",
+          "public"
+        ],
+        "children": [
+          {
+            "id": "def-public.ChromeDocTitle.change",
+            "type": "Function",
+            "label": "change",
+            "signature": [
+              "(newTitle: string | string[]) => void"
+            ],
+            "description": [
+              "\nChanges the current document title.\n"
+            ],
+            "children": [
+              {
+                "type": "CompoundType",
+                "label": "newTitle",
+                "isRequired": true,
+                "signature": [
+                  "string | string[]"
+                ],
+                "description": [
+                  "The new title to set, either a string or string array"
+                ],
+                "source": {
+                  "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
+                  "lineNumber": 45,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/doc_title/doc_title_service.ts#L45"
+                }
+              }
+            ],
+            "tags": [
+              "example"
+            ],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
+              "lineNumber": 45,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/doc_title/doc_title_service.ts#L45"
+            }
+          },
+          {
+            "id": "def-public.ChromeDocTitle.reset",
+            "type": "Function",
+            "label": "reset",
+            "signature": [
+              "() => void"
+            ],
+            "description": [
+              "\nResets the document title to it's initial value.\n(meaning the one present in the title meta at application load.)"
+            ],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
+              "lineNumber": 50,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/doc_title/doc_title_service.ts#L50"
+            }
+          }
+        ],
+        "source": {
+          "path": "src/core/public/chrome/doc_title/doc_title_service.ts",
+          "lineNumber": 32,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/doc_title/doc_title_service.ts#L32"
         },
         "initialIsOpen": false
       },
@@ -1250,7 +1327,8 @@
                 ],
                 "source": {
                   "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-                  "lineNumber": 71
+                  "lineNumber": 71,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L71"
                 }
               },
               {
@@ -1265,7 +1343,8 @@
                 ],
                 "source": {
                   "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-                  "lineNumber": 71
+                  "lineNumber": 71,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L71"
                 }
               },
               {
@@ -1280,15 +1359,19 @@
                 ],
                 "source": {
                   "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-                  "lineNumber": 71
+                  "lineNumber": 71,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L71"
                 }
               }
             ],
-            "tags": [],
+            "tags": [
+              "example"
+            ],
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 71
+              "lineNumber": 71,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L71"
             }
           },
           {
@@ -1310,11 +1393,14 @@
               "\nGets an Array of the current recently accessed history.\n"
             ],
             "children": [],
-            "tags": [],
+            "tags": [
+              "example"
+            ],
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 81
+              "lineNumber": 81,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L81"
             }
           },
           {
@@ -1338,17 +1424,21 @@
               "\nGets an Observable of the array of recently accessed history.\n"
             ],
             "children": [],
-            "tags": [],
+            "tags": [
+              "example"
+            ],
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 91
+              "lineNumber": 91,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L91"
             }
           }
         ],
         "source": {
           "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-          "lineNumber": 58
+          "lineNumber": 58,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L58"
         },
         "initialIsOpen": false
       },
@@ -1369,7 +1459,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 17
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L17"
             }
           },
           {
@@ -1380,7 +1471,8 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 18
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L18"
             }
           },
           {
@@ -1391,13 +1483,54 @@
             "description": [],
             "source": {
               "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-              "lineNumber": 19
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L19"
             }
           }
         ],
         "source": {
           "path": "src/core/public/chrome/recently_accessed/recently_accessed_service.ts",
-          "lineNumber": 16
+          "lineNumber": 16,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/recently_accessed/recently_accessed_service.ts#L16"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ChromeUserBanner",
+        "type": "Interface",
+        "label": "ChromeUserBanner",
+        "description": [],
+        "tags": [
+          "public"
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ChromeUserBanner.content",
+            "type": "Function",
+            "label": "content",
+            "description": [],
+            "source": {
+              "path": "src/core/public/chrome/types.ts",
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L41"
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.MountPoint",
+                "text": "MountPoint"
+              },
+              "<HTMLDivElement>"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/core/public/chrome/types.ts",
+          "lineNumber": 40,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L40"
         },
         "initialIsOpen": false
       },
@@ -1409,6 +1542,9 @@
           "\nChromeStart allows plugins to customize the global chrome header UI and\nenrich the UX with additional information about the current location of the\nbrowser.\n"
         ],
         "tags": [
+          "remarks",
+          "example",
+          "example",
           "public"
         ],
         "children": [
@@ -1422,7 +1558,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 88
+              "lineNumber": 88,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L88"
             },
             "signature": [
               {
@@ -1444,7 +1581,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 90
+              "lineNumber": 90,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L90"
             },
             "signature": [
               {
@@ -1466,7 +1604,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 92
+              "lineNumber": 92,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L92"
             },
             "signature": [
               {
@@ -1488,7 +1627,8 @@
             ],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 94
+              "lineNumber": 94,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L94"
             },
             "signature": [
               {
@@ -1521,15 +1661,19 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 103
+                  "lineNumber": 103,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L103"
                 }
               }
             ],
-            "tags": [],
+            "tags": [
+              "internalRemarks"
+            ],
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 103
+              "lineNumber": 103,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L103"
             }
           },
           {
@@ -1557,7 +1701,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 108
+              "lineNumber": 108,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L108"
             }
           },
           {
@@ -1595,15 +1740,20 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 128
+                  "lineNumber": 128,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L128"
                 }
               }
             ],
-            "tags": [],
+            "tags": [
+              "remarks",
+              "example"
+            ],
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 128
+              "lineNumber": 128,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L128"
             }
           },
           {
@@ -1623,7 +1773,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 133
+              "lineNumber": 133,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L133"
             }
           },
           {
@@ -1647,7 +1798,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 140
+                  "lineNumber": 140,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L140"
                 }
               }
             ],
@@ -1655,7 +1807,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 140
+              "lineNumber": 140,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L140"
             }
           },
           {
@@ -1675,7 +1828,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 145
+              "lineNumber": 145,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L145"
             }
           },
           {
@@ -1699,7 +1853,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 150
+                  "lineNumber": 150,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L150"
                 }
               }
             ],
@@ -1707,7 +1862,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 150
+              "lineNumber": 150,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L150"
             }
           },
           {
@@ -1731,7 +1887,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 155
+                  "lineNumber": 155,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L155"
                 }
               }
             ],
@@ -1739,7 +1896,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 155
+              "lineNumber": 155,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L155"
             }
           },
           {
@@ -1767,7 +1925,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 160
+              "lineNumber": 160,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L160"
             }
           },
           {
@@ -1806,7 +1965,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 165
+                  "lineNumber": 165,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L165"
                 }
               }
             ],
@@ -1814,7 +1974,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 165
+              "lineNumber": 165,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L165"
             }
           },
           {
@@ -1836,7 +1997,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 170
+              "lineNumber": 170,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L170"
             }
           },
           {
@@ -1863,7 +2025,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 175
+                  "lineNumber": 175,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L175"
                 }
               }
             ],
@@ -1871,7 +2034,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 175
+              "lineNumber": 175,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L175"
             }
           },
           {
@@ -1899,7 +2063,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 180
+              "lineNumber": 180,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L180"
             }
           },
           {
@@ -1938,7 +2103,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 186
+                  "lineNumber": 186,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L186"
                 }
               }
             ],
@@ -1946,7 +2112,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 185
+              "lineNumber": 185,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L185"
             }
           },
           {
@@ -1974,7 +2141,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 192
+              "lineNumber": 192,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L192"
             }
           },
           {
@@ -2014,7 +2182,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 197
+                  "lineNumber": 197,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L197"
                 }
               }
             ],
@@ -2022,7 +2191,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 197
+              "lineNumber": 197,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L197"
             }
           },
           {
@@ -2050,7 +2220,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 202
+              "lineNumber": 202,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L202"
             }
           },
           {
@@ -2089,7 +2260,8 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 207
+                  "lineNumber": 207,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L207"
                 }
               }
             ],
@@ -2097,7 +2269,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 207
+              "lineNumber": 207,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L207"
             }
           },
           {
@@ -2123,7 +2296,8 @@
                 ],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 213
+                  "lineNumber": 213,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L213"
                 }
               }
             ],
@@ -2131,7 +2305,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 213
+              "lineNumber": 213,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L213"
             }
           },
           {
@@ -2151,7 +2326,8 @@
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 218
+              "lineNumber": 218,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L218"
             }
           },
           {
@@ -2190,58 +2366,26 @@
                 "description": [],
                 "source": {
                   "path": "src/core/public/chrome/types.ts",
-                  "lineNumber": 225
+                  "lineNumber": 225,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L225"
                 }
               }
             ],
-            "tags": [],
+            "tags": [
+              "remarks"
+            ],
             "returnComment": [],
             "source": {
               "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 225
+              "lineNumber": 225,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L225"
             }
           }
         ],
         "source": {
           "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 86
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ChromeUserBanner",
-        "type": "Interface",
-        "label": "ChromeUserBanner",
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ChromeUserBanner.content",
-            "type": "Function",
-            "label": "content",
-            "description": [],
-            "source": {
-              "path": "src/core/public/chrome/types.ts",
-              "lineNumber": 41
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
-              "<HTMLDivElement>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 40
+          "lineNumber": 86,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L86"
         },
         "initialIsOpen": false
       }
@@ -2258,7 +2402,8 @@
         "description": [],
         "source": {
           "path": "src/core/public/chrome/types.ts",
-          "lineNumber": 32
+          "lineNumber": 32,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/types.ts#L32"
         },
         "signature": [
           "CommonProps",
@@ -2267,23 +2412,6 @@
           "; href?: string | undefined; onClick?: ((event: ",
           "MouseEvent",
           "<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ChromeHelpExtensionLinkBase",
-        "type": "Type",
-        "label": "ChromeHelpExtensionLinkBase",
-        "tags": [
-          "public"
-        ],
-        "description": [],
-        "source": {
-          "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 34
-        },
-        "signature": [
-          "{ iconType?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; 'data-test-subj'?: string | undefined; target?: string | undefined; rel?: string | undefined; }"
         ],
         "initialIsOpen": false
       },
@@ -2297,7 +2425,8 @@
         "description": [],
         "source": {
           "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
-          "lineNumber": 98
+          "lineNumber": 98,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L98"
         },
         "signature": [
           {
@@ -2335,6 +2464,24 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.ChromeHelpExtensionLinkBase",
+        "type": "Type",
+        "label": "ChromeHelpExtensionLinkBase",
+        "tags": [
+          "public"
+        ],
+        "description": [],
+        "source": {
+          "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
+          "lineNumber": 34,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/header_help_menu.tsx#L34"
+        },
+        "signature": [
+          "{ iconType?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; 'data-test-subj'?: string | undefined; target?: string | undefined; rel?: string | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.ChromeNavLinkUpdateableFields",
         "type": "Type",
         "label": "ChromeNavLinkUpdateableFields",
@@ -2344,7 +2491,8 @@
         "description": [],
         "source": {
           "path": "src/core/public/chrome/nav_links/nav_link.ts",
-          "lineNumber": 85
+          "lineNumber": 85,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/nav_links/nav_link.ts#L85"
         },
         "signature": [
           "{ readonly hidden?: boolean | undefined; readonly disabled?: boolean | undefined; readonly href?: string | undefined; readonly url?: string | undefined; }"
@@ -2359,7 +2507,8 @@
         "description": [],
         "source": {
           "path": "src/core/public/chrome/ui/header/types.ts",
-          "lineNumber": 10
+          "lineNumber": 10,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/core/public/chrome/ui/header/types.ts#L10"
         },
         "signature": [
           "\"legacy\" | \"modern\""

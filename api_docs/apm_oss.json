@@ -14,7 +14,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/apm_oss/common/index_pattern_constants.ts",
-          "lineNumber": 9
+          "lineNumber": 9,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/common/index_pattern_constants.ts#L9"
         },
         "signature": [
           "\"apm_static_index_pattern_id\""
@@ -32,7 +33,8 @@
       "children": [],
       "source": {
         "path": "src/plugins/apm_oss/public/types.ts",
-        "lineNumber": 10
+        "lineNumber": 10,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/public/types.ts#L10"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -46,7 +48,8 @@
       "children": [],
       "source": {
         "path": "src/plugins/apm_oss/public/types.ts",
-        "lineNumber": 13
+        "lineNumber": 13,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/public/types.ts#L13"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -55,6 +58,53 @@
   "server": {
     "classes": [],
     "functions": [
+      {
+        "id": "def-server.createNodeAgentInstructions",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "apmServerUrl",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L11"
+            }
+          },
+          {
+            "type": "string",
+            "label": "secretToken",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 11,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L11"
+            }
+          }
+        ],
+        "signature": [
+          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
+        ],
+        "description": [],
+        "label": "createNodeAgentInstructions",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L11"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.createDjangoAgentInstructions",
         "type": "Function",
@@ -69,7 +119,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 88
+              "lineNumber": 88,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L88"
             }
           },
           {
@@ -82,7 +133,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 88
+              "lineNumber": 88,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L88"
             }
           }
         ],
@@ -93,51 +145,8 @@
         "label": "createDjangoAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 88
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createDotNetAgentInstructions",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 631
-            }
-          },
-          {
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 631
-            }
-          }
-        ],
-        "signature": [
-          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; } | { title: string; commands: string[]; textPost: string; textPre?: undefined; })[]"
-        ],
-        "description": [],
-        "label": "createDotNetAgentInstructions",
-        "source": {
-          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 631
+          "lineNumber": 88,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L88"
         },
         "tags": [],
         "returnComment": [],
@@ -157,7 +166,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 173
+              "lineNumber": 173,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L173"
             }
           },
           {
@@ -170,7 +180,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 173
+              "lineNumber": 173,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L173"
             }
           }
         ],
@@ -181,258 +192,8 @@
         "label": "createFlaskAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 173
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createGoAgentInstructions",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 492
-            }
-          },
-          {
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 492
-            }
-          }
-        ],
-        "signature": [
-          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
-        ],
-        "description": [],
-        "label": "createGoAgentInstructions",
-        "source": {
-          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 492
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createJavaAgentInstructions",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 585
-            }
-          },
-          {
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 585
-            }
-          }
-        ],
-        "signature": [
-          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
-        ],
-        "description": [],
-        "label": "createJavaAgentInstructions",
-        "source": {
-          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 585
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createJsAgentInstructions",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 393
-            }
-          }
-        ],
-        "signature": [
-          "(apmServerUrl?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; } | { title: string; textPre: string; commands: string[]; textPost?: undefined; })[]"
-        ],
-        "description": [],
-        "label": "createJsAgentInstructions",
-        "source": {
-          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 393
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createNodeAgentInstructions",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 11
-            }
-          }
-        ],
-        "signature": [
-          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
-        ],
-        "description": [],
-        "label": "createNodeAgentInstructions",
-        "source": {
-          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 11
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createPhpAgentInstructions",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 705
-            }
-          },
-          {
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 705
-            }
-          }
-        ],
-        "signature": [
-          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
-        ],
-        "description": [],
-        "label": "createPhpAgentInstructions",
-        "source": {
-          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 705
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.createRackAgentInstructions",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "apmServerUrl",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 298
-            }
-          },
-          {
-            "type": "string",
-            "label": "secretToken",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 298
-            }
-          }
-        ],
-        "signature": [
-          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
-        ],
-        "description": [],
-        "label": "createRackAgentInstructions",
-        "source": {
-          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 298
+          "lineNumber": 173,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L173"
         },
         "tags": [],
         "returnComment": [],
@@ -452,7 +213,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 255
+              "lineNumber": 255,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L255"
             }
           },
           {
@@ -465,7 +227,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-              "lineNumber": 255
+              "lineNumber": 255,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L255"
             }
           }
         ],
@@ -476,7 +239,276 @@
         "label": "createRailsAgentInstructions",
         "source": {
           "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
-          "lineNumber": 255
+          "lineNumber": 255,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L255"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.createRackAgentInstructions",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "apmServerUrl",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 298,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L298"
+            }
+          },
+          {
+            "type": "string",
+            "label": "secretToken",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 298,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L298"
+            }
+          }
+        ],
+        "signature": [
+          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
+        ],
+        "description": [],
+        "label": "createRackAgentInstructions",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 298,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L298"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.createJsAgentInstructions",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "apmServerUrl",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 393,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L393"
+            }
+          }
+        ],
+        "signature": [
+          "(apmServerUrl?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; } | { title: string; textPre: string; commands: string[]; textPost?: undefined; })[]"
+        ],
+        "description": [],
+        "label": "createJsAgentInstructions",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 393,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L393"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.createGoAgentInstructions",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "apmServerUrl",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 492,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L492"
+            }
+          },
+          {
+            "type": "string",
+            "label": "secretToken",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 492,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L492"
+            }
+          }
+        ],
+        "signature": [
+          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands: string[]; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
+        ],
+        "description": [],
+        "label": "createGoAgentInstructions",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 492,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L492"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.createJavaAgentInstructions",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "apmServerUrl",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 585,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L585"
+            }
+          },
+          {
+            "type": "string",
+            "label": "secretToken",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 585,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L585"
+            }
+          }
+        ],
+        "signature": [
+          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
+        ],
+        "description": [],
+        "label": "createJavaAgentInstructions",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 585,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L585"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.createDotNetAgentInstructions",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "apmServerUrl",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 631,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L631"
+            }
+          },
+          {
+            "type": "string",
+            "label": "secretToken",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 631,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L631"
+            }
+          }
+        ],
+        "signature": [
+          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; } | { title: string; commands: string[]; textPost: string; textPre?: undefined; })[]"
+        ],
+        "description": [],
+        "label": "createDotNetAgentInstructions",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 631,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L631"
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.createPhpAgentInstructions",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "apmServerUrl",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 705,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L705"
+            }
+          },
+          {
+            "type": "string",
+            "label": "secretToken",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+              "lineNumber": 705,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L705"
+            }
+          }
+        ],
+        "signature": [
+          "(apmServerUrl?: string, secretToken?: string) => ({ title: string; textPre: string; commands?: undefined; textPost?: undefined; } | { title: string; textPre: string; commands: string[]; textPost: string; })[]"
+        ],
+        "description": [],
+        "label": "createPhpAgentInstructions",
+        "source": {
+          "path": "src/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts",
+          "lineNumber": 705,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/tutorial/instructions/apm_agent_instructions.ts#L705"
         },
         "tags": [],
         "returnComment": [],
@@ -487,21 +519,6 @@
     "enums": [],
     "misc": [
       {
-        "tags": [],
-        "id": "def-server.APM_STATIC_INDEX_PATTERN_ID",
-        "type": "string",
-        "label": "APM_STATIC_INDEX_PATTERN_ID",
-        "description": [],
-        "source": {
-          "path": "src/plugins/apm_oss/common/index_pattern_constants.ts",
-          "lineNumber": 9
-        },
-        "signature": [
-          "\"apm_static_index_pattern_id\""
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.APMOSSConfig",
         "type": "Type",
         "label": "APMOSSConfig",
@@ -509,10 +526,27 @@
         "description": [],
         "source": {
           "path": "src/plugins/apm_oss/server/index.ts",
-          "lineNumber": 32
+          "lineNumber": 32,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/index.ts#L32"
         },
         "signature": [
           "{ readonly enabled: boolean; readonly transactionIndices: string; readonly spanIndices: string; readonly errorIndices: string; readonly metricsIndices: string; readonly sourcemapIndices: string; readonly onboardingIndices: string; readonly indexPattern: string; readonly fleetMode: boolean; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-server.APM_STATIC_INDEX_PATTERN_ID",
+        "type": "string",
+        "label": "APM_STATIC_INDEX_PATTERN_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/apm_oss/common/index_pattern_constants.ts",
+          "lineNumber": 9,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/common/index_pattern_constants.ts#L9"
+        },
+        "signature": [
+          "\"apm_static_index_pattern_id\""
         ],
         "initialIsOpen": false
       }
@@ -533,7 +567,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/apm_oss/server/plugin.ts",
-            "lineNumber": 48
+            "lineNumber": 48,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/plugin.ts#L48"
           },
           "signature": [
             "Readonly<{} & { enabled: boolean; transactionIndices: string; spanIndices: string; errorIndices: string; metricsIndices: string; sourcemapIndices: string; onboardingIndices: string; indexPattern: string; fleetMode: boolean; }>"
@@ -547,7 +582,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/apm_oss/server/plugin.ts",
-            "lineNumber": 49
+            "lineNumber": 49,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/plugin.ts#L49"
           },
           "signature": [
             "Observable",
@@ -574,13 +610,15 @@
           "returnComment": [],
           "source": {
             "path": "src/plugins/apm_oss/server/plugin.ts",
-            "lineNumber": 50
+            "lineNumber": 50,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/plugin.ts#L50"
           }
         }
       ],
       "source": {
         "path": "src/plugins/apm_oss/server/plugin.ts",
-        "lineNumber": 47
+        "lineNumber": 47,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/apm_oss/server/plugin.ts#L47"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

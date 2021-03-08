@@ -27,7 +27,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 12
+              "lineNumber": 12,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L12"
             }
           },
           {
@@ -38,7 +39,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 13
+              "lineNumber": 13,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L13"
             }
           },
           {
@@ -49,7 +51,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 14
+              "lineNumber": 14,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L14"
             }
           },
           {
@@ -60,7 +63,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 15
+              "lineNumber": 15,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L15"
             }
           },
           {
@@ -71,7 +75,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 16
+              "lineNumber": 16,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L16"
             }
           },
           {
@@ -82,7 +87,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 17
+              "lineNumber": 17,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L17"
             }
           },
           {
@@ -93,7 +99,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 18
+              "lineNumber": 18,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L18"
             }
           },
           {
@@ -104,7 +111,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 19
+              "lineNumber": 19,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L19"
             }
           },
           {
@@ -115,7 +123,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 20
+              "lineNumber": 20,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L20"
             }
           },
           {
@@ -126,7 +135,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 21
+              "lineNumber": 21,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L21"
             }
           },
           {
@@ -137,13 +147,15 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 22
+              "lineNumber": 22,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L22"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-          "lineNumber": 11
+          "lineNumber": 11,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts#L11"
         },
         "initialIsOpen": false
       }

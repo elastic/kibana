@@ -22,7 +22,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/enterprise_search/server/index.ts",
-          "lineNumber": 24
+          "lineNumber": 24,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/enterprise_search/server/index.ts#L24"
         },
         "signature": [
           "{ readonly host?: string | undefined; readonly enabled: boolean; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; }"
@@ -39,7 +40,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/enterprise_search/server/index.ts",
-          "lineNumber": 17
+          "lineNumber": 17,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/enterprise_search/server/index.ts#L17"
         },
         "signature": [
           "ObjectType",

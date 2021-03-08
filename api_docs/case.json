@@ -27,7 +27,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/case/server/types.ts",
-              "lineNumber": 14
+              "lineNumber": 14,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/case/server/types.ts#L14"
             },
             "signature": [
               "() => ",
@@ -43,7 +44,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/case/server/types.ts",
-          "lineNumber": 13
+          "lineNumber": 13,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/case/server/types.ts#L13"
         },
         "initialIsOpen": false
       }
