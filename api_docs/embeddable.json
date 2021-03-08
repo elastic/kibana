@@ -2854,7 +2854,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 96
+                  "lineNumber": 97
                 }
               }
             ],
@@ -2862,7 +2862,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 96
+              "lineNumber": 97
             }
           },
           {
@@ -2878,7 +2878,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 153
+              "lineNumber": 154
             }
           },
           {
@@ -2894,7 +2894,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 187
+              "lineNumber": 188
             }
           },
           {
@@ -2911,7 +2911,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 199
+                  "lineNumber": 200
                 }
               }
             ],
@@ -2922,7 +2922,7 @@
             "label": "onFocus",
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 199
+              "lineNumber": 200
             },
             "tags": [],
             "returnComment": []
@@ -2941,7 +2941,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 203
+                  "lineNumber": 204
                 }
               }
             ],
@@ -2952,7 +2952,7 @@
             "label": "onBlur",
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 203
+              "lineNumber": 204
             },
             "tags": [],
             "returnComment": []
@@ -2970,7 +2970,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 209
+              "lineNumber": 210
             }
           },
           {
@@ -2986,7 +2986,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 251
+              "lineNumber": 252
             }
           },
           {
@@ -3000,7 +3000,7 @@
             "label": "closeMyContextMenuPanel",
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 274
+              "lineNumber": 296
             },
             "tags": [],
             "returnComment": []
@@ -3008,7 +3008,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-          "lineNumber": 89
+          "lineNumber": 90
         },
         "initialIsOpen": false
       },
