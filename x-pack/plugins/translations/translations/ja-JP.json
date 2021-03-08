@@ -8544,7 +8544,6 @@
     "xpack.fleet.epm.loadingIntegrationErrorTitle": "統合詳細の読み込みエラー",
     "xpack.fleet.epm.packageDetails.integrationList.agentCount": "エージェント",
     "xpack.fleet.epm.packageDetails.integrationList.agentPolicy": "エージェントポリシー",
-    "xpack.fleet.epm.packageDetails.integrationList.description": "説明",
     "xpack.fleet.epm.packageDetails.integrationList.loadingPoliciesMessage": "統合ポリシーを読み込んでいます...",
     "xpack.fleet.epm.packageDetails.integrationList.name": "統合",
     "xpack.fleet.epm.packageDetails.integrationList.updatedAt": "最終更新",
