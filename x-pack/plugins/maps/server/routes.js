@@ -631,7 +631,7 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
         const result = await importData(context.core, id, index, mappings, data);
         return response.ok({ body: result });
       } catch (error) {
-        logger.error(`Error processing geo point/shape request: ${error.message}.`);
+        logger.error(`Error creating geo point/shape index: ${error.message}.`);
       }
     }
   );

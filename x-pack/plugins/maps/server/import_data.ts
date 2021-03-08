@@ -39,21 +39,14 @@ export function importDataProvider(
     mappings: Mappings,
     data: InputData
   ): Promise<ImportResponse> {
-    let createdIndex;
     const docCount = data.length;
 
     try {
       if (id === undefined) {
         // first chunk of data, create the index and id to return
         id = generateId();
-
         await createIndex(index, mappings);
-        createdIndex = index;
-        if (createdIndex) {
-          await createIndexPattern(index);
-        }
-      } else {
-        createdIndex = index;
+        await createIndexPattern(index);
       }
 
       let failures: ImportFailure[] = [];
@@ -61,11 +54,8 @@ export function importDataProvider(
         const resp = await indexData(index, data);
         if (resp.success === false) {
           if (resp.ingestError) {
-            // all docs failed, abort
             throw resp;
           } else {
-            // some docs failed.
-            // still report success but with a list of failures
             logger.warn(`Error: some documents failed to index. ${resp.failures}`);
             failures = resp.failures || [];
           }
@@ -75,7 +65,7 @@ export function importDataProvider(
       return {
         success: true,
         id,
-        index: createdIndex,
+        index,
         docCount,
         failures,
       };
@@ -83,7 +73,7 @@ export function importDataProvider(
       return {
         success: false,
         id: id!,
-        index: createdIndex,
+        index,
         error: error.body !== undefined ? error.body : error,
         docCount,
         ingestError: error.ingestError,
