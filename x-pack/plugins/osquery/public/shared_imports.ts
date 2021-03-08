@@ -26,7 +26,10 @@ export {
   ValidationFunc,
   VALIDATION_TYPES,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-export { WithHeaderLayout, WithoutHeaderLayout } from '../../fleet/public';
+export {
+  WithHeaderLayout,
+  WithoutHeaderLayout, // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../fleet/public/applications/fleet/layouts';
 export {
   Field,
   ToggleField,

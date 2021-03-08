@@ -38,21 +38,13 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId }) => {
           </>
         ),
       },
-      {
-        id: 'results_discover',
-        name: 'Results in Discover',
-        href: `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(columns:!(),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logs-*',key:action_id,negate:!f,params:(query:'${actionId}'),type:phrase),query:(match_phrase:(action_id:'${actionId}')))),index:'logs-*',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))`,
-        target: '_blank',
-      },
     ],
     [actionId]
   );
 
   return (
     <EuiTabbedContent
-      // @ts-expect-error update types
       tabs={tabs}
-      // @ts-expect-error update types
       initialSelectedTab={tabs[0]}
       autoFocus="selected"
       expand={false}

@@ -20,7 +20,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const Container = styled.div`
+const Container = styled.div`
   min-height: calc(
     100vh - ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px
   );
@@ -29,13 +29,13 @@ export const Container = styled.div`
   flex-direction: column;
 `;
 
-export const Wrapper = styled.div`
+const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
 `;
 
-export const Nav = styled.nav`
+const Nav = styled.nav`
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
   border-bottom: ${(props) => props.theme.eui.euiBorderThin};
   padding: ${(props) =>

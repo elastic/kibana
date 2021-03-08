@@ -23,7 +23,7 @@ const LiveQueriesPageComponent = () => {
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.fleet.liveQueryList.pageTitle"
+                id="xpack.osquery.liveQueryList.pageTitle"
                 defaultMessage="Live queries"
               />
             </h1>
