@@ -1,7 +1,7 @@
 [[discover-view-single-document]]
 == View single document
 
-Once you've found a document of interest in Discover there's a simple way to share or bookmark it. 
+Once you've found a document of interest in *Discover*, there's a simple way to share or bookmark it. 
 
 . In the document table, click the expand icon (>).
 . Click **View single document** 
@@ -14,7 +14,6 @@ image::images/discover-view-single-document.png[Discover single document view]
 
 The link is valid for the time the document is available in Elasticsearch. If you need another way to view single 
 documents, you can extend **Table** and **JSON** by creating <<external-plugin-development, your own plugin>>.
-
 
 
 
