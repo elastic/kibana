@@ -24,11 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { useInitialFocus } from '../../../components/use_initial_focus';
 import { FormFlyout } from '../../../components/form_flyout';
 import { useCurrentUser } from '../../../components/use_current_user';
 import type { ValidationErrors } from '../../../components/use_form';
 import { useForm } from '../../../components/use_form';
+import { useInitialFocus } from '../../../components/use_initial_focus';
 import { UserAPIClient } from '../user_api_client';
 
 export interface ChangePasswordFormValues {

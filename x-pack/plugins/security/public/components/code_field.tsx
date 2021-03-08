@@ -95,10 +95,7 @@ export const SelectableCodeField: FunctionComponent<SelectableCodeFieldProps> = 
               iconType="arrowDown"
               iconSide="right"
               color="success"
-              onClick={() => {
-                console.log('toggle');
-                setIsPopoverOpen(!isPopoverOpen);
-              }}
+              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             >
               {selectedOption.label}
             </EuiButtonEmpty>
