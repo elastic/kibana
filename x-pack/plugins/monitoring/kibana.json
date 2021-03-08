@@ -17,11 +17,11 @@
     "home",
     "cloud",
     "triggersActionsUi",
-    "alerts",
+    "alerting",
     "actions",
     "encryptedSavedObjects"
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils", "home", "alerts", "kibanaReact", "licenseManagement"]
+  "requiredBundles": ["kibanaUtils", "home", "alerting", "kibanaReact", "licenseManagement"]
 }

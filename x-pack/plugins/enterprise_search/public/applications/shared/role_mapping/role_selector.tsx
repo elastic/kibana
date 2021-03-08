@@ -9,15 +9,7 @@ import React from 'react';
 
 import { startCase } from 'lodash';
 
-import {
-  EuiCallOut,
-  EuiFormRow,
-  EuiRadio,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFormRow, EuiRadio, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 interface Props {
   disabled?: boolean;
@@ -30,7 +22,6 @@ interface Props {
 
 export const RoleSelector: React.FC<Props> = ({
   disabled,
-  disabledText,
   roleType,
   roleTypeOption,
   description,
@@ -49,13 +40,6 @@ export const RoleSelector: React.FC<Props> = ({
           <EuiTitle size="xs">
             <h4 className="usersLayout__users--roletype">{startCase(roleTypeOption)}</h4>
           </EuiTitle>
-          {disabled && disabledText && (
-            <EuiCallOut
-              size="s"
-              title={<EuiTextColor color="subdued">{disabledText}</EuiTextColor>}
-              iconType="alert"
-            />
-          )}
           <EuiSpacer size="xs" />
           <EuiText size="s">
             <p>{description}</p>
