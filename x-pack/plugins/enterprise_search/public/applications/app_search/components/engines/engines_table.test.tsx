@@ -58,8 +58,8 @@ describe('EnginesTable', () => {
     beforeAll(() => {
       jest.clearAllMocks();
       setMockValues({
-        // AppLogic
-        myRole: {},
+        // LicensingLogic
+        hasPlatinumLicense: false,
       });
       wrapper = mountWithIntl(<EnginesTable {...props} />);
       table = wrapper.find(EuiBasicTable);
@@ -103,8 +103,8 @@ describe('EnginesTable', () => {
     it('passes the loading prop', () => {
       jest.clearAllMocks();
       setMockValues({
-        // AppLogic
-        myRole: {},
+        // LicensingLogic
+        hasPlatinumLicense: false,
       });
       const wrapper = mountWithIntl(<EnginesTable {...props} loading />);
 
@@ -123,8 +123,8 @@ describe('EnginesTable', () => {
     beforeAll(() => {
       jest.clearAllMocks();
       setMockValues({
-        // AppLogic
-        myRole: {},
+        // LicensingLogic
+        hasPlatinumLicense: false,
       });
     });
 
@@ -181,13 +181,11 @@ describe('EnginesTable', () => {
   });
 
   describe('actions', () => {
-    it('will hide the action buttons if the user does not have permissions to manage this the engine', () => {
+    it('will hide the action buttons if the user does not have a platinum license', () => {
       jest.clearAllMocks();
       setMockValues({
-        // AppLogic
-        myRole: {
-          canManageEngines: false,
-        },
+        // LicensingLogic
+        hasPlatinumLicense: false,
       });
       const wrapper = shallow(<EnginesTable {...props} />);
       const tableRow = wrapper.find(EuiTableRow).first();
@@ -195,7 +193,7 @@ describe('EnginesTable', () => {
       expect(tableRow.find(EuiIcon)).toHaveLength(0);
     });
 
-    describe('when user can manage engines', () => {
+    describe('when user has a platinum license', () => {
       let wrapper: ReactWrapper<any>;
       let tableRow: ReactWrapper<any>;
       let actions: ReactWrapper<any>;
@@ -203,10 +201,8 @@ describe('EnginesTable', () => {
       beforeEach(() => {
         jest.clearAllMocks();
         setMockValues({
-          // AppLogic
-          myRole: {
-            canManageEngines: true,
-          },
+          // LicensingLogic
+          hasPlatinumLicense: true,
         });
         wrapper = mountWithIntl(<EnginesTable {...props} />);
         tableRow = wrapper.find(EuiTableRow).first();
