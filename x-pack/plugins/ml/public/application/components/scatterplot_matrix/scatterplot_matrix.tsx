@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -56,6 +57,24 @@ const TOGGLE_OFF = i18n.translate('xpack.ml.splom.toggleOff', {
 });
 
 const sampleSizeOptions = [100, 1000, 10000].map((d) => ({ value: d, text: '' + d }));
+
+interface OptionLabelWithIconTipProps {
+  label: string;
+  tooltip: string;
+}
+
+const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
+  <>
+    {label}
+    <EuiIconTip
+      content={tooltip}
+      iconProps={{
+        className: 'eui-alignTop',
+      }}
+      size="s"
+    />
+  </>
+);
 
 export interface ScatterplotMatrixProps {
   fields: string[];
@@ -252,9 +271,16 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.fieldSelectionLabel', {
-                  defaultMessage: 'Fields',
-                })}
+                label={
+                  <OptionLabelWithIconTip
+                    label={i18n.translate('xpack.ml.splom.fieldSelectionLabel', {
+                      defaultMessage: 'Fields',
+                    })}
+                    tooltip={i18n.translate('xpack.ml.splom.fieldSelectionInfoTooltip', {
+                      defaultMessage: 'Pick fields to explore their relationships.',
+                    })}
+                  />
+                }
                 display="rowCompressed"
                 fullWidth
               >
@@ -276,9 +302,16 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '200px' }} grow={false}>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.sampleSizeLabel', {
-                  defaultMessage: 'Sample size',
-                })}
+                label={
+                  <OptionLabelWithIconTip
+                    label={i18n.translate('xpack.ml.splom.sampleSizeLabel', {
+                      defaultMessage: 'Sample size',
+                    })}
+                    tooltip={i18n.translate('xpack.ml.splom.sampleSizeInfoTooltip', {
+                      defaultMessage: 'Amount of documents to display in the scatterplot matrix.',
+                    })}
+                  />
+                }
                 display="rowCompressed"
                 fullWidth
               >
@@ -292,9 +325,17 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '120px' }} grow={false}>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.splom.randomScoringLabel', {
-                  defaultMessage: 'Random scoring',
-                })}
+                label={
+                  <OptionLabelWithIconTip
+                    label={i18n.translate('xpack.ml.splom.randomScoringLabel', {
+                      defaultMessage: 'Random scoring',
+                    })}
+                    tooltip={i18n.translate('xpack.ml.splom.randomScoringInfoTooltip', {
+                      defaultMessage:
+                        'Uses a function score query to get randomly selected documents as the sample.',
+                    })}
+                  />
+                }
                 display="rowCompressed"
                 fullWidth
               >
@@ -310,9 +351,16 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             {resultsField !== undefined && legendType === undefined && (
               <EuiFlexItem style={{ width: '120px' }} grow={false}>
                 <EuiFormRow
-                  label={i18n.translate('xpack.ml.splom.dynamicSizeLabel', {
-                    defaultMessage: 'Dynamic size',
-                  })}
+                  label={
+                    <OptionLabelWithIconTip
+                      label={i18n.translate('xpack.ml.splom.dynamicSizeLabel', {
+                        defaultMessage: 'Dynamic size',
+                      })}
+                      tooltip={i18n.translate('xpack.ml.splom.dynamicSizeInfoTooltip', {
+                        defaultMessage: 'Scales the size of each point by its outlier score.',
+                      })}
+                    />
+                  }
                   display="rowCompressed"
                   fullWidth
                 >

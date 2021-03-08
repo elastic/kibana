@@ -6,7 +6,7 @@
  */
 
 import { curry } from 'lodash';
-
+import { Logger } from 'src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import {
   CasePatchRequest,
@@ -26,6 +26,7 @@ import * as i18n from './translations';
 
 import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
 import { nullUser } from '../../common';
+import { createCaseError } from '../../common/error';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -84,6 +85,7 @@ async function executor(
     connectorMappingsService,
     userActionService,
     alertsService,
+    logger,
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -93,9 +95,17 @@ async function executor(
   }
 
   if (subAction === 'create') {
-    data = await caseClient.create({
-      ...(subActionParams as CasePostRequest),
-    });
+    try {
+      data = await caseClient.create({
+        ...(subActionParams as CasePostRequest),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to create a case using connector: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   if (subAction === 'update') {
@@ -107,13 +117,29 @@ async function executor(
       {} as CasePatchRequest
     );
 
-    data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+    try {
+      data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to update case using connector id: ${updateParamsWithoutNullValues?.id} version: ${updateParamsWithoutNullValues?.version}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    const formattedComment = transformConnectorComment(comment);
-    data = await caseClient.addComment({ caseId, comment: formattedComment });
+    try {
+      const formattedComment = transformConnectorComment(comment, logger);
+      data = await caseClient.addComment({ caseId, comment: formattedComment });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to create comment using connector case id: ${caseId}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
   return { status: 'ok', data: data ?? {}, actionId };
@@ -127,7 +153,19 @@ interface AttachmentAlerts {
   indices: string[];
   rule: { id: string | null; name: string | null };
 }
-export const transformConnectorComment = (comment: CommentSchemaType): CommentRequest => {
+
+/**
+ * Convert a connector style comment passed through the action plugin to the expected format for the add comment functionality.
+ *
+ * @param comment an object defining the comment to be attached to a case/sub case
+ * @param logger an optional logger to handle logging an error if parsing failed
+ *
+ * Note: This is exported so that the integration tests can use it.
+ */
+export const transformConnectorComment = (
+  comment: CommentSchemaType,
+  logger?: Logger
+): CommentRequest => {
   if (isCommentGeneratedAlert(comment)) {
     try {
       const genAlerts: Array<{
@@ -162,7 +200,11 @@ export const transformConnectorComment = (comment: CommentSchemaType): CommentRe
         rule,
       };
     } catch (e) {
-      throw new Error(`Error parsing generated alert in case connector -> ${e.message}`);
+      throw createCaseError({
+        message: `Error parsing generated alert in case connector -> ${e}`,
+        error: e,
+        logger,
+      });
     }
   } else {
     return comment;

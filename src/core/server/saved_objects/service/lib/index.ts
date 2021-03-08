@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
-
-export {
+export type { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
+export { SavedObjectsClientProvider } from './scoped_client_provider';
+export type {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   ISavedObjectsClientProvider,
-  SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,

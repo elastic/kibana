@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { AlertingPlugin } from '../../../../alerting/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
@@ -22,13 +22,13 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asDecimalOrInteger } from '../../../common/utils/formatters';
-import { environmentQuery } from '../../../common/utils/queries';
+import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
-  alerts: AlertingPlugin['setup'];
+  alerting: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -44,10 +44,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate];
 
 export function registerTransactionErrorRateAlertType({
-  alerts,
+  alerting,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType({
+  alerting.registerType({
     id: AlertType.TransactionErrorRate,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,

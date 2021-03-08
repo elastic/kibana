@@ -9,20 +9,24 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
+import { HITS_TOTAL_RELATION } from '../../../../common/types/es_client';
+import { ChartData } from '../../../../common/types/field_histograms';
+
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { ColumnChart } from './column_chart';
-import { INIT_MAX_COLUMNS } from './common';
+import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED, INIT_MAX_COLUMNS } from './common';
 import {
+  ChartsVisible,
   ColumnId,
   DataGridItem,
   IndexPagination,
   OnChangeItemsPerPage,
   OnChangePage,
   OnSort,
+  RowCountRelation,
   UseDataGridReturnType,
 } from './types';
-import { ChartData } from './use_column_chart';
 
 export const useDataGrid = (
   columns: EuiDataGridColumn[],
@@ -36,14 +40,17 @@ export const useDataGrid = (
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
   const [rowCount, setRowCount] = useState(0);
+  const [rowCountRelation, setRowCountRelation] = useState<RowCountRelation>(undefined);
   const [columnCharts, setColumnCharts] = useState<ChartData[]>([]);
   const [tableItems, setTableItems] = useState<DataGridItem[]>([]);
   const [pagination, setPagination] = useState(defaultPagination);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  const [chartsVisible, setChartsVisible] = useState(false);
+  const [chartsVisible, setChartsVisible] = useState<ChartsVisible>(undefined);
 
   const toggleChartVisibility = () => {
-    setChartsVisible(!chartsVisible);
+    if (chartsVisible !== undefined) {
+      setChartsVisible(!chartsVisible);
+    }
   };
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback((pageSize) => {
@@ -131,6 +138,19 @@ export const useDataGrid = (
     });
   }, [columns, columnCharts, chartsVisible, JSON.stringify(visibleColumns)]);
 
+  // Initialize the mini histogram charts toggle button.
+  // On load `chartsVisible` is set to `undefined`, the button will be disabled.
+  // Once we know how many rows have been returned,
+  // we decide whether to show or hide the charts by default.
+  useEffect(() => {
+    if (chartsVisible === undefined && rowCount > 0 && rowCountRelation !== undefined) {
+      setChartsVisible(
+        rowCount <= COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED &&
+          rowCountRelation !== HITS_TOTAL_RELATION.GTE
+      );
+    }
+  }, [chartsVisible, rowCount, rowCountRelation]);
+
   return {
     chartsVisible,
     chartsButtonVisible: true,
@@ -144,11 +164,13 @@ export const useDataGrid = (
     pagination,
     resetPagination,
     rowCount,
+    rowCountRelation,
     setColumnCharts,
     setErrorMessage,
     setNoDataMessage,
     setPagination,
     setRowCount,
+    setRowCountRelation,
     setSortingColumns,
     setStatus,
     setTableItems,

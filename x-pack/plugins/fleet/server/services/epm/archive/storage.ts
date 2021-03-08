@@ -6,22 +6,26 @@
  */
 
 import { extname } from 'path';
+
 import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
-import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
-import {
-  ASSETS_SAVED_OBJECT_TYPE,
+import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
+
+import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import type {
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
   RegistryDataStream,
 } from '../../../../common';
-import { ArchiveEntry, getArchiveEntry, setArchiveEntry, setArchiveFilelist } from './index';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 import { pkgToPkgKey } from '../registry';
+
+import { getArchiveEntry, setArchiveEntry, setArchiveFilelist } from './index';
+import type { ArchiveEntry } from './index';
+import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;

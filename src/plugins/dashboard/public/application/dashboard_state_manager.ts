@@ -88,6 +88,7 @@ export class DashboardStateManager {
 
   private readonly usageCollection: UsageCollectionSetup | undefined;
   public readonly hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard;
+  private hasPendingEmbeddable: () => boolean;
 
   /**
    *
@@ -104,6 +105,7 @@ export class DashboardStateManager {
     usageCollection,
     hideWriteControls,
     kbnUrlStateStorage,
+    hasPendingEmbeddable,
     dashboardPanelStorage,
     hasTaggingCapabilities,
     allowByValueEmbeddables,
@@ -111,6 +113,7 @@ export class DashboardStateManager {
     history: History;
     kibanaVersion: string;
     hideWriteControls: boolean;
+    hasPendingEmbeddable: () => boolean;
     allowByValueEmbeddables: boolean;
     savedDashboard: DashboardSavedObject;
     toasts: NotificationsStart['toasts'];
@@ -126,19 +129,22 @@ export class DashboardStateManager {
     this.usageCollection = usageCollection;
     this.hasTaggingCapabilities = hasTaggingCapabilities;
     this.allowByValueEmbeddables = allowByValueEmbeddables;
+    this.hasPendingEmbeddable = hasPendingEmbeddable;
+    this.dashboardPanelStorage = dashboardPanelStorage;
+    this.kbnUrlStateStorage = kbnUrlStateStorage;
 
     // get state defaults from saved dashboard, make sure it is migrated
+    const viewMode = this.getInitialViewMode();
     this.stateDefaults = migrateAppState(
-      getAppStateDefaults(this.savedDashboard, this.hideWriteControls, this.hasTaggingCapabilities),
+      getAppStateDefaults(viewMode, this.savedDashboard, this.hasTaggingCapabilities),
       kibanaVersion,
       usageCollection
     );
-    this.dashboardPanelStorage = dashboardPanelStorage;
-    this.kbnUrlStateStorage = kbnUrlStateStorage;
 
     // setup initial state by merging defaults with state from url & panels storage
     // also run migration, as state in url could be of older version
     const initialUrlState = this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY);
+
     const initialState = migrateAppState(
       {
         ...this.stateDefaults,
@@ -345,7 +351,7 @@ export class DashboardStateManager {
   /**
    * Resets the state back to the last saved version of the dashboard.
    */
-  public resetState(resetViewMode: boolean) {
+  public resetState() {
     // In order to show the correct warning, we have to store the unsaved
     // title on the dashboard object. We should fix this at some point, but this is how all the other object
     // save panels work at the moment.
@@ -356,8 +362,9 @@ export class DashboardStateManager {
     // The right way to fix this might be to ensure the defaults object stored on state is a deep
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
+    const currentViewMode = this.stateContainer.get().viewMode;
     this.stateDefaults = migrateAppState(
-      getAppStateDefaults(this.savedDashboard, this.hideWriteControls, this.hasTaggingCapabilities),
+      getAppStateDefaults(currentViewMode, this.savedDashboard, this.hasTaggingCapabilities),
       this.kibanaVersion,
       this.usageCollection
     );
@@ -368,12 +375,7 @@ export class DashboardStateManager {
     this.stateDefaults.filters = [...this.getLastSavedFilterBars()];
     this.isDirty = false;
 
-    if (resetViewMode) {
-      this.stateContainer.set(this.stateDefaults);
-    } else {
-      const currentViewMode = this.stateContainer.get().viewMode;
-      this.stateContainer.set({ ...this.stateDefaults, viewMode: currentViewMode });
-    }
+    this.stateContainer.set(this.stateDefaults);
   }
 
   /**
@@ -537,9 +539,7 @@ export class DashboardStateManager {
       return this.appState.viewMode;
     }
     // get viewMode should work properly even before the state container is created
-    return this.savedDashboard.id
-      ? this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY)?.viewMode ?? ViewMode.VIEW
-      : ViewMode.EDIT;
+    return this.getInitialViewMode();
   }
 
   public getIsViewMode() {
@@ -558,7 +558,10 @@ export class DashboardStateManager {
     // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
     // changes are not tracked by the state monitor.
     const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
-    return this.getIsEditMode() && (this.isDirty || hasTimeFilterChanged);
+    return (
+      this.hasUnsavedPanelState() ||
+      (this.getIsEditMode() && (this.isDirty || hasTimeFilterChanged))
+    );
   }
 
   public getPanels(): SavedDashboardPanel[] {
@@ -671,6 +674,7 @@ export class DashboardStateManager {
 
   public switchViewMode(newMode: ViewMode) {
     this.stateContainer.transitions.set('viewMode', newMode);
+    this.restorePanels();
   }
 
   /**
@@ -695,6 +699,7 @@ export class DashboardStateManager {
           ...this.stateDefaults,
           ...unsavedState,
           ...this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY),
+          viewMode: this.getViewMode(),
         },
         this.kibanaVersion,
         this.usageCollection
@@ -740,6 +745,18 @@ export class DashboardStateManager {
     }
     const { panels, ...stateWithoutPanels } = state;
     return stateWithoutPanels;
+  }
+
+  private getInitialViewMode() {
+    if (this.hideWriteControls) {
+      return ViewMode.VIEW;
+    }
+    const viewModeFromUrl = this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY)
+      ?.viewMode;
+    if (viewModeFromUrl) {
+      return viewModeFromUrl;
+    }
+    return !this.savedDashboard.id || this.hasPendingEmbeddable() ? ViewMode.EDIT : ViewMode.VIEW;
   }
 
   private checkIsDirty() {

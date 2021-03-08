@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useReducer, useCallback } from 'react';
-
+import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { CommentRequest } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 
@@ -49,7 +48,7 @@ interface PostComment {
   subCaseId?: string;
 }
 export interface UsePostComment extends NewCommentState {
-  postComment: (args: PostComment) => void;
+  postComment: (args: PostComment) => Promise<void>;
 }
 
 export const usePostComment = (): UsePostComment => {
@@ -58,38 +57,47 @@ export const usePostComment = (): UsePostComment => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const postMyComment = useCallback(
     async ({ caseId, data, updateCase, subCaseId }: PostComment) => {
-      let cancel = false;
-      const abortCtrl = new AbortController();
-
       try {
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
-        const response = await postComment(data, caseId, abortCtrl.signal, subCaseId);
-        if (!cancel) {
+
+        const response = await postComment(data, caseId, abortCtrlRef.current.signal, subCaseId);
+
+        if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS' });
           if (updateCase) {
             updateCase(response);
           }
         }
       } catch (error) {
-        if (!cancel) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+        if (!isCancelledRef.current) {
+          if (error.name !== 'AbortError') {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
           dispatch({ type: 'FETCH_FAILURE' });
         }
       }
-      return () => {
-        abortCtrl.abort();
-        cancel = true;
-      };
     },
     [dispatchToaster]
   );
+
+  useEffect(() => {
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
+  }, []);
 
   return { ...state, postComment: postMyComment };
 };

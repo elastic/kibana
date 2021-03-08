@@ -116,10 +116,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreationDataGridHistogramButton');
     },
 
-    async enableSourceDataPreviewHistogramCharts() {
-      await this.assertSourceDataPreviewHistogramChartButtonCheckState(false);
-      await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
-      await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+    async enableSourceDataPreviewHistogramCharts(expectedDefaultButtonState: boolean) {
+      await this.assertSourceDataPreviewHistogramChartButtonCheckState(expectedDefaultButtonState);
+      if (expectedDefaultButtonState === false) {
+        await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
+        await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+      }
     },
 
     async assertSourceDataPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
@@ -313,6 +315,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active');
     },
 
+    async assertValidationStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardValidationStepWrapper active');
+    },
+
     async continueToAdditionalOptionsStep() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
@@ -325,6 +331,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
         await this.assertDetailsStepActive();
       });
+    },
+
+    async continueToValidationStep() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertValidationStepActive();
+      });
+    },
+
+    async assertValidationCalloutsExists() {
+      await retry.tryForTime(4000, async () => {
+        await testSubjects.existOrFail('mlValidationCallout');
+      });
+    },
+
+    async assertAllValidationCalloutsPresent(expectedNumCallouts: number) {
+      const validationCallouts = await testSubjects.findAll('mlValidationCallout');
+      expect(validationCallouts.length).to.eql(expectedNumCallouts);
     },
 
     async continueToCreateStep() {
