@@ -74,15 +74,19 @@ export const createArtifact = async (
 };
 
 export const deleteArtifact = async (esClient: ElasticsearchClient, id: string): Promise<void> => {
-  await esClient.delete({
-    index: FLEET_SERVER_ARTIFACTS_INDEX,
-    id,
-  });
+  try {
+    await esClient.delete({
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      id,
+    });
+  } catch (e) {
+    throw new ArtifactsElasticsearchError(e);
+  }
 };
 
 export const listArtifacts = async (
   esClient: ElasticsearchClient,
-  options: ListWithKuery
+  options: Pick<ListWithKuery, 'perPage' | 'page' | 'kuery' | 'sortField' | 'sortOrder'> = {}
 ): Promise<ListResult<Artifact>> => {
   const { perPage = 20, page = 1, kuery = '', sortField = 'created', sortOrder = 'asc' } = options;
 
