@@ -34,7 +34,6 @@ import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
-import { appContextService } from './app_context';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
@@ -57,7 +56,6 @@ async function createSetupSideEffects(
   esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
-  const isFleetServerEnabled = appContextService.getConfig()?.agents.fleetServerEnabled;
   const [
     installedPackages,
     defaultOutput,
@@ -68,9 +66,7 @@ async function createSetupSideEffects(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
-    isFleetServerEnabled
-      ? agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient)
-      : {},
+    agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
     updateFleetRoleIfExists(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
@@ -90,25 +86,23 @@ async function createSetupSideEffects(
   // packages that are stuck in the installing state.
   await ensurePackagesCompletedInstall(soClient, callCluster);
 
-  if (isFleetServerEnabled) {
-    await awaitIfFleetServerSetupPending();
+  await awaitIfFleetServerSetupPending();
 
-    const fleetServerPackage = await ensureInstalledPackage({
-      savedObjectsClient: soClient,
-      pkgName: FLEET_SERVER_PACKAGE,
+  const fleetServerPackage = await ensureInstalledPackage({
+    savedObjectsClient: soClient,
+    pkgName: FLEET_SERVER_PACKAGE,
+    callCluster,
+  });
+
+  if (defaultFleetServerPolicyCreated) {
+    await addPackageToAgentPolicy(
+      soClient,
+      esClient,
       callCluster,
-    });
-
-    if (defaultFleetServerPolicyCreated) {
-      await addPackageToAgentPolicy(
-        soClient,
-        esClient,
-        callCluster,
-        fleetServerPackage,
-        defaultFleetServerPolicy,
-        defaultOutput
-      );
-    }
+      fleetServerPackage,
+      defaultFleetServerPolicy,
+      defaultOutput
+    );
   }
 
   // If we just created the default fleet server policy add the fleet server package
