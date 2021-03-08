@@ -894,28 +894,13 @@
     "misc": [
       {
         "tags": [],
-        "id": "def-common.AGGS_TERMS_SIZE_SETTING",
-        "type": "string",
-        "label": "AGGS_TERMS_SIZE_SETTING",
-        "description": [],
-        "source": {
-          "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 11
-        },
-        "signature": [
-          "\"discover:aggs:terms:size\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
         "id": "def-common.CONTEXT_DEFAULT_SIZE_SETTING",
         "type": "string",
         "label": "CONTEXT_DEFAULT_SIZE_SETTING",
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 16
+          "lineNumber": 15
         },
         "signature": [
           "\"context:defaultSize\""
@@ -930,7 +915,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 17
+          "lineNumber": 16
         },
         "signature": [
           "\"context:step\""
@@ -945,7 +930,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 18
+          "lineNumber": 17
         },
         "signature": [
           "\"context:tieBreakerFields\""
@@ -975,7 +960,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 14
+          "lineNumber": 13
         },
         "signature": [
           "\"doc_table:hideTimeColumn\""
@@ -990,7 +975,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "signature": [
           "\"doc_table:legacy\""
@@ -1005,7 +990,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 15
+          "lineNumber": 14
         },
         "signature": [
           "\"fields:popularLimit\""
@@ -1020,7 +1005,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 20
+          "lineNumber": 19
         },
         "signature": [
           "\"discover:modifyColumnsOnSwitch\""
@@ -1050,7 +1035,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 21
+          "lineNumber": 20
         },
         "signature": [
           "\"discover:searchFieldsFromSource\""
@@ -1065,7 +1050,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "signature": [
           "\"discover:searchOnPageLoad\""
@@ -1080,7 +1065,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/discover/common/index.ts",
-          "lineNumber": 12
+          "lineNumber": 11
         },
         "signature": [
           "\"discover:sort:defaultOrder\""
