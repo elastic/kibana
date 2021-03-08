@@ -12,7 +12,7 @@ import {
   EntriesArray,
   ExceptionListItemSchema,
 } from '../shared_imports';
-import { Type } from './schemas/common/schemas';
+import { Type, JobStatus } from './schemas/common/schemas';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -54,3 +54,6 @@ export const normalizeThresholdField = (
     ? []
     : [thresholdField!];
 };
+
+export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>
+  value === 'partial failure' ? 'warning' : value != null ? value : null;
