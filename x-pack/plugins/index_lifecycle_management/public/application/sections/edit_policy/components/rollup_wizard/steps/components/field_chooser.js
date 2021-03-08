@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
@@ -177,8 +178,15 @@ export class FieldChooser extends Component {
 
             <EuiSpacer size="s" />
 
-            {/* TODO: Copy required */}
-            <EuiFormRow label="Index pattern">
+            <EuiFormRow
+              label={i18n.translate(
+                // TODO: Copy required
+                'xpack.indexLifecycleMgmt.rollup.create.indexPatternFieldLabel',
+                {
+                  defaultMessage: '[Index pattern]',
+                }
+              )}
+            >
               <EuiFieldText
                 value={indexPattern}
                 onChange={(e) => onIndexPatternChange(e.target.value)}
