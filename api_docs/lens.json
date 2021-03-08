@@ -1172,8 +1172,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx#L34"
+              "lineNumber": 43,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx#L43"
             },
             "signature": [
               "\"cardinality\""
@@ -1182,8 +1182,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx#L31"
+          "lineNumber": 40,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx#L40"
         },
         "initialIsOpen": false
       },

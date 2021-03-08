@@ -11864,8 +11864,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/kbn_field_types/types.ts",
-          "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/kbn_field_types/types.ts#L57"
+          "lineNumber": 64,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/kbn_field_types/types.ts#L64"
         },
         "initialIsOpen": false
       },
@@ -21350,8 +21350,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/kbn_field_types/types.ts",
-          "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/kbn_field_types/types.ts#L57"
+          "lineNumber": 64,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/kbn_field_types/types.ts#L64"
         },
         "initialIsOpen": false
       },
@@ -28238,8 +28238,8 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/kbn_field_types/types.ts",
-          "lineNumber": 57,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/kbn_field_types/types.ts#L57"
+          "lineNumber": 64,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/common/kbn_field_types/types.ts#L64"
         },
         "initialIsOpen": false
       }

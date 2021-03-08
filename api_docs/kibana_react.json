@@ -1489,8 +1489,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L53"
+              "lineNumber": 59,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L59"
             }
           }
         ],
@@ -1498,8 +1498,8 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-          "lineNumber": 53,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L53"
+          "lineNumber": 59,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L59"
         },
         "initialIsOpen": false
       },
@@ -2425,8 +2425,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L27"
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L30"
             },
             "signature": [
               "string | undefined"
@@ -2440,8 +2440,8 @@
             "description": [],
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L28"
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L31"
             },
             "signature": [
               "boolean | undefined"
@@ -3549,8 +3549,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 35,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L35"
+                  "lineNumber": 38,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L38"
                 }
               }
             ],
@@ -3558,8 +3558,8 @@
             "label": "boolean",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L35"
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L38"
             }
           },
           {
@@ -3575,8 +3575,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L37"
+                  "lineNumber": 40,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L40"
                 }
               },
               {
@@ -3587,8 +3587,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L37"
+                  "lineNumber": 40,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L40"
                 }
               },
               {
@@ -3599,8 +3599,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L37"
+                  "lineNumber": 40,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L40"
                 },
                 "signature": [
                   "\"square\""
@@ -3613,8 +3613,8 @@
             "label": "conflict",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L37"
+              "lineNumber": 40,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L40"
             }
           },
           {
@@ -3630,8 +3630,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 38,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L38"
+                  "lineNumber": 41,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L41"
                 }
               }
             ],
@@ -3639,8 +3639,34 @@
             "label": "date",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L38"
+              "lineNumber": 41,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L41"
+            }
+          },
+          {
+            "id": "def-public.typeToEuiIconMap.date_range",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.typeToEuiIconMap.date_range.iconType",
+                "type": "string",
+                "label": "iconType",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 42,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L42"
+                }
+              }
+            ],
+            "description": [],
+            "label": "date_range",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 42,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L42"
             }
           },
           {
@@ -3656,8 +3682,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 39,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L39"
+                  "lineNumber": 43,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L43"
                 }
               }
             ],
@@ -3665,8 +3691,8 @@
             "label": "geo_point",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L39"
+              "lineNumber": 43,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L43"
             }
           },
           {
@@ -3682,8 +3708,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L40"
+                  "lineNumber": 44,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L44"
                 }
               }
             ],
@@ -3691,8 +3717,8 @@
             "label": "geo_shape",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L40"
+              "lineNumber": 44,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L44"
             }
           },
           {
@@ -3708,8 +3734,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 41,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L41"
+                  "lineNumber": 45,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L45"
                 }
               }
             ],
@@ -3717,8 +3743,34 @@
             "label": "ip",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L41"
+              "lineNumber": 45,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L45"
+            }
+          },
+          {
+            "id": "def-public.typeToEuiIconMap.ip_range",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.typeToEuiIconMap.ip_range.iconType",
+                "type": "string",
+                "label": "iconType",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 46,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L46"
+                }
+              }
+            ],
+            "description": [],
+            "label": "ip_range",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 46,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L46"
             }
           },
           {
@@ -3734,8 +3786,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 43,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L43"
+                  "lineNumber": 48,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L48"
                 }
               }
             ],
@@ -3745,8 +3797,8 @@
             "label": "murmur3",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L43"
+              "lineNumber": 48,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L48"
             }
           },
           {
@@ -3762,8 +3814,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 44,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L44"
+                  "lineNumber": 49,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L49"
                 }
               }
             ],
@@ -3771,8 +3823,34 @@
             "label": "number",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L44"
+              "lineNumber": 49,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L49"
+            }
+          },
+          {
+            "id": "def-public.typeToEuiIconMap.number_range",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.typeToEuiIconMap.number_range.iconType",
+                "type": "string",
+                "label": "iconType",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+                  "lineNumber": 50,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L50"
+                }
+              }
+            ],
+            "description": [],
+            "label": "number_range",
+            "source": {
+              "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
+              "lineNumber": 50,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L50"
             }
           },
           {
@@ -3788,8 +3866,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L45"
+                  "lineNumber": 51,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L51"
                 }
               },
               {
@@ -3800,8 +3878,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L45"
+                  "lineNumber": 51,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L51"
                 }
               }
             ],
@@ -3809,8 +3887,8 @@
             "label": "_source",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L45"
+              "lineNumber": 51,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L51"
             }
           },
           {
@@ -3826,8 +3904,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L46"
+                  "lineNumber": 52,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L52"
                 }
               }
             ],
@@ -3835,8 +3913,8 @@
             "label": "string",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L46"
+              "lineNumber": 52,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L52"
             }
           },
           {
@@ -3852,8 +3930,8 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-                  "lineNumber": 47,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L47"
+                  "lineNumber": 53,
+                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L53"
                 }
               }
             ],
@@ -3861,8 +3939,8 @@
             "label": "nested",
             "source": {
               "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L47"
+              "lineNumber": 53,
+              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L53"
             }
           }
         ],
@@ -3870,8 +3948,8 @@
         "label": "typeToEuiIconMap",
         "source": {
           "path": "src/plugins/kibana_react/public/field_icon/field_icon.tsx",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L34"
+          "lineNumber": 37,
+          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/kibana_react/public/field_icon/field_icon.tsx#L37"
         },
         "initialIsOpen": false
       }

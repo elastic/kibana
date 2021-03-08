@@ -13,7 +13,16 @@ import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './col
 
 import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
 
-const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+const supportedTypes = new Set([
+  'string',
+  'boolean',
+  'number',
+  'number_range',
+  'ip',
+  'ip_range',
+  'date',
+  'date_range',
+]);
 
 const SCALE = 'ratio';
 const OPERATION_TYPE = 'cardinality';
