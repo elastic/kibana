@@ -42,10 +42,12 @@ export const TransformManagement: FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [transforms, setTransforms] = useState<TransformListRow[]>([]);
+  const [transformNodes, setTransformNodes] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
 
   const getTransforms = useGetTransforms(
     setTransforms,
+    setTransformNodes,
     setErrorMessage,
     setIsInitialized,
     blockRefresh
@@ -111,7 +113,7 @@ export const TransformManagement: FC = () => {
         </EuiTitle>
         <EuiPageContentBody>
           <EuiSpacer size="l" />
-          <TransformStatsBar transformsList={transforms} />
+          <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
           <EuiSpacer size="s" />
           <TransformList
             errorMessage={errorMessage}

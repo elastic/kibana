@@ -14,7 +14,7 @@ import { TransformListRow } from '../../../../common';
 
 import { StatsBar, TransformStatsBarStats } from '../stats_bar';
 
-function createTranformStats(transformsList: TransformListRow[]) {
+function createTranformStats(transformNodes: number, transformsList: TransformListRow[]) {
   const transformStats = {
     total: {
       label: i18n.translate('xpack.transform.statsBar.totalTransformsLabel', {
@@ -49,6 +49,13 @@ function createTranformStats(transformsList: TransformListRow[]) {
         defaultMessage: 'Started',
       }),
       value: 0,
+      show: true,
+    },
+    nodes: {
+      label: i18n.translate('xpack.transform.statsBar.transformNodesLabel', {
+        defaultMessage: 'Nodes',
+      }),
+      value: transformNodes,
       show: true,
     },
   };
@@ -87,12 +94,19 @@ function createTranformStats(transformsList: TransformListRow[]) {
   return transformStats;
 }
 
-interface Props {
+interface TransformStatsBarProps {
+  transformNodes: number;
   transformsList: TransformListRow[];
 }
 
-export const TransformStatsBar: FC<Props> = ({ transformsList }) => {
-  const transformStats: TransformStatsBarStats = createTranformStats(transformsList);
+export const TransformStatsBar: FC<TransformStatsBarProps> = ({
+  transformNodes,
+  transformsList,
+}) => {
+  const transformStats: TransformStatsBarStats = createTranformStats(
+    transformNodes,
+    transformsList
+  );
 
   return <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />;
 };

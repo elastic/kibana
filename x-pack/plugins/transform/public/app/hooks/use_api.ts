@@ -66,6 +66,13 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
+      async getTransformNodes(): Promise<GetTransformsResponseSchema | HttpFetchError> {
+        try {
+          return await http.get(`${API_BASE_PATH}transforms/nodes`);
+        } catch (e) {
+          return e;
+        }
+      },
       async getTransform(
         transformId: TransformId
       ): Promise<GetTransformsResponseSchema | HttpFetchError> {

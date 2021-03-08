@@ -16,6 +16,11 @@ import type { TransformId, TransformPivotConfig } from '../types/transform';
 
 import { transformStateSchema, runtimeMappingsSchema } from './common';
 
+// GET transform nodes
+export interface GetTransformNodesResponseSchema {
+  count: number;
+}
+
 // GET transforms
 export const getTransformsRequestSchema = schema.arrayOf(
   schema.object({
