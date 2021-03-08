@@ -45,6 +45,7 @@ const agentIcons: { [key: string]: string } = {
 const darkAgentIcons: { [key: string]: string } = {
   php: darkPhpIcon,
   rum: darkRumJsIcon,
+  rust: darkRustIcon,
 };
 
 // This only needs to be exported for testing purposes, since we stub the SVG
