@@ -380,40 +380,15 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
     kind: 'signal',
   },
   signal: {
-    parents: [
-      {
-        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
-        type: 'event',
-        index: 'myFakeSignalIndex',
-        depth: 0,
-      },
-      {
-        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
-        type: 'event',
-        index: 'myFakeSignalIndex',
-        depth: 0,
-      },
-    ],
-    ancestors: [
-      {
-        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
-        type: 'event',
-        index: 'myFakeSignalIndex',
-        depth: 0,
-      },
-      {
-        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
-        type: 'event',
-        index: 'myFakeSignalIndex',
-        depth: 0,
-      },
-    ],
+    parents: [],
+    ancestors: [],
     original_time: '2021-02-16T17:37:34.275Z',
     status: 'open',
     threshold_result: {
       count: 72,
       terms: [{ field: 'host.name', value: 'a hostname' }],
       cardinality: [{ field: 'process.name', value: 6 }],
+      from: '2021-02-16T17:31:34.275Z',
     },
     rule: {
       author: [],
@@ -434,8 +409,12 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
       threshold: {
         field: ['host.name'],
         value: 5,
-        cardinality_field: 'process.name',
-        cardinality_value: 2,
+        cardinality: [
+          {
+            field: 'process.name',
+            value: 2,
+          },
+        ],
       },
       updated_by: 'elastic_kibana',
       tags: ['some fake tag 1', 'some fake tag 2'],
@@ -460,11 +439,79 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
   },
 });
 
+const sampleThresholdHit = sampleThresholdSignalHit();
+export const sampleLegacyThresholdSignalHit = (): unknown => ({
+  ...sampleThresholdHit,
+  signal: {
+    ...sampleThresholdHit.signal,
+    rule: {
+      ...sampleThresholdHit.signal.rule,
+      threshold: {
+        field: 'host.name',
+        value: 5,
+      },
+    },
+    threshold_result: {
+      count: 72,
+      value: 'a hostname',
+    },
+  },
+});
+
+export const sampleThresholdSignalHitWithMitigatedDupes = (): unknown => ({
+  ...sampleThresholdHit,
+  signal: {
+    ...sampleThresholdHit.signal,
+    threshold_result: {
+      ...sampleThresholdHit.signal.threshold_result,
+      from: '2021-02-16T17:34:34.275Z',
+    },
+  },
+});
+
+export const sampleThresholdSignalHitWithEverything = (): unknown => ({
+  ...sampleThresholdHit,
+  signal: {
+    ...sampleThresholdHit.signal,
+    rule: {
+      ...sampleThresholdHit.signal.rule,
+      threshold: {
+        field: ['host.name', 'event.category', 'source.ip'],
+        value: 5,
+        cardinality: [
+          {
+            field: 'process.name',
+            value: 2,
+          },
+        ],
+      },
+    },
+    threshold_result: {
+      count: 22,
+      terms: [
+        { field: 'host.name', value: 'a hostname' },
+        { field: 'event.category', value: 'network' },
+        { field: 'source.ip', value: '192.168.0.1' },
+      ],
+      cardinality: [{ field: 'process.name', value: 3 }],
+      from: '2021-02-16T17:34:34.275Z',
+    },
+  },
+});
+
 export const sampleWrappedThresholdSignalHit = (): WrappedSignalHit => {
   return {
     _index: 'myFakeSignalIndex',
     _id: sampleIdGuid,
     _source: sampleThresholdSignalHit(),
+  };
+};
+
+export const sampleWrappedLegacyThresholdSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: 'adb9d636-fbbe-4962-ac1c-e282f3ec5879',
+    _source: sampleLegacyThresholdSignalHit() as SignalHit,
   };
 };
 
