@@ -15,7 +15,7 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
   /**
    * @apiGroup Transform Nodes
    *
-   * @api {get} /api/transform/nodes Transform Nodes
+   * @api {get} /api/transforms/nodes Transform Nodes
    * @apiName GetTransformNodes
    * @apiDescription Get transform nodes
    */
