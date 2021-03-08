@@ -235,7 +235,7 @@ If the package has unit tests, they will need to be migrated which will be invok
 Packages were a likely choice for phase 1 for a few reasons; they aren’t often updated and the developer experience is quite lacking making it easy to maintain parity with. In phase 2, we will bring the developer experience of packages to that which developers are accustomed to with plugins. This means re-builds will be automatic when a change occurs as well as giving time to address any developer experience shortcomings which were not foreseen. During this time we will work on overall Bazel documentation as it pertains to the Kibana repository.
 
 
-## Phase III - Plugins
+## Phase III - Core & Plugins
 
 In this phase, we will be migrating each of the 135 plugins over to being built and unit tested using Bazel. During this time, the legacy systems will stay in place and run in parallel with Bazel. Once all plugins have been migrated, we can decommission the legacy systems.
 
