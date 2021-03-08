@@ -273,6 +273,22 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async assertOutlierScatterplotMatrix(expectedColor: string) {
+      await testSubjects.existOrFail(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded',
+        {
+          timeout: 5000,
+        }
+      );
+      await testSubjects.scrollIntoView(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded'
+      );
+      await mlCommonUI.assertColorInCanvasElement(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
+        expectedColor
+      );
+    },
+
     async assertTrainingPercentInputExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardTrainingPercentSlider');
     },

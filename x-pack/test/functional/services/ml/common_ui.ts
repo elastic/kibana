@@ -262,5 +262,29 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
         );
       });
     },
+
+    // In case where `assertCanvasElement` turns out to be flaky across systems,
+    // e.g. because of different anti-aliasing resulting in non-matching color stats,
+    // `assertColorInCanvasElement` can be used to reduce the check to just find out
+    // if a certain color is present in the canvas element.
+    async assertColorInCanvasElement(dataTestSubj: string, expectedColor: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(dataTestSubj);
+
+        const actualColorStats = await canvasElement.getColorStats(
+          `[data-test-subj="${dataTestSubj}"] canvas`,
+          undefined,
+          undefined,
+          1
+        );
+        const actualColors = actualColorStats.map((d) => d.key);
+        const colorInCanvasElement = actualColors.includes(expectedColor);
+
+        expect(colorInCanvasElement).to.eql(
+          true,
+          `Expected color '${expectedColor}' to be present in canvas element '${dataTestSubj}'. Expected: 'true' (got 'false')`
+        );
+      });
+    },
   };
 }

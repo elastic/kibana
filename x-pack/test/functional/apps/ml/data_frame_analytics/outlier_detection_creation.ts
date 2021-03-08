@@ -50,16 +50,10 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
             { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
           ],
-          scatterplotMatrixColorStatsWizard: [
-            // tick/grid/axis, grey markers
-            { key: '#6A717D', value: 25 },
-            { key: '#D3DAE6', value: 8 },
-            // scatterplot circles
-            { key: '#54B399', value: 7 },
-            { key: '#54B39A', value: 10 },
-            // anti-aliasing
-            { key: '#F5F7FA', value: 30 },
-          ],
+          scatterplotMatrixColorsWizard: {
+            boilerplateColor: '#6A717D',
+            markerColor: '#54B39A',
+          },
           scatterplotMatrixColorStatsResults: [
             // tick/grid/axis, grey markers
             // the red outlier color is not above the 5% threshold.
@@ -131,8 +125,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
-            testData.expected.scatterplotMatrixColorStatsWizard
+          await ml.dataFrameAnalyticsCreation.assertOutlierScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorsWizard.boilerplateColor
+          );
+          await ml.dataFrameAnalyticsCreation.assertOutlierScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorsWizard.markerColor
           );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
