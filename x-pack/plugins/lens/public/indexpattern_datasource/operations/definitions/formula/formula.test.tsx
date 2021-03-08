@@ -721,5 +721,23 @@ describe('formula', () => {
         ).toEqual(undefined);
       }
     });
+
+    it('returns errors if math operations are used with no arguments', () => {
+      const formulas = [
+        'derivative(7+1)',
+        'derivative(7+avg(bytes))',
+        'moving_average(7+avg(bytes), window=7)',
+      ];
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
   });
 });

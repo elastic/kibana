@@ -121,3 +121,12 @@ export function isValidNumber(
     (lowerBound === undefined || inputValueAsNumber >= lowerBound)
   );
 }
+
+export function getFormatFromPreviousColumn(previousColumn: IndexPatternColumn | undefined) {
+  return previousColumn?.dataType === 'number' &&
+    previousColumn.params &&
+    'format' in previousColumn.params &&
+    previousColumn.params.format
+    ? { format: previousColumn.params.format }
+    : undefined;
+}

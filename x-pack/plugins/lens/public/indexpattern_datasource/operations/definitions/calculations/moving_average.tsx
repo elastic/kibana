@@ -19,7 +19,7 @@ import {
   hasDateField,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { isValidNumber, useDebounceWithOptions } from '../helpers';
+import { getFormatFromPreviousColumn, isValidNumber, useDebounceWithOptions } from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
@@ -96,13 +96,10 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format, window }
-          : { window },
+      params: {
+        window,
+        ...getFormatFromPreviousColumn(previousColumn),
+      },
     };
   },
   paramEditor: MovingAverageParamEditor,

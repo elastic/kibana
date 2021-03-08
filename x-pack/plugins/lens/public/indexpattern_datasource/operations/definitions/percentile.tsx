@@ -12,6 +12,7 @@ import { AggFunctionsMapping } from 'src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import {
+  getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
@@ -89,8 +90,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       isBucketed: false,
       scale: 'ratio',
       params: {
-        format: existingFormat,
         percentile: newPercentileParam,
+        ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },
