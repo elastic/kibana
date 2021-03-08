@@ -7,9 +7,11 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+// @ts-expect-error
 import { parse } from 'wellknown';
+// @ts-expect-error
 import turfCircle from '@turf/circle';
-import { FeatureCollection, GeoJsonProperties, Geometry, Polygon, Position } from 'geojson';
+import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
 import { BBox } from '@turf/helpers';
 import {
   DECIMAL_DEGREES_PRECISION,
@@ -26,25 +28,39 @@ import { MapExtent } from '../descriptor_types';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
 
+type Coordinates = Position | Position[] | Position[][] | Position[][][];
+
+// Elasticsearch stores more then just GeoJSON.
+// 1) geometry.type as lower case string
+// 2) circle and envelope types
+interface ESGeometry {
+  type: string;
+  coordinates: Coordinates;
+}
+
 export interface ESBBox {
   top_left: number[];
   bottom_right: number[];
 }
 
-export interface ESGeoBoundingBoxFilter {
-  geo_bounding_box: {
-    [geoFieldName: string]: ESBBox;
-  };
+interface GeoShapeQueryBody {
+  shape?: Polygon;
+  relation?: ES_SPATIAL_RELATIONS;
+  indexed_shape?: PreIndexedShape;
 }
 
-export interface ESPolygonFilter {
-  geo_shape: {
-    [geoFieldName: string]: {
-      shape: Polygon;
-      relation: ES_SPATIAL_RELATIONS.INTERSECTS;
-    };
+export type GeoFilter = Filter & {
+  geo_bounding_box?: {
+    [geoFieldName: string]: ESBBox;
   };
-}
+  geo_distance?: {
+    distance: string;
+    [geoFieldName: string]: Position | { lat: number; lon: number } | string;
+  };
+  geo_shape?: {
+    [geoFieldName: string]: GeoShapeQueryBody;
+  };
+};
 
 export interface PreIndexedShape {
   index: string;
@@ -70,8 +86,8 @@ function ensureGeoField(type: ES_GEO_FIELD_TYPE) {
   }
 }
 
-function ensureGeometryType(type: GEO_JSON_TYPE, expectedTypes: GEO_JSON_TYPE[]) {
-  if (!expectedTypes.includes(type)) {
+function ensureGeometryType(type: string, expectedTypes: GEO_JSON_TYPE[]) {
+  if (!expectedTypes.includes(type as GEO_JSON_TYPE)) {
     const errorMessage = i18n.translate(
       'xpack.maps.es_geo_utils.unsupportedGeometryTypeErrorMessage',
       {
@@ -99,7 +115,7 @@ function ensureGeometryType(type: GEO_JSON_TYPE, expectedTypes: GEO_JSON_TYPE[])
  */
 export function hitsToGeoJson(
   hits: Array<Record<string, unknown>>,
-  flattenHit: (elasticSearchHit: Record<string, unknown>) => GeoJsonProperties,
+  flattenHit: (elasticSearchHit: Record<string, unknown>) => Record<string, any>,
   geoFieldName: string,
   geoFieldType: ES_GEO_FIELD_TYPE,
   epochMillisFields: string[]
@@ -176,10 +192,10 @@ export function geoPointToGeometry(
   accumulator.push({
     type: GEO_JSON_TYPE.POINT,
     coordinates: [lon, lat],
-  });
+  } as Point);
 }
 
-export function convertESShapeToGeojsonGeometry(value: Geometry): Geometry {
+export function convertESShapeToGeojsonGeometry(value: ESGeometry): Geometry {
   const geoJson = {
     type: value.type,
     coordinates: value.coordinates,
@@ -221,12 +237,13 @@ export function convertESShapeToGeojsonGeometry(value: Geometry): Geometry {
       );
       throw new Error(invalidGeometrycollectionError);
     case 'envelope':
+      const envelopeCoords = geoJson.coordinates as Position[];
       // format defined here https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html#_envelope
       const polygon = formatEnvelopeAsPolygon({
-        minLon: geoJson.coordinates[0][0],
-        maxLon: geoJson.coordinates[1][0],
-        minLat: geoJson.coordinates[1][1],
-        maxLat: geoJson.coordinates[0][1],
+        minLon: envelopeCoords[0][0],
+        maxLon: envelopeCoords[1][0],
+        minLat: envelopeCoords[1][1],
+        maxLat: envelopeCoords[0][1],
       });
       geoJson.type = polygon.type;
       geoJson.coordinates = polygon.coordinates;
@@ -243,10 +260,10 @@ export function convertESShapeToGeojsonGeometry(value: Geometry): Geometry {
       );
       throw new Error(errorMessage);
   }
-  return geoJson;
+  return (geoJson as unknown) as Geometry;
 }
 
-function convertWKTStringToGeojson(value: string): Feature {
+function convertWKTStringToGeojson(value: string): Geometry {
   try {
     return parse(value);
   } catch (e) {
@@ -261,7 +278,7 @@ function convertWKTStringToGeojson(value: string): Feature {
 }
 
 export function geoShapeToGeometry(
-  value: string | Geometry | string[] | Geometry[] | undefined,
+  value: string | ESGeometry | string[] | ESGeometry[] | undefined,
   accumulator: Geometry[]
 ): void {
   if (!value) {
@@ -284,8 +301,9 @@ export function geoShapeToGeometry(
     value.type === GEO_JSON_TYPE.GEOMETRY_COLLECTION ||
     value.type === 'geometrycollection'
   ) {
-    for (let i = 0; i < value.geometries.length; i++) {
-      geoShapeToGeometry(value.geometries[i], accumulator);
+    const geometryCollection = (value as unknown) as { geometries: ESGeometry[] };
+    for (let i = 0; i < geometryCollection.geometries.length; i++) {
+      geoShapeToGeometry(geometryCollection.geometries[i], accumulator);
     }
   } else {
     const geoJson = convertESShapeToGeojsonGeometry(value);
@@ -321,14 +339,16 @@ export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBo
   return esBbox;
 }
 
-export function createExtentFilter(
-  mapExtent: MapExtent,
-  geoFieldName: string
-): ESPolygonFilter | ESGeoBoundingBoxFilter {
-  const boundingBox = makeESBbox(mapExtent);
+export function createExtentFilter(mapExtent: MapExtent, geoFieldName: string): GeoFilter {
   return {
     geo_bounding_box: {
-      [geoFieldName]: boundingBox,
+      [geoFieldName]: makeESBbox(mapExtent),
+    },
+    meta: {
+      alias: null,
+      disabled: false,
+      negate: false,
+      key: geoFieldName,
     },
   };
 }
@@ -343,7 +363,7 @@ export function createSpatialFilterWithGeometry({
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
   preIndexedShape?: PreIndexedShape;
-  geometry: Geometry;
+  geometry: Polygon;
   geometryLabel: string;
   indexPatternId: string;
   geoFieldName: string;
@@ -367,7 +387,7 @@ export function createSpatialFilterWithGeometry({
     alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
   };
 
-  const shapeQuery = {
+  const shapeQuery: GeoShapeQueryBody = {
     // geo_shape query with geo_point field only supports intersects relation
     relation: isGeoPoint ? ES_SPATIAL_RELATIONS.INTERSECTS : relation,
   };
@@ -426,8 +446,7 @@ export function createDistanceFilterWithMeta({
   };
 }
 
-type Coordinates = Position | Position[] | Position[][] | Position[][][];
-export function roundCoordinates(coordinates: Coordinates): Coordinates {
+export function roundCoordinates(coordinates: Coordinates): void {
   for (let i = 0; i < coordinates.length; i++) {
     const value = coordinates[i];
     if (Array.isArray(value)) {
@@ -441,10 +460,10 @@ export function roundCoordinates(coordinates: Coordinates): Coordinates {
 /*
  * returns Polygon geometry where coordinates define a bounding box that contains the input geometry
  */
-export function getBoundingBoxGeometry(geometry: Feature): Feature {
+export function getBoundingBoxGeometry(geometry: Geometry): Polygon {
   ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON]);
 
-  const exterior = geometry.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
+  const exterior = (geometry as Polygon).coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
   const extent = {
     minLon: exterior[0][LON_INDEX],
     minLat: exterior[0][LAT_INDEX],
@@ -461,7 +480,7 @@ export function getBoundingBoxGeometry(geometry: Feature): Feature {
   return formatEnvelopeAsPolygon(extent);
 }
 
-export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }: MapExtent): Feature {
+export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }: MapExtent): Polygon {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline
   const lonDelta = maxLon - minLon;
@@ -469,12 +488,12 @@ export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }: MapE
   const right = lonDelta > 360 ? 180 : maxLon;
   const top = clampToLatBounds(maxLat);
   const bottom = clampToLatBounds(minLat);
-  const topLeft = [left, top];
-  const bottomLeft = [left, bottom];
-  const bottomRight = [right, bottom];
-  const topRight = [right, top];
+  const topLeft = [left, top] as Position;
+  const bottomLeft = [left, bottom] as Position;
+  const bottomRight = [right, bottom] as Position;
+  const topRight = [right, top] as Position;
   return {
-    type: GEO_JSON_TYPE.POLYGON,
+    type: GEO_JSON_TYPE.POLYGON as 'Polygon',
     coordinates: [[topLeft, bottomLeft, bottomRight, topRight, topLeft]],
   };
 }
@@ -497,25 +516,26 @@ export function clamp(val: number, min: number, max: number): number {
   }
 }
 
-export function extractFeaturesFromFilters(filters: Filter[]): Feature[] {
-  const features: Feature = [];
+export function extractFeaturesFromFilters(filters: GeoFilter[]): Feature[] {
+  const features: Feature[] = [];
   filters
     .filter((filter) => {
       return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
     })
     .forEach((filter) => {
+      const geoFieldName = filter.meta.key!;
       let geometry;
-      if (filter.geo_distance && filter.geo_distance[filter.meta.key]) {
+      if (filter.geo_distance && filter.geo_distance[geoFieldName]) {
         const distanceSplit = filter.geo_distance.distance.split('km');
         const distance = parseFloat(distanceSplit[0]);
-        const circleFeature = turfCircle(filter.geo_distance[filter.meta.key], distance);
+        const circleFeature = turfCircle(filter.geo_distance[geoFieldName], distance);
         geometry = circleFeature.geometry;
       } else if (
         filter.geo_shape &&
-        filter.geo_shape[filter.meta.key] &&
-        filter.geo_shape[filter.meta.key].shape
+        filter.geo_shape[geoFieldName] &&
+        filter.geo_shape[geoFieldName].shape
       ) {
-        geometry = filter.geo_shape[filter.meta.key].shape;
+        geometry = filter.geo_shape[geoFieldName].shape;
       } else {
         // do not know how to convert spatial filter to geometry
         // this includes pre-indexed shapes
