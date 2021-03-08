@@ -24,6 +24,7 @@ import rubyIcon from './icons/ruby.svg';
 import rumJsIcon from './icons/rumjs.svg';
 import darkPhpIcon from './icons/php_dark.svg';
 import darkRumJsIcon from './icons/rumjs_dark.svg';
+import rustIcon from './icons/rust.svg';
 
 const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
@@ -37,6 +38,7 @@ const agentIcons: { [key: string]: string } = {
   python: pythonIcon,
   ruby: rubyIcon,
   rum: rumJsIcon,
+  rust: rustIcon,
 };
 
 const darkAgentIcons: { [key: string]: string } = {
