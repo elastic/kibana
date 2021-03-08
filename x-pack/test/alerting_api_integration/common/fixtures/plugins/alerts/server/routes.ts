@@ -13,8 +13,8 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerts/server/types';
-import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
+import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerting/server/types';
+import { RawAlert } from '../../../../../../../plugins/alerting/server/types';
 import {
   ConcreteTaskInstance,
   TaskInstance,
