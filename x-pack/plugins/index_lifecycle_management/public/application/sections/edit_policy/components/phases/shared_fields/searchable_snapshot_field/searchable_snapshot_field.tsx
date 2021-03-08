@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import {
@@ -26,7 +27,7 @@ import {
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfigurationIssues, UseField, searchableSnapshotFields } from '../../../../form';
-import { FieldLoadingError, DescribedFormRow, LearnMoreLink, MoreLessSection } from '../../../';
+import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 
 import './_searchable_snapshot_field.scss';
@@ -88,6 +89,16 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
         policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
     )
   );
+
+  const [isMoreOptionsExpanded, setIsMoreOptionsExpanded] = useState(false);
+
+  const moreOptionsLabel = isMoreOptionsExpanded
+    ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.lessButtonLabel', {
+        defaultMessage: 'Fewer options',
+      })
+    : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.moreButtonLabel', {
+        defaultMessage: 'More options',
+      });
 
   useEffect(() => {
     if (isDisabledDueToLicense) {
@@ -247,8 +258,12 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
               </>
             )}
 
-            <EuiSpacer size="s" />
-            <MoreLessSection>
+            <EuiSpacer />
+            <EuiAccordion
+              id="searchableSnapshotAdvanced"
+              buttonContent={moreOptionsLabel}
+              onToggle={() => setIsMoreOptionsExpanded((prev) => !prev)}
+            >
               <UseField
                 key={searchableSnapshotStoragePath}
                 path={searchableSnapshotStoragePath}
@@ -266,7 +281,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                   },
                 }}
               />
-            </MoreLessSection>
+            </EuiAccordion>
           </div>
         );
       }}
