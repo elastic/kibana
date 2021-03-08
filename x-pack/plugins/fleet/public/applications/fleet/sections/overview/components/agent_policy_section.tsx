@@ -14,12 +14,14 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { OverviewPanel } from './overview_panel';
-import { OverviewStats } from './overview_stats';
+
 import { SO_SEARCH_LIMIT } from '../../../constants';
 import { useLink, useGetPackagePolicies } from '../../../hooks';
 import { AgentPolicy } from '../../../types';
 import { Loading } from '../../agents/components';
+
+import { OverviewStats } from './overview_stats';
+import { OverviewPanel } from './overview_panel';
 
 export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> = ({
   agentPolicies,

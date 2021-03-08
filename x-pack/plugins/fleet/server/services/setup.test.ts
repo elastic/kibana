@@ -6,6 +6,7 @@
  */
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
+
 import { appContextService } from './app_context';
 import { setupIngestManager } from './setup';
 

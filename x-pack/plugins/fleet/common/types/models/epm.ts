@@ -8,6 +8,7 @@
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
@@ -17,6 +18,7 @@ import {
   requiredPackages,
 } from '../../constants';
 import type { ValueOf } from '../../types';
+
 import type { PackageSpecManifest, PackageSpecScreenshot } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
@@ -229,7 +231,7 @@ export interface RegistryElasticsearch {
   'index_template.mappings'?: object;
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml';
+export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
 // EPR types this as `[]map[string]interface{}`
 // which means the official/possible type is Record<string, any>
 // but we effectively only see this shape
