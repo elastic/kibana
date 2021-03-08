@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IndicesDeleteTemplateParams } from 'elasticsearch';
-import { CallWithRequest } from '../types';
+import { ElasticsearchClient } from 'kibana/server';
 
 export const deleteTemplate = async (
-  callWithRequest: CallWithRequest<IndicesDeleteTemplateParams, unknown>,
+  esClient: ElasticsearchClient,
   name: string
 ): Promise<unknown> => {
-  return callWithRequest('indices.deleteTemplate', {
-    name,
-  });
+  return (
+    await esClient.indices.deleteTemplate({
+      name,
+    })
+  ).body;
 };

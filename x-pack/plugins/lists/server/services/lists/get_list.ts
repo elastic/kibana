@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 
 import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
@@ -13,19 +13,19 @@ import { transformElasticToList } from '../utils/transform_elastic_to_list';
 
 interface GetListOptions {
   id: Id;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listIndex: string;
 }
 
 export const getList = async ({
   id,
-  callCluster,
+  esClient,
   listIndex,
 }: GetListOptions): Promise<ListSchema | null> => {
-  // Note: This typing of response = await callCluster<SearchResponse<SearchEsListSchema>>
+  // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
   // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
   // to explicitly define the type <T>.
-  const response = await callCluster<SearchResponse<SearchEsListSchema>>('search', {
+  const { body: response } = await esClient.search<SearchResponse<SearchEsListSchema>>({
     body: {
       query: {
         term: {
@@ -33,7 +33,7 @@ export const getList = async ({
         },
       },
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: listIndex,
     seq_no_primary_term: true,
   });

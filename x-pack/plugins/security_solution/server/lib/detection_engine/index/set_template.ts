@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { IndicesPutTemplateParams } from 'elasticsearch';
-import { CallWithRequest } from '../types';
+import { ElasticsearchClient } from 'kibana/server';
 
 export const setTemplate = async (
-  callWithRequest: CallWithRequest<IndicesPutTemplateParams, unknown>,
+  esClient: ElasticsearchClient,
   name: string,
-  body: unknown
+  body: Record<string, unknown>
 ): Promise<unknown> => {
-  return callWithRequest('indices.putTemplate', {
-    name,
-    body,
-  });
+  return (
+    await esClient.indices.putTemplate({
+      name,
+      body,
+    })
+  ).body;
 };

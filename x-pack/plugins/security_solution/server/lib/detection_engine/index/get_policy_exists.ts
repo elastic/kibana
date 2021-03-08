@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CallWithRequest } from '../types';
+import { ElasticsearchClient } from 'kibana/server';
 
 export const getPolicyExists = async (
-  callWithRequest: CallWithRequest<{ path: string; method: 'GET' }, unknown>,
+  esClient: ElasticsearchClient,
   policy: string
 ): Promise<boolean> => {
   try {
-    await callWithRequest('transport.request', {
+    await esClient.transport.request({
       path: `/_ilm/policy/${policy}`,
       method: 'GET',
     });

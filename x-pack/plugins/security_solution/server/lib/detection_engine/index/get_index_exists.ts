@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { CallWithRequest } from '../types';
+import { ElasticsearchClient } from 'kibana/server';
 
 export const getIndexExists = async (
-  callWithRequest: CallWithRequest<
-    { index: string; size: number; terminate_after: number; allow_no_indices: boolean },
-    { _shards: { total: number } }
-  >,
+  esClient: ElasticsearchClient,
   index: string
 ): Promise<boolean> => {
   try {
-    const response = await callWithRequest('search', {
+    const { body: response } = await esClient.search({
       index,
       size: 0,
       terminate_after: 1,

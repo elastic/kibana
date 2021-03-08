@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import {
   DeserializerOrUndefined,
@@ -28,7 +28,7 @@ export interface CreateListItemOptions {
   listId: string;
   type: Type;
   value: string;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -43,7 +43,7 @@ export const createListItem = async ({
   listId,
   type,
   value,
-  callCluster,
+  esClient,
   listItemIndex,
   user,
   meta,
@@ -69,7 +69,7 @@ export const createListItem = async ({
       ...baseBody,
       ...elasticQuery,
     };
-    const response = await callCluster<CreateDocumentResponse>('index', {
+    const { body: response } = await esClient.index<CreateDocumentResponse>({
       body,
       id,
       index: listItemIndex,

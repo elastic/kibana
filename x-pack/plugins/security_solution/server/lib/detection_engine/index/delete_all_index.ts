@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { IndicesDeleteParams, Client } from 'elasticsearch';
-import { CallWithRequest } from '../types';
+import { ElasticsearchClient } from 'kibana/server';
 
 export const deleteAllIndex = async (
-  callWithRequest: CallWithRequest<IndicesDeleteParams, ReturnType<Client['indices']['getAlias']>>,
+  esClient: ElasticsearchClient,
   pattern: string,
   maxAttempts = 5
 ): Promise<boolean> => {
@@ -21,9 +20,8 @@ export const deleteAllIndex = async (
     }
 
     // resolve pattern to concrete index names
-    const resp = await callWithRequest('indices.getAlias', {
+    const { body: resp } = await esClient.indices.getAlias({
       index: pattern,
-      ignore: 404,
     });
 
     if (resp.status === 404) {
@@ -38,9 +36,9 @@ export const deleteAllIndex = async (
     }
 
     // delete the concrete indexes we found and try again until this pattern resolves to no indexes
-    await callWithRequest('indices.delete', {
+    await esClient.indices.delete({
       index: indices,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
     });
   }
 };

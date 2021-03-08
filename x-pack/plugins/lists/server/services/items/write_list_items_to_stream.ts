@@ -8,7 +8,7 @@
 import { PassThrough } from 'stream';
 
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { SearchEsListItemSchema } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
@@ -22,7 +22,7 @@ export const SIZE = 100;
 
 export interface ExportListItemsToStreamOptions {
   listId: string;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
@@ -30,7 +30,7 @@ export interface ExportListItemsToStreamOptions {
 
 export const exportListItemsToStream = ({
   listId,
-  callCluster,
+  esClient,
   stream,
   listItemIndex,
   stringToAppend,
@@ -39,7 +39,7 @@ export const exportListItemsToStream = ({
   // and prevent the async await from bubbling up to the caller
   setTimeout(async () => {
     let searchAfter = await writeNextResponse({
-      callCluster,
+      esClient,
       listId,
       listItemIndex,
       searchAfter: undefined,
@@ -48,7 +48,7 @@ export const exportListItemsToStream = ({
     });
     while (searchAfter != null) {
       searchAfter = await writeNextResponse({
-        callCluster,
+        esClient,
         listId,
         listItemIndex,
         searchAfter,
@@ -62,7 +62,7 @@ export const exportListItemsToStream = ({
 
 export interface WriteNextResponseOptions {
   listId: string;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   stream: PassThrough;
   searchAfter: string[] | undefined;
@@ -71,14 +71,14 @@ export interface WriteNextResponseOptions {
 
 export const writeNextResponse = async ({
   listId,
-  callCluster,
+  esClient,
   stream,
   listItemIndex,
   searchAfter,
   stringToAppend,
 }: WriteNextResponseOptions): Promise<string[] | undefined> => {
   const response = await getResponse({
-    callCluster,
+    esClient,
     listId,
     listItemIndex,
     searchAfter,
@@ -102,7 +102,7 @@ export const getSearchAfterFromResponse = <T>({
     : undefined;
 
 export interface GetResponseOptions {
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listId: string;
   searchAfter: undefined | string[];
   listItemIndex: string;
@@ -110,26 +110,28 @@ export interface GetResponseOptions {
 }
 
 export const getResponse = async ({
-  callCluster,
+  esClient,
   searchAfter,
   listId,
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<SearchResponse<SearchEsListItemSchema>> => {
-  return callCluster<SearchEsListItemSchema>('search', {
-    body: {
-      query: {
-        term: {
-          list_id: listId,
+  return ((
+    await esClient.search<SearchEsListItemSchema>({
+      body: {
+        query: {
+          term: {
+            list_id: listId,
+          },
         },
+        search_after: searchAfter,
+        sort: [{ tie_breaker_id: 'asc' }],
       },
-      search_after: searchAfter,
-      sort: [{ tie_breaker_id: 'asc' }],
-    },
-    ignoreUnavailable: true,
-    index: listItemIndex,
-    size,
-  });
+      ignore_unavailable: true,
+      index: listItemIndex,
+      size,
+    })
+  ).body as unknown) as SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {

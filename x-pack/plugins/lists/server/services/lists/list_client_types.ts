@@ -7,7 +7,7 @@
 
 import { PassThrough, Readable } from 'stream';
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import {
   Description,
@@ -35,7 +35,7 @@ import {
 import { ConfigType } from '../../config';
 
 export interface ConstructorOptions {
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   config: ConfigType;
   spaceId: string;
   user: string;

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { CallWithRequest } from '../types';
+import { ElasticsearchClient } from 'kibana/server';
 
 export const deletePolicy = async (
-  callWithRequest: CallWithRequest<{ path: string; method: 'DELETE' }, unknown>,
+  esClient: ElasticsearchClient,
   policy: string
 ): Promise<unknown> => {
-  return callWithRequest('transport.request', {
-    path: `/_ilm/policy/${policy}`,
-    method: 'DELETE',
-  });
+  return (
+    await esClient.transport.request({
+      path: `/_ilm/policy/${policy}`,
+      method: 'DELETE',
+    })
+  ).body;
 };
