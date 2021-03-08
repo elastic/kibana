@@ -24,7 +24,7 @@ export enum CaseType {
  */
 export const caseTypeField = 'type';
 
-const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
+const CaseTypeRt = rt.literal(CaseType.individual);
 
 const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
