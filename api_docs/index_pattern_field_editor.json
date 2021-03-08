@@ -254,7 +254,6 @@
         "initialIsOpen": false
       },
       {
-<<<<<<< HEAD
         "id": "def-public.OpenFieldDeleteModalOptions",
         "type": "Interface",
         "label": "OpenFieldDeleteModalOptions",
@@ -269,8 +268,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_delete_modal.tsx#L25"
+              "lineNumber": 25
             },
             "signature": [
               "{ indexPattern: ",
@@ -292,8 +290,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_delete_modal.tsx#L28"
+              "lineNumber": 28
             },
             "signature": [
               "((fieldNames: string[]) => void) | undefined"
@@ -307,8 +304,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_delete_modal.tsx#L29"
+              "lineNumber": 29
             },
             "signature": [
               "string | string[]"
@@ -317,16 +313,12 @@
         ],
         "source": {
           "path": "src/plugins/index_pattern_field_editor/public/open_delete_modal.tsx",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/open_delete_modal.tsx#L24"
+          "lineNumber": 24
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.FieldEditorContext",
-=======
         "id": "def-public.OpenFieldEditorOptions",
->>>>>>> upstream/master
         "type": "Interface",
         "label": "OpenFieldEditorOptions",
         "description": [],
@@ -441,9 +433,7 @@
               "description": [],
               "source": {
                 "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-<<<<<<< HEAD
-                "lineNumber": 27,
-                "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L27"
+                "lineNumber": 27
               }
             }
           ],
@@ -451,8 +441,7 @@
           "returnComment": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-            "lineNumber": 27,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L27"
+            "lineNumber": 27
           }
         },
         {
@@ -488,11 +477,7 @@
               "description": [],
               "source": {
                 "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-                "lineNumber": 28,
-                "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L28"
-=======
-                "lineNumber": 26
->>>>>>> upstream/master
+                "lineNumber": 28
               }
             }
           ],
@@ -500,12 +485,7 @@
           "returnComment": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-<<<<<<< HEAD
-            "lineNumber": 28,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L28"
-=======
-            "lineNumber": 26
->>>>>>> upstream/master
+            "lineNumber": 28
           }
         },
         {
@@ -516,12 +496,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-<<<<<<< HEAD
-            "lineNumber": 29,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L29"
-=======
-            "lineNumber": 27
->>>>>>> upstream/master
+            "lineNumber": 29
           },
           "signature": [
             "{ getAll: () => typeof ",
@@ -551,12 +526,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-<<<<<<< HEAD
-            "lineNumber": 30,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L30"
-=======
-            "lineNumber": 28
->>>>>>> upstream/master
+            "lineNumber": 30
           },
           "signature": [
             "{ editIndexPattern: () => boolean; }"
@@ -570,12 +540,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-<<<<<<< HEAD
-            "lineNumber": 33,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L33"
-=======
-            "lineNumber": 31
->>>>>>> upstream/master
+            "lineNumber": 33
           },
           "signature": [
             "React.FunctionComponent<",
@@ -592,12 +557,7 @@
       ],
       "source": {
         "path": "src/plugins/index_pattern_field_editor/public/types.ts",
-<<<<<<< HEAD
-        "lineNumber": 26,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/index_pattern_field_editor/public/types.ts#L26"
-=======
-        "lineNumber": 25
->>>>>>> upstream/master
+        "lineNumber": 26
       },
       "lifecycle": "start",
       "initialIsOpen": true
