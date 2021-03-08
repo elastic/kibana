@@ -160,7 +160,6 @@ const StyledEuiTab = styled(EuiTab)`
 `;
 
 const TabsContentComponent: React.FC<BasicTimelineTab> = ({
-  setTimelineFullScreen,
   timelineId,
   timelineFullScreen,
   timelineType,
