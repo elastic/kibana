@@ -38,19 +38,19 @@ describe('transformActionVariables', () => {
         },
         Object {
           "description": "The ID of the alert that scheduled actions for the rule.",
-          "name": "rule.alertId",
+          "name": "alert.id",
         },
         Object {
           "description": "The action group of the alert that scheduled actions for the rule.",
-          "name": "rule.alertActionGroup",
+          "name": "alert.actionGroup",
         },
         Object {
           "description": "The action subgroup of the alert that scheduled actions for the rule.",
-          "name": "rule.alertActionSubgroup",
+          "name": "alert.actionSubgroup",
         },
         Object {
           "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
-          "name": "rule.alertActionGroupName",
+          "name": "alert.actionGroupName",
         },
         Object {
           "description": "The configured server.publicBaseUrl value or empty string if not configured.",
@@ -68,22 +68,22 @@ describe('transformActionVariables', () => {
         },
         Object {
           "deprecated": true,
-          "description": "This has been deprecated in favor of rule.alertId.",
+          "description": "This has been deprecated in favor of alert.id.",
           "name": "alertInstanceId",
         },
         Object {
           "deprecated": true,
-          "description": "This has been deprecated in favor of rule.alertActionGroup.",
+          "description": "This has been deprecated in favor of alert.actionGroup.",
           "name": "alertActionGroup",
         },
         Object {
           "deprecated": true,
-          "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+          "description": "This has been deprecated in favor of alert.actionGroupName.",
           "name": "alertActionGroupName",
         },
         Object {
           "deprecated": true,
-          "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+          "description": "This has been deprecated in favor of alert.actionSubgroup.",
           "name": "alertActionSubgroup",
         },
         Object {
@@ -133,19 +133,19 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The ID of the alert that scheduled actions for the rule.",
-            "name": "rule.alertId",
+            "name": "alert.id",
           },
           Object {
             "description": "The action group of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionGroup",
+            "name": "alert.actionGroup",
           },
           Object {
             "description": "The action subgroup of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionSubgroup",
+            "name": "alert.actionSubgroup",
           },
           Object {
             "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionGroupName",
+            "name": "alert.actionGroupName",
           },
           Object {
             "description": "The configured server.publicBaseUrl value or empty string if not configured.",
@@ -163,22 +163,22 @@ describe('transformActionVariables', () => {
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertId.",
+            "description": "This has been deprecated in favor of alert.id.",
             "name": "alertInstanceId",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionGroup.",
+            "description": "This has been deprecated in favor of alert.actionGroup.",
             "name": "alertActionGroup",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+            "description": "This has been deprecated in favor of alert.actionGroupName.",
             "name": "alertActionGroupName",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+            "description": "This has been deprecated in favor of alert.actionSubgroup.",
             "name": "alertActionSubgroup",
           },
           Object {
@@ -236,19 +236,19 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The ID of the alert that scheduled actions for the rule.",
-            "name": "rule.alertId",
+            "name": "alert.id",
           },
           Object {
             "description": "The action group of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionGroup",
+            "name": "alert.actionGroup",
           },
           Object {
             "description": "The action subgroup of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionSubgroup",
+            "name": "alert.actionSubgroup",
           },
           Object {
             "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionGroupName",
+            "name": "alert.actionGroupName",
           },
           Object {
             "description": "The configured server.publicBaseUrl value or empty string if not configured.",
@@ -266,22 +266,22 @@ describe('transformActionVariables', () => {
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertId.",
+            "description": "This has been deprecated in favor of alert.id.",
             "name": "alertInstanceId",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionGroup.",
+            "description": "This has been deprecated in favor of alert.actionGroup.",
             "name": "alertActionGroup",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+            "description": "This has been deprecated in favor of alert.actionGroupName.",
             "name": "alertActionGroupName",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+            "description": "This has been deprecated in favor of alert.actionSubgroup.",
             "name": "alertActionSubgroup",
           },
           Object {
@@ -342,19 +342,19 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The ID of the alert that scheduled actions for the rule.",
-            "name": "rule.alertId",
+            "name": "alert.id",
           },
           Object {
             "description": "The action group of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionGroup",
+            "name": "alert.actionGroup",
           },
           Object {
             "description": "The action subgroup of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionSubgroup",
+            "name": "alert.actionSubgroup",
           },
           Object {
             "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionGroupName",
+            "name": "alert.actionGroupName",
           },
           Object {
             "description": "The configured server.publicBaseUrl value or empty string if not configured.",
@@ -372,22 +372,22 @@ describe('transformActionVariables', () => {
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertId.",
+            "description": "This has been deprecated in favor of alert.id.",
             "name": "alertInstanceId",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionGroup.",
+            "description": "This has been deprecated in favor of alert.actionGroup.",
             "name": "alertActionGroup",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+            "description": "This has been deprecated in favor of alert.actionGroupName.",
             "name": "alertActionGroupName",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+            "description": "This has been deprecated in favor of alert.actionSubgroup.",
             "name": "alertActionSubgroup",
           },
           Object {
@@ -466,19 +466,19 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The ID of the alert that scheduled actions for the rule.",
-            "name": "rule.alertId",
+            "name": "alert.id",
           },
           Object {
             "description": "The action group of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionGroup",
+            "name": "alert.actionGroup",
           },
           Object {
             "description": "The action subgroup of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionSubgroup",
+            "name": "alert.actionSubgroup",
           },
           Object {
             "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionGroupName",
+            "name": "alert.actionGroupName",
           },
           Object {
             "description": "The configured server.publicBaseUrl value or empty string if not configured.",
@@ -496,22 +496,22 @@ describe('transformActionVariables', () => {
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertId.",
+            "description": "This has been deprecated in favor of alert.id.",
             "name": "alertInstanceId",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionGroup.",
+            "description": "This has been deprecated in favor of alert.actionGroup.",
             "name": "alertActionGroup",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionGroupName.",
+            "description": "This has been deprecated in favor of alert.actionGroupName.",
             "name": "alertActionGroupName",
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+            "description": "This has been deprecated in favor of alert.actionSubgroup.",
             "name": "alertActionSubgroup",
           },
           Object {

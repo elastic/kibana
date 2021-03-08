@@ -22,7 +22,7 @@ export const getDefaultsForActionParams = (
   switch (actionTypeId) {
     case '.pagerduty':
       const pagerDutyDefaults = {
-        dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.ruleAlertId}}}`,
+        dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
         eventAction: EventActionOptions.TRIGGER,
       };
       if (isRecoveryActionGroup) {

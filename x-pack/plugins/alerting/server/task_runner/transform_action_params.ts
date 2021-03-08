@@ -68,12 +68,14 @@ export function transformActionParams({
     rule: {
       id: alertId,
       name: alertName,
-      alertId: alertInstanceId,
-      alertActionGroup,
-      alertActionGroupName,
-      alertActionSubgroup,
       spaceId,
       tags,
+    },
+    alert: {
+      id: alertInstanceId,
+      actionGroup: alertActionGroup,
+      actionGroupName: alertActionGroupName,
+      actionSubgroup: alertActionSubgroup,
     },
   };
   return actionsPlugin.renderActionParameterTemplates(actionTypeId, actionParams, variables);

@@ -24,13 +24,13 @@ export function transformActionVariables(actionVariables: ActionVariables): Acti
 export enum AlertProvidedActionVariables {
   ruleId = 'rule.id',
   ruleName = 'rule.name',
-  ruleAlertId = 'rule.alertId',
-  ruleAlertActionGroup = 'rule.alertActionGroup',
-  ruleAlertActionGroupName = 'rule.alertActionGroupName',
-  ruleAlertActionSubgroup = 'rule.alertActionSubgroup',
   ruleSpaceId = 'rule.spaceId',
   ruleTags = 'rule.tags',
   date = 'date',
+  alertId = 'alert.id',
+  alertActionGroup = 'alert.actionGroup',
+  alertActionGroupName = 'alert.actionGroupName',
+  alertActionSubgroup = 'alert.actionSubgroup',
 }
 
 export enum LegacyAlertProvidedActionVariables {
@@ -91,26 +91,23 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
-    name: AlertProvidedActionVariables.ruleAlertId,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleAlertIdLabel', {
+    name: AlertProvidedActionVariables.alertId,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertIdLabel', {
       defaultMessage: 'The ID of the alert that scheduled actions for the rule.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.ruleAlertActionGroup,
-    description: i18n.translate(
-      'xpack.triggersActionsUI.actionVariables.ruleAlertActionGroupLabel',
-      {
-        defaultMessage: 'The action group of the alert that scheduled actions for the rule.',
-      }
-    ),
+    name: AlertProvidedActionVariables.alertActionGroup,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertActionGroupLabel', {
+      defaultMessage: 'The action group of the alert that scheduled actions for the rule.',
+    }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.ruleAlertActionSubgroup,
+    name: AlertProvidedActionVariables.alertActionSubgroup,
     description: i18n.translate(
-      'xpack.triggersActionsUI.actionVariables.ruleAlertActionSubgroupLabel',
+      'xpack.triggersActionsUI.actionVariables.alertActionSubgroupLabel',
       {
         defaultMessage: 'The action subgroup of the alert that scheduled actions for the rule.',
       }
@@ -118,9 +115,9 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
-    name: AlertProvidedActionVariables.ruleAlertActionGroupName,
+    name: AlertProvidedActionVariables.alertActionGroupName,
     description: i18n.translate(
-      'xpack.triggersActionsUI.actionVariables.ruleAlertActionGroupNameLabel',
+      'xpack.triggersActionsUI.actionVariables.alertActionGroupNameLabel',
       {
         defaultMessage:
           'The human readable name of the action group of the alert that scheduled actions for the rule.',
@@ -166,7 +163,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       {
         defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
-          variable: AlertProvidedActionVariables.ruleAlertId,
+          variable: AlertProvidedActionVariables.alertId,
         },
       }
     ),
@@ -180,7 +177,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       {
         defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
-          variable: AlertProvidedActionVariables.ruleAlertActionGroup,
+          variable: AlertProvidedActionVariables.alertActionGroup,
         },
       }
     ),
@@ -194,7 +191,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       {
         defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
-          variable: AlertProvidedActionVariables.ruleAlertActionGroupName,
+          variable: AlertProvidedActionVariables.alertActionGroupName,
         },
       }
     ),
@@ -208,7 +205,7 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       {
         defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
-          variable: AlertProvidedActionVariables.ruleAlertActionSubgroup,
+          variable: AlertProvidedActionVariables.alertActionSubgroup,
         },
       }
     ),
