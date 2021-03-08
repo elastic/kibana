@@ -23004,7 +23004,7 @@
     "xpack.triggersActionsUI.sections.alertsList.alertErrorReasonRunning": "运行告警时发生错误。",
     "xpack.triggersActionsUI.sections.alertsList.alertErrorReasonUnknown": "由于未知原因发生错误。",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex": "操作",
-    "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText": "操作",
+    "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsCount": "操作",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle": "类型",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.intervalTitle": "运行间隔",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle": "名称",
