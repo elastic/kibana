@@ -116,7 +116,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
             'xpack.apm.correlations.correlationsTable.filterDescription',
             { defaultMessage: 'Filter by value' }
           ),
-          icon: 'magnifyWithPlus',
+          icon: 'plusInCircle',
           type: 'icon',
           onClick: (term: T) => {
             push(history, {
@@ -139,7 +139,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
             'xpack.apm.correlations.correlationsTable.excludeDescription',
             { defaultMessage: 'Filter out value' }
           ),
-          icon: 'magnifyWithMinus',
+          icon: 'minusInCircle',
           type: 'icon',
           onClick: (term: T) => {
             push(history, {
