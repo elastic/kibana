@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export {
-  InjectedMetadataService,
+export { InjectedMetadataService } from './injected_metadata_service';
+export type {
   InjectedMetadataParams,
   InjectedMetadataSetup,
   InjectedMetadataStart,

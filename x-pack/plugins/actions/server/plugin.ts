@@ -50,15 +50,7 @@ import {
 
 import { getActionsConfigurationUtilities } from './actions_config';
 
-import {
-  createActionRoute,
-  deleteActionRoute,
-  getAllActionRoute,
-  getActionRoute,
-  updateActionRoute,
-  listActionTypesRoute,
-  executeActionRoute,
-} from './routes';
+import { defineRoutes } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
@@ -237,14 +229,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     // Routes
-    const router = core.http.createRouter<ActionsRequestHandlerContext>();
-    createActionRoute(router, this.licenseState);
-    deleteActionRoute(router, this.licenseState);
-    getActionRoute(router, this.licenseState);
-    getAllActionRoute(router, this.licenseState);
-    updateActionRoute(router, this.licenseState);
-    listActionTypesRoute(router, this.licenseState);
-    executeActionRoute(router, this.licenseState);
+    defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
 
     return {
       registerType: <

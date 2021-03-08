@@ -6,6 +6,7 @@
  */
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
+
 import { appContextService } from './app_context';
 import { setupIngestManager } from './setup';
 
@@ -43,7 +44,7 @@ describe('setupIngestManager', () => {
       soClient.update = mockedMethodThrowsError();
       const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      const setupPromise = setupIngestManager(soClient, esClient, jest.fn());
+      const setupPromise = setupIngestManager(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
       await expect(setupPromise).rejects.toThrow(Error);
     });
@@ -56,7 +57,7 @@ describe('setupIngestManager', () => {
       soClient.update = mockedMethodThrowsCustom();
       const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      const setupPromise = setupIngestManager(soClient, esClient, jest.fn());
+      const setupPromise = setupIngestManager(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
       await expect(setupPromise).rejects.toThrow(CustomTestError);
     });

@@ -6,23 +6,24 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import {
+import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsBulkCreateObject,
 } from 'src/core/server';
-import {
+
+import type {
   Agent,
   NewAgentEvent,
   AgentEvent,
   AgentSOAttributes,
   AgentEventSOAttributes,
 } from '../../../types';
-
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { agentCheckinState } from './state';
 import { getAgentActionsForCheckin } from '../actions';
 import { updateAgent } from '../crud';
+
+import { agentCheckinState } from './state';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
@@ -45,7 +46,7 @@ export async function agentCheckin(
   }
   // Update agent only if something changed
   if (Object.keys(updateData).length > 0) {
-    await updateAgent(soClient, esClient, agent.id, updateData);
+    await updateAgent(esClient, agent.id, updateData);
   }
   // Check if some actions are not acknowledged
   let actions = await getAgentActionsForCheckin(soClient, agent.id);

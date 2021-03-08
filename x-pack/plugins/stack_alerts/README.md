@@ -1,7 +1,7 @@
 # stack_alerts plugin
 
 This plugin provides alertTypes shipped with Kibana for use with the
-[the alerts plugin](../alerts/README.md).  When enabled, it will register
+[the alerting plugin](../alerting/README.md).  When enabled, it will register
 the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
