@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Ast, toExpression } from '@kbn/interpreter/common';
+import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -352,7 +352,7 @@ export const InnerVisualizationWrapper = ({
   ExpressionRendererComponent,
   dispatch,
 }: {
-  expression: Ast | null | undefined;
+  expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
   timefilter: TimefilterContract;
   onEvent: (event: ExpressionRendererEvent) => void;
