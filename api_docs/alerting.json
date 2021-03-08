@@ -905,7 +905,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 112
+                  "lineNumber": 94
                 }
               }
             ],
@@ -913,13 +913,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 104
+              "lineNumber": 86
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 103
+          "lineNumber": 85
         },
         "initialIsOpen": false
       },
@@ -938,7 +938,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 124
+              "lineNumber": 106
             },
             "signature": [
               "() => Set<",
@@ -994,7 +994,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 125
+                  "lineNumber": 107
                 }
               }
             ],
@@ -1002,7 +1002,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 125
+              "lineNumber": 107
             }
           },
           {
@@ -1013,7 +1013,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 126
+              "lineNumber": 108
             },
             "signature": [
               "() => Promise<",
@@ -1030,7 +1030,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 123
+          "lineNumber": 105
         },
         "initialIsOpen": false
       }
@@ -3005,21 +3005,6 @@
         "initialIsOpen": false
       },
       {
-        "tags": [],
-        "id": "def-common.BASE_ALERT_API_PATH",
-        "type": "string",
-        "label": "BASE_ALERT_API_PATH",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 27
-        },
-        "signature": [
-          "\"/api/alerts\""
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.DefaultActionGroupId",
         "type": "Type",
         "label": "DefaultActionGroupId",
@@ -3031,6 +3016,21 @@
         },
         "signature": [
           "\"default\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.LEGACY_BASE_ALERT_API_PATH",
+        "type": "string",
+        "label": "LEGACY_BASE_ALERT_API_PATH",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/alerting/common/index.ts",
+          "lineNumber": 27
+        },
+        "signature": [
+          "\"/api/alerts\""
         ],
         "initialIsOpen": false
       },
