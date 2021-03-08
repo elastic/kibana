@@ -100,9 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return a 400 when given an invalid "kuery" value', async () => {
-      await supertest
-        .get(`/api/fleet/agents?kuery=m`) // missing saved object type
-        .expect(400);
+      await supertest.get(`/api/fleet/agents?kuery=.test%3A`).expect(400);
     });
     it('should accept a valid "kuery" value', async () => {
       const filter = encodeURIComponent('fleet-agents.access_api_key_id : "api-key-2"');
