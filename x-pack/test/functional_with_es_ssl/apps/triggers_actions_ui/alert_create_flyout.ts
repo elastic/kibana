@@ -139,7 +139,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('variableMenuButton-rule.id');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{rule.alertActionGroup}} some additional text {{rule.id}}'
+        'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
       await testSubjects.click('saveAlertButton');
