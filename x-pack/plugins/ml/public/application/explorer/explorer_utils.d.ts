@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-
 import { AnnotationsTable } from '../../../common/types/annotations';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { SwimlaneType } from './explorer_constants';
+import { TimeRangeBounds } from '../util/time_buckets';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -97,11 +96,6 @@ export declare interface ExplorerJob {
 }
 
 export declare const createJobs: (jobs: CombinedJob[]) => ExplorerJob[];
-
-export declare interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
 
 declare interface SwimlaneBounds {
   earliest: number;

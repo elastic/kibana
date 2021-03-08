@@ -117,14 +117,14 @@ export function useExplorerInputResolver(
             viewBy,
             swimlaneType: swimlaneTypeInput,
             maxSeriesToPlot,
-            timeRange,
+            timeRange: timeRangeInput,
             filters,
             query,
           } = input;
 
           const viewBySwimlaneFieldName = viewBy;
 
-          anomalyTimelineService.setTimeRange(timeRange);
+          anomalyTimelineService.setTimeRange(timeRangeInput);
 
           if (!swimlaneType) {
             setSwimlaneType(swimlaneTypeInput);
@@ -138,77 +138,75 @@ export function useExplorerInputResolver(
               bucketSpanSeconds: bucketSpan!.asSeconds(),
             };
           });
-
-          if (viewBySwimlaneFieldName !== undefined) {
-            let influencersFilterQuery: any;
-            try {
-              influencersFilterQuery = processFilters(filters, query);
-            } catch (e) {
-              // handle query syntax errors
-              setError(e);
-              return of(undefined);
-            }
-
-            const bounds = anomalyTimelineService.getTimeBounds();
-            // Can be from input timerange or from the timefilter query bar
-            const selections: AppStateSelectedCells = {
-              lanes: ['Overall'],
-              times: [bounds.min?.unix()!, bounds.max?.unix()!],
-              type: 'overall',
-            };
-
-            const selectionInfluencers = getSelectionInfluencers(
-              selections,
-              viewBySwimlaneFieldName!
-            );
-
-            const jobIds = getSelectionJobIds(selections, explorerJobs);
-
-            const swimlaneBucketInterval = timeBuckets.getInterval();
-
-            const timerange = getSelectionTimeRange(
-              selections,
-              swimlaneBucketInterval.asSeconds(),
-              bounds
-            );
-            const explorer$ = forkJoin({
-              combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
-              anomalyChartRecords: loadDataForCharts(
-                jobIds,
-                timerange.earliestMs,
-                timerange.latestMs,
-                selectionInfluencers,
-                selections,
-                influencersFilterQuery
-              ),
-            }).pipe(
-              mergeMap(({ combinedJobs, anomalyChartRecords }) => {
-                const combinedJobRecords: Record<
-                  string,
-                  CombinedJob
-                > = (combinedJobs as CombinedJob[]).reduce((acc, job) => {
-                  return { ...acc, [job.job_id]: job };
-                }, {});
-
-                return forkJoin({
-                  chartsData: from(
-                    anomalyExplorerService.getAnomalyData(
-                      combinedJobRecords,
-                      swimlaneContainerWidth,
-                      // @ts-ignore
-                      anomalyChartRecords,
-                      timerange.earliestMs,
-                      timerange.latestMs,
-                      timefilter,
-                      severityValue,
-                      maxSeriesToPlot
-                    )
-                  ),
-                });
-              })
-            );
-            return explorer$;
+          if (viewBySwimlaneFieldName !== undefined) return of(undefined);
+          let influencersFilterQuery: any;
+          try {
+            influencersFilterQuery = processFilters(filters, query);
+          } catch (e) {
+            // handle query syntax errors
+            setError(e);
+            return of(undefined);
           }
+
+          const bounds = anomalyTimelineService.getTimeBounds();
+          // Can be from input time range or from the timefilter bar
+          const selections: AppStateSelectedCells = {
+            lanes: ['Overall'],
+            times: [bounds.min?.unix()!, bounds.max?.unix()!],
+            type: 'overall',
+          };
+
+          const selectionInfluencers = getSelectionInfluencers(
+            selections,
+            viewBySwimlaneFieldName!
+          );
+
+          const jobIds = getSelectionJobIds(selections, explorerJobs);
+
+          const swimlaneBucketInterval = timeBuckets.getInterval();
+
+          const timeRange = getSelectionTimeRange(
+            selections,
+            swimlaneBucketInterval.asSeconds(),
+            bounds
+          );
+          const explorer$ = forkJoin({
+            combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
+            anomalyChartRecords: loadDataForCharts(
+              jobIds,
+              timeRange.earliestMs,
+              timeRange.latestMs,
+              selectionInfluencers,
+              selections,
+              influencersFilterQuery
+            ),
+          }).pipe(
+            mergeMap(({ combinedJobs, anomalyChartRecords }) => {
+              const combinedJobRecords: Record<
+                string,
+                CombinedJob
+              > = (combinedJobs as CombinedJob[]).reduce((acc, job) => {
+                return { ...acc, [job.job_id]: job };
+              }, {});
+
+              return forkJoin({
+                chartsData: from(
+                  anomalyExplorerService.getAnomalyData(
+                    combinedJobRecords,
+                    swimlaneContainerWidth,
+                    // @ts-ignore
+                    anomalyChartRecords,
+                    timeRange.earliestMs,
+                    timeRange.latestMs,
+                    timefilter,
+                    severityValue,
+                    maxSeriesToPlot
+                  )
+                ),
+              });
+            })
+          );
+          return explorer$;
         }),
         catchError((e) => {
           setError(e.body);
