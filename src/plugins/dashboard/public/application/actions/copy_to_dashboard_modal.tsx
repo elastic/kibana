@@ -19,6 +19,8 @@ import {
   EuiRadio,
   EuiSpacer,
   EuiText,
+  EuiFocusTrap,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
 import { DashboardPicker } from '../../services/presentation_util';
@@ -66,74 +68,94 @@ export function CopyToDashboardModal({
     });
   }, [dashboardOption, embeddable, selectedDashboard, stateTransfer, closeModal]);
 
+  const titleId = 'copyToDashboardTitle';
+  const descriptionId = 'copyToDashboardDescription';
+
   return (
-    <PresentationUtilContext>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{dashboardCopyToDashboardAction.getDisplayName()}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>
-        <>
-          <EuiText>
-            <p>{dashboardCopyToDashboardAction.getDescription()}</p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiFormRow hasChildLabel={false}>
-            <EuiPanel color="subdued" hasShadow={false} data-test-subj="add-to-dashboard-options">
-              <div>
-                {capabilities.canEditExisting && (
-                  <>
-                    <EuiRadio
-                      checked={dashboardOption === 'existing'}
-                      data-test-subj="add-to-existing-dashboard-option"
-                      id="existing-dashboard-option"
-                      name="dashboard-option"
-                      label={dashboardCopyToDashboardAction.getExistingDashboardOption()}
-                      onChange={() => setDashboardOption('existing')}
-                    />
-                    <div className="savAddDashboard__searchDashboards">
-                      <DashboardPicker
-                        isDisabled={dashboardOption !== 'existing'}
-                        idsToOmit={dashboardId ? [dashboardId] : undefined}
-                        onChange={(dashboard) => setSelectedDashboard(dashboard)}
-                      />
-                    </div>
-                    <EuiSpacer size="s" />
-                  </>
-                )}
-                {capabilities.canCreateNew && (
-                  <>
-                    <EuiRadio
-                      checked={dashboardOption === 'new'}
-                      data-test-subj="add-to-new-dashboard-option"
-                      id="new-dashboard-option"
-                      name="dashboard-option"
-                      disabled={!dashboardId}
-                      label={dashboardCopyToDashboardAction.getNewDashboardOption()}
-                      onChange={() => setDashboardOption('new')}
-                    />
-                    <EuiSpacer size="s" />
-                  </>
-                )}
-              </div>
-            </EuiPanel>
-          </EuiFormRow>
-        </>
-      </EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelCopyToButton" onClick={() => closeModal()}>
-          {dashboardCopyToDashboardAction.getCancelButtonName()}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          data-test-subj="confirmCopyToButton"
-          onClick={onSubmit}
-          disabled={dashboardOption === 'existing' && !selectedDashboard}
+    <EuiFocusTrap clickOutsideDisables={true}>
+      <EuiOutsideClickDetector onOutsideClick={closeModal}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          aria-describedby={descriptionId}
         >
-          {dashboardCopyToDashboardAction.getAcceptButtonName()}
-        </EuiButton>
-      </EuiModalFooter>
-    </PresentationUtilContext>
+          <PresentationUtilContext>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>
+                <h2 id={titleId}>{dashboardCopyToDashboardAction.getDisplayName()}</h2>
+              </EuiModalHeaderTitle>
+            </EuiModalHeader>
+
+            <EuiModalBody>
+              <>
+                <EuiText>
+                  <p id={descriptionId}>{dashboardCopyToDashboardAction.getDescription()}</p>
+                </EuiText>
+                <EuiSpacer />
+                <EuiFormRow hasChildLabel={false}>
+                  <EuiPanel
+                    color="subdued"
+                    hasShadow={false}
+                    data-test-subj="add-to-dashboard-options"
+                  >
+                    <div>
+                      {capabilities.canEditExisting && (
+                        <>
+                          <EuiRadio
+                            checked={dashboardOption === 'existing'}
+                            data-test-subj="add-to-existing-dashboard-option"
+                            id="existing-dashboard-option"
+                            name="dashboard-option"
+                            label={dashboardCopyToDashboardAction.getExistingDashboardOption()}
+                            onChange={() => setDashboardOption('existing')}
+                          />
+                          <div className="savAddDashboard__searchDashboards">
+                            <DashboardPicker
+                              isDisabled={dashboardOption !== 'existing'}
+                              idsToOmit={dashboardId ? [dashboardId] : undefined}
+                              onChange={(dashboard) => setSelectedDashboard(dashboard)}
+                            />
+                          </div>
+                          <EuiSpacer size="s" />
+                        </>
+                      )}
+                      {capabilities.canCreateNew && (
+                        <>
+                          <EuiRadio
+                            checked={dashboardOption === 'new'}
+                            data-test-subj="add-to-new-dashboard-option"
+                            id="new-dashboard-option"
+                            name="dashboard-option"
+                            disabled={!dashboardId}
+                            label={dashboardCopyToDashboardAction.getNewDashboardOption()}
+                            onChange={() => setDashboardOption('new')}
+                          />
+                          <EuiSpacer size="s" />
+                        </>
+                      )}
+                    </div>
+                  </EuiPanel>
+                </EuiFormRow>
+              </>
+            </EuiModalBody>
+
+            <EuiModalFooter>
+              <EuiButtonEmpty data-test-subj="cancelCopyToButton" onClick={() => closeModal()}>
+                {dashboardCopyToDashboardAction.getCancelButtonName()}
+              </EuiButtonEmpty>
+              <EuiButton
+                fill
+                data-test-subj="confirmCopyToButton"
+                onClick={onSubmit}
+                disabled={dashboardOption === 'existing' && !selectedDashboard}
+              >
+                {dashboardCopyToDashboardAction.getAcceptButtonName()}
+              </EuiButton>
+            </EuiModalFooter>
+          </PresentationUtilContext>
+        </div>
+      </EuiOutsideClickDetector>
+    </EuiFocusTrap>
   );
 }
