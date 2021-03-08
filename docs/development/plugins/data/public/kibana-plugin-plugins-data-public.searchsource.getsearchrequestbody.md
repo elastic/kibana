@@ -4,6 +4,8 @@
 
 ## SearchSource.getSearchRequestBody() method
 
+Returns body contents of the search request, often referred as query DSL.
+
 <b>Signature:</b>
 
 ```typescript

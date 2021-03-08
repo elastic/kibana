@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
-import { npStart } from '../../../../legacy_singletons';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+
+import type { HttpHandler } from 'src/core/public';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 import {
   LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
@@ -17,15 +16,13 @@ import {
 } from '../../../../../common/http_api';
 
 export const fetchLogSummaryHighlights = async (
-  requestArgs: LogEntriesSummaryHighlightsRequest
+  requestArgs: LogEntriesSummaryHighlightsRequest,
+  fetch: HttpHandler
 ) => {
-  const response = await npStart.http.fetch(LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH, {
+  const response = await fetch(LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH, {
     method: 'POST',
     body: JSON.stringify(logEntriesSummaryHighlightsRequestRT.encode(requestArgs)),
   });
 
-  return pipe(
-    logEntriesSummaryHighlightsResponseRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(logEntriesSummaryHighlightsResponseRT)(response);
 };

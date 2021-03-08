@@ -1,0 +1,31 @@
+.lnsIndexPatternDimensionEditor {
+  height: 100%;
+}
+
+.lnsIndexPatternDimensionEditor__section {
+  padding: $euiSizeS;
+}
+
+.lnsIndexPatternDimensionEditor__section--shaded {
+  background-color: $euiColorLightestShade;
+}
+
+.lnsIndexPatternDimensionEditor__columns {
+  column-count: 2;
+  column-gap: $euiSizeXL;
+}
+
+// overrides the .euiListGroupItem display flex.
+// The parent container has a column-count property that only works properly with block elements.
+.lnsIndexPatternDimensionEditor__operation {
+  display: block;
+}
+
+.lnsIndexPatternDimensionEditor__operation .euiListGroupItem__label {
+  width: 100%;
+}
+
+.lnsIndexPatternDimensionEditor__operation > button {
+  padding-top: 0;
+  padding-bottom: 0;
+}

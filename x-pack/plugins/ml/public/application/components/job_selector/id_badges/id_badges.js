@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -38,7 +39,7 @@ export function IdBadges({ limit, maps, onLinkClick, selectedIds, showAllBarBadg
     if (maps.groupsMap[currentId] === undefined) {
       const jobGroups = maps.jobsMap[currentId] || [];
 
-      if (jobGroups.some(g => currentGroups.includes(g)) === false) {
+      if (jobGroups.some((g) => currentGroups.includes(g)) === false) {
         badges.push(
           <EuiFlexItem grow={false} key={currentId}>
             <JobSelectorBadge id={currentId} />

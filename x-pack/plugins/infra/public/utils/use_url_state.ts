@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parse, stringify } from 'query-string';
 import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
+import { useHistory } from 'react-router-dom';
 import { url } from '../../../../../src/plugins/kibana_utils/public';
-
-import { useHistory } from './history_context';
 
 export const useUrlState = <State>({
   defaultState,
@@ -38,15 +38,13 @@ export const useUrlState = <State>({
     return getParamFromQueryString(queryString, urlStateKey);
   }, [queryString, urlStateKey]);
 
-  const decodedState = useMemo(() => decodeUrlState(decodeRisonUrlState(urlStateString)), [
-    decodeUrlState,
-    urlStateString,
-  ]);
+  const decodedState = useMemo(() => {
+    return decodeUrlState(decodeRisonUrlState(urlStateString));
+  }, [decodeUrlState, urlStateString]);
 
-  const state = useMemo(() => (typeof decodedState !== 'undefined' ? decodedState : defaultState), [
-    defaultState,
-    decodedState,
-  ]);
+  const state = useMemo(() => {
+    return typeof decodedState !== 'undefined' ? decodedState : defaultState;
+  }, [defaultState, decodedState]);
 
   const setState = useCallback(
     (newState: State | undefined) => {
@@ -112,16 +110,15 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   urlState: UrlState | undefined
 ) => (queryString: string) => {
   const previousQueryValues = parse(queryString, { sort: false });
-  const encodedUrlState =
-    typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
+  const newValue =
+    typeof urlState === 'undefined'
+      ? previousQueryValues
+      : {
+          ...previousQueryValues,
+          [stateKey]: encodeRisonUrlState(urlState),
+        };
 
-  return stringify(
-    url.encodeQuery({
-      ...previousQueryValues,
-      [stateKey]: encodedUrlState,
-    }),
-    { sort: false, encode: false }
-  );
+  return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {

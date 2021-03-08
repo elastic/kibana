@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { ToastsSetup } from 'src/core/public';
-import { ReportingPanelContent } from './reporting_panel_content';
+import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingPanelContent } from './reporting_panel_content';
 
-interface Props {
+export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
   objectId?: string;
-  objectType: string;
-  getJobParams: () => any;
-  isDirty: boolean;
-  onClose: () => void;
+  getJobParams: () => BaseParams;
+  isDirty?: boolean;
+  onClose?: () => void;
 }
 
 interface State {
@@ -31,8 +32,8 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const isPreserveLayoutSupported =
-      props.reportType !== 'png' && props.objectType !== 'visualization';
+    const { objectType } = props.getJobParams();
+    const isPreserveLayoutSupported = props.reportType !== 'png' && objectType !== 'visualization';
     this.state = {
       isPreserveLayoutSupported,
       usePrintLayout: false,
@@ -46,7 +47,6 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
         toasts={this.props.toasts}
         reportType={this.props.reportType}
         layoutId={this.getLayout().id}
-        objectType={this.props.objectType}
         objectId={this.props.objectId}
         getJobParams={this.getJobParams}
         options={this.renderOptions()}
@@ -83,7 +83,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     );
   };
 
-  private handlePrintLayoutChange = (evt: any) => {
+  private handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
     this.setState({ usePrintLayout: evt.target.checked });
   };
 

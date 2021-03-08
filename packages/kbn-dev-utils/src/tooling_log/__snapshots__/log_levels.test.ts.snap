@@ -7,6 +7,7 @@ Object {
     "error": true,
     "info": true,
     "silent": true,
+    "success": true,
     "verbose": false,
     "warning": true,
   },
@@ -21,6 +22,7 @@ Object {
     "error": true,
     "info": false,
     "silent": true,
+    "success": false,
     "verbose": false,
     "warning": false,
   },
@@ -35,6 +37,7 @@ Object {
     "error": true,
     "info": true,
     "silent": true,
+    "success": true,
     "verbose": false,
     "warning": true,
   },
@@ -49,6 +52,7 @@ Object {
     "error": false,
     "info": false,
     "silent": true,
+    "success": false,
     "verbose": false,
     "warning": false,
   },
@@ -63,6 +67,7 @@ Object {
     "error": true,
     "info": true,
     "silent": true,
+    "success": true,
     "verbose": true,
     "warning": true,
   },
@@ -77,6 +82,7 @@ Object {
     "error": true,
     "info": false,
     "silent": true,
+    "success": false,
     "verbose": false,
     "warning": true,
   },
@@ -84,8 +90,8 @@ Object {
 }
 `;
 
-exports[`throws error for invalid levels: bar 1`] = `"Invalid log level \\"bar\\" (expected one of silent,error,warning,info,debug,verbose)"`;
+exports[`throws error for invalid levels: bar 1`] = `"Invalid log level \\"bar\\" (expected one of silent,error,warning,success,info,debug,verbose)"`;
 
-exports[`throws error for invalid levels: foo 1`] = `"Invalid log level \\"foo\\" (expected one of silent,error,warning,info,debug,verbose)"`;
+exports[`throws error for invalid levels: foo 1`] = `"Invalid log level \\"foo\\" (expected one of silent,error,warning,success,info,debug,verbose)"`;
 
-exports[`throws error for invalid levels: warn 1`] = `"Invalid log level \\"warn\\" (expected one of silent,error,warning,info,debug,verbose)"`;
+exports[`throws error for invalid levels: warn 1`] = `"Invalid log level \\"warn\\" (expected one of silent,error,warning,success,info,debug,verbose)"`;

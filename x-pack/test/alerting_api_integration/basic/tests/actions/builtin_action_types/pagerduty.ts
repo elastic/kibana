@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -13,7 +14,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
   describe('pagerduty action', () => {
     it('should return 403 when creating a pagerduty action', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty action',

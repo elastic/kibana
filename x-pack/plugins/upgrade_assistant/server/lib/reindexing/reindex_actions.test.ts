@@ -1,10 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import moment from 'moment';
 
 import {
@@ -14,12 +19,16 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
+import { mockKibanaVersion } from '../../../common/constants';
+import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
+import { getMockVersionInfo } from '../__fixtures__/version';
+
+const { currentMajor, prevMajor } = getMockVersionInfo();
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
-  let callCluster: jest.Mock;
+  let clusterClient: ScopedClusterClientMock;
   let actions: ReindexActions;
 
   const unimplemented = (name: string) => () =>
@@ -27,7 +36,7 @@ describe('ReindexActions', () => {
 
   beforeEach(() => {
     client = {
-      errors: null,
+      errors: SavedObjectsErrorHelpers,
       create: jest.fn(unimplemented('create')),
       bulkCreate: jest.fn(unimplemented('bulkCreate')),
       delete: jest.fn(unimplemented('delete')),
@@ -39,18 +48,21 @@ describe('ReindexActions', () => {
         Promise.resolve({ id, attributes } as ReindexSavedObject)
       ) as any,
     };
-    callCluster = jest.fn();
-    actions = reindexActionsFactory(client, callCluster);
+    clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    actions = reindexActionsFactory(client, clusterClient.asCurrentUser);
   });
 
   describe('createReindexOp', () => {
-    beforeEach(() => client.create.mockResolvedValue());
+    beforeEach(() => {
+      versionService.setup(mockKibanaVersion);
+      client.create.mockResolvedValue();
+    });
 
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name`, async () => {
+    it(`prepends reindexed-v${currentMajor} to new name`, async () => {
       await actions.createReindexOp('myIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -62,11 +74,11 @@ describe('ReindexActions', () => {
       });
     });
 
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name, preserving leading period`, async () => {
+    it(`prepends reindexed-v${currentMajor} to new name, preserving leading period`, async () => {
       await actions.createReindexOp('.internalIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: '.internalIndex',
-        newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-internalIndex`,
+        newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -78,29 +90,11 @@ describe('ReindexActions', () => {
       });
     });
 
-    // in v5.6, the upgrade assistant appended to the index name instead of prepending
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION}- and removes reindex appended in v5`, async () => {
-      const indexName = 'myIndex-reindexed-v5';
-      await actions.createReindexOp(indexName);
+    it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor}`, async () => {
+      await actions.createReindexOp(`reindexed-v${prevMajor}-myIndex`);
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName,
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
-      });
-    });
-
-    it(`replaces reindexed-v${PREV_MAJOR_VERSION} with reindexed-v${CURRENT_MAJOR_VERSION}`, async () => {
-      await actions.createReindexOp(`reindexed-v${PREV_MAJOR_VERSION}-myIndex`);
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: `reindexed-v${PREV_MAJOR_VERSION}-myIndex`,
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        indexName: `reindexed-v${prevMajor}-myIndex`,
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -152,7 +146,7 @@ describe('ReindexActions', () => {
   describe('runWhileLocked', () => {
     it('locks and unlocks if object is unlocked', async () => {
       const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
-      await actions.runWhileLocked(reindexOp, op => Promise.resolve(op));
+      await actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op));
 
       expect(client.update).toHaveBeenCalledTimes(2);
 
@@ -174,13 +168,10 @@ describe('ReindexActions', () => {
         id: '1',
         attributes: {
           // Set locked timestamp to timeout + 10 seconds ago
-          locked: moment()
-            .subtract(LOCK_WINDOW)
-            .subtract(moment.duration(10, 'seconds'))
-            .format(),
+          locked: moment().subtract(LOCK_WINDOW).subtract(moment.duration(10, 'seconds')).format(),
         },
       } as ReindexSavedObject;
-      await actions.runWhileLocked(reindexOp, op => Promise.resolve(op));
+      await actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op));
 
       expect(client.update).toHaveBeenCalledTimes(2);
 
@@ -201,7 +192,7 @@ describe('ReindexActions', () => {
       const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
 
       await expect(
-        actions.runWhileLocked(reindexOp, op => Promise.reject(new Error('IT FAILED!')))
+        actions.runWhileLocked(reindexOp, (op) => Promise.reject(new Error('IT FAILED!')))
       ).rejects.toThrow('IT FAILED!');
 
       expect(client.update).toHaveBeenCalledTimes(2);
@@ -224,7 +215,9 @@ describe('ReindexActions', () => {
         id: '1',
         attributes: { locked: moment().format() },
       } as ReindexSavedObject;
-      await expect(actions.runWhileLocked(reindexOp, op => Promise.resolve(op))).rejects.toThrow();
+      await expect(
+        actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op))
+      ).rejects.toThrow();
     });
   });
 
@@ -283,13 +276,20 @@ describe('ReindexActions', () => {
   });
 
   describe('getFlatSettings', () => {
+    const asApiResponse = <T>(body: T): RequestEvent<T> =>
+      ({
+        body,
+      } as RequestEvent<T>);
+
     it('returns flat settings', async () => {
-      callCluster.mockResolvedValueOnce({
-        myIndex: {
-          settings: { 'index.mySetting': '1' },
-          mappings: {},
-        },
-      });
+      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+        asApiResponse({
+          myIndex: {
+            settings: { 'index.mySetting': '1' },
+            mappings: {},
+          },
+        })
+      );
       await expect(actions.getFlatSettings('myIndex')).resolves.toEqual({
         settings: { 'index.mySetting': '1' },
         mappings: {},
@@ -297,7 +297,7 @@ describe('ReindexActions', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      callCluster.mockResolvedValueOnce({});
+      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(asApiResponse({}));
       await expect(actions.getFlatSettings('myIndex')).resolves.toBeNull();
     });
   });
@@ -307,7 +307,7 @@ describe('ReindexActions', () => {
       describe(`IndexConsumerType.${typeKey}`, () => {
         it('creates the lock doc if it does not exist and executes callback', async () => {
           expect.assertions(3);
-          client.get.mockRejectedValueOnce(Boom.notFound()); // mock no ML doc exists yet
+          client.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError()); // mock no ML doc exists yet
           client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
             Promise.resolve({
               type,
@@ -317,7 +317,7 @@ describe('ReindexActions', () => {
           );
 
           let flip = false;
-          await actions.runWhileIndexGroupLocked(consumerType, async mlDoc => {
+          await actions.runWhileIndexGroupLocked(consumerType, async (mlDoc) => {
             expect(mlDoc.id).toEqual(consumerType);
             expect(mlDoc.attributes.runningReindexCount).toEqual(0);
             flip = true;
@@ -327,7 +327,6 @@ describe('ReindexActions', () => {
         });
 
         it('fails after 10 attempts to lock', async () => {
-          jest.setTimeout(20000); // increase the timeout
           client.get.mockResolvedValue({
             type: REINDEX_OP_TYPE,
             id: consumerType,
@@ -337,13 +336,10 @@ describe('ReindexActions', () => {
           client.update.mockRejectedValue(new Error('NO LOCKING!'));
 
           await expect(
-            actions.runWhileIndexGroupLocked(consumerType, async m => m)
+            actions.runWhileIndexGroupLocked(consumerType, async (m) => m)
           ).rejects.toThrow('Could not acquire lock for ML jobs');
           expect(client.update).toHaveBeenCalledTimes(10);
-
-          // Restore default timeout.
-          jest.setTimeout(5000);
-        });
+        }, 20000);
       });
     });
   });

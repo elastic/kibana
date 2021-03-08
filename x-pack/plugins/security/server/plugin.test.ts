@@ -1,135 +1,184 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { of } from 'rxjs';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { ICustomClusterClient } from '../../../../src/core/server';
-import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
-import { Plugin, PluginSetupDependencies } from './plugin';
 
-import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { coreMock } from 'src/core/server/mocks';
+
+import { featuresPluginMock } from '../../features/server/mocks';
+import { licensingMock } from '../../licensing/server/mocks';
+import { taskManagerMock } from '../../task_manager/server/mocks';
+import { ConfigSchema } from './config';
+import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
+import { SecurityPlugin } from './plugin';
 
 describe('Security Plugin', () => {
-  let plugin: Plugin;
+  let plugin: SecurityPlugin;
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
-  let mockClusterClient: jest.Mocked<ICustomClusterClient>;
-  let mockDependencies: PluginSetupDependencies;
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
+  let mockSetupDependencies: PluginSetupDependencies;
+  let mockStartDependencies: PluginStartDependencies;
   beforeEach(() => {
-    plugin = new Plugin(
-      coreMock.createPluginInitializerContext({
-        cookieName: 'sid',
-        session: {
-          idleTimeout: 1500,
-          lifespan: null,
-        },
-        authc: {
-          selector: { enabled: false },
-          providers: ['saml', 'token'],
-          saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
-          http: { enabled: true, autoSchemesEnabled: true, schemes: ['apikey'] },
-        },
-      })
+    plugin = new SecurityPlugin(
+      coreMock.createPluginInitializerContext(
+        ConfigSchema.validate({
+          session: { idleTimeout: 1500 },
+          authc: {
+            providers: ['saml', 'token'],
+            saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
+          },
+        })
+      )
     );
 
     mockCoreSetup = coreMock.createSetup();
-    mockCoreSetup.http.isTlsEnabled = true;
+    mockCoreSetup.http.getServerInfo.mockReturnValue({
+      hostname: 'localhost',
+      name: 'kibana',
+      port: 80,
+      protocol: 'https',
+    });
 
-    mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
-    mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<ICustomClusterClient>
-    );
+    mockSetupDependencies = ({
+      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+      features: featuresPluginMock.createSetup(),
+      taskManager: taskManagerMock.createSetup(),
+    } as unknown) as PluginSetupDependencies;
 
-    mockDependencies = { licensing: { license$: of({}) } } as PluginSetupDependencies;
+    mockCoreStart = coreMock.createStart();
+
+    const mockFeaturesStart = featuresPluginMock.createStart();
+    mockFeaturesStart.getKibanaFeatures.mockReturnValue([]);
+    mockStartDependencies = {
+      features: mockFeaturesStart,
+      licensing: licensingMock.createStart(),
+      taskManager: taskManagerMock.createStart(),
+    };
   });
 
   describe('setup()', () => {
-    it('exposes proper contract', async () => {
-      await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
-              Object {
-                "__legacyCompat": Object {
-                  "license": Object {
-                    "features$": Observable {
-                      "_isScalar": false,
-                      "operator": MapOperator {
-                        "project": [Function],
-                        "thisArg": undefined,
-                      },
-                      "source": Observable {
-                        "_isScalar": false,
-                        "_subscribe": [Function],
-                      },
-                    },
-                    "getFeatures": [Function],
-                    "isEnabled": [Function],
-                  },
-                  "registerLegacyAPI": [Function],
-                  "registerPrivilegesWithCluster": [Function],
-                },
-                "authc": Object {
-                  "createAPIKey": [Function],
-                  "getCurrentUser": [Function],
-                  "getSessionInfo": [Function],
-                  "grantAPIKeyAsInternalUser": [Function],
-                  "invalidateAPIKey": [Function],
-                  "invalidateAPIKeyAsInternalUser": [Function],
-                  "isAuthenticated": [Function],
-                  "isProviderTypeEnabled": [Function],
-                  "login": [Function],
-                  "logout": [Function],
-                },
-                "authz": Object {
-                  "actions": Actions {
-                    "api": ApiActions {
-                      "prefix": "api:version:",
-                    },
-                    "app": AppActions {
-                      "prefix": "app:version:",
-                    },
-                    "login": "login:",
-                    "savedObject": SavedObjectActions {
-                      "prefix": "saved_object:version:",
-                    },
-                    "space": SpaceActions {
-                      "prefix": "space:version:",
-                    },
-                    "ui": UIActions {
-                      "prefix": "ui:version:",
-                    },
-                    "version": "version:version",
-                    "versionNumber": "version",
-                  },
-                  "checkPrivilegesWithRequest": [Function],
-                  "mode": Object {
-                    "useRbacForRequest": [Function],
-                  },
-                },
-                "registerSpacesService": [Function],
-              }
-            `);
+    it('exposes proper contract', () => {
+      expect(plugin.setup(mockCoreSetup, mockSetupDependencies)).toMatchInlineSnapshot(`
+        Object {
+          "audit": Object {
+            "asScoped": [Function],
+            "getLogger": [Function],
+          },
+          "authc": Object {
+            "getCurrentUser": [Function],
+          },
+          "authz": Object {
+            "actions": Actions {
+              "alerting": AlertingActions {
+                "prefix": "alerting:version:",
+              },
+              "api": ApiActions {
+                "prefix": "api:version:",
+              },
+              "app": AppActions {
+                "prefix": "app:version:",
+              },
+              "login": "login:",
+              "savedObject": SavedObjectActions {
+                "prefix": "saved_object:version:",
+              },
+              "space": SpaceActions {
+                "prefix": "space:version:",
+              },
+              "ui": UIActions {
+                "prefix": "ui:version:",
+              },
+              "version": "version:version",
+              "versionNumber": "version",
+            },
+            "checkPrivilegesDynamicallyWithRequest": [Function],
+            "checkPrivilegesWithRequest": [Function],
+            "mode": Object {
+              "useRbacForRequest": [Function],
+            },
+          },
+          "license": Object {
+            "features$": Observable {
+              "_isScalar": false,
+              "operator": MapOperator {
+                "project": [Function],
+                "thisArg": undefined,
+              },
+              "source": Observable {
+                "_isScalar": false,
+                "_subscribe": [Function],
+              },
+            },
+            "getFeatures": [Function],
+            "getType": [Function],
+            "isEnabled": [Function],
+            "isLicenseAvailable": [Function],
+          },
+        }
+      `);
     });
+  });
 
-    it('properly creates cluster client instance', async () => {
-      await plugin.setup(mockCoreSetup, mockDependencies);
-
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
-        plugins: [elasticsearchClientPlugin],
-      });
+  describe('start()', () => {
+    it('exposes proper contract', async () => {
+      await plugin.setup(mockCoreSetup, mockSetupDependencies);
+      expect(plugin.start(mockCoreStart, mockStartDependencies)).toMatchInlineSnapshot(`
+        Object {
+          "authc": Object {
+            "apiKeys": Object {
+              "areAPIKeysEnabled": [Function],
+              "create": [Function],
+              "grantAsInternalUser": [Function],
+              "invalidate": [Function],
+              "invalidateAsInternalUser": [Function],
+            },
+            "getCurrentUser": [Function],
+          },
+          "authz": Object {
+            "actions": Actions {
+              "alerting": AlertingActions {
+                "prefix": "alerting:version:",
+              },
+              "api": ApiActions {
+                "prefix": "api:version:",
+              },
+              "app": AppActions {
+                "prefix": "app:version:",
+              },
+              "login": "login:",
+              "savedObject": SavedObjectActions {
+                "prefix": "saved_object:version:",
+              },
+              "space": SpaceActions {
+                "prefix": "space:version:",
+              },
+              "ui": UIActions {
+                "prefix": "ui:version:",
+              },
+              "version": "version:version",
+              "versionNumber": "version",
+            },
+            "checkPrivilegesDynamicallyWithRequest": [Function],
+            "checkPrivilegesWithRequest": [Function],
+            "mode": Object {
+              "useRbacForRequest": [Function],
+            },
+          },
+        }
+      `);
     });
   });
 
   describe('stop()', () => {
-    beforeEach(async () => await plugin.setup(mockCoreSetup, mockDependencies));
+    beforeEach(async () => await plugin.setup(mockCoreSetup, mockSetupDependencies));
 
-    it('properly closes cluster client instance', async () => {
-      expect(mockClusterClient.close).not.toHaveBeenCalled();
-
+    it('close does not throw', async () => {
       await plugin.stop();
-
-      expect(mockClusterClient.close).toHaveBeenCalledTimes(1);
     });
   });
 });

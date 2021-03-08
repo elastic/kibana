@@ -1,23 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'kibana/server';
-import { RouteDependencies } from '../../types';
+import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'kibana/server';
+import type { RouteDependencies, WatcherRequestHandlerContext } from '../../types';
 
-export const licensePreRoutingFactory = <P, Q, B>(
+export const licensePreRoutingFactory = <P, Q, B, Context extends WatcherRequestHandlerContext>(
   { getLicenseStatus }: RouteDependencies,
-  handler: RequestHandler<P, Q, B>
+  handler: RequestHandler<P, Q, B, Context>
 ) => {
   return function licenseCheck(
-    ctx: RequestHandlerContext,
+    ctx: Context,
     request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) {

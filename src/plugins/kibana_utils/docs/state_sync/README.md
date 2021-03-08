@@ -3,6 +3,18 @@
 State syncing utilities are a set of helpers for syncing your application state
 with URL or browser storage.
 
+**When you should consider using state syncing utils:**
+
+- You want to sync your application state with URL in similar manner analyze applications do that.
+- You want to follow platform's <<history-and-location, working with browser history and location best practices>> out of the box.
+- You want to support `state:storeInSessionStore` escape hatch for URL overflowing out of the box.
+- You should also consider using them if you'd like to serialize state to different (not `rison`) format. Utils are composable, and you can implement your own `storage`.
+- In case you want to sync part of your state with URL, but other part of it with browser storage.
+
+**When you shouldn't look into using state syncing utils:**
+
+- Adding a query param flag or simple key/value to URL
+
 They are designed to work together with [state containers](../state_containers). But state containers are not required.
 
 State syncing utilities include:
@@ -42,9 +54,9 @@ stateContainer.set({ count: 2 });
 stop();
 ```
 
-## Demos Plugins
+## Demo Plugins
 
-See demos plugins [here](../../../../../examples/state_containers_examples).
+See demo plugins [here](../../../../../examples/state_containers_examples).
 
 To run them, start kibana with `--run-examples` flag.
 
@@ -58,3 +70,4 @@ To run them, start kibana with `--run-examples` flag.
 - [On-the-fly state migrations](./on_fly_state_migrations.md).
 - [syncStates helper](./sync_states.md).
 - [Helpers for Data plugin (syncing TimeRange, RefreshInterval and Filters)](./data_plugin_helpers.md).
+- [Error handling](./error_handling.md)

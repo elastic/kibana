@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as runtimeTypes from 'io-ts';
@@ -9,10 +10,11 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
-import { RequestHandlerContext } from 'src/core/server';
+import { inRange } from 'lodash';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { defaultSourceConfiguration } from './defaults';
-import { NotFoundError } from './errors';
-import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
+import { AnomalyThresholdRangeError, NotFoundError } from './errors';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
@@ -20,12 +22,16 @@ import {
   pickSavedSourceConfiguration,
   SourceConfigurationSavedObjectRuntimeType,
   StaticSourceConfigurationRuntimeType,
-} from './types';
+  InfraSource,
+} from '../../../common/http_api/source_api';
 import { InfraConfig } from '../../../server';
 
 interface Libs {
   config: InfraConfig;
 }
+
+// extract public interface
+export type IInfraSources = Pick<InfraSources, keyof InfraSources>;
 
 export class InfraSources {
   private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
@@ -35,11 +41,13 @@ export class InfraSources {
     this.libs = libs;
   }
 
-  public async getSourceConfiguration(requestContext: RequestHandlerContext, sourceId: string) {
+  public async getSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
-
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
-      .then(internalSourceConfiguration => ({
+      .then((internalSourceConfiguration) => ({
         id: sourceId,
         version: undefined,
         updatedAt: undefined,
@@ -49,9 +57,9 @@ export class InfraSources {
           internalSourceConfiguration
         ),
       }))
-      .catch(err =>
+      .catch((err) =>
         err instanceof NotFoundError
-          ? this.getSavedSourceConfiguration(requestContext, sourceId).then(result => ({
+          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then((result) => ({
               ...result,
               configuration: mergeSourceConfiguration(
                 staticDefaultSourceConfiguration,
@@ -60,8 +68,8 @@ export class InfraSources {
             }))
           : Promise.reject(err)
       )
-      .catch(err =>
-        requestContext.core.savedObjects.client.errors.isNotFoundError(err)
+      .catch((err) =>
+        savedObjectsClient.errors.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
               version: undefined,
@@ -75,12 +83,14 @@ export class InfraSources {
     return savedSourceConfiguration;
   }
 
-  public async getAllSourceConfigurations(requestContext: RequestHandlerContext) {
+  public async getAllSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
-    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(requestContext);
+    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(
+      savedObjectsClient
+    );
 
-    return savedSourceConfigurations.map(savedSourceConfiguration => ({
+    return savedSourceConfigurations.map((savedSourceConfiguration) => ({
       ...savedSourceConfiguration,
       configuration: mergeSourceConfiguration(
         staticDefaultSourceConfiguration,
@@ -90,11 +100,14 @@ export class InfraSources {
   }
 
   public async createSourceConfiguration(
-    requestContext: RequestHandlerContext,
+    savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
     source: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
+    const { anomalyThreshold } = source;
+    if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
+      throw new AnomalyThresholdRangeError('anomalyThreshold must be 1-100');
 
     const newSourceConfiguration = mergeSourceConfiguration(
       staticDefaultSourceConfiguration,
@@ -102,8 +115,8 @@ export class InfraSources {
     );
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await requestContext.core.savedObjects.client.create(
-        infraSourceConfigurationSavedObjectType,
+      await savedObjectsClient.create(
+        infraSourceConfigurationSavedObjectName,
         pickSavedSourceConfiguration(newSourceConfiguration) as any,
         { id: sourceId }
       )
@@ -118,21 +131,28 @@ export class InfraSources {
     };
   }
 
-  public async deleteSourceConfiguration(requestContext: RequestHandlerContext, sourceId: string) {
-    await requestContext.core.savedObjects.client.delete(
-      infraSourceConfigurationSavedObjectType,
-      sourceId
-    );
+  public async deleteSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ) {
+    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectName, sourceId);
   }
 
   public async updateSourceConfiguration(
-    requestContext: RequestHandlerContext,
+    savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
     sourceProperties: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
+    const { anomalyThreshold } = sourceProperties;
 
-    const { configuration, version } = await this.getSourceConfiguration(requestContext, sourceId);
+    if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
+      throw new AnomalyThresholdRangeError('anomalyThreshold must be 1-100');
+
+    const { configuration, version } = await this.getSourceConfiguration(
+      savedObjectsClient,
+      sourceId
+    );
 
     const updatedSourceConfigurationAttributes = mergeSourceConfiguration(
       configuration,
@@ -140,8 +160,8 @@ export class InfraSources {
     );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await requestContext.core.savedObjects.client.update(
-        infraSourceConfigurationSavedObjectType,
+      await savedObjectsClient.update(
+        infraSourceConfigurationSavedObjectName,
         sourceId,
         pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
         {
@@ -195,20 +215,20 @@ export class InfraSources {
   }
 
   private async getSavedSourceConfiguration(
-    requestContext: RequestHandlerContext,
+    savedObjectsClient: SavedObjectsClientContract,
     sourceId: string
   ) {
-    const savedObject = await requestContext.core.savedObjects.client.get(
-      infraSourceConfigurationSavedObjectType,
+    const savedObject = await savedObjectsClient.get(
+      infraSourceConfigurationSavedObjectName,
       sourceId
     );
 
     return convertSavedObjectToSavedSourceConfiguration(savedObject);
   }
 
-  private async getAllSavedSourceConfigurations(requestContext: RequestHandlerContext) {
-    const savedObjects = await requestContext.core.savedObjects.client.find({
-      type: infraSourceConfigurationSavedObjectType,
+  private async getAllSavedSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
+    const savedObjects = await savedObjectsClient.find({
+      type: infraSourceConfigurationSavedObjectName,
     });
 
     return savedObjects.saved_objects.map(convertSavedObjectToSavedSourceConfiguration);
@@ -234,14 +254,14 @@ const mergeSourceConfiguration = (
 export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
   pipe(
     SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
-    map(savedSourceConfiguration => ({
+    map((savedSourceConfiguration) => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       origin: 'stored' as 'stored',
       configuration: savedSourceConfiguration.attributes,
     })),
-    fold(errors => {
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );

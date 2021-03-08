@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -52,10 +54,9 @@ export const DynamicMappingSection = () => (
     }
   >
     <FormDataProvider pathsToWatch={['dynamicMapping.enabled', 'dynamicMapping.date_detection']}>
-      {formData => {
+      {(formData) => {
         const {
-          'dynamicMapping.enabled': enabled,
-          'dynamicMapping.date_detection': dateDetection,
+          dynamicMapping: { enabled, date_detection: dateDetection },
         } = formData;
 
         if (enabled === undefined) {
@@ -67,6 +68,7 @@ export const DynamicMappingSection = () => (
           return (
             <>
               <UseField
+                key="numericDetectionToggle"
                 path="dynamicMapping.numeric_detection"
                 componentProps={{ 'data-test-subj': 'numericDetection' }}
               />
@@ -87,6 +89,7 @@ export const DynamicMappingSection = () => (
         } else {
           return (
             <UseField
+              key="throwErrorsCheckBox"
               path="dynamicMapping.throwErrorsForUnmappedFields"
               component={CheckBoxField}
             />

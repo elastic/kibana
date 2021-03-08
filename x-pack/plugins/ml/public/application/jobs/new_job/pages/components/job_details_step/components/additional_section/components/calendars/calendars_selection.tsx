@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
@@ -22,10 +23,19 @@ import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { ml } from '../../../../../../../../../services/ml_api_service';
+import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
 import { Calendar } from '../../../../../../../../../../../common/types/calendars';
+import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
+import { ML_PAGES } from '../../../../../../../../../../../common/constants/ml_url_generator';
 
 export const CalendarsSelection: FC = () => {
+  const {
+    services: {
+      application: { getUrlForApp },
+    },
+  } = useMlKibana();
+
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>(jobCreator.calendars);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<Calendar>>>(
@@ -37,10 +47,10 @@ export const CalendarsSelection: FC = () => {
   async function loadCalendars() {
     setIsLoading(true);
     const calendars = (await ml.calendars()).filter(
-      c => c.job_ids.includes(GLOBAL_CALENDAR) === false
+      (c) => c.job_ids.includes(GLOBAL_CALENDAR) === false
     );
-    setOptions(calendars.map(c => ({ label: c.calendar_id, value: c })));
-    setSelectedOptions(selectedCalendars.map(c => ({ label: c.calendar_id, value: c })));
+    setOptions(calendars.map((c) => ({ label: c.calendar_id, value: c })));
+    setSelectedOptions(selectedCalendars.map((c) => ({ label: c.calendar_id, value: c })));
     setIsLoading(false);
   }
 
@@ -58,13 +68,15 @@ export const CalendarsSelection: FC = () => {
     options,
     selectedOptions,
     isLoading,
-    onChange: optionsIn => {
+    onChange: (optionsIn) => {
       setSelectedOptions(optionsIn);
-      setSelectedCalendars(optionsIn.map(o => o.value!));
+      setSelectedCalendars(optionsIn.map((o) => o.value!));
     },
   };
 
-  const manageCalendarsHref = '#/settings/calendars_list';
+  const manageCalendarsHref = getUrlForApp(PLUGIN_ID, {
+    path: ML_PAGES.CALENDARS_MANAGE,
+  });
 
   return (
     <Description>

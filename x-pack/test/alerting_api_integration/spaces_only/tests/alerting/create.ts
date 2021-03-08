@@ -1,12 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { checkAAD, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import {
+  checkAAD,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+  getConsumerUnauthorizedErrorMessage,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,7 +35,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     it('should handle create alert request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'MY action',
@@ -39,7 +46,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -54,7 +61,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         );
 
       expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
       expect(response.body).to.eql({
         id: response.body.id,
         name: 'abc',
@@ -69,7 +76,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         ],
         enabled: true,
         alertTypeId: 'test.noop',
-        consumer: 'bar',
+        consumer: 'alertsFixture',
         params: {},
         createdBy: null,
         schedule: { interval: '1m' },
@@ -77,13 +84,16 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
+        notifyWhen: 'onThrottleInterval',
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
+        executionStatus: response.body.executionStatus,
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+      expect(Date.parse(response.body.updatedAt)).to.eql(Date.parse(response.body.createdAt));
 
       expect(typeof response.body.scheduledTaskId).to.be('string');
       const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
@@ -102,14 +112,101 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should allow providing custom saved object ids (uuid v1)', async () => {
+      const customId = '09570bb0-6299-11eb-8fde-9fe5ce6ea450';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData());
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
+      expect(response.body.id).to.eql(customId);
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: customId,
+      });
+    });
+
+    it('should allow providing custom saved object ids (uuid v4)', async () => {
+      const customId = 'b3bc6d83-3192-4ffd-9702-ad4fb88617ba';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData());
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
+      expect(response.body.id).to.eql(customId);
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: customId,
+      });
+    });
+
+    it('should not allow providing simple custom ids (non uuid)', async () => {
+      const customId = '1';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData());
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.: Bad Request',
+      });
+    });
+
+    it('should return 409 when document with id already exists', async () => {
+      const customId = '5031f8f0-629a-11eb-b500-d1931a8e5df7';
+      const createdAlertResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlertResponse.body.id, 'alert', 'alerts');
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(409);
+    });
+
+    it('should handle create alert request appropriately when consumer is unknown', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ consumer: 'some consumer patrick invented' }));
+
+      expect(response.status).to.eql(403);
+      expect(response.body).to.eql({
+        error: 'Forbidden',
+        message: getConsumerUnauthorizedErrorMessage(
+          'create',
+          'test.noop',
+          'some consumer patrick invented'
+        ),
+        statusCode: 403,
+      });
+    });
+
     it('should handle create alert request appropriately when an alert is disabled ', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }));
 
       expect(response.status).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
       expect(response.body.scheduledTaskId).to.eql(undefined);
     });
   });

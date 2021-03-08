@@ -1,23 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { TelemetryPluginConfig } from '../plugin';
@@ -26,6 +14,7 @@ interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
   http: CoreStart['http'];
   notifications: CoreStart['notifications'];
+  currentKibanaVersion: string;
   reportOptInStatusChange?: boolean;
 }
 
@@ -36,15 +25,19 @@ export class TelemetryService {
   private readonly defaultConfig: TelemetryPluginConfig;
   private updatedConfig?: TelemetryPluginConfig;
 
+  public readonly currentKibanaVersion: string;
+
   constructor({
     config,
     http,
     notifications,
+    currentKibanaVersion,
     reportOptInStatusChange = true,
   }: TelemetryServiceConstructor) {
     this.defaultConfig = config;
     this.reportOptInStatusChange = reportOptInStatusChange;
     this.notifications = notifications;
+    this.currentKibanaVersion = currentKibanaVersion;
     this.http = http;
   }
 
@@ -87,9 +80,25 @@ export class TelemetryService {
     return telemetryUrl;
   };
 
-  public getUserHasSeenOptedInNotice = () => {
-    return this.config.telemetryNotifyUserAboutOptInDefault || false;
-  };
+  /**
+   * Returns if an user should be shown the notice about Opt-In/Out telemetry.
+   * The decision is made based on whether any user has already dismissed the message or
+   * the user can't actually change the settings (in which case, there's no point on bothering them)
+   */
+  public getUserShouldSeeOptInNotice(): boolean {
+    return (
+      (this.config.telemetryNotifyUserAboutOptInDefault && this.config.userCanChangeSettings) ??
+      false
+    );
+  }
+
+  public get userCanChangeSettings() {
+    return this.config.userCanChangeSettings ?? false;
+  }
+
+  public set userCanChangeSettings(userCanChangeSettings: boolean) {
+    this.config = { ...this.config, userCanChangeSettings };
+  }
 
   public getIsOptedIn = () => {
     return this.isOptedIn;
@@ -100,17 +109,9 @@ export class TelemetryService {
   };
 
   public fetchTelemetry = async ({ unencrypted = false } = {}) => {
-    const now = moment();
     return this.http.post('/api/telemetry/v2/clusters/_stats', {
       body: JSON.stringify({
         unencrypted,
-        timeRange: {
-          min: now
-            .clone() // Need to clone it to avoid mutation (and max being the same value)
-            .subtract(20, 'minutes')
-            .toISOString(),
-          max: now.toISOString(),
-        },
       }),
     });
   };
@@ -122,11 +123,15 @@ export class TelemetryService {
     }
 
     try {
-      await this.http.post('/api/telemetry/v2/optIn', {
+      // Report the option to the Kibana server to store the settings.
+      // It returns the encrypted update to send to the telemetry cluster [{cluster_uuid, opt_in_status}]
+      const optInPayload = await this.http.post<string[]>('/api/telemetry/v2/optIn', {
         body: JSON.stringify({ enabled: optedIn }),
       });
       if (this.reportOptInStatusChange) {
-        await this.reportOptInStatus(optedIn);
+        // Use the response to report about the change to the remote telemetry cluster.
+        // If it's opt-out, this will be the last communication to the remote service.
+        await this.reportOptInStatus(optInPayload);
       }
       this.isOptedIn = optedIn;
     } catch (err) {
@@ -162,7 +167,11 @@ export class TelemetryService {
     }
   };
 
-  private reportOptInStatus = async (OptInStatus: boolean): Promise<void> => {
+  /**
+   * Pushes the encrypted payload [{cluster_uuid, opt_in_status}] to the remote telemetry service
+   * @param optInPayload [{cluster_uuid, opt_in_status}] encrypted by the server into an array of strings
+   */
+  private reportOptInStatus = async (optInPayload: string[]): Promise<void> => {
     const telemetryOptInStatusUrl = this.getOptInStatusUrl();
 
     try {
@@ -170,8 +179,9 @@ export class TelemetryService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Elastic-Stack-Version': this.currentKibanaVersion,
         },
-        body: JSON.stringify({ enabled: OptInStatus }),
+        body: JSON.stringify(optInPayload),
       });
     } catch (err) {
       // Sending the ping is best-effort. Telemetry tries to send the ping once and discards it immediately if sending fails.

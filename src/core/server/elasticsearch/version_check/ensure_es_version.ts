@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -29,10 +18,10 @@ import {
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
-import { APICaller } from '..';
+import type { ElasticsearchClient } from '../client';
 
 export interface PollEsNodesVersionOptions {
-  callWithInternalUser: APICaller;
+  internalClient: ElasticsearchClient;
   log: Logger;
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;
@@ -72,7 +61,7 @@ export function mapNodesVersionCompatibility(
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
-  if (Object.keys(nodesInfo.nodes).length === 0) {
+  if (Object.keys(nodesInfo.nodes ?? {}).length === 0) {
     return {
       isCompatible: false,
       message: 'Unable to retrieve version information from Elasticsearch nodes.',
@@ -83,32 +72,32 @@ export function mapNodesVersionCompatibility(
   }
   const nodes = Object.keys(nodesInfo.nodes)
     .sort() // Sorting ensures a stable node ordering for comparison
-    .map(key => nodesInfo.nodes[key])
-    .map(node => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
+    .map((key) => nodesInfo.nodes[key])
+    .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
 
   // Aggregate incompatible ES nodes.
   const incompatibleNodes = nodes.filter(
-    node => !esVersionCompatibleWithKibana(node.version, kibanaVersion)
+    (node) => !esVersionCompatibleWithKibana(node.version, kibanaVersion)
   );
 
   // Aggregate ES nodes which should prompt a Kibana upgrade. It's acceptable
   // if ES and Kibana versions are not the same as long as they are not
   // incompatible, but we should warn about it.
   // Ignore version qualifiers https://github.com/elastic/elasticsearch/issues/36859
-  const warningNodes = nodes.filter(node => !esVersionEqualsKibana(node.version, kibanaVersion));
+  const warningNodes = nodes.filter((node) => !esVersionEqualsKibana(node.version, kibanaVersion));
 
   // Note: If incompatible and warning nodes are present `message` only contains
   // an incompatibility notice.
   let message;
   if (incompatibleNodes.length > 0) {
-    const incompatibleNodeNames = incompatibleNodes.map(node => node.name).join(', ');
+    const incompatibleNodeNames = incompatibleNodes.map((node) => node.name).join(', ');
     if (ignoreVersionMismatch) {
       message = `Ignoring version incompatibility between Kibana v${kibanaVersion} and the following Elasticsearch nodes: ${incompatibleNodeNames}`;
     } else {
       message = `This version of Kibana (v${kibanaVersion}) is incompatible with the following Elasticsearch nodes in your cluster: ${incompatibleNodeNames}`;
     }
   } else if (warningNodes.length > 0) {
-    const warningNodeNames = warningNodes.map(node => node.name).join(', ');
+    const warningNodeNames = warningNodes.map((node) => node.name).join(', ');
     message =
       `You're running Kibana ${kibanaVersion} with some different versions of ` +
       'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
@@ -137,7 +126,7 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
 }
 
 export const pollEsNodesVersion = ({
-  callWithInternalUser,
+  internalClient,
   log,
   kibanaVersion,
   ignoreVersionMismatch,
@@ -147,11 +136,12 @@ export const pollEsNodesVersion = ({
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
       return from(
-        callWithInternalUser('nodes.info', {
-          filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+        internalClient.nodes.info<NodesInfo>({
+          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
         })
       ).pipe(
-        catchError(_err => {
+        map(({ body }) => body),
+        catchError((_err) => {
           return of({ nodes: {} });
         })
       );

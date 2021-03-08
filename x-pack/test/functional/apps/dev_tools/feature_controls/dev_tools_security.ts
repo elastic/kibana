@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'console', 'security']);
-  const config = getService('config');
+  const PageObjects = getPageObjects(['common', 'console', 'security', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
@@ -64,7 +65,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Dev Tools navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Dev Tools', 'Management']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools']);
       });
 
       describe('console', () => {
@@ -144,8 +145,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows 'Dev Tools' navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Dev Tools', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Dev Tools']);
       });
 
       describe('console', () => {
@@ -229,25 +230,31 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dev Tools']);
       });
 
-      it(`navigating to console redirect to homepage`, async () => {
+      it(`navigating to console shows 403`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`navigating to search profiler redirect to homepage`, async () => {
+      it(`navigating to search profiler shows 403`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`navigating to grok debugger redirect to homepage`, async () => {
+      it(`navigating to grok debugger shows 403`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectForbidden();
       });
     });
   });

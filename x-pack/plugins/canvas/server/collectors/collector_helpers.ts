@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -27,8 +28,8 @@ export function collectFns(ast: ExpressionAstNode, cb: (functionName: string) =>
     cb(cFunction);
 
     // recurse the arguments and update the set along the way
-    Object.keys(cArguments).forEach(argName => {
-      cArguments[argName].forEach(subAst => {
+    Object.keys(cArguments).forEach((argName) => {
+      cArguments[argName].forEach((subAst) => {
         if (subAst != null) {
           collectFns(subAst, cb);
         }

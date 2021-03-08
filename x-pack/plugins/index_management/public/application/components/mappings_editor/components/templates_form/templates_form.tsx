@@ -1,28 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useForm, Form, SerializerFunc, UseField, JsonEditorField } from '../../shared_imports';
-import { Types, useDispatch } from '../../mappings_state';
+import { MappingsTemplates } from '../../types';
+import { useDispatch } from '../../mappings_state_context';
 import { templatesFormSchema } from './templates_form_schema';
 import { documentationService } from '../../../../services/documentation';
 
-type MappingsTemplates = Types['MappingsTemplates'];
-
 interface Props {
-  defaultValue?: MappingsTemplates;
+  value?: MappingsTemplates;
 }
 
 const stringifyJson = (json: { [key: string]: any }) =>
   Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
 
-const formSerializer: SerializerFunc<MappingsTemplates> = formData => {
+const formSerializer: SerializerFunc<MappingsTemplates | undefined> = (formData) => {
   const { dynamicTemplates } = formData;
 
   let parsedTemplates;
@@ -34,15 +35,17 @@ const formSerializer: SerializerFunc<MappingsTemplates> = formData => {
       parsedTemplates = [parsedTemplates];
     }
   } catch {
-    parsedTemplates = [];
+    // Silently swallow errors
   }
 
   return {
-    dynamic_templates: parsedTemplates,
+    dynamic_templates:
+      Array.isArray(parsedTemplates) && parsedTemplates.length > 0 ? parsedTemplates : [],
   };
 };
 
 const formDeserializer = (formData: { [key: string]: any }) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { dynamic_templates } = formData;
 
   return {
@@ -50,44 +53,47 @@ const formDeserializer = (formData: { [key: string]: any }) => {
   };
 };
 
-export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
-  const didMountRef = useRef(false);
+export const TemplatesForm = React.memo(({ value }: Props) => {
+  const isMounted = useRef(false);
 
-  const { form } = useForm<MappingsTemplates>({
+  const { form } = useForm<any>({
     schema: templatesFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
-    defaultValue,
+    defaultValue: value,
   });
+  const { subscribe, getFormData, submit: submitForm, reset } = form;
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const subscription = form.subscribe(({ data, isValid, validate }) => {
+    const subscription = subscribe(({ data, isValid, validate }) => {
       dispatch({
         type: 'templates.update',
-        value: { data, isValid, validate, submitForm: form.submit },
+        value: { data, isValid, validate, submitForm },
       });
     });
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [subscribe, dispatch, submitForm]);
 
   useEffect(() => {
-    if (didMountRef.current) {
-      // If the defaultValue has changed (it probably means that we have loaded a new JSON)
+    if (isMounted.current) {
+      // If the value has changed (it probably means that we have loaded a new JSON)
       // we need to reset the form to update the fields values.
-      form.reset({ resetValues: true });
-    } else {
-      // Avoid reseting the form on component mount.
-      didMountRef.current = true;
+      reset({ resetValues: true, defaultValue: value });
     }
-  }, [defaultValue]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value, reset]);
 
   useEffect(() => {
+    isMounted.current = true;
+
     return () => {
+      isMounted.current = false;
+
       // On unmount => save in the state a snapshot of the current form data.
-      dispatch({ type: 'templates.save' });
+      const dynamicTemplatesData = getFormData();
+      dispatch({ type: 'templates.save', value: dynamicTemplatesData });
     };
-  }, [dispatch]);
+  }, [getFormData, dispatch]);
 
   return (
     <div data-test-subj="dynamicTemplates">

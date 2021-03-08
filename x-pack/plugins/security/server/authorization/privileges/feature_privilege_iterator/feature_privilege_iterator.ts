@@ -1,20 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { LicenseType } from '../../../../../licensing/server';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
 interface IteratorOptions {
   augmentWithSubFeaturePrivileges: boolean;
+  licenseType: LicenseType;
   predicate?: (privilegeId: string, privilege: FeatureKibanaPrivileges) => boolean;
 }
 
 export function* featurePrivilegeIterator(
-  feature: Feature,
+  feature: KibanaFeature,
   options: IteratorOptions
 ): IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }> {
   for (const entry of Object.entries(feature.privileges ?? {})) {
@@ -25,7 +29,10 @@ export function* featurePrivilegeIterator(
     }
 
     if (options.augmentWithSubFeaturePrivileges) {
-      yield { privilegeId, privilege: mergeWithSubFeatures(privilegeId, privilege, feature) };
+      yield {
+        privilegeId,
+        privilege: mergeWithSubFeatures(privilegeId, privilege, feature, options.licenseType),
+      };
     } else {
       yield { privilegeId, privilege };
     }
@@ -35,10 +42,11 @@ export function* featurePrivilegeIterator(
 function mergeWithSubFeatures(
   privilegeId: string,
   privilege: FeatureKibanaPrivileges,
-  feature: Feature
+  feature: KibanaFeature,
+  licenseType: LicenseType
 ) {
   const mergedConfig = _.cloneDeep(privilege);
-  for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
+  for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, licenseType)) {
     if (subFeaturePrivilege.includeIn !== 'read' && subFeaturePrivilege.includeIn !== privilegeId) {
       continue;
     }
@@ -72,11 +80,19 @@ function mergeWithSubFeatures(
       mergedConfig.savedObject.read,
       subFeaturePrivilege.savedObject.read
     );
+
+    mergedConfig.alerting = {
+      all: mergeArrays(mergedConfig.alerting?.all ?? [], subFeaturePrivilege.alerting?.all ?? []),
+      read: mergeArrays(
+        mergedConfig.alerting?.read ?? [],
+        subFeaturePrivilege.alerting?.read ?? []
+      ),
+    };
   }
   return mergedConfig;
 }
 
-function mergeArrays(input1: string[] | undefined, input2: string[] | undefined) {
+function mergeArrays(input1: readonly string[] | undefined, input2: readonly string[] | undefined) {
   const first = input1 ?? [];
   const second = input2 ?? [];
   return Array.from(new Set([...first, ...second]));

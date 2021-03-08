@@ -1,0 +1,282 @@
+[[dashboard]]
+= Dashboard
+
+[partintro]
+--
+**_Visualize your data with dashboards._**
+
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<index-patterns, index patterns>> into a collection of panels 
+that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. Configure each panel to display your data in a chart, table, map, and more, 
+then compare the panels side-by-side to identify the patterns and connections in your data. 
+
+[role="screenshot"]
+image:images/Dashboard_example.png[Example dashboard]
+
+[[tsvb]]
+
+Dashboards support many types of panels, and provide several editors that you can use to create panels.
+
+[cols="2"]
+|===
+
+| <<create-panels-with-lens,Lens>>
+| The drag and drop editor that creates visualizations of your data. *Lens* is recommended for most users.
+
+| <<maps,Maps>>
+| Create beautiful displays of your geographical data.
+
+| <<add-panels-with-advanced-editors,Advanced editors>>
+| Visualize time series data with *TSVB* or *Timelion*, or create a custom visualization using *Vega* or *Vega-Lite*.
+
+| <<add-aggregation-based-visualization-panels,Aggregation-based visualization panels>>
+| Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
+
+| <<enhance-dashboards,Tools>>
+| Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
+
+| <<save-your-search,Saved search table>>
+| Display a previously saved search table from <<discover, *Discover*>>. The table results are not aggregated.
+
+| <<xpack-ml-anomalies,Machine Learning>>
+| Display a previously saved visualization of <<xpack-ml, machine learning>> anomaly detection data.
+
+|===
+
+[float]
+[[create-dashboards]]
+== Create dashboards
+
+Dashboards provide you with the space where you add panels of your data.
+
+[float]
+[[dashboard-minimum-requirements]]
+=== Minimum requirements
+
+To create dashboards, you must meet the minimum requirements. 
+
+* If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
+
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+
+* Have an understanding of {ref}/documents-indices.html[{es} documents and indices].
+
+* When the read-only indicator appears, you have insufficient privileges
+to create or save dashboards. The options to create and save dashboards are not visible. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
+
+[float]
+[[open-the-dashboard]]
+=== Open the dashboard
+
+Begin with an empty dashboard, or open an existing dashboard. 
+
+. Open the main menu, then click *Dashboard*.
+
+. On the *Dashboards* page, choose one of the following options:
+
+* To start with an empty dashboard, click *Create dashboard*.
+
+* To open an existing dashboard, click the dashboard *Title* you want to open.
+
+[float]
+[[create-panels-with-lens]]
+=== Create panels
+
+Choose the type of panel you want to create, then save the panel to the dashboard.
+
+. From the dashboard, choose one of the following options:
+
+* To create a panel, click *Create panel*, then click the panel type on the *New visualization* window. *Lens* is recommended for most users. 
+
+* To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
+
+. To save the panel, click *Save* in the toolbar, then configure the *Save visualization* options.
+
+.. Enter the *Title* and optional *Description*.
+
+.. From the *Tags* drop down, select any applicable tags. 
+
+.. Select *Add to Dashboard after saving*.
+
+.. Click *Save and return*.
+
+TIP: To access your saved panels, open the main menu, then click *Visualize Library*.
+
+[float]
+[[arrange-panels]]
+[[moving-containers]]
+[[resizing-containers]]
+=== Arrange panels
+
+To compare the data in the panels, arrange the panels on the dashboard, or remove the panel from the dashboard.
+
+. From the toolbar, click *Edit*, then use the following options:
+
+* To move, click and hold the panel header, then drag to the new location.
+
+* To resize, click the resize control, then drag to the new dimensions.
+
+* To delete, open the panel menu, then select *Delete from dashboard*.
+
+. To save your changes, click *Save* in the toolbar.
+
+[float]
+[[search-or-filter-your-data]]
+=== Search or filter your data
+
+{kib} provides you with several ways to search your data and apply {es} filters. You can combine the filters with any panel-specific
+filters to display the data want to you see.
+
+[role="screenshot"]
+image::dashboard/images/dashboard-filters.png[Labeled interface with semi-structured search, time filter, and additional filters]
+
+Semi-structured search::
+  Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>.
+  Type a search term to match across all fields, or begin typing a field name to
+  get prompted with field names and operators you can use to build a structured query. 
+  For example, in the sample web logs data, this query displays data only for the US:
+
+  . Enter `g`, then select *geo.source*.
+  . Select *equals some value* and *US*, then click *Update*.
+  . For a more complex search, try:
+
+[source,text]
+-------------------
+geo.src : "US" and url.keyword : "https://www.elastic.co/downloads/beats/metricbeat"
+-------------------
+
+Time filter::
+  Dashboards have a global time filter that restricts the data that displays, but individual panels can
+  override the global time filter.
+  
+  . To update the time filter, add a panel that displays time on the x-axis.
+
+  . Open the panel menu, then select *More > Customize time range*.
+
+  . On the *Customize panel time range* window, specify the new time range, then click *Add to panel*.
+  
+[role="screenshot"]
+image:images/time_range_per_panel.gif[Time range per dashboard panel]
+
+Additional filters with AND::
+  Add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, using a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL]. 
+  When you use more than one index pattern on a dashboard, the filter editor allows you to filter only one dashboard.
+  To dynamically add filters, click a series on a dashboard. For example, to filter the dashboard to display only ios data:
+  . Click *Add filter*.
+  . Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
+  . *Save* the filter.
+  . To remove the filter, click *x*.
+
+[float]
+[[clone-panels]]
+=== Clone panels
+
+To duplicate a panel and the configured functionality, clone the panel. Cloned panels continue to replicate all of the functionality from the original panel, 
+including renaming, editing, and cloning. When you clone a panel, the clone appears beside the original panel, and moves other panels to provide a space on the 
+dashboard.
+
+. From the toolbar, click *Edit*. 
+
+. Open the panel menu, then select *Clone panel*. 
++
+[role="screenshot"]
+image:images/clone_panel.gif[clone panel]
++
+To access the cloned panel, open the main menu, then click *Visualize Library*.
+
+[float]
+[[explore-the-underlying-data]]
+=== Explore the underlying documents
+
+Dashboard panels have a shortcut to view the underlying documents in *Discover*. Open the panel menu,
+then click *Explore underlying data*. *Discover* will be opened with the same time range and filters as the panel.
+
+[role="screenshot"]
+image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+
+A second shortcut is disabled by default, and creates a new interaction when clicking on a chart.
+This shortcut is similar to a <<drilldowns, drilldown>>, but can show you data for only one series.
+To enable the chart interactivity shortcut, add the following to kibana.yml:
+
+["source","yml"]
+-----------
+xpack.discoverEnhanced.actions.exploreDataInChart.enabled: true
+-----------
+
+[role="screenshot"]
+image::images/explore_data_in_chart.png[Explore underlying data from chart]
+
+TIP: *Explore underlying data* is available only for visualization panels with a single index pattern.
+
+[float]
+[[download-csv]]
+=== Download panel data as CSV
+
+Download panel data in a CSV file. You can download most panels in a CSV file, but there is a shortcut available
+for *Lens* panels.
+
+[role="xpack"]
+Lens::
+Open the *Lens* panel menu, then select *More > Download as CSV*.
++
+[role="screenshot"]
+image::images/download_csv_context_menu.png[Download as CSV from panel context menu]
+
+All panels::
+  . Open the panel menu, then select *Inspect*.
+
+  . Click *Download CSV*, then select the CSV type from the dropdown. The *Formatted CSV* contains
+    human-readable dates and numbers, while the *Unformatted* option is for computer use.
+
+[role="screenshot"]
+image:images/Dashboard_inspect.png[Inspect in dashboard]
+
+[float]
+[[save-the-dashboard]]
+=== Save the dashboard
+
+When you're finished making changes, save the dashboard.
+
+. From the toolbar, click *Save*.
+
+. Enter the dashboard *Title* and an optional *Description*.
+
+. From the *Tags* dropdown, select the tags you want to apply.
+
+. To save the time range, select *Store time with dashboard*.
+
+. Click *Save*.
+
+[float]
+[[share-the-dashboard]]
+=== Share the dashboard
+
+To share the dashboard with a larger audience, click *Share* in the toolbar, then choose one of the following options:
+
+* *Embed code* &mdash; Embed a fully interactive dashboard as an iframe on a web page. To access embedded dashboards, you can require users to
+log in using their {kib} credentials, via reverse proxy, or enable <<anonymous-access-and-embedding, anonymous access>>.
+
+* *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
+
+* *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
+
+* *PNG Reports* &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
+
+[float]
+[[import-dashboards]]
+=== Export the dashboard
+
+To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all references needed.
+
+--
+include::lens.asciidoc[]
+
+include::advanced-editors.asciidoc[]
+
+include::aggregation-based.asciidoc[]
+
+include::enhance-dashboards.asciidoc[]
+
+include::drilldowns.asciidoc[]
+
+include::aggregation-reference.asciidoc[]

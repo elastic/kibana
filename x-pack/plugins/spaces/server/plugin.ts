@@ -1,49 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { CoreSetup, Logger, PluginInitializerContext } from '../../../../src/core/server';
-import {
+import type { Observable } from 'rxjs';
+
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/server';
+import type { HomeServerPluginSetup } from 'src/plugins/home/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { createDefaultSpace } from './lib/create_default_space';
-// @ts-ignore
-import { AuditLogger } from '../../../../server/lib/audit_logger';
-import { SpacesAuditLogger } from './lib/audit_logger';
-import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { registerSpacesUsageCollector } from './usage_collection';
-import { SpacesService } from './spaces_service';
-import { SpacesServiceSetup } from './spaces_service';
-import { ConfigType } from './config';
+import type { LicensingPluginSetup } from '../../licensing/server';
+import { SpacesLicenseService } from '../common/licensing';
+import { setupCapabilities } from './capabilities';
+import type { ConfigType } from './config';
+import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
+import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
-import { setupCapabilities } from './capabilities';
 import { SpacesSavedObjectsService } from './saved_objects';
-
-/**
- * Describes a set of APIs that is available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  auditLogger: {
-    create: (pluginId: string) => AuditLogger;
-  };
-}
+import type { SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
+import { SpacesClientService } from './spaces_client';
+import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+import { SpacesService } from './spaces_service';
+import type { SpacesRequestHandlerContext } from './types';
+import { registerSpacesUsageCollector } from './usage_collection';
+import { UsageStatsService } from './usage_stats';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
-  security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }
@@ -54,130 +53,141 @@ export interface PluginsStart {
 
 export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
-  __legacyCompat: {
-    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
-    // TODO: We currently need the legacy plugin to inform this plugin when it is safe to create the default space.
-    // The NP does not have the equivilent ES connection/health/comapt checks that the legacy world does.
-    // See: https://github.com/elastic/kibana/issues/43456
-    createDefaultSpace: () => Promise<void>;
+  spacesClient: {
+    setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
+    registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
   };
 }
 
-export class Plugin {
-  private readonly pluginId = 'spaces';
+export interface SpacesPluginStart {
+  spacesService: SpacesServiceStart;
+}
 
+export class SpacesPlugin
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart> {
   private readonly config$: Observable<ConfigType>;
 
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
 
   private readonly log: Logger;
 
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
+  private readonly spacesLicenseService = new SpacesLicenseService();
 
-  private spacesAuditLogger?: SpacesAuditLogger;
-  private readonly getSpacesAuditLogger = () => {
-    if (!this.spacesAuditLogger) {
-      this.spacesAuditLogger = new SpacesAuditLogger(
-        this.getLegacyAPI().auditLogger.create(this.pluginId)
-      );
-    }
-    return this.spacesAuditLogger;
-  };
+  private readonly spacesClientService: SpacesClientService;
+
+  private readonly spacesService: SpacesService;
+
+  private spacesServiceStart?: SpacesServiceStart;
+
+  private defaultSpaceService?: DefaultSpaceService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
     this.kibanaIndexConfig$ = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
+    this.spacesService = new SpacesService();
+    this.spacesClientService = new SpacesClientService((message) => this.log.debug(message));
   }
 
-  public async start() {}
+  public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
+    const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
 
-  public async setup(
-    core: CoreSetup<PluginsStart>,
-    plugins: PluginsSetup
-  ): Promise<SpacesPluginSetup> {
-    const service = new SpacesService(this.log);
+    const spacesServiceSetup = this.spacesService.setup({
+      basePath: core.http.basePath,
+    });
 
-    const spacesService = await service.setup({
-      http: core.http,
+    const getSpacesService = () => {
+      if (!this.spacesServiceStart) {
+        throw new Error('spaces service has not been initialized!');
+      }
+      return this.spacesServiceStart;
+    };
+
+    const usageStatsServicePromise = new UsageStatsService(this.log).setup({
       getStartServices: core.getStartServices,
-      authorization: plugins.security ? plugins.security.authz : null,
-      getSpacesAuditLogger: this.getSpacesAuditLogger,
-      config$: this.config$,
     });
 
     const savedObjectsService = new SpacesSavedObjectsService();
-    savedObjectsService.setup({ core, spacesService });
+    savedObjectsService.setup({ core, getSpacesService });
 
-    const viewRouter = core.http.createRouter();
-    initSpacesViewsRoutes({
-      viewRouter,
-      cspHeader: core.http.csp.header,
+    const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
+
+    this.defaultSpaceService = new DefaultSpaceService();
+    this.defaultSpaceService.setup({
+      coreStatus: core.status,
+      getSavedObjects: async () => (await core.getStartServices())[0].savedObjects,
+      license$: plugins.licensing.license$,
+      spacesLicense: license,
+      logger: this.log,
     });
 
-    const externalRouter = core.http.createRouter();
+    initSpacesViewsRoutes({
+      httpResources: core.http.resources,
+      basePath: core.http.basePath,
+      logger: this.log,
+    });
+
+    const externalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initExternalSpacesApi({
       externalRouter,
       log: this.log,
       getStartServices: core.getStartServices,
-      getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
-      spacesService,
+      getSpacesService,
+      usageStatsServicePromise,
     });
 
-    const internalRouter = core.http.createRouter();
+    const internalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initInternalSpacesApi({
       internalRouter,
-      spacesService,
+      getSpacesService,
     });
 
     initSpacesRequestInterceptors({
       http: core.http,
       log: this.log,
-      spacesService,
+      getSpacesService,
       features: plugins.features,
     });
 
-    setupCapabilities(core, spacesService, this.log);
+    setupCapabilities(core, getSpacesService, this.log);
 
     if (plugins.usageCollection) {
       registerSpacesUsageCollector(plugins.usageCollection, {
         kibanaIndexConfig$: this.kibanaIndexConfig$,
         features: plugins.features,
         licensing: plugins.licensing,
+        usageStatsServicePromise,
       });
-    }
-
-    if (plugins.security) {
-      plugins.security.registerSpacesService(spacesService);
     }
 
     if (plugins.home) {
       plugins.home.tutorials.addScopedTutorialContextFactory(
-        createSpacesTutorialContextFactory(spacesService)
+        createSpacesTutorialContextFactory(getSpacesService)
       );
     }
 
     return {
-      spacesService,
-      __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-          this.legacyAPI = legacyAPI;
-        },
-        createDefaultSpace: async () => {
-          const [coreStart] = await core.getStartServices();
-          return await createDefaultSpace({
-            savedObjects: coreStart.savedObjects,
-          });
-        },
-      },
+      spacesClient: spacesClientSetup,
+      spacesService: spacesServiceSetup,
     };
   }
 
-  public stop() {}
+  public start(core: CoreStart) {
+    const spacesClientStart = this.spacesClientService.start(core);
+
+    this.spacesServiceStart = this.spacesService.start({
+      basePath: core.http.basePath,
+      spacesClientService: spacesClientStart,
+    });
+
+    return {
+      spacesService: this.spacesServiceStart,
+    };
+  }
+
+  public stop() {
+    if (this.defaultSpaceService) {
+      this.defaultSpaceService.stop();
+    }
+  }
 }

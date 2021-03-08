@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -23,12 +12,12 @@ import { promisify } from 'util';
 
 import Chalk from 'chalk';
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import stripAnsi from 'strip-ansi';
 
 import jestDiff from 'jest-diff';
 import jsonStable from 'json-stable-stringify';
-import { ascending, WorkerConfig } from '../common';
+import { ascending, CacheableWorkerConfig } from '../common';
 
 import { getMtimes } from './get_mtimes';
 import { getChanges } from './get_changes';
@@ -38,11 +27,18 @@ const OPTIMIZER_DIR = Path.dirname(require.resolve('../../package.json'));
 const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
 
 export function diffCacheKey(expected?: unknown, actual?: unknown) {
-  if (jsonStable(expected) === jsonStable(actual)) {
+  const expectedJson = jsonStable(expected, {
+    space: '  ',
+  });
+  const actualJson = jsonStable(actual, {
+    space: '  ',
+  });
+
+  if (expectedJson === actualJson) {
     return;
   }
 
-  return reformatJestDiff(jestDiff(expected, actual));
+  return reformatJestDiff(jestDiff(expectedJson, actualJson));
 }
 
 export function reformatJestDiff(diff: string | null) {
@@ -119,7 +115,7 @@ export function reformatJestDiff(diff: string | null) {
 export interface OptimizerCacheKey {
   readonly lastCommit: string | undefined;
   readonly bootstrap: string | undefined;
-  readonly workerConfig: WorkerConfig;
+  readonly workerConfig: CacheableWorkerConfig;
   readonly deletedPaths: string[];
   readonly modifiedTimes: Record<string, number>;
 }
@@ -164,15 +160,15 @@ export async function getOptimizerCacheKey(config: OptimizerConfig) {
   }
 
   const cacheKeys: OptimizerCacheKey = {
-    workerConfig: config.getWorkerConfig('♻'),
     lastCommit,
     bootstrap,
     deletedPaths,
     modifiedTimes: {} as Record<string, number>,
+    workerConfig: config.getCacheableWorkerConfig(),
   };
 
   const mtimes = await getMtimes(modifiedPaths);
-  for (const [path, mtime] of Array.from(mtimes.entries()).sort(ascending(e => e[0]))) {
+  for (const [path, mtime] of Array.from(mtimes.entries()).sort(ascending((e) => e[0]))) {
     if (typeof mtime === 'number') {
       cacheKeys.modifiedTimes[path] = mtime;
     }

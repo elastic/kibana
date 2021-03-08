@@ -1,12 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import './toggle_all_features.scss';
+
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component } from 'react';
+
 interface Props {
   onChange: (visible: boolean) => void;
   disabled?: boolean;
@@ -51,7 +57,7 @@ export class ToggleAllFeatures extends Component<Props, State> {
       </EuiLink>
     );
 
-    const items = options.map(item => {
+    const items = options.map((item) => {
       return (
         <EuiContextMenuItem
           data-test-subj={`spc-toggle-all-features-${item.id}`}
@@ -68,8 +74,8 @@ export class ToggleAllFeatures extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id={'changeAllFeatureVisibilityPopover'}
         button={button}
+        data-test-subj="changeAllFeatureVisibilityPopover"
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"

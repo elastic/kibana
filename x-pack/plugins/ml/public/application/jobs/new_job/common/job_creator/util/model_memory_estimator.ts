@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,11 @@ import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
-import { ErrorResponse } from '../../../../../../../common/types/errors';
+import {
+  MLHttpFetchError,
+  MLResponseError,
+  extractErrorMessage,
+} from '../../../../../../../common/util/errors';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { JobCreator } from '../job_creator';
 
@@ -36,16 +41,16 @@ export const modelMemoryEstimatorProvider = (
   jobValidator: JobValidator
 ) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
-  const error$ = new Subject<ErrorResponse['body']>();
+  const error$ = new Subject<MLHttpFetchError<MLResponseError>>();
 
   return {
-    get error$(): Observable<ErrorResponse['body']> {
+    get error$(): Observable<MLHttpFetchError<MLResponseError>> {
       return error$.asObservable();
     },
     get updates$(): Observable<string> {
       return combineLatest([
         jobCreator.wizardInitialized$.pipe(
-          skipWhile(wizardInitialized => wizardInitialized === false)
+          skipWhile((wizardInitialized) => wizardInitialized === false)
         ),
         modelMemoryCheck$,
       ]).pipe(
@@ -58,13 +63,13 @@ export const modelMemoryEstimatorProvider = (
         distinctUntilChanged(isEqual),
         // don't call the endpoint with invalid payload
         filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
-        switchMap(payload => {
+        switchMap((payload) => {
           return ml.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
-            catchError(error => {
+            catchError((error) => {
               // eslint-disable-next-line no-console
               console.error('Model memory limit could not be calculated', error.body);
-              error$.next(error.body);
+              error$.next(error);
               // fallback to the default in case estimation failed
               return of(DEFAULT_MODEL_MEMORY_LIMIT);
             })
@@ -115,12 +120,12 @@ export const useModelMemoryEstimator = (
     );
 
     subscription.add(
-      modelMemoryEstimator.error$.subscribe(error => {
+      modelMemoryEstimator.error$.subscribe((error) => {
         notifications.toasts.addWarning({
           title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
             defaultMessage: 'Model memory limit could not be calculated',
           }),
-          text: error.message,
+          text: extractErrorMessage(error),
         });
       })
     );
@@ -133,6 +138,7 @@ export const useModelMemoryEstimator = (
   // Update model memory estimation payload on the job creator updates
   useEffect(() => {
     modelMemoryEstimator.update({
+      datafeedConfig: jobCreator.datafeedConfig,
       analysisConfig: jobCreator.jobConfig.analysis_config,
       indexPattern: jobCreator.indexPatternTitle,
       query: jobCreator.datafeedConfig.query,

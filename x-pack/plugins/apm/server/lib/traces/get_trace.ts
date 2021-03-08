@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PromiseReturnType } from '../../../typings/common';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 
@@ -17,6 +18,6 @@ export async function getTrace(traceId: string, setup: Setup & SetupTimeRange) {
 
   return {
     trace,
-    errorsPerTransaction
+    errorsPerTransaction,
   };
 }

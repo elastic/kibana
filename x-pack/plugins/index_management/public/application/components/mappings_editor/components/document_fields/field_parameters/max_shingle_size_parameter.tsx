@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,7 +24,7 @@ export const MaxShingleSizeParameter = ({ defaultToggleValue }: Props) => (
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.maxShingleSizeFieldDescription', {
       defaultMessage:
-        'The default is three shingle subfields. More subfields enables more specific queries, but increases index size.',
+        'The default is three shingle subfields. More subfields enable more specific queries, but increase index size.',
     })}
     defaultToggleValue={defaultToggleValue}
   >

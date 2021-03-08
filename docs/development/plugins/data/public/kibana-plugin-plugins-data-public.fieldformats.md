@@ -10,7 +10,6 @@
 fieldFormats: {
     FieldFormat: typeof FieldFormat;
     FieldFormatsRegistry: typeof FieldFormatsRegistry;
-    serialize: (agg: import("./search").AggConfig) => import("../../expressions/common").SerializedFieldFormat<object>;
     DEFAULT_CONVERTER_COLOR: {
         range: string;
         regex: string;
@@ -35,5 +34,6 @@ fieldFormats: {
     UrlFormat: typeof UrlFormat;
     StringFormat: typeof StringFormat;
     TruncateFormat: typeof TruncateFormat;
+    HistogramFormat: typeof HistogramFormat;
 }
 ```

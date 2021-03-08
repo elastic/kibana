@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // @ts-ignore
@@ -24,6 +13,7 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
+import { UI_SETTINGS } from '../../constants';
 
 const numeralInst = numeral();
 
@@ -51,7 +41,8 @@ export abstract class NumeralFormat extends FieldFormat {
     if (isNaN(val)) return '';
 
     const previousLocale = numeral.language();
-    const defaultLocale = (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
+    const defaultLocale =
+      (this.getConfig && this.getConfig(UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
     const formatted = numeralInst.set(val).format(this.param('pattern'));
@@ -61,7 +52,7 @@ export abstract class NumeralFormat extends FieldFormat {
     return formatted;
   }
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     return this.getConvertedValue(val);
   };
 }

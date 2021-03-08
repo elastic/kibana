@@ -1,19 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
-import { CustomSelectionTable } from '../custom_selection_table';
+import { CustomSelectionTable } from '../../custom_selection_table';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTabbedContent,
+  EuiCallOut,
+  EuiButton,
+  EuiText,
+} from '@elastic/eui';
 
 import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
+import { useMlKibana } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
@@ -26,9 +38,16 @@ export function JobSelectorTable({
   selectedIds,
   singleSelection,
   timeseriesOnly,
+  withTimeRangeSelector,
 }) {
   const [sortableProperties, setSortableProperties] = useState();
   const [currentTab, setCurrentTab] = useState('Jobs');
+
+  const {
+    services: {
+      application: { navigateToApp },
+    },
+  } = useMlKibana();
 
   useEffect(() => {
     let sortablePropertyItems = [];
@@ -38,12 +57,12 @@ export function JobSelectorTable({
       sortablePropertyItems = [
         {
           name: 'job_id',
-          getValue: item => item.job_id.toLowerCase(),
+          getValue: (item) => item.job_id.toLowerCase(),
           isAscending: true,
         },
         {
           name: 'groups',
-          getValue: item => (item.groups && item.groups[0] ? item.groups[0].toLowerCase() : ''),
+          getValue: (item) => (item.groups && item.groups[0] ? item.groups[0].toLowerCase() : ''),
           isAscending: true,
         },
       ];
@@ -52,7 +71,7 @@ export function JobSelectorTable({
       sortablePropertyItems = [
         {
           name: 'id',
-          getValue: item => item.id.toLowerCase(),
+          getValue: (item) => item.id.toLowerCase(),
           isAscending: true,
         },
       ];
@@ -81,7 +100,7 @@ export function JobSelectorTable({
   ];
 
   function getGroupOptions() {
-    return groupsList.map(g => ({
+    return groupsList.map((g) => ({
       value: g.id,
       view: (
         <Fragment>
@@ -107,7 +126,7 @@ export function JobSelectorTable({
         id: 'checkbox',
         isCheckbox: true,
         textOnly: false,
-        width: '24px',
+        width: '32px',
       },
       {
         label: 'job ID',
@@ -121,17 +140,22 @@ export function JobSelectorTable({
         isSortable: true,
         alignment: LEFT_ALIGNMENT,
         render: ({ groups = [] }) =>
-          groups.map(group => <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />),
+          groups.map((group) => (
+            <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />
+          )),
       },
-      {
+    ];
+
+    if (withTimeRangeSelector) {
+      columns.push({
         label: 'time range',
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {}, isRunning }) => (
           <TimeRangeBar timerange={timeRange} isRunning={isRunning} ganttBarWidth={ganttBarWidth} />
         ),
-      },
-    ];
+      });
+    }
 
     const filters = [
       {
@@ -154,7 +178,10 @@ export function JobSelectorTable({
         filters={filters}
         filterDefaultFields={!singleSelection ? JOB_FILTER_FIELDS : undefined}
         items={jobs}
-        onTableChange={selectionFromTable => onSelection({ selectionFromTable })}
+        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
+        radioDisabledCheck={(item) => {
+          return timeseriesOnly && item.isSingleMetricViewerJob === false;
+        }}
         selectedIds={selectedIds}
         singleSelection={singleSelection}
         sortableProperties={sortableProperties}
@@ -169,7 +196,7 @@ export function JobSelectorTable({
         id: 'checkbox',
         isCheckbox: true,
         textOnly: false,
-        width: '24px',
+        width: '32px',
       },
       {
         label: 'group ID',
@@ -185,22 +212,25 @@ export function JobSelectorTable({
         alignment: CENTER_ALIGNMENT,
         render: ({ jobIds = [] }) => jobIds.length,
       },
-      {
+    ];
+
+    if (withTimeRangeSelector) {
+      groupColumns.push({
         label: 'time range',
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {} }) => (
           <TimeRangeBar timerange={timeRange} ganttBarWidth={ganttBarWidth} />
         ),
-      },
-    ];
+      });
+    }
 
     return (
       <CustomSelectionTable
         columns={groupColumns}
         filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
         items={groupsList}
-        onTableChange={selectionFromTable => onSelection({ selectionFromTable })}
+        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
         selectedIds={selectedIds}
         sortableProperties={sortableProperties}
       />
@@ -213,18 +243,41 @@ export function JobSelectorTable({
         size="s"
         tabs={tabs}
         initialSelectedTab={tabs[0]}
-        onTabClick={tab => {
+        onTabClick={(tab) => {
           setCurrentTab(tab.id);
         }}
       />
     );
   }
 
+  const navigateToWizard = async () => {
+    await navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+  };
+
   return (
     <Fragment>
-      {jobs.length === 0 && <EuiLoadingSpinner size="l" />}
+      {jobs.length === 0 && (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.ml.jobSelector.noJobsFoundTitle"
+              defaultMessage="No anomaly detection jobs found"
+            />
+          }
+          iconType="iInCircle"
+        >
+          <EuiText textAlign="center">
+            <EuiButton color="primary" onClick={navigateToWizard}>
+              <FormattedMessage
+                id="xpack.ml.jobSelector.createJobButtonLabel"
+                defaultMessage="Create job"
+              />
+            </EuiButton>
+          </EuiText>
+        </EuiCallOut>
+      )}
       {jobs.length !== 0 && singleSelection === true && renderJobsTable()}
-      {jobs.length !== 0 && singleSelection === undefined && renderTabs()}
+      {jobs.length !== 0 && !singleSelection && renderTabs()}
     </Fragment>
   );
 }
@@ -237,4 +290,5 @@ JobSelectorTable.propTypes = {
   selectedIds: PropTypes.array.isRequired,
   singleSelection: PropTypes.bool,
   timeseriesOnly: PropTypes.bool,
+  withTimeRangeSelector: PropTypes.bool,
 };

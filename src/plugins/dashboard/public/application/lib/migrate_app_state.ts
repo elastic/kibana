@@ -1,39 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import semver from 'semver';
+import semverSatisfies from 'semver/functions/satisfies';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from '../../services/usage_collection';
+import { DashboardAppState, SavedDashboardPanel } from '../../types';
 import {
-  DashboardAppState,
+  migratePanelsTo730,
   SavedDashboardPanelTo60,
   SavedDashboardPanel730ToLatest,
   SavedDashboardPanel610,
   SavedDashboardPanel630,
   SavedDashboardPanel640To720,
   SavedDashboardPanel620,
-  SavedDashboardPanel,
-} from '../../types';
-// should be moved in src/plugins/dashboard/common right after https://github.com/elastic/kibana/pull/61895 is merged
-import { migratePanelsTo730 } from '../../../../../legacy/core_plugins/kibana/public/dashboard/migrations/migrate_to_730_panels';
+} from '../../../common';
 
 /**
  * Attempts to migrate the state stored in the URL into the latest version of it.
@@ -41,7 +28,7 @@ import { migratePanelsTo730 } from '../../../../../legacy/core_plugins/kibana/pu
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: unknown } & DashboardAppState,
+  appState: { [key: string]: any } & DashboardAppState,
   kibanaVersion: string,
   usageCollection?: UsageCollectionSetup
 ): DashboardAppState {
@@ -60,17 +47,21 @@ export function migrateAppState(
     | SavedDashboardPanel630
     | SavedDashboardPanel640To720
     | SavedDashboardPanel730ToLatest
-  >).some(panel => {
+  >).some((panel) => {
     if ((panel as { version?: string }).version === undefined) return true;
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;
 
     if (usageCollection) {
       // This will help us figure out when to remove support for older style URLs.
-      usageCollection.reportUiStats('DashboardPanelVersionInUrl', METRIC_TYPE.LOADED, `${version}`);
+      usageCollection.reportUiCounter(
+        'DashboardPanelVersionInUrl',
+        METRIC_TYPE.LOADED,
+        `${version}`
+      );
     }
 
-    return semver.satisfies(version, '<7.3');
+    return semverSatisfies(version, '<7.3');
   });
 
   if (panelNeedsMigration) {

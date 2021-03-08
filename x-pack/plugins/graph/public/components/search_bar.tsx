@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
@@ -97,7 +98,7 @@ export function SearchBarComponent(props: SearchBarProps) {
 
   return (
     <form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
         if (!isLoading && currentIndexPattern) {
           onQuerySubmit(queryToString(query, currentIndexPattern));
@@ -185,7 +186,7 @@ export const SearchBar = connect(
         datasource.current.type === 'indexpattern' ? datasource.current : undefined,
     };
   },
-  dispatch => ({
+  (dispatch) => ({
     onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => {
       dispatch(
         requestDatasource({

@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
+import { TemplateDeserialized } from '../../../../common';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
-import { decodePath, getTemplateDetailsLink } from '../../services/routing';
+import { getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
-import { getFormatVersionFromQueryparams } from '../../lib/index_templates';
+import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
+import { attemptToURIDecode } from '../../../shared_imports';
 
 interface MatchParams {
   name: string;
@@ -26,17 +29,13 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   location,
   history,
 }) => {
-  const decodedTemplateName = decodePath(name);
-  const formatVersion =
-    getFormatVersionFromQueryparams(location) ?? DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT;
+  const decodedTemplateName = attemptToURIDecode(name)!;
+  const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { error, data: template, isLoading } = useLoadIndexTemplate(
-    decodedTemplateName,
-    formatVersion
-  );
+  const { error, data: template, isLoading } = useLoadIndexTemplate(decodedTemplateName, isLegacy);
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('templateEdit');
@@ -55,7 +54,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       return;
     }
 
-    history.push(getTemplateDetailsLink(name, updatedTemplate._kbnMeta.formatVersion));
+    history.push(getTemplateDetailsLink(decodedTemplateName, updatedTemplate._kbnMeta.isLegacy));
   };
 
   const clearSaveError = () => {
@@ -87,10 +86,13 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       />
     );
   } else if (template) {
-    const { name: templateName, isManaged } = template;
+    const {
+      name: templateName,
+      _kbnMeta: { type },
+    } = template;
     const isSystemTemplate = templateName && templateName.startsWith('.');
 
-    if (isManaged) {
+    if (type === 'cloudManaged') {
       content = (
         <EuiCallOut
           title={
@@ -134,12 +136,24 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
             </Fragment>
           )}
           <TemplateForm
+            title={
+              <EuiTitle size="l">
+                <h1 data-test-subj="pageTitle">
+                  <FormattedMessage
+                    id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
+                    defaultMessage="Edit template '{name}'"
+                    values={{ name: decodedTemplateName }}
+                  />
+                </h1>
+              </EuiTitle>
+            }
             defaultValue={template}
             onSave={onSave}
             isSaving={isSaving}
             saveError={saveError}
             clearSaveError={clearSaveError}
             isEditing={true}
+            isLegacy={isLegacy}
           />
         </Fragment>
       );
@@ -148,19 +162,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
-              defaultMessage="Edit template '{name}'"
-              values={{ name: decodedTemplateName }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {content}
-      </EuiPageContent>
+      <EuiPageContent>{content}</EuiPageContent>
     </EuiPageBody>
   );
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BaseWatch } from './base_watch';
@@ -161,7 +162,7 @@ describe('BaseWatch', () => {
         isSystemWatch: false,
         watchStatus: props.watchStatus.downstreamJson,
         watchErrors: props.watchErrors.downstreamJson,
-        actions: props.actions.map(a => a.downstreamJson),
+        actions: props.actions.map((a) => a.downstreamJson),
       };
 
       expect(actual).toEqual(expected);
@@ -181,7 +182,7 @@ describe('BaseWatch', () => {
         isSystemWatch: false,
         watchStatus: undefined,
         watchErrors: undefined,
-        actions: props.actions.map(a => a.downstreamJson),
+        actions: props.actions.map((a) => a.downstreamJson),
       };
 
       expect(actual).toEqual(expected);

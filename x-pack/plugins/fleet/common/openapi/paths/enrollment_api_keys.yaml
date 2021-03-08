@@ -1,0 +1,13 @@
+get:
+  summary: Enrollment - List
+  tags: []
+  responses: {}
+  operationId: get-fleet-enrollment-api-keys
+  parameters: []
+post:
+  summary: Enrollment - Create
+  tags: []
+  responses: {}
+  operationId: post-fleet-enrollment-api-keys
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml

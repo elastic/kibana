@@ -1,19 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { register } from './add_route';
 import { API_BASE_PATH } from '../../../common/constants';
 import { LicenseStatus } from '../../types';
+
+import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
 
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
+  coreMock,
 } from '../../../../../../src/core/server/mocks';
 
+// Re-implement the mock that was imported directly from `x-pack/mocks`
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
 interface TestOptions {
   licenseCheckResult?: LicenseStatus;
   apiResponses?: Array<() => Promise<unknown>>;
@@ -27,7 +43,7 @@ describe('ADD remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts, payload }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createLegacyClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),
@@ -39,10 +55,10 @@ describe('ADD remote clusters', () => {
         },
       };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
       elasticsearchServiceMock
-        .createClusterClient()
+        .createLegacyClusterClient()
         .asScoped.mockReturnValue(mockScopedClusterClient);
 
       for (const apiResponse of apiResponses) {
@@ -59,13 +75,8 @@ describe('ADD remote clusters', () => {
         headers: { authorization: 'foo' },
       });
 
-      const mockContext = ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClusterClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext;
+      const mockContext = xpackMocks.createRequestHandlerContext();
+      mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 

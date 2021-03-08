@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Service for obtaining data for the ML Results dashboards.
-import { http, http$ } from '../http_service';
-
+import { GetStoppedPartitionResult } from '../../../../common/types/results';
+import { HttpService } from '../http_service';
 import { basePath } from './index';
-
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
+import { PartitionFieldsConfig } from '../../../../common/types/storage';
 
-export const results = {
+export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],
     criteriaFields: string[],
@@ -23,8 +25,9 @@ export const results = {
     latestMs: number,
     dateFormatTz: string,
     maxRecords: number,
-    maxExamples: number,
-    influencersFilterQuery: any
+    maxExamples?: number,
+    influencersFilterQuery?: any,
+    functionDescription?: string
   ) {
     const body = JSON.stringify({
       jobIds,
@@ -38,9 +41,10 @@ export const results = {
       maxRecords,
       maxExamples,
       influencersFilterQuery,
+      functionDescription,
     });
 
-    return http$<any>({
+    return httpService.http$<any>({
       path: `${basePath()}/results/anomalies_table_data`,
       method: 'POST',
       body,
@@ -53,7 +57,7 @@ export const results = {
       earliestMs,
       latestMs,
     });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/results/max_anomaly_score`,
       method: 'POST',
       body,
@@ -62,7 +66,7 @@ export const results = {
 
   getCategoryDefinition(jobId: string, categoryId: string) {
     const body = JSON.stringify({ jobId, categoryId });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/results/category_definition`,
       method: 'POST',
       body,
@@ -75,7 +79,7 @@ export const results = {
       categoryIds,
       maxExamples,
     });
-    return http<any>({
+    return httpService.http<any>({
       path: `${basePath()}/results/category_examples`,
       method: 'POST',
       body,
@@ -87,13 +91,54 @@ export const results = {
     searchTerm: Record<string, string>,
     criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    fieldsConfig?: PartitionFieldsConfig
   ) {
-    const body = JSON.stringify({ jobId, searchTerm, criteriaFields, earliestMs, latestMs });
-    return http$<PartitionFieldsDefinition>({
+    const body = JSON.stringify({
+      jobId,
+      searchTerm,
+      criteriaFields,
+      earliestMs,
+      latestMs,
+      fieldsConfig,
+    });
+    return httpService.http$<PartitionFieldsDefinition>({
       path: `${basePath()}/results/partition_fields_values`,
       method: 'POST',
       body,
     });
   },
-};
+
+  anomalySearch(query: any, jobIds: string[]) {
+    const body = JSON.stringify({ query, jobIds });
+    return httpService.http<any>({
+      path: `${basePath()}/results/anomaly_search`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  anomalySearch$(query: any, jobIds: string[]) {
+    const body = JSON.stringify({ query, jobIds });
+    return httpService.http$<any>({
+      path: `${basePath()}/results/anomaly_search`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getCategoryStoppedPartitions(
+    jobIds: string[],
+    fieldToBucket?: typeof JOB_ID | typeof PARTITION_FIELD_VALUE
+  ) {
+    const body = JSON.stringify({
+      jobIds,
+      fieldToBucket,
+    });
+    return httpService.http<GetStoppedPartitionResult>({
+      path: `${basePath()}/results/category_stopped_partitions`,
+      method: 'POST',
+      body,
+    });
+  },
+});

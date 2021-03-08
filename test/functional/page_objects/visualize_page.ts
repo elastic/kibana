@@ -1,24 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
+import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
+
+// TODO: Remove & Refactor to use the TTV page objects
+interface VisualizeSaveModalArgs {
+  saveAsNew?: boolean;
+  redirectToOrigin?: boolean;
+  addToDashboard?: boolean;
+  dashboardId?: string;
+}
+
+type DashboardPickerOption =
+  | 'add-to-library-option'
+  | 'existing-dashboard-option'
+  | 'new-dashboard-option';
 
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -27,7 +29,14 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
   const log = getService('log');
   const globalNav = getService('globalNav');
   const listingTable = getService('listingTable');
-  const { common, header, visEditor } = getPageObjects(['common', 'header', 'visEditor']);
+  const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
+  const { common, header, visEditor, visChart } = getPageObjects([
+    'common',
+    'header',
+    'visEditor',
+    'visChart',
+  ]);
 
   /**
    * This page object contains the visualization type selection, the landing page,
@@ -47,6 +56,14 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await listingTable.clickNewButton('createVisualizationPromptButton');
     }
 
+    public async clickAggBasedVisualizations() {
+      await testSubjects.click('visGroupAggBasedExploreLink');
+    }
+
+    public async goBackToGroups() {
+      await testSubjects.click('goBackLink');
+    }
+
     public async createVisualizationPromptButton() {
       await testSubjects.click('createVisualizationPromptButton');
     }
@@ -56,12 +73,22 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       const $ = await chartTypeField.parseDomContent();
       return $('button')
         .toArray()
-        .map(chart =>
-          $(chart)
-            .findTestSubject('visTypeTitle')
-            .text()
-            .trim()
-        );
+        .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
+    }
+
+    public async getPromotedVisTypes() {
+      const chartTypeField = await testSubjects.find('visNewDialogGroups');
+      const $ = await chartTypeField.parseDomContent();
+      const promotedVisTypes: string[] = [];
+      $('button')
+        .toArray()
+        .forEach((chart) => {
+          const title = $(chart).findTestSubject('visTypeTitle').text().trim();
+          if (title) {
+            promotedVisTypes.push(title);
+          }
+        });
+      return promotedVisTypes;
     }
 
     public async waitForVisualizationSelectPage() {
@@ -73,9 +100,34 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
+    public async clickRefresh() {
+      if (await visChart.isNewChartsLibraryEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
+      await queryBar.clickQuerySubmitButton();
+    }
+
+    public async waitForGroupsSelectPage() {
+      await retry.try(async () => {
+        const visualizeSelectGroupStep = await testSubjects.find('visNewDialogGroups');
+        if (!(await visualizeSelectGroupStep.isDisplayed())) {
+          throw new Error('wait for vis groups select step');
+        }
+      });
+    }
+
     public async navigateToNewVisualization() {
       await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
+      await this.waitForGroupsSelectPage();
+    }
+
+    public async navigateToNewAggBasedVisualization() {
+      await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
+      await this.clickNewVisualization();
+      await this.clickAggBasedVisualizations();
       await this.waitForVisualizationSelectPage();
     }
 
@@ -250,12 +302,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     public async clickLoadSavedVisButton() {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
-      await find.clickByCssSelector('[href="#/visualize"]');
-    }
-
-    public async clickVisualizationByName(vizName: string) {
-      log.debug('clickVisualizationByLinkText(' + vizName + ')');
-      await find.clickByPartialLinkText(vizName);
+      await find.clickByCssSelector('[href="#/"]');
     }
 
     public async loadSavedVisualization(vizName: string, { navigateToVisualize = true } = {}) {
@@ -266,7 +313,8 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async openSavedVisualization(vizName: string) {
-      await this.clickVisualizationByName(vizName);
+      const dataTestSubj = `visListingTitleLink-${vizName.split(' ').join('-')}`;
+      await testSubjects.click(dataTestSubj, 20000);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -285,7 +333,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async onLandingPage() {
       log.debug(`VisualizePage.onLandingPage`);
-      return await testSubjects.exists('visualizeLandingPage');
+      return await testSubjects.exists('visualizationLandingPage');
     }
 
     public async gotoLandingPage() {
@@ -300,13 +348,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    public async saveVisualization(vizName: string, { saveAsNew = false } = {}) {
+    public async saveVisualization(vizName: string, saveModalArgs: VisualizeSaveModalArgs = {}) {
       await this.ensureSavePanelOpen();
-      await testSubjects.setValue('savedObjectTitle', vizName);
-      if (saveAsNew) {
-        log.debug('Check save as new visualization');
-        await testSubjects.click('saveAsNewCheckbox');
-      }
+
+      await this.setSaveModalValues(vizName, saveModalArgs);
       log.debug('Click Save Visualization button');
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -320,8 +365,53 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       return message;
     }
 
-    public async saveVisualizationExpectSuccess(vizName: string, { saveAsNew = false } = {}) {
-      const saveMessage = await this.saveVisualization(vizName, { saveAsNew });
+    public async setSaveModalValues(
+      vizName: string,
+      { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
+    ) {
+      await testSubjects.setValue('savedObjectTitle', vizName);
+
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        const state = saveAsNew ? 'check' : 'uncheck';
+        log.debug('save as new checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
+      }
+
+      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
+      if (redirectToOriginCheckboxExists) {
+        const state = redirectToOrigin ? 'check' : 'uncheck';
+        log.debug('redirect to origin checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
+      }
+
+      const dashboardSelectorExists = await testSubjects.exists('add-to-dashboard-options');
+      if (dashboardSelectorExists) {
+        let option: DashboardPickerOption = 'add-to-library-option';
+        if (addToDashboard) {
+          option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
+        }
+        log.debug('save modal dashboard selector, choosing option:', option);
+        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+        const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
+        await label.click();
+
+        if (dashboardId) {
+          // TODO - selecting an existing dashboard
+        }
+      }
+    }
+
+    public async saveVisualizationExpectSuccess(
+      vizName: string,
+      { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
+    ) {
+      const saveMessage = await this.saveVisualization(vizName, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard,
+        dashboardId,
+      });
       if (!saveMessage) {
         throw new Error(
           `Expected saveVisualization to respond with the saveMessage from the toast, got ${saveMessage}`
@@ -331,13 +421,43 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async saveVisualizationExpectSuccessAndBreadcrumb(
       vizName: string,
-      { saveAsNew = false } = {}
+      { saveAsNew = false, redirectToOrigin = false } = {}
     ) {
-      await this.saveVisualizationExpectSuccess(vizName, { saveAsNew });
+      await this.saveVisualizationExpectSuccess(vizName, { saveAsNew, redirectToOrigin });
       await retry.waitFor(
         'last breadcrumb to have new vis name',
         async () => (await globalNav.getLastBreadcrumb()) === vizName
       );
+    }
+
+    public async saveVisualizationAndReturn() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizesaveAndReturnButton');
+      await testSubjects.click('visualizesaveAndReturnButton');
+    }
+
+    public async linkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizesaveAndReturnButton');
+    }
+
+    public async notLinkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('visualizesaveAndReturnButton');
+    }
+
+    public async cancelAndReturn(showConfirmModal: boolean) {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizeCancelAndReturnButton');
+      await testSubjects.click('visualizeCancelAndReturnButton');
+      if (showConfirmModal) {
+        await retry.waitFor(
+          'confirm modal to show',
+          async () => await testSubjects.exists('appLeaveConfirmModal')
+        );
+        await testSubjects.exists('confirmModalConfirmButton');
+        await testSubjects.click('confirmModalConfirmButton');
+      }
     }
   }
 

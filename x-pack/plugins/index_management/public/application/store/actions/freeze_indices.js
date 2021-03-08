@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createAction } from 'redux-actions';
@@ -12,7 +13,7 @@ import { notificationService } from '../../services/notification';
 
 export const freezeIndicesStart = createAction('INDEX_MANAGEMENT_FREEZE_INDICES_START');
 
-export const freezeIndices = ({ indexNames }) => async dispatch => {
+export const freezeIndices = ({ indexNames }) => async (dispatch) => {
   dispatch(freezeIndicesStart({ indexNames }));
   try {
     await request(indexNames);

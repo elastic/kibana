@@ -1,0 +1,116 @@
+@import '../../../mixins';
+
+.lnsWorkspacePanelWrapper {
+  @include euiScrollBar;
+  // Override panel size padding
+  padding: 0 !important; // sass-lint:disable-line no-important
+  margin-bottom: $euiSize;
+  display: flex;
+  flex-direction: column;
+  position: relative; // For positioning the dnd overlay
+  min-height: $euiSizeXXL * 10;
+  overflow: visible;
+  border: none;
+  height: 100%;
+
+  .lnsWorkspacePanelWrapper__pageContentBody {
+    @include euiScrollBar;
+    flex-grow: 1;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+
+    > * {
+      flex: 1 1 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+  }
+}
+
+.lnsWorkspacePanel__dragDrop {
+  width: 100%;
+  height: 100%;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+
+  &.lnsDragDrop-isDropTarget {
+    @include lnsDroppable;
+    @include lnsDroppableActive;
+
+    p {
+      transition: filter $euiAnimSpeedFast ease-in-out;
+      filter: blur(5px);
+    }
+
+    .lnsExpressionRenderer {
+      transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
+      filter: blur($euiSizeXS);
+      opacity: .25;
+    }
+  }
+
+  &.lnsDragDrop-isActiveDropTarget {
+    @include lnsDroppableActiveHover;
+
+    .lnsDropIllustration__hand {
+      animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
+    }
+  }
+}
+
+.lnsWorkspacePanel__emptyContent {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color $euiAnimSpeedFast ease-in-out;
+}
+
+.lnsWorkspacePanelWrapper__toolbar {
+  margin-bottom: 0;
+}
+
+.lnsDropIllustration__adjustFill {
+  fill: $euiColorFullShade;
+}
+
+.lnsWorkspacePanel__dropIllustration {
+  overflow: visible; // Shows arrow animation when it gets out of bounds
+  margin-top: $euiSizeL;
+  margin-bottom: $euiSizeXXL;
+  // Drop shadow values is a dupe of @euiBottomShadowMedium but used as a filter
+  // Hard-coded px values OK (@cchaos)
+  // sass-lint:disable-block indentation
+  filter:
+    drop-shadow(0 6px 12px transparentize($euiShadowColor, .8))
+    drop-shadow(0 4px 4px transparentize($euiShadowColor, .8))
+    drop-shadow(0 2px 2px transparentize($euiShadowColor, .8));
+}
+
+.lnsDropIllustration__hand {
+  animation: lnsWorkspacePanel__illustrationPulseArrow 5s ease-in-out 0s infinite normal forwards;
+}
+
+@keyframes lnsWorkspacePanel__illustrationPulseArrow {
+  0% { transform: translateY(0%); }
+  65% { transform: translateY(0%); }
+  72% { transform: translateY(10%); }
+  79% { transform: translateY(7%); }
+  86% { transform: translateY(10%); }
+  95% { transform: translateY(0); }
+}
+
+@keyframes lnsWorkspacePanel__illustrationPulseContinuous {
+  0% { transform: translateY(10%); }
+  25% { transform: translateY(15%); }
+  50% { transform: translateY(10%); }
+  75% { transform: translateY(15%); }
+  100% { transform: translateY(10%); }
+}

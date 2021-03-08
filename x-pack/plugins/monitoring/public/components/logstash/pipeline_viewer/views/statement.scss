@@ -1,0 +1,47 @@
+.monPipelineViewer__spaceContainer {
+  background-color: $euiColorEmptyShade;
+  align-self: stretch;
+  display: flex;
+  // Separates the left border spaces properly
+  border-bottom: solid 2px $euiColorEmptyShade;
+}
+
+.monPipelineViewer__spacer {
+  width: $euiSizeM;
+  align-self: stretch;
+  margin-left: $euiSizeM;
+  border-left: 1px $euiBorderColor dashed;
+
+  // This allows the border to be flush
+  &:last-child {
+    width: 0;
+  }
+
+  &:first-child {
+    // Odd number is because of the single pixel border.
+    margin-left: $euiSizeL - 1px;
+  }
+}
+
+.monPipelineViewer__list {
+  .monPipelineViewer__listItem {
+    display: flex;
+    min-height: $euiSizeXL;
+    align-items: center;
+    padding-right: $euiSizeM;
+
+    &:nth-child(2n + 1) {
+      background: tintOrShade($euiColorLightestShade, 2%, 2%);
+    }
+  }
+}
+
+.monPipelineViewer__conditional {
+  font-weight: bold;
+}
+
+@include euiBreakpoint('m') {
+  .monPipelineViewer__spacer {
+    border: none;
+  }
+}

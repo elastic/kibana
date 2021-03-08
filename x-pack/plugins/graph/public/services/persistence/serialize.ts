@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -96,22 +97,22 @@ export function appStateToSavedWorkspace(
   },
   canSaveData: boolean
 ) {
-  const blacklist: SerializedNode[] = canSaveData
-    ? workspace.blacklistedNodes.map(node => serializeNode(node))
+  const blocklist: SerializedNode[] = canSaveData
+    ? workspace.blocklistedNodes.map((node) => serializeNode(node))
     : [];
   const vertices: SerializedNode[] = canSaveData
-    ? workspace.nodes.map(node => serializeNode(node, workspace.nodes))
+    ? workspace.nodes.map((node) => serializeNode(node, workspace.nodes))
     : [];
   const links: SerializedEdge[] = canSaveData
-    ? workspace.edges.map(edge => serializeEdge(edge, workspace.nodes))
+    ? workspace.edges.map((edge) => serializeEdge(edge, workspace.nodes))
     : [];
 
   const mappedUrlTemplates = urlTemplates.map(serializeUrlTemplate);
 
   const persistedWorkspaceState: SerializedWorkspaceState = {
-    indexPattern: selectedIndex.title,
+    indexPattern: selectedIndex.id,
     selectedFields: selectedFields.map(serializeField),
-    blacklist,
+    blocklist,
     vertices,
     links,
     urlTemplates: mappedUrlTemplates,

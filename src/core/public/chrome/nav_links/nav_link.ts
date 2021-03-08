@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { pick } from '../../../utils';
+import { pick } from '@kbn/std';
 import { AppCategory } from '../../';
 
 /**
@@ -45,6 +34,12 @@ export interface ChromeNavLink {
   readonly baseUrl: string;
 
   /**
+   * The route used to open the {@link AppBase.defaultPath | default path } of an application.
+   * If unset, `baseUrl` will be used instead.
+   */
+  readonly url?: string;
+
+  /**
    * An ordinal used to sort nav links relative to one another for display.
    */
   readonly order?: number;
@@ -56,7 +51,7 @@ export interface ChromeNavLink {
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
+   * takes precedence over the `icon` property.
    */
   readonly euiIconType?: string;
 
@@ -66,60 +61,10 @@ export interface ChromeNavLink {
    */
   readonly icon?: string;
 
-  /** LEGACY FIELDS */
-
   /**
-   * A url base that legacy apps can set to match deep URLs to an application.
-   *
-   * @internalRemarks
-   * This should be removed once legacy apps are gone.
-   *
-   * @deprecated
+   * Settled state between `url`, `baseUrl`, and `active`
    */
-  readonly subUrlBase?: string;
-
-  /**
-   * A flag that tells legacy chrome to ignore the link when
-   * tracking sub-urls
-   *
-   * @internalRemarks
-   * This should be removed once legacy apps are gone.
-   *
-   * @deprecated
-   */
-  readonly disableSubUrlTracking?: boolean;
-
-  /**
-   * Whether or not the subUrl feature should be enabled.
-   *
-   * @internalRemarks
-   * Only read by legacy platform.
-   *
-   * @deprecated
-   */
-  readonly linkToLastSubUrl?: boolean;
-
-  /**
-   * A url that legacy apps can set to deep link into their applications.
-   *
-   * @internalRemarks
-   * Currently used by the "lastSubUrl" feature legacy/ui/chrome. This should
-   * be removed once the ApplicationService is implemented and mounting apps. At that
-   * time, each app can handle opening to the previous location when they are mounted.
-   *
-   * @deprecated
-   */
-  readonly url?: string;
-
-  /**
-   * Indicates whether or not this app is currently on the screen.
-   *
-   * @internalRemarks
-   * Remove this when ApplicationService is implemented and managing apps.
-   *
-   * @deprecated
-   */
-  readonly active?: boolean;
+  readonly href: string;
 
   /**
    * Disables a link from being clickable.
@@ -127,30 +72,18 @@ export interface ChromeNavLink {
    * @internalRemarks
    * This is only used by the ML and Graph plugins currently. They use this field
    * to disable the nav link when the license is expired.
-   *
-   * @deprecated
    */
   readonly disabled?: boolean;
 
   /**
    * Hides a link from the navigation.
-   *
-   * @internalRemarks
-   * Remove this when ApplicationService is implemented. Instead, plugins should only
-   * register an Application if needed.
    */
   readonly hidden?: boolean;
-
-  /**
-   * Used to separate links to legacy applications from NP applications
-   * @internal
-   */
-  readonly legacy: boolean;
 }
 
 /** @public */
 export type ChromeNavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>
+  Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>
 >;
 
 export class NavLinkWrapper {
@@ -168,7 +101,7 @@ export class NavLinkWrapper {
 
   public update(newProps: ChromeNavLinkUpdateableFields) {
     // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase']);
+    newProps = pick(newProps, ['disabled', 'hidden', 'url', 'href']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }

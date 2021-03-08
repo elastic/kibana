@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component } from 'react';
+import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -21,25 +22,25 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  EuiInMemoryTableProps,
 } from '@elastic/eui';
+import moment from 'moment-timezone';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment-timezone';
-import _ from 'lodash';
-import { NotificationsStart } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsStart } from 'src/core/public';
+
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
-import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
-import { APIKeysAPIClient } from '../api_keys_api_client';
-import { DocumentationLinksService } from '../documentation_links';
-import { PermissionDenied } from './permission_denied';
+import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
+import type { APIKeysAPIClient } from '../api_keys_api_client';
 import { EmptyPrompt } from './empty_prompt';
-import { NotEnabled } from './not_enabled';
 import { InvalidateProvider } from './invalidate_provider';
+import { NotEnabled } from './not_enabled';
+import { PermissionDenied } from './permission_denied';
 
 interface Props {
   notifications: NotificationsStart;
-  docLinks: DocumentationLinksService;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
 }
 
@@ -47,10 +48,10 @@ interface State {
   isLoadingApp: boolean;
   isLoadingTable: boolean;
   isAdmin: boolean;
+  canManage: boolean;
   areApiKeysEnabled: boolean;
   apiKeys: ApiKey[];
   selectedItems: ApiKey[];
-  permissionDenied: boolean;
   error: any;
 }
 
@@ -63,9 +64,9 @@ export class APIKeysGridPage extends Component<Props, State> {
       isLoadingApp: true,
       isLoadingTable: false,
       isAdmin: false,
+      canManage: false,
       areApiKeysEnabled: false,
       apiKeys: [],
-      permissionDenied: false,
       selectedItems: [],
       error: undefined,
     };
@@ -77,18 +78,14 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   public render() {
     const {
-      permissionDenied,
       isLoadingApp,
       isLoadingTable,
       areApiKeysEnabled,
       isAdmin,
+      canManage,
       error,
       apiKeys,
     } = this.state;
-
-    if (permissionDenied) {
-      return <PermissionDenied />;
-    }
 
     if (isLoadingApp) {
       return (
@@ -101,6 +98,10 @@ export class APIKeysGridPage extends Component<Props, State> {
           </SectionLoading>
         </EuiPageContent>
       );
+    }
+
+    if (!canManage) {
+      return <PermissionDenied />;
     }
 
     if (error) {
@@ -130,7 +131,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!areApiKeysEnabled) {
       return (
         <EuiPageContent>
-          <NotEnabled docLinks={this.props.docLinks} />
+          <NotEnabled />
         </EuiPageContent>
       );
     }
@@ -138,7 +139,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
         <EuiPageContent>
-          <EmptyPrompt isAdmin={isAdmin} docLinks={this.props.docLinks} />
+          <EmptyPrompt isAdmin={isAdmin} />
         </EuiPageContent>
       );
     }
@@ -190,9 +191,7 @@ export class APIKeysGridPage extends Component<Props, State> {
         id="xpack.security.management.apiKeys.table.apiKeysTableLoadingMessage"
         defaultMessage="Loading API keys…"
       />
-    ) : (
-      undefined
-    );
+    ) : undefined;
 
     const sorting = {
       sort: {
@@ -221,7 +220,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           notifications={this.props.notifications}
           apiKeysAPIClient={this.props.apiKeysAPIClient}
         >
-          {invalidateApiKeyPrompt => {
+          {(invalidateApiKeyPrompt) => {
             return (
               <EuiButton
                 onClick={() =>
@@ -244,9 +243,7 @@ export class APIKeysGridPage extends Component<Props, State> {
             );
           }}
         </InvalidateProvider>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       toolsRight: (
         <EuiButton
           color="secondary"
@@ -277,7 +274,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                   apiKeysMap[apiKey.username] = true;
                   return apiKeysMap;
                 }, {})
-              ).map(username => {
+              ).map((username) => {
                 return {
                   value: username,
                   view: username,
@@ -296,7 +293,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                   apiKeysMap[apiKey.realm] = true;
                   return apiKeysMap;
                 }, {})
-              ).map(realm => {
+              ).map((realm) => {
                 return {
                   value: realm,
                   view: realm,
@@ -326,9 +323,7 @@ export class APIKeysGridPage extends Component<Props, State> {
 
             <EuiSpacer size="m" />
           </>
-        ) : (
-          undefined
-        )}
+        ) : undefined}
 
         {
           <EuiInMemoryTable
@@ -356,7 +351,7 @@ export class APIKeysGridPage extends Component<Props, State> {
   private getColumnConfig = () => {
     const { isAdmin } = this.state;
 
-    let config = [
+    let config: Array<EuiBasicTableColumn<any>> = [
       {
         field: 'name',
         name: i18n.translate('xpack.security.management.apiKeys.table.nameColumnName', {
@@ -392,7 +387,6 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Created',
         }),
         sortable: true,
-        // @ts-ignore
         render: (creationDateMs: number) => moment(creationDateMs).format(DATE_FORMAT),
       },
       {
@@ -401,7 +395,6 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Expires',
         }),
         sortable: true,
-        // @ts-ignore
         render: (expirationDateMs: number) => {
           if (expirationDateMs === undefined) {
             return (
@@ -448,7 +441,7 @@ export class APIKeysGridPage extends Component<Props, State> {
                       notifications={this.props.notifications}
                       apiKeysAPIClient={this.props.apiKeysAPIClient}
                     >
-                      {invalidateApiKeyPrompt => {
+                      {(invalidateApiKeyPrompt) => {
                         return (
                           <EuiToolTip
                             content={i18n.translate(
@@ -495,26 +488,25 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   private async checkPrivileges() {
     try {
-      const { isAdmin, areApiKeysEnabled } = await this.props.apiKeysAPIClient.checkPrivileges();
-      this.setState({ isAdmin, areApiKeysEnabled });
+      const {
+        isAdmin,
+        canManage,
+        areApiKeysEnabled,
+      } = await this.props.apiKeysAPIClient.checkPrivileges();
+      this.setState({ isAdmin, canManage, areApiKeysEnabled });
 
-      if (areApiKeysEnabled) {
-        this.initiallyLoadApiKeys();
-      } else {
-        // We're done loading and will just show the "Disabled" error.
+      if (!canManage || !areApiKeysEnabled) {
         this.setState({ isLoadingApp: false });
+      } else {
+        this.initiallyLoadApiKeys();
       }
     } catch (e) {
-      if (_.get(e, 'body.statusCode') === 403) {
-        this.setState({ permissionDenied: true, isLoadingApp: false });
-      } else {
-        this.props.notifications.toasts.addDanger(
-          i18n.translate('xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage', {
-            defaultMessage: 'Error checking privileges: {message}',
-            values: { message: _.get(e, 'body.message', '') },
-          })
-        );
-      }
+      this.props.notifications.toasts.addDanger(
+        i18n.translate('xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage', {
+          defaultMessage: 'Error checking privileges: {message}',
+          values: { message: e.body?.message ?? '' },
+        })
+      );
     }
   }
 

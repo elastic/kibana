@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState } from 'react';
-import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
-  mlInMemoryTableFactory,
-  SortDirection,
-  SORT_DIRECTION,
-  OnTableChangeArg,
-  ColumnType,
-} from '../../../components/ml_in_memory_table';
+  Direction,
+  EuiBadge,
+  EuiInMemoryTable,
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
 import {
   DataFrameAnalyticsListColumn,
@@ -22,11 +23,19 @@ import {
 import {
   getTaskStateBadge,
   progressColumn,
-} from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/columns';
-import { AnalyticsViewAction } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/actions';
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+} from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 
-const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
+import { ViewLink } from './actions';
+
+type DataFrameAnalyticsTableColumns = [
+  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
+  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
+  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
+  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
+  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
+  EuiTableActionsColumnType<DataFrameAnalyticsListRow>
+];
 
 interface Props {
   items: DataFrameAnalyticsListRow[];
@@ -36,10 +45,10 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   const [pageSize, setPageSize] = useState(10);
 
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
+  const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   // id, type, status, progress, created time, view icon
-  const columns: Array<ColumnType<DataFrameAnalyticsListRow>> = [
+  const columns: DataFrameAnalyticsTableColumns = [
     {
       field: DataFrameAnalyticsListColumn.id,
       name: i18n.translate('xpack.ml.overview.analyticsList.id', { defaultMessage: 'ID' }),
@@ -82,15 +91,19 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       name: i18n.translate('xpack.ml.overview.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
-      actions: [AnalyticsViewAction],
+      actions: [
+        {
+          render: (item: DataFrameAnalyticsListRow) => <ViewLink item={item} />,
+        },
+      ],
       width: '100px',
     },
   ];
 
-  const onTableChange = ({
+  const onTableChange: EuiInMemoryTable<DataFrameAnalyticsListRow>['onTableChange'] = ({
     page = { index: 0, size: 10 },
-    sort = { field: DataFrameAnalyticsListColumn.id, direction: SORT_DIRECTION.ASC },
-  }: OnTableChangeArg) => {
+    sort = { field: DataFrameAnalyticsListColumn.id, direction: 'asc' },
+  }) => {
     const { index, size } = page;
     setPageIndex(index);
     setPageSize(size);
@@ -116,7 +129,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   };
 
   return (
-    <MlInMemoryTable
+    <EuiInMemoryTable
       allowNeutralSort={false}
       className="mlAnalyticsTable"
       columns={columns}

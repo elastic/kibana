@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-const _ = require('lodash');
+import _ from 'lodash';
 import { WalkingState, walkTokenPath, wrapComponentWithDefaults } from './engine';
 import {
   ConstantComponent,
@@ -51,7 +40,7 @@ function resolvePathToComponents(tokenPath, context, editor, components) {
     context,
     editor
   );
-  const result = [].concat.apply([], _.pluck(walkStates, 'components'));
+  const result = [].concat.apply([], _.map(walkStates, 'components'));
   return result;
 }
 
@@ -104,7 +93,7 @@ class ScopeResolver extends SharedComponent {
   getTerms(context, editor) {
     const options = [];
     const components = this.resolveLinkToComponents(context, editor);
-    _.each(components, function(component) {
+    _.each(components, function (component) {
       options.push.apply(options, component.getTerms(context, editor));
     });
     return options;
@@ -115,7 +104,7 @@ class ScopeResolver extends SharedComponent {
       next: [],
     };
     const components = this.resolveLinkToComponents(context, editor);
-    _.each(components, function(component) {
+    _.each(components, function (component) {
       const componentResult = component.match(token, context, editor);
       if (componentResult && componentResult.next) {
         result.next.push.apply(result.next, componentResult.next);
@@ -193,7 +182,7 @@ function compileDescription(description, compilingContext) {
     }
     if (description.__one_of) {
       return _.flatten(
-        _.map(description.__one_of, function(d) {
+        _.map(description.__one_of, function (d) {
           return compileDescription(d, compilingContext);
         })
       );
@@ -228,7 +217,7 @@ function compileObject(objDescription, compilingContext) {
   const objectC = new ConstantComponent('{');
   const constants = [];
   const patterns = [];
-  _.each(objDescription, function(desc, key) {
+  _.each(objDescription, function (desc, key) {
     if (key.indexOf('__') === 0) {
       // meta key
       return;
@@ -247,7 +236,7 @@ function compileObject(objDescription, compilingContext) {
       component = new ConstantComponent(key, null, [options]);
       constants.push(component);
     }
-    _.map(compileDescription(desc, compilingContext), function(subComponent) {
+    _.map(compileDescription(desc, compilingContext), function (subComponent) {
       component.addComponent(subComponent);
     });
   });
@@ -257,8 +246,8 @@ function compileObject(objDescription, compilingContext) {
 
 function compileList(listRule, compilingContext) {
   const listC = new ConstantComponent('[');
-  _.each(listRule, function(desc) {
-    _.each(compileDescription(desc, compilingContext), function(component) {
+  _.each(listRule, function (desc) {
+    _.each(compileDescription(desc, compilingContext), function (component) {
       listC.addComponent(component);
     });
   });
@@ -268,7 +257,7 @@ function compileList(listRule, compilingContext) {
 /** takes a compiled object and wraps in a {@link ConditionalProxy }*/
 function compileCondition(description, compiledObject) {
   if (description.lines_regex) {
-    return new ConditionalProxy(function(context, editor) {
+    return new ConditionalProxy(function (context, editor) {
       const lines = editor
         .getLines(context.requestStartRow, editor.getCurrentPosition().lineNumber)
         .join('\n');

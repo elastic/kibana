@@ -2,14 +2,19 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-public](./kibana-plugin-core-public.md) &gt; [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.md)
 
-## ChromeHelpExtensionMenuDiscussLink type
+## ChromeHelpExtensionMenuDiscussLink interface
 
 
 <b>Signature:</b>
 
 ```typescript
-export declare type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
-    linkType: 'discuss';
-    href: string;
-};
+export interface ChromeHelpExtensionMenuDiscussLink extends ChromeHelpExtensionLinkBase 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [href](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.href.md) | <code>string</code> | URL to discuss page. i.e. <code>https://discuss.elastic.co/c/${appName}</code> |
+|  [linkType](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.linktype.md) | <code>'discuss'</code> | Creates a generic give feedback link with comment icon |
+

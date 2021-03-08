@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export enum ReindexStep {
@@ -93,12 +93,8 @@ export interface ReindexOperation extends SavedObjectAttributes {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 export enum ReindexWarning {
-  // 6.0 -> 7.0 warnings, now unused
-  allField = 0,
-  booleanFields = 1,
-
   // 7.0 -> 8.0 warnings
-  apmReindex,
+  customTypeName,
 
   // 8.0 -> 9.0 warnings
 }
@@ -164,6 +160,23 @@ export interface UpgradeAssistantTelemetrySavedObjectAttributes {
   [key: string]: any;
 }
 
+export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
+export interface DeprecationInfo {
+  level: MIGRATION_DEPRECATION_LEVEL;
+  message: string;
+  url: string;
+  details?: string;
+}
+
+export interface IndexSettingsDeprecationInfo {
+  [indexName: string]: DeprecationInfo[];
+}
+export interface DeprecationAPIResponse {
+  cluster_settings: DeprecationInfo[];
+  ml_settings: DeprecationInfo[];
+  node_settings: DeprecationInfo[];
+  index_settings: IndexSettingsDeprecationInfo;
+}
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
@@ -184,41 +197,17 @@ export interface UpgradeAssistantStatus {
   indices: EnrichedDeprecationInfo[];
 }
 
-export interface ClusterStateIndexAPIResponse {
-  state: 'open' | 'close';
-  settings: {
-    index: {
-      verified_before_close: string;
-      search: {
-        throttled: string;
-      };
-      number_of_shards: string;
-      provided_name: string;
-      frozen: string;
-      creation_date: string;
-      number_of_replicas: string;
-      uuid: string;
-      version: {
-        created: string;
-      };
-    };
-  };
-  mappings: any;
-  aliases: string[];
-}
-
-export interface ClusterStateAPIResponse {
-  cluster_name: string;
-  cluster_uuid: string;
-  metadata: {
-    cluster_uuid: string;
-    cluster_coordination: {
-      term: number;
-      last_committed_config: string[];
-      last_accepted_config: string[];
-      voting_config_exclusions: [];
-    };
-    templates: any;
-    indices: { [indexName: string]: ClusterStateIndexAPIResponse };
-  };
+export interface ResolveIndexResponseFromES {
+  indices: Array<{
+    name: string;
+    // per https://github.com/elastic/elasticsearch/pull/57626
+    attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;
+    aliases?: string[];
+    data_stream?: string;
+  }>;
+  aliases: Array<{
+    name: string;
+    indices: string[];
+  }>;
+  data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
 }

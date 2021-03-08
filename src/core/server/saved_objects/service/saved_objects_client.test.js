@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsClient } from './saved_objects_client';
@@ -32,6 +21,21 @@ test(`#create`, async () => {
   const result = await client.create(type, attributes, options);
 
   expect(mockRepository.create).toHaveBeenCalledWith(type, attributes, options);
+  expect(result).toBe(returnValue);
+});
+
+test(`#checkConflicts`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    checkConflicts: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const objects = Symbol();
+  const options = Symbol();
+  const result = await client.checkConflicts(objects, options);
+
+  expect(mockRepository.checkConflicts).toHaveBeenCalledWith(objects, options);
   expect(result).toBe(returnValue);
 });
 
@@ -111,6 +115,52 @@ test(`#get`, async () => {
   expect(result).toBe(returnValue);
 });
 
+test(`#openPointInTimeForType`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    openPointInTimeForType: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const options = Symbol();
+  const result = await client.openPointInTimeForType(type, options);
+
+  expect(mockRepository.openPointInTimeForType).toHaveBeenCalledWith(type, options);
+  expect(result).toBe(returnValue);
+});
+
+test(`#closePointInTime`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    closePointInTime: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const id = Symbol();
+  const options = Symbol();
+  const result = await client.closePointInTime(id, options);
+
+  expect(mockRepository.closePointInTime).toHaveBeenCalledWith(id, options);
+  expect(result).toBe(returnValue);
+});
+
+test(`#resolve`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    resolve: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const options = Symbol();
+  const result = await client.resolve(type, id, options);
+
+  expect(mockRepository.resolve).toHaveBeenCalledWith(type, id, options);
+  expect(result).toBe(returnValue);
+});
+
 test(`#update`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
@@ -145,5 +195,55 @@ test(`#bulkUpdate`, async () => {
   expect(mockRepository.bulkUpdate).toHaveBeenCalledWith([{ type, id, attributes, version }], {
     namespace,
   });
+  expect(result).toBe(returnValue);
+});
+
+test(`#addToNamespaces`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    addToNamespaces: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const namespaces = Symbol();
+  const options = Symbol();
+  const result = await client.addToNamespaces(type, id, namespaces, options);
+
+  expect(mockRepository.addToNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
+  expect(result).toBe(returnValue);
+});
+
+test(`#deleteFromNamespaces`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    deleteFromNamespaces: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const namespaces = Symbol();
+  const options = Symbol();
+  const result = await client.deleteFromNamespaces(type, id, namespaces, options);
+
+  expect(mockRepository.deleteFromNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
+  expect(result).toBe(returnValue);
+});
+
+test(`#removeReferencesTo`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    removeReferencesTo: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const options = Symbol();
+  const result = await client.removeReferencesTo(type, id, options);
+
+  expect(mockRepository.removeReferencesTo).toHaveBeenCalledWith(type, id, options);
   expect(result).toBe(returnValue);
 });

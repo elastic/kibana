@@ -1,32 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import path from 'path';
 import fs from 'fs';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file =>
+  const plugins = allFiles.filter((file) =>
     fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
   );
 
@@ -50,8 +39,11 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
+
+        // Required to load new platform plugins via `--plugin-path` flag.
+        '--env.name=development',
         ...plugins.map(
-          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
       ],
     },

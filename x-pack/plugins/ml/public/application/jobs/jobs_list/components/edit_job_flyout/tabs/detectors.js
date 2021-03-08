@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -16,7 +17,7 @@ export class Detectors extends Component {
   constructor(props) {
     super(props);
 
-    this.detectors = mlJobService.getJobGroups().map(g => ({ label: g.id }));
+    this.detectors = mlJobService.getJobGroups().map((g) => ({ label: g.id }));
 
     this.state = {
       detectors: [],
@@ -47,7 +48,7 @@ export class Detectors extends Component {
         <EuiForm>
           {detectorDescriptions.map((d, i) => (
             <EuiFormRow label={detectorToString(detectors[i])} key={i}>
-              <EuiFieldText value={d} onChange={e => this.onDescriptionChange(e, i)} />
+              <EuiFieldText value={d} onChange={(e) => this.onDescriptionChange(e, i)} />
             </EuiFormRow>
           ))}
         </EuiForm>

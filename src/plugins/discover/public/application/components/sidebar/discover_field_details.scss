@@ -1,0 +1,10 @@
+.dscFieldDetails {
+  color: $euiTextColor;
+  margin-bottom: $euiSizeS;
+}
+
+.dscFieldDetails__visualizeBtn {
+  @include euiFontSizeXS;
+  height: $euiSizeL !important;
+  min-width: $euiSize * 4;
+}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,15 +11,13 @@ import { registerHelpers } from './nodes.helpers';
 import { NODE_CUSTOM_ATTRIBUTE } from './constants';
 import { initElasticsearchHelpers } from './lib';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const es = getService('legacyEs');
-
-  const { getNodesStats } = initElasticsearchHelpers(es);
+  const { getNodesStats } = initElasticsearchHelpers(getService);
   const { loadNodes, getNodeDetails } = registerHelpers({ supertest });
 
-  describe('nodes', function() {
+  describe('nodes', function () {
     // Cloud disallows setting custom node attributes, so we can't use `NODE_CUSTOM_ATTRIBUTE`
     // to retrieve the IDs we expect.
     this.tags(['skipCloud']);
@@ -29,7 +28,8 @@ export default function({ getService }) {
         const nodesIds = Object.keys(nodeStats.nodes);
 
         const { body } = await loadNodes().expect(200);
-        expect(body[NODE_CUSTOM_ATTRIBUTE]).to.eql(nodesIds);
+        expect(body.isUsingDeprecatedDataRoleConfig).to.eql(false);
+        expect(body.nodesByAttributes[NODE_CUSTOM_ATTRIBUTE]).to.eql(nodesIds);
       });
     });
 

@@ -1,68 +1,77 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { Alert, AlertTaskState } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
+import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
+import { useKibana } from '../../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
-type WithAlertStateProps = {
+type WithAlertInstanceSummaryProps = {
   alert: Alert;
+  alertType: AlertType;
+  readOnly: boolean;
   requestRefresh: () => Promise<void>;
-} & Pick<AlertApis, 'loadAlertState'>;
+} & Pick<AlertApis, 'loadAlertInstanceSummary'>;
 
-export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> = ({
+export const AlertInstancesRoute: React.FunctionComponent<WithAlertInstanceSummaryProps> = ({
   alert,
+  alertType,
+  readOnly,
   requestRefresh,
-  loadAlertState,
+  loadAlertInstanceSummary: loadAlertInstanceSummary,
 }) => {
-  const { http, toastNotifications } = useAppDependencies();
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
 
-  const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+  const [alertInstanceSummary, setAlertInstanceSummary] = useState<AlertInstanceSummary | null>(
+    null
+  );
 
   useEffect(() => {
-    getAlertState(alert.id, loadAlertState, setAlertState, toastNotifications);
-  }, [alert, http, loadAlertState, toastNotifications]);
+    getAlertInstanceSummary(alert.id, loadAlertInstanceSummary, setAlertInstanceSummary, toasts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alert]);
 
-  return alertState ? (
-    <AlertInstances requestRefresh={requestRefresh} alert={alert} alertState={alertState} />
+  return alertInstanceSummary ? (
+    <AlertInstances
+      requestRefresh={requestRefresh}
+      alert={alert}
+      alertType={alertType}
+      readOnly={readOnly}
+      alertInstanceSummary={alertInstanceSummary}
+    />
   ) : (
-    <div
-      style={{
-        textAlign: 'center',
-        margin: '4em 0em',
-      }}
-    >
-      <EuiLoadingSpinner size="l" />
-    </div>
+    <CenterJustifiedSpinner />
   );
 };
 
-export async function getAlertState(
+export async function getAlertInstanceSummary(
   alertId: string,
-  loadAlertState: AlertApis['loadAlertState'],
-  setAlertState: React.Dispatch<React.SetStateAction<AlertTaskState | null>>,
-  toastNotifications: Pick<ToastsApi, 'addDanger'>
+  loadAlertInstanceSummary: AlertApis['loadAlertInstanceSummary'],
+  setAlertInstanceSummary: React.Dispatch<React.SetStateAction<AlertInstanceSummary | null>>,
+  toasts: Pick<ToastsApi, 'addDanger'>
 ) {
   try {
-    const loadedState = await loadAlertState(alertId);
-    setAlertState(loadedState);
+    const loadedInstanceSummary = await loadAlertInstanceSummary(alertId);
+    setAlertInstanceSummary(loadedInstanceSummary);
   } catch (e) {
-    toastNotifications.addDanger({
+    toasts.addDanger({
       title: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertStateMessage',
+        'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertInstanceSummaryMessage',
         {
-          defaultMessage: 'Unable to load alert state: {message}',
+          defaultMessage: 'Unable to load alert instance summary: {message}',
           values: {
             message: e.message,
           },

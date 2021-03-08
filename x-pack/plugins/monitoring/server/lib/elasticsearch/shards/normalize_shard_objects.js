@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, partition } from 'lodash';
@@ -16,7 +17,7 @@ import { calculateNodeType } from '../nodes';
 export function normalizeNodeShards(masterNode) {
   return (nodes, node) => {
     if (node.key && node.node_ids) {
-      const nodeIds = node.node_ids.buckets.map(b => b.key);
+      const nodeIds = node.node_ids.buckets.map((b) => b.key);
       const _node = {
         ...node,
         node_ids: nodeIds,
@@ -37,19 +38,19 @@ export function normalizeNodeShards(masterNode) {
   };
 }
 
-const countShards = shardBuckets => {
+const countShards = (shardBuckets) => {
   let primaryShards = 0;
   let replicaShards = 0;
 
-  shardBuckets.forEach(shard => {
+  shardBuckets.forEach((shard) => {
     const primaryMap = get(shard, 'primary.buckets', []);
 
-    const primaryBucket = primaryMap.find(b => b.key_as_string === 'true');
+    const primaryBucket = primaryMap.find((b) => b.key_as_string === 'true');
     if (primaryBucket !== undefined) {
       primaryShards += primaryBucket.doc_count;
     }
 
-    const replicaBucket = primaryMap.find(b => b.key_as_string === 'false');
+    const replicaBucket = primaryMap.find((b) => b.key_as_string === 'false');
     if (replicaBucket !== undefined) {
       replicaShards += replicaBucket.doc_count;
     }
@@ -68,7 +69,7 @@ const countShards = shardBuckets => {
  */
 export function normalizeIndexShards(indices, index) {
   const stateBuckets = get(index, 'states.buckets', []);
-  const [assignedShardBuckets, unassignedShardBuckets] = partition(stateBuckets, b => {
+  const [assignedShardBuckets, unassignedShardBuckets] = partition(stateBuckets, (b) => {
     return b.key === 'STARTED' || b.key === 'RELOCATING';
   });
 

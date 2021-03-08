@@ -1,18 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
+
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  findTestSubject,
-  TestBed,
-  TestBedConfig,
-  nextTick,
-} from '../../../../../test_utils';
+import { registerTestBed, findTestSubject, TestBed, TestBedConfig, delay } from '@kbn/test/jest';
 import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
 import { BASE_PATH } from '../../../public/application/constants';
 import { WithAppDependencies } from './setup_environment';
@@ -66,7 +61,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = repositoryLink.props();
       router.navigateTo(href!);
-      await nextTick();
+      await delay(10);
       component.update();
     });
   };
@@ -90,7 +85,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = snapshotLink.props();
       router.navigateTo(href!);
-      await nextTick(100);
+      await delay(100);
       component.update();
     });
   };
@@ -98,19 +93,13 @@ export const setup = async (): Promise<HomeTestBed> => {
   const selectTab = (tab: 'repositories' | 'snapshots') => {
     const tabs = ['snapshots', 'repositories'];
 
-    testBed
-      .find(`${tab}_tab`)
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find(`${tab}_tab`).at(tabs.indexOf(tab)).simulate('click');
   };
 
   const selectSnapshotDetailTab = (tab: 'summary' | 'failedIndices') => {
     const tabs = ['summary', 'failedIndices'];
 
-    testBed
-      .find('snapshotDetail.tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('snapshotDetail.tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   return {

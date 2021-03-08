@@ -1,20 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpSetup } from 'kibana/public';
-import * as t from 'io-ts';
+import { Errors, identity } from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
-import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
+import {
+  Alert,
+  AlertAggregations,
+  AlertType,
+  AlertUpdates,
+  AlertTaskState,
+  AlertInstanceSummary,
+  Pagination,
+  Sorting,
+} from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
-  return await http.get(`${BASE_ALERT_API_PATH}/types`);
+  return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
 }
 
 export async function loadAlert({
@@ -24,7 +34,7 @@ export async function loadAlert({
   http: HttpSetup;
   alertId: string;
 }): Promise<Alert> {
-  return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
+  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}`);
 }
 
 type EmptyHttpResponse = '';
@@ -36,36 +46,37 @@ export async function loadAlertState({
   alertId: string;
 }): Promise<AlertTaskState> {
   return await http
-    .get(`${BASE_ALERT_API_PATH}/${alertId}/state`)
+    .get(`${BASE_ALERT_API_PATH}/alert/${alertId}/state`)
     .then((state: AlertTaskState | EmptyHttpResponse) => (state ? state : {}))
     .then((state: AlertTaskState) => {
       return pipe(
         alertStateSchema.decode(state),
-        fold((e: t.Errors) => {
+        fold((e: Errors) => {
           throw new Error(`Alert "${alertId}" has invalid state`);
-        }, t.identity)
+        }, identity)
       );
     });
 }
 
-export async function loadAlerts({
+export async function loadAlertInstanceSummary({
   http,
-  page,
-  searchText,
-  typesFilter,
-  actionTypesFilter,
+  alertId,
 }: {
   http: HttpSetup;
-  page: { index: number; size: number };
-  searchText?: string;
+  alertId: string;
+}): Promise<AlertInstanceSummary> {
+  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}/_instance_summary`);
+}
+
+export const mapFiltersToKql = ({
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+}: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
-}): Promise<{
-  page: number;
-  perPage: number;
-  total: number;
-  data: Alert[];
-}> {
+  alertStatusesFilter?: string[];
+}): string[] => {
   const filters = [];
   if (typesFilter && typesFilter.length) {
     filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
@@ -74,11 +85,42 @@ export async function loadAlerts({
     filters.push(
       [
         '(',
-        actionTypesFilter.map(id => `alert.attributes.actions:{ actionTypeId:${id} }`).join(' OR '),
+        actionTypesFilter
+          .map((id) => `alert.attributes.actions:{ actionTypeId:${id} }`)
+          .join(' OR '),
         ')',
       ].join('')
     );
   }
+  if (alertStatusesFilter && alertStatusesFilter.length) {
+    filters.push(`alert.attributes.executionStatus.status:(${alertStatusesFilter.join(' or ')})`);
+  }
+  return filters;
+};
+
+export async function loadAlerts({
+  http,
+  page,
+  searchText,
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+  sort = { field: 'name', direction: 'asc' },
+}: {
+  http: HttpSetup;
+  page: Pagination;
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
+  sort?: Sorting;
+}): Promise<{
+  page: number;
+  perPage: number;
+  total: number;
+  data: Alert[];
+}> {
+  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
   return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
       page: page.index + 1,
@@ -87,8 +129,32 @@ export async function loadAlerts({
       search: searchText,
       filter: filters.length ? filters.join(' and ') : undefined,
       default_search_operator: 'AND',
-      sort_field: 'name.keyword',
-      sort_order: 'asc',
+      sort_field: sort.field,
+      sort_order: sort.direction,
+    },
+  });
+}
+
+export async function loadAlertAggregations({
+  http,
+  searchText,
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+}: {
+  http: HttpSetup;
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
+}): Promise<AlertAggregations> {
+  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
+  return await http.get(`${BASE_ALERT_API_PATH}/_aggregate`, {
+    query: {
+      search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
+      search: searchText,
+      filter: filters.length ? filters.join(' and ') : undefined,
+      default_search_operator: 'AND',
     },
   });
 }
@@ -102,11 +168,11 @@ export async function deleteAlerts({
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
-  await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`))).then(
-    function(fulfilled) {
+  await Promise.all(ids.map((id) => http.delete(`${BASE_ALERT_API_PATH}/alert/${id}`))).then(
+    function (fulfilled) {
       successes.push(...fulfilled);
     },
-    function(rejected) {
+    function (rejected) {
       errors.push(...rejected);
     }
   );
@@ -118,9 +184,12 @@ export async function createAlert({
   alert,
 }: {
   http: HttpSetup;
-  alert: Omit<AlertWithoutId, 'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds'>;
+  alert: Omit<
+    AlertUpdates,
+    'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
+  >;
 }): Promise<Alert> {
-  return await http.post(`${BASE_ALERT_API_PATH}`, {
+  return await http.post(`${BASE_ALERT_API_PATH}/alert`, {
     body: JSON.stringify(alert),
   });
 }
@@ -131,18 +200,21 @@ export async function updateAlert({
   id,
 }: {
   http: HttpSetup;
-  alert: Pick<AlertWithoutId, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
+  alert: Pick<
+    AlertUpdates,
+    'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyWhen'
+  >;
   id: string;
 }): Promise<Alert> {
-  return await http.put(`${BASE_ALERT_API_PATH}/${id}`, {
+  return await http.put(`${BASE_ALERT_API_PATH}/alert/${id}`, {
     body: JSON.stringify(
-      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'])
+      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions', 'notifyWhen'])
     ),
   });
 }
 
 export async function enableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`);
+  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/_enable`);
 }
 
 export async function enableAlerts({
@@ -152,11 +224,11 @@ export async function enableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => enableAlert({ id, http })));
+  await Promise.all(ids.map((id) => enableAlert({ id, http })));
 }
 
 export async function disableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`);
+  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/_disable`);
 }
 
 export async function disableAlerts({
@@ -166,7 +238,7 @@ export async function disableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => disableAlert({ id, http })));
+  await Promise.all(ids.map((id) => disableAlert({ id, http })));
 }
 
 export async function muteAlertInstance({
@@ -178,7 +250,7 @@ export async function muteAlertInstance({
   instanceId: string;
   http: HttpSetup;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/alert_instance/${instanceId}/_mute`);
+  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${instanceId}/_mute`);
 }
 
 export async function unmuteAlertInstance({
@@ -190,19 +262,19 @@ export async function unmuteAlertInstance({
   instanceId: string;
   http: HttpSetup;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/alert_instance/${instanceId}/_unmute`);
+  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${instanceId}/_unmute`);
 }
 
 export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`);
+  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/_mute_all`);
 }
 
 export async function muteAlerts({ ids, http }: { ids: string[]; http: HttpSetup }): Promise<void> {
-  await Promise.all(ids.map(id => muteAlert({ http, id })));
+  await Promise.all(ids.map((id) => muteAlert({ http, id })));
 }
 
 export async function unmuteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`);
+  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/_unmute_all`);
 }
 
 export async function unmuteAlerts({
@@ -212,9 +284,13 @@ export async function unmuteAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => unmuteAlert({ id, http })));
+  await Promise.all(ids.map((id) => unmuteAlert({ id, http })));
 }
 
-export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
+export async function alertingFrameworkHealth({
+  http,
+}: {
+  http: HttpSetup;
+}): Promise<AlertingFrameworkHealth> {
   return await http.get(`${BASE_ALERT_API_PATH}/_health`);
 }

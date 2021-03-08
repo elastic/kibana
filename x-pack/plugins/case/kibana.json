@@ -2,7 +2,7 @@
   "configPath": ["xpack", "case"],
   "id": "case",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["actions"],
+  "requiredPlugins": ["actions", "securitySolution"],
   "optionalPlugins": [
     "spaces",
     "security"

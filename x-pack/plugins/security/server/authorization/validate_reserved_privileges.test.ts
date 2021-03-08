@@ -1,28 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Feature } from '../../../features/server';
+import { KibanaFeature } from '../../../features/server';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
 
 it('allows features to be defined without privileges', () => {
-  const feature: Feature = new Feature({
+  const feature: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
     privileges: null,
+    category: { id: 'foo', label: 'foo' },
   });
 
   validateReservedPrivileges([feature]);
 });
 
 it('allows features with a single reserved privilege to be defined', () => {
-  const feature: Feature = new Feature({
+  const feature: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -45,10 +48,11 @@ it('allows features with a single reserved privilege to be defined', () => {
 });
 
 it('allows multiple features with reserved privileges to be defined', () => {
-  const feature1: Feature = new Feature({
+  const feature1: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -67,10 +71,11 @@ it('allows multiple features with reserved privileges to be defined', () => {
     },
   });
 
-  const feature2: Feature = new Feature({
+  const feature2: KibanaFeature = new KibanaFeature({
     id: 'foo2',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -93,10 +98,11 @@ it('allows multiple features with reserved privileges to be defined', () => {
 });
 
 it('prevents a feature from specifying the same reserved privilege id', () => {
-  const feature1: Feature = new Feature({
+  const feature1: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -131,10 +137,11 @@ it('prevents a feature from specifying the same reserved privilege id', () => {
 });
 
 it('prevents features from sharing a reserved privilege id', () => {
-  const feature1: Feature = new Feature({
+  const feature1: KibanaFeature = new KibanaFeature({
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -153,10 +160,11 @@ it('prevents features from sharing a reserved privilege id', () => {
     },
   });
 
-  const feature2: Feature = new Feature({
+  const feature2: KibanaFeature = new KibanaFeature({
     id: 'foo2',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',

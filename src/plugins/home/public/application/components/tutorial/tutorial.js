@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -101,11 +90,11 @@ class TutorialUi extends React.Component {
     getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
-        href: '#/home',
+        href: '#/',
       },
       {
         text: addDataTitle,
-        href: '#/home/tutorial_directory',
+        href: '#/tutorial_directory',
       },
       {
         text: tutorial ? tutorial.name : this.props.tutorialId,
@@ -147,7 +136,7 @@ class TutorialUi extends React.Component {
 
     const paramValues = {};
     if (instructions.params) {
-      instructions.params.forEach(param => {
+      instructions.params.forEach((param) => {
         paramValues[param.id] = param.defaultValue;
       });
     }
@@ -162,7 +151,7 @@ class TutorialUi extends React.Component {
     });
   };
 
-  setVisibleInstructions = instructionsType => {
+  setVisibleInstructions = (instructionsType) => {
     this.setState(
       {
         visibleInstructions: instructionsType,
@@ -172,21 +161,21 @@ class TutorialUi extends React.Component {
   };
 
   setParameter = (paramId, newValue) => {
-    this.setState(previousState => {
+    this.setState((previousState) => {
       const paramValues = _.cloneDeep(previousState.paramValues);
       paramValues[paramId] = newValue;
       return { paramValues: paramValues };
     });
   };
 
-  checkInstructionSetStatus = async instructionSetIndex => {
+  checkInstructionSetStatus = async (instructionSetIndex) => {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
 
     if (esHitsCheckConfig) {
       const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
 
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         statusCheckStates: {
           ...prevState.statusCheckStates,
           [instructionSetIndex]: statusCheckState,
@@ -200,27 +189,19 @@ class TutorialUi extends React.Component {
    * @param esHitsCheckConfig
    * @return {Promise<string>}
    */
-  fetchEsHitsStatus = async esHitsCheckConfig => {
-    const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
-    const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
-    const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
-      method: 'post',
-      body: `${searchHeader}\n${searchBody}\n`,
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/x-ndjson',
-        'kbn-xsrf': 'kibana',
-      },
-      credentials: 'same-origin',
-    });
-
-    if (response.status > 300) {
+  fetchEsHitsStatus = async (esHitsCheckConfig) => {
+    const { http } = getServices();
+    try {
+      const response = await http.post('/api/home/hits_status', {
+        body: JSON.stringify({
+          index: esHitsCheckConfig.index,
+          query: esHitsCheckConfig.query,
+        }),
+      });
+      return response.count > 0 ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
+    } catch (e) {
       return StatusCheckStates.ERROR;
     }
-
-    const results = await response.json();
-    const numHits = _.get(results, 'responses.[0].hits.hits.length', 0);
-    return numHits === 0 ? StatusCheckStates.NO_DATA : StatusCheckStates.HAS_DATA;
   };
 
   renderInstructionSetsToggle = () => {
@@ -253,6 +234,9 @@ class TutorialUi extends React.Component {
               idSelected={this.state.visibleInstructions}
               onChange={this.setVisibleInstructions}
               color="primary"
+              legend={i18n.translate('home.tutorial.selectionLegend', {
+                defaultMessage: 'Deployment type',
+              })}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -260,9 +244,9 @@ class TutorialUi extends React.Component {
     }
   };
 
-  onStatusCheck = instructionSetIndex => {
+  onStatusCheck = (instructionSetIndex) => {
     this.setState(
-      prevState => ({
+      (prevState) => ({
         statusCheckStates: {
           ...prevState.statusCheckStates,
           [instructionSetIndex]: StatusCheckStates.FETCHING,
@@ -272,7 +256,7 @@ class TutorialUi extends React.Component {
     );
   };
 
-  renderInstructionSets = instructions => {
+  renderInstructionSets = (instructions) => {
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
@@ -320,12 +304,12 @@ class TutorialUi extends React.Component {
       label = this.state.tutorial.artifacts.application.label;
       url = this.props.addBasePath(this.state.tutorial.artifacts.application.path);
     } else if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
-      const overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
+      const overviewDashboard = this.state.tutorial.artifacts.dashboards.find((dashboard) => {
         return dashboard.isOverview;
       });
       if (overviewDashboard) {
         label = overviewDashboard.linkLabel;
-        url = this.props.addBasePath(`/app/kibana#/dashboard/${overviewDashboard.id}`);
+        url = this.props.addBasePath(`/app/dashboards#/view/${overviewDashboard.id}`);
       }
     }
 
@@ -333,6 +317,23 @@ class TutorialUi extends React.Component {
       return <Footer label={label} url={url} />;
     }
   };
+
+  renderModuleNotices() {
+    const notices = getServices().tutorialService.getModuleNotices();
+    if (notices.length && this.state.tutorial.moduleName) {
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {notices.map((ModuleNotice, index) => (
+            <EuiFlexItem key={index}>
+              <ModuleNotice moduleName={this.state.tutorial.moduleName} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      );
+    } else {
+      return null;
+    }
+  }
 
   render() {
     let content;
@@ -382,6 +383,7 @@ class TutorialUi extends React.Component {
             isBeta={this.state.tutorial.isBeta}
           />
 
+          {this.renderModuleNotices()}
           <EuiSpacer />
           <div className="eui-textCenter">{this.renderInstructionSetsToggle()}</div>
 

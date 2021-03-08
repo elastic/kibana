@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
@@ -30,7 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggGroupNames, search, IAggConfig, TimeRange } from '../../../data/public';
+import { AggGroupNames, AggGroupLabels, IAggConfig, TimeRange } from '../../../data/public';
+import type { Schema } from '../../../visualizations/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
@@ -41,7 +31,6 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
-import { Schema } from '../schemas';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
@@ -70,9 +59,9 @@ function DefaultEditorAggGroup({
   setValidity,
   timeRange,
 }: DefaultEditorAggGroupProps) {
-  const groupNameLabel = (search.aggs.aggGroupNamesMap() as any)[groupName];
+  const groupNameLabel = AggGroupLabels[groupName];
   // e.g. buckets can have no aggs
-  const schemaNames = schemas.map(s => s.name);
+  const schemaNames = schemas.map((s) => s.name);
   const group: IAggConfig[] = useMemo(
     () =>
       state.data.aggs!.aggs.filter(
@@ -100,7 +89,7 @@ function DefaultEditorAggGroup({
         })
       : undefined;
 
-  const isGroupValid = !bucketsError && Object.values(aggsState).every(item => item.valid);
+  const isGroupValid = !bucketsError && Object.values(aggsState).every((item) => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
   const isMetricAggregationDisabled = useMemo(
     () => groupName === AggGroupNames.Metrics && getEnabledMetricAggsCount(group) === 1,
@@ -152,7 +141,7 @@ function DefaultEditorAggGroup({
         <EuiSpacer size="s" />
         {bucketsError && (
           <>
-            <EuiFormErrorText>{bucketsError}</EuiFormErrorText>
+            <EuiFormErrorText data-test-subj="bucketsError">{bucketsError}</EuiFormErrorText>
             <EuiSpacer size="s" />
           </>
         )}
@@ -165,12 +154,12 @@ function DefaultEditorAggGroup({
                 draggableId={`agg_group_dnd_${groupName}_${agg.id}`}
                 customDragHandle={true}
               >
-                {provided => (
+                {(provided) => (
                   <DefaultEditorAgg
                     agg={agg}
                     aggIndex={index}
                     aggIsTooLow={calcAggIsTooLow(agg, index, group, schemas)}
-                    dragHandleProps={provided.dragHandleProps}
+                    dragHandleProps={provided.dragHandleProps || null}
                     formIsTouched={aggsState[agg.id] ? aggsState[agg.id].touched : false}
                     groupName={groupName}
                     isDraggable={stats.count > 1}

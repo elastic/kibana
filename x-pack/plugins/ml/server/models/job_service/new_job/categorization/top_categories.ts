@@ -1,82 +1,87 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { CategoryId, Category } from '../../../../../common/types/categories';
-import { callWithRequestType } from '../../../../../common/types/kibana';
+import type { MlClient } from '../../../../lib/ml_client';
 
-export function topCategoriesProvider(callWithRequest: callWithRequestType) {
-  async function getTotalCategories(jobId: string): Promise<{ total: number }> {
-    const totalResp = await callWithRequest('search', {
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  job_id: jobId,
+export function topCategoriesProvider(mlClient: MlClient) {
+  async function getTotalCategories(jobId: string): Promise<number> {
+    const { body } = await mlClient.anomalySearch<SearchResponse<any>>(
+      {
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    job_id: jobId,
+                  },
                 },
-              },
-              {
-                exists: {
-                  field: 'category_id',
+                {
+                  exists: {
+                    field: 'category_id',
+                  },
                 },
-              },
-            ],
-          },
-        },
-      },
-    });
-    return totalResp?.hits?.total?.value ?? 0;
-  }
-
-  async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const top: SearchResponse<any> = await callWithRequest('search', {
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  job_id: jobId,
-                },
-              },
-              {
-                term: {
-                  result_type: 'model_plot',
-                },
-              },
-              {
-                term: {
-                  by_field_name: 'mlcategory',
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          cat_count: {
-            terms: {
-              field: 'by_field_value',
-              size: numberOfCategories,
+              ],
             },
           },
         },
       },
-    });
+      []
+    );
+    // @ts-ignore total is an object here
+    return body?.hits?.total?.value ?? 0;
+  }
+
+  async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
+    const { body } = await mlClient.anomalySearch<SearchResponse<any>>(
+      {
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    job_id: jobId,
+                  },
+                },
+                {
+                  term: {
+                    result_type: 'model_plot',
+                  },
+                },
+                {
+                  term: {
+                    by_field_name: 'mlcategory',
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            cat_count: {
+              terms: {
+                field: 'by_field_value',
+                size: numberOfCategories,
+              },
+            },
+          },
+        },
+      },
+      []
+    );
 
     const catCounts: Array<{
       id: CategoryId;
       count: number;
-    }> = top.aggregations?.cat_count?.buckets.map((c: any) => ({
+    }> = body.aggregations?.cat_count?.buckets.map((c: any) => ({
       id: c.key,
       count: c.doc_count,
     }));
@@ -99,33 +104,35 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
             field: 'category_id',
           },
         };
-    const result: SearchResponse<any> = await callWithRequest('search', {
-      index: ML_RESULTS_INDEX_PATTERN,
-      size,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  job_id: jobId,
+    const { body } = await mlClient.anomalySearch<any>(
+      {
+        size,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    job_id: jobId,
+                  },
                 },
-              },
-              categoryFilter,
-            ],
+                categoryFilter,
+              ],
+            },
           },
         },
       },
-    });
+      []
+    );
 
-    return result.hits.hits?.map((c: { _source: Category }) => c._source) || [];
+    return body.hits.hits?.map((c: { _source: Category }) => c._source) || [];
   }
 
   async function topCategories(jobId: string, numberOfCategories: number) {
     const catCounts = await getTopCategoryCounts(jobId, numberOfCategories);
     const categories = await getCategories(
       jobId,
-      catCounts.map(c => c.id),
+      catCounts.map((c) => c.id),
       catCounts.length || numberOfCategories
     );
 
@@ -149,7 +156,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
     } else {
       return {
         total,
-        categories: categories.map(category => {
+        categories: categories.map((category) => {
           return {
             category,
           };

@@ -1,33 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { defaults, indexBy, sortBy } from 'lodash';
+import { defaults, keyBy, sortBy } from 'lodash';
 
-import { APICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
-import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
+import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
-
-export function concatIfUniq<T>(arr: T[], value: T) {
-  return arr.includes(value) ? arr : arr.concat(value);
-}
 
 /**
  *  Get the field capabilities for field in `indices`, excluding
@@ -36,21 +21,35 @@ export function concatIfUniq<T>(arr: T[], value: T) {
  *  @param  {Function} callCluster bound function for accessing an es client
  *  @param  {Array}  [indices=[]]  the list of indexes to check
  *  @param  {Array}  [metaFields=[]] the list of internal fields to include
+ *  @param  {Object} fieldCapsOptions
  *  @return {Promise<Array<FieldDescriptor>>}
  */
 export async function getFieldCapabilities(
-  callCluster: APICaller,
+  callCluster: ElasticsearchClient,
   indices: string | string[] = [],
-  metaFields: string[] = []
+  metaFields: string[] = [],
+  fieldCapsOptions?: { allow_no_indices: boolean }
 ) {
-  const esFieldCaps: FieldCapsResponse = await callFieldCapsApi(callCluster, indices);
-  const fieldsFromFieldCapsByName = indexBy(readFieldCapsResponse(esFieldCaps), 'name');
+  const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
+  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
-    .filter(name => !name.startsWith('_'))
+    .filter((name) => !name.startsWith('_'))
     .concat(metaFields)
-    .reduce(concatIfUniq, [] as string[])
-    .map<FieldDescriptor>(name =>
+    .reduce<{ names: string[]; hash: Record<string, string> }>(
+      (agg, value) => {
+        // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
+        if (agg.hash[value] != null) {
+          return agg;
+        } else {
+          agg.hash[value] = value;
+          agg.names.push(value);
+          return agg;
+        }
+      },
+      { names: [], hash: {} }
+    )
+    .names.map<FieldDescriptor>((name) =>
       defaults({}, fieldsFromFieldCapsByName[name], {
         name,
         type: 'string',

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
@@ -27,6 +16,8 @@ export type GetArgsType<T extends LifecyclePhase<any>> = T extends LifecyclePhas
 
 export class LifecyclePhase<Args extends readonly any[]> {
   private readonly handlers: Array<(...args: Args) => Promise<void> | void> = [];
+
+  public triggered = false;
 
   private readonly beforeSubj = new Rx.Subject<void>();
   public readonly before$ = this.beforeSubj.asObservable();
@@ -46,10 +37,18 @@ export class LifecyclePhase<Args extends readonly any[]> {
     this.handlers.push(fn);
   }
 
+  public addSub(sub: Rx.Subscription) {
+    this.handlers.push(() => {
+      sub.unsubscribe();
+    });
+  }
+
   public async trigger(...args: Args) {
-    if (this.beforeSubj.isStopped) {
+    if (this.options.singular && this.triggered) {
       throw new Error(`singular lifecycle event can only be triggered once`);
     }
+
+    this.triggered = true;
 
     this.beforeSubj.next(undefined);
     if (this.options.singular) {
@@ -57,18 +56,20 @@ export class LifecyclePhase<Args extends readonly any[]> {
     }
 
     // catch the first error but still execute all handlers
-    let error;
+    let error: Error | undefined;
 
     // shuffle the handlers to prevent relying on their order
-    for (const fn of shuffle(this.handlers)) {
-      try {
-        await fn(...args);
-      } catch (_error) {
-        if (!error) {
-          error = _error;
+    await Promise.all(
+      shuffle(this.handlers).map(async (fn) => {
+        try {
+          await fn(...args);
+        } catch (_error) {
+          if (!error) {
+            error = _error;
+          }
         }
-      }
-    }
+      })
+    );
 
     this.afterSubj.next(undefined);
     if (this.options.singular) {

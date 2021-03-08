@@ -1,0 +1,48 @@
+get:
+  summary: Agents setup - Info
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              isInitialized:
+                type: boolean
+            required:
+              - isInitialized
+  operationId: get-agents-setup
+  security:
+    - basicAuth: []
+post:
+  summary: Agents setup - Create
+  operationId: post-agents-setup
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              isInitialized:
+                type: boolean
+            required:
+              - isInitialized
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            admin_username:
+              type: string
+            admin_password:
+              type: string
+          required:
+            - admin_username
+            - admin_password
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml

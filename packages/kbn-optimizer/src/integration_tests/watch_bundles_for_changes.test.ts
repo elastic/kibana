@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import ActualWatchpack from 'watchpack';
+import { lastValueFrom } from '@kbn/std';
 
 import { Bundle, ascending } from '../common';
 import { watchBundlesForChanges$ } from '../optimizer/watch_bundles_for_changes';
@@ -29,14 +19,14 @@ jest.mock('fs');
 jest.mock('watchpack');
 
 const MockWatchPack: jest.MockedClass<typeof ActualWatchpack> = jest.requireMock('watchpack');
-const bundleEntryPath = (bundle: Bundle) => `${bundle.contextDir}/${bundle.entry}`;
+const bundleEntryPath = (bundle: Bundle) => `${bundle.contextDir}/public/index.ts`;
 
 const makeTestBundle = (id: string) => {
   const bundle = new Bundle({
     type: 'plugin',
     id,
     contextDir: `/repo/plugins/${id}/public`,
-    entry: 'index.ts',
+    publicDirNames: ['public'],
     outputDir: `/repo/plugins/${id}/target/public`,
     sourceRoot: `/repo`,
   });
@@ -78,8 +68,8 @@ afterEach(async () => {
 it('notifies of changes and completes once all bundles have changed', async () => {
   expect.assertions(18);
 
-  const promise = watchBundlesForChanges$(bundleCacheEvent$, Date.now())
-    .pipe(
+  const promise = lastValueFrom(
+    watchBundlesForChanges$(bundleCacheEvent$, Date.now()).pipe(
       map((event, i) => {
         // each time we trigger a change event we get a 'changed detected' event
         if (i === 0 || i === 2 || i === 4 || i === 6) {
@@ -96,7 +86,7 @@ it('notifies of changes and completes once all bundles have changed', async () =
         // first we change foo and bar, and after 1 second get that change comes though
         if (i === 1) {
           expect(event.bundles).toHaveLength(2);
-          const [bar, foo] = event.bundles.sort(ascending(b => b.id));
+          const [bar, foo] = event.bundles.sort(ascending((b) => b.id));
           expect(bar).toHaveProperty('id', 'bar');
           expect(foo).toHaveProperty('id', 'foo');
         }
@@ -110,13 +100,13 @@ it('notifies of changes and completes once all bundles have changed', async () =
         // finally we change box and car together
         if (i === 5) {
           expect(event.bundles).toHaveLength(2);
-          const [bar, foo] = event.bundles.sort(ascending(b => b.id));
+          const [bar, foo] = event.bundles.sort(ascending((b) => b.id));
           expect(bar).toHaveProperty('id', 'box');
           expect(foo).toHaveProperty('id', 'car');
         }
       })
     )
-    .toPromise();
+  );
 
   expect(MockWatchPack.mock.instances).toHaveLength(1);
   const [watcher] = (MockWatchPack.mock.instances as any) as Array<jest.Mocked<ActualWatchpack>>;

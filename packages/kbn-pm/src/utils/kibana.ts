@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -22,6 +11,8 @@ import Path from 'path';
 import multimatch from 'multimatch';
 import isPathInside from 'is-path-inside';
 
+import { resolveDepsForProject, YarnLock } from './yarn_lock';
+import { Log } from './log';
 import { ProjectMap, getProjects, includeTransitiveProjects } from './projects';
 import { Project } from './project';
 import { getProjectPaths } from '../config';
@@ -42,7 +33,7 @@ export class Kibana {
     return new Kibana(await getProjects(rootPath, getProjectPaths({ rootPath })));
   }
 
-  private readonly kibanaProject: Project;
+  public readonly kibanaProject: Project;
 
   constructor(private readonly allWorkspaceProjects: ProjectMap) {
     const kibanaProject = allWorkspaceProjects.get('kibana');
@@ -103,11 +94,11 @@ export class Kibana {
     const allProjects = this.getAllProjects();
     const filteredProjects: ProjectMap = new Map();
 
-    const pkgJsonPaths = Array.from(allProjects.values()).map(p => p.packageJsonLocation);
+    const pkgJsonPaths = Array.from(allProjects.values()).map((p) => p.packageJsonLocation);
     const filteredPkgJsonGlobs = getProjectPaths({
       ...options,
       rootPath: this.kibanaProject.path,
-    }).map(g => Path.resolve(g, 'package.json'));
+    }).map((g) => Path.resolve(g, 'package.json'));
     const matchingPkgJsonPaths = multimatch(pkgJsonPaths, filteredPkgJsonGlobs);
 
     for (const project of allProjects.values()) {
@@ -132,5 +123,27 @@ export class Kibana {
 
   isOutsideRepo(project: Project) {
     return !this.isPartOfRepo(project);
+  }
+
+  resolveAllProductionDependencies(yarnLock: YarnLock, log: Log) {
+    const kibanaDeps = resolveDepsForProject({
+      project: this.kibanaProject,
+      yarnLock,
+      kbn: this,
+      includeDependentProject: true,
+      productionDepsOnly: true,
+      log,
+    })!;
+
+    const xpackDeps = resolveDepsForProject({
+      project: this.getProject('x-pack')!,
+      yarnLock,
+      kbn: this,
+      includeDependentProject: true,
+      productionDepsOnly: true,
+      log,
+    })!;
+
+    return new Map([...kibanaDeps.entries(), ...xpackDeps.entries()]);
   }
 }

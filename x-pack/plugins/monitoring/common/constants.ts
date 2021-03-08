@@ -1,8 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { i18n } from '@kbn/i18n';
+import { CommonAlertParamDetail } from './types/alerts';
+import { AlertParamType } from './enums';
 
 /**
  * Helper string to add as a tag in every logging call
@@ -139,7 +144,7 @@ export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*';
 export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*,.monitoring-kibana-7-*';
 export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logstash-7-*';
 export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
-export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7';
+export const INDEX_ALERTS = '.monitoring-alerts-6*,.monitoring-alerts-7*';
 export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
@@ -216,47 +221,375 @@ export const REPORTING_SYSTEM_ID = 'reporting';
 export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
 
 /**
- * We want to slowly rollout the migration from watcher-based cluster alerts to
- * kibana alerts and we only want to enable the kibana alerts once all
- * watcher-based cluster alerts have been migrated so this flag will serve
- * as the only way to see the new UI and actually run Kibana alerts. It will
- * be false until all alerts have been migrated, then it will be removed
+ * The amount of time, in milliseconds, to fetch the cluster uuids from es.
+ *
+ * Currently 3 hours.
+ * @type {Number}
  */
-export const KIBANA_ALERTING_ENABLED = false;
+export const CLUSTER_DETAILS_FETCH_INTERVAL = 10800000;
+
+/**
+ * The amount of time, in milliseconds, to fetch the usage data from es.
+ *
+ * Currently 20 minutes.
+ * @type {Number}
+ */
+export const USAGE_FETCH_INTERVAL = 1200000;
 
 /**
  * The prefix for all alert types used by monitoring
  */
-export const ALERT_TYPE_PREFIX = 'monitoring_';
+export const ALERT_PREFIX = 'monitoring_';
+export const ALERT_LICENSE_EXPIRATION = `${ALERT_PREFIX}alert_license_expiration`;
+export const ALERT_CLUSTER_HEALTH = `${ALERT_PREFIX}alert_cluster_health`;
+export const ALERT_CPU_USAGE = `${ALERT_PREFIX}alert_cpu_usage`;
+export const ALERT_DISK_USAGE = `${ALERT_PREFIX}alert_disk_usage`;
+export const ALERT_NODES_CHANGED = `${ALERT_PREFIX}alert_nodes_changed`;
+export const ALERT_ELASTICSEARCH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_elasticsearch_version_mismatch`;
+export const ALERT_KIBANA_VERSION_MISMATCH = `${ALERT_PREFIX}alert_kibana_version_mismatch`;
+export const ALERT_LOGSTASH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_logstash_version_mismatch`;
+export const ALERT_MEMORY_USAGE = `${ALERT_PREFIX}alert_jvm_memory_usage`;
+export const ALERT_MISSING_MONITORING_DATA = `${ALERT_PREFIX}alert_missing_monitoring_data`;
+export const ALERT_THREAD_POOL_SEARCH_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_search_rejections`;
+export const ALERT_THREAD_POOL_WRITE_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_write_rejections`;
+export const ALERT_CCR_READ_EXCEPTIONS = `${ALERT_PREFIX}ccr_read_exceptions`;
+export const ALERT_LARGE_SHARD_SIZE = `${ALERT_PREFIX}shard_size`;
 
 /**
- * This is the alert type id for the license expiration alert
+ * Legacy alerts details/label for server and public use
  */
-export const ALERT_TYPE_LICENSE_EXPIRATION = `${ALERT_TYPE_PREFIX}alert_type_license_expiration`;
+export const LEGACY_ALERT_DETAILS = {
+  [ALERT_CLUSTER_HEALTH]: {
+    label: i18n.translate('xpack.monitoring.alerts.clusterHealth.label', {
+      defaultMessage: 'Cluster health',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.clusterHealth.description', {
+      defaultMessage: 'Alert when the health of the cluster changes.',
+    }),
+  },
+  [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: {
+    label: i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.label', {
+      defaultMessage: 'Elasticsearch version mismatch',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.alerts.elasticsearchVersionMismatch.description',
+      {
+        defaultMessage: 'Alert when the cluster has multiple versions of Elasticsearch.',
+      }
+    ),
+  },
+  [ALERT_KIBANA_VERSION_MISMATCH]: {
+    label: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.label', {
+      defaultMessage: 'Kibana version mismatch',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.description', {
+      defaultMessage: 'Alert when the cluser has multiple versions of Kibana.',
+    }),
+  },
+  [ALERT_LICENSE_EXPIRATION]: {
+    label: i18n.translate('xpack.monitoring.alerts.licenseExpiration.label', {
+      defaultMessage: 'License expiration',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.licenseExpiration.description', {
+      defaultMessage: 'Alert when the cluster license is about to expire.',
+    }),
+  },
+  [ALERT_LOGSTASH_VERSION_MISMATCH]: {
+    label: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.label', {
+      defaultMessage: 'Logstash version mismatch',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.description', {
+      defaultMessage: 'Alert when the cluster has multiple versions of Logstash.',
+    }),
+  },
+  [ALERT_NODES_CHANGED]: {
+    label: i18n.translate('xpack.monitoring.alerts.nodesChanged.label', {
+      defaultMessage: 'Nodes changed',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.nodesChanged.description', {
+      defaultMessage: 'Alert when adding, removing, or restarting a node.',
+    }),
+  },
+};
+
 /**
- * This is the alert type id for the cluster state alert
+ * Alerts details/label for server and public use
  */
-export const ALERT_TYPE_CLUSTER_STATE = `${ALERT_TYPE_PREFIX}alert_type_cluster_state`;
+export const ALERT_DETAILS = {
+  [ALERT_CPU_USAGE]: {
+    label: i18n.translate('xpack.monitoring.alerts.cpuUsage.label', {
+      defaultMessage: 'CPU Usage',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.cpuUsage.description', {
+      defaultMessage: 'Alert when the CPU load for a node is consistently high.',
+    }),
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.cpuUsage.paramDetails.threshold.label', {
+          defaultMessage: `Notify when CPU is over`,
+        }),
+        type: AlertParamType.Percentage,
+      } as CommonAlertParamDetail,
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.cpuUsage.paramDetails.duration.label', {
+          defaultMessage: `Look at the average over`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+    },
+  },
+  [ALERT_DISK_USAGE]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.diskUsage.paramDetails.threshold.label', {
+          defaultMessage: `Notify when disk capacity is over`,
+        }),
+        type: AlertParamType.Percentage,
+      },
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.diskUsage.paramDetails.duration.label', {
+          defaultMessage: `Look at the average over`,
+        }),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.diskUsage.label', {
+      defaultMessage: 'Disk Usage',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.diskUsage.description', {
+      defaultMessage: 'Alert when the disk usage for a node is consistently high.',
+    }),
+  },
+  [ALERT_MEMORY_USAGE]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.threshold.label', {
+          defaultMessage: `Notify when memory usage is over`,
+        }),
+        type: AlertParamType.Percentage,
+      },
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.duration.label', {
+          defaultMessage: `Look at the average over`,
+        }),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.memoryUsage.label', {
+      defaultMessage: 'Memory Usage (JVM)',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.memoryUsage.description', {
+      defaultMessage: 'Alert when a node reports high memory usage.',
+    }),
+  },
+  [ALERT_MISSING_MONITORING_DATA]: {
+    paramDetails: {
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.duration.label', {
+          defaultMessage: `Notify if monitoring data is missing for the last`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+      limit: {
+        label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.limit.label', {
+          defaultMessage: `looking back`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+    },
+    label: i18n.translate('xpack.monitoring.alerts.missingData.label', {
+      defaultMessage: 'Missing monitoring data',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.missingData.description', {
+      defaultMessage: 'Alert when monitoring data is missing.',
+    }),
+  },
+  [ALERT_THREAD_POOL_SEARCH_REJECTIONS]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.threshold.label', {
+          defaultMessage: `Notify when {type} rejection count is over`,
+          values: { type: 'search' },
+        }),
+        type: AlertParamType.Number,
+      },
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.duration.label', {
+          defaultMessage: `In the last`,
+        }),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.label', {
+      defaultMessage: 'Thread pool {type} rejections',
+      values: { type: 'search' },
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.searchThreadPoolRejections.description', {
+      defaultMessage:
+        'Alert when the number of rejections in the search thread pool exceeds the threshold.',
+    }),
+  },
+  [ALERT_THREAD_POOL_WRITE_REJECTIONS]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.threshold.label', {
+          defaultMessage: `Notify when {type} rejection count is over`,
+          values: { type: 'write' },
+        }),
+        type: AlertParamType.Number,
+      },
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.duration.label', {
+          defaultMessage: `In the last`,
+        }),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.threadPoolRejections.label', {
+      defaultMessage: 'Thread pool {type} rejections',
+      values: { type: 'write' },
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.writeThreadPoolRejections.description', {
+      defaultMessage:
+        'Alert when the number of rejections in the write thread pool exceeds the threshold.',
+    }),
+  },
+  [ALERT_CCR_READ_EXCEPTIONS]: {
+    paramDetails: {
+      duration: {
+        label: i18n.translate(
+          'xpack.monitoring.alerts.ccrReadExceptions.paramDetails.duration.label',
+          {
+            defaultMessage: `In the last`,
+          }
+        ),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.label', {
+      defaultMessage: 'CCR read exceptions',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.description', {
+      defaultMessage: 'Alert if any CCR read exceptions have been detected.',
+    }),
+  },
+  [ALERT_LARGE_SHARD_SIZE]: {
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.threshold.label', {
+          defaultMessage: `Notify when a shard exceeds this size`,
+        }),
+        type: AlertParamType.Number,
+        append: 'GB',
+      },
+      indexPattern: {
+        label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.indexPattern.label', {
+          defaultMessage: `Check the following index patterns`,
+        }),
+        placeholder: 'eg: data-*, *prod-data, -.internal-data*',
+        type: AlertParamType.TextField,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.shardSize.label', {
+      defaultMessage: 'Shard size',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.shardSize.description', {
+      defaultMessage: 'Alert if an index (primary) shard is oversize.',
+    }),
+  },
+};
+
+export const ALERT_PANEL_MENU = [
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.clusterHealth', {
+      defaultMessage: 'Cluster health',
+    }),
+    alerts: [
+      { alertName: ALERT_NODES_CHANGED },
+      { alertName: ALERT_CLUSTER_HEALTH },
+      { alertName: ALERT_ELASTICSEARCH_VERSION_MISMATCH },
+      { alertName: ALERT_KIBANA_VERSION_MISMATCH },
+      { alertName: ALERT_LOGSTASH_VERSION_MISMATCH },
+    ],
+  },
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.resourceUtilization', {
+      defaultMessage: 'Resource utilization',
+    }),
+    alerts: [
+      { alertName: ALERT_CPU_USAGE },
+      { alertName: ALERT_DISK_USAGE },
+      { alertName: ALERT_MEMORY_USAGE },
+      { alertName: ALERT_LARGE_SHARD_SIZE },
+    ],
+  },
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.errors', {
+      defaultMessage: 'Errors and exceptions',
+    }),
+    alerts: [
+      { alertName: ALERT_MISSING_MONITORING_DATA },
+      { alertName: ALERT_LICENSE_EXPIRATION },
+      { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS },
+      { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS },
+      { alertName: ALERT_CCR_READ_EXCEPTIONS },
+    ],
+  },
+];
 
 /**
  * A listing of all alert types
  */
-export const ALERT_TYPES = [ALERT_TYPE_LICENSE_EXPIRATION, ALERT_TYPE_CLUSTER_STATE];
+export const ALERTS = [
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_CPU_USAGE,
+  ALERT_DISK_USAGE,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MEMORY_USAGE,
+  ALERT_MISSING_MONITORING_DATA,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_CCR_READ_EXCEPTIONS,
+  ALERT_LARGE_SHARD_SIZE,
+];
+
+/**
+ * A list of all legacy alerts, which means they are powered by watcher
+ */
+export const LEGACY_ALERTS = [
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_KIBANA_VERSION_MISMATCH,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+];
 
 /**
  * Matches the id for the built-in in email action type
- * See x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts
+ * See x-pack/plugins/actions/server/builtin_action_types/email.ts
  */
 export const ALERT_ACTION_TYPE_EMAIL = '.email';
+/**
+ * Matches the id for the built-in in log action type
+ * See x-pack/plugins/actions/server/builtin_action_types/log.ts
+ */
+export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
 /**
- * The number of alerts that have been migrated
+ * To enable modifing of alerts in under actions
  */
-export const NUMBER_OF_MIGRATED_ALERTS = 2;
-
-/**
- * The advanced settings config name for the email address
- */
-export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'monitoring:alertingEmailAddress';
+export const ALERT_REQUIRES_APP_CONTEXT = false;
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];
+
+/**
+ * The saved object type for various monitoring data
+ */
+export const SAVED_OBJECT_TELEMETRY = 'monitoring-telemetry';
+
+export const TELEMETRY_METRIC_BUTTON_CLICK = 'btnclick__';

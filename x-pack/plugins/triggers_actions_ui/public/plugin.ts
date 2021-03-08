@@ -1,62 +1,163 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CoreStart, PluginInitializerContext, Plugin as CorePlugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
+import { ReactElement } from 'react';
+import { FeaturesPluginStart } from '../../features/public';
+import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
-import { registerBuiltInAlertTypes } from './application/components/builtin_alert_types';
-import { hasShowActionsCapability, hasShowAlertsCapability } from './application/lib/capabilities';
-import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
-import { ManagementStart } from '../../../../src/plugins/management/public';
-import { boot } from './application/boot';
+import {
+  ManagementAppMountParams,
+  ManagementSetup,
+} from '../../../../src/plugins/management/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import type { SpacesPluginStart } from '../../spaces/public';
+
+import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
+import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
+import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
+import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+
+import type { ActionTypeModel, AlertTypeModel } from './types';
+import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
+import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
+import type { AlertAddProps } from './application/sections/alert_form/alert_add';
+import type { AlertEditProps } from './application/sections/alert_form/alert_edit';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
+  getAddConnectorFlyout: (
+    props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
+  ) => ReactElement<ConnectorAddFlyoutProps>;
+  getEditConnectorFlyout: (
+    props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>
+  ) => ReactElement<ConnectorEditFlyoutProps>;
+  getAddAlertFlyout: (
+    props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+  ) => ReactElement<AlertAddProps>;
+  getEditAlertFlyout: (
+    props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+  ) => ReactElement<AlertEditProps>;
+}
+
+interface PluginsSetup {
+  management: ManagementSetup;
+  home?: HomePublicPluginSetup;
 }
 
 interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  management: ManagementStart;
   alerting?: AlertingStart;
+  spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
+  features: FeaturesPluginStart;
 }
 
 export class Plugin
   implements
-    CorePlugin<TriggersAndActionsUIPublicPluginSetup, TriggersAndActionsUIPublicPluginStart> {
+    CorePlugin<
+      TriggersAndActionsUIPublicPluginSetup,
+      TriggersAndActionsUIPublicPluginStart,
+      PluginsSetup,
+      PluginsStart
+    > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    this.actionTypeRegistry = actionTypeRegistry;
-
-    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
-    this.alertTypeRegistry = alertTypeRegistry;
+  constructor() {
+    this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    this.alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
   }
 
-  public setup(): TriggersAndActionsUIPublicPluginSetup {
-    registerBuiltInActionTypes({
-      actionTypeRegistry: this.actionTypeRegistry,
+  public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
+    const actionTypeRegistry = this.actionTypeRegistry;
+    const alertTypeRegistry = this.alertTypeRegistry;
+
+    const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
+      defaultMessage: 'Alerts and Actions',
+    });
+    const featureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.displayDescription',
+      {
+        defaultMessage: 'Detect conditions using alerts, and take actions using connectors.',
+      }
+    );
+
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register({
+        id: 'triggersActions',
+        title: featureTitle,
+        description: featureDescription,
+        icon: 'watchesApp',
+        path: '/app/management/insightsAndAlerting/triggersActions',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
+
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
+      id: 'triggersActions',
+      title: featureTitle,
+      order: 0,
+      async mount(params: ManagementAppMountParams) {
+        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+          CoreStart,
+          PluginsStart,
+          unknown
+        ];
+
+        const { renderApp } = await import('./application/app');
+
+        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+        // subset of this privilege are not authorized to access this endpoint and will receive a 404
+        // error that causes the Alerting view to fail to load.
+        let kibanaFeatures: KibanaFeature[];
+        try {
+          kibanaFeatures = await pluginsStart.features.getFeatures();
+        } catch (err) {
+          kibanaFeatures = [];
+        }
+
+        return renderApp({
+          ...coreStart,
+          data: pluginsStart.data,
+          charts: pluginsStart.charts,
+          alerting: pluginsStart.alerting,
+          spaces: pluginsStart.spaces,
+          element: params.element,
+          storage: new Storage(window.localStorage),
+          setBreadcrumbs: params.setBreadcrumbs,
+          history: params.history,
+          actionTypeRegistry,
+          alertTypeRegistry,
+          kibanaFeatures,
+        });
+      },
     });
 
-    registerBuiltInAlertTypes({
-      alertTypeRegistry: this.alertTypeRegistry,
+    registerBuiltInActionTypes({
+      actionTypeRegistry: this.actionTypeRegistry,
     });
 
     return {
@@ -65,46 +166,37 @@ export class Plugin
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
-    const { capabilities } = core.application;
-
-    const canShowActions = hasShowActionsCapability(capabilities);
-    const canShowAlerts = hasShowAlertsCapability(capabilities);
-
-    // Don't register routes when user doesn't have access to the application
-    if (canShowActions || canShowAlerts) {
-      plugins.management.sections.getSection('kibana')!.registerApp({
-        id: 'triggersActions',
-        title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-          defaultMessage: 'Alerts and Actions',
-        }),
-        order: 7,
-        mount: params => {
-          boot({
-            dataPlugin: plugins.data,
-            charts: plugins.charts,
-            alerting: plugins.alerting,
-            element: params.element,
-            toastNotifications: core.notifications.toasts,
-            http: core.http,
-            uiSettings: core.uiSettings,
-            docLinks: core.docLinks,
-            chrome: core.chrome,
-            savedObjects: core.savedObjects.client,
-            I18nContext: core.i18n.Context,
-            capabilities: core.application.capabilities,
-            navigateToApp: core.application.navigateToApp,
-            setBreadcrumbs: params.setBreadcrumbs,
-            actionTypeRegistry: this.actionTypeRegistry,
-            alertTypeRegistry: this.alertTypeRegistry,
-          });
-          return () => {};
-        },
-      });
-    }
+  public start(): TriggersAndActionsUIPublicPluginStart {
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       alertTypeRegistry: this.alertTypeRegistry,
+      getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
+        return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
+      },
+      getEditConnectorFlyout: (props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>) => {
+        return getEditConnectorFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+        });
+      },
+      getAddAlertFlyout: (
+        props: Omit<AlertAddProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+      ) => {
+        return getAddAlertFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          alertTypeRegistry: this.alertTypeRegistry,
+        });
+      },
+      getEditAlertFlyout: (
+        props: Omit<AlertEditProps, 'actionTypeRegistry' | 'alertTypeRegistry'>
+      ) => {
+        return getEditAlertFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          alertTypeRegistry: this.alertTypeRegistry,
+        });
+      },
     };
   }
 

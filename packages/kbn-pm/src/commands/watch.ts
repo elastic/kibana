@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
+import { CliError } from '../utils/errors';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
 import { ProjectMap, topologicallyBatchProjects } from '../utils/projects';
@@ -58,20 +47,13 @@ export const WatchCommand: ICommand = {
     }
 
     if (projectsToWatch.size === 0) {
-      log.write(
-        chalk.red(
-          `\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`
-        )
+      throw new CliError(
+        `There are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.`
       );
-      return;
     }
 
     const projectNames = Array.from(projectsToWatch.keys());
-    log.write(
-      chalk.bold(
-        chalk.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`)
-      )
-    );
+    log.info(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`);
 
     // Kibana should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
@@ -83,14 +65,14 @@ export const WatchCommand: ICommand = {
       batchedProjects.push([projects.get(kibanaProjectName)!]);
     }
 
-    await parallelizeBatches(batchedProjects, async pkg => {
+    await parallelizeBatches(batchedProjects, async (pkg) => {
       const completionHint = await waitUntilWatchIsReady(
-        pkg.runScriptStreaming(watchScriptName).stdout
+        pkg.runScriptStreaming(watchScriptName, {
+          debug: false,
+        }).stdout! // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       );
 
-      log.write(
-        chalk.bold(`[${chalk.green(pkg.name)}] Initial build completed (${completionHint}).`)
-      );
+      log.success(`[${pkg.name}] Initial build completed (${completionHint}).`);
     });
   },
 };

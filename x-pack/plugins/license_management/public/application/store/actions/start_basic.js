@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -38,14 +39,15 @@ export const startBasicLicense = (currentLicenseType, ack) => async (
     //messages coming back in arrays
     const messages = Object.values(acknowledge)
       .slice(1)
-      .map(item => {
+      .map((item) => {
         return item[0];
       });
     const first = i18n.translate(
       'xpack.licenseMgmt.replacingCurrentLicenseWithBasicLicenseWarningMessage',
       {
         //eslint-disable-next-line
-      defaultMessage: 'Some functionality will be lost if you replace your {currentLicenseType} license with a BASIC license. Review the list of features below.',
+        defaultMessage:
+          'Some functionality will be lost if you replace your {currentLicenseType} license with a BASIC license. Review the list of features below.',
         values: {
           currentLicenseType: currentLicenseType.toUpperCase(),
         },

@@ -1,17 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ActionType } from '../../types';
+import { ActionType, ActionConnector } from '../../types';
 
-export function actionTypeCompare(a: ActionType, b: ActionType) {
-  if (a.enabled === true && b.enabled === false) {
+export function actionTypeCompare(
+  a: ActionType,
+  b: ActionType,
+  preconfiguredConnectors?: ActionConnector[]
+) {
+  const aEnabled = getIsEnabledValue(a, preconfiguredConnectors);
+  const bEnabled = getIsEnabledValue(b, preconfiguredConnectors);
+
+  if (aEnabled === true && bEnabled === false) {
     return -1;
   }
-  if (a.enabled === false && b.enabled === true) {
+  if (aEnabled === false && bEnabled === true) {
     return 1;
   }
   return a.name.localeCompare(b.name);
 }
+
+const getIsEnabledValue = (actionType: ActionType, preconfiguredConnectors?: ActionConnector[]) => {
+  let isEnabled = actionType.enabled;
+  if (
+    !actionType.enabledInConfig &&
+    preconfiguredConnectors &&
+    preconfiguredConnectors.length > 0
+  ) {
+    isEnabled =
+      preconfiguredConnectors.find((connector) => connector.actionTypeId === actionType.id) !==
+      undefined;
+  }
+  return isEnabled;
+};

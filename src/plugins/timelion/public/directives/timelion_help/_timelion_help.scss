@@ -1,0 +1,33 @@
+.timHelp {
+  // EUITODO: Make .euiText > code background transparent
+  code {
+    background-color: transparentize($euiTextColor, .9);
+  }
+}
+
+.timHelp__buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.timHelp__functions {
+  height: $euiSizeXL * 10;
+  overflow-y: auto;
+}
+
+.timHelp__links {
+  color: $euiColorPrimary;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/**
+ * 1. Override bootstrap .table styles.
+ */
+.timHelp__functionsTableRow:hover,
+.timHelp__functionDetailsTable {
+  // sass-lint:disable-block no-important
+  background-color: $euiColorLightestShade !important; /* 1 */
+}

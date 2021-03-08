@@ -1,18 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { fireEvent, render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
 import { JobSelectorTable } from './job_selector_table';
 
-jest.mock('../../../services/job_service', () => ({
-  mlJobService: {
-    getJob: jest.fn(),
-  },
-}));
+jest.mock('../../../contexts/kibana');
 
 const props = {
   ganttBarWidth: 299,
@@ -124,6 +122,19 @@ describe('JobSelectorTable', () => {
   });
 
   describe('Not Single Selection', () => {
+    test('renders callout when no jobs provided', () => {
+      const propsEmptyJobs = { ...props, jobs: [], groupsList: [] };
+      const { getByText } = render(
+        <I18nProvider>
+          <JobSelectorTable {...propsEmptyJobs} />
+        </I18nProvider>
+      );
+      const calloutMessage = getByText('No anomaly detection jobs found');
+      const createJobButton = getByText('Create job');
+      expect(createJobButton).toBeDefined();
+      expect(calloutMessage).toBeDefined();
+    });
+
     test('renders tabs when not singleSelection', () => {
       const { getAllByRole } = render(<JobSelectorTable {...props} />);
       const tabs = getAllByRole('tab');

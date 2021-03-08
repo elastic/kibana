@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -88,7 +89,8 @@ export const EditFilterListHeader = ({
           name="new_filter_id"
           value={newFilterId}
           isInvalid={isNewFilterIdInvalid}
-          onChange={e => updateNewFilterId(e.target.value)}
+          onChange={(e) => updateNewFilterId(e.target.value)}
+          data-test-subj={'mlNewFilterListIdInput'}
         />
       </EuiFormRow>
     );
@@ -96,7 +98,7 @@ export const EditFilterListHeader = ({
 
   if (description !== undefined && description.length > 0) {
     descriptionField = (
-      <EuiText>
+      <EuiText data-test-subj={'mlNewFilterListDescriptionText'}>
         <p>{description}</p>
       </EuiText>
     );

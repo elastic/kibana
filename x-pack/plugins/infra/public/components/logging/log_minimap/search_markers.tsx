@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import classNames from 'classnames';
@@ -31,13 +32,11 @@ export class SearchMarkers extends React.PureComponent<SearchMarkersProps, {}> {
       return null;
     }
 
-    const yScale = scaleTime()
-      .domain([start, end])
-      .range([0, height]);
+    const yScale = scaleTime().domain([start, end]).range([0, height]);
 
     return (
       <g transform={`translate(${width / 2}, 0)`} className={classes}>
-        {buckets.map(bucket => (
+        {buckets.map((bucket) => (
           <g
             key={`${bucket.representativeKey.time}:${bucket.representativeKey.tiebreaker}`}
             transform={`translate(0, ${yScale(bucket.start)})`}

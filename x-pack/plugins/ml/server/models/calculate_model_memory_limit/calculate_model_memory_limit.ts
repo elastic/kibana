@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import numeral from '@elastic/numeral';
-import { APICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
-import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
+import { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
+import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client';
 
-interface ModelMemoryEstimationResult {
+export interface ModelMemoryEstimationResult {
   /**
    * Result model memory limit
    */
@@ -28,15 +31,15 @@ interface ModelMemoryEstimationResult {
 /**
  * Response of the _estimate_model_memory endpoint.
  */
-export interface ModelMemoryEstimate {
+export interface ModelMemoryEstimateResponse {
   model_memory_estimate: string;
 }
 
 /**
  * Retrieves overall and max bucket cardinalities.
  */
-const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
-  const fieldsService = fieldsServiceProvider(callAsCurrentUser);
+const cardinalityCheckProvider = (client: IScopedClusterClient) => {
+  const fieldsService = fieldsServiceProvider(client);
 
   return async (
     analysisConfig: AnalysisConfig,
@@ -44,7 +47,8 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
     query: any,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    datafeedConfig?: Datafeed
   ): Promise<{
     overallCardinality: { [key: string]: number };
     maxBucketCardinality: { [key: string]: number };
@@ -76,8 +80,8 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
         }
       ) => {
         [byFieldName, partitionFieldName, overFieldName]
-          .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
-          .forEach(key => {
+          .filter((field) => field !== undefined && field !== '' && !excludedKeywords.has(field))
+          .forEach((key) => {
             acc.add(key as string);
           });
         return acc;
@@ -86,7 +90,7 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
     );
 
     const maxBucketFieldCardinalities: string[] = influencers.filter(
-      influencerField =>
+      (influencerField) =>
         !!influencerField &&
         !excludedKeywords.has(influencerField) &&
         !overallCardinalityFields.has(influencerField)
@@ -99,7 +103,8 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
         query,
         timeFieldName,
         earliestMs,
-        latestMs
+        latestMs,
+        datafeedConfig
       );
     }
 
@@ -111,7 +116,8 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
         timeFieldName,
         earliestMs,
         latestMs,
-        bucketSpan
+        bucketSpan,
+        datafeedConfig
       );
     }
 
@@ -122,8 +128,11 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
   };
 };
 
-export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) {
-  const getCardinalities = cardinalityCheckProvider(callAsCurrentUser);
+export function calculateModelMemoryLimitProvider(
+  client: IScopedClusterClient,
+  mlClient: MlClient
+) {
+  const getCardinalities = cardinalityCheckProvider(client);
 
   /**
    * Retrieves an estimated size of the model memory limit used in the job config
@@ -137,17 +146,12 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    allowMMLGreaterThanMax = false
+    allowMMLGreaterThanMax = false,
+    datafeedConfig?: Datafeed
   ): Promise<ModelMemoryEstimationResult> {
-    let maxModelMemoryLimit;
-    try {
-      const resp = await callAsCurrentUser('ml.info');
-      if (resp?.limits?.max_model_memory_limit !== undefined) {
-        maxModelMemoryLimit = resp.limits.max_model_memory_limit.toUpperCase();
-      }
-    } catch (e) {
-      throw new Error('Unable to retrieve max model memory limit');
-    }
+    const { body: info } = await mlClient.info<MlInfoResponse>();
+    const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
+    const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit?.toUpperCase();
 
     const { overallCardinality, maxBucketCardinality } = await getCardinalities(
       analysisConfig,
@@ -155,30 +159,45 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       query,
       timeFieldName,
       earliestMs,
-      latestMs
+      latestMs,
+      datafeedConfig
     );
 
-    const estimatedModelMemoryLimit = (
-      await callAsCurrentUser<ModelMemoryEstimate>('ml.estimateModelMemory', {
-        body: {
-          analysis_config: analysisConfig,
-          overall_cardinality: overallCardinality,
-          max_bucket_cardinality: maxBucketCardinality,
-        },
-      })
-    ).model_memory_estimate.toUpperCase();
+    const { body } = await mlClient.estimateModelMemory<ModelMemoryEstimateResponse>({
+      body: {
+        analysis_config: analysisConfig,
+        overall_cardinality: overallCardinality,
+        max_bucket_cardinality: maxBucketCardinality,
+      },
+    });
+    const estimatedModelMemoryLimit = body.model_memory_estimate.toUpperCase();
 
-    let modelMemoryLimit: string = estimatedModelMemoryLimit;
+    let modelMemoryLimit = estimatedModelMemoryLimit;
+    let mmlCappedAtMax = false;
     // if max_model_memory_limit has been set,
     // make sure the estimated value is not greater than it.
-    if (!allowMMLGreaterThanMax && maxModelMemoryLimit !== undefined) {
-      // @ts-ignore
-      const maxBytes = numeral(maxModelMemoryLimit).value();
-      // @ts-ignore
+    if (allowMMLGreaterThanMax === false) {
+      // @ts-expect-error
       const mmlBytes = numeral(estimatedModelMemoryLimit).value();
-      if (mmlBytes > maxBytes) {
-        // @ts-ignore
-        modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
+      if (maxModelMemoryLimit !== undefined) {
+        // @ts-expect-error
+        const maxBytes = numeral(maxModelMemoryLimit).value();
+        if (mmlBytes > maxBytes) {
+          // @ts-expect-error
+          modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
+          mmlCappedAtMax = true;
+        }
+      }
+
+      // if we've not already capped the estimated mml at the hard max server setting
+      // ensure that the estimated mml isn't greater than the effective max mml
+      if (mmlCappedAtMax === false && effectiveMaxModelMemoryLimit !== undefined) {
+        // @ts-expect-error
+        const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
+        if (mmlBytes > effectiveMaxMmlBytes) {
+          // @ts-expect-error
+          modelMemoryLimit = `${Math.floor(effectiveMaxMmlBytes / numeral('1MB').value())}MB`;
+        }
       }
     }
 
@@ -186,6 +205,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       estimatedModelMemoryLimit,
       modelMemoryLimit,
       ...(maxModelMemoryLimit ? { maxModelMemoryLimit } : {}),
+      ...(effectiveMaxModelMemoryLimit ? { effectiveMaxModelMemoryLimit } : {}),
     };
   };
 }

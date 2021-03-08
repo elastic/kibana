@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<TaskManagerSetupContract> = {
-    registerLegacyAPI: jest.fn(),
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
   };
@@ -23,6 +23,7 @@ const createStartMock = () => {
     schedule: jest.fn(),
     runNow: jest.fn(),
     ensureScheduled: jest.fn(),
+    removeIfExists: jest.fn(),
   };
   return mock;
 };

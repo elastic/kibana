@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { Switch, Route, Redirect, Router } from 'react-router-dom';
 
-import { CRUD_APP_BASE_PATH, UIM_APP_LOAD } from './constants';
+import { UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 
@@ -22,15 +23,16 @@ class AppComponent extends Component {
 
   constructor(...args) {
     super(...args);
+    setUserHasLeftApp(false);
     this.registerRouter();
   }
 
   registerRouter() {
     // Share the router with the app without requiring React or context.
-    const { history, location } = this.props;
+    const { history } = this.props;
     registerRouter({
       history,
-      route: { location },
+      route: { location: history.location },
     });
   }
 
@@ -45,17 +47,16 @@ class AppComponent extends Component {
 
   render() {
     return (
-      <div>
+      <Router history={this.props.history}>
         <Switch>
-          <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/list`} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/list`} component={RemoteClusterList} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/add`} component={RemoteClusterAdd} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/edit/:name`} component={RemoteClusterEdit} />
-          <Redirect from={`${CRUD_APP_BASE_PATH}/:anything`} to={`${CRUD_APP_BASE_PATH}/list`} />
+          <Route exact path={[`/list`, '/', '']} component={RemoteClusterList} />
+          <Route path={[`/add`]} component={RemoteClusterAdd} />
+          <Route path={`/edit/:name`} component={RemoteClusterEdit} />
+          <Redirect from={`/:anything`} to="/list" />
         </Switch>
-      </div>
+      </Router>
     );
   }
 }
 
-export const App = withRouter(AppComponent);
+export const App = AppComponent;

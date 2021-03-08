@@ -1,31 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import { first } from 'rxjs/operators';
+
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
-import { readLegacyEsConfig } from '../../../legacy/core_plugins/console_legacy';
-
 import { ProxyConfigCollection } from './lib';
-import { SpecDefinitionsService } from './services';
+import { SpecDefinitionsService, EsLegacyConfigService } from './services';
 import { ConfigType } from './config';
-import { registerProxyRoute } from './routes/api/console/proxy';
-import { registerSpecDefinitionsRoute } from './routes/api/console/spec_definitions';
+
+import { registerRoutes } from './routes';
+
 import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 
 export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
@@ -33,11 +21,13 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
 
   specDefinitionsService = new SpecDefinitionsService();
 
+  esLegacyConfigService = new EsLegacyConfigService();
+
   constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
     this.log = this.ctx.logger.get();
   }
 
-  async setup({ http, capabilities, getStartServices }: CoreSetup) {
+  setup({ http, capabilities, getStartServices, elasticsearch }: CoreSetup) {
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
@@ -45,34 +35,32 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       },
     }));
 
-    const config = await this.ctx.config
-      .create()
-      .pipe(first())
-      .toPromise();
-
-    const { elasticsearch } = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
-
+    const config = this.ctx.config.get();
+    const globalConfig = this.ctx.config.legacy.get();
     const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+
+    this.esLegacyConfigService.setup(elasticsearch.legacy.config$);
 
     const router = http.createRouter();
 
-    registerProxyRoute({
+    registerRoutes({
+      router,
       log: this.log,
-      proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
-      readLegacyESConfig: (): ESConfigForProxy => {
-        const legacyConfig = readLegacyEsConfig();
-        return {
-          ...elasticsearch,
-          ...legacyConfig,
-        };
+      services: {
+        esLegacyConfigService: this.esLegacyConfigService,
+        specDefinitionService: this.specDefinitionsService,
       },
-      pathFilters: proxyPathFilters,
-      router,
-    });
-
-    registerSpecDefinitionsRoute({
-      router,
-      services: { specDefinitions: this.specDefinitionsService },
+      proxy: {
+        proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
+        readLegacyESConfig: async (): Promise<ESConfigForProxy> => {
+          const legacyConfig = await this.esLegacyConfigService.readConfig();
+          return {
+            ...globalConfig.elasticsearch,
+            ...legacyConfig,
+          };
+        },
+        pathFilters: proxyPathFilters,
+      },
     });
 
     return {
@@ -84,5 +72,9 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     return {
       ...this.specDefinitionsService.start(),
     };
+  }
+
+  stop() {
+    this.esLegacyConfigService.stop();
   }
 }

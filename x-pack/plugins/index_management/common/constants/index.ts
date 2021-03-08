@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-export { PLUGIN } from './plugin';
 export { BASE_PATH } from './base_path';
 export { API_BASE_PATH } from './api_base_path';
 export { INVALID_INDEX_PATTERN_CHARS, INVALID_TEMPLATE_NAME_CHARS } from './invalid_characters';
 export * from './index_statuses';
-export { DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from './index_templates';
 
 export {
   UIM_APP_NAME,
@@ -48,7 +47,9 @@ export {
   UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
+  UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
   UIM_TEMPLATE_CREATE,
   UIM_TEMPLATE_UPDATE,
   UIM_TEMPLATE_CLONE,
+  UIM_TEMPLATE_SIMULATE,
 } from './ui_metric';

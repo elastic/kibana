@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
   loadIndexPatterns,
-  getMatchingIndicesForThresholdAlertType,
-  getThresholdAlertTypeFields,
+  getMatchingIndices,
+  getESIndexFields,
   getSavedObjectsClient,
-} from '../lib/index_threshold_api';
+} from '../lib/data_apis';
 
 export interface IOption {
   label: string;
@@ -38,16 +40,16 @@ export const getIndexOptions = async (
     return options;
   }
 
-  const matchingIndices = (await getMatchingIndicesForThresholdAlertType({
+  const matchingIndices = (await getMatchingIndices({
     pattern,
     http,
   })) as string[];
-  const matchingIndexPatterns = indexPatternsParam.filter(anIndexPattern => {
+  const matchingIndexPatterns = indexPatternsParam.filter((anIndexPattern) => {
     return anIndexPattern.includes(pattern);
   }) as string[];
 
   if (matchingIndices.length || matchingIndexPatterns.length) {
-    const matchingOptions = _.uniq([...matchingIndices, ...matchingIndexPatterns]);
+    const matchingOptions = uniq([...matchingIndices, ...matchingIndexPatterns]);
 
     options.push({
       label: i18n.translate(
@@ -56,7 +58,7 @@ export const getIndexOptions = async (
           defaultMessage: 'Based on your index patterns',
         }
       ),
-      options: matchingOptions.map(match => {
+      options: matchingOptions.map((match) => {
         return {
           label: match,
           value: match,
@@ -84,12 +86,15 @@ export const getIndexOptions = async (
 };
 
 export const getFields = async (http: HttpSetup, indexes: string[]) => {
-  return await getThresholdAlertTypeFields({ indexes, http });
+  return await getESIndexFields({ indexes, http });
 };
 
 export const firstFieldOption = {
-  text: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.threshold.timeFieldOptionLabel', {
-    defaultMessage: 'Select a field',
-  }),
+  text: i18n.translate(
+    'xpack.triggersActionsUI.sections.alertAdd.indexControls.timeFieldOptionLabel',
+    {
+      defaultMessage: 'Select a field',
+    }
+  ),
   value: '',
 };

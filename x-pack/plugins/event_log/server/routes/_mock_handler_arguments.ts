@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity, merge } from 'lodash';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+import type { MethodKeysOf } from '@kbn/utility-types';
+
+import { httpServerMock } from 'src/core/server/mocks';
 import { IEventLogClient } from '../types';
 
 export function mockHandlerArguments(
   eventLogClient: IEventLogClient,
-  req: any,
+  req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
-): [RequestHandlerContext, KibanaRequest<any, any, any, any>, KibanaResponseFactory] {
+): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   return [
     ({
       eventLog: {
@@ -22,7 +25,7 @@ export function mockHandlerArguments(
         },
       },
     } as unknown) as RequestHandlerContext,
-    req as KibanaRequest<any, any, any, any>,
+    req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
 }
@@ -50,9 +53,9 @@ export function fakeEvent(overrides = {}) {
         duration: 1000000,
       },
       kibana: {
-        namespace: 'default',
         saved_objects: [
           {
+            namespace: 'default',
             type: 'action',
             id: '968f1b82-0414-4a10-becc-56b6473e4a29',
           },

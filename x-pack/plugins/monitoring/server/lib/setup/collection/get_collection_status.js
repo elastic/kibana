@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, uniq } from 'lodash';
@@ -18,7 +19,7 @@ import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_node
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 
-const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nodeUuid) => {
+const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nodeUuid, size) => {
   const start = get(req.payload, 'timeRange.min') || `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`;
   const end = get(req.payload, 'timeRange.max') || 'now';
 
@@ -73,6 +74,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
             es_uuids: {
               terms: {
                 field: 'node_stats.node_id',
+                size,
               },
               aggs: {
                 by_timestamp: {
@@ -85,6 +87,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
             kibana_uuids: {
               terms: {
                 field: 'kibana_stats.kibana.uuid',
+                size,
               },
               aggs: {
                 by_timestamp: {
@@ -97,6 +100,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
             beats_uuids: {
               terms: {
                 field: 'beats_stats.beat.uuid',
+                size,
               },
               aggs: {
                 by_timestamp: {
@@ -107,11 +111,13 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                 beat_type: {
                   terms: {
                     field: 'beats_stats.beat.type',
+                    size,
                   },
                 },
                 cluster_uuid: {
                   terms: {
                     field: 'cluster_uuid',
+                    size,
                   },
                 },
               },
@@ -119,6 +125,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
             logstash_uuids: {
               terms: {
                 field: 'logstash_stats.logstash.uuid',
+                size,
               },
               aggs: {
                 by_timestamp: {
@@ -129,6 +136,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                 cluster_uuid: {
                   terms: {
                     field: 'cluster_uuid',
+                    size,
                   },
                 },
               },
@@ -226,6 +234,10 @@ function isBeatFromAPM(bucket) {
 }
 
 async function hasNecessaryPermissions(req) {
+  const securityFeature = req.server.plugins.monitoring.info.getSecurityFeature();
+  if (!securityFeature.isAvailable || !securityFeature.isEnabled) {
+    return true;
+  }
   try {
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
     const response = await callWithRequest(req, 'transport.request', {
@@ -241,6 +253,9 @@ async function hasNecessaryPermissions(req) {
     if (
       err.message === 'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
     ) {
+      return true;
+    }
+    if (err.message.includes('Invalid index name [_security]')) {
       return true;
     }
     return false;
@@ -348,6 +363,7 @@ export const getCollectionStatus = async (
 ) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
+  const size = config.get('monitoring.ui.max_bucket_size');
   const hasPermissions = await hasNecessaryPermissions(req);
 
   if (!hasPermissions) {
@@ -369,7 +385,7 @@ export const getCollectionStatus = async (
   ];
 
   const [recentDocuments, detectedProducts] = await Promise.all([
-    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid),
+    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid, size),
     await detectProducts(req, isLiveCluster),
   ]);
 
@@ -382,7 +398,7 @@ export const getCollectionStatus = async (
 
   const status = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
-    const indexBuckets = indicesBuckets.filter(bucket => bucket.key.includes(token));
+    const indexBuckets = indicesBuckets.filter((bucket) => bucket.key.includes(token));
     const uuidBucketName = getUuidBucketName(product.name);
 
     const productStatus = {

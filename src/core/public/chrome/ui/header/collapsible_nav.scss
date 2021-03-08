@@ -1,0 +1,5 @@
+.kbnCollapsibleNav__recentsListGroup {
+  @include euiYScroll;
+  max-height: $euiSize * 10;
+  margin-right: -$euiSizeS;
+}

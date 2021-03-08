@@ -1,0 +1,60 @@
+{
+  "author": [],
+  "actions": [],
+  "description": "endpoint list only",
+  "enabled": true,
+  "false_positives": [],
+  "filters": [],
+  "from": "now-360s",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "logs-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "interval": "5m",
+  "rule_id": "bf8ee47a-3f7f-4561-b2e6-92c9d618a0b2",
+  "language": "kuery",
+  "license": "",
+  "output_index": ".siem-signals-ytercero-default",
+  "max_signals": 100,
+  "risk_score": 50,
+  "risk_score_mapping": [],
+  "name": "endpoint list only",
+  "query": "host.name: * ",
+  "references": [],
+  "meta": {
+    "from": "1m",
+    "kibana_siem_app_url": "http://localhost:5601/app/security"
+  },
+  "severity": "low",
+  "severity_mapping": [],
+  "tags": [],
+  "to": "now",
+  "type": "query",
+  "threat": [],
+  "throttle": "no_actions",
+  "exceptions_list": [
+    {
+      "list_id": "endpoint_list",
+      "namespace_type": "agnostic",
+      "id": "endpoint_list",
+      "type": "endpoint"
+    },
+    {
+      "list_id": "b27b7e13-4105-49cf-8142-cee0c61de321",
+      "namespace_type": "single",
+      "id": "8da260a0-d1bb-11ea-b248-4ba44bc54af7",
+      "type": "detection"
+    },
+    {
+      "list_id": "b27b7e13-4105-49cf-8142-cee0c61de321",
+      "namespace_type": "single",
+      "id": "8da260a0-d1bb-11ea-b248-4ba44bc54af7",
+      "type": "detection"
+    }
+  ]
+}

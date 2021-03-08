@@ -1,97 +1,52 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const { join } = require('path');
-const { readFileSync } = require('fs');
-const { execSync } = require('child_process');
-const merge = require('lodash.merge');
-const { name, version, build } = require('../package.json');
+const { name, build } = require('../package.json');
+const { loadConfiguration } = require('@kbn/apm-config-loader');
 
 const ROOT_DIR = join(__dirname, '..');
-
-function gitRev() {
-  try {
-    return execSync('git rev-parse --short HEAD', {
-      encoding: 'utf-8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch (e) {
-    return null;
-  }
-}
-
-function devConfig() {
-  try {
-    const apmDevConfigPath = join(ROOT_DIR, 'config', 'apm.dev.js');
-    return require(apmDevConfigPath); // eslint-disable-line import/no-dynamic-require
-  } catch (e) {
-    return {};
-  }
-}
-
-const apmConfig = merge(
-  {
-    active: false,
-    serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
-    // The secretToken below is intended to be hardcoded in this file even though
-    // it makes it public. This is not a security/privacy issue. Normally we'd
-    // instead disable the need for a secretToken in the APM Server config where
-    // the data is transmitted to, but due to how it's being hosted, it's easier,
-    // for now, to simply leave it in.
-    secretToken: 'R0Gjg46pE9K9wGestd',
-    globalLabels: {},
-    breakdownMetrics: true,
-    centralConfig: false,
-    logUncaughtExceptions: true,
-  },
-  devConfig()
-);
-
-try {
-  const filename = join(ROOT_DIR, 'data', 'uuid');
-  apmConfig.globalLabels.kibana_uuid = readFileSync(filename, 'utf-8');
-} catch (e) {} // eslint-disable-line no-empty
-
-const rev = gitRev();
-if (rev !== null) apmConfig.globalLabels.git_rev = rev;
-
-function getConfig(serviceName) {
-  return {
-    ...apmConfig,
-    ...{
-      serviceName: `${serviceName}-${version.replace(/\./g, '_')}`,
-    },
-  };
-}
+let apmConfig;
 
 /**
  * Flag to disable APM RUM support on all kibana builds by default
  */
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
-module.exports = function(serviceName = name) {
-  if (process.env.kbnWorkerType === 'optmzr') return;
+module.exports = function (serviceName = name) {
+  apmConfig = loadConfiguration(process.argv, ROOT_DIR, isKibanaDistributable);
+  const conf = apmConfig.getConfig(serviceName);
+  const apm = require('elastic-apm-node');
 
-  const conf = getConfig(serviceName);
+  // Filter out all user PII
+  apm.addFilter((payload) => {
+    try {
+      if (payload.context && payload.context.user && typeof payload.context.user === 'object') {
+        Object.keys(payload.context.user).forEach((key) => {
+          payload.context.user[key] = '[REDACTED]';
+        });
+      }
+    } finally {
+      return payload;
+    }
+  });
 
-  require('elastic-apm-node').start(conf);
+  apm.start(conf);
 };
 
-module.exports.getConfig = getConfig;
-module.exports.isKibanaDistributable = isKibanaDistributable;
+module.exports.getConfig = (serviceName) => {
+  // integration test runner starts a kibana server that import the module without initializing APM.
+  // so we need to check initialization of the config.
+  // note that we can't just load the configuration during this module's import
+  // because jest IT are ran with `--config path-to-jest-config.js` which conflicts with the CLI's `config` arg
+  // causing the config loader to try to load the jest js config as yaml and throws.
+  if (apmConfig) {
+    return apmConfig.getConfig(serviceName);
+  }
+  return {};
+};

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { deleteAlertRoute } from './delete';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
@@ -22,21 +24,14 @@ beforeEach(() => {
 
 describe('deleteAlertRoute', () => {
   it('deletes an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     deleteAlertRoute(router, licenseState);
 
     const [config, handler] = router.delete.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-all",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
     alertsClient.delete.mockResolvedValueOnce({});
 
@@ -65,8 +60,8 @@ describe('deleteAlertRoute', () => {
   });
 
   it('ensures the license allows deleting alerts', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     deleteAlertRoute(router, licenseState);
 
@@ -74,9 +69,12 @@ describe('deleteAlertRoute', () => {
 
     alertsClient.delete.mockResolvedValueOnce({});
 
-    const [context, req, res] = mockHandlerArguments(alertsClient, {
-      params: { id: '1' },
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        params: { id: '1' },
+      }
+    );
 
     await handler(context, req, res);
 
@@ -84,8 +82,8 @@ describe('deleteAlertRoute', () => {
   });
 
   it('ensures the license check prevents deleting alerts', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -97,9 +95,12 @@ describe('deleteAlertRoute', () => {
 
     alertsClient.delete.mockResolvedValueOnce({});
 
-    const [context, req, res] = mockHandlerArguments(alertsClient, {
-      id: '1',
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        id: '1',
+      }
+    );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 

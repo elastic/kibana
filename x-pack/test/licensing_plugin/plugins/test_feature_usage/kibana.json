@@ -1,0 +1,7 @@
+{
+  "id": "testFeatureUsage",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["licensing"]
+}

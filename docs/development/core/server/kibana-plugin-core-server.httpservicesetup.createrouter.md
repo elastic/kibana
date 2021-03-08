@@ -9,7 +9,7 @@ Provides ability to declare a handler function for a particular path and HTTP re
 <b>Signature:</b>
 
 ```typescript
-createRouter: () => IRouter;
+createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() => IRouter<Context>;
 ```
 
 ## Remarks

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -60,7 +61,7 @@ export function isValidRule(rule) {
     } else {
       const scope = rule.scope;
       if (scope !== undefined) {
-        isValid = Object.keys(scope).some(field => scope[field].enabled === true);
+        isValid = Object.keys(scope).some((field) => scope[field].enabled === true);
       }
     }
   }
@@ -76,7 +77,7 @@ export function saveJobRule(job, detectorIndex, ruleIndex, editedRule) {
   const clonedRule = cloneDeep(editedRule);
   const scope = clonedRule.scope;
   if (scope !== undefined) {
-    Object.keys(scope).forEach(field => {
+    Object.keys(scope).forEach((field) => {
       if (scope[field].enabled === false) {
         delete scope[field];
       } else {
@@ -146,24 +147,19 @@ export function updateJobRules(job, detectorIndex, rules) {
   }
 
   return new Promise((resolve, reject) => {
-    mlJobService
-      .updateJob(jobId, jobData)
-      .then(resp => {
-        if (resp.success) {
-          // Refresh the job data in the job service before resolving.
-          mlJobService
-            .refreshJob(jobId)
-            .then(() => {
-              resolve({ success: true });
-            })
-            .catch(refreshResp => {
-              reject(refreshResp);
-            });
-        } else {
-          reject(resp);
-        }
+    ml.updateJob({ jobId: jobId, job: jobData })
+      .then(() => {
+        // Refresh the job data in the job service before resolving.
+        mlJobService
+          .refreshJob(jobId)
+          .then(() => {
+            resolve({ success: true });
+          })
+          .catch((refreshResp) => {
+            reject(refreshResp);
+          });
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -175,10 +171,10 @@ export function addItemToFilter(item, filterId) {
   return new Promise((resolve, reject) => {
     ml.filters
       .updateFilter(filterId, undefined, [item], undefined)
-      .then(updatedFilter => {
+      .then((updatedFilter) => {
         resolve(updatedFilter);
       })
-      .catch(error => {
+      .catch((error) => {
         reject(error);
       });
   });

@@ -1,11 +1,12 @@
-.kbnTopNavMenu__wrapper {
-  z-index: 5;
+.kbnTopNavMenu {
+  margin-right: $euiSizeXS;
+}
 
-  .kbnTopNavMenu {
-    padding: $euiSizeS 0;
+.kbnTopNavMenu__badgeWrapper {
+  display: flex;
+  align-items: baseline;
+}
 
-    .kbnTopNavItemEmphasized {
-      padding: 0 $euiSizeS;
-    }
-  }
+.kbnTopNavMenu__badgeGroup {
+  margin-right: $euiSizeM;
 }

@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConditionalToolTip should just work 1`] = `
+<div
+  data-test-subj="conditionalTooltipContent"
+  style={
+    Object {
+      "minWidth": 200,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "borderBottom": "1px solid #98a2b3",
+        "marginBottom": "4px",
+        "paddingBottom": "4px",
+      }
+    }
+  >
+    host-01
+  </div>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
+      grow={1}
+    >
+      CPU usage
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      10%
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
+      grow={1}
+    >
+      Memory usage
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      80%
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
+      grow={1}
+    >
+      Outbound traffic
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      8Mbit/s
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
+      grow={1}
+    >
+      Inbound traffic
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      8Mbit/s
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
+      grow={1}
+    >
+      My Custom Label
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      34.1%
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
+      grow={1}
+    >
+      Avg of host.network.out.packets
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      4,392.2
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

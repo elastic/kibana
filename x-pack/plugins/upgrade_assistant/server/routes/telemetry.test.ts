@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
-import { savedObjectsServiceMock } from 'src/core/server/saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from 'src/core/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
@@ -39,7 +40,7 @@ describe('Upgrade Assistant Telemetry API', () => {
   });
   afterEach(() => jest.clearAllMocks());
 
-  describe('PUT /api/upgrade_assistant/telemetry/ui_open', () => {
+  describe('PUT /api/upgrade_assistant/stats/ui_open', () => {
     it('returns correct payload with single option', async () => {
       const returnPayload = {
         overview: true,
@@ -51,7 +52,7 @@ describe('Upgrade Assistant Telemetry API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_open',
+        pathPattern: '/api/upgrade_assistant/stats/ui_open',
       })(
         routeHandlerContextMock,
         createRequestMock({ body: returnPayload }),
@@ -72,7 +73,7 @@ describe('Upgrade Assistant Telemetry API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_open',
+        pathPattern: '/api/upgrade_assistant/stats/ui_open',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -91,24 +92,24 @@ describe('Upgrade Assistant Telemetry API', () => {
     it('returns an error if it throws', async () => {
       (upsertUIOpenOption as jest.Mock).mockRejectedValue(new Error(`scary error!`));
 
-      const resp = await routeDependencies.router.getHandler({
-        method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_open',
-      })(
-        routeHandlerContextMock,
-        createRequestMock({
-          body: {
-            overview: false,
-          },
-        }),
-        kibanaResponseFactory
-      );
-
-      expect(resp.status).toEqual(500);
+      await expect(
+        routeDependencies.router.getHandler({
+          method: 'put',
+          pathPattern: '/api/upgrade_assistant/stats/ui_open',
+        })(
+          routeHandlerContextMock,
+          createRequestMock({
+            body: {
+              overview: false,
+            },
+          }),
+          kibanaResponseFactory
+        )
+      ).rejects.toThrowError('scary error!');
     });
   });
 
-  describe('PUT /api/upgrade_assistant/telemetry/ui_reindex', () => {
+  describe('PUT /api/upgrade_assistant/stats/ui_reindex', () => {
     it('returns correct payload with single option', async () => {
       const returnPayload = {
         close: false,
@@ -117,11 +118,11 @@ describe('Upgrade Assistant Telemetry API', () => {
         stop: false,
       };
 
-      (upsertUIReindexOption as jest.Mock).mockRejectedValue(returnPayload);
+      (upsertUIReindexOption as jest.Mock).mockResolvedValue(returnPayload);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_reindex',
+        pathPattern: '/api/upgrade_assistant/stats/ui_reindex',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -143,11 +144,11 @@ describe('Upgrade Assistant Telemetry API', () => {
         stop: true,
       };
 
-      (upsertUIReindexOption as jest.Mock).mockRejectedValue(returnPayload);
+      (upsertUIReindexOption as jest.Mock).mockResolvedValue(returnPayload);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_reindex',
+        pathPattern: '/api/upgrade_assistant/stats/ui_reindex',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -167,20 +168,20 @@ describe('Upgrade Assistant Telemetry API', () => {
     it('returns an error if it throws', async () => {
       (upsertUIReindexOption as jest.Mock).mockRejectedValue(new Error(`scary error!`));
 
-      const resp = await routeDependencies.router.getHandler({
-        method: 'put',
-        pathPattern: '/api/upgrade_assistant/telemetry/ui_reindex',
-      })(
-        routeHandlerContextMock,
-        createRequestMock({
-          body: {
-            start: false,
-          },
-        }),
-        kibanaResponseFactory
-      );
-
-      expect(resp.status).toEqual(500);
+      await expect(
+        routeDependencies.router.getHandler({
+          method: 'put',
+          pathPattern: '/api/upgrade_assistant/stats/ui_reindex',
+        })(
+          routeHandlerContextMock,
+          createRequestMock({
+            body: {
+              start: false,
+            },
+          }),
+          kibanaResponseFactory
+        )
+      ).rejects.toThrowError('scary error!');
     });
   });
 });

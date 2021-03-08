@@ -150,7 +150,7 @@ exports[`statusCheckState checking status 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -169,7 +169,7 @@ exports[`statusCheckState checking status 1`] = `
                   custom btn label
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -257,7 +257,7 @@ exports[`statusCheckState failed status check - error 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -276,7 +276,7 @@ exports[`statusCheckState failed status check - error 1`] = `
                   custom btn label
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -368,7 +368,7 @@ exports[`statusCheckState failed status check - no data 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -387,7 +387,7 @@ exports[`statusCheckState failed status check - no data 1`] = `
                   custom btn label
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -479,7 +479,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -498,7 +498,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
                   custom btn label
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />
@@ -586,7 +586,7 @@ exports[`statusCheckState successful status check 1`] = `
         },
         Object {
           "children": <React.Fragment>
-            <ForwardRef
+            <EuiFlexGroup
               alignItems="center"
               justifyContent="spaceBetween"
             >
@@ -605,7 +605,7 @@ exports[`statusCheckState successful status check 1`] = `
                   custom btn label
                 </EuiButton>
               </EuiFlexItem>
-            </ForwardRef>
+            </EuiFlexGroup>
             <EuiSpacer
               size="s"
             />

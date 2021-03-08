@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactNode, useCallback, useMemo, useState } from 'react';
 
-import { createInputFieldProps, validateInputFieldNotEmpty } from './input_fields';
+import {
+  createInputFieldProps,
+  createInputRangeFieldProps,
+  validateInputFieldNotEmpty,
+} from './input_fields';
 
 interface FormState {
   name: string;
@@ -19,6 +24,7 @@ interface FormState {
   podField: string;
   tiebreakerField: string;
   timestampField: string;
+  anomalyThreshold: number;
 }
 
 type FormStateChanges = Partial<FormState>;
@@ -45,7 +51,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.name),
         name: 'name',
-        onChange: name => setFormStateChanges(changes => ({ ...changes, name })),
+        onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
         value: formState.name,
       }),
     [formState.name]
@@ -55,7 +61,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.logAlias),
         name: 'logAlias',
-        onChange: logAlias => setFormStateChanges(changes => ({ ...changes, logAlias })),
+        onChange: (logAlias) => setFormStateChanges((changes) => ({ ...changes, logAlias })),
         value: formState.logAlias,
       }),
     [formState.logAlias]
@@ -65,7 +71,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.metricAlias),
         name: 'metricAlias',
-        onChange: metricAlias => setFormStateChanges(changes => ({ ...changes, metricAlias })),
+        onChange: (metricAlias) => setFormStateChanges((changes) => ({ ...changes, metricAlias })),
         value: formState.metricAlias,
       }),
     [formState.metricAlias]
@@ -75,8 +81,8 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.containerField),
         name: `containerField`,
-        onChange: containerField =>
-          setFormStateChanges(changes => ({ ...changes, containerField })),
+        onChange: (containerField) =>
+          setFormStateChanges((changes) => ({ ...changes, containerField })),
         value: formState.containerField,
       }),
     [formState.containerField]
@@ -86,7 +92,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.hostField),
         name: `hostField`,
-        onChange: hostField => setFormStateChanges(changes => ({ ...changes, hostField })),
+        onChange: (hostField) => setFormStateChanges((changes) => ({ ...changes, hostField })),
         value: formState.hostField,
       }),
     [formState.hostField]
@@ -96,7 +102,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.podField),
         name: `podField`,
-        onChange: podField => setFormStateChanges(changes => ({ ...changes, podField })),
+        onChange: (podField) => setFormStateChanges((changes) => ({ ...changes, podField })),
         value: formState.podField,
       }),
     [formState.podField]
@@ -106,8 +112,8 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.tiebreakerField),
         name: `tiebreakerField`,
-        onChange: tiebreakerField =>
-          setFormStateChanges(changes => ({ ...changes, tiebreakerField })),
+        onChange: (tiebreakerField) =>
+          setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
         value: formState.tiebreakerField,
       }),
     [formState.tiebreakerField]
@@ -117,11 +123,22 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.timestampField),
         name: `timestampField`,
-        onChange: timestampField =>
-          setFormStateChanges(changes => ({ ...changes, timestampField })),
+        onChange: (timestampField) =>
+          setFormStateChanges((changes) => ({ ...changes, timestampField })),
         value: formState.timestampField,
       }),
     [formState.timestampField]
+  );
+  const anomalyThresholdFieldProps = useMemo(
+    () =>
+      createInputRangeFieldProps({
+        errors: validateInputFieldNotEmpty(formState.anomalyThreshold),
+        name: 'anomalyThreshold',
+        onChange: (anomalyThreshold) =>
+          setFormStateChanges((changes) => ({ ...changes, anomalyThreshold })),
+        value: formState.anomalyThreshold,
+      }),
+    [formState.anomalyThreshold]
   );
 
   const fieldProps = useMemo(
@@ -134,6 +151,7 @@ export const useIndicesConfigurationFormState = ({
       podField: podFieldFieldProps,
       tiebreakerField: tiebreakerFieldFieldProps,
       timestampField: timestampFieldFieldProps,
+      anomalyThreshold: anomalyThresholdFieldProps,
     }),
     [
       nameFieldProps,
@@ -144,6 +162,7 @@ export const useIndicesConfigurationFormState = ({
       podFieldFieldProps,
       tiebreakerFieldFieldProps,
       timestampFieldFieldProps,
+      anomalyThresholdFieldProps,
     ]
   );
 
@@ -182,4 +201,5 @@ const defaultFormState: FormState = {
   podField: '',
   tiebreakerField: '',
   timestampField: '',
+  anomalyThreshold: 0,
 };

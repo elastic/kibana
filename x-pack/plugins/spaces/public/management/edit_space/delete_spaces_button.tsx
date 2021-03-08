@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
-import { NotificationsStart } from 'src/core/public';
-import { Space } from '../../../common/model/space';
-import { SpacesManager } from '../../spaces_manager';
+import type { NotificationsStart } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 
 interface Props {
@@ -42,11 +46,11 @@ export class DeleteSpacesButton extends Component<Props, State> {
 
     let ButtonComponent: any = EuiButton;
 
-    const extraProps: EuiButtonIconProps = {};
+    let extraProps: EuiButtonIconProps | undefined;
 
     if (this.props.style === 'icon') {
       ButtonComponent = EuiButtonIcon;
-      extraProps.iconType = 'trash';
+      extraProps = { iconType: 'trash' };
     }
 
     return (
@@ -99,10 +103,14 @@ export class DeleteSpacesButton extends Component<Props, State> {
   public deleteSpaces = async () => {
     const { spacesManager, space } = this.props;
 
+    this.setState({
+      showConfirmDeleteModal: false,
+    });
+
     try {
       await spacesManager.deleteSpace(space);
     } catch (error) {
-      const { message: errorMessage = '' } = error.data || {};
+      const { message: errorMessage = '' } = error.data || error.body || {};
 
       this.props.notifications.toasts.addDanger(
         i18n.translate('xpack.spaces.management.deleteSpacesButton.deleteSpaceErrorTitle', {
@@ -110,11 +118,8 @@ export class DeleteSpacesButton extends Component<Props, State> {
           values: { errorMessage },
         })
       );
+      return;
     }
-
-    this.setState({
-      showConfirmDeleteModal: false,
-    });
 
     const message = i18n.translate(
       'xpack.spaces.management.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',

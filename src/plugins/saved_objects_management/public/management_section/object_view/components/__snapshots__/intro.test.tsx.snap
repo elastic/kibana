@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Intro component renders correctly 1`] = `
+<Intro>
+  <EuiCallOut
+    color="warning"
+    iconType="alert"
+    title={
+      <FormattedMessage
+        defaultMessage="Proceed with caution!"
+        id="savedObjectsManagement.view.howToModifyObjectTitle"
+        values={Object {}}
+      />
+    }
+  >
+    <div
+      className="euiCallOut euiCallOut--warning"
+    >
+      <div
+        className="euiCallOutHeader"
+      >
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          size="m"
+          type="alert"
+        >
+          <span
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          <FormattedMessage
+            defaultMessage="Proceed with caution!"
+            id="savedObjectsManagement.view.howToModifyObjectTitle"
+            values={Object {}}
+          >
+            Proceed with caution!
+          </FormattedMessage>
+        </span>
+      </div>
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          <div>
+            <FormattedMessage
+              defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be."
+              id="savedObjectsManagement.view.howToModifyObjectDescription"
+              values={Object {}}
+            >
+              Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be.
+            </FormattedMessage>
+          </div>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
+</Intro>
+`;

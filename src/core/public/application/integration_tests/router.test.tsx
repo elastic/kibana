@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -22,15 +11,13 @@ import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
 import { AppRouter, AppNotFound } from '../ui';
-import { EitherApp, MockedMounterMap, MockedMounterTuple } from '../test_types';
-import { createRenderer, createAppMounter, createLegacyAppMounter, getUnmounter } from './utils';
+import { MockedMounterMap, MockedMounterTuple } from '../test_types';
+import { createRenderer, createAppMounter, getUnmounter } from './utils';
 import { AppStatus } from '../types';
-import { ScopedHistory } from '../scoped_history';
 
-describe('AppContainer', () => {
-  let mounters: MockedMounterMap<EitherApp>;
+describe('AppRouter', () => {
+  let mounters: MockedMounterMap;
   let globalHistory: History;
-  let appStatuses$: BehaviorSubject<Map<string, AppStatus>>;
   let update: ReturnType<typeof createRenderer>;
   let scopedAppHistory: History;
 
@@ -40,12 +27,12 @@ describe('AppContainer', () => {
   };
   const mockMountersToMounters = () =>
     new Map([...mounters].map(([appId, { mounter }]) => [appId, mounter]));
-  const setAppLeaveHandlerMock = () => undefined;
+  const noop = () => undefined;
 
   const mountersToAppStatus$ = () => {
     return new BehaviorSubject(
       new Map(
-        [...mounters.keys()].map(id => [
+        [...mounters.keys()].map((id) => [
           id,
           id.startsWith('disabled') ? AppStatus.inaccessible : AppStatus.accessible,
         ])
@@ -53,12 +40,22 @@ describe('AppContainer', () => {
     );
   };
 
+  const createMountersRenderer = () =>
+    createRenderer(
+      <AppRouter
+        history={globalHistory}
+        mounters={mockMountersToMounters()}
+        appStatuses$={mountersToAppStatus$()}
+        setAppLeaveHandler={noop}
+        setAppActionMenu={noop}
+        setIsMounting={noop}
+      />
+    );
+
   beforeEach(() => {
     mounters = new Map([
       createAppMounter({ appId: 'app1', html: '<span>App 1</span>' }),
-      createLegacyAppMounter('legacyApp1', jest.fn()),
       createAppMounter({ appId: 'app2', html: '<div>App 2</div>' }),
-      createLegacyAppMounter('baseApp:legacyApp2', jest.fn()),
       createAppMounter({
         appId: 'app3',
         html: '<div>Chromeless A</div>',
@@ -70,7 +67,6 @@ describe('AppContainer', () => {
         appRoute: '/chromeless-b/path',
       }),
       createAppMounter({ appId: 'disabledApp', html: '<div>Disabled app</div>' }),
-      createLegacyAppMounter('disabledLegacyApp', jest.fn()),
       createAppMounter({
         appId: 'scopedApp',
         extraMountHook: ({ history }) => {
@@ -78,17 +74,19 @@ describe('AppContainer', () => {
           history.push('/subpath');
         },
       }),
-    ] as Array<MockedMounterTuple<EitherApp>>);
+      createAppMounter({
+        appId: 'app5',
+        html: '<div>App 5</div>',
+        appRoute: '/app/my-app/app5',
+      }),
+      createAppMounter({
+        appId: 'app6',
+        html: '<div>App 6</div>',
+        appRoute: '/app/my-app/app6',
+      }),
+    ] as MockedMounterTuple[]);
     globalHistory = createMemoryHistory();
-    appStatuses$ = mountersToAppStatus$();
-    update = createRenderer(
-      <AppRouter
-        history={globalHistory}
-        mounters={mockMountersToMounters()}
-        appStatuses$={appStatuses$}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
-      />
-    );
+    update = createMountersRenderer();
   });
 
   it('calls mount handler and returned unmount function when navigating between apps', async () => {
@@ -98,7 +96,7 @@ describe('AppContainer', () => {
 
     expect(app1.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -110,7 +108,7 @@ describe('AppContainer', () => {
     expect(app1Unmount).toHaveBeenCalled();
     expect(app2.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
       basename: /app/app2
       html: <div>App 2</div>
       </div></div>"
@@ -124,7 +122,7 @@ describe('AppContainer', () => {
 
     expect(standardApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -136,7 +134,7 @@ describe('AppContainer', () => {
     expect(standardAppUnmount).toHaveBeenCalled();
     expect(chromelessApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -148,7 +146,7 @@ describe('AppContainer', () => {
     expect(chromelessAppUnmount).toHaveBeenCalled();
     expect(standardApp.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -162,7 +160,7 @@ describe('AppContainer', () => {
 
     expect(chromelessAppA.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -174,7 +172,7 @@ describe('AppContainer', () => {
     expect(chromelessAppAUnmount).toHaveBeenCalled();
     expect(chromelessAppB.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
       basename: /chromeless-b/path
       html: <div>Chromeless B</div>
       </div></div>"
@@ -186,7 +184,7 @@ describe('AppContainer', () => {
     expect(chromelessAppBUnmount).toHaveBeenCalled();
     expect(chromelessAppA.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingElastic euiLoadingElastic--xxLarge\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span></div><div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -209,14 +207,7 @@ describe('AppContainer', () => {
       })
     );
     globalHistory = createMemoryHistory();
-    update = createRenderer(
-      <AppRouter
-        history={globalHistory}
-        mounters={mockMountersToMounters()}
-        appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
-      />
-    );
+    update = createMountersRenderer();
 
     await navigate('/fake-login');
 
@@ -240,19 +231,59 @@ describe('AppContainer', () => {
       })
     );
     globalHistory = createMemoryHistory();
-    update = createRenderer(
-      <AppRouter
-        history={globalHistory}
-        mounters={mockMountersToMounters()}
-        appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
-      />
-    );
+    update = createMountersRenderer();
 
     await navigate('/spaces/fake-login');
 
     expect(mounters.get('spaces')!.mounter.mount).toHaveBeenCalled();
     expect(mounters.get('login')!.mounter.mount).not.toHaveBeenCalled();
+  });
+
+  it('should mount an exact route app only when the path is an exact match', async () => {
+    mounters.set(
+      ...createAppMounter({
+        appId: 'exactApp',
+        html: '<div>exact app</div>',
+        exactRoute: true,
+        appRoute: '/app/exact-app',
+      })
+    );
+
+    globalHistory = createMemoryHistory();
+    update = createMountersRenderer();
+
+    await navigate('/app/exact-app/some-path');
+
+    expect(mounters.get('exactApp')!.mounter.mount).not.toHaveBeenCalled();
+
+    await navigate('/app/exact-app');
+
+    expect(mounters.get('exactApp')!.mounter.mount).toHaveBeenCalledTimes(1);
+  });
+
+  it('should mount an an app with a route nested in an exact route app', async () => {
+    mounters.set(
+      ...createAppMounter({
+        appId: 'exactApp',
+        html: '<div>exact app</div>',
+        exactRoute: true,
+        appRoute: '/app/exact-app',
+      })
+    );
+    mounters.set(
+      ...createAppMounter({
+        appId: 'nestedApp',
+        html: '<div>nested app</div>',
+        appRoute: '/app/exact-app/another-app',
+      })
+    );
+    globalHistory = createMemoryHistory();
+    update = createMountersRenderer();
+
+    await navigate('/app/exact-app/another-app');
+
+    expect(mounters.get('exactApp')!.mounter.mount).not.toHaveBeenCalled();
+    expect(mounters.get('nestedApp')!.mounter.mount).toHaveBeenCalledTimes(1);
   });
 
   it('should not remount when changing pages within app', async () => {
@@ -279,16 +310,19 @@ describe('AppContainer', () => {
     expect(unmount).not.toHaveBeenCalled();
   });
 
+  it('allows multiple apps with the same `/app/appXXX` appRoute prefix', async () => {
+    await navigate('/app/my-app/app5/path');
+    expect(mounters.get('app5')!.mounter.mount).toHaveBeenCalledTimes(1);
+    expect(mounters.get('app6')!.mounter.mount).toHaveBeenCalledTimes(0);
+
+    await navigate('/app/my-app/app6/another-path');
+    expect(mounters.get('app5')!.mounter.mount).toHaveBeenCalledTimes(1);
+    expect(mounters.get('app6')!.mounter.mount).toHaveBeenCalledTimes(1);
+  });
+
   it('should not remount when when changing pages within app using hash history', async () => {
     globalHistory = createHashHistory();
-    update = createRenderer(
-      <AppRouter
-        history={globalHistory}
-        mounters={mockMountersToMounters()}
-        appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
-      />
-    );
+    update = createMountersRenderer();
 
     const { mounter, unmount } = mounters.get('app1')!;
     await navigate('/app/app1/page1');
@@ -335,26 +369,6 @@ describe('AppContainer', () => {
     expect(globalHistory.location.pathname).toEqual('/app/scopedApp/subpath');
   });
 
-  it('calls legacy mount handler', async () => {
-    await navigate('/app/legacyApp1');
-    expect(mounters.get('legacyApp1')!.mounter.mount.mock.calls[0][0]).toMatchObject({
-      appBasePath: '/app/legacyApp1',
-      element: expect.any(HTMLDivElement),
-      onAppLeave: expect.any(Function),
-      history: expect.any(ScopedHistory),
-    });
-  });
-
-  it('handles legacy apps with subapps', async () => {
-    await navigate('/app/baseApp');
-    expect(mounters.get('baseApp:legacyApp2')!.mounter.mount.mock.calls[0][0]).toMatchObject({
-      appBasePath: '/app/baseApp',
-      element: expect.any(HTMLDivElement),
-      onAppLeave: expect.any(Function),
-      history: expect.any(ScopedHistory),
-    });
-  });
-
   it('displays error page if no app is found', async () => {
     const dom = await navigate('/app/unknown');
 
@@ -363,12 +377,6 @@ describe('AppContainer', () => {
 
   it('displays error page if app is inaccessible', async () => {
     const dom = await navigate('/app/disabledApp');
-
-    expect(dom?.exists(AppNotFound)).toBe(true);
-  });
-
-  it('displays error page if legacy app is inaccessible', async () => {
-    const dom = await navigate('/app/disabledLegacyApp');
 
     expect(dom?.exists(AppNotFound)).toBe(true);
   });

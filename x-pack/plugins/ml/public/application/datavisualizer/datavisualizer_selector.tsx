@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment } from 'react';
@@ -23,10 +24,9 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
-import { useTimefilter, useMlKibana } from '../contexts/kibana';
-
+import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { NavigationMenu } from '../components/navigation_menu';
-import { getMaxBytesFormatted } from './file_based/components/utils';
+import { HelpMenu } from '../components/help_menu';
 
 function startTrialDescription() {
   return (
@@ -52,15 +52,28 @@ function startTrialDescription() {
 export const DatavisualizerSelector: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { licenseManagement },
+    services: {
+      licenseManagement,
+      http: { basePath },
+      docLinks,
+      fileUpload,
+    },
   } = useMlKibana();
+
+  const helpLink = docLinks.links.ml.guide;
+  const navigateToPath = useNavigateToPath();
 
   const startTrialVisible =
     licenseManagement !== undefined &&
     licenseManagement.enabled === true &&
     isFullLicense() === false;
 
-  const maxFileSize = getMaxBytesFormatted();
+  if (fileUpload === undefined) {
+    // eslint-disable-next-line no-console
+    console.error('File upload plugin not available');
+    return null;
+  }
+  const maxFileSize = fileUpload.getMaxBytesFormatted();
 
   return (
     <Fragment>
@@ -124,12 +137,12 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#/filedatavisualizer"
+                    onClick={() => navigateToPath('/filedatavisualizer')}
                     data-test-subj="mlDataVisualizerUploadFileButton"
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
-                      defaultMessage="Upload file"
+                      defaultMessage="Select file"
                     />
                   </EuiButton>
                 }
@@ -154,12 +167,12 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#/datavisualizer_index_select"
+                    onClick={() => navigateToPath('/datavisualizer_index_select')}
                     data-test-subj="mlDataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
-                      defaultMessage="Select index"
+                      defaultMessage="Select index pattern"
                     />
                   </EuiButton>
                 }
@@ -184,7 +197,8 @@ export const DatavisualizerSelector: FC = () => {
                     footer={
                       <EuiButton
                         target="_blank"
-                        href="kibana#/management/elasticsearch/license_management/home"
+                        href={`${basePath.get()}/app/management/stack/license_management/home`}
+                        data-test-subj="mlDataVisualizerStartTrialButton"
                       >
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
@@ -192,6 +206,7 @@ export const DatavisualizerSelector: FC = () => {
                         />
                       </EuiButton>
                     }
+                    data-test-subj="mlDataVisualizerCardStartTrial"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -199,6 +214,7 @@ export const DatavisualizerSelector: FC = () => {
           )}
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

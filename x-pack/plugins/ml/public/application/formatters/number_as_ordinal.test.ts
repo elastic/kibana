@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { numberAsOrdinal } from './number_as_ordinal';
@@ -21,7 +22,7 @@ describe('ML - numberAsOrdinal formatter', () => {
     { number: 100, asOrdinal: '100th' },
   ];
   test('returns the expected numeral format', () => {
-    tests.forEach(test => {
+    tests.forEach((test) => {
       expect(numberAsOrdinal(test.number)).toBe(test.asOrdinal);
     });
   });

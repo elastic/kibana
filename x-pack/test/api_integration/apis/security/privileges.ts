@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import util from 'util';
-import { isEqual } from 'lodash';
+import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect/expect.js';
 import { RawKibanaPrivileges } from '../../../../plugins/security/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Privileges', () => {
@@ -20,13 +22,28 @@ export default function({ getService }: FtrProviderContext) {
         // Roles are associated with these privileges, and we shouldn't be removing them in a minor version.
         const expected = {
           features: {
-            discover: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            discover: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+            ],
             visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
-            dashboard: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            dashboard: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'store_search_session',
+            ],
             dev_tools: ['all', 'read'],
             advancedSettings: ['all', 'read'],
             indexPatterns: ['all', 'read'],
             savedObjectsManagement: ['all', 'read'],
+            savedObjectsTagging: ['all', 'read'],
             timelion: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
@@ -35,13 +52,15 @@ export default function({ getService }: FtrProviderContext) {
             logs: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
+            ml: ['all', 'read'],
             siem: ['all', 'read'],
-            endpoint: ['all', 'read'],
-            ingestManager: ['all', 'read'],
+            fleet: ['all', 'read'],
+            stackAlerts: ['all', 'read'],
+            actions: ['all', 'read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['ml_user', 'ml_admin', 'monitoring'],
+          reserved: ['ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
         };
 
         await supertest
@@ -54,7 +73,7 @@ export default function({ getService }: FtrProviderContext) {
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
-            const success = isEqual(res.body, expected, (value, other, key) => {
+            const success = isEqualWith(res.body, expected, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
                 if (key === 'reserved') {
                   // order does not matter for the reserved privilege set.
@@ -96,9 +115,9 @@ export default function({ getService }: FtrProviderContext) {
             expect(reserved).to.be.an('object');
 
             Object.entries(features).forEach(([featureId, featurePrivs]) => {
-              Object.values(featurePrivs).forEach(actions => {
+              Object.values(featurePrivs).forEach((actions) => {
                 expect(actions).to.be.an('array');
-                actions.forEach(action => {
+                actions.forEach((action) => {
                   expect(action).to.be.a('string');
                   expect(action.indexOf('*')).to.eql(
                     -1,
@@ -110,7 +129,7 @@ export default function({ getService }: FtrProviderContext) {
 
             Object.entries(global).forEach(([privilegeId, actions]) => {
               expect(actions).to.be.an('array');
-              actions.forEach(action => {
+              actions.forEach((action) => {
                 expect(action).to.be.a('string');
                 expect(action.indexOf('*')).to.eql(
                   -1,
@@ -121,7 +140,7 @@ export default function({ getService }: FtrProviderContext) {
 
             Object.entries(space).forEach(([privilegeId, actions]) => {
               expect(actions).to.be.an('array');
-              actions.forEach(action => {
+              actions.forEach((action) => {
                 expect(action).to.be.a('string');
                 expect(action.indexOf('*')).to.eql(
                   -1,
@@ -132,7 +151,7 @@ export default function({ getService }: FtrProviderContext) {
 
             Object.entries(reserved).forEach(([privilegeId, actions]) => {
               expect(actions).to.be.an('array');
-              actions.forEach(action => {
+              actions.forEach((action) => {
                 expect(action).to.be.a('string');
                 expect(action.indexOf('*')).to.eql(
                   -1,

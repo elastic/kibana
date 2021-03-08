@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,13 +25,18 @@ export interface ListingProps {
   hideWriteControls: boolean;
   capabilities: { save: boolean; delete: boolean };
   initialFilter: string;
+  initialPageSize: number;
 }
 
 export function Listing(props: ListingProps) {
   return (
     <I18nProvider>
       <TableListView
+        tableCaption={i18n.translate('xpack.graph.listing.graphsTitle', {
+          defaultMessage: 'Graphs',
+        })}
         headingId="graphListingHeading"
+        rowHeader="title"
         createItem={props.capabilities.save ? props.createItem : undefined}
         findItems={props.findItems}
         deleteItems={props.capabilities.delete ? props.deleteItems : undefined}
@@ -38,6 +44,7 @@ export function Listing(props: ListingProps) {
         tableColumns={getTableColumns(props.getViewUrl)}
         listingLimit={props.listingLimit}
         initialFilter={props.initialFilter}
+        initialPageSize={props.initialPageSize}
         noItemsFragment={getNoItemsMessage(
           props.capabilities.save === false,
           props.createItem,
@@ -53,7 +60,6 @@ export function Listing(props: ListingProps) {
         tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
-        uiSettings={props.coreStart.uiSettings}
       />
     </I18nProvider>
   );
@@ -82,7 +88,7 @@ function getNoItemsMessage(
     );
   }
 
-  const sampleDataUrl = `${application.getUrlForApp('kibana')}#/home/tutorial_directory/sampleData`;
+  const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
 
   return (
     <div>

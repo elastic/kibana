@@ -1,18 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'maps', 'timePicker']);
+  const security = getService('security');
 
   describe('discover visualize button', () => {
     beforeEach(async () => {
+      await security.testUser.setRoles([
+        'test_logstash_reader',
+        'global_maps_all',
+        'geoshape_data_reader',
+        'global_discover_read',
+        'global_visualize_read',
+      ]);
       await PageObjects.common.navigateToApp('discover');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should link geo_shape fields to Maps application', async () => {
@@ -24,6 +37,7 @@ export default function({ getService, getPageObjects }) {
       expect(doesLayerExist).to.equal(true);
       const hits = await PageObjects.maps.getHits();
       expect(hits).to.equal('4');
+      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
 
     it('should link geo_point fields to Maps application with time and query context', async () => {
@@ -43,6 +57,7 @@ export default function({ getService, getPageObjects }) {
       expect(doesLayerExist).to.equal(true);
       const hits = await PageObjects.maps.getHits();
       expect(hits).to.equal('7');
+      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
   });
 }

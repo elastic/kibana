@@ -1,39 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+// must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
 import { join } from 'path';
 
 import { PluginsService } from '../plugins_service';
 import { ConfigPath, ConfigService, Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
+import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 import { BehaviorSubject, from } from 'rxjs';
-import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { config } from '../plugins_config';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
-import { Plugin } from '../types';
+import { AsyncPlugin } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
-  const logger = loggingServiceMock.create();
+  const logger = loggingSystemMock.create();
+  const environmentSetup = environmentServiceMock.createSetupContract();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -43,6 +35,7 @@ describe('PluginsService', () => {
       disabled = false,
       version = 'some-version',
       requiredPlugins = [],
+      requiredBundles = [],
       optionalPlugins = [],
       kibanaVersion = '7.0.0',
       configPath = [path],
@@ -53,6 +46,7 @@ describe('PluginsService', () => {
       disabled?: boolean;
       version?: string;
       requiredPlugins?: string[];
+      requiredBundles?: string[];
       optionalPlugins?: string[];
       kibanaVersion?: string;
       configPath?: ConfigPath;
@@ -68,6 +62,7 @@ describe('PluginsService', () => {
         configPath: `${configPath}${disabled ? '-disabled' : ''}`,
         kibanaVersion,
         requiredPlugins,
+        requiredBundles,
         optionalPlugins,
         server,
         ui,
@@ -88,7 +83,7 @@ describe('PluginsService', () => {
       },
     };
 
-    const env = Env.createDefault(getEnvOptions());
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = new BehaviorSubject<Record<string, any>>({
       plugins: {
         initialize: true,
@@ -139,11 +134,11 @@ describe('PluginsService', () => {
         },
         start: async (core, plugins) => {
           contextFromStart = { core, plugins };
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         },
-      } as Plugin<void, typeof pluginStartContract, {}, {}>);
+      } as AsyncPlugin<void, typeof pluginStartContract, {}, {}>);
 
     jest.doMock(
       join(pluginPath, 'server'),
@@ -155,7 +150,7 @@ describe('PluginsService', () => {
       }
     );
 
-    await pluginsService.discover();
+    await pluginsService.discover({ environment: environmentSetup });
 
     const setupDeps = coreMock.createInternalSetup();
     await pluginsService.setup(setupDeps);

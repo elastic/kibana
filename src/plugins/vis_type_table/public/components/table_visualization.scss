@@ -1,0 +1,37 @@
+// Prefix all styles with "tbv" to avoid conflicts.
+// Examples
+//   tbvChart
+//   tbvChart__legend
+//   tbvChart__legend--small
+//   tbvChart__legend-isLoading
+
+.tbvChart {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0;
+  overflow: auto;
+
+  @include euiScrollBar;
+}
+
+.tbvChart__split {
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeL;
+
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0;
+
+  > h3 {
+    text-align: center;
+  }
+}
+
+.tbvChart__splitColumns {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.tbvChartCellContent {
+  @include euiTextTruncate;
+}

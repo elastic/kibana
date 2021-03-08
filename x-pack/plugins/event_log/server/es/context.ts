@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Logger, ClusterClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
 
-export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
-
 export interface EsContext {
   logger: Logger;
   esNames: EsNames;
   esAdapter: IClusterClientAdapter;
   initialize(): void;
+  shutdown(): Promise<void>;
   waitTillReady(): Promise<boolean>;
+  initialized: boolean;
 }
 
 export interface EsError {
@@ -32,8 +33,9 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
 
 export interface EsContextCtorParams {
   logger: Logger;
-  clusterClient: EsClusterClient;
   indexNameRoot: string;
+  kibanaVersion: string;
+  elasticsearchClientPromise: Promise<ElasticsearchClient>;
 }
 
 class EsContextImpl implements EsContext {
@@ -41,16 +43,17 @@ class EsContextImpl implements EsContext {
   public readonly esNames: EsNames;
   public esAdapter: IClusterClientAdapter;
   private readonly readySignal: ReadySignal<boolean>;
-  private initialized: boolean;
+  public initialized: boolean;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
-    this.esNames = getEsNames(params.indexNameRoot);
+    this.esNames = getEsNames(params.indexNameRoot, params.kibanaVersion);
     this.readySignal = createReadySignal();
     this.initialized = false;
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
-      clusterClient: params.clusterClient,
+      elasticsearchClientPromise: params.elasticsearchClientPromise,
+      context: this,
     });
   }
 
@@ -63,9 +66,9 @@ class EsContextImpl implements EsContext {
 
     setImmediate(async () => {
       try {
-        await this._initialize();
-        this.logger.debug('readySignal.signal(true)');
-        this.readySignal.signal(true);
+        const success = await this._initialize();
+        this.logger.debug(`readySignal.signal(${success})`);
+        this.readySignal.signal(success);
       } catch (err) {
         this.logger.debug('readySignal.signal(false)');
         this.readySignal.signal(false);
@@ -73,11 +76,17 @@ class EsContextImpl implements EsContext {
     });
   }
 
+  async shutdown() {
+    await this.esAdapter.shutdown();
+  }
+
+  // waits till the ES initialization is done, returns true if it was successful,
+  // false if it was not successful
   async waitTillReady(): Promise<boolean> {
     return await this.readySignal.wait();
   }
 
-  private async _initialize() {
-    await initializeEs(this);
+  private async _initialize(): Promise<boolean> {
+    return await initializeEs(this);
   }
 }

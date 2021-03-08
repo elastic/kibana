@@ -1,0 +1,31 @@
+1,5c1,15
+< var assignValue = require('./_assignValue'),
+<     castPath = require('./_castPath'),
+<     isIndex = require('./_isIndex'),
+<     isObject = require('./isObject'),
+<     toKey = require('./_toKey');
+---
+> /*
+>  * This file is forked from the lodash project (https://lodash.com/),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
+>  */
+> 
+> /* eslint-disable */
+> 
+> var assignValue = require('lodash/_assignValue'),
+>     castPath = require('lodash/_castPath'),
+>     isFunction = require('lodash/isFunction'),
+>     isIndex = require('lodash/_isIndex'),
+>     isObject = require('lodash/isObject'),
+>     toKey = require('lodash/_toKey');
+31a42,45
+>     if (key == 'prototype' && isFunction(nested)) {
+>       throw new Error('Illegal access of function prototype')
+>     }
+> 
+33c47
+<       var objValue = nested[key];
+---
+>       var objValue = hasOwnProperty.call(nested, key) ? nested[key] : undefined

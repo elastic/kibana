@@ -1,37 +1,28 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { getEnvOptions } from '../config/mocks';
 import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
 import { ConfigService, Env } from '../config';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
-import { getEnvOptions } from '../config/__mocks__/env';
 import { config as cspConfig } from '../csp';
+import { config as externalUrlConfig } from '../external_url';
 
-const logger = loggingServiceMock.create();
-const env = Env.createDefault(getEnvOptions());
+const logger = loggingSystemMock.create();
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const coreId = Symbol();
 
 const createConfigService = (value: Partial<HttpConfigType> = {}) => {
@@ -47,6 +38,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   );
   configService.setSchema(config.path, config.schema);
   configService.setSchema(cspConfig.path, cspConfig.schema);
+  configService.setSchema(externalUrlConfig.path, externalUrlConfig.schema);
   return configService;
 };
 const contextSetup = contextServiceMock.createSetupContract();
@@ -115,7 +107,7 @@ test('spins up notReady server until started if configured with `autoListen:true
   const service = new HttpService({
     coreId,
     configService,
-    env: new Env('.', getEnvOptions()),
+    env: Env.createDefault(REPO_ROOT, getEnvOptions()),
     logger,
   });
 
@@ -159,7 +151,7 @@ test('logs error if already set up', async () => {
 
   await service.setup(setupDeps);
 
-  expect(loggingServiceMock.collect(logger).warn).toMatchSnapshot();
+  expect(loggingSystemMock.collect(logger).warn).toMatchSnapshot();
 });
 
 test('stops http server', async () => {
@@ -263,7 +255,7 @@ test('does not start http server if process is dev cluster master', async () => 
   const service = new HttpService({
     coreId,
     configService,
-    env: new Env('.', getEnvOptions({ isDevClusterMaster: true })),
+    env: Env.createDefault(REPO_ROOT, getEnvOptions({ isDevCliParent: true })),
     logger,
   });
 
@@ -288,7 +280,7 @@ test('does not start http server if configured with `autoListen:false`', async (
   const service = new HttpService({
     coreId,
     configService,
-    env: new Env('.', getEnvOptions()),
+    env: Env.createDefault(REPO_ROOT, getEnvOptions()),
     logger,
   });
 

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Moment } from 'moment';
 
+import { AnnotationsTable } from '../../../common/types/annotations';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-
-import { TimeBucketsInterval } from '../util/time_buckets';
+import { SwimlaneType } from './explorer_constants';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -17,16 +18,26 @@ interface ClearedSelectedAnomaliesState {
 
 export declare const getClearedSelectedAnomaliesState: () => ClearedSelectedAnomaliesState;
 
+export interface SwimlanePoint {
+  laneLabel: string;
+  time: number;
+  value: number;
+}
+
 export declare interface SwimlaneData {
-  fieldName: string;
+  fieldName?: string;
   laneLabels: string[];
-  points: any[];
+  points: SwimlanePoint[];
   interval: number;
 }
 
 export declare interface OverallSwimlaneData extends SwimlaneData {
   earliest: number;
   latest: number;
+}
+
+export interface ViewBySwimLaneData extends OverallSwimlaneData {
+  cardinality: number;
 }
 
 export declare const getDateFormatTz: () => any;
@@ -102,7 +113,7 @@ export declare const loadAnnotationsTableData: (
   selectedJobs: ExplorerJob[],
   interval: number,
   bounds: TimeRangeBounds
-) => Promise<any[]>;
+) => Promise<AnnotationsTable>;
 
 export declare interface AnomaliesTableData {
   anomalies: any[];
@@ -157,22 +168,6 @@ declare interface LoadOverallDataResponse {
   overallSwimlaneData: OverallSwimlaneData;
 }
 
-export declare const loadOverallData: (
-  selectedJobs: ExplorerJob[],
-  interval: TimeBucketsInterval,
-  bounds: TimeRangeBounds
-) => Promise<LoadOverallDataResponse>;
-
-export declare const loadViewBySwimlane: (
-  fieldValues: string[],
-  bounds: SwimlaneBounds,
-  selectedJobs: ExplorerJob[],
-  viewBySwimlaneFieldName: string,
-  swimlaneLimit: number,
-  influencersFilterQuery: any,
-  noInfluencersConfigured: boolean
-) => Promise<any>;
-
 export declare const loadViewByTopFieldValuesForSelectedTime: (
   earliestMs: number,
   latestMs: number,
@@ -190,9 +185,15 @@ export declare interface FilterData {
 }
 
 export declare interface AppStateSelectedCells {
-  type: string;
+  type: SwimlaneType;
   lanes: string[];
-  times: number[];
-  showTopFieldValues: boolean;
-  viewByFieldName: string;
+  times: [number, number];
+  showTopFieldValues?: boolean;
+  viewByFieldName?: string;
 }
+
+export declare const removeFilterFromQueryString: (
+  currentQueryString: string,
+  fieldName: string,
+  fieldValue: string
+) => string;

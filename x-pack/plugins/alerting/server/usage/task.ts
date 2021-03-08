@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Logger, CoreSetup } from 'kibana/server';
+import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
@@ -41,8 +42,7 @@ function registerAlertingTelemetryTask(
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
-      title: 'Alerting telemetry fetch task',
-      type: TELEMETRY_TASK_TYPE,
+      title: 'Alerting usage fetch task',
       timeout: '5m',
       createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
@@ -54,7 +54,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
     await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
-      state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
+      state: {},
       params: {},
     });
   } catch (e) {
@@ -65,7 +65,12 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = core.elasticsearch.adminClient.callAsInternalUser;
+    const callCluster = (...args: Parameters<LegacyAPICaller>) => {
+      return core.getStartServices().then(([{ elasticsearch: { legacy: { client } } }]) =>
+        client.callAsInternalUser(...args)
+      );
+    };
+
     return {
       async run() {
         return Promise.all([
@@ -84,7 +89,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
               runAt: getNextMidnight(),
             };
           })
-          .catch(errMsg => {
+          .catch((errMsg) => {
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
@@ -97,8 +102,5 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 }
 
 function getNextMidnight() {
-  return moment()
-    .add(1, 'd')
-    .startOf('d')
-    .toDate();
+  return moment().add(1, 'd').startOf('d').toDate();
 }

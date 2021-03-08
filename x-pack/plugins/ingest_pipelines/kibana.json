@@ -1,0 +1,10 @@
+{
+  "id": "ingestPipelines",
+  "version": "8.0.0",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["licensing", "management", "features", "share"],
+  "optionalPlugins": ["security", "usageCollection"],
+  "configPath": ["xpack", "ingest_pipelines"],
+  "requiredBundles": ["esUiShared", "kibanaReact"]
+}

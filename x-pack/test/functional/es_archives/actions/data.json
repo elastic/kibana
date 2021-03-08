@@ -1,0 +1,112 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "action:uuid-actionId",
+    "source": {
+      "type": "action",
+      "action": {
+        "actionTypeId": "test.not-enabled",
+        "name": "an action created before test.not-enabled was disabled",
+        "config": {}
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:791a2ab1-784a-46ea-aa68-04c837e5da2d",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".jira",
+        "config": {
+          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira",
+          "casesConfiguration": {
+            "mapping": [
+              {
+                "actionType": "overwrite",
+                "source": "title",
+                "target": "summary"
+              },
+              {
+                "actionType": "overwrite",
+                "source": "description",
+                "target": "description"
+              },
+              {
+                "actionType": "append",
+                "source": "comments",
+                "target": "comments"
+              }
+            ]
+          },
+          "projectKey": "CK"
+        },
+        "name": "A jira action",
+        "secrets": "gUYVHxyvkY6I6rZrST16PzSBjwuPLzWYIm9Ow6qjJXiCimA1wHGgH1BR5nO/xZJjv9QqIGO3eKDSYsn7K9m39UJv83+oi5P4ZgtFktsFq0Jv6XEFQPFkuVY5sWno7w89CxgxlsTQFpYAJb0Hl0qf/6p6bKKaje48YRqNS5roebNAAribh9AWu80uxIJFWNo="
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-09-24T08:08:23.715Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:949f909b-20a0-46e3-aadb-6a4d117bb592",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".webhook",
+        "config": {
+          "headers": null,
+          "method": "post",
+          "url": "http://localhost"
+        },
+        "name": "A webhook with auth",
+        "secrets": "LUqlrITACjqPmcWGlbl+H4RsGGOlw8LM0Urq8r7y6jNT7Igv3J7FjKJ2NXfNTaghVBO7e9x3wZOtiycwyoAdviTyYm1pspni24vH+OT70xaSuXcDoxfGwiLEcaG04INDnUJX4dtmRerxqR9ChktC70LNtOU3sqjYI2tWt2vOqGeq"
+      },
+      "migrationVersion": {
+        "action": "7.10.0"
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-10-26T21:29:47.380Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:7434121e-045a-47d6-a0a6-0b6da752397a",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".webhook",
+        "config": {
+          "headers": null,
+          "method": "post",
+          "url": "http://localhost"
+        },
+        "name": "A webhook with no auth",
+        "secrets": "tOwFq20hbUrcp3FX7stKB5aJaQQdLNQwomSNym8BgnFaBBafPOASv5T0tGdGsTr/CA7VK+N/wYBHQPzt0apF8Z/UYl63ZXqck5tSoFDnQW77zv1VVQ5wEwN1qkAQQcfrXTXU2wYVAYZNSuHkbeRjcasfG0ty1K+J7A=="
+      },
+      "migrationVersion": {
+        "action": "7.10.0"
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-10-26T21:30:35.146Z"
+    }
+  }
+}

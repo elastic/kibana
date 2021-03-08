@@ -1,0 +1,12 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "signal_object_clash",
+    "source": {
+      "@timestamp": "2020-10-28T05:08:53.000Z",
+      "signal": { "child_1": { "child_2": { "value": "some_value" } } }
+    },
+    "type": "_doc"
+  }
+}

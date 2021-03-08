@@ -1,0 +1,15 @@
+.lnsXyExpression__container {
+  height: 100%;
+  width: 100%;
+  // the FocusTrap is adding extra divs which are making the visualization redraw twice
+  // with a visible glitch. This make the chart library resilient to this extra reflow
+  overflow-x: hidden;
+}
+
+.lnsChart__empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

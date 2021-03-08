@@ -1,106 +1,81 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import Boom from 'boom';
-import { combineLatest } from 'rxjs';
-import { first } from 'rxjs/operators';
+
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
-import {
-  LOGGING_TAG,
-  KIBANA_MONITORING_LOGGING_TAG,
-  KIBANA_ALERTING_ENABLED,
-  KIBANA_STATS_TYPE_MONITORING,
-} from '../common/constants';
+import { TypeOf } from '@kbn/config-schema';
 import {
   Logger,
   PluginInitializerContext,
-  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   CoreStart,
-  IRouter,
-  IClusterClient,
-} from '../../../../src/core/server';
-import { MonitoringConfig } from './config';
-// @ts-ignore
+  CustomHttpResponseOptions,
+  ResponseError,
+  Plugin,
+} from 'kibana/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import {
+  LOGGING_TAG,
+  KIBANA_MONITORING_LOGGING_TAG,
+  KIBANA_STATS_TYPE_MONITORING,
+  ALERTS,
+  SAVED_OBJECT_TELEMETRY,
+} from '../common/constants';
+import { MonitoringConfig, createConfig, configSchema } from './config';
 import { requireUIRoutes } from './routes';
-// @ts-ignore
 import { initBulkUploader } from './kibana_monitoring';
-// @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
+import { mbSafeQuery } from './lib/mb_safe_query';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
-import { registerMonitoringCollection } from './telemetry_collection';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
+import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import { LicenseService } from './license_service';
-import { MonitoringLicenseService } from './types';
+import { AlertsFactory } from './alerts';
 import {
-  PluginStartContract as AlertingPluginStartContract,
-  PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerting/server';
-import { getLicenseExpiration } from './alerts/license_expiration';
-import { getClusterState } from './alerts/cluster_state';
-import { InfraPluginSetup } from '../../infra/server';
+  MonitoringCore,
+  MonitoringLicenseService,
+  MonitoringPluginSetup,
+  LegacyShimDependencies,
+  IBulkUploader,
+  PluginsSetup,
+  PluginsStart,
+  LegacyRequest,
+  RequestHandlerContextMonitoringPlugin,
+} from './types';
 
-export interface LegacyAPI {
-  getServerStatus: () => string;
-}
-
-interface PluginsSetup {
-  telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-  licensing: LicensingPluginSetup;
-  features: FeaturesPluginSetupContract;
-  alerting: AlertingPluginSetupContract;
-  infra: InfraPluginSetup;
-}
-
-interface PluginsStart {
-  alerting: AlertingPluginStartContract;
-}
-
-interface MonitoringCoreConfig {
-  get: (key: string) => string | undefined;
-}
-
-interface MonitoringCore {
-  config: () => MonitoringCoreConfig;
-  log: Logger;
-  route: (options: any) => void;
-}
-
-interface LegacyShimDependencies {
-  router: IRouter;
-  instanceUuid: string;
-  esDataClient: IClusterClient;
-  kibanaStatsCollector: any;
-}
-
-interface IBulkUploader {
-  setKibanaStatusGetter: (getter: () => string | undefined) => void;
-  getKibanaStats: () => any;
-}
+import { Globals } from './static_globals';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
 
-export class Plugin {
+const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
+  const options = { statusCode: error.statusCode ?? 500 };
+  const boom = Boom.isBoom(error) ? error : Boom.boomify(error, options);
+  return {
+    body: boom,
+    headers: boom.output.headers as { [key: string]: string },
+    statusCode: boom.output.statusCode,
+  };
+};
+
+export class MonitoringPlugin
+  implements Plugin<MonitoringPluginSetup, void, PluginsSetup, PluginsStart> {
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ICustomClusterClient;
+  private cluster = {} as ILegacyCustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
-  private bulkUploader = {} as IBulkUploader;
+  private bulkUploader: IBulkUploader | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -108,18 +83,15 @@ export class Plugin {
     this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
   }
 
-  async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const [config, legacyConfig] = await combineLatest([
-      this.initializerContext.config.create<MonitoringConfig>(),
-      this.initializerContext.config.legacy.globalConfig$,
-    ])
-      .pipe(first())
-      .toPromise();
+  setup(core: CoreSetup, plugins: PluginsSetup) {
+    const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
+    const legacyConfig = this.initializerContext.config.legacy.get();
 
+    const router = core.http.createRouter<RequestHandlerContextMonitoringPlugin>();
     this.legacyShimDependencies = {
-      router: core.http.createRouter(),
-      instanceUuid: core.uuid.getInstanceUuid(),
-      esDataClient: core.elasticsearch.dataClient,
+      router,
+      instanceUuid: this.initializerContext.env.instanceUuid,
+      esDataClient: core.elasticsearch.legacy.client,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
       ),
@@ -130,7 +102,7 @@ export class Plugin {
     const cluster = (this.cluster = instantiateClient(
       config.ui.elasticsearch,
       this.log,
-      core.elasticsearch.createClient
+      core.elasticsearch.legacy.createClient
     ));
 
     // Start our license service which will ensure
@@ -141,68 +113,61 @@ export class Plugin {
       config,
       log: this.log,
     });
-    await this.licenseService.refresh();
 
-    if (KIBANA_ALERTING_ENABLED) {
-      plugins.alerting.registerType(
-        getLicenseExpiration(
-          async () => {
-            const coreStart = (await core.getStartServices())[0];
-            return coreStart.uiSettings;
-          },
-          cluster,
-          this.getLogger,
-          config.ui.ccs.enabled
-        )
-      );
-      plugins.alerting.registerType(
-        getClusterState(
-          async () => {
-            const coreStart = (await core.getStartServices())[0];
-            return coreStart.uiSettings;
-          },
-          cluster,
-          this.getLogger,
-          config.ui.ccs.enabled
-        )
-      );
-    }
-
-    // Initialize telemetry
-    if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(plugins.telemetryCollectionManager, this.cluster, {
-        maxBucketSize: config.ui.max_bucket_size,
-      });
+    Globals.init(core, plugins.cloud, cluster, config, this.getLogger);
+    const serverInfo = core.http.getServerInfo();
+    const alerts = AlertsFactory.getAll();
+    for (const alert of alerts) {
+      plugins.alerting?.registerType(alert.getAlertType());
     }
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(plugins.usageCollection, config);
+      core.savedObjects.registerType({
+        name: SAVED_OBJECT_TELEMETRY,
+        hidden: true,
+        namespaceType: 'agnostic',
+        mappings: {
+          properties: {
+            reportedClusterUuids: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+
+      registerCollectors(plugins.usageCollection, config, cluster);
+      registerMonitoringTelemetryCollection(
+        plugins.usageCollection,
+        cluster,
+        config.ui.max_bucket_size
+      );
     }
 
-    // If collection is enabled, create the bulk uploader
+    // Always create the bulk uploader
     const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
+    const bulkUploader = (this.bulkUploader = initBulkUploader({
+      elasticsearch: core.elasticsearch,
+      config,
+      log: kibanaMonitoringLog,
+      opsMetrics$: core.metrics.getOpsMetrics$(),
+      statusGetter$: core.status.overall$,
+      kibanaStats: {
+        uuid: this.initializerContext.env.instanceUuid,
+        name: serverInfo.name,
+        index: get(legacyConfig, 'kibana.index'),
+        host: serverInfo.hostname,
+        locale: i18n.getLocale(),
+        port: serverInfo.port.toString(),
+        transport_address: `${serverInfo.hostname}:${serverInfo.port}`,
+        version: this.initializerContext.env.packageInfo.version,
+        snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
+      },
+    }));
+
+    // If collection is enabled, start it
     const kibanaCollectionEnabled = config.kibana.collection.enabled;
     if (kibanaCollectionEnabled) {
-      // Start kibana internal collection
-      const serverInfo = core.http.getServerInfo();
-      const bulkUploader = (this.bulkUploader = initBulkUploader({
-        elasticsearch: core.elasticsearch,
-        config,
-        log: kibanaMonitoringLog,
-        kibanaStats: {
-          uuid: core.uuid.getInstanceUuid(),
-          name: serverInfo.name,
-          index: get(legacyConfig, 'kibana.index'),
-          host: serverInfo.host,
-          locale: i18n.getLocale(),
-          port: serverInfo.port.toString(),
-          transport_address: `${serverInfo.host}:${serverInfo.port}`,
-          version: this.initializerContext.env.packageInfo.version,
-          snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
-        },
-      }));
-
       // Do not use `this.licenseService` as that looks at the monitoring cluster
       // whereas we want to check the production cluster here
       if (plugins.licensing) {
@@ -212,11 +177,15 @@ export class Plugin {
           const monitoringBulkEnabled =
             mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
           if (monitoringBulkEnabled) {
-            bulkUploader.start(plugins.usageCollection);
+            bulkUploader.start();
           } else {
             bulkUploader.handleNotEnabled();
           }
         });
+      } else {
+        kibanaMonitoringLog.warn(
+          'Internal collection for Kibana monitoring is disabled due to missing license information.'
+        );
       }
     } else {
       kibanaMonitoringLog.info(
@@ -233,23 +202,25 @@ export class Plugin {
         legacyConfig,
         core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         this.licenseService,
-        this.cluster
+        this.cluster,
+        plugins
       );
 
       this.registerPluginInUI(plugins);
-      requireUIRoutes(this.monitoringCore);
+      requireUIRoutes(this.monitoringCore, {
+        cluster,
+        router,
+        licenseService: this.licenseService,
+        encryptedSavedObjects: plugins.encryptedSavedObjects,
+        logger: this.log,
+      });
       initInfraSource(config, plugins.infra);
     }
 
     return {
-      // The legacy plugin calls this to register certain legacy dependencies
-      // that are necessary for the plugin to properly run
-      registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        this.setupLegacy(legacyAPI);
-      },
       // OSS stats api needs to call this in order to centralize how
       // we fetch kibana specific stats
-      getKibanaStats: () => this.bulkUploader.getKibanaStats(),
+      getKibanaStats: () => bulkUploader.getKibanaStats(),
     };
   }
 
@@ -262,19 +233,20 @@ export class Plugin {
     if (this.licenseService) {
       this.licenseService.stop();
     }
+    this.bulkUploader?.stop();
   }
 
   registerPluginInUI(plugins: PluginsSetup) {
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: 'monitoring',
       name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
         defaultMessage: 'Stack Monitoring',
       }),
-      icon: 'monitoringApp',
-      navLinkId: 'monitoring',
+      category: DEFAULT_APP_CATEGORIES.management,
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
+      alerting: ALERTS,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -289,6 +261,9 @@ export class Plugin {
                 all: [],
                 read: [],
               },
+              alerting: {
+                all: ALERTS,
+              },
               ui: [],
             },
           },
@@ -297,17 +272,13 @@ export class Plugin {
     });
   }
 
-  async setupLegacy(legacyAPI: LegacyAPI) {
-    // Set the stats getter
-    this.bulkUploader.setKibanaStatusGetter(() => legacyAPI.getServerStatus());
-  }
-
   getLegacyShim(
     config: MonitoringConfig,
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ICustomClusterClient
+    cluster: ILegacyCustomClusterClient,
+    setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({
@@ -333,24 +304,41 @@ export class Plugin {
       route: (options: any) => {
         const method = options.method;
         const handler = async (
-          context: RequestHandlerContext,
+          context: RequestHandlerContextMonitoringPlugin,
           req: KibanaRequest<any, any, any, any>,
           res: KibanaResponseFactory
         ) => {
           const plugins = (await getCoreServices())[1];
-          const legacyRequest = {
+          const legacyRequest: LegacyRequest = {
             ...req,
             logger: this.log,
             getLogger: this.getLogger,
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
-            getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
+            getActionTypeRegistry: () => context.actions?.listTypes(),
+            getAlertsClient: () => {
+              try {
+                return plugins.alerting.getAlertsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
+            getActionsClient: () => {
+              try {
+                return plugins.actions.getActionsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
             server: {
+              route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {
-                  plugins,
+                  plugins: setupPlugins,
                 },
               },
               plugins: {
@@ -362,19 +350,26 @@ export class Plugin {
                     callWithRequest: async (_req: any, endpoint: string, params: any) => {
                       const client =
                         name === 'monitoring' ? cluster : this.legacyShimDependencies.esDataClient;
-                      return client.asScoped(req).callAsCurrentUser(endpoint, params);
+                      return mbSafeQuery(() =>
+                        client.asScoped(req).callAsCurrentUser(endpoint, params)
+                      );
                     },
                   }),
                 },
               },
             },
           };
-
-          const result = await options.handler(legacyRequest);
-          if (Boom.isBoom(result)) {
-            return res.customError({ statusCode: result.output.statusCode, body: result });
+          try {
+            const result = await options.handler(legacyRequest);
+            return res.ok({ body: result });
+          } catch (err) {
+            const statusCode: number =
+              err.output?.statusCode || err.statusCode || err.status || 500;
+            if (Boom.isBoom(err) || statusCode !== 500) {
+              return res.customError({ statusCode, body: err });
+            }
+            throw wrapError(err).body;
           }
-          return res.ok({ body: result });
         };
 
         const validate: any = get(options, 'config.validate', false);

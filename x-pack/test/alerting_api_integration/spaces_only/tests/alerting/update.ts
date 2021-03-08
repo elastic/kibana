@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect/expect.js';
@@ -20,11 +21,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     it('should handle update alert request appropriately', async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       const updatedData = {
         name: 'bcd',
@@ -37,7 +38,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         throttle: '1m',
       };
       const response = await supertest
-        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send(updatedData)
         .expect(200);
@@ -47,16 +48,18 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         id: createdAlert.id,
         tags: ['bar'],
         alertTypeId: 'test.noop',
-        consumer: 'bar',
+        consumer: 'alertsFixture',
         createdBy: null,
         enabled: true,
         updatedBy: null,
         apiKeyOwner: null,
         muteAll: false,
         mutedInstanceIds: [],
+        notifyWhen: 'onThrottleInterval',
         scheduledTaskId: createdAlert.scheduledTaskId,
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
+        executionStatus: response.body.executionStatus,
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
@@ -75,14 +78,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't update alert from another space`, async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       await supertest
-        .put(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
+        .put(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'bcd',

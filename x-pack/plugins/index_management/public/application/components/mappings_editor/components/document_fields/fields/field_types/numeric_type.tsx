@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedField, Field as FieldType } from '../../../../types';
+import { NormalizedField, Field as FieldType, ComboBoxOption } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, FormDataProvider, NumericField, Field } from '../../../../shared_imports';
 import {
@@ -18,6 +20,7 @@ import {
   CoerceNumberParameter,
   IgnoreMalformedParameter,
   CopyToParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 import { PARAMETERS_DEFINITION } from '../../../../constants';
@@ -26,6 +29,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'copy_to':
     case 'boost':
+    case 'meta':
     case 'ignore_malformed': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
@@ -46,9 +50,9 @@ export const NumericType = ({ field }: Props) => {
     <>
       <BasicParametersSection>
         {/* scaling_factor */}
-        <FormDataProvider pathsToWatch="subType">
-          {formData =>
-            formData.subType === 'scaled_float' ? (
+        <FormDataProvider<{ subType?: ComboBoxOption[] }> pathsToWatch="subType">
+          {(formData) => {
+            return formData.subType?.[0]?.value === 'scaled_float' ? (
               <EditFieldFormRow
                 title={PARAMETERS_DEFINITION.scaling_factor.title!}
                 description={PARAMETERS_DEFINITION.scaling_factor.description}
@@ -58,10 +62,11 @@ export const NumericType = ({ field }: Props) => {
                   path="scaling_factor"
                   config={getFieldConfig('scaling_factor')}
                   component={Field}
+                  data-test-subj="scalingFactor"
                 />
               </EditFieldFormRow>
-            ) : null
-          }
+            ) : null;
+          }}
         </FormDataProvider>
 
         <IndexParameter hasIndexOptions={false} />
@@ -94,6 +99,8 @@ export const NumericType = ({ field }: Props) => {
         </NullValueParameter>
 
         <StoreParameter />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
         <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>

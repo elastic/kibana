@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertType, ActionVariables } from '../../types';
-import { actionVariablesFromAlertType } from './action_variables';
+import { transformActionVariables } from './action_variables';
+import { ALERTS_FEATURE_ID } from '../../../../alerting/common';
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('actionVariablesFromAlertType', () => {
+describe('transformActionVariables', () => {
   test('should return correct variables when no state or context provided', async () => {
-    const alertType = getAlertType({ context: [], state: [] });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    const alertType = getAlertType({ context: [], state: [], params: [] });
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -31,8 +33,28 @@ describe('actionVariablesFromAlertType', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
       ]
     `);
@@ -45,8 +67,9 @@ describe('actionVariablesFromAlertType', () => {
         { name: 'bar', description: 'bar-description' },
       ],
       state: [],
+      params: [],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -65,8 +88,28 @@ describe('actionVariablesFromAlertType', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "foo-description",
@@ -87,8 +130,9 @@ describe('actionVariablesFromAlertType', () => {
         { name: 'foo', description: 'foo-description' },
         { name: 'bar', description: 'bar-description' },
       ],
+      params: [],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -107,8 +151,28 @@ describe('actionVariablesFromAlertType', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "foo-description",
@@ -132,8 +196,9 @@ describe('actionVariablesFromAlertType', () => {
         { name: 'fooS', description: 'fooS-description' },
         { name: 'barS', description: 'barS-description' },
       ],
+      params: [{ name: 'fooP', description: 'fooP-description' }],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -152,8 +217,28 @@ describe('actionVariablesFromAlertType', () => {
           "name": "tags",
         },
         Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
           "description": "The alert instance id that scheduled actions for the alert.",
           "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
         },
         Object {
           "description": "fooC-description",
@@ -164,12 +249,103 @@ describe('actionVariablesFromAlertType', () => {
           "name": "context.barC",
         },
         Object {
+          "description": "fooP-description",
+          "name": "params.fooP",
+        },
+        Object {
           "description": "fooS-description",
           "name": "state.fooS",
         },
         Object {
           "description": "barS-description",
           "name": "state.barS",
+        },
+      ]
+    `);
+  });
+
+  test('should return useWithTripleBracesInTemplates with action variables if specified', () => {
+    const alertType = getAlertType({
+      context: [
+        { name: 'fooC', description: 'fooC-description', useWithTripleBracesInTemplates: true },
+        { name: 'barC', description: 'barC-description' },
+      ],
+      state: [
+        { name: 'fooS', description: 'fooS-description' },
+        { name: 'barS', description: 'barS-description', useWithTripleBracesInTemplates: true },
+      ],
+      params: [
+        {
+          name: 'fooP',
+          description: 'fooP-description',
+          useWithTripleBracesInTemplates: true,
+        },
+      ],
+    });
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": "The id of the alert.",
+          "name": "alertId",
+        },
+        Object {
+          "description": "The name of the alert.",
+          "name": "alertName",
+        },
+        Object {
+          "description": "The spaceId of the alert.",
+          "name": "spaceId",
+        },
+        Object {
+          "description": "The tags of the alert.",
+          "name": "tags",
+        },
+        Object {
+          "description": "The date the alert scheduled the action.",
+          "name": "date",
+        },
+        Object {
+          "description": "The alert instance id that scheduled actions for the alert.",
+          "name": "alertInstanceId",
+        },
+        Object {
+          "description": "The alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroup",
+        },
+        Object {
+          "description": "The alert action subgroup that was used to scheduled actions for the alert.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
+          "description": "The human readable name of the alert action group that was used to scheduled actions for the alert.",
+          "name": "alertActionGroupName",
+        },
+        Object {
+          "description": "The configured server.publicBaseUrl value or empty string if not configured.",
+          "name": "kibanaBaseUrl",
+        },
+        Object {
+          "description": "fooC-description",
+          "name": "context.fooC",
+          "useWithTripleBracesInTemplates": true,
+        },
+        Object {
+          "description": "barC-description",
+          "name": "context.barC",
+        },
+        Object {
+          "description": "fooP-description",
+          "name": "params.fooP",
+          "useWithTripleBracesInTemplates": true,
+        },
+        Object {
+          "description": "fooS-description",
+          "name": "state.fooS",
+        },
+        Object {
+          "description": "barS-description",
+          "name": "state.barS",
+          "useWithTripleBracesInTemplates": true,
         },
       ]
     `);
@@ -183,5 +359,10 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     actionVariables,
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    authorizedConsumers: {},
+    producer: ALERTS_FEATURE_ID,
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
   };
 }

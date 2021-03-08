@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -57,7 +58,7 @@ export function getShardStats(
     size: 0,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: 'shards',
         clusterUuid: cluster.cluster_uuid,
@@ -71,7 +72,7 @@ export function getShardStats(
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then(resp => {
+  return callWithRequest(req, 'search', params).then((resp) => {
     return handleResponse(resp, includeNodes, includeIndices, cluster);
   });
 }

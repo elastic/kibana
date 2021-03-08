@@ -1,0 +1,207 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// --------------------------------------------------
+// Custom Source display settings
+// --------------------------------------------------
+
+@mixin sourceName {
+  font-size: .6875em;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: .06em;
+}
+
+@mixin exampleResultBoxShadow {
+  box-shadow:
+    0 1px 3px rgba($euiColorInk, .1),
+    0 0 20px $euiColorLightestShade;
+}
+
+// Wrapper
+.custom-source-display-settings {
+  font-size: 16px;
+}
+
+// Example result content
+.example-result-content {
+  & > * {
+    line-height: 1.5em;
+  }
+
+  &__title {
+    font-size: 1em;
+    font-weight: 600;
+    color: $euiColorPrimary;
+
+    .example-result-detail-card & {
+      font-size: 20px;
+    }
+  }
+
+  &__subtitle,
+  &__description {
+    font-size: .875;
+  }
+
+  &__subtitle {
+    color: $euiColorDarkestShade;
+  }
+
+  &__description {
+    padding: .1rem 0 .125rem .35rem;
+    border-left: 3px solid $euiColorLightShade;
+    color: $euiColorDarkShade;
+    line-height: 1.8;
+    word-break: break-word;
+
+    @supports (display: -webkit-box) {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__url {
+    .example-result-detail-card & {
+      color: $euiColorDarkShade;
+    }
+  }
+}
+
+.example-result-content-placeholder {
+  color: $euiColorMediumShade;
+}
+
+// Example standout result
+.example-standout-result {
+  border-radius: 4px;
+  overflow: hidden;
+  @include exampleResultBoxShadow;
+
+  &__header,
+  &__content {
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+
+  &__content {
+    padding-top: 1em;
+    padding-bottom: 1em;
+  }
+
+  &__source-name {
+    line-height: 34px;
+    @include sourceName;
+  }
+}
+
+// Example result group
+.example-result-group {
+  &__header {
+    padding: 0 .5em;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+
+    .euiIcon {
+      margin-right: .25rem;
+    }
+  }
+
+  &__source-name {
+    line-height: 1.75em;
+    @include sourceName;
+  }
+
+  &__content {
+    display: flex;
+    align-items: stretch;
+    padding: .75em 0;
+  }
+
+  &__border {
+    width: 4px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-left: .875rem;
+  }
+
+  &__results {
+    flex: 1;
+    max-width: 100%;
+  }
+}
+
+.example-grouped-result {
+  padding: 1em;
+}
+
+.example-result-field-hover {
+  background: lighten($euiColorVis1_behindText, 30%);
+  position: relative;
+
+  &:before,
+  &:after {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 4px;
+    background: lighten($euiColorVis1_behindText, 30%);
+  }
+
+  &:before {
+    right: 100%;
+    border-radius: 2px 0 0 2px;
+  }
+
+  &:after {
+    left: 100%;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .example-result-content-placeholder {
+    color: $euiColorFullShade;
+  }
+}
+
+.example-result-detail-card {
+  @include exampleResultBoxShadow;
+
+  &__header {
+    position: relative;
+    padding: 1.25em 1em 0;
+  }
+
+  &__border {
+    height: 4px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+  }
+
+  &__source-name {
+    margin-bottom: 1em;
+    font-weight: 500;
+  }
+
+  &__field {
+    padding: 1em;
+
+    & + & {
+      border-top: 1px solid $euiColorLightShade;
+    }
+  }
+}
+
+.visible-fields-container {
+  background: $euiColorLightestShade;
+  border-color: transparent;
+}

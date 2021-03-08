@@ -1,35 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {
     testFiles: [
+      require.resolve('./apps/bundles'),
       require.resolve('./apps/console'),
-      require.resolve('./apps/getting_started'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
+      require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
@@ -39,16 +29,20 @@ export default async function({ readConfigFile }) {
     ],
     pageObjects,
     services,
+
     servers: commonConfig.get('servers'),
 
-    esTestCluster: commonConfig.get('esTestCluster'),
-
+    esTestCluster: {
+      ...commonConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
         '--telemetry.optIn=false',
+        '--savedObjects.maxImportPayloadBytes=10485760',
       ],
     },
 
@@ -56,6 +50,7 @@ export default async function({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'visualization:visualize:legacyChartsLibrary': true,
       },
     },
 
@@ -67,35 +62,38 @@ export default async function({ readConfigFile }) {
         pathname: '/status',
       },
       discover: {
-        pathname: '/app/kibana',
-        hash: '/discover',
+        pathname: '/app/discover',
+        hash: '/',
       },
       context: {
-        pathname: '/app/kibana',
+        pathname: '/app/discover',
         hash: '/context',
       },
       visualize: {
-        pathname: '/app/kibana',
-        hash: '/visualize',
+        pathname: '/app/visualize',
+        hash: '/',
       },
       dashboard: {
-        pathname: '/app/kibana',
-        hash: '/dashboards',
+        pathname: '/app/dashboards',
+        hash: '/list',
       },
+      management: {
+        pathname: '/app/management',
+      },
+      /** @obsolete "management" should be instead of "settings" **/
       settings: {
-        pathname: '/app/kibana',
-        hash: '/management',
+        pathname: '/app/management',
       },
       timelion: {
         pathname: '/app/timelion',
       },
       console: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/console',
+        pathname: '/app/dev_tools',
+        hash: '/console',
       },
       home: {
-        pathname: '/app/kibana',
-        hash: '/home',
+        pathname: '/app/home',
+        hash: '/',
       },
     },
     junit: {
@@ -224,6 +222,21 @@ export default async function({ readConfigFile }) {
           kibana: [],
         },
 
+        kibana_timefield: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['without-timefield', 'with-timefield'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_large_strings: {
           elasticsearch: {
             cluster: [],
@@ -259,7 +272,7 @@ export default async function({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['animals-*'],
+                names: ['animals-*', 'dogbreeds'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
@@ -267,6 +280,18 @@ export default async function({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
+        },
+
+        test_alias1_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['alias1'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
         },
       },
       defaultRoles: ['test_logstash_reader', 'kibana_admin'],

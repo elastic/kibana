@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -32,16 +21,15 @@ declare global {
   }
 }
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const appsMenu = getService('appsMenu');
   const browser = getService('browser');
+  const deployment = getService('deployment');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
-  const navigateTo = (path: string) =>
-    browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
+  const navigateTo = async (path: string) =>
+    await browser.navigateTo(`${deployment.getHostPort()}${path}`);
   const navigateToApp = async (title: string) => {
     await appsMenu.clickLink(title);
     return browser.execute(() => {
@@ -52,11 +40,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       window.__RENDERING_SESSION__.push(window.location.pathname);
     });
   };
-  const getLegacyMode = () =>
-    browser.execute(() => {
-      return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
-        .legacyMode;
-    });
+
   const getUserSettings = () =>
     browser.execute(() => {
       return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
@@ -74,13 +58,11 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     it('renders "core" application', async () => {
       await navigateTo('/render/core');
 
-      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
+      const [loadingMessage, userSettings] = await Promise.all([
         findLoadingMessage(),
-        getLegacyMode(),
         getUserSettings(),
       ]);
 
-      expect(legacyMode).to.be(false);
       expect(userSettings).to.not.be.empty();
 
       await find.waitForElementStale(loadingMessage);
@@ -91,54 +73,16 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     it('renders "core" application without user settings', async () => {
       await navigateTo('/render/core?includeUserSettings=false');
 
-      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
+      const [loadingMessage, userSettings] = await Promise.all([
         findLoadingMessage(),
-        getLegacyMode(),
         getUserSettings(),
       ]);
 
-      expect(legacyMode).to.be(false);
       expect(userSettings).to.be.empty();
 
       await find.waitForElementStale(loadingMessage);
 
       expect(await exists('renderingHeader')).to.be(true);
-    });
-
-    it('renders "legacy" application', async () => {
-      await navigateTo('/render/legacy_app');
-
-      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
-        findLoadingMessage(),
-        getLegacyMode(),
-        getUserSettings(),
-      ]);
-
-      expect(legacyMode).to.be(true);
-      expect(userSettings).to.not.be.empty();
-
-      await find.waitForElementStale(loadingMessage);
-
-      expect(await exists('legacyAppH1')).to.be(true);
-      expect(await exists('renderingHeader')).to.be(false);
-    });
-
-    it('renders "legacy" application without user settings', async () => {
-      await navigateTo('/render/legacy_app?includeUserSettings=false');
-
-      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
-        findLoadingMessage(),
-        getLegacyMode(),
-        getUserSettings(),
-      ]);
-
-      expect(legacyMode).to.be(true);
-      expect(userSettings).to.be.empty();
-
-      await find.waitForElementStale(loadingMessage);
-
-      expect(await exists('legacyAppH1')).to.be(true);
-      expect(await exists('renderingHeader')).to.be(false);
     });
 
     it('navigates between standard application and one with custom appRoute', async () => {

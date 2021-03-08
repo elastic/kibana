@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -13,10 +14,13 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
+  getConsumerUnauthorizedErrorMessage,
+  getProducerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateApiKeyTests({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -31,32 +35,249 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
       describe(scenario.id, () => {
         it('should handle update alert api key request appropriately', async () => {
-          const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send({
+              name: 'MY action',
+              actionTypeId: 'test.noop',
+              config: {},
+              secrets: {},
+            })
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
-
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to execute actions`,
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle update alert api key request appropriately when consumer is the same as producer', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.restricted-noop',
+                consumer: 'alertsRestrictedFixture',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+
+          const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle update alert api key request appropriately when consumer is not the producer', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.unrestricted-noop',
+                consumer: 'alertsFixture',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+
+          const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.unrestricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle update alert api key request appropriately when consumer is "alerts"', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.restricted-noop',
+                consumer: 'alerts',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+
+          const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.restricted-noop',
+                  'alerts'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
@@ -76,21 +297,25 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
         it('should still be able to update API key when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
-          await supertest
-            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              attributes: {
-                name: 'bar',
-              },
-            })
-            .expect(200);
+          await retry.try(async () => {
+            await supertest
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+              )
+              .set('kbn-xsrf', 'foo')
+              .send({
+                attributes: {
+                  name: 'bar',
+                },
+              })
+              .expect(200);
+          });
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
 
@@ -98,19 +323,25 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'updateApiKey',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
@@ -130,11 +361,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
         it(`shouldn't update alert api key from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix('other')}/api/alert`)
+            .post(`${getUrlPrefix('other')}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert');
+          objectRemover.add('other', createdAlert.id, 'alert', 'alerts');
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
 
@@ -143,14 +374,10 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',

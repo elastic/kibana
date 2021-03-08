@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Privileges } from '../../../common/types';
+
+import { Privileges } from '../../../../../../src/plugins/es_ui_shared/common';
+
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
   APP_RESTORE_INDEX_PRIVILEGES,
   APP_SLM_CLUSTER_PRIVILEGES,
-} from '../../../common/constants';
+} from '../../../common';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
 
@@ -39,7 +42,7 @@ export function registerAppRoutes({
         },
       };
 
-      if (!isSecurityEnabled) {
+      if (!isSecurityEnabled()) {
         // If security isn't enabled, let the user use app.
         return res.ok({ body: privilegesResult });
       }
@@ -74,7 +77,7 @@ export function registerAppRoutes({
               return true;
             }
 
-            const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every(privilege =>
+            const indexHasAllPrivileges = APP_RESTORE_INDEX_PRIVILEGES.every((privilege) =>
               privileges.includes(privilege)
             );
 
@@ -96,7 +99,7 @@ export function registerAppRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

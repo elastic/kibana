@@ -1,8 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { AlertType } from '../../types';
+import { InitialAlert } from '../sections/alert_form/alert_reducer';
 
 /**
  * NOTE: Applications that want to show the alerting UIs will need to add
@@ -12,19 +16,16 @@
 
 type Capabilities = Record<string, any>;
 
-const apps = ['apm', 'siem', 'uptime', 'infrastructure'];
+export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
+export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
+export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.execute;
+export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.delete;
 
-function hasCapability(capabilities: Capabilities, capability: string) {
-  return apps.some(app => capabilities[app]?.[capability]);
+export function hasAllPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
+  return alertType?.authorizedConsumers[alert.consumer]?.all ?? false;
 }
-
-function createCapabilityCheck(capability: string) {
-  return (capabilities: Capabilities) => hasCapability(capabilities, capability);
+export function hasReadPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
+  return alertType?.authorizedConsumers[alert.consumer]?.read ?? false;
 }
-
-export const hasShowAlertsCapability = createCapabilityCheck('alerting:show');
-export const hasShowActionsCapability = createCapabilityCheck('actions:show');
-export const hasSaveAlertsCapability = createCapabilityCheck('alerting:save');
-export const hasSaveActionsCapability = createCapabilityCheck('actions:save');
-export const hasDeleteAlertsCapability = createCapabilityCheck('alerting:delete');
-export const hasDeleteActionsCapability = createCapabilityCheck('actions:delete');

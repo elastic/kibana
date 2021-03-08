@@ -1,0 +1,23 @@
+.actCollapsedItemActions {
+  .euiContextMenuItem:hover {
+    text-decoration: none;
+  }
+}
+
+.actCollapsedItemActions__item {
+  padding: $euiSizeM;
+}
+
+.actCollapsedItemActions__delete {
+  display: flex;
+
+  .actCollapsedItemActions__deleteIcon {
+    width: $euiSwitchWidthCompressed;
+    text-align: center;
+  }
+
+  .actCollapsedItemActions__deleteLabel {
+    padding-left: $euiSizeS;
+    padding-top: $euiSizeXS * .5;
+  }
+}

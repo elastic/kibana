@@ -1,31 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-
-import { AutocompleteField } from '../../../components/autocomplete_field';
+import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
 import { Toolbar } from '../../../components/eui';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
+import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
-import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
-import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogFilterState } from '../../../containers/logs/log_filter';
+import { LogFlyout } from '../../../containers/logs/log_flyout';
+import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
 import { LogPositionState } from '../../../containers/logs/log_position';
-import { Source } from '../../../containers/source';
-import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
-import { LogDatepicker } from '../../../components/logging/log_datepicker';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 
 export const LogsToolbar = () => {
-  const { createDerivedIndexPattern } = useContext(Source.Context);
-  const derivedIndexPattern = createDerivedIndexPattern('logs');
+  const { derivedIndexPattern } = useLogSourceContext();
   const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } = useContext(
     LogViewConfiguration.Context
   );
@@ -59,32 +57,31 @@ export const LogsToolbar = () => {
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
-            {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-              <AutocompleteField
-                isLoadingSuggestions={isLoadingSuggestions}
-                isValid={isFilterQueryDraftValid}
-                loadSuggestions={loadSuggestions}
-                onChange={(expression: string) => {
-                  setSurroundingLogsId(null);
-                  setLogFilterQueryDraft(expression);
-                }}
-                onSubmit={(expression: string) => {
-                  setSurroundingLogsId(null);
-                  applyLogFilterQuery(expression);
-                }}
-                placeholder={i18n.translate(
-                  'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
-                  { defaultMessage: 'Search for log entries… (e.g. host.name:host-1)' }
-                )}
-                suggestions={suggestions}
-                value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                aria-label={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldAriaLabel', {
-                  defaultMessage: 'Search for log entries',
-                })}
-              />
-            )}
-          </WithKueryAutocompletion>
+          <QueryStringInput
+            disableLanguageSwitcher={true}
+            iconType="search"
+            indexPatterns={[derivedIndexPattern]}
+            isInvalid={!isFilterQueryDraftValid}
+            onChange={(expression: Query) => {
+              if (typeof expression.query === 'string') {
+                setSurroundingLogsId(null);
+                setLogFilterQueryDraft(expression.query);
+              }
+            }}
+            onSubmit={(expression: Query) => {
+              if (typeof expression.query === 'string') {
+                setSurroundingLogsId(null);
+                applyLogFilterQuery(expression.query);
+              }
+            }}
+            placeholder={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder', {
+              defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
+            })}
+            query={{
+              query: filterQueryDraft?.expression ?? '',
+              language: filterQueryDraft?.kind ?? 'kuery',
+            }}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogCustomizationMenu>
@@ -101,7 +98,7 @@ export const LogsToolbar = () => {
             onChange={setHighlightTerms}
             isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
             activeHighlights={
-              highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length > 0
+              highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length > 0
             }
             goToPreviousHighlight={goToPreviousHighlight}
             goToNextHighlight={goToNextHighlight}

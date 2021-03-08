@@ -1,0 +1,121 @@
+<div
+  ng-if="hits.length"
+  ng-class="{ loading: isLoading }"
+>
+  <div ng-if="!infiniteScroll">
+    <div class="kuiBar kbnDocTable__bar">
+      <div class="kuiBarSection">
+        <div
+          ng-if="shouldShowLimitedResultsWarning()"
+          class="kuiToolBarText kuiSubduedText"
+        >
+          {{ limitedResultsWarning }}
+        </div>
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="pager.startItem"
+          end-item="pager.endItem"
+          total-items="totalHitCount"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="pager.hasPreviousPage"
+          has-next-page="pager.hasNextPage"
+          on-page-next="onPageNext"
+          on-page-previous="onPagePrevious"
+        ></tool-bar-pager-buttons>
+      </div>
+    </div>
+    <div class="kbnDocTable__container kbnDocTable__padBottom">
+      <table class="kbnDocTable table" ng-if="indexPattern" data-test-subj="docTable">
+        <thead
+          kbn-table-header
+          columns="columns"
+          index-pattern="indexPattern"
+          sort-order="sorting"
+          on-change-sort-order="onChangeSortOrder"
+          on-move-column="onMoveColumn"
+          on-remove-column="onRemoveColumn"
+        ></thead>
+        <tbody>
+          <tr ng-repeat="row in pageOfItems|limitTo:limit track by row._index+row._type+row._id+row._score+row._version+row._routing"
+            kbn-table-row="row"
+            columns="columns"
+            sorting="sorting"
+            index-pattern="indexPattern"
+            filter="filter"
+            class="kbnDocTable__row"
+            data-test-subj="docTableRow"
+            on-add-column="onAddColumn"
+            on-remove-column="onRemoveColumn"
+            use-new-fields-api="useNewFieldsApi"
+          ></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- ToolBarFooter -->
+    <div class="kuiBar kbnDocTable__bar--footer">
+      <div class="kuiBarSection">
+        <div
+          ng-if="shouldShowLimitedResultsWarning()"
+          class="kuiToolBarText kuiSubduedText"
+        >
+          {{ limitedResultsWarning }}
+        </div>
+        <!-- Pagination -->
+        <tool-bar-pager-text
+          start-item="pager.startItem"
+          end-item="pager.endItem"
+          total-items="totalHitCount"
+        ></tool-bar-pager-text>
+        <tool-bar-pager-buttons
+          has-previous-page="pager.hasPreviousPage"
+          has-next-page="pager.hasNextPage"
+          on-page-next="onPageNext"
+          on-page-previous="onPagePrevious"
+        ></tool-bar-pager-buttons>
+      </div>
+    </div>
+  </div>
+
+  <table ng-if="infiniteScroll" class="kbn-table table" ng-if="indexPattern" data-test-subj="docTable">
+    <thead
+      kbn-table-header
+      columns="columns"
+      index-pattern="indexPattern"
+      sort-order="sorting"
+      on-change-sort-order="onChangeSortOrder"
+      on-move-column="onMoveColumn"
+      on-remove-column="onRemoveColumn"
+    ></thead>
+    <tbody>
+      <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version+row._routing"
+        kbn-table-row="row"
+        columns="columns"
+        sorting="sorting"
+        index-pattern="indexPattern"
+        filter="filter"
+        class="kbnDocTable__row"
+        ng-class="{'kbnDocTable__row--highlight': row['$$_isAnchor']}"
+        data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
+        on-add-column="onAddColumn"
+        on-remove-column="onRemoveColumn"
+        use-new-fields-api="useNewFieldsApi"
+      ></tr>
+    </tbody>
+  </table>
+  <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
+</div>
+
+<div ng-if="hits != null && !hits.length" class="kbnDocTable__error">
+  <div class="euiText euiText--extraSmall euiTextColor euiTextColor--subdued">
+    <icon type="'visualizeApp'" size="'m'" color="'subdued'"></icon>
+
+    <div class="euiSpacer euiSpacer--m"></div>
+
+    <p
+      i18n-id="discover.docTable.noResultsTitle"
+      i18n-default-message="No results found"
+    >
+    </p>
+  </div>
+</div>

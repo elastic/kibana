@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { PainlessContext } from '@kbn/monaco';
 
 export interface Store {
   payload: Payload;
@@ -10,7 +13,7 @@ export interface Store {
 }
 
 export interface Payload {
-  context: string;
+  context: PainlessContext;
   code: string;
   parameters: string;
   index: string;

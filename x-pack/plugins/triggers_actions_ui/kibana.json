@@ -1,9 +1,11 @@
 {
-  "id": "triggers_actions_ui",
+  "id": "triggersActionsUi",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
-  "optionalPlugins": ["alerting", "alertingBuiltins"],
-  "requiredPlugins": ["management", "charts", "data"],
-  "configPath": ["xpack", "trigger_actions_ui"]
+  "optionalPlugins": ["alerting", "features", "home", "spaces"],
+  "requiredPlugins": ["management", "charts", "data", "kibanaReact", "kibanaUtils", "savedObjects"],
+  "configPath": ["xpack", "trigger_actions_ui"],
+  "extraPublicDirs": ["public/common", "public/common/constants"],
+  "requiredBundles": ["home", "alerting", "esUiShared", "kibanaReact", "kibanaUtils"]
 }

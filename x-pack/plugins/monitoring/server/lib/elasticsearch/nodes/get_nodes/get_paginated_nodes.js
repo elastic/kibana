@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, isUndefined } from 'lodash';
@@ -56,13 +57,13 @@ export async function getPaginatedNodes(
   const filters = [
     {
       terms: {
-        'source_node.name': nodes.map(node => node.name),
+        'source_node.name': nodes.map((node) => node.name),
       },
     },
   ];
   const groupBy = {
     field: `source_node.uuid`,
-    include: nodes.map(node => node.uuid),
+    include: nodes.map((node) => node.uuid),
     size: config.get('monitoring.ui.max_bucket_size'),
   };
   const metricSeriesData = await getMetrics(
@@ -81,7 +82,7 @@ export async function getPaginatedNodes(
 
     const metricList = metricSeriesData[metricName];
     for (const metricItem of metricList[0]) {
-      const node = nodes.find(node => node.uuid === metricItem.groupedBy);
+      const node = nodes.find((node) => node.uuid === metricItem.groupedBy);
       if (!node) {
         continue;
       }

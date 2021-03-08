@@ -1,0 +1,31 @@
+.canvasVarHeader__triggerWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.canvasVarHeader__button {
+  @include euiFontSize;
+  text-align: left;
+
+  width: 100%;
+  flex-grow: 1;
+
+  display: flex;
+  align-items: center;
+}
+
+.canvasVarHeader__iconWrapper {
+  width: $euiSize;
+  height: $euiSize;
+
+  border-radius: $euiBorderRadius;
+
+  margin-right: $euiSizeS;
+  margin-left: $euiSizeXS;
+
+  flex-shrink: 0;
+}
+
+.canvasVarHeader__anchor {
+  display: inline-block;
+}

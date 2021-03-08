@@ -1,30 +1,50 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { collectSavedObjects } from './collect_saved_objects';
-import { extractErrors } from './extract_errors';
+import { Readable } from 'stream';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { SavedObjectsClientContract } from '../types';
 import {
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportResponse,
-  SavedObjectsImportOptions,
+  SavedObjectsImportHook,
 } from './types';
-import { validateReferences } from './validate_references';
+import {
+  validateReferences,
+  checkOriginConflicts,
+  createSavedObjects,
+  checkConflicts,
+  regenerateIds,
+  collectSavedObjects,
+  executeImportHooks,
+} from './lib';
+
+/**
+ * Options to control the import operation.
+ */
+export interface ImportSavedObjectsOptions {
+  /** The stream of {@link SavedObject | saved objects} to import */
+  readStream: Readable;
+  /** The maximum number of object to import */
+  objectLimit: number;
+  /** If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option. */
+  overwrite: boolean;
+  /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
+  savedObjectsClient: SavedObjectsClientContract;
+  /** The registry of all known saved object types */
+  typeRegistry: ISavedObjectTypeRegistry;
+  /** List of registered import hooks */
+  importHooks: Record<string, SavedObjectsImportHook[]>;
+  /** if specified, will import in given namespace, else will import as global object */
+  namespace?: string;
+  /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
+  createNewCopies: boolean;
+}
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -36,49 +56,115 @@ export async function importSavedObjectsFromStream({
   readStream,
   objectLimit,
   overwrite,
+  createNewCopies,
   savedObjectsClient,
-  supportedTypes,
+  typeRegistry,
+  importHooks,
   namespace,
-}: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
-  let errorAccumulator: SavedObjectsImportError[] = [];
+}: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
+  let errorAccumulator: SavedObjectsImportFailure[] = [];
+  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   // Get the objects to import
-  const {
-    errors: collectorErrors,
-    collectedObjects: objectsFromStream,
-  } = await collectSavedObjects({ readStream, objectLimit, supportedTypes });
-  errorAccumulator = [...errorAccumulator, ...collectorErrors];
+  const collectSavedObjectsResult = await collectSavedObjects({
+    readStream,
+    objectLimit,
+    supportedTypes,
+  });
+  errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
+  /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
+  let importIdMap = collectSavedObjectsResult.importIdMap;
+  let pendingOverwrites = new Set<string>();
 
   // Validate references
-  const { filteredObjects, errors: validationErrors } = await validateReferences(
-    objectsFromStream,
+  const validateReferencesResult = await validateReferences(
+    collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
     namespace
   );
-  errorAccumulator = [...errorAccumulator, ...validationErrors];
+  errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
-  // Exit early if no objects to import
-  if (filteredObjects.length === 0) {
-    return {
-      success: errorAccumulator.length === 0,
-      successCount: 0,
-      ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
+  if (createNewCopies) {
+    importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
+  } else {
+    // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
+    const checkConflictsParams = {
+      objects: collectSavedObjectsResult.collectedObjects,
+      savedObjectsClient,
+      namespace,
+      ignoreRegularConflicts: overwrite,
     };
+    const checkConflictsResult = await checkConflicts(checkConflictsParams);
+    errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
+    importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
+    pendingOverwrites = checkConflictsResult.pendingOverwrites;
+
+    // Check multi-namespace object types for origin conflicts in this namespace
+    const checkOriginConflictsParams = {
+      objects: checkConflictsResult.filteredObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+      ignoreRegularConflicts: overwrite,
+      importIdMap,
+    };
+    const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
+    errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
+    importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
+    pendingOverwrites = new Set([
+      ...pendingOverwrites,
+      ...checkOriginConflictsResult.pendingOverwrites,
+    ]);
   }
 
   // Create objects in bulk
-  const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
+  const createSavedObjectsParams = {
+    objects: collectSavedObjectsResult.collectedObjects,
+    accumulatedErrors: errorAccumulator,
+    savedObjectsClient,
+    importIdMap,
     overwrite,
     namespace,
+  };
+  const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
+  errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
+
+  const successResults = createSavedObjectsResult.createdObjects.map((createdObject) => {
+    const { type, id, destinationId, originId } = createdObject;
+    const getTitle = typeRegistry.getType(type)?.management?.getTitle;
+    const meta = {
+      title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
+      icon: typeRegistry.getType(type)?.management?.icon,
+    };
+    const attemptedOverwrite = pendingOverwrites.has(`${type}:${id}`);
+    return {
+      type,
+      id,
+      meta,
+      ...(attemptedOverwrite && { overwrite: true }),
+      ...(destinationId && { destinationId }),
+      ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
+    };
   });
-  errorAccumulator = [
-    ...errorAccumulator,
-    ...extractErrors(bulkCreateResult.saved_objects, filteredObjects),
-  ];
+  const errorResults = errorAccumulator.map((error) => {
+    const icon = typeRegistry.getType(error.type)?.management?.icon;
+    const attemptedOverwrite = pendingOverwrites.has(`${error.type}:${error.id}`);
+    return {
+      ...error,
+      meta: { ...error.meta, icon },
+      ...(attemptedOverwrite && { overwrite: true }),
+    };
+  });
+  const warnings = await executeImportHooks({
+    objects: createSavedObjectsResult.createdObjects,
+    importHooks,
+  });
 
   return {
+    successCount: createSavedObjectsResult.createdObjects.length,
     success: errorAccumulator.length === 0,
-    successCount: bulkCreateResult.saved_objects.filter(obj => !obj.error).length,
-    ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
+    warnings,
+    ...(successResults.length && { successResults }),
+    ...(errorResults.length && { errors: errorResults }),
   };
 }

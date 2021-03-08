@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -27,7 +28,7 @@ interface StatsBarProps {
 }
 
 export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
-  const statsList = Object.keys(stats).map(k => stats[k as StatsKey]);
+  const statsList = Object.keys(stats).map((k) => stats[k as StatsKey]);
   return (
     <div className="transformStatsBar" data-test-subj={dataTestSub}>
       {statsList

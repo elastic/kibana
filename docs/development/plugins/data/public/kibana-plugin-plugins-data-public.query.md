@@ -2,18 +2,15 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [Query](./kibana-plugin-plugins-data-public.query.md)
 
-## Query interface
+## Query type
 
 <b>Signature:</b>
 
 ```typescript
-export interface Query 
+export declare type Query = {
+    query: string | {
+        [key: string]: any;
+    };
+    language: string;
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [language](./kibana-plugin-plugins-data-public.query.language.md) | <code>string</code> |  |
-|  [query](./kibana-plugin-plugins-data-public.query.query.md) | <code>string &#124; {</code><br/><code>        [key: string]: any;</code><br/><code>    }</code> |  |
-

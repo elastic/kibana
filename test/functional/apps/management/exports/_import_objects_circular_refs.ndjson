@@ -1,0 +1,2 @@
+{"attributes":{"title":"dashboard-b"},"id":"dashboard-b","references":[{"id":"dashboard-a","name":"circular-dashboard-ref","type":"dashboard"}],"type":"dashboard"}
+{"attributes":{"title":"dashboard-a"},"id":"dashboard-a","references":[{"id":"dashboard-b","name":"circular-dashboard-ref","type":"dashboard"}],"type":"dashboard"}

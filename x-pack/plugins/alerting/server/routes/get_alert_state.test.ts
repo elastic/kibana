@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getAlertStateRoute } from './get_alert_state';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { SavedObjectsErrorHelpers } from 'src/core/server/saved_objects';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { alertsClientMock } from '../alerts_client.mock';
 
 const alertsClient = alertsClientMock.create();
@@ -40,21 +41,14 @@ describe('getAlertStateRoute', () => {
   };
 
   it('gets alert state', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertStateRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
 
     alertsClient.getAlertState.mockResolvedValueOnce(mockedAlertState);
 
@@ -83,21 +77,14 @@ describe('getAlertStateRoute', () => {
   });
 
   it('returns NO-CONTENT when alert exists but has no task state yet', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertStateRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
 
     alertsClient.getAlertState.mockResolvedValueOnce(undefined);
 
@@ -126,21 +113,14 @@ describe('getAlertStateRoute', () => {
   });
 
   it('returns NOT-FOUND when alert is not found', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertStateRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/state"`);
 
     alertsClient.getAlertState = jest
       .fn()

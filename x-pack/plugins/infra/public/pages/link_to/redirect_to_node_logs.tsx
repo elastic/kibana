@@ -1,25 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { compose } from 'lodash';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import flowRight from 'lodash/flowRight';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-
+import useMount from 'react-use/lib/useMount';
+import { HttpStart } from 'src/core/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { findInventoryFields } from '../../../common/inventory_models';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
+import { useLogSource } from '../../containers/logs/log_source';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { SourceConfigurationFields } from '../../graphql/types';
-import { getFilterFromLocation, getTimeFromLocation } from './query_params';
-import { useSource } from '../../containers/source/source';
-import { findInventoryFields } from '../../../common/inventory_models';
-import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LinkDescriptor } from '../../hooks/use_link_props';
+import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
@@ -27,26 +30,27 @@ type RedirectToNodeLogsType = RouteComponentProps<{
   sourceId?: string;
 }>;
 
-const getFieldByNodeType = (
-  nodeType: InventoryItemType,
-  fields: SourceConfigurationFields.Fields
-) => {
-  const inventoryFields = findInventoryFields(nodeType, fields);
-  return inventoryFields.id;
-};
-
 export const RedirectToNodeLogs = ({
   match: {
     params: { nodeId, nodeType, sourceId = 'default' },
   },
   location,
 }: RedirectToNodeLogsType) => {
-  const { source, isLoading } = useSource({ sourceId });
-  const configuration = source && source.configuration;
+  const { services } = useKibana<{ http: HttpStart }>();
+  const { isLoading, loadSourceConfiguration, sourceConfiguration } = useLogSource({
+    fetch: services.http.fetch,
+    sourceId,
+  });
+  const fields = sourceConfiguration?.configuration.fields;
+
+  useMount(() => {
+    loadSourceConfiguration();
+  });
 
   if (isLoading) {
     return (
       <LoadingPage
+        data-test-subj={`nodeLoadingPage-${nodeType}`}
         message={i18n.translate('xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage', {
           defaultMessage: 'Loading {nodeType} logs',
           values: {
@@ -55,23 +59,21 @@ export const RedirectToNodeLogs = ({
         })}
       />
     );
-  }
-
-  if (!configuration) {
+  } else if (fields == null) {
     return null;
   }
 
-  const nodeFilter = `${getFieldByNodeType(nodeType, configuration.fields)}: ${nodeId}`;
+  const nodeFilter = `${findInventoryFields(nodeType, fields).id}: ${nodeId}`;
   const userFilter = getFilterFromLocation(location);
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 
-  const searchString = compose(
+  const searchString = flowRight(
     replaceLogFilterInQueryString(filter),
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)
   )('');
 
-  return <Redirect to={`/?${searchString}`} />;
+  return <Redirect to={`/stream?${searchString}`} />;
 };
 
 export const getNodeLogsUrl = ({

@@ -1,53 +1,42 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-
-import {
-  // @ts-ignore
-  EuiHeaderSectionItem,
-} from '@elastic/eui';
-
-import { HeaderExtension } from './header_extension';
+import { EuiHeaderSectionItem } from '@elastic/eui';
+import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 import { ChromeNavControl } from '../../nav_controls';
+import { HeaderExtension } from './header_extension';
 
 interface Props {
-  navControls: readonly ChromeNavControl[];
-  side: 'left' | 'right';
+  navControls$: Observable<readonly ChromeNavControl[]>;
+  side?: 'left' | 'right';
 }
 
-export class HeaderNavControls extends Component<Props> {
-  public render() {
-    const { navControls } = this.props;
+export function HeaderNavControls({ navControls$, side }: Props) {
+  const navControls = useObservable(navControls$, []);
 
-    if (!navControls) {
-      return null;
-    }
-
-    return navControls.map(this.renderNavControl);
+  if (!navControls) {
+    return null;
   }
 
   // It should be performant to use the index as the key since these are unlikely
   // to change while Kibana is running.
-  private renderNavControl = (navControl: ChromeNavControl, index: number) => (
-    <EuiHeaderSectionItem key={index} border={this.props.side === 'left' ? 'right' : 'left'}>
-      <HeaderExtension extension={navControl.mount} />
-    </EuiHeaderSectionItem>
+  return (
+    <>
+      {navControls.map((navControl: ChromeNavControl, index: number) => (
+        <EuiHeaderSectionItem
+          key={index}
+          border={side ? (side === 'left' ? 'right' : 'left') : 'none'}
+        >
+          <HeaderExtension extension={navControl.mount} />
+        </EuiHeaderSectionItem>
+      ))}
+    </>
   );
 }

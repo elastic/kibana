@@ -15,5 +15,7 @@ export interface HttpServiceStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [isListening](./kibana-plugin-core-server.httpservicestart.islistening.md) | <code>(port: number) =&gt; boolean</code> | Indicates if http server is listening on a given port |
+|  [auth](./kibana-plugin-core-server.httpservicestart.auth.md) | <code>HttpAuth</code> | Auth status. See [HttpAuth](./kibana-plugin-core-server.httpauth.md) |
+|  [basePath](./kibana-plugin-core-server.httpservicestart.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-core-server.ibasepath.md)<!-- -->. |
+|  [getServerInfo](./kibana-plugin-core-server.httpservicestart.getserverinfo.md) | <code>() =&gt; HttpServerInfo</code> | Provides common [information](./kibana-plugin-core-server.httpserverinfo.md) about the running http server. |
 

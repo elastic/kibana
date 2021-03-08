@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { ES_INDEX_NAME } from './constants';
 import moment from 'moment';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const randomness = getService('randomness');
   const es = getService('legacyEs');
@@ -48,9 +49,7 @@ export default function({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: validEnrollmentToken,
-            expires_on: moment()
-              .add(4, 'hours')
-              .toJSON(),
+            expires_on: moment().add(4, 'hours').toJSON(),
           },
         },
       });
@@ -94,7 +93,7 @@ export default function({ getService }) {
         .send(beat)
         .expect(401);
 
-      expect(body.error.message).to.be('Invalid access token');
+      expect(body.message).to.be('Invalid access token');
 
       const beatInEs = await es.get({
         index: ES_INDEX_NAME,
@@ -117,7 +116,7 @@ export default function({ getService }) {
         .send(beat)
         .expect(404);
 
-      expect(body.error.message).to.be('Beat not found');
+      expect(body.message).to.be('Beat not found');
     });
   });
 }

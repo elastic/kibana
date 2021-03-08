@@ -70,6 +70,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     labelType="label"
   >
     <EuiFieldText
+      data-test-subj="mlNewFilterListIdInput"
       isInvalid={false}
       name="new_filter_id"
       onChange={[Function]}
@@ -84,7 +85,9 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     <EuiFlexItem
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        data-test-subj="mlNewFilterListDescriptionText"
+      >
         <p>
           A test filter list
         </p>
@@ -180,6 +183,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     labelType="label"
   >
     <EuiFieldText
+      data-test-subj="mlNewFilterListIdInput"
       isInvalid={true}
       name="new_filter_id"
       onChange={[Function]}
@@ -388,7 +392,9 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
     <EuiFlexItem
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        data-test-subj="mlNewFilterListDescriptionText"
+      >
         <p>
           A test filter list
         </p>

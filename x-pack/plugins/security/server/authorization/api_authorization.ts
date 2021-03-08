@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CoreSetup, Logger } from '../../../../../src/core/server';
-import { Authorization } from '.';
+import type { HttpServiceSetup, Logger } from 'src/core/server';
+
+import type { AuthorizationServiceSetup } from './authorization_service';
 
 export function initAPIAuthorization(
-  http: CoreSetup['http'],
-  { actions, checkPrivilegesDynamicallyWithRequest, mode }: Authorization,
+  http: HttpServiceSetup,
+  { actions, checkPrivilegesDynamicallyWithRequest, mode }: AuthorizationServiceSetup,
   logger: Logger
 ) {
   http.registerOnPostAuth(async (request, response, toolkit) => {
@@ -20,25 +22,26 @@ export function initAPIAuthorization(
 
     const tags = request.route.options.tags;
     const tagPrefix = 'access:';
-    const actionTags = tags.filter(tag => tag.startsWith(tagPrefix));
+    const actionTags = tags.filter((tag) => tag.startsWith(tagPrefix));
 
     // if there are no tags starting with "access:", just continue
     if (actionTags.length === 0) {
-      logger.debug('API endpoint is not marked with "access:" tags, skipping.');
       return toolkit.next();
     }
 
-    const apiActions = actionTags.map(tag => actions.api.get(tag.substring(tagPrefix.length)));
+    const apiActions = actionTags.map((tag) => actions.api.get(tag.substring(tagPrefix.length)));
     const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-    const checkPrivilegesResponse = await checkPrivileges(apiActions);
+    const checkPrivilegesResponse = await checkPrivileges({ kibana: apiActions });
 
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {
-      logger.debug(`authorized for "${request.url.path}"`);
+      logger.debug(`User authorized for "${request.url.pathname}${request.url.search}"`);
       return toolkit.next();
     }
 
-    logger.debug(`not authorized for "${request.url.path}"`);
-    return response.notFound();
+    logger.warn(
+      `User not authorized for "${request.url.pathname}${request.url.search}": responding with 403`
+    );
+    return response.forbidden();
   });
 }

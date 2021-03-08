@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const fs = require('fs');
@@ -40,8 +29,8 @@ const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
-  new Promise(resolve => {
-    const onData = data => {
+  new Promise((resolve) => {
+    const onData = (data) => {
       const result = map(data);
       if (result !== undefined) {
         resolve(result);
@@ -180,7 +169,7 @@ exports.Cluster = class Cluster {
     await Promise.race([
       // wait for native realm to be setup and es to be started
       Promise.all([
-        first(this._process.stdout, data => {
+        first(this._process.stdout, (data) => {
           if (/started/.test(data)) {
             return true;
           }
@@ -207,7 +196,7 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch(error => {
+    this._nativeRealmSetup.catch((error) => {
       this._log.error(error);
       this.stop();
     });
@@ -246,7 +235,7 @@ exports.Cluster = class Cluster {
    * @private
    * @param {String} installPath
    * @param {Object} options
-   * @property {Array} options.esArgs
+   * @property {string|Array} options.esArgs
    * @return {undefined}
    */
   _exec(installPath, options = {}) {
@@ -257,8 +246,9 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
+    const esArgs = ['action.destructive_requires_name=true'].concat(options.esArgs || []);
+
     // Add to esArgs if ssl is enabled
-    const esArgs = [].concat(options.esArgs || []);
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
       esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
@@ -275,19 +265,28 @@ exports.Cluster = class Cluster {
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
 
+    options.esEnvVars = options.esEnvVars || {};
+
+    // ES now automatically sets heap size to 50% of the machine's available memory
+    // so we need to set it to a smaller size for local dev and CI
+    // especially because we currently run many instances of ES on the same machine during CI
+    options.esEnvVars.ES_JAVA_OPTS =
+      (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars.ES_JAVA_OPTS} ` : '') +
+      '-Xms1g -Xmx1g';
+
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
-        ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
+        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ...(options.esEnvVars || {}),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     // parse log output to find http port
-    const httpPort = first(this._process.stdout, data => {
+    const httpPort = first(this._process.stdout, (data) => {
       const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
       if (match) {
@@ -296,7 +295,7 @@ exports.Cluster = class Cluster {
     });
 
     // once the http port is available setup the native realm
-    this._nativeRealmSetup = httpPort.then(async port => {
+    this._nativeRealmSetup = httpPort.then(async (port) => {
       const caCert = await this._caCertPromise;
       const nativeRealm = new NativeRealm({
         port,
@@ -309,19 +308,19 @@ exports.Cluster = class Cluster {
     });
 
     // parse and forward es stdout to the log
-    this._process.stdout.on('data', data => {
+    this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
-      lines.forEach(line => {
+      lines.forEach((line) => {
         this._log.info(line.formattedMessage);
       });
     });
 
     // forward es stderr to the log
-    this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
+    this._process.stderr.on('data', (data) => this._log.error(chalk.red(data.toString())));
 
     // observe the exit code of the process and reflect in _outcome promies
-    const exitCode = new Promise(resolve => this._process.once('exit', resolve));
-    this._outcome = exitCode.then(code => {
+    const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
+    this._outcome = exitCode.then((code) => {
       if (this._stopCalled) {
         return;
       }

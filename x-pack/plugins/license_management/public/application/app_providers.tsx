@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import * as history from 'history';
 import { Provider } from 'react-redux';
 
-import { BASE_PATH } from '../../common/constants';
 import { AppContextProvider, AppDependencies } from './app_context';
 // @ts-ignore
 import { licenseManagementStore } from './store';
@@ -33,8 +33,7 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
 
   // Setup Redux store
   const thunkServices = {
-    // So we can imperatively control the hash route
-    history: history.createHashHistory({ basename: BASE_PATH }),
+    history: appDependencies.services.history,
     toasts,
     http,
     telemetry: plugins.telemetry,

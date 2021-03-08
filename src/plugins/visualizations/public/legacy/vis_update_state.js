@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 
 /**
@@ -31,7 +21,7 @@ function convertHeatmapLabelColor(visState) {
   if (visState.type === 'heatmap' && visState.params && !hasOverwriteColorParam) {
     const showLabels = _.get(visState, 'params.valueAxes[0].labels.show', false);
     const color = _.get(visState, 'params.valueAxes[0].labels.color', '#555');
-    _.set(visState, 'params.valueAxes[0].labels.overwriteColor', showLabels && color !== '#555');
+    set(visState, 'params.valueAxes[0].labels.overwriteColor', showLabels && color !== '#555');
   }
 }
 
@@ -42,7 +32,7 @@ function convertHeatmapLabelColor(visState) {
  */
 function convertTermAggregation(visState) {
   if (visState.aggs) {
-    visState.aggs.forEach(agg => {
+    visState.aggs.forEach((agg) => {
       if (agg.type === 'terms' && agg.params && agg.params.orderBy === '_term') {
         agg.params.orderBy = '_key';
       }
@@ -60,7 +50,7 @@ function convertPropertyNames(visState) {
 
 function convertDateHistogramScaleMetrics(visState) {
   if (visState.aggs) {
-    visState.aggs.forEach(agg => {
+    visState.aggs.forEach((agg) => {
       if (
         agg.type === 'date_histogram' &&
         agg.params &&
@@ -75,6 +65,77 @@ function convertDateHistogramScaleMetrics(visState) {
   }
 }
 
+function convertSeriesParams(visState) {
+  if (visState.params.seriesParams) {
+    return;
+  }
+
+  // update value axis options
+  const isUserDefinedYAxis = visState.params.setYExtents;
+  const defaultYExtents = visState.params.defaultYExtents;
+  const mode = ['stacked', 'overlap'].includes(visState.params.mode)
+    ? 'normal'
+    : visState.params.mode || 'normal';
+
+  if (!visState.params.valueAxes || !visState.params.valueAxes.length) {
+    visState.params.valueAxes = [
+      {
+        id: 'ValueAxis-1',
+        name: 'LeftAxis-1',
+        type: 'value',
+        position: 'left',
+        show: true,
+        style: {},
+        scale: {
+          type: 'linear',
+          mode: 'normal',
+        },
+        labels: {
+          show: true,
+          rotate: 0,
+          filter: false,
+          truncate: 100,
+        },
+        title: {
+          text: 'Count',
+        },
+      },
+    ];
+  }
+
+  visState.params.valueAxes[0].scale = {
+    ...visState.params.valueAxes[0].scale,
+    type: visState.params.scale || 'linear',
+    setYExtents: visState.params.setYExtents || false,
+    defaultYExtents: visState.params.defaultYExtents || false,
+    boundsMargin: defaultYExtents ? visState.params.boundsMargin : 0,
+    min: isUserDefinedYAxis ? visState.params.yAxis.min : undefined,
+    max: isUserDefinedYAxis ? visState.params.yAxis.max : undefined,
+    mode: mode,
+  };
+
+  // update series options
+  const interpolate = visState.params.smoothLines ? 'cardinal' : visState.params.interpolate;
+  const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(visState.params.mode);
+  visState.params.seriesParams = [
+    {
+      show: true,
+      type: visState.params.type || 'line',
+      mode: stacked ? 'stacked' : 'normal',
+      interpolate: interpolate,
+      drawLinesBetweenPoints: visState.params.drawLinesBetweenPoints,
+      showCircles: visState.params.showCircles,
+      radiusRatio: visState.params.radiusRatio,
+      data: {
+        label: 'Count',
+        id: '1',
+      },
+      lineWidth: 2,
+      valueAxis: 'ValueAxis-1',
+    },
+  ];
+}
+
 /**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
@@ -82,7 +143,7 @@ function convertDateHistogramScaleMetrics(visState) {
  * It will return the updated version as Kibana would expect it. It does not modify
  * the passed state.
  */
-export const updateOldState = visState => {
+export const updateOldState = (visState) => {
   if (!visState) return visState;
   const newState = _.cloneDeep(visState);
 
@@ -90,9 +151,13 @@ export const updateOldState = visState => {
   convertPropertyNames(newState);
   convertDateHistogramScaleMetrics(newState);
 
+  if (visState.params && ['line', 'area', 'histogram'].includes(visState.params.type)) {
+    convertSeriesParams(newState);
+  }
+
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;
-    _.set(newState, 'gauge.style.fontSize', visState.fontSize);
+    set(newState, 'gauge.style.fontSize', visState.fontSize);
   }
 
   // update old metric to the new one

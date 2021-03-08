@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState } from 'react';
@@ -18,16 +19,25 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useNavigateToPath } from '../../../../contexts/kibana';
+
 import { useMlContext } from '../../../../contexts/ml';
 import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
-import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { LinkCard } from '../../../../components/link_card';
 import { CategorizationIcon } from './categorization_job_icon';
+import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
 export const Page: FC = () => {
   const mlContext = useMlContext();
+  const navigateToPath = useNavigateToPath();
+  const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
+  );
+
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
   const { currentSavedSearch, currentIndexPattern } = mlContext;
@@ -68,25 +78,23 @@ export const Page: FC = () => {
     },
   };
 
-  const getUrl = (basePath: string) => {
+  const getUrlParams = () => {
     return !isSavedSearchSavedObject(currentSavedSearch)
-      ? `${basePath}?index=${currentIndexPattern.id}`
-      : `${basePath}?savedSearchId=${currentSavedSearch.id}`;
+      ? `?index=${currentIndexPattern.id}`
+      : `?savedSearchId=${currentSavedSearch.id}`;
   };
 
   const addSelectionToRecentlyAccessed = () => {
     const title = !isSavedSearchSavedObject(currentSavedSearch)
       ? currentIndexPattern.title
       : (currentSavedSearch.attributes.title as string);
-    const url = getUrl('');
-    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, url);
-
-    window.location.href = getUrl('#jobs/new_job/datavisualizer');
+    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, '');
+    navigateToPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
   };
 
   const jobTypes = [
     {
-      href: getUrl('#jobs/new_job/single_metric'),
+      onClick: () => navigateToPath(`/jobs/new_job/single_metric${getUrlParams()}`),
       icon: {
         type: 'createSingleMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel', {
@@ -102,24 +110,24 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkSingleMetricJob',
     },
     {
-      href: getUrl('#jobs/new_job/multi_metric'),
+      onClick: () => navigateToPath(`/jobs/new_job/multi_metric${getUrlParams()}`),
       icon: {
         type: 'createMultiMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
-          defaultMessage: 'Multi metric job',
+          defaultMessage: 'Multi-metric job',
         }),
       },
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricTitle', {
-        defaultMessage: 'Multi metric',
+        defaultMessage: 'Multi-metric',
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricDescription', {
         defaultMessage:
-          'Detect anomalies in multiple metrics by splitting a time series by a categorical field.',
+          'Detect anomalies with one or more metrics and optionally split the analysis.',
       }),
       id: 'mlJobTypeLinkMultiMetricJob',
     },
     {
-      href: getUrl('#jobs/new_job/population'),
+      onClick: () => navigateToPath(`/jobs/new_job/population${getUrlParams()}`),
       icon: {
         type: 'createPopulationJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.populationAriaLabel', {
@@ -136,7 +144,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkPopulationJob',
     },
     {
-      href: getUrl('#jobs/new_job/advanced'),
+      onClick: () => navigateToPath(`/jobs/new_job/advanced${getUrlParams()}`),
       icon: {
         type: 'createAdvancedJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedAriaLabel', {
@@ -153,7 +161,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkAdvancedJob',
     },
     {
-      href: getUrl('#jobs/new_job/categorization'),
+      onClick: () => navigateToPath(`/jobs/new_job/categorization${getUrlParams()}`),
       icon: {
         type: CategorizationIcon,
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
@@ -192,7 +200,7 @@ export const Page: FC = () => {
                 defaultMessage="Anomaly detection can only be run over indices which are time based."
               />
               <br />
-              <EuiLink href="#jobs/new_job">
+              <EuiLink onClick={onSelectDifferentIndex}>
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
                   defaultMessage="Select a different index"
@@ -208,7 +216,7 @@ export const Page: FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
-                defaultMessage="Use a supplied configuration"
+                defaultMessage="Use preconfigured jobs"
               />
             </h2>
           </EuiTitle>
@@ -217,8 +225,8 @@ export const Page: FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription"
-                defaultMessage="The fields in your data have been recognized as matching known configurations.
-                Select to create a set of machine learning jobs and associated dashboards."
+                defaultMessage="The fields in your data match known configurations.
+                Create a set of preconfigured jobs."
               />
             </p>
           </EuiText>
@@ -244,24 +252,14 @@ export const Page: FC = () => {
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobType.useWizardDescription"
-              defaultMessage="Use one of the wizards to create a machine learning job to find anomalies in your data."
-            />
-          </p>
-        </EuiText>
-
         <EuiSpacer size="m" />
 
         <EuiFlexGrid gutterSize="l" columns={4}>
-          {jobTypes.map(({ href, icon, title, description, id }) => (
+          {jobTypes.map(({ onClick, icon, title, description, id }) => (
             <EuiFlexItem key={id}>
-              <CreateJobLinkCard
+              <LinkCard
                 data-test-subj={id}
-                href={href}
+                onClick={onClick}
                 icon={icon.type}
                 iconAreaLabel={icon.ariaLabel}
                 title={title}
@@ -296,7 +294,7 @@ export const Page: FC = () => {
 
         <EuiFlexGrid gutterSize="l" columns={4}>
           <EuiFlexItem>
-            <CreateJobLinkCard
+            <LinkCard
               icon="dataVisualizer"
               iconAreaLabel={i18n.translate(
                 'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
@@ -317,7 +315,6 @@ export const Page: FC = () => {
                 />
               }
               onClick={addSelectionToRecentlyAccessed}
-              href={getUrl('#jobs/new_job/datavisualizer')}
             />
           </EuiFlexItem>
         </EuiFlexGrid>

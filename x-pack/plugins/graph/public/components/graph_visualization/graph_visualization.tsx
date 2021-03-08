@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useRef } from 'react';
@@ -36,7 +37,7 @@ export interface GraphVisualizationProps {
 }
 
 function registerZooming(element: SVGSVGElement) {
-  const blockScroll = function() {
+  const blockScroll = function () {
     (d3.event as Event).preventDefault();
   };
   d3.select(element)
@@ -69,7 +70,7 @@ export function GraphVisualization({
       height="100%"
       pointerEvents="all"
       id="graphSvg"
-      ref={element => {
+      ref={(element) => {
         if (element && svgRoot.current !== element) {
           svgRoot.current = element;
           registerZooming(element);
@@ -79,7 +80,7 @@ export function GraphVisualization({
       <g>
         <g>
           {edges &&
-            edges.map(edge => (
+            edges.map((edge) => (
               <line
                 key={`${makeNodeId(edge.source.data.field, edge.source.data.term)}-${makeNodeId(
                   edge.target.data.field,
@@ -102,14 +103,14 @@ export function GraphVisualization({
         </g>
         {nodes &&
           nodes
-            .filter(node => !node.parent)
-            .map(node => (
+            .filter((node) => !node.parent)
+            .map((node) => (
               <g
                 key={makeNodeId(node.data.field, node.data.term)}
-                onClick={e => {
+                onClick={(e) => {
                   nodeClick(node, e);
                 }}
-                onMouseDown={e => {
+                onMouseDown={(e) => {
                   // avoid selecting text when selecting nodes
                   if (e.ctrlKey || e.shiftKey) {
                     e.preventDefault();
@@ -122,6 +123,7 @@ export function GraphVisualization({
                   cy={node.ky}
                   r={node.scaledSize}
                   className={classNames('gphNode__circle', {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     'gphNode__circle--selected': node.isSelected,
                   })}
                   style={{ fill: node.color }}
@@ -129,6 +131,7 @@ export function GraphVisualization({
                 {node.icon && (
                   <text
                     className={classNames('fa gphNode__text', {
+                      // eslint-disable-next-line @typescript-eslint/naming-convention
                       'gphNode__text--inverse': isColorDark(...hexToRgb(node.color)),
                     })}
                     transform="translate(0,5)"

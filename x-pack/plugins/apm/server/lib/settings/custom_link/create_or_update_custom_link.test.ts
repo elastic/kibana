@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { mockNow } from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+import { mockNow } from '../../../utils/test_helpers';
 import { CustomLink } from '../../../../common/custom_link/custom_link_types';
 import { createOrUpdateCustomLink } from './create_or_update_custom_link';
 
@@ -13,11 +14,11 @@ describe('Create or Update Custom link', () => {
   const internalClientIndexMock = jest.fn();
   const mockedSetup = ({
     internalClient: {
-      index: internalClientIndexMock
+      index: internalClientIndexMock,
     },
     indices: {
-      apmCustomLinkIndex: 'apmCustomLinkIndex'
-    }
+      apmCustomLinkIndex: 'apmCustomLinkIndex',
+    },
   } as unknown) as Setup;
 
   const customLink = ({
@@ -25,8 +26,8 @@ describe('Create or Update Custom link', () => {
     url: 'http://elastic.com/{{trace.id}}',
     filters: [
       { key: 'service.name', value: 'opbeans-java' },
-      { key: 'transaction.type', value: 'Request' }
-    ]
+      { key: 'transaction.type', value: 'Request' },
+    ],
   } as unknown) as CustomLink;
   afterEach(() => {
     internalClientIndexMock.mockClear();
@@ -46,15 +47,15 @@ describe('Create or Update Custom link', () => {
         label: 'foo',
         url: 'http://elastic.com/{{trace.id}}',
         'service.name': ['opbeans-java'],
-        'transaction.type': ['Request']
-      }
+        'transaction.type': ['Request'],
+      },
     });
   });
   it('update a new custom link', () => {
     createOrUpdateCustomLink({
       customLinkId: 'bar',
       customLink,
-      setup: mockedSetup
+      setup: mockedSetup,
     });
     expect(internalClientIndexMock).toHaveBeenCalledWith({
       refresh: true,
@@ -65,8 +66,8 @@ describe('Create or Update Custom link', () => {
         label: 'foo',
         url: 'http://elastic.com/{{trace.id}}',
         'service.name': ['opbeans-java'],
-        'transaction.type': ['Request']
-      }
+        'transaction.type': ['Request'],
+      },
     });
   });
 });

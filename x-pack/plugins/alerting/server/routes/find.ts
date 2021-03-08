@@ -1,21 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'kibana/server';
-import { FindOptions } from '../../../alerting/server';
-import { LicenseState } from '../lib/license_state';
+import { schema } from '@kbn/config-schema';
+import type { AlertingRouter } from '../types';
+
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
+import { renameKeys } from './lib/rename_keys';
+import { FindOptions } from '../alerts_client';
 
 // config definition
 const querySchema = schema.object({
@@ -42,38 +39,35 @@ const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
-export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+export const findAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.get(
     {
       path: `${BASE_ALERT_API_PATH}/_find`,
       validate: {
         query: querySchema,
       },
-      options: {
-        tags: ['access:alerting-read'],
-      },
     },
-    router.handleLegacyErrors(async function(
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, TypeOf<typeof querySchema>, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       const alertsClient = context.alerting.getAlertsClient();
+
       const query = req.query;
-      const options: FindOptions['options'] = {
-        perPage: query.per_page,
-        page: query.page,
-        search: query.search,
-        defaultSearchOperator: query.default_search_operator,
-        sortField: query.sort_field,
-        fields: query.fields,
-        filter: query.filter,
-        sortOrder: query.sort_order,
+      const renameMap = {
+        default_search_operator: 'defaultSearchOperator',
+        fields: 'fields',
+        has_reference: 'hasReference',
+        page: 'page',
+        per_page: 'perPage',
+        search: 'search',
+        sort_field: 'sortField',
+        sort_order: 'sortOrder',
+        filter: 'filter',
       };
+
+      const options = renameKeys<FindOptions, Record<string, unknown>>(renameMap, query);
 
       if (query.search_fields) {
         options.searchFields = Array.isArray(query.search_fields)
@@ -81,13 +75,7 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
           : [query.search_fields];
       }
 
-      if (query.has_reference) {
-        options.hasReference = query.has_reference;
-      }
-
-      const findResult = await alertsClient.find({
-        options,
-      });
+      const findResult = await alertsClient.find({ options });
       return res.ok({
         body: findResult,
       });

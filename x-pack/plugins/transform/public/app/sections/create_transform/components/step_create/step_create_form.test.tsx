@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 
-import { StepCreateForm } from './step_create_form';
+import { StepCreateForm, StepCreateFormProps } from './step_create_form';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
@@ -16,10 +16,21 @@ jest.mock('../../../../../app/app_dependencies');
 describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {
     // Arrange
-    const props = {
+    const props: StepCreateFormProps = {
       createIndexPattern: false,
       transformId: 'the-transform-id',
-      transformConfig: {},
+      transformConfig: {
+        dest: {
+          index: 'the-destination-index',
+        },
+        pivot: {
+          group_by: {},
+          aggregations: {},
+        },
+        source: {
+          index: 'the-source-index',
+        },
+      },
       overrides: { created: false, started: false, indexPatternId: undefined },
       onChange() {},
     };

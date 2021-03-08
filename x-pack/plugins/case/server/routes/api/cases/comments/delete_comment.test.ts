@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
@@ -15,6 +16,7 @@ import {
   mockCaseComments,
 } from '../../__fixtures__';
 import { initDeleteCommentApi } from './delete_comment';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
 describe('DELETE comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -23,7 +25,7 @@ describe('DELETE comment', () => {
   });
   it(`deletes the comment. responds with 204`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       method: 'delete',
       params: {
         case_id: 'mock-id-1',
@@ -31,19 +33,19 @@ describe('DELETE comment', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(204);
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       method: 'delete',
       params: {
         case_id: 'mock-id-1',
@@ -51,14 +53,14 @@ describe('DELETE comment', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
   });
 });

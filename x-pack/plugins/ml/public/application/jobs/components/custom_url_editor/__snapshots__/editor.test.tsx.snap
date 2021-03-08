@@ -21,9 +21,8 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
   >
     <EuiFormRow
       className="url-label"
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       error={Array []}
       fullWidth={false}
       hasChildLabel={true}
@@ -48,9 +47,8 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -86,9 +84,8 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -150,6 +147,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
         placeholder="Select entities"
         selectedOptions={Array []}
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
     <EuiSpacer
@@ -161,9 +159,8 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       >
         <EuiFormRow
           className="url-time-range"
-          compressed={true}
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
@@ -221,9 +218,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
   >
     <EuiFormRow
       className="url-label"
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       error={Array []}
       fullWidth={false}
       hasChildLabel={true}
@@ -248,9 +244,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -286,9 +281,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -356,6 +350,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           ]
         }
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
     <EuiSpacer
@@ -367,9 +362,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       >
         <EuiFormRow
           className="url-time-range"
-          compressed={true}
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
@@ -404,9 +398,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       <EuiFlexItem>
         <EuiFormRow
           className="url-time-range"
-          compressed={true}
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           error={
             Array [
               "Invalid interval format",
@@ -459,9 +452,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
   >
     <EuiFormRow
       className="url-label"
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       error={Array []}
       fullWidth={false}
       hasChildLabel={true}
@@ -486,9 +478,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -524,9 +515,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -594,6 +584,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           ]
         }
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
     <EuiSpacer
@@ -605,9 +596,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       >
         <EuiFormRow
           className="url-time-range"
-          compressed={true}
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
@@ -642,9 +632,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       <EuiFlexItem>
         <EuiFormRow
           className="url-time-range"
-          compressed={true}
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           error={Array []}
           fullWidth={false}
           hasChildLabel={true}
@@ -693,9 +682,8 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
   >
     <EuiFormRow
       className="url-label"
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       error={
         Array [
           "A unique label must be supplied",
@@ -724,9 +712,8 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -762,9 +749,8 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -826,6 +812,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         placeholder="Select entities"
         selectedOptions={Array []}
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
     <EuiSpacer
@@ -837,9 +824,8 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       >
         <EuiFormRow
           className="url-time-range"
-          compressed={true}
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
@@ -897,9 +883,8 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
   >
     <EuiFormRow
       className="url-label"
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       error={
         Array [
           "A unique label must be supplied",
@@ -928,9 +913,8 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -966,9 +950,8 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={true}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -1014,9 +997,8 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
   >
     <EuiFormRow
       className="url-label"
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       error={Array []}
       fullWidth={false}
       hasChildLabel={true}
@@ -1041,9 +1023,8 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -1079,9 +1060,8 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       />
     </EuiFormRow>
     <EuiFormRow
-      compressed={true}
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={true}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}

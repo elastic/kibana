@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,7 +11,11 @@ import {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
 } from '../../../../../services/ml_api_service/data_frame_analytics';
-import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
+import {
+  getAnalysisType,
+  REFRESH_ANALYTICS_LIST_STATE,
+  refreshAnalyticsList$,
+} from '../../../../common';
 
 import {
   DATA_FRAME_MODE,
@@ -21,6 +26,8 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -101,7 +108,9 @@ export const getAnalyticsFactory = (
     React.SetStateAction<GetDataFrameAnalyticsStatsResponseError | undefined>
   >,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
-  blockRefresh: boolean
+  setJobsAwaitingNodeCount: React.Dispatch<React.SetStateAction<number>>,
+  blockRefresh: boolean,
+  isManagementTable: boolean
 ): GetAnalytics => {
   let concurrentLoads = 0;
 
@@ -118,14 +127,22 @@ export const getAnalyticsFactory = (
         const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics();
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
 
+        let spaces: { [id: string]: string[] } = {};
+        if (isManagementTable) {
+          const allSpaces = await ml.savedObjects.jobsSpaces();
+          spaces = allSpaces['data-frame-analytics'];
+        }
+
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)
           : undefined;
 
+        let jobsAwaitingNodeCount = 0;
+
         const tableRows = analyticsConfigs.data_frame_analytics.reduce(
           (reducedtableRows, config) => {
             const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
-              ? analyticsStats.data_frame_analytics.find(d => config.id === d.id)
+              ? analyticsStats.data_frame_analytics.find((d) => config.id === d.id)
               : undefined;
 
             // A newly created analytics job might not have corresponding stats yet.
@@ -134,13 +151,20 @@ export const getAnalyticsFactory = (
               return reducedtableRows;
             }
 
+            if (stats.state === DATA_FRAME_TASK_STATE.STARTING && stats.node === undefined) {
+              jobsAwaitingNodeCount++;
+            }
+
             // Table with expandable rows requires `id` on the outer most level
             reducedtableRows.push({
+              checkpointing: {},
               config,
               id: config.id,
-              checkpointing: {},
+              job_type: getAnalysisType(config.analysis) as DataFrameAnalysisConfigType,
               mode: DATA_FRAME_MODE.BATCH,
+              state: stats.state,
               stats,
+              spaceIds: spaces[config.id] ?? [],
             });
             return reducedtableRows;
           },
@@ -151,6 +175,7 @@ export const getAnalyticsFactory = (
         setAnalyticsStats(analyticsStatsResult);
         setErrorMessage(undefined);
         setIsInitialized(true);
+        setJobsAwaitingNodeCount(jobsAwaitingNodeCount);
         refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
       } catch (e) {
         // An error is followed immediately by setting the state to idle.

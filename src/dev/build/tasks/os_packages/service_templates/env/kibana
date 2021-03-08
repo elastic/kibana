@@ -1,0 +1,5 @@
+user="kibana"
+group="kibana"
+
+KBN_PATH_CONF="/etc/kibana"
+RESTART_ON_UPGRADE="true"

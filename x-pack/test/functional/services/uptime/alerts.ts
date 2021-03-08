@@ -1,19 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const browser = getService('browser');
 
   return {
-    async openFlyout() {
+    async openFlyout(alertType: 'monitorStatus' | 'tls') {
       await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
-      await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
+      await testSubjects.click('xpack.uptime.openAlertContextPanel', 5000);
+      if (alertType === 'monitorStatus') {
+        await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
+      } else if (alertType === 'tls') {
+        await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
+      }
     },
     async openMonitorStatusAlertType(alertType: string) {
       return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`, 5000);
@@ -32,6 +39,8 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       return testSubjects.setValue('intervalInput', value);
     },
     async setAlertThrottleInterval(value: string) {
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
       return testSubjects.setValue('throttleInput', value);
     },
     async setAlertExpressionValue(
@@ -41,7 +50,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     ) {
       await testSubjects.click(expressionAttribute);
       await testSubjects.setValue(fieldAttribute, value);
-      return browser.pressKeys(browser.keys.ESCAPE);
+      return await testSubjects.click(expressionAttribute);
     },
     async setAlertStatusNumTimes(value: string) {
       return this.setAlertExpressionValue(
@@ -67,7 +76,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       for (let i = 0; i < optionAttributes.length; i += 1) {
         await testSubjects.click(optionAttributes[i], 5000);
       }
-      return browser.pressKeys(browser.keys.ESCAPE);
+      return testSubjects.click(expressionAttribute, 5000);
     },
     async setMonitorStatusSelectableToHours() {
       return this.setAlertExpressionSelectable(
@@ -76,20 +85,41 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
         ['xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption']
       );
     },
-    async setLocationsSelectable() {
-      await testSubjects.click(
-        'xpack.uptime.alerts.monitorStatus.locationsSelectionExpression',
-        5000
-      );
-      await testSubjects.click('xpack.uptime.alerts.monitorStatus.locationsSelectionSwitch', 5000);
-      await testSubjects.click(
-        'xpack.uptime.alerts.monitorStatus.locationsSelectionSelectable',
-        5000
-      );
-      return browser.pressKeys(browser.keys.ESCAPE);
+    async clickAddFilter() {
+      await testSubjects.click('uptimeCreateAlertAddFilter');
     },
-    async clickSaveAlertButtion() {
+    async clickAddFilterLocation() {
+      await this.clickAddFilter();
+      await testSubjects.click('uptimeAlertAddFilter.observer.geo.name');
+    },
+    async clickAddFilterPort() {
+      await this.clickAddFilter();
+      await testSubjects.click('uptimeAlertAddFilter.url.port');
+    },
+    async clickAddFilterType() {
+      await this.clickAddFilter();
+      await testSubjects.click('uptimeAlertAddFilter.monitor.type');
+    },
+    async clickLocationExpression(filter: string) {
+      await testSubjects.click('uptimeCreateStatusAlert.filter_location');
+      await testSubjects.click(`filter-popover-item_${filter}`);
+      return find.clickByCssSelector('body');
+    },
+    async clickPortExpression(filter: string) {
+      await testSubjects.click('uptimeCreateStatusAlert.filter_port');
+      await testSubjects.click(`filter-popover-item_${filter}`);
+      return find.clickByCssSelector('body');
+    },
+    async clickTypeExpression(filter: string) {
+      await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
+      await testSubjects.click(`filter-popover-item_${filter}`);
+      return find.clickByCssSelector('body');
+    },
+    async clickSaveAlertButton() {
       return testSubjects.click('saveAlertButton');
+    },
+    async clickSaveAlertsConfirmButton() {
+      return testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
     },
   };
 }

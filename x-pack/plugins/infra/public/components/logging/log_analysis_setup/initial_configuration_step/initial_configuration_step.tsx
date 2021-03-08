@@ -1,19 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiSpacer, EuiForm, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiForm, EuiSpacer } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
-
-import { SetupStatus } from '../../../../../common/log_analysis';
+import { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-import { ValidatedIndex, ValidationIndicesUIError } from './validation';
+import {
+  AvailableIndex,
+  TimeRangeValidationError,
+  timeRangeValidationErrorRT,
+  ValidationIndicesError,
+  validationIndicesErrorRT,
+  ValidationUIError,
+} from './validation';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
@@ -21,10 +28,11 @@ interface InitialConfigurationStepProps {
   startTime: number | undefined;
   endTime: number | undefined;
   isValidating: boolean;
-  validatedIndices: ValidatedIndex[];
+  validatedIndices: AvailableIndex[];
   setupStatus: SetupStatus;
-  setValidatedIndices: (selectedIndices: ValidatedIndex[]) => void;
-  validationErrors?: ValidationIndicesUIError[];
+  setValidatedIndices: (selectedIndices: AvailableIndex[]) => void;
+  validationErrors?: ValidationUIError[];
+  previousQualityWarnings?: QualityWarning[];
 }
 
 export const createInitialConfigurationStep = (
@@ -44,8 +52,14 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setupStatus,
   setValidatedIndices,
   validationErrors = [],
+  previousQualityWarnings = [],
 }: InitialConfigurationStepProps) => {
   const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
+
+  const [indexValidationErrors, timeRangeValidationErrors, globalValidationErrors] = useMemo(
+    () => partitionValidationErrors(validationErrors),
+    [validationErrors]
+  );
 
   return (
     <>
@@ -57,22 +71,24 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
           setEndTime={setEndTime}
           startTime={startTime}
           endTime={endTime}
+          validationErrors={timeRangeValidationErrors}
         />
         <AnalysisSetupIndicesForm
           disabled={disabled}
           indices={validatedIndices}
           isValidating={isValidating}
           onChangeSelectedIndices={setValidatedIndices}
-          valid={validationErrors.length === 0}
+          previousQualityWarnings={previousQualityWarnings}
+          validationErrors={indexValidationErrors}
         />
 
-        <ValidationErrors errors={validationErrors} />
+        <ValidationErrors errors={globalValidationErrors} />
       </EuiForm>
     </>
   );
 };
 
-const editableFormStatus = ['required', 'failed'];
+const editableFormStatus = ['required', 'failed', 'skipped'];
 
 const errorCalloutTitle = i18n.translate(
   'xpack.infra.analysisSetup.steps.initialConfigurationStep.errorCalloutTitle',
@@ -88,7 +104,7 @@ const initialConfigurationStepTitle = i18n.translate(
   }
 );
 
-const ValidationErrors: React.FC<{ errors: ValidationIndicesUIError[] }> = ({ errors }) => {
+const ValidationErrors: React.FC<{ errors: ValidationUIError[] }> = ({ errors }) => {
   if (errors.length === 0) {
     return null;
   }
@@ -107,7 +123,7 @@ const ValidationErrors: React.FC<{ errors: ValidationIndicesUIError[] }> = ({ er
   );
 };
 
-const formatValidationError = (error: ValidationIndicesUIError): React.ReactNode => {
+const formatValidationError = (error: ValidationUIError): React.ReactNode => {
   switch (error.error) {
     case 'NETWORK_ERROR':
       return (
@@ -129,3 +145,19 @@ const formatValidationError = (error: ValidationIndicesUIError): React.ReactNode
       return '';
   }
 };
+
+const partitionValidationErrors = (validationErrors: ValidationUIError[]) =>
+  validationErrors.reduce<
+    [ValidationIndicesError[], TimeRangeValidationError[], ValidationUIError[]]
+  >(
+    ([indicesErrors, timeRangeErrors, otherErrors], error) => {
+      if (validationIndicesErrorRT.is(error)) {
+        return [[...indicesErrors, error], timeRangeErrors, otherErrors];
+      } else if (timeRangeValidationErrorRT.is(error)) {
+        return [indicesErrors, [...timeRangeErrors, error], otherErrors];
+      } else {
+        return [indicesErrors, timeRangeErrors, [...otherErrors, error]];
+      }
+    },
+    [[], [], []]
+  );

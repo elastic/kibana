@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import mockAnomalyRecord from './__mocks__/mock_anomaly_record.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
 import mockJobConfig from './__mocks__/mock_job_config.json';
-
-jest.mock('../../util/ml_error', () => class MLRequestFailure {});
 
 jest.mock('../../services/job_service', () => ({
   mlJobService: {

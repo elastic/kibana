@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 import { AlertsList } from './alerts_list';
 import { ValidationResult } from '../../../../types';
-import { AppContextProvider } from '../../../app_context';
-import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { alertingPluginMock } from '../../../../../../alerting/public/mocks';
+import {
+  AlertExecutionStatusErrorReasons,
+  ALERTS_FEATURE_ID,
+} from '../../../../../../alerting/common';
+import { useKibana } from '../../../../common/lib/kibana';
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -24,6 +28,13 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/alert_api', () => ({
   loadAlerts: jest.fn(),
   loadAlertTypes: jest.fn(),
+  alertingFrameworkHealth: jest.fn(() => ({
+    isSufficientlySecure: true,
+    hasPermanentEncryptionKey: true,
+  })),
+}));
+jest.mock('../../../../common/lib/health_api', () => ({
+  triggersActionsUiHealth: jest.fn(() => ({ isAlertsAvailable: true })),
 }));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -33,28 +44,42 @@ jest.mock('react-router-dom', () => ({
     pathname: '/triggersActions/alerts/',
   }),
 }));
+const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
+const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
 const alertType = {
   id: 'test_alert_type',
-  name: 'some alert type',
+  description: 'test',
   iconClass: 'test',
+  documentationUrl: null,
   validate: (): ValidationResult => {
     return { errors: {} };
   },
   alertParamsExpression: () => null,
+  requiresAppContext: false,
+};
+const alertTypeFromApi = {
+  id: 'test_alert_type',
+  name: 'some alert type',
+  actionGroups: [{ id: 'default', name: 'Default' }],
+  recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+  actionVariables: { context: [], state: [] },
+  defaultActionGroupId: 'default',
+  producer: ALERTS_FEATURE_ID,
+  minimumLicenseRequired: 'basic',
+  authorizedConsumers: {
+    [ALERTS_FEATURE_ID]: { read: true, all: true },
+  },
 };
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('alerts_list component empty', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
-    const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-    const { loadActionTypes, loadAllActions } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -71,45 +96,16 @@ describe('alerts_list component empty', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        siem: {
-          'alerting:show': true,
-          'alerting:save': true,
-          'alerting:delete': true,
-        },
-      },
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
-    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+
+    wrapper = mountWithIntl(<AlertsList />);
 
     await act(async () => {
       await nextTick();
@@ -127,58 +123,152 @@ describe('alerts_list component empty', () => {
     expect(
       wrapper.find('[data-test-subj="createFirstAlertButton"]').find('EuiButton')
     ).toHaveLength(1);
-    expect(wrapper.find('AlertAdd')).toHaveLength(1);
+    expect(wrapper.find('AlertAdd').exists()).toBeFalsy();
+
+    wrapper.find('button[data-test-subj="createFirstAlertButton"]').simulate('click');
+
+    await act(async () => {
+      // When the AlertAdd component is rendered, it waits for the healthcheck to resolve
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('AlertAdd').exists()).toEqual(true);
   });
 });
 
 describe('alerts_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
+  const mockedAlertsData = [
+    {
+      id: '1',
+      name: 'test alert',
+      tags: ['tag1'],
+      enabled: true,
+      alertTypeId: 'test_alert_type',
+      schedule: { interval: '5d' },
+      actions: [],
+      params: { name: 'test alert type name' },
+      scheduledTaskId: null,
+      createdBy: null,
+      updatedBy: null,
+      apiKeyOwner: null,
+      throttle: '1m',
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'active',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: null,
+      },
+    },
+    {
+      id: '2',
+      name: 'test alert ok',
+      tags: ['tag1'],
+      enabled: true,
+      alertTypeId: 'test_alert_type',
+      schedule: { interval: '5d' },
+      actions: [],
+      params: { name: 'test alert type name' },
+      scheduledTaskId: null,
+      createdBy: null,
+      updatedBy: null,
+      apiKeyOwner: null,
+      throttle: '1m',
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'ok',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: null,
+      },
+    },
+    {
+      id: '3',
+      name: 'test alert pending',
+      tags: ['tag1'],
+      enabled: true,
+      alertTypeId: 'test_alert_type',
+      schedule: { interval: '5d' },
+      actions: [],
+      params: { name: 'test alert type name' },
+      scheduledTaskId: null,
+      createdBy: null,
+      updatedBy: null,
+      apiKeyOwner: null,
+      throttle: '1m',
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'pending',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: null,
+      },
+    },
+    {
+      id: '4',
+      name: 'test alert error',
+      tags: ['tag1'],
+      enabled: true,
+      alertTypeId: 'test_alert_type',
+      schedule: { interval: '5d' },
+      actions: [{ id: 'test', group: 'alert', params: { message: 'test' } }],
+      params: { name: 'test alert type name' },
+      scheduledTaskId: null,
+      createdBy: null,
+      updatedBy: null,
+      apiKeyOwner: null,
+      throttle: '1m',
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Unknown,
+          message: 'test',
+        },
+      },
+    },
+    {
+      id: '5',
+      name: 'test alert license error',
+      tags: ['tag1'],
+      enabled: true,
+      alertTypeId: 'test_alert_type',
+      schedule: { interval: '5d' },
+      actions: [{ id: 'test', group: 'alert', params: { message: 'test' } }],
+      params: { name: 'test alert type name' },
+      scheduledTaskId: null,
+      createdBy: null,
+      updatedBy: null,
+      apiKeyOwner: null,
+      throttle: '1m',
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: AlertExecutionStatusErrorReasons.License,
+          message: 'test',
+        },
+      },
+    },
+  ];
+
   async function setup() {
-    const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-    const { loadActionTypes, loadAllActions } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          name: 'test alert',
-          tags: ['tag1'],
-          enabled: true,
-          alertTypeId: 'test_alert_type',
-          schedule: { interval: '5d' },
-          actions: [],
-          params: { name: 'test alert type name' },
-          scheduledTaskId: null,
-          createdBy: null,
-          updatedBy: null,
-          apiKeyOwner: null,
-          throttle: '1m',
-          muteAll: false,
-          mutedInstanceIds: [],
-        },
-        {
-          id: '2',
-          name: 'test alert 2',
-          tags: ['tag1'],
-          enabled: true,
-          alertTypeId: 'test_alert_type',
-          schedule: { interval: '5d' },
-          actions: [{ id: 'test', group: 'alert', params: { message: 'test' } }],
-          params: { name: 'test alert type name' },
-          scheduledTaskId: null,
-          createdBy: null,
-          updatedBy: null,
-          apiKeyOwner: null,
-          throttle: '1m',
-          muteAll: false,
-          mutedInstanceIds: [],
-        },
-      ],
+      total: 4,
+      data: mockedAlertsData,
     });
     loadActionTypes.mockResolvedValue([
       {
@@ -190,46 +280,16 @@ describe('alerts_list component with items', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        siem: {
-          'alerting:show': true,
-          'alerting:save': true,
-          'alerting:delete': true,
-        },
-      },
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
-    };
 
     alertTypeRegistry.has.mockReturnValue(true);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<AlertsList />);
 
     await act(async () => {
       await nextTick();
@@ -243,11 +303,87 @@ describe('alerts_list component with items', () => {
   it('renders table of alerts', async () => {
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(mockedAlertsData.length);
+    expect(wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-status"]').length).toEqual(
+      mockedAlertsData.length
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-active"]').length).toEqual(1);
+    expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-ok"]').length).toEqual(1);
+    expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-pending"]').length).toEqual(1);
+    expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-unknown"]').length).toEqual(0);
+
+    expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-error"]').length).toEqual(2);
+    expect(wrapper.find('[data-test-subj="alertStatus-error-tooltip"]').length).toEqual(2);
+    expect(
+      wrapper.find('EuiButtonEmpty[data-test-subj="alertStatus-error-license-fix"]').length
+    ).toEqual(1);
+
+    expect(wrapper.find('[data-test-subj="refreshAlertsButton"]').exists()).toBeTruthy();
+
+    expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-error"]').first().text()).toEqual(
+      'Error'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-error"]').last().text()).toEqual(
+      'License Error'
+    );
   });
-  it('renders edit button for registered alert types', async () => {
+
+  it('loads alerts when refresh button is clicked', async () => {
     await setup();
-    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBeGreaterThan(0);
+    wrapper.find('[data-test-subj="refreshAlertsButton"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadAlerts).toHaveBeenCalled();
+  });
+
+  it('renders license errors and manage license modal on click', async () => {
+    global.open = jest.fn();
+    await setup();
+    expect(wrapper.find('ManageLicenseModal').exists()).toBeFalsy();
+    expect(
+      wrapper.find('EuiButtonEmpty[data-test-subj="alertStatus-error-license-fix"]').length
+    ).toEqual(1);
+    wrapper
+      .find('EuiButtonEmpty[data-test-subj="alertStatus-error-license-fix"]')
+      .simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('ManageLicenseModal').exists()).toBeTruthy();
+    expect(wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').text()).toEqual(
+      'Manage license'
+    );
+    wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    expect(global.open).toHaveBeenCalled();
+  });
+
+  it('sorts alerts when clicking the name column', async () => {
+    await setup();
+    wrapper
+      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
+      .first()
+      .simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: 'name',
+          direction: 'desc',
+        },
+      })
+    );
   });
 });
 
@@ -255,10 +391,6 @@ describe('alerts_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-    const { loadActionTypes, loadAllActions } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -275,48 +407,16 @@ describe('alerts_list component empty with show only capability', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+    loadAlertTypes.mockResolvedValue([
+      { id: 'test_alert_type', name: 'some alert type', authorizedConsumers: {} },
+    ]);
     loadAllActions.mockResolvedValue([]);
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        siem: {
-          'alerting:show': true,
-          'alerting:save': false,
-          'alerting:delete': false,
-        },
-      },
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: {
-        get() {
-          return null;
-        },
-      } as any,
-      alertTypeRegistry: {} as any,
-    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<AlertsList />);
 
     await act(async () => {
       await nextTick();
@@ -334,10 +434,6 @@ describe('alerts_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-    const { loadActionTypes, loadAllActions } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -359,6 +455,11 @@ describe('alerts_list with show only capability', () => {
           throttle: '1m',
           muteAll: false,
           mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+            error: null,
+          },
         },
         {
           id: '2',
@@ -376,6 +477,11 @@ describe('alerts_list with show only capability', () => {
           throttle: '1m',
           muteAll: false,
           mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+            error: null,
+          },
         },
       ],
     });
@@ -389,46 +495,17 @@ describe('alerts_list with show only capability', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        siem: {
-          'alerting:show': true,
-          'alerting:save': false,
-          'alerting:delete': false,
-        },
-      },
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
-    };
 
     alertTypeRegistry.has.mockReturnValue(false);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<AlertsList />);
 
     await act(async () => {
       await nextTick();
@@ -441,9 +518,5 @@ describe('alerts_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     // TODO: check delete button
-  });
-  it('not renders edit button for non registered alert types', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBe(0);
   });
 });

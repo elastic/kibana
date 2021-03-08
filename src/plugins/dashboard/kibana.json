@@ -7,10 +7,22 @@
     "inspector",
     "kibanaLegacy",
     "navigation",
+    "savedObjects",
+    "share",
     "uiActions",
-    "savedObjects"
+    "urlForwarding",
+    "presentationUtil"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection"],
-  "server": false,
-  "ui": true
+  "optionalPlugins": [
+    "home",
+    "spacesOss",
+    "savedObjectsTaggingOss",
+    "usageCollection"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "home",
+    "kibanaReact",
+    "kibanaUtils"
+  ]
 }

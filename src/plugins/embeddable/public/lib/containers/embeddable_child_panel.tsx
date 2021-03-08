@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import classNames from 'classnames';
@@ -22,12 +11,7 @@ import React from 'react';
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
-import { CoreStart } from 'src/core/public';
-import { UiActionsService } from 'src/plugins/ui_actions/public';
-
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
-import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
 import { EmbeddableStart } from '../../plugin';
 
@@ -35,13 +19,7 @@ export interface EmbeddableChildPanelProps {
   embeddableId: string;
   className?: string;
   container: IContainer;
-  getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
-  overlays: CoreStart['overlays'];
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
+  PanelComponent: EmbeddableStart['EmbeddablePanel'];
 }
 
 interface State {
@@ -86,6 +64,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   }
 
   public render() {
+    const { PanelComponent } = this.props;
     const classes = classNames('embPanel', {
       'embPanel-isLoading': this.state.loading,
     });
@@ -95,16 +74,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
         {this.state.loading || !this.embeddable ? (
           <EuiLoadingChart size="l" mono />
         ) : (
-          <EmbeddablePanel
-            embeddable={this.embeddable}
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            notifications={this.props.notifications}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
-          />
+          <PanelComponent embeddable={this.embeddable} />
         )}
       </div>
     );

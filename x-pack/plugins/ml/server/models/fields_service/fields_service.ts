@@ -1,20 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-import { APICaller } from 'kibana/server';
+import Boom from '@hapi/boom';
+import { IScopedClusterClient } from 'kibana/server';
 import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
+import { AggCardinality } from '../../../common/types/fields';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Service for carrying out queries to obtain data
  * specific to fields in Elasticsearch indices.
  */
-export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
+export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   const fieldsAggsCache = initCardinalityFieldsCache();
 
   /**
@@ -35,15 +40,36 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
    */
   async function getAggregatableFields(
     index: string | string[],
-    fieldNames: string[]
+    fieldNames: string[],
+    datafeedConfig?: Datafeed
   ): Promise<string[]> {
-    const fieldCapsResp = await callAsCurrentUser('fieldCaps', {
+    const { body } = await asCurrentUser.fieldCaps({
       index,
       fields: fieldNames,
     });
     const aggregatableFields: string[] = [];
-    fieldNames.forEach(fieldName => {
-      const fieldInfo = fieldCapsResp.fields[fieldName];
+    const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
+
+    fieldNames.forEach((fieldName) => {
+      if (
+        typeof datafeedConfig?.script_fields === 'object' &&
+        datafeedConfig.script_fields.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        typeof datafeedConfig?.runtime_mappings === 'object' &&
+        datafeedConfig.runtime_mappings.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        datafeedAggregations !== undefined &&
+        isValidAggregationField(datafeedAggregations, fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      const fieldInfo = body.fields[fieldName];
       const typeKeys = fieldInfo !== undefined ? Object.keys(fieldInfo) : [];
       if (typeKeys.length > 0) {
         const fieldType = typeKeys[0];
@@ -67,10 +93,12 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     query: any,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
-    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+    const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
+    // getAggregatableFields doesn't account for scripted or aggregated fields
     if (aggregatableFields.length === 0) {
       return {};
     }
@@ -88,7 +116,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;
@@ -112,10 +140,29 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       mustCriteria.push(query);
     }
 
-    const aggs = fieldsToAgg.reduce((obj, field) => {
-      obj[field] = { cardinality: { field } };
-      return obj;
-    }, {} as { [field: string]: { cardinality: { field: string } } });
+    const runtimeMappings: any = {};
+    const aggs = fieldsToAgg.reduce(
+      (obj, field) => {
+        if (
+          typeof datafeedConfig?.script_fields === 'object' &&
+          datafeedConfig.script_fields.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
+        } else if (
+          typeof datafeedConfig?.runtime_mappings === 'object' &&
+          datafeedConfig.runtime_mappings.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { field } };
+          runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
+        } else {
+          obj[field] = { cardinality: { field } };
+        }
+        return obj;
+      },
+      {} as {
+        [field: string]: AggCardinality;
+      }
+    );
 
     const body = {
       query: {
@@ -128,14 +175,15 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
         excludes: [],
       },
       aggs,
+      ...runtimeMappings,
     };
 
-    const aggregations = (
-      await callAsCurrentUser('search', {
-        index,
-        body,
-      })
-    )?.aggregations;
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
+      index,
+      body,
+    });
 
     if (!aggregations) {
       return {};
@@ -170,7 +218,9 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
   }> {
     const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-    const resp = await callAsCurrentUser('search', {
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
       index,
       size: 0,
       body: {
@@ -190,12 +240,12 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       },
     });
 
-    if (resp.aggregations && resp.aggregations.earliest && resp.aggregations.latest) {
-      obj.start.epoch = resp.aggregations.earliest.value;
-      obj.start.string = resp.aggregations.earliest.value_as_string;
+    if (aggregations && aggregations.earliest && aggregations.latest) {
+      obj.start.epoch = aggregations.earliest.value;
+      obj.start.string = aggregations.earliest.value_as_string;
 
-      obj.end.epoch = resp.aggregations.latest.value;
-      obj.end.string = resp.aggregations.latest.value_as_string;
+      obj.end.epoch = aggregations.latest.value;
+      obj.end.string = aggregations.latest.value_as_string;
     }
     return obj;
   }
@@ -248,13 +298,14 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    interval: string | undefined
+    interval: string | undefined,
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
     if (!interval) {
       throw Boom.badRequest('Interval is required to retrieve max bucket cardinalities.');
     }
 
-    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+    const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
     if (aggregatableFields.length === 0) {
       return {};
@@ -276,7 +327,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;
@@ -338,12 +389,12 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       },
     };
 
-    const aggregations = (
-      await callAsCurrentUser('search', {
-        index,
-        body,
-      })
-    )?.aggregations;
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
+      index,
+      body,
+    });
 
     if (!aggregations) {
       return cachedValues;

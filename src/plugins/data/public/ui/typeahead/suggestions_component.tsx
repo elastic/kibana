@@ -1,79 +1,107 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
+import classNames from 'classnames';
+import styled from 'styled-components';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
+import {
+  SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
+  SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
+  SUGGESTIONS_LIST_REQUIRED_WIDTH,
+} from './constants';
+import { SuggestionOnClick } from './types';
 
-interface Props {
+// @internal
+export interface SuggestionsComponentProps {
   index: number | null;
-  onClick: (suggestion: QuerySuggestion) => void;
+  onClick: SuggestionOnClick;
   onMouseEnter: (index: number) => void;
   show: boolean;
   suggestions: QuerySuggestion[];
   loadMore: () => void;
+  queryBarRect?: DOMRect;
+  size?: SuggestionsListSize;
 }
 
-export class SuggestionsComponent extends Component<Props> {
+export type SuggestionsListSize = 's' | 'l';
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default class SuggestionsComponent extends Component<SuggestionsComponentProps> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
 
   public render() {
-    if (!this.props.show || isEmpty(this.props.suggestions)) {
+    if (!this.props.queryBarRect || !this.props.show || isEmpty(this.props.suggestions)) {
       return null;
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
+      const isDescriptionFittable =
+        this.props.queryBarRect!.width >= SUGGESTIONS_LIST_REQUIRED_WIDTH;
       return (
         <SuggestionComponent
-          innerRef={node => (this.childNodes[index] = node)}
+          innerRef={(node) => (this.childNodes[index] = node)}
           selected={index === this.props.index}
+          index={index}
           suggestion={suggestion}
           onClick={this.props.onClick}
           onMouseEnter={() => this.props.onMouseEnter(index)}
           ariaId={'suggestion-' + index}
           key={`${suggestion.type} - ${suggestion.text}`}
+          shouldDisplayDescription={isDescriptionFittable}
         />
       );
     });
 
+    const documentHeight = document.documentElement.clientHeight || window.innerHeight;
+    const { queryBarRect } = this.props;
+
+    // reflects if the suggestions list has enough space below to be opened down
+    const isSuggestionsListFittable =
+      documentHeight - (queryBarRect.top + queryBarRect.height) >
+      SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE;
+    const verticalListPosition = isSuggestionsListFittable
+      ? `top: ${window.scrollY + queryBarRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
+      : `bottom: ${documentHeight - (window.scrollY + queryBarRect.top)}px;`;
+
     return (
-      <div className="reactSuggestionTypeahead">
-        <div className="kbnTypeahead">
-          <div className="kbnTypeahead__popover">
+      <StyledSuggestionsListDiv
+        queryBarRect={queryBarRect}
+        verticalListPosition={verticalListPosition}
+      >
+        <div
+          className={classNames('kbnTypeahead', { 'kbnTypeahead--small': this.props.size === 's' })}
+        >
+          <div
+            className={classNames('kbnTypeahead__popover', {
+              ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
+              ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
+            })}
+          >
             <div
               id="kbnTypeahead__items"
-              className="kbnTypeahead__items"
               role="listbox"
-              ref={node => (this.parentNode = node)}
+              ref={(node) => (this.parentNode = node)}
               onScroll={this.handleScroll}
             >
               {suggestions}
             </div>
           </div>
         </div>
-      </div>
+      </StyledSuggestionsListDiv>
     );
   }
 
-  public componentDidUpdate(prevProps: Props) {
+  public componentDidUpdate(prevProps: SuggestionsComponentProps) {
     if (prevProps.index !== this.props.index) {
       this.scrollIntoView();
     }
@@ -116,3 +144,12 @@ export class SuggestionsComponent extends Component<Props> {
     }
   };
 }
+
+const StyledSuggestionsListDiv = styled.div`
+  ${(props: { queryBarRect: DOMRect; verticalListPosition: string }) => `
+      position: absolute;
+      z-index: 4001;
+      left: ${props.queryBarRect.left}px;
+      width: ${props.queryBarRect.width}px;
+      ${props.verticalListPosition}`}
+`;

@@ -4,6 +4,7 @@
 
 ## SearchSourceFields.index property
 
+
 <b>Signature:</b>
 
 ```typescript

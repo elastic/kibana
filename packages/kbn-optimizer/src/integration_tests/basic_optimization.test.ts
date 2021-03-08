@@ -1,37 +1,46 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
 import Fs from 'fs';
+import Zlib from 'zlib';
 import { inspect } from 'util';
 
 import cpy from 'cpy';
 import del from 'del';
-import { toArray, tap } from 'rxjs/operators';
-import { createAbsolutePathSerializer, ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { tap, filter } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
+
+import { allValuesFrom } from '../common';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
-expect.addSnapshotSerializer(createAbsolutePathSerializer(REPO_ROOT));
+expect.addSnapshotSerializer({
+  serialize: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
+  test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
+});
+
+const log = new ToolingLog({
+  level: 'error',
+  writeTo: {
+    write(chunk) {
+      if (chunk.endsWith('\n')) {
+        chunk = chunk.slice(0, -1);
+      }
+      // eslint-disable-next-line no-console
+      console.error(chunk);
+    },
+  },
+});
 
 beforeAll(async () => {
   await del(TMP_DIR);
@@ -49,28 +58,19 @@ afterAll(async () => {
 it('builds expected bundles, saves bundle counts to metadata', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
     maxWorkerCount: 1,
-    dist: true,
+    dist: false,
   });
 
   expect(config).toMatchSnapshot('OptimizerConfig');
 
-  const log = new ToolingLog({
-    level: 'error',
-    writeTo: {
-      write(chunk) {
-        if (chunk.endsWith('\n')) {
-          chunk = chunk.slice(0, -1);
-        }
-        // eslint-disable-next-line no-console
-        console.error(chunk);
-      },
-    },
-  });
-  const msgs = await runOptimizer(config)
-    .pipe(logOptimizerState(log, config), toArray())
-    .toPromise();
+  const msgs = await allValuesFrom(
+    runOptimizer(config).pipe(
+      logOptimizerState(log, config),
+      filter((x) => x.event?.type !== 'worker stdio')
+    )
+  );
 
   const assert = (statement: string, truth: boolean, altStates?: OptimizerUpdate[]) => {
     if (!truth) {
@@ -83,39 +83,39 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     }
   };
 
-  const initializingStates = msgs.filter(msg => msg.state.phase === 'initializing');
+  const initializingStates = msgs.filter((msg) => msg.state.phase === 'initializing');
   assert('produce at least one initializing event', initializingStates.length >= 1);
 
   const bundleCacheStates = msgs.filter(
-    msg =>
+    (msg) =>
       (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
       msg.state.phase === 'initializing'
   );
-  assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
+  assert('produce three bundle cache events while initializing', bundleCacheStates.length === 3);
 
-  const initializedStates = msgs.filter(msg => msg.state.phase === 'initialized');
+  const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
 
-  const workerStarted = msgs.filter(msg => msg.event?.type === 'worker started');
+  const workerStarted = msgs.filter((msg) => msg.event?.type === 'worker started');
   assert('produce one worker started event', workerStarted.length === 1);
 
-  const runningStates = msgs.filter(msg => msg.state.phase === 'running');
+  const runningStates = msgs.filter((msg) => msg.state.phase === 'running');
   assert(
-    'produce two or three "running" states',
-    runningStates.length === 2 || runningStates.length === 3
+    'produce three to five "running" states',
+    runningStates.length >= 3 && runningStates.length <= 5
   );
 
-  const bundleNotCachedEvents = msgs.filter(msg => msg.event?.type === 'bundle not cached');
-  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
+  const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
+  assert('produce three "bundle not cached" events', bundleNotCachedEvents.length === 3);
 
-  const successStates = msgs.filter(msg => msg.state.phase === 'success');
+  const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
-    'produce one or two "compiler success" states',
-    successStates.length === 1 || successStates.length === 2
+    'produce one to three "compiler success" states',
+    successStates.length >= 1 && successStates.length <= 3
   );
 
   const otherStates = msgs.filter(
-    msg =>
+    (msg) =>
       msg.state.phase !== 'initializing' &&
       msg.state.phase !== 'success' &&
       msg.state.phase !== 'running' &&
@@ -124,51 +124,59 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
-  expect(
-    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/foo.plugin.js'), 'utf8')
-  ).toMatchSnapshot('foo bundle');
-
-  expect(
-    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/1.plugin.js'), 'utf8')
-  ).toMatchSnapshot('1 async bundle');
-
-  expect(
-    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/bar/target/public/bar.plugin.js'), 'utf8')
-  ).toMatchSnapshot('bar bundle');
-
-  const foo = config.bundles.find(b => b.id === 'foo')!;
+  const foo = config.bundles.find((b) => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
-  expect(foo.cache.getModuleCount()).toBe(4);
+  expect(foo.cache.getModuleCount()).toBe(6);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
+      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
+      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
 
-  const bar = config.bundles.find(b => b.id === 'bar')!;
+  const bar = config.bundles.find((b) => b.id === 'bar')!;
   expect(bar).toBeTruthy();
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
-    // code + styles + style/css-loader runtimes
-    15
+    // code + styles + style/css-loader runtimes + public path updater
+    16
   );
 
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
       <absolute path>/node_modules/css-loader/package.json,
       <absolute path>/node_modules/style-loader/package.json,
+      <absolute path>/packages/kbn-optimizer/postcss.config.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/_other_styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/legacy/ui/public/icon.svg,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7dark.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7light.scss,
+      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
+      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
+    ]
+  `);
+
+  const baz = config.bundles.find((b) => b.id === 'baz')!;
+  expect(baz).toBeTruthy();
+  baz.cache.refresh();
+  expect(baz.cache.getModuleCount()).toBe(3);
+
+  expect(baz.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
+      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
+      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
 });
@@ -176,25 +184,25 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 it('uses cache on second run and exist cleanly', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
     maxWorkerCount: 1,
-    dist: true,
+    dist: false,
   });
 
-  const msgs = await runOptimizer(config)
-    .pipe(
-      tap(state => {
+  const msgs = await allValuesFrom(
+    runOptimizer(config).pipe(
+      tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
+          console.log('worker', state.event.stream, state.event.line);
         }
-      }),
-      toArray()
+      })
     )
-    .toPromise();
+  );
 
-  expect(msgs.map(m => m.state.phase)).toMatchInlineSnapshot(`
+  expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
     Array [
+      "initializing",
       "initializing",
       "initializing",
       "initializing",
@@ -203,3 +211,51 @@ it('uses cache on second run and exist cleanly', async () => {
     ]
   `);
 });
+
+it('prepares assets for distribution', async () => {
+  if (process.env.CODE_COVERAGE) {
+    // test fails when testing coverage because source includes instrumentation, so skip it
+    return;
+  }
+  const config = OptimizerConfig.create({
+    repoRoot: MOCK_REPO_DIR,
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
+    maxWorkerCount: 1,
+    dist: true,
+  });
+
+  await allValuesFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
+
+  expect(
+    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/metrics.json'), 'utf8')
+  ).toMatchSnapshot('metrics.json');
+
+  expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
+  expectFileMatchesSnapshotWithCompression(
+    'plugins/foo/target/public/foo.chunk.1.js',
+    'foo async bundle'
+  );
+  expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
+  expectFileMatchesSnapshotWithCompression('x-pack/baz/target/public/baz.plugin.js', 'baz bundle');
+});
+
+/**
+ * Verifies that the file matches the expected output and has matching compressed variants.
+ */
+const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabel: string) => {
+  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+
+  expect(raw).toMatchSnapshot(snapshotLabel);
+
+  // Verify the brotli variant matches
+  expect(
+    Zlib.brotliDecompressSync(
+      Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
+    ).toString()
+  ).toEqual(raw);
+
+  // Verify the gzip variant matches
+  expect(
+    Zlib.gunzipSync(Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.gz`))).toString()
+  ).toEqual(raw);
+};

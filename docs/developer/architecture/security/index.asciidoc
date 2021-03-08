@@ -1,0 +1,14 @@
+[[development-security]]
+== Security
+
+{kib} has generally been able to implement security transparently to core and plugin developers, and this largely remains the case. {kib} on two methods that the {es} `Cluster` provides: `callWithRequest` and `callWithInternalUser`. 
+
+`callWithRequest` executes requests against {es} using the authentication credentials of the {kib} end-user. So, if you log into {kib} with the user of `foo` when `callWithRequest` is used, {kib} execute the request against {es} as the user `foo`. Historically, `callWithRequest` has been used extensively to perform actions that are initiated at the request of {kib} end-users.
+
+`callWithInternalUser` executes requests against {es} using the internal {kib} server user, and has historically been used for performing actions that aren't initiated by {kib} end users; for example, creating the initial `.kibana` index or performing health checks against {es}.
+
+However, with the changes that role-based access control (RBAC) introduces, this is no longer cut and dry. {kib} now requires all access to the `.kibana` index goes through the `SavedObjectsClient`. This used to be a best practice, as the `SavedObjectsClient` was responsible for translating the documents stored in {es} to and from Saved Objects, but RBAC is now taking advantage of this abstraction to implement access control and determine when to use `callWithRequest` versus `callWithInternalUser`.
+
+include::rbac.asciidoc[leveloffset=+1]
+
+include::feature-registration.asciidoc[leveloffset=+1]

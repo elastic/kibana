@@ -1,105 +1,137 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { deepFreeze } from '@kbn/std';
 import {
   CoreSetup,
+  CoreStart,
+  SavedObjectsServiceStart,
   Logger,
+  Plugin,
   PluginInitializerContext,
-  RecursiveReadonly,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
-import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
-import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/timelion/server';
 import { FeatureRegistry } from './feature_registry';
-import { Feature, FeatureConfig } from '../common/feature';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
+import {
+  ElasticsearchFeatureConfig,
+  ElasticsearchFeature,
+  KibanaFeature,
+  KibanaFeatureConfig,
+} from '../common';
 
 /**
  * Describes public Features plugin contract returned at the `setup` stage.
  */
 export interface PluginSetupContract {
-  registerFeature(feature: FeatureConfig): void;
-  getFeatures(): Feature[];
+  registerKibanaFeature(feature: KibanaFeatureConfig): void;
+  registerElasticsearchFeature(feature: ElasticsearchFeatureConfig): void;
+  /*
+   * Calling this function during setup will crash Kibana.
+   * Use start contract instead.
+   * @deprecated
+   * */
+  getKibanaFeatures(): KibanaFeature[];
+  /*
+   * Calling this function during setup will crash Kibana.
+   * Use start contract instead.
+   * @deprecated
+   * */
+  getElasticsearchFeatures(): ElasticsearchFeature[];
   getFeaturesUICapabilities(): UICapabilities;
-  registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
 }
 
 export interface PluginStartContract {
-  getFeatures(): Feature[];
+  getElasticsearchFeatures(): ElasticsearchFeature[];
+  getKibanaFeatures(): KibanaFeature[];
 }
 
-/**
- * Describes a set of APIs that are available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  xpackInfo: Pick<XPackInfo, 'license'>;
-  savedObjectTypes: string[];
+interface TimelionSetupContract {
+  uiEnabled: boolean;
 }
 
 /**
  * Represents Features Plugin instance that will be managed by the Kibana plugin system.
  */
-export class Plugin {
+export class FeaturesPlugin
+  implements
+    Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>> {
   private readonly logger: Logger;
-
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
-
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
+  private isTimelionEnabled: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
-    { timelion }: { timelion?: TimelionSetupContract }
-  ): Promise<RecursiveReadonly<PluginSetupContract>> {
+    { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
+  ): RecursiveReadonly<PluginSetupContract> {
+    this.isTimelionEnabled = visTypeTimelion !== undefined && visTypeTimelion.uiEnabled;
+
     defineRoutes({
       router: core.http.createRouter(),
       featureRegistry: this.featureRegistry,
-      getLegacyAPI: this.getLegacyAPI,
     });
 
+    const getFeaturesUICapabilities = () =>
+      uiCapabilitiesForFeatures(
+        this.featureRegistry.getAllKibanaFeatures(),
+        this.featureRegistry.getAllElasticsearchFeatures()
+      );
+
+    core.capabilities.registerProvider(getFeaturesUICapabilities);
+
     return deepFreeze({
-      registerFeature: this.featureRegistry.register.bind(this.featureRegistry),
-      getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
-      getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(this.featureRegistry.getAll()),
-
-      registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        this.legacyAPI = legacyAPI;
-
-        // Register OSS features.
-        for (const feature of buildOSSFeatures({
-          savedObjectTypes: this.legacyAPI.savedObjectTypes,
-          includeTimelion: timelion !== undefined && timelion.uiEnabled,
-        })) {
-          this.featureRegistry.register(feature);
-        }
-      },
+      registerKibanaFeature: this.featureRegistry.registerKibanaFeature.bind(this.featureRegistry),
+      registerElasticsearchFeature: this.featureRegistry.registerElasticsearchFeature.bind(
+        this.featureRegistry
+      ),
+      getKibanaFeatures: this.featureRegistry.getAllKibanaFeatures.bind(this.featureRegistry),
+      getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(
+        this.featureRegistry
+      ),
+      getFeaturesUICapabilities,
     });
   }
 
-  public start(): RecursiveReadonly<PluginStartContract> {
-    this.logger.debug('Starting plugin');
+  public start(core: CoreStart): RecursiveReadonly<PluginStartContract> {
+    this.registerOssFeatures(core.savedObjects);
+
     return deepFreeze({
-      getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
+      getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(
+        this.featureRegistry
+      ),
+      getKibanaFeatures: this.featureRegistry.getAllKibanaFeatures.bind(this.featureRegistry),
     });
   }
 
-  public stop() {
-    this.logger.debug('Stopping plugin');
+  public stop() {}
+
+  private registerOssFeatures(savedObjects: SavedObjectsServiceStart) {
+    const registry = savedObjects.getTypeRegistry();
+    const savedObjectTypes = registry.getVisibleTypes().map((t) => t.name);
+
+    this.logger.debug(
+      `Registering OSS features with SO types: ${savedObjectTypes.join(', ')}. "includeTimelion": ${
+        this.isTimelionEnabled
+      }.`
+    );
+    const features = buildOSSFeatures({
+      savedObjectTypes,
+      includeTimelion: this.isTimelionEnabled,
+    });
+
+    for (const feature of features) {
+      this.featureRegistry.registerKibanaFeature(feature);
+    }
   }
 }

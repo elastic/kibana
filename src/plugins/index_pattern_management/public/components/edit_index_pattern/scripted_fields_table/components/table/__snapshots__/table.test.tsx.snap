@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table should render normally 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "dataType": "string",
+        "description": "Name of the field",
+        "field": "displayName",
+        "name": "Name",
+        "sortable": true,
+        "width": "38%",
+      },
+      Object {
+        "data-test-subj": "scriptedFieldLang",
+        "dataType": "string",
+        "description": "Language used for the field",
+        "field": "lang",
+        "name": "Lang",
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "description": "Script for the field",
+        "field": "script",
+        "name": "Script",
+        "sortable": true,
+      },
+      Object {
+        "description": "Format used for the field",
+        "field": "name",
+        "name": "Format",
+        "render": [Function],
+        "sortable": false,
+      },
+      Object {
+        "actions": Array [
+          Object {
+            "description": "Edit this field",
+            "icon": "pencil",
+            "name": "Edit",
+            "onClick": [Function],
+            "type": "icon",
+          },
+          Object {
+            "color": "danger",
+            "description": "Delete this field",
+            "icon": "trash",
+            "name": "Delete",
+            "onClick": [Function],
+            "type": "icon",
+          },
+        ],
+        "name": "",
+        "width": "40px",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "lang": "Elastic",
+        "name": "1",
+        "script": "",
+      },
+    ]
+  }
+  pagination={
+    Object {
+      "initialPageSize": 10,
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
+      ],
+    }
+  }
+  responsive={true}
+  sorting={true}
+  tableLayout="fixed"
+/>
+`;
+
+exports[`Table should render the format 1`] = `
+<span>
+  string
+</span>
+`;

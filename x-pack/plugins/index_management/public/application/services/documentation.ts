@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DocLinksStart } from '../../../../../../src/core/public';
@@ -20,6 +21,10 @@ class DocumentationService {
     this.kibanaDocsBase = `${docsBase}/kibana/${DOC_LINK_VERSION}`;
   }
 
+  public getEsDocsBase() {
+    return this.esDocsBase;
+  }
+
   public getSettingsDocumentationLink() {
     return `${this.esDocsBase}/index-modules.html#index-modules-settings`;
   }
@@ -32,8 +37,14 @@ class DocumentationService {
     return `${this.esDocsBase}/mapping-routing-field.html`;
   }
 
-  public getTemplatesDocumentationLink() {
-    return `${this.esDocsBase}/indices-templates.html`;
+  public getDataStreamsDocumentationLink() {
+    return `${this.esDocsBase}/data-streams.html`;
+  }
+
+  public getTemplatesDocumentationLink(isLegacy = false) {
+    return isLegacy
+      ? `${this.esDocsBase}/indices-templates-v1.html`
+      : `${this.esDocsBase}/indices-templates.html`;
   }
 
   public getIdxMgmtDocumentationLink() {
@@ -111,6 +122,10 @@ class DocumentationService {
 
   public getIgnoreMalformedLink() {
     return `${this.esDocsBase}/ignore-malformed.html`;
+  }
+
+  public getMetaLink() {
+    return `${this.esDocsBase}/mapping-field-meta.html`;
   }
 
   public getFormatLink() {
@@ -195,6 +210,10 @@ class DocumentationService {
 
   public getEnabledLink() {
     return `${this.esDocsBase}/enabled.html`;
+  }
+
+  public getRuntimeFields() {
+    return `${this.esDocsBase}/runtime.html`;
   }
 
   public getWellKnownTextLink() {

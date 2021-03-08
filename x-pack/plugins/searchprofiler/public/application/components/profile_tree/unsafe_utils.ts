@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -93,7 +94,7 @@ export function normalizeBreakdown(breakdown: Record<string, number>) {
   }, 0);
   Object.keys(breakdown)
     .sort()
-    .forEach(key => {
+    .forEach((key) => {
       let relative = 0;
       if (key.indexOf('_count') === -1) {
         relative = ((breakdown[key] / total) * 100).toFixed(1) as any;
@@ -122,10 +123,10 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
   let sortQueryComponents;
   if (target === 'searches') {
     sortQueryComponents = (a: Shard, b: Shard) => {
-      const aTime = _.sum(a.searches!, search => {
+      const aTime = _.sumBy(a.searches!, (search: any) => {
         return search.treeRoot!.time;
       });
-      const bTime = _.sum(b.searches!, search => {
+      const bTime = _.sumBy(b.searches!, (search: any) => {
         return search.treeRoot!.time;
       });
 
@@ -133,10 +134,10 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
     };
   } else if (target === 'aggregations') {
     sortQueryComponents = (a: Shard, b: Shard) => {
-      const aTime = _.sum(a.aggregations!, agg => {
+      const aTime = _.sumBy(a.aggregations!, (agg: any) => {
         return agg.treeRoot!.time;
       });
-      const bTime = _.sum(b.aggregations!, agg => {
+      const bTime = _.sumBy(b.aggregations!, (agg: any) => {
         return agg.treeRoot!.time;
       });
 

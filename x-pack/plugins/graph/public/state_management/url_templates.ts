@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { i18n } from '@kbn/i18n';
+import { modifyUrl } from '@kbn/std';
 import rison from 'rison-node';
 import { takeEvery, select } from 'redux-saga/effects';
 import { format, parse } from 'url';
@@ -17,7 +19,6 @@ import { setDatasource, IndexpatternDatasource, requestDatasource } from './data
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
 import { matchesOne } from './helpers';
-import { modifyUrl } from '../../../../../src/core/utils';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
@@ -35,7 +36,7 @@ function generateDefaultTemplate(
   datasource: IndexpatternDatasource,
   addBasePath: (url: string) => string
 ): UrlTemplate {
-  const appPath = modifyUrl('/discover', parsed => {
+  const appPath = modifyUrl('/', (parsed) => {
     parsed.query._a = rison.encode({
       columns: ['_source'],
       index: datasource.id,
@@ -44,7 +45,7 @@ function generateDefaultTemplate(
       sort: ['_score', 'desc'],
     });
   });
-  const parsedAppPath = parse(`/app/kibana#${appPath}`, true, true);
+  const parsedAppPath = parse(`/app/discover#${appPath}`, true, true);
   const formattedAppPath = format({
     protocol: parsedAppPath.protocol,
     host: parsedAppPath.host,
@@ -78,7 +79,7 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
       if (datasource.type === 'none') {
         return initialTemplates;
       }
-      const customTemplates = templates.filter(template => !template.isDefault);
+      const customTemplates = templates.filter((template) => !template.isDefault);
       return [...customTemplates, generateDefaultTemplate(datasource, addBasePath)];
     })
     .case(loadTemplates, (_currentTemplates, newTemplates) => newTemplates)
@@ -90,7 +91,7 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
         : templates.map((template, index) => (index === indexToUpdate ? newTemplate : template));
     })
     .case(removeTemplate, (templates, templateToDelete) =>
-      templates.filter(template => template !== templateToDelete)
+      templates.filter((template) => template !== templateToDelete)
     )
     .build();
 
@@ -108,7 +109,7 @@ export const syncTemplatesSaga = ({ setUrlTemplates, notifyAngular }: GraphStore
     notifyAngular();
   }
 
-  return function*() {
+  return function* () {
     yield takeEvery(
       matchesOne(loadTemplates, saveTemplate, removeTemplate, requestDatasource, setDatasource),
       syncTemplates

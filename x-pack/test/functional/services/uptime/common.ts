@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function UptimeCommonProvider({ getService }: FtrProviderContext) {
+export function UptimeCommonProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const find = getService('find');
+
+  const { header } = getPageObjects(['header']);
 
   return {
     async assertExists(key: string) {
@@ -52,6 +56,20 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
     async setStatusFilterDown() {
       await testSubjects.click('xpack.uptime.filterBar.filterStatusDown');
     },
+    async resetStatusFilter() {
+      const upFilter = await find.byCssSelector(
+        '[data-test-subj="xpack.uptime.filterBar.filterStatusUp"]'
+      );
+      if (await upFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
+        await this.setStatusFilterUp();
+      }
+      const downFilter = await find.byCssSelector(
+        '[data-test-subj="xpack.uptime.filterBar.filterStatusDown"]'
+      );
+      if (await downFilter.elementHasClass('euiFilterButton-hasActiveFilters')) {
+        await this.setStatusFilterDown();
+      }
+    },
     async selectFilterItem(filterType: string, option: string) {
       const popoverId = `filter-popover_${filterType}`;
       const optionId = `filter-popover-item_${option}`;
@@ -75,6 +93,16 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
         `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
         5000
       );
+    },
+    async waitUntilDataIsLoaded() {
+      await header.waitUntilLoadingHasFinished();
+      return retry.tryForTime(60 * 1000, async () => {
+        if (await testSubjects.exists('data-missing')) {
+          await testSubjects.click('superDatePickerApplyTimeButton');
+          await header.waitUntilLoadingHasFinished();
+        }
+        await testSubjects.missingOrFail('data-missing');
+      });
     },
   };
 }

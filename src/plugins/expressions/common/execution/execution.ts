@@ -1,29 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer, now } from '../../../kibana_utils/common';
-import { AbortError } from '../../../data/common';
-import { RequestAdapter, DataAdapter } from '../../../inspector/common';
+import { abortSignalToPromise, Defer, now } from '../../../kibana_utils/common';
+import { RequestAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstExpression,
@@ -31,46 +20,64 @@ import {
   parse,
   formatExpression,
   parseExpression,
+  ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType, ExpressionValue } from '../expression_types';
+import { getType, ExpressionValue, Datatable } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
+import { ExpressionExecutionParams } from '../service';
+import { TablesAdapter } from '../util/tables_adapter';
+import { ExpressionsInspectorAdapter } from '../util/expressions_inspector_adapter';
 
-export interface ExecutionParams<
-  ExtraContext extends Record<string, unknown> = Record<string, unknown>
-> {
+/**
+ * AbortController is not available in Node until v15, so we
+ * need to temporarily mock it for plugins using expressions
+ * on the server.
+ *
+ * TODO: Remove this once Kibana is upgraded to Node 15.
+ */
+const getNewAbortController = (): AbortController => {
+  try {
+    return new AbortController();
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const polyfill = require('abortcontroller-polyfill/dist/cjs-ponyfill');
+    return new polyfill.AbortController();
+  }
+};
+
+const createAbortErrorValue = () =>
+  createError({
+    message: 'The expression was aborted.',
+    name: 'AbortError',
+  });
+
+export interface ExecutionParams {
   executor: Executor<any>;
   ast?: ExpressionAstExpression;
   expression?: string;
-  context?: ExtraContext;
-
-  /**
-   * Whether to execute expression in *debug mode*. In *debug mode* inputs and
-   * outputs as well as all resolved arguments and time it took to execute each
-   * function are saved and are available for introspection.
-   */
-  debug?: boolean;
+  params: ExpressionExecutionParams;
 }
 
 const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
   requests: new RequestAdapter(),
-  data: new DataAdapter(),
+  tables: new TablesAdapter(),
+  expression: new ExpressionsInspectorAdapter(),
 });
 
 export class Execution<
-  ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   Input = unknown,
   Output = unknown,
-  InspectorAdapters = ExtraContext['inspectorAdapters'] extends object
-    ? ExtraContext['inspectorAdapters']
+  InspectorAdapters extends Adapters = ExpressionExecutionParams['inspectorAdapters'] extends object
+    ? ExpressionExecutionParams['inspectorAdapters']
     : DefaultInspectorAdapters
 > {
   /**
    * Dynamic state of the execution.
    */
-  public readonly state: ExecutionContainer<Output>;
+  public readonly state: ExecutionContainer<Output | ExpressionValueError>;
 
   /**
    * Initial input of the execution.
@@ -84,12 +91,24 @@ export class Execution<
    * Execution context - object that allows to do side-effects. Context is passed
    * to every function.
    */
-  public readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
+  public readonly context: ExecutionContext<InspectorAdapters>;
 
   /**
    * AbortController to cancel this Execution.
    */
-  private readonly abortController = new AbortController();
+  private readonly abortController = getNewAbortController();
+
+  /**
+   * Promise that rejects if/when abort controller sends "abort" signal.
+   */
+  private readonly abortRejection = abortSignalToPromise(this.abortController.signal);
+
+  /**
+   * Races a given promise against the "abort" event of `abortController`.
+   */
+  private race<T>(promise: Promise<T>): Promise<T> {
+    return Promise.race<T>([this.abortRejection.promise, promise]);
+  }
 
   /**
    * Whether .start() method has been called.
@@ -99,22 +118,28 @@ export class Execution<
   /**
    * Future that tracks result or error of this execution.
    */
-  private readonly firstResultFuture = new Defer<Output>();
+  private readonly firstResultFuture = new Defer<Output | ExpressionValueError>();
+
+  /**
+   * Keeping track of any child executions
+   * Needed to cancel child executions in case parent execution is canceled
+   * @private
+   */
+  private readonly childExecutions: Execution[] = [];
 
   /**
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
    */
   public readonly contract: ExecutionContract<
-    ExtraContext,
     Input,
     Output,
     InspectorAdapters
-  > = new ExecutionContract<ExtraContext, Input, Output, InspectorAdapters>(this);
+  > = new ExecutionContract<Input, Output, InspectorAdapters>(this);
 
   public readonly expression: string;
 
-  public get result(): Promise<unknown> {
+  public get result(): Promise<Output | ExpressionValueError> {
     return this.firstResultFuture.promise;
   }
 
@@ -122,33 +147,42 @@ export class Execution<
     return this.context.inspectorAdapters;
   }
 
-  constructor(public readonly params: ExecutionParams<ExtraContext>) {
-    const { executor } = params;
+  constructor(public readonly execution: ExecutionParams) {
+    const { executor } = execution;
 
-    if (!params.ast && !params.expression) {
+    if (!execution.ast && !execution.expression) {
       throw new TypeError('Execution params should contain at least .ast or .expression key.');
-    } else if (params.ast && params.expression) {
+    } else if (execution.ast && execution.expression) {
       throw new TypeError('Execution params cannot contain both .ast and .expression key.');
     }
 
-    this.expression = params.expression || formatExpression(params.ast!);
-    const ast = params.ast || parseExpression(this.expression);
+    this.expression = execution.expression || formatExpression(execution.ast!);
+    const ast = execution.ast || parseExpression(this.expression);
 
-    this.state = createExecutionContainer<Output>({
+    this.state = createExecutionContainer<Output | ExpressionValueError>({
       ...executor.state.get(),
       state: 'not-started',
       ast,
     });
 
+    const inspectorAdapters =
+      execution.params.inspectorAdapters || createDefaultInspectorAdapters();
+
     this.context = {
-      getInitialInput: () => this.input,
-      variables: {},
+      getSearchContext: () => this.execution.params.searchContext || {},
+      getSearchSessionId: () => execution.params.searchSessionId,
+      getKibanaRequest: execution.params.kibanaRequest
+        ? () => execution.params.kibanaRequest
+        : undefined,
+      variables: execution.params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
-      ...(params.context || ({} as ExtraContext)),
-      inspectorAdapters: (params.context && params.context.inspectorAdapters
-        ? params.context.inspectorAdapters
-        : createDefaultInspectorAdapters()) as InspectorAdapters,
+      inspectorAdapters,
+      logDatatable: (name: string, datatable: Datatable) => {
+        inspectorAdapters.tables[name] = datatable;
+      },
+      isSyncColorsEnabled: () => execution.params.syncColors,
+      ...(execution.params as any).extraContext,
     };
   }
 
@@ -173,32 +207,61 @@ export class Execution<
     this.state.transitions.start();
 
     const { resolve, reject } = this.firstResultFuture;
-    this.invokeChain(this.state.get().ast.chain, input).then(resolve, reject);
+    const chainPromise = this.invokeChain(this.state.get().ast.chain, input);
 
-    this.firstResultFuture.promise.then(
-      result => {
-        this.state.transitions.setResult(result);
-      },
-      error => {
-        this.state.transitions.setError(error);
-      }
-    );
+    this.race(chainPromise).then(resolve, (error) => {
+      if (this.abortController.signal.aborted) {
+        this.childExecutions.forEach((ex) => ex.cancel());
+        resolve(createAbortErrorValue());
+      } else reject(error);
+    });
+
+    this.firstResultFuture.promise
+      .then(
+        (result) => {
+          if (this.context.inspectorAdapters.expression) {
+            this.context.inspectorAdapters.expression.logAST(this.state.get().ast);
+          }
+          this.state.transitions.setResult(result);
+        },
+        (error) => {
+          this.state.transitions.setError(error);
+        }
+      )
+      .finally(() => {
+        this.abortRejection.cleanup();
+      });
   }
 
   async invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any> {
     if (!chainArr.length) return input;
 
     for (const link of chainArr) {
-      // if execution was aborted return error
-      if (this.context.abortSignal && this.context.abortSignal.aborted) {
-        return createError(new AbortError('The expression was aborted.'));
-      }
-
       const { function: fnName, arguments: fnArgs } = link;
       const fn = getByAlias(this.state.get().functions, fnName);
 
       if (!fn) {
-        return createError({ message: `Function ${fnName} could not be found.` });
+        return createError({
+          name: 'fn not found',
+          message: i18n.translate('expressions.execution.functionNotFound', {
+            defaultMessage: `Function {fnName} could not be found.`,
+            values: {
+              fnName,
+            },
+          }),
+        });
+      }
+
+      if (fn.disabled) {
+        return createError({
+          name: 'fn is disabled',
+          message: i18n.translate('expressions.execution.functionDisabled', {
+            defaultMessage: `Function {fnName} is disabled.`,
+            values: {
+              fnName,
+            },
+          }),
+        });
       }
 
       let args: Record<string, ExpressionValue> = {};
@@ -207,16 +270,16 @@ export class Execution<
       try {
         // `resolveArgs` returns an object because the arguments themselves might
         // actually have a `then` function which would be treated as a `Promise`.
-        const { resolvedArgs } = await this.resolveArgs(fn, input, fnArgs);
+        const { resolvedArgs } = await this.race(this.resolveArgs(fn, input, fnArgs));
         args = resolvedArgs;
-        timeStart = this.params.debug ? now() : 0;
-        const output = await this.invokeFunction(fn, input, resolvedArgs);
+        timeStart = this.execution.params.debug ? now() : 0;
+        const output = await this.race(this.invokeFunction(fn, input, resolvedArgs));
 
-        if (this.params.debug) {
+        if (this.execution.params.debug) {
           const timeEnd: number = now();
           (link as ExpressionAstFunction).debug = {
             success: true,
-            fn,
+            fn: fn.name,
             input,
             args: resolvedArgs,
             output,
@@ -227,14 +290,14 @@ export class Execution<
         if (getType(output) === 'error') return output;
         input = output;
       } catch (rawError) {
-        const timeEnd: number = this.params.debug ? now() : 0;
+        const timeEnd: number = this.execution.params.debug ? now() : 0;
         const error = createError(rawError) as ExpressionValueError;
         error.error.message = `[${fnName}] > ${error.error.message}`;
 
-        if (this.params.debug) {
+        if (this.execution.params.debug) {
           (link as ExpressionAstFunction).debug = {
             success: false,
-            fn,
+            fn: fn.name,
             input,
             args,
             error,
@@ -256,7 +319,7 @@ export class Execution<
     args: Record<string, unknown>
   ): Promise<any> {
     const normalizedInput = this.cast(input, fn.inputTypes);
-    const output = await fn.fn(normalizedInput, args, this.context);
+    const output = await this.race(fn.fn(normalizedInput, args, this.context));
 
     // Validate that the function returned the type it said it would.
     // This isn't required, but it keeps function developers honest.
@@ -327,9 +390,12 @@ export class Execution<
 
     // Check for missing required arguments.
     for (const argDef of Object.values(argDefs)) {
-      const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
-        any
-      > & { name: string };
+      const {
+        aliases,
+        default: argDefault,
+        name: argName,
+        required,
+      } = argDef as ArgumentType<any> & { name: string };
       if (
         typeof argDefault !== 'undefined' ||
         !required ||
@@ -364,9 +430,7 @@ export class Execution<
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
-          const output = await this.params.executor.interpret(item, subInput, {
-            debug: this.params.debug,
-          });
+          const output = await this.interpret(item, subInput);
           if (isExpressionValueError(output)) throw output.error;
           const casted = this.cast(output, argDefs[argName as any].types);
           return casted;
@@ -378,7 +442,7 @@ export class Execution<
 
     // Actually resolve unless the argument definition says not to
     const resolvedArgValues = await Promise.all(
-      argNames.map(argName => {
+      argNames.map((argName) => {
         const interpretFns = resolveArgFns[argName];
         if (!argDefs[argName].resolve) return interpretFns;
         return Promise.all(interpretFns.map((fn: any) => fn()));
@@ -396,5 +460,25 @@ export class Execution<
     // Return an object here because the arguments themselves might actually have a 'then'
     // function which would be treated as a promise
     return { resolvedArgs };
+  }
+
+  public async interpret<T>(ast: ExpressionAstNode, input: T): Promise<unknown> {
+    switch (getType(ast)) {
+      case 'expression':
+        const execution = this.execution.executor.createExecution(
+          ast as ExpressionAstExpression,
+          this.execution.params
+        );
+        this.childExecutions.push(execution);
+        execution.start(input);
+        return await execution.result;
+      case 'string':
+      case 'number':
+      case 'null':
+      case 'boolean':
+        return ast;
+      default:
+        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
+    }
   }
 }

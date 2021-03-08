@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { isString } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../../../src/core/server';
+
+import type { Capabilities as UICapabilities } from 'src/core/server';
+
 import { uiCapabilitiesRegex } from '../../../../features/server';
 
 export class UIActions {
@@ -26,7 +30,7 @@ export class UIActions {
     if (
       uiCapabilityParts.length === 0 ||
       uiCapabilityParts.findIndex(
-        part => !part || !isString(part) || !uiCapabilitiesRegex.test(part)
+        (part) => !part || !isString(part) || !uiCapabilitiesRegex.test(part)
       ) >= 0
     ) {
       throw new Error(

@@ -1,103 +1,87 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { IClusterClient, ICustomClusterClient } from './cluster_client';
-import { IScopedClusterClient } from './scoped_cluster_client';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import { ILegacyClusterClient, ILegacyCustomClusterClient } from './legacy';
+import {
+  elasticsearchClientMock,
+  ClusterClientMock,
+  CustomClusterClientMock,
+} from './client/mocks';
+import { ElasticsearchClientConfig } from './client';
+import { legacyClientMock } from './legacy/mocks';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import {
-  InternalElasticsearchServiceSetup,
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-} from './types';
+import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 
-const createScopedClusterClientMock = (): jest.Mocked<IScopedClusterClient> => ({
-  callAsInternalUser: jest.fn(),
-  callAsCurrentUser: jest.fn(),
-});
-
-const createCustomClusterClientMock = (): jest.Mocked<ICustomClusterClient> => ({
-  ...createClusterClientMock(),
-  close: jest.fn(),
-});
-
-function createClusterClientMock() {
-  const client: jest.Mocked<IClusterClient> = {
-    callAsInternalUser: jest.fn(),
-    asScoped: jest.fn(),
+export interface MockedElasticSearchServiceSetup {
+  legacy: {
+    config$: BehaviorSubject<ElasticsearchConfig>;
+    createClient: jest.Mock<ILegacyCustomClusterClient, any>;
+    client: jest.Mocked<ILegacyClusterClient>;
   };
-  client.asScoped.mockReturnValue(createScopedClusterClientMock());
-  return client;
 }
 
-type MockedElasticSearchServiceSetup = jest.Mocked<
-  ElasticsearchServiceSetup & {
-    adminClient: jest.Mocked<IClusterClient>;
-    dataClient: jest.Mocked<IClusterClient>;
-  }
->;
+type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup & {
+  client: ClusterClientMock;
+  createClient: jest.MockedFunction<
+    (name: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
+  >;
+};
 
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
-    createClient: jest.fn(),
-    adminClient: createClusterClientMock(),
-    dataClient: createClusterClientMock(),
+    legacy: {
+      config$: new BehaviorSubject({} as ElasticsearchConfig),
+      createClient: jest.fn(),
+      client: legacyClientMock.createClusterClient(),
+    },
   };
-  setupContract.createClient.mockReturnValue(createCustomClusterClientMock());
-  setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
-  setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
+  setupContract.legacy.createClient.mockReturnValue(legacyClientMock.createCustomClusterClient());
+  setupContract.legacy.client.asScoped.mockReturnValue(
+    legacyClientMock.createScopedClusterClient()
+  );
   return setupContract;
-};
-
-type MockedElasticSearchServiceStart = {
-  legacy: jest.Mocked<ElasticsearchServiceStart['legacy']>;
-} & {
-  legacy: {
-    client: jest.Mocked<IClusterClient>;
-  };
 };
 
 const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
+    client: elasticsearchClientMock.createClusterClient(),
+    createClient: jest.fn(),
     legacy: {
+      config$: new BehaviorSubject({} as ElasticsearchConfig),
       createClient: jest.fn(),
-      client: createClusterClientMock(),
+      client: legacyClientMock.createClusterClient(),
     },
   };
-  startContract.legacy.createClient.mockReturnValue(createCustomClusterClientMock());
-  startContract.legacy.client.asScoped.mockReturnValue(createScopedClusterClientMock());
+  startContract.legacy.createClient.mockReturnValue(legacyClientMock.createCustomClusterClient());
+  startContract.legacy.client.asScoped.mockReturnValue(
+    legacyClientMock.createScopedClusterClient()
+  );
+  startContract.createClient.mockImplementation(() =>
+    elasticsearchClientMock.createCustomClusterClient()
+  );
   return startContract;
 };
 
+const createInternalStartContractMock = createStartContractMock;
+
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<
   InternalElasticsearchServiceSetup & {
-    adminClient: jest.Mocked<IClusterClient>;
-    dataClient: jest.Mocked<IClusterClient>;
+    legacy: { client: jest.Mocked<ILegacyClusterClient> };
   }
 >;
 const createInternalSetupContractMock = () => {
   const setupContract: MockedInternalElasticSearchServiceSetup = {
-    ...createSetupContractMock(),
     esNodesCompatibility$: new BehaviorSubject<NodesVersionCompatibility>({
       isCompatible: true,
       incompatibleNodes: [],
@@ -109,11 +93,12 @@ const createInternalSetupContractMock = () => {
       summary: 'Elasticsearch is available',
     }),
     legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
+      ...createSetupContractMock().legacy,
     },
   };
-  setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
-  setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
+  setupContract.legacy.client.asScoped.mockReturnValue(
+    legacyClientMock.createScopedClusterClient()
+  );
   return setupContract;
 };
 
@@ -125,7 +110,7 @@ const createMock = () => {
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
-  mocked.start.mockResolvedValueOnce(createStartContractMock());
+  mocked.start.mockResolvedValueOnce(createInternalStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
@@ -134,8 +119,12 @@ export const elasticsearchServiceMock = {
   create: createMock,
   createInternalSetup: createInternalSetupContractMock,
   createSetup: createSetupContractMock,
+  createInternalStart: createInternalStartContractMock,
   createStart: createStartContractMock,
-  createClusterClient: createClusterClientMock,
-  createCustomClusterClient: createCustomClusterClientMock,
-  createScopedClusterClient: createScopedClusterClientMock,
+  createLegacyClusterClient: legacyClientMock.createClusterClient,
+  createLegacyCustomClusterClient: legacyClientMock.createCustomClusterClient,
+  createLegacyScopedClusterClient: legacyClientMock.createScopedClusterClient,
+  createLegacyElasticsearchClient: legacyClientMock.createElasticsearchClient,
+
+  ...elasticsearchClientMock,
 };

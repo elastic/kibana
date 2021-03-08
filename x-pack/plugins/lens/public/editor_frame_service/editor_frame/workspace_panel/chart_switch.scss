@@ -1,0 +1,22 @@
+.lnsChartSwitch__header {
+  > * {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.lnsChartSwitch__summaryIcon {
+  margin-right: $euiSizeS;
+  transform: translateY(-1px);
+  color: $euiTextSubduedColor;
+}
+
+// Targeting img as this won't target normal EuiIcon's only the custom svgs's
+img.lnsChartSwitch__chartIcon { // stylelint-disable-line selector-no-qualifying-type
+  // The large icons aren't square so max out the width to fill the height
+  width: 100%;
+}
+
+.lnsChartSwitch__search {
+  width: 7 * $euiSizeXXL;
+}

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import bluebird, { promisify } from 'bluebird';
@@ -81,10 +70,10 @@ async function compareScreenshots() {
   fs.mkdirSync(DIFF_SCREENSHOTS_DIR, { recursive: true });
   fs.mkdirSync(SESSION_SCREENSHOTS_DIR, { recursive: true });
   const files = await readDirAsync(SESSION_SCREENSHOTS_DIR);
-  const screenshots = files.filter(file => file.indexOf('.png') !== -1);
+  const screenshots = files.filter((file) => file.indexOf('.png') !== -1);
 
   // We'll use this data to build a screenshot gallery in HTML.
-  return await bluebird.map(screenshots, async screenshot => {
+  return await bluebird.map(screenshots, async (screenshot) => {
     // We're going to load image data and cache it in this object.
     const comparison = {
       name: screenshot,
@@ -138,13 +127,13 @@ async function compareScreenshots() {
 
 export function run(done) {
   compareScreenshots().then(
-    screenshotComparisons => {
+    (screenshotComparisons) => {
       // Once all of the data has been loaded, we can build the gallery.
       buildGallery(screenshotComparisons).then(() => {
         done();
       });
     },
-    error => {
+    (error) => {
       console.error(error);
       done(false);
     }

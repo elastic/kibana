@@ -1,24 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
 import { Plugin } from './plugin';
 
-export { AlertsContextProvider } from './application/context/alerts_context';
-export { ActionsConnectorsContextProvider } from './application/context/actions_connectors_context';
 export { AlertAdd } from './application/sections/alert_form';
-export { ActionForm } from './application/sections/action_connector_form';
-export { AlertAction, Alert, AlertTypeModel, ActionType } from './types';
 export {
+  AlertEdit,
+  AlertConditions,
+  AlertConditionsGroup,
+  ActionGroupWithCondition,
+} from './application/sections';
+
+export type {
+  AlertAction,
+  Alert,
+  AlertTypeModel,
+  ActionType,
+  ActionTypeRegistryContract,
+  AlertTypeRegistryContract,
+  AlertTypeParamsExpressionProps,
+  ValidationResult,
+  ActionVariable,
+  ActionVariables,
+  ActionConnector,
+  IErrorObject,
+  AlertFlyoutCloseReason,
+  AlertTypeParams,
+} from './types';
+
+export {
+  ActionForm,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from './application/sections/action_connector_form';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new Plugin(ctx);
+export { loadActionTypes } from './application/lib/action_connector_api';
+export * from './common';
+
+export function plugin() {
+  return new Plugin();
 }
 
 export { Plugin };
@@ -26,4 +50,4 @@ export * from './plugin';
 
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export { ForLastExpression } from './common/expression_items/for_the_last';
+export type { TriggersAndActionsUiServices } from '../public/application/app';

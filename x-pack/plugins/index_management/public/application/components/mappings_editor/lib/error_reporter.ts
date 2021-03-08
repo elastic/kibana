@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ValidationError } from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { Reporter } from 'io-ts/lib/Reporter';
@@ -10,7 +12,7 @@ import { Reporter } from 'io-ts/lib/Reporter';
 export type ReporterResult = Array<{ path: string[]; message: string }>;
 
 const failure = (validation: ValidationError[]): ReporterResult => {
-  return validation.map(e => {
+  return validation.map((e) => {
     const path: string[] = [];
     let validationName = '';
 

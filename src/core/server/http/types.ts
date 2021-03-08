@@ -1,41 +1,33 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { GetAuthHeaders } from './auth_headers_storage';
-import { RequestHandler, IRouter } from './router';
+import { IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
 import { AuthenticationHandler } from './lifecycle/auth';
+import { OnPreRoutingHandler } from './lifecycle/on_pre_routing';
 import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
-import { PluginOpaqueId, RequestHandlerContext } from '..';
+import { ExternalUrlConfig } from '../external_url';
+import type { PluginOpaqueId, RequestHandlerContext } from '..';
 
 /**
  * An object that handles registration of http request context providers.
  * @public
  */
-export type RequestHandlerContextContainer = IContextContainer<RequestHandler<any, any, any>>;
+export type RequestHandlerContextContainer = IContextContainer;
 
 /**
  * Context provider for request handler.
@@ -44,8 +36,25 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
  * @public
  */
 export type RequestHandlerContextProvider<
-  TContextName extends keyof RequestHandlerContext
-> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
+  Context extends RequestHandlerContext,
+  ContextName extends keyof Context
+> = IContextProvider<Context, ContextName>;
+
+/**
+ * @public
+ */
+export interface HttpAuth {
+  /**
+   * Gets authentication state for a request. Returned by `auth` interceptor.
+   * {@link GetAuthState}
+   */
+  get: GetAuthState;
+  /**
+   * Returns authentication status for a request.
+   * {@link IsAuthenticated}
+   */
+  isAuthenticated: IsAuthenticated;
+}
 
 /**
  * Kibana HTTP Service provides own abstraction for work with HTTP stack.
@@ -129,15 +138,26 @@ export interface HttpServiceSetup {
   ) => Promise<SessionStorageFactory<T>>;
 
   /**
-   * To define custom logic to perform for incoming requests.
+   * To define custom logic to perform for incoming requests before server performs a route lookup.
    *
    * @remarks
-   * Runs the handler before Auth interceptor performs a check that user has access to requested resources, so it's the
-   * only place when you can forward a request to another URL right on the server.
-   * Can register any number of registerOnPostAuth, which are called in sequence
+   * It's the only place when you can forward a request to another URL right on the server.
+   * Can register any number of registerOnPreRouting, which are called in sequence
+   * (from the first registered to the last). See {@link OnPreRoutingHandler}.
+   *
+   * @param handler {@link OnPreRoutingHandler} - function to call.
+   */
+  registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
+
+  /**
+   * To define custom logic to perform for incoming requests before
+   * the Auth interceptor performs a check that user has access to requested resources.
+   *
+   * @remarks
+   * Can register any number of registerOnPreAuth, which are called in sequence
    * (from the first registered to the last). See {@link OnPreAuthHandler}.
    *
-   * @param handler {@link OnPreAuthHandler} - function to call.
+   * @param handler {@link OnPreRoutingHandler} - function to call.
    */
   registerOnPreAuth: (handler: OnPreAuthHandler) => void;
 
@@ -154,13 +174,11 @@ export interface HttpServiceSetup {
   registerAuth: (handler: AuthenticationHandler) => void;
 
   /**
-   * To define custom logic to perform for incoming requests.
+   * To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
    *
    * @remarks
-   * Runs the handler after Auth interceptor
-   * did make sure a user has access to the requested resource.
    * The auth state is available at stage via http.auth.get(..)
-   * Can register any number of registerOnPreAuth, which are called in sequence
+   * Can register any number of registerOnPostAuth, which are called in sequence
    * (from the first registered to the last). See {@link OnPostAuthHandler}.
    *
    * @param handler {@link OnPostAuthHandler} - function to call.
@@ -185,28 +203,18 @@ export interface HttpServiceSetup {
    */
   basePath: IBasePath;
 
-  auth: {
-    /**
-     * Gets authentication state for a request. Returned by `auth` interceptor.
-     * {@link GetAuthState}
-     */
-    get: GetAuthState;
-    /**
-     * Returns authentication status for a request.
-     * {@link IsAuthenticated}
-     */
-    isAuthenticated: IsAuthenticated;
-  };
+  /**
+   * Auth status.
+   * See {@link HttpAuth}
+   *
+   * @deprecated use {@link HttpServiceStart.auth | the start contract} instead.
+   */
+  auth: HttpAuth;
 
   /**
    * The CSP config used for Kibana.
    */
   csp: ICspConfig;
-
-  /**
-   * Flag showing whether a server was configured to use TLS connection.
-   */
-  isTlsEnabled: boolean;
 
   /**
    * Provides ability to declare a handler function for a particular path and HTTP request method.
@@ -223,24 +231,31 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  createRouter: () => IRouter;
+  createRouter: <
+    Context extends RequestHandlerContext = RequestHandlerContext
+  >() => IRouter<Context>;
 
   /**
    * Register a context provider for a route handler.
    * @example
    * ```ts
    *  // my-plugin.ts
-   *  deps.http.registerRouteHandlerContext(
+   *  interface MyRequestHandlerContext extends RequestHandlerContext {
+   *    myApp: { search(id: string): Promise<Result> };
+   *  }
+   *  deps.http.registerRouteHandlerContext<MyRequestHandlerContext, 'myApp'>(
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {
-   *       return await context.elasticsearch.adminClient.callAsInternalUser('endpoint', id);
+   *       return await context.elasticsearch.client.asCurrentUser.find(id);
    *     }
    *     return { search };
    *    }
    *  );
    *
    * // my-route-handler.ts
+   *  import type { MyRequestHandlerContext } from './my-plugin.ts';
+   *  const router = createRouter<MyRequestHandlerContext>();
    *  router.get({ path: '/', validate: false }, async (context, req, res) => {
    *    const response = await context.myApp.search(...);
    *    return res.ok(response);
@@ -248,9 +263,12 @@ export interface HttpServiceSetup {
    * ```
    * @public
    */
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+  registerRouteHandlerContext: <
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
+  >(
+    contextName: ContextName,
+    provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
 
   /**
@@ -264,28 +282,60 @@ export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
-  createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  externalUrl: ExternalUrlConfig;
+  createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+    path: string,
+    plugin?: PluginOpaqueId
+  ) => IRouter<Context>;
   registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+  registerRouteHandlerContext: <
+    Context extends RequestHandlerContext,
+    ContextName extends keyof Context
+  >(
     pluginOpaqueId: PluginOpaqueId,
-    contextName: T,
-    provider: RequestHandlerContextProvider<T>
+    contextName: ContextName,
+    provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
 }
 
 /** @public */
 export interface HttpServiceStart {
-  /** Indicates if http server is listening on a given port */
-  isListening: (port: number) => boolean;
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
+
+  /**
+   * Auth status.
+   * See {@link HttpAuth}
+   */
+  auth: HttpAuth;
+
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running http server.
+   */
+  getServerInfo: () => HttpServerInfo;
 }
 
-/** @public */
+/** @internal */
+export interface InternalHttpServiceStart extends HttpServiceStart {
+  /** Indicates if the http server is listening on the configured port */
+  isListening: () => boolean;
+}
+
+/**
+ * Information about what hostname, port, and protocol the server process is
+ * running on. Note that this may not match the URL that end-users access
+ * Kibana at. For the public URL, see {@link BasePath.publicBaseUrl}.
+ * @public
+ */
 export interface HttpServerInfo {
   /** The name of the Kibana server */
   name: string;
   /** The hostname of the server */
-  host: string;
+  hostname: string;
   /** The port the server is listening on */
   port: number;
   /** The protocol used by the server */

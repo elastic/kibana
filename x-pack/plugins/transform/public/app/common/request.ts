@@ -1,18 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { DefaultOperator } from 'elasticsearch';
+import type { DefaultOperator } from 'elasticsearch';
 
-import { dictionaryToArray } from '../../../common/types/common';
-import { SavedSearchQuery } from '../hooks/use_search_items';
+import { HttpFetchError } from '../../../../../../src/core/public';
+import type { IndexPattern } from '../../../../../../src/plugins/data/public';
 
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define/step_define_form';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
+import type {
+  PivotTransformPreviewRequestSchema,
+  PostTransformsPreviewRequestSchema,
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+  PutTransformsRequestSchema,
+} from '../../../common/api_schemas/transforms';
+import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { SavedSearchQuery } from '../hooks/use_search_items';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import { isPopulatedObject } from './utils/object_utils';
 
 import {
   getEsAggFromAggConfig,
@@ -20,12 +30,10 @@ import {
   isGroupByDateHistogram,
   isGroupByHistogram,
   isGroupByTerms,
+  GroupByConfigWithUiSupport,
+  PivotAggsConfig,
   PivotGroupByConfig,
-} from '../common';
-
-import { PivotAggsConfig } from './pivot_aggs';
-import { DateHistogramAgg, HistogramAgg, TermsAgg } from './pivot_group_by';
-import { PreviewRequestBody, CreateRequestBody } from './transform';
+} from './';
 
 export interface SimpleQuery {
   query_string: {
@@ -63,33 +71,52 @@ export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
-export function getPreviewRequestBody(
-  indexPatternTitle: IndexPattern['title'],
-  query: PivotQuery,
-  groupBy: PivotGroupByConfig[],
-  aggs: PivotAggsConfig[]
-): PreviewRequestBody {
-  const index = indexPatternTitle.split(',').map((name: string) => name.trim());
+export function getCombinedRuntimeMappings(
+  indexPattern: IndexPattern | undefined,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+): StepDefineExposedState['runtimeMappings'] | undefined {
+  let combinedRuntimeMappings = {};
 
-  const request: PreviewRequestBody = {
-    source: {
-      index,
-    },
+  // Use runtime field mappings defined inline from API
+  if (isPopulatedObject(runtimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
+  }
+
+  // And runtime field mappings defined by index pattern
+  if (indexPattern !== undefined) {
+    const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+  }
+
+  if (isPopulatedObject(combinedRuntimeMappings)) {
+    return combinedRuntimeMappings;
+  }
+  return undefined;
+}
+
+export const getMissingBucketConfig = (
+  g: GroupByConfigWithUiSupport
+): { missing_bucket?: boolean } => {
+  return g.missing_bucket !== undefined ? { missing_bucket: g.missing_bucket } : {};
+};
+
+export const getRequestPayload = (
+  pivotAggsArr: PivotAggsConfig[],
+  pivotGroupByArr: PivotGroupByConfig[]
+) => {
+  const request = {
     pivot: {
       group_by: {},
       aggregations: {},
-    },
+    } as PivotTransformPreviewRequestSchema['pivot'],
   };
 
-  if (!isDefaultQuery(query) && !isMatchAllQuery(query)) {
-    request.source.query = query;
-  }
-
-  groupBy.forEach(g => {
+  pivotGroupByArr.forEach((g) => {
     if (isGroupByTerms(g)) {
       const termsAgg: TermsAgg = {
         terms: {
           field: g.field,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = termsAgg;
@@ -98,6 +125,7 @@ export function getPreviewRequestBody(
         histogram: {
           field: g.field,
           interval: g.interval,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = histogramAgg;
@@ -106,6 +134,7 @@ export function getPreviewRequestBody(
         date_histogram: {
           field: g.field,
           calendar_interval: g.calendar_interval,
+          ...getMissingBucketConfig(g),
         },
       };
       request.pivot.group_by[g.aggName] = dateHistogramAgg;
@@ -114,44 +143,101 @@ export function getPreviewRequestBody(
     }
   });
 
-  aggs.forEach(agg => {
-    request.pivot.aggregations[agg.aggName] = getEsAggFromAggConfig(agg);
+  pivotAggsArr.forEach((agg) => {
+    const result = getEsAggFromAggConfig(agg);
+    if (result === null) {
+      return;
+    }
+    request.pivot.aggregations[agg.aggName] = result;
   });
 
   return request;
+};
+
+export function getPreviewTransformRequestBody(
+  indexPatternTitle: IndexPattern['title'],
+  query: PivotQuery,
+  partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+): PostTransformsPreviewRequestSchema {
+  const index = indexPatternTitle.split(',').map((name: string) => name.trim());
+
+  return {
+    source: {
+      index,
+      ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+    },
+    ...(partialRequest ?? {}),
+  };
 }
 
-export function getCreateRequestBody(
+export const getCreateTransformSettingsRequestBody = (
+  transformDetailsState: Partial<StepDetailsExposedState>
+): { settings?: PutTransformsRequestSchema['settings'] } => {
+  const settings: PutTransformsRequestSchema['settings'] = {
+    ...(transformDetailsState.transformSettingsMaxPageSearchSize
+      ? { max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize }
+      : {}),
+    ...(transformDetailsState.transformSettingsDocsPerSecond
+      ? { docs_per_second: transformDetailsState.transformSettingsDocsPerSecond }
+      : {}),
+  };
+  return Object.keys(settings).length > 0 ? { settings } : {};
+};
+
+export const getCreateTransformRequestBody = (
   indexPatternTitle: IndexPattern['title'],
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
-): CreateRequestBody {
-  const request: CreateRequestBody = {
-    ...getPreviewRequestBody(
-      indexPatternTitle,
-      getPivotQuery(pivotState.searchQuery),
-      dictionaryToArray(pivotState.groupByList),
-      dictionaryToArray(pivotState.aggList)
-    ),
-    // conditionally add optional description
-    ...(transformDetailsState.transformDescription !== ''
-      ? { description: transformDetailsState.transformDescription }
-      : {}),
-    dest: {
-      index: transformDetailsState.destinationIndex,
-    },
-    // conditionally add continuous mode config
-    ...(transformDetailsState.isContinuousModeEnabled
-      ? {
-          sync: {
-            time: {
-              field: transformDetailsState.continuousModeDateField,
-              delay: transformDetailsState.continuousModeDelay,
-            },
+): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
+  ...getPreviewTransformRequestBody(
+    indexPatternTitle,
+    getPivotQuery(pivotState.searchQuery),
+    pivotState.previewRequest,
+    pivotState.runtimeMappings
+  ),
+  // conditionally add optional description
+  ...(transformDetailsState.transformDescription !== ''
+    ? { description: transformDetailsState.transformDescription }
+    : {}),
+  // conditionally add optional frequency
+  ...(transformDetailsState.transformFrequency !== ''
+    ? { frequency: transformDetailsState.transformFrequency }
+    : {}),
+  dest: {
+    index: transformDetailsState.destinationIndex,
+  },
+  // conditionally add continuous mode config
+  ...(transformDetailsState.isContinuousModeEnabled
+    ? {
+        sync: {
+          time: {
+            field: transformDetailsState.continuousModeDateField,
+            delay: transformDetailsState.continuousModeDelay,
           },
-        }
-      : {}),
-  };
+        },
+      }
+    : {}),
+  // conditionally add retention policy settings
+  ...(transformDetailsState.isRetentionPolicyEnabled
+    ? {
+        retention_policy: {
+          time: {
+            field: transformDetailsState.retentionPolicyDateField,
+            max_age: transformDetailsState.retentionPolicyMaxAge,
+          },
+        },
+      }
+    : {}),
+  // conditionally add additional settings
+  ...getCreateTransformSettingsRequestBody(transformDetailsState),
+});
 
-  return request;
+export function isHttpFetchError(error: any): error is HttpFetchError {
+  return (
+    error instanceof HttpFetchError &&
+    typeof error.name === 'string' &&
+    typeof error.message !== 'undefined'
+  );
 }

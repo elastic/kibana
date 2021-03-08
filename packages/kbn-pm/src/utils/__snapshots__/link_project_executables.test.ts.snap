@@ -1,81 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`bin script points nowhere does not try to create symlink or node_modules/.bin directory: fs module calls 1`] = `
+exports[`bin script points nowhere does not try to create symlink on node_modules/.bin for that bin script: fs module calls 1`] = `
 Object {
   "chmod": Array [],
   "copyDirectory": Array [],
   "createSymlink": Array [],
   "isDirectory": Array [],
-  "isFile": Array [
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
-    ],
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
-    ],
-  ],
+  "isFile": Array [],
   "isSymlink": Array [],
   "mkdirp": Array [],
   "readFile": Array [],
+  "rmdirp": Array [],
   "unlink": Array [],
+  "writeFile": Array [],
 }
 `;
 
-exports[`bin script points to a file creates a symlink in the project node_modules/.bin directory: fs module calls 1`] = `
+exports[`bin script points to a file creates a symlink for the project bin into the roots project node_modules/.bin directory as well as node_modules/.bin directory symlink into the roots one: fs module calls 1`] = `
 Object {
-  "chmod": Array [
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/foo/node_modules/.bin/bar",
-      "755",
-    ],
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/baz/node_modules/.bin/bar",
-      "755",
-    ],
-  ],
+  "chmod": Array [],
   "copyDirectory": Array [],
-  "createSymlink": Array [
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
-      "<repoRoot>/packages/kbn-pm/src/utils/foo/node_modules/.bin/bar",
-      "exec",
-    ],
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
-      "<repoRoot>/packages/kbn-pm/src/utils/baz/node_modules/.bin/bar",
-      "exec",
-    ],
-  ],
+  "createSymlink": Array [],
   "isDirectory": Array [],
-  "isFile": Array [
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
-    ],
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
-    ],
-  ],
+  "isFile": Array [],
   "isSymlink": Array [],
-  "mkdirp": Array [
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/foo/node_modules/.bin",
-    ],
-    Array [
-      "<repoRoot>/packages/kbn-pm/src/utils/baz/node_modules/.bin",
-    ],
-  ],
+  "mkdirp": Array [],
   "readFile": Array [],
+  "rmdirp": Array [],
   "unlink": Array [],
+  "writeFile": Array [],
 }
-`;
-
-exports[`bin script points to a file creates a symlink in the project node_modules/.bin directory: logs 1`] = `
-Array [
-  Array [
-    "[foo] bar -> ../bar/bin/bar.js",
-  ],
-  Array [
-    "[baz] bar -> ../bar/bin/bar.js",
-  ],
-]
 `;

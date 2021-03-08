@@ -2,6 +2,11 @@
 
 exports[`service node queries fetches metadata for a service node 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "containerId": Object {
@@ -28,20 +33,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
             },
           },
           Object {
@@ -50,8 +41,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
             },
           },
         ],
@@ -59,12 +54,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`service node queries fetches metadata for unidentified service nodes 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "containerId": Object {
@@ -91,20 +90,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
             },
           },
           Object {
@@ -119,8 +104,12 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
             },
           },
         ],
@@ -128,12 +117,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`service node queries fetches services nodes 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "nodes": Object {
@@ -175,11 +168,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -188,15 +176,9 @@ Object {
               },
             },
           },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
         ],
       },
     },
   },
-  "index": "myIndex",
 }
 `;

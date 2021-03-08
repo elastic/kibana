@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -24,7 +25,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
-import { TIME_FORMAT } from '../events_table';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 import { generateTempId } from '../utils';
 
 import { i18n } from '@kbn/i18n';
@@ -42,9 +43,7 @@ export class NewEventModal extends Component {
     super(props);
 
     const startDate = moment().startOf('day');
-    const endDate = moment()
-      .startOf('day')
-      .add(1, 'days');
+    const endDate = moment().startOf('day').add(1, 'days');
 
     this.state = {
       startDate,
@@ -55,7 +54,7 @@ export class NewEventModal extends Component {
     };
   }
 
-  onDescriptionChange = e => {
+  onDescriptionChange = (e) => {
     this.setState({
       description: e.target.value,
     });
@@ -76,7 +75,7 @@ export class NewEventModal extends Component {
     this.props.addEvent(event);
   };
 
-  handleChangeStart = date => {
+  handleChangeStart = (date) => {
     let start = null;
     let end = this.state.endDate;
 
@@ -96,7 +95,7 @@ export class NewEventModal extends Component {
     });
   };
 
-  handleChangeEnd = date => {
+  handleChangeEnd = (date) => {
     let start = this.state.startDate;
     let end = null;
 
@@ -116,7 +115,7 @@ export class NewEventModal extends Component {
     });
   };
 
-  handleTimeStartChange = event => {
+  handleTimeStartChange = (event) => {
     const dateString = event.target.value;
     let isValidDate = false;
 
@@ -136,7 +135,7 @@ export class NewEventModal extends Component {
     }
   };
 
-  handleTimeEndChange = event => {
+  handleTimeEndChange = (event) => {
     const dateString = event.target.value;
     let isValidDate = false;
 
@@ -259,7 +258,12 @@ export class NewEventModal extends Component {
 
     return (
       <Fragment>
-        <EuiModal onClose={closeModal} initialFocus="[name=eventDescription]" maxWidth={false}>
+        <EuiModal
+          onClose={closeModal}
+          initialFocus="[name=eventDescription]"
+          maxWidth={false}
+          data-test-subj={'mlCalendarEventForm'}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
@@ -285,6 +289,7 @@ export class NewEventModal extends Component {
                   onChange={this.onDescriptionChange}
                   isInvalid={!description}
                   fullWidth
+                  data-test-subj={'mlCalendarEventDescriptionInput'}
                 />
               </EuiFormRow>
 
@@ -295,13 +300,18 @@ export class NewEventModal extends Component {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>
+            <EuiButtonEmpty onClick={closeModal} data-test-subj={'mlCalendarCancelEventButton'}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
-            <EuiButton onClick={this.handleAddEvent} fill disabled={!description}>
+            <EuiButton
+              onClick={this.handleAddEvent}
+              fill
+              disabled={!description}
+              data-test-subj={'mlCalendarAddEventButton'}
+            >
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.addButtonLabel"
                 defaultMessage="Add"

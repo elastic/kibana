@@ -1,36 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { SpacesSavedObjectMappings } from './mappings';
+import type { CoreSetup } from 'src/core/server';
+
+import type { SpacesServiceStart } from '../spaces_service';
+import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
+import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
 import { migrateToKibana660 } from './migrations';
 import { spacesSavedObjectsClientWrapperFactory } from './saved_objects_client_wrapper_factory';
-import { SpacesServiceSetup } from '../spaces_service';
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
 }
 
 export class SpacesSavedObjectsService {
-  public setup({ core, spacesService }: SetupDeps) {
+  public setup({ core, getSpacesService }: SetupDeps) {
     core.savedObjects.registerType({
       name: 'space',
       hidden: true,
-      namespaceAgnostic: true,
+      namespaceType: 'agnostic',
       mappings: SpacesSavedObjectMappings,
       migrations: {
         '6.6.0': migrateToKibana660,
       },
     });
 
+    core.savedObjects.registerType({
+      name: SPACES_USAGE_STATS_TYPE,
+      hidden: true,
+      namespaceType: 'agnostic',
+      mappings: UsageStatsMappings,
+    });
+
     core.savedObjects.addClientWrapper(
       Number.MIN_SAFE_INTEGER,
       'spaces',
-      spacesSavedObjectsClientWrapperFactory(spacesService)
+      spacesSavedObjectsClientWrapperFactory(getSpacesService)
     );
   }
 }

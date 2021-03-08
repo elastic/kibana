@@ -1,23 +1,43 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-export interface IKibanaSearchResponse {
+import { Observable } from 'rxjs';
+import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { IndexPattern } from '..';
+
+export type ISearchGeneric = <
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+>(
+  request: SearchStrategyRequest,
+  options?: ISearchOptions
+) => Observable<SearchStrategyResponse>;
+
+export type ISearchCancelGeneric = (id: string, options?: ISearchOptions) => Promise<void>;
+export type ISearchExtendGeneric = (
+  id: string,
+  keepAlive: string,
+  options?: ISearchOptions
+) => Promise<void>;
+
+export interface ISearchClient {
+  search: ISearchGeneric;
+  /**
+   * Used to cancel an in-progress search request.
+   */
+  cancel: ISearchCancelGeneric;
+  /**
+   * Used to extend the TTL of an in-progress search request.
+   */
+  extend: ISearchExtendGeneric;
+}
+
+export interface IKibanaSearchResponse<RawResponse = any> {
   /**
    * Some responses may contain a unique id to identify the request this response came from.
    */
@@ -34,16 +54,77 @@ export interface IKibanaSearchResponse {
    * that represents how progress is indicated.
    */
   loaded?: number;
+
+  /**
+   * Indicates whether search is still in flight
+   */
+  isRunning?: boolean;
+
+  /**
+   * Indicates whether the results returned are complete or partial
+   */
+  isPartial?: boolean;
+
+  /**
+   * The raw response returned by the internal search method (usually the raw ES response)
+   */
+  rawResponse: RawResponse;
 }
 
-export interface IKibanaSearchRequest {
+export interface IKibanaSearchRequest<Params = any> {
   /**
    * An id can be used to uniquely identify this request.
    */
   id?: string;
 
-  /**
-   * Optionally tell search strategies to output debug information.
-   */
-  debug?: boolean;
+  params?: Params;
 }
+
+export interface ISearchOptions {
+  /**
+   * An `AbortSignal` that allows the caller of `search` to abort a search request.
+   */
+  abortSignal?: AbortSignal;
+
+  /**
+   * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
+   */
+  strategy?: string;
+
+  /**
+   * Request the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to
+   * something other than `true`, this should be set to `false`.
+   */
+  legacyHitsTotal?: boolean;
+
+  /**
+   * A session ID, grouping multiple search requests into a single session.
+   */
+  sessionId?: string;
+
+  /**
+   * Whether the session is already saved (i.e. sent to background)
+   */
+  isStored?: boolean;
+
+  /**
+   * Whether the session is restored (i.e. search requests should re-use the stored search IDs,
+   * rather than starting from scratch)
+   */
+  isRestore?: boolean;
+
+  /**
+   * Index pattern reference is used for better error messages
+   */
+
+  indexPattern?: IndexPattern;
+}
+
+/**
+ * Same as `ISearchOptions`, but contains only serializable fields, which can
+ * be sent over the network.
+ */
+export type ISearchOptionsSerializable = Pick<
+  ISearchOptions,
+  'strategy' | 'legacyHitsTotal' | 'sessionId' | 'isStored' | 'isRestore'
+>;

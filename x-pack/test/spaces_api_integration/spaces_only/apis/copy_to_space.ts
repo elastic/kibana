@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -20,21 +21,22 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
     expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
+    createMultiNamespaceTestCases,
     originSpaces,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('copy to spaces', () => {
-    originSpaces.forEach(spaceId => {
+    originSpaces.forEach((spaceId) => {
       copyToSpaceTest(`from the ${spaceId} space`, {
         spaceId,
         tests: {
           noConflictsWithoutReferences: {
             statusCode: 200,
-            response: expectNoConflictsWithoutReferencesResult,
+            response: expectNoConflictsWithoutReferencesResult(spaceId),
           },
           noConflictsWithReferences: {
             statusCode: 200,
-            response: expectNoConflictsWithReferencesResult,
+            response: expectNoConflictsWithReferencesResult(spaceId),
           },
           withConflictsOverwriting: {
             statusCode: 200,
@@ -47,12 +49,13 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
           multipleSpaces: {
             statusCode: 200,
             withConflictsResponse: createExpectWithConflictsOverwritingResult(spaceId),
-            noConflictsResponse: expectNoConflictsWithReferencesResult,
+            noConflictsResponse: expectNoConflictsWithReferencesResult(spaceId),
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNoConflictsForNonExistentSpaceResult,
+            response: expectNoConflictsForNonExistentSpaceResult(spaceId),
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId),
         },
       });
     });

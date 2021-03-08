@@ -3,9 +3,15 @@
 }
 
 .actAccordionActionForm {
-  .euiCard {
-    box-shadow: none;
-  }
+  background-color: $euiColorLightestShade;
+}
+
+.actAccordionActionForm .euiCard {
+  box-shadow: none;
+}
+
+.actAccordionActionForm__button {
+  padding: $euiSizeM;
 }
 
 .actConnectorsListGrid {

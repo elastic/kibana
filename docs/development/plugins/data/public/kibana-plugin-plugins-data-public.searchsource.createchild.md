@@ -4,6 +4,8 @@
 
 ## SearchSource.createChild() method
 
+creates a new child search source
+
 <b>Signature:</b>
 
 ```typescript

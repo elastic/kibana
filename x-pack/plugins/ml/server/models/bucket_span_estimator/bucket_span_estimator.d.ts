@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { APICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
+import { RuntimeMappings } from '../../../common/types/fields';
 
 export interface BucketSpanEstimatorData {
   aggTypes: Array<ES_AGGREGATION | null>;
@@ -18,10 +20,10 @@ export interface BucketSpanEstimatorData {
   query: any;
   splitField: string | undefined;
   timeField: string | undefined;
+  runtimeMappings: RuntimeMappings | undefined;
 }
 
-export function estimateBucketSpanFactory(
-  callAsCurrentUser: APICaller,
-  callAsInternalUser: APICaller,
-  isSecurityDisabled: boolean
-): (config: BucketSpanEstimatorData) => Promise<any>;
+export function estimateBucketSpanFactory({
+  asCurrentUser,
+  asInternalUser,
+}: IScopedClusterClient): (config: BucketSpanEstimatorData) => Promise<any>;

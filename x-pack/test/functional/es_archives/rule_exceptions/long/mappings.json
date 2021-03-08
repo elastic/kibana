@@ -1,0 +1,20 @@
+{
+  "type": "index",
+  "value": {
+    "index": "long",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "long": { "type": "long" }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

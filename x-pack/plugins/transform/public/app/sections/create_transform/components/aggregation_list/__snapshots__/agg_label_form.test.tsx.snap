@@ -1,70 +1,72 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="s"
-  responsive={false}
->
-  <EuiFlexItem
-    className="transform__AggregationLabel--text"
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    responsive={false}
   >
-    <span
-      className="eui-textTruncate"
-      data-test-subj="transformAggregationEntryLabel"
+    <EuiFlexItem
+      className="transform__AggregationLabel--text"
     >
-      the-group-by-agg-name
-    </span>
-  </EuiFlexItem>
-  <EuiFlexItem
-    className="transform__GroupByLabel--button"
-    grow={false}
-  >
-    <EuiPopover
-      anchorPosition="downCenter"
-      button={
-        <EuiButtonIcon
-          aria-label="Edit aggregation"
-          data-test-subj="transformAggregationEntryEditButton"
-          iconType="pencil"
-          onClick={[Function]}
-          size="s"
-        />
-      }
-      closePopover={[Function]}
-      display="inlineBlock"
-      hasArrow={true}
-      id="transformFormPopover"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="m"
+      <span
+        className="eui-textTruncate"
+        data-test-subj="transformAggregationEntryLabel"
+      >
+        the-group-by-agg-name
+      </span>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="transform__GroupByLabel--button"
+      grow={false}
     >
-      <PopoverForm
-        defaultData={
-          Object {
-            "agg": "cardinality",
-            "aggName": "the-group-by-agg-name",
-            "dropDownName": "the-group-by-drop-down-name",
-            "field": "the-group-by-field",
-          }
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonIcon
+            aria-label="Edit aggregation"
+            data-test-subj="transformAggregationEntryEditButton"
+            iconType="pencil"
+            onClick={[Function]}
+            size="s"
+          />
         }
-        onChange={[Function]}
-        options={Object {}}
-        otherAggNames={Array []}
+        closePopover={[Function]}
+        display="inlineBlock"
+        hasArrow={true}
+        id="transformFormPopover"
+        isOpen={false}
+        ownFocus={true}
+        panelPaddingSize="m"
+      >
+        <PopoverForm
+          defaultData={
+            Object {
+              "agg": "cardinality",
+              "aggName": "the-group-by-agg-name",
+              "dropDownName": "the-group-by-drop-down-name",
+              "field": "the-group-by-field",
+            }
+          }
+          onChange={[Function]}
+          options={Object {}}
+          otherAggNames={Array []}
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="transform__GroupByLabel--button"
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Delete item"
+        data-test-subj="transformAggregationEntryDeleteButton"
+        iconType="cross"
+        onClick={[Function]}
+        size="s"
       />
-    </EuiPopover>
-  </EuiFlexItem>
-  <EuiFlexItem
-    className="transform__GroupByLabel--button"
-    grow={false}
-  >
-    <EuiButtonIcon
-      aria-label="Delete item"
-      data-test-subj="transformAggregationEntryDeleteButton"
-      iconType="cross"
-      onClick={[Function]}
-      size="s"
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
 `;

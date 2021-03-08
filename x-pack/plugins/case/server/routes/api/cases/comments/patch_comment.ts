@@ -1,142 +1,178 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
+import { pick } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { schema } from '@kbn/config-schema';
+import Boom from '@hapi/boom';
 
-import { CommentPatchRequestRt, CaseResponseRt, throwErrors } from '../../../../../common/api';
-import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { CommentableCase } from '../../../../common';
+import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, flattenCaseSavedObject } from '../../utils';
+import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CaseServiceSetup } from '../../../../services';
 
-export function initPatchCommentApi({ caseService, router, userActionService }: RouteDeps) {
+interface CombinedCaseParams {
+  service: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+  caseID: string;
+  logger: Logger;
+  subCaseId?: string;
+}
+
+async function getCommentableCase({
+  service,
+  client,
+  caseID,
+  subCaseId,
+  logger,
+}: CombinedCaseParams) {
+  if (subCaseId) {
+    const [caseInfo, subCase] = await Promise.all([
+      service.getCase({
+        client,
+        id: caseID,
+      }),
+      service.getSubCase({
+        client,
+        id: subCaseId,
+      }),
+    ]);
+    return new CommentableCase({
+      collection: caseInfo,
+      service,
+      subCase,
+      soClient: client,
+      logger,
+    });
+  } else {
+    const caseInfo = await service.getCase({
+      client,
+      id: caseID,
+    });
+    return new CommentableCase({ collection: caseInfo, service, soClient: client, logger });
+  }
+}
+
+export function initPatchCommentApi({ caseService, router, userActionService, logger }: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
         }),
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
         body: escapeHatch,
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const caseId = request.params.case_id;
         const query = pipe(
           CommentPatchRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const myCase = await caseService.getCase({
+        const { id: queryCommentId, version: queryCommentVersion, ...queryRestAttributes } = query;
+        decodeCommentRequest(queryRestAttributes);
+
+        const commentableCase = await getCommentableCase({
+          service: caseService,
           client,
-          caseId,
+          caseID: request.params.case_id,
+          subCaseId: request.query?.subCaseId,
+          logger,
         });
 
         const myComment = await caseService.getComment({
           client,
-          commentId: query.id,
+          commentId: queryCommentId,
         });
 
         if (myComment == null) {
-          throw Boom.notFound(`This comment ${query.id} does not exist anymore.`);
+          throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
         }
 
-        const caseRef = myComment.references.find(c => c.type === CASE_SAVED_OBJECT);
-        if (caseRef == null || (caseRef != null && caseRef.id !== caseId)) {
-          throw Boom.notFound(`This comment ${query.id} does not exist in ${caseId}).`);
+        if (myComment.attributes.type !== queryRestAttributes.type) {
+          throw Boom.badRequest(`You cannot change the type of the comment.`);
         }
 
-        if (query.version !== myComment.version) {
+        const saveObjType = request.query?.subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+
+        const caseRef = myComment.references.find((c) => c.type === saveObjType);
+        if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
+          throw Boom.notFound(
+            `This comment ${queryCommentId} does not exist in ${commentableCase.id}).`
+          );
+        }
+
+        if (queryCommentVersion !== myComment.version) {
           throw Boom.conflict(
             'This case has been updated. Please refresh before saving additional updates.'
           );
         }
 
-        const { username, full_name, email } = await caseService.getUser({ request, response });
-        const updatedDate = new Date().toISOString();
-        const [updatedComment, updatedCase] = await Promise.all([
-          caseService.patchComment({
-            client,
-            commentId: query.id,
-            updatedAttributes: {
-              comment: query.comment,
-              updated_at: updatedDate,
-              updated_by: { email, full_name, username },
-            },
-            version: query.version,
-          }),
-          caseService.patchCase({
-            client,
-            caseId,
-            updatedAttributes: {
-              updated_at: updatedDate,
-              updated_by: { username, full_name, email },
-            },
-            version: myCase.version,
-          }),
-        ]);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { username, full_name, email } = await caseService.getUser({ request });
+        const userInfo: User = {
+          username,
+          full_name,
+          email,
+        };
 
-        const totalCommentsFindByCases = await caseService.getAllCaseComments({
-          client,
-          caseId,
-          options: {
-            fields: [],
-            page: 1,
-            perPage: 1,
-          },
+        const updatedDate = new Date().toISOString();
+        const {
+          comment: updatedComment,
+          commentableCase: updatedCase,
+        } = await commentableCase.updateComment({
+          updateRequest: query,
+          updatedAt: updatedDate,
+          user: userInfo,
         });
 
-        const [comments] = await Promise.all([
-          caseService.getAllCaseComments({
-            client,
-            caseId: request.params.case_id,
-            options: {
-              fields: [],
-              page: 1,
-              perPage: totalCommentsFindByCases.total,
-            },
-          }),
-          userActionService.postUserActions({
-            client,
-            actions: [
-              buildCommentUserActionItem({
-                action: 'update',
-                actionAt: updatedDate,
-                actionBy: { username, full_name, email },
-                caseId: request.params.case_id,
-                commentId: updatedComment.id,
-                fields: ['comment'],
-                newValue: query.comment,
-                oldValue: myComment.attributes.comment,
-              }),
-            ],
-          }),
-        ]);
+        await userActionService.postUserActions({
+          client,
+          actions: [
+            buildCommentUserActionItem({
+              action: 'update',
+              actionAt: updatedDate,
+              actionBy: { username, full_name, email },
+              caseId: request.params.case_id,
+              subCaseId: request.query?.subCaseId,
+              commentId: updatedComment.id,
+              fields: ['comment'],
+              newValue: JSON.stringify(queryRestAttributes),
+              oldValue: JSON.stringify(
+                // We are interested only in ContextBasicRt attributes
+                // myComment.attribute contains also CommentAttributesBasicRt attributes
+                pick(Object.keys(queryRestAttributes), myComment.attributes)
+              ),
+            }),
+          ],
+        });
 
         return response.ok({
-          body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
-                ...myCase,
-                ...updatedCase,
-                attributes: { ...myCase.attributes, ...updatedCase.attributes },
-                version: updatedCase.version ?? myCase.version,
-                references: myCase.references,
-              },
-              comments.saved_objects
-            )
-          ),
+          body: await updatedCase.encode(),
         });
       } catch (error) {
+        logger.error(
+          `Failed to patch comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

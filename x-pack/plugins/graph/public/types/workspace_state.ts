@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FontawesomeIcon } from '../helpers/style_choices';
@@ -63,7 +64,7 @@ export interface Workspace {
   nodesMap: Record<string, WorkspaceNode>;
   nodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
-  blacklistedNodes: WorkspaceNode[];
+  blocklistedNodes: WorkspaceNode[];
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];

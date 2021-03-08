@@ -1,28 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-import { RouteDefinitionParams } from '..';
+import type { RouteDefinitionParams } from '../';
 
 /**
  * Defines routes required for the Logged Out view.
  */
 export function defineLoggedOutRoutes({
-  router,
   logger,
-  authc,
-  csp,
+  getSession,
+  httpResources,
   basePath,
 }: RouteDefinitionParams) {
-  router.get(
+  httpResources.register(
     {
       path: '/security/logged_out',
       validate: false,
@@ -31,7 +25,7 @@ export function defineLoggedOutRoutes({
     async (context, request, response) => {
       // Authentication flow isn't triggered automatically for this route, so we should explicitly
       // check whether user has an active session already.
-      const isUserAlreadyLoggedIn = (await authc.getSessionInfo(request)) !== null;
+      const isUserAlreadyLoggedIn = (await getSession().get(request)) !== null;
       if (isUserAlreadyLoggedIn) {
         logger.debug('User is already authenticated, redirecting...');
         return response.redirected({
@@ -39,10 +33,7 @@ export function defineLoggedOutRoutes({
         });
       }
 
-      return response.ok({
-        body: await context.core.rendering.render({ includeUserSettings: false }),
-        headers: { 'content-security-policy': csp.header },
-      });
+      return response.renderAnonymousCoreApp();
     }
   );
 }

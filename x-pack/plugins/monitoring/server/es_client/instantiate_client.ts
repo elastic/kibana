@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Logger, ElasticsearchClientConfig, ICustomClusterClient } from 'kibana/server';
+import { ConfigOptions } from 'elasticsearch';
+import { Logger, ILegacyCustomClusterClient } from 'kibana/server';
 // @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
-import { MonitoringElasticsearchConfig } from '../types';
+import { monitoringEndpointDisableWatches } from './monitoring_endpoint_disable_watches';
+import { MonitoringElasticsearchConfig } from '../config';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application
@@ -15,20 +18,21 @@ import { MonitoringElasticsearchConfig } from '../types';
  * Kibana itself is connected to a production cluster.
  */
 
+type ESClusterConfig = MonitoringElasticsearchConfig & Pick<ConfigOptions, 'plugins'>;
+
 export function instantiateClient(
-  elasticsearchConfig: any,
+  elasticsearchConfig: MonitoringElasticsearchConfig,
   log: Logger,
   createClient: (
     type: string,
-    clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => ICustomClusterClient
+    clientConfig?: Partial<ESClusterConfig>
+  ) => ILegacyCustomClusterClient
 ) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
   const cluster = createClient('monitoring', {
     ...(isMonitoringCluster ? elasticsearchConfig : {}),
-    plugins: [monitoringBulk],
-    logQueries: Boolean(elasticsearchConfig.logQueries),
-  });
+    plugins: [monitoringBulk, monitoringEndpointDisableWatches],
+  } as ESClusterConfig);
 
   const configSource = isMonitoringCluster ? 'monitoring' : 'production';
   log.info(`config sourced from: ${configSource} cluster`);

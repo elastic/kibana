@@ -63,3 +63,5 @@ If there are multiple visualizations, the `data-shared-items-count` attribute sh
 many Visualizations to look for. Reporting will look at every element with the `data-shared-item` attribute and use the corresponding
 `data-render-complete` attribute and `renderComplete` events to listen for rendering to complete. When rendering is complete for a visualization
 the `data-render-complete` attribute should be set to "true" and it should dispatch a custom DOM `renderComplete` event.
+
+If the reporting job uses multiple URLs, before looking for any of the `data-shared-item` or `data-shared-items-count` attributes, it waits for a `data-shared-page` attribute that specifies which page is being loaded.

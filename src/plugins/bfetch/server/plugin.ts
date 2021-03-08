@@ -1,29 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
+import type {
   CoreStart,
   PluginInitializerContext,
   CoreSetup,
   Plugin,
   Logger,
   KibanaRequest,
+  RouteMethod,
+  RequestHandler,
+  RequestHandlerContext,
 } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
@@ -35,6 +27,7 @@ import {
   removeLeadingSlash,
   normalizeError,
 } from '../common';
+import { StreamingRequestHandler } from './types';
 import { createNDJSONStream } from './streaming';
 
 // eslint-disable-next-line
@@ -47,6 +40,7 @@ export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
   onBatchItem: (data: BatchItemData) => Promise<BatchItemResult>;
 }
 
+/** @public */
 export interface BfetchServerSetup {
   addBatchProcessingRoute: <BatchItemData extends object, BatchItemResult extends object>(
     path: string,
@@ -56,10 +50,54 @@ export interface BfetchServerSetup {
     path: string,
     params: (request: KibanaRequest) => StreamingResponseHandler<Payload, Response>
   ) => void;
+  /**
+   * Create a streaming request handler to be able to use an Observable to return chunked content to the client.
+   * This is meant to be used with the `fetchStreaming` API of the `bfetch` client-side plugin.
+   *
+   * @example
+   * ```ts
+   * setup({ http }: CoreStart, { bfetch }: SetupDeps) {
+   *   const router = http.createRouter();
+   *   router.post(
+   *   {
+   *     path: '/api/my-plugin/stream-endpoint,
+   *     validate: {
+   *       body: schema.object({
+   *         term: schema.string(),
+   *       }),
+   *     }
+   *   },
+   *   bfetch.createStreamingResponseHandler(async (ctx, req) => {
+   *     const { term } = req.body;
+   *     const results$ = await myApi.getResults$(term);
+   *     return results$;
+   *   })
+   * )}
+   *
+   * ```
+   *
+   * @param streamHandler
+   */
+  createStreamingRequestHandler: <
+    Response,
+    P,
+    Q,
+    B,
+    Context extends RequestHandlerContext = RequestHandlerContext,
+    Method extends RouteMethod = any
+  >(
+    streamHandler: StreamingRequestHandler<Response, P, Q, B, Method>
+  ) => RequestHandler<P, Q, B, Context, Method>;
 }
 
 // eslint-disable-next-line
 export interface BfetchServerStart {}
+
+const streamingHeaders = {
+  'Content-Type': 'application/x-ndjson',
+  Connection: 'keep-alive',
+  'Transfer-Encoding': 'chunked',
+};
 
 export class BfetchServerPlugin
   implements
@@ -76,10 +114,12 @@ export class BfetchServerPlugin
     const router = core.http.createRouter();
     const addStreamingResponseRoute = this.addStreamingResponseRoute({ router, logger });
     const addBatchProcessingRoute = this.addBatchProcessingRoute(addStreamingResponseRoute);
+    const createStreamingRequestHandler = this.createStreamingRequestHandler({ logger });
 
     return {
       addBatchProcessingRoute,
       addStreamingResponseRoute,
+      createStreamingRequestHandler,
     };
   }
 
@@ -106,17 +146,28 @@ export class BfetchServerPlugin
       async (context, request, response) => {
         const handlerInstance = handler(request);
         const data = request.body;
-        const headers = {
-          'Content-Type': 'application/x-ndjson',
-          Connection: 'keep-alive',
-          'Transfer-Encoding': 'chunked',
-        };
         return response.ok({
-          headers,
-          body: createNDJSONStream(data, handlerInstance, logger),
+          headers: streamingHeaders,
+          body: createNDJSONStream(handlerInstance.getResponseStream(data), logger),
         });
       }
     );
+  };
+
+  private createStreamingRequestHandler = ({
+    logger,
+  }: {
+    logger: Logger;
+  }): BfetchServerSetup['createStreamingRequestHandler'] => (streamHandler) => async (
+    context,
+    request,
+    response
+  ) => {
+    const response$ = await streamHandler(context, request);
+    return response.ok({
+      headers: streamingHeaders,
+      body: createNDJSONStream(response$, logger),
+    });
   };
 
   private addBatchProcessingRoute = (
@@ -132,7 +183,7 @@ export class BfetchServerPlugin
     addStreamingResponseRoute<
       BatchRequestData<BatchItemData>,
       BatchResponseItem<BatchItemResult, E>
-    >(path, request => {
+    >(path, (request) => {
       const handlerInstance = handler(request);
       return {
         getResponseStream: ({ batch }) => {

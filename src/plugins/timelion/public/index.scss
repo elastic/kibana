@@ -1,0 +1,18 @@
+/* Timelion plugin styles */
+
+// Prefix all styles with "tim" to avoid conflicts.
+// Examples
+//   timChart
+//   timChart__legend
+//   timChart__legend--small
+//   timChart__legend-isLoading
+
+@import './app';
+@import './base';
+@import './directives/index';
+
+// these styles is needed to be loaded here explicitly if the timelion visualization was not opened in browser
+// styles for timelion visualization are lazy loaded only while a vis is opened
+// this will duplicate styles only if both Timelion app and timelion visualization are loaded
+// could be left here as it is since the Timelion app is deprecated
+@import '../../vis_type_timelion/public/components/timelion_vis.scss';

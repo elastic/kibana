@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createAction } from 'redux-actions';
@@ -11,7 +12,7 @@ export const loadIndicesStart = createAction('INDEX_MANAGEMENT_LOAD_INDICES_STAR
 export const loadIndicesSuccess = createAction('INDEX_MANAGEMENT_LOAD_INDICES_SUCCESS');
 export const loadIndicesError = createAction('INDEX_MANAGEMENT_LOAD_INDICES_ERROR');
 
-export const loadIndices = () => async dispatch => {
+export const loadIndices = () => async (dispatch) => {
   dispatch(loadIndicesStart());
   let indices;
   try {

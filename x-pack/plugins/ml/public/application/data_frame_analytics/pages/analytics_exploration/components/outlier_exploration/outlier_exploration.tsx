@@ -1,141 +1,107 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { useCallback, useState, FC } from 'react';
+
+import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-
-import {
   useColorRange,
-  ColorRangeLegend,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
+import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { sortColumns, INDEX_STATUS, defaultSearchQuery } from '../../../../common';
+import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
-
-import { useExploreData, TableItem } from '../../hooks/use_explore_data';
-
-import { ExplorationDataGrid } from '../exploration_data_grid';
+import {
+  ExpandableSectionSplom,
+  ExpandableSectionAnalytics,
+  ExpandableSectionResults,
+} from '../expandable_section';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 
-const FEATURE_INFLUENCE = 'feature_influence';
+import { getFeatureCount } from './common';
+import { useOutlierData } from './use_outlier_data';
+import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
+import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 
-const ExplorationTitle: FC<{ jobId: string }> = ({ jobId }) => (
-  <EuiTitle size="xs">
-    <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
-        defaultMessage: 'Outlier detection job ID {jobId}',
-        values: { jobId },
-      })}
-    </span>
-  </EuiTitle>
-);
+export type TableItem = Record<string, any>;
 
 interface ExplorationProps {
   jobId: string;
 }
 
-const getFeatureCount = (resultsField: string, tableItems: TableItem[] = []) => {
-  if (tableItems.length === 0) {
-    return 0;
-  }
-
-  return Object.keys(tableItems[0]).filter(key =>
-    key.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
-  ).length;
-};
-
 export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
   const {
-    errorMessage,
     indexPattern,
+    indexPatternErrorMessage,
     jobConfig,
-    jobStatus,
-    pagination,
-    searchQuery,
-    selectedFields,
-    setPagination,
-    setSearchQuery,
-    setSelectedFields,
-    setSortingColumns,
-    sortingColumns,
-    rowCount,
-    status,
-    tableFields,
-    tableItems,
-  } = useExploreData(jobId);
+    needsDestIndexPattern,
+  } = useResultsViewConfig(jobId);
+  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
+  const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
-  const columns = [];
-
-  if (
-    jobConfig !== undefined &&
-    indexPattern !== undefined &&
-    selectedFields.length > 0 &&
-    tableItems.length > 0
-  ) {
-    const resultsField = jobConfig.dest.results_field;
-    const removePrefix = new RegExp(`^${resultsField}\.${FEATURE_INFLUENCE}\.`, 'g');
-    columns.push(
-      ...tableFields.sort(sortColumns(tableItems[0], resultsField)).map(id => {
-        const idWithoutPrefix = id.replace(removePrefix, '');
-        const field = indexPattern.fields.getByName(idWithoutPrefix);
-
-        // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-        // To fall back to the default string schema it needs to be undefined.
-        let schema;
-
-        switch (field?.type) {
-          case 'date':
-            schema = 'datetime';
-            break;
-          case 'geo_point':
-            schema = 'json';
-            break;
-          case 'number':
-            schema = 'numeric';
-            break;
-        }
-
-        if (id === `${resultsField}.outlier_score`) {
-          schema = 'numeric';
-        }
-
-        return { id, schema };
-      })
-    );
-  }
-
-  const colorRange = useColorRange(
-    COLOR_RANGE.BLUE,
-    COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
+  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
+    (update) => {
+      if (update.query) {
+        setSearchQuery(update.query);
+      }
+      if (update.queryString !== pageUrlState.queryText) {
+        setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
+      }
+    },
+    [pageUrlState, setPageUrlState]
   );
 
-  if (jobConfig === undefined || indexPattern === undefined) {
-    return null;
-  }
+  const query: ExplorationQueryBarProps['query'] = {
+    query: pageUrlState.queryText,
+    language: pageUrlState.queryLanguage,
+  };
 
-  // if it's a searchBar syntax error leave the table visible so they can try again
-  if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
+  const { columnsWithCharts, tableItems } = outlierData;
+
+  const featureCount = getFeatureCount(jobConfig?.dest?.results_field || '', tableItems);
+  const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
+
+  // Show the color range only if feature influence is enabled and there's more than 0 features.
+  const showColorRange =
+    featureCount > 0 &&
+    isOutlierAnalysis(jobConfig?.analysis) &&
+    jobConfig?.analysis.outlier_detection.compute_feature_influence === true;
+
+  const resultsField = jobConfig?.dest.results_field ?? '';
+
+  // Identify if the results index has a legacy feature influence format.
+  // If feature influence was enabled for the legacy job we'll show a callout
+  // with some additional information for a workaround.
+  const showLegacyFeatureInfluenceFormatCallout =
+    !needsDestIndexPattern &&
+    isOutlierAnalysis(jobConfig?.analysis) &&
+    jobConfig?.analysis.outlier_detection.compute_feature_influence === true &&
+    columnsWithCharts.findIndex(
+      (d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}.feature_name`
+    ) === -1;
+
+  const scatterplotFieldOptions = useScatterplotFieldOptions(
+    indexPattern,
+    jobConfig?.analyzed_fields.includes,
+    jobConfig?.analyzed_fields.excludes,
+    resultsField
+  );
+
+  if (indexPatternErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false}>
-        <ExplorationTitle jobId={jobConfig.id} />
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
@@ -143,80 +109,66 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           color="danger"
           iconType="cross"
         >
-          <p>{errorMessage}</p>
+          <p>{indexPatternErrorMessage}</p>
         </EuiCallOut>
       </EuiPanel>
     );
   }
 
-  let tableError =
-    status === INDEX_STATUS.ERROR && errorMessage.includes('parsing_exception')
-      ? errorMessage
-      : undefined;
-
-  if (status === INDEX_STATUS.LOADED && tableItems.length === 0 && tableError === undefined) {
-    tableError = i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutBody', {
-      defaultMessage:
-        'The query for the index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
-    });
-  }
-
   return (
-    <EuiPanel data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-        gutterSize="s"
-      >
-        <EuiFlexItem grow={false}>
-          <ExplorationTitle jobId={jobConfig.id} />
-        </EuiFlexItem>
-        {jobStatus !== undefined && (
-          <EuiFlexItem grow={false}>
-            <span>{getTaskStateBadge(jobStatus)}</span>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
-      {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
+    <>
+      {typeof jobConfig?.description !== 'undefined' && (
         <>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <ExplorationQueryBar indexPattern={indexPattern} setSearchQuery={setSearchQuery} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="s" />
-              <ColorRangeLegend
-                colorRange={colorRange}
-                title={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
-                  {
-                    defaultMessage: 'Feature influence score',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          {columns.length > 0 && tableItems.length > 0 && (
-            <ExplorationDataGrid
-              colorRange={colorRange}
-              columns={columns}
-              indexPattern={indexPattern}
-              pagination={pagination}
-              resultsField={jobConfig.dest.results_field}
-              rowCount={rowCount}
-              selectedFields={selectedFields}
-              setPagination={setPagination}
-              setSelectedFields={setSelectedFields}
-              setSortingColumns={setSortingColumns}
-              sortingColumns={sortingColumns}
-              tableItems={tableItems}
-            />
-          )}
+          <EuiText>{jobConfig?.description}</EuiText>
+          <EuiSpacer size="m" />
         </>
       )}
-    </EuiPanel>
+      {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
+        indexPattern !== undefined && (
+          <>
+            <ExplorationQueryBar
+              indexPattern={indexPattern}
+              setSearchQuery={searchQueryUpdateHandler}
+              query={query}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+      {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
+      {typeof jobConfig?.id === 'string' && scatterplotFieldOptions.length > 1 && (
+        <ExpandableSectionSplom
+          fields={scatterplotFieldOptions}
+          index={jobConfig?.dest.index}
+          resultsField={jobConfig?.dest.results_field}
+          searchQuery={searchQuery}
+        />
+      )}
+      {showLegacyFeatureInfluenceFormatCallout && (
+        <>
+          <EuiCallOut
+            size="s"
+            title={i18n.translate(
+              'xpack.ml.dataframe.analytics.outlierExploration.legacyFeatureInfluenceFormatCalloutTitle',
+              {
+                defaultMessage:
+                  'Color coded table cells based on feature influence are not available because the results index uses an unsupported legacy format. Please clone and rerun the job.',
+              }
+            )}
+            iconType="pin"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <ExpandableSectionResults
+        colorRange={
+          showColorRange && !showLegacyFeatureInfluenceFormatCallout ? colorRange : undefined
+        }
+        indexData={outlierData}
+        indexPattern={indexPattern}
+        jobConfig={jobConfig}
+        needsDestIndexPattern={needsDestIndexPattern}
+        searchQuery={searchQuery}
+      />
+    </>
   );
 });

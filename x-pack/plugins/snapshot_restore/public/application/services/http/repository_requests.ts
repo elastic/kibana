@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { API_BASE_PATH } from '../../../../common/constants';
 import { Repository, EmptyRepository } from '../../../../common/types';
 import {
@@ -92,7 +94,7 @@ export const editRepository = async (editedRepository: Repository | EmptyReposit
 
 export const deleteRepositories = async (names: Array<Repository['name']>) => {
   const result = await sendRequest({
-    path: `${API_BASE_PATH}repositories/${names.map(name => encodeURIComponent(name)).join(',')}`,
+    path: `${API_BASE_PATH}repositories/${names.map((name) => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
   });
 

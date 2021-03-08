@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -9,7 +10,7 @@ import { PropTypes } from 'prop-types';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiPage, EuiPageBody, EuiPageContent, EuiOverlayMask } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu';
 
@@ -20,6 +21,9 @@ import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
 
 class NewCalendarUI extends Component {
   static propTypes = {
@@ -55,12 +59,22 @@ class NewCalendarUI extends Component {
     this.formSetup();
   }
 
+  returnToCalendarsManagementPage = async () => {
+    const {
+      services: {
+        http: { basePath },
+        application: { navigateToUrl },
+      },
+    } = this.props.kibana;
+    await navigateToUrl(`${basePath.get()}/app/ml/${ML_PAGES.CALENDARS_MANAGE}`, true);
+  };
+
   async formSetup() {
     try {
       const { jobIds, groupIds, calendars } = await getCalendarSettingsData();
 
-      const jobIdOptions = jobIds.map(jobId => ({ label: jobId }));
-      const groupIdOptions = groupIds.map(groupId => ({ label: groupId }));
+      const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
+      const groupIdOptions = groupIds.map((groupId) => ({ label: groupId }));
 
       const selectedJobOptions = [];
       const selectedGroupOptions = [];
@@ -71,7 +85,7 @@ class NewCalendarUI extends Component {
 
       // Editing existing calendar.
       if (this.props.calendarId !== undefined) {
-        selectedCalendar = calendars.find(cal => cal.calendar_id === this.props.calendarId);
+        selectedCalendar = calendars.find((cal) => cal.calendar_id === this.props.calendarId);
 
         if (selectedCalendar) {
           formCalendarId = selectedCalendar.calendar_id;
@@ -80,10 +94,10 @@ class NewCalendarUI extends Component {
           if (selectedCalendar.job_ids.includes(GLOBAL_CALENDAR)) {
             isGlobalCalendar = true;
           } else {
-            selectedCalendar.job_ids.forEach(id => {
-              if (jobIds.find(jobId => jobId === id)) {
+            selectedCalendar.job_ids.forEach((id) => {
+              if (jobIds.find((jobId) => jobId === id)) {
                 selectedJobOptions.push({ label: id });
-              } else if (groupIds.find(groupId => groupId === id)) {
+              } else if (groupIds.find((groupId) => groupId === id)) {
                 selectedGroupOptions.push({ label: id });
               }
             });
@@ -146,7 +160,7 @@ class NewCalendarUI extends Component {
 
       try {
         await ml.addCalendar(calendar);
-        window.location = '#/settings/calendars_list';
+        await this.returnToCalendarsManagementPage();
       } catch (error) {
         console.log('Error saving calendar', error);
         this.setState({ saving: false });
@@ -167,7 +181,7 @@ class NewCalendarUI extends Component {
 
     try {
       await ml.updateCalendar(calendar);
-      window.location = '#/settings/calendars_list';
+      await this.returnToCalendarsManagementPage();
     } catch (error) {
       console.log('Error saving calendar', error);
       this.setState({ saving: false });
@@ -195,12 +209,12 @@ class NewCalendarUI extends Component {
     const allIds = isGlobalCalendar
       ? [GLOBAL_CALENDAR]
       : [
-          ...selectedJobOptions.map(option => option.label),
-          ...selectedGroupOptions.map(option => option.label),
+          ...selectedJobOptions.map((option) => option.label),
+          ...selectedGroupOptions.map((option) => option.label),
         ];
 
     // Reduce events to fields expected by api
-    const eventsToSave = events.map(event => ({
+    const eventsToSave = events.map((event) => ({
       description: event.description,
       start_time: event.start_time,
       end_time: event.end_time,
@@ -217,12 +231,12 @@ class NewCalendarUI extends Component {
     return calendar;
   };
 
-  onCreateGroupOption = newGroup => {
+  onCreateGroupOption = (newGroup) => {
     const newOption = {
       label: newGroup,
     };
     // Select the option.
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       selectedGroupOptions: prevState.selectedGroupOptions.concat(newOption),
     }));
   };
@@ -233,19 +247,19 @@ class NewCalendarUI extends Component {
     });
   };
 
-  onJobSelection = selectedJobOptions => {
+  onJobSelection = (selectedJobOptions) => {
     this.setState({
       selectedJobOptions,
     });
   };
 
-  onGroupSelection = selectedGroupOptions => {
+  onGroupSelection = (selectedGroupOptions) => {
     this.setState({
       selectedGroupOptions,
     });
   };
 
-  onCalendarIdChange = e => {
+  onCalendarIdChange = (e) => {
     const isValid = validateCalendarId(e.target.value);
 
     this.setState({
@@ -254,14 +268,14 @@ class NewCalendarUI extends Component {
     });
   };
 
-  onDescriptionChange = e => {
+  onDescriptionChange = (e) => {
     this.setState({
       description: e.target.value,
     });
   };
 
   showImportModal = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isImportModalVisible: !prevState.isImportModalVisible,
     }));
   };
@@ -272,9 +286,9 @@ class NewCalendarUI extends Component {
     });
   };
 
-  onEventDelete = eventId => {
-    this.setState(prevState => ({
-      events: prevState.events.filter(event => event.event_id !== eventId),
+  onEventDelete = (eventId) => {
+    this.setState((prevState) => ({
+      events: prevState.events.filter((event) => event.event_id !== eventId),
     }));
   };
 
@@ -286,15 +300,15 @@ class NewCalendarUI extends Component {
     this.setState({ isNewEventModalVisible: true });
   };
 
-  addEvent = event => {
-    this.setState(prevState => ({
+  addEvent = (event) => {
+    this.setState((prevState) => ({
       events: [...prevState.events, event],
       isNewEventModalVisible: false,
     }));
   };
 
-  addImportedEvents = events => {
-    this.setState(prevState => ({
+  addImportedEvents = (events) => {
+    this.setState((prevState) => ({
       events: [...prevState.events, ...events],
       isImportModalVisible: false,
     }));
@@ -317,29 +331,25 @@ class NewCalendarUI extends Component {
       isGlobalCalendar,
     } = this.state;
 
+    const helpLink = getDocLinks().links.ml.calendars;
+
     let modal = '';
 
     if (isNewEventModalVisible) {
-      modal = (
-        <EuiOverlayMask>
-          <NewEventModal addEvent={this.addEvent} closeModal={this.closeNewEventModal} />
-        </EuiOverlayMask>
-      );
+      modal = <NewEventModal addEvent={this.addEvent} closeModal={this.closeNewEventModal} />;
     } else if (isImportModalVisible) {
       modal = (
-        <EuiOverlayMask>
-          <ImportModal
-            addImportedEvents={this.addImportedEvents}
-            closeImportModal={this.closeImportModal}
-          />
-        </EuiOverlayMask>
+        <ImportModal
+          addImportedEvents={this.addImportedEvents}
+          closeImportModal={this.closeImportModal}
+        />
       );
     }
 
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
-        <EuiPage className="mlCalendarEditForm">
+        <EuiPage className="mlCalendarEditForm" data-test-subj="mlPageCalendarEdit">
           <EuiPageBody>
             <EuiPageContent
               className="mlCalendarEditForm__content"
@@ -378,6 +388,7 @@ class NewCalendarUI extends Component {
             {modal}
           </EuiPageBody>
         </EuiPage>
+        <HelpMenu docLink={helpLink} />
       </Fragment>
     );
   }

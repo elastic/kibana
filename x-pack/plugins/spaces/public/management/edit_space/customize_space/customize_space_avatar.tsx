@@ -1,26 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
 import {
+  EuiButton,
   EuiColorPicker,
   EuiFieldText,
+  EuiFilePicker,
   EuiFlexItem,
   EuiFormRow,
-  // @ts-ignore (elastic/eui#1262) EuiFilePicker is not exported yet
-  EuiFilePicker,
-  EuiButton,
   EuiSpacer,
   isValidHex,
 } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { Space } from '../../../../common/model/space';
-import { imageTypes, encode } from '../../../../common/lib/dataurl';
-import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { MAX_SPACE_INITIALS } from '../../../../common';
+import { encode, imageTypes } from '../../../../common/lib/dataurl';
+import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
+
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
@@ -58,7 +62,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
     const image = new Image();
     image.addEventListener(
       'load',
-      function() {
+      function () {
         const MAX_IMAGE_SIZE = 64;
         const imgDimx = image.width;
         const imgDimy = image.height;
@@ -119,6 +123,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
         >
           <EuiFieldText
             inputRef={this.initialsInputRef}
+            data-test-subj="spaceLetterInitial"
             name="spaceInitials"
             // allows input to be cleared or otherwise invalidated while user is editing the initials,
             // without defaulting to the derived initials provided by `getSpaceInitials`
@@ -163,6 +168,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
         >
           <EuiFilePicker
             display="default"
+            data-test-subj="uploadCustomImageFile"
             initialPromptText={i18n.translate(
               'xpack.spaces.management.customizeSpaceAvatar.selectImageUrl',
               {

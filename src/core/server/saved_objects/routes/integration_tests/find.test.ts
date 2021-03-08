@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import supertest from 'supertest';
@@ -23,15 +12,19 @@ import querystring from 'querystring';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerFindRoute } from '../find';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { setupServer } from './test_utils';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
+import { setupServer } from '../test_utils';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('GET /api/saved_objects/_find', () => {
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
-  let handlerContext: setupServerReturn['handlerContext'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
+  let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 
   const clientResponse = {
     total: 0,
@@ -47,7 +40,10 @@ describe('GET /api/saved_objects/_find', () => {
     savedObjectsClient.find.mockResolvedValue(clientResponse);
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerFindRoute(router);
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsFind.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerFindRoute(router, { coreUsageData });
 
     await server.start();
   });
@@ -66,7 +62,7 @@ describe('GET /api/saved_objects/_find', () => {
     );
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records usage stats', async () => {
     const findResponse = {
       total: 2,
       per_page: 2,
@@ -79,7 +75,9 @@ describe('GET /api/saved_objects/_find', () => {
           timeFieldName: '@timestamp',
           notExpandable: true,
           attributes: {},
+          score: 1,
           references: [],
+          namespaces: ['default'],
         },
         {
           type: 'index-pattern',
@@ -88,7 +86,9 @@ describe('GET /api/saved_objects/_find', () => {
           timeFieldName: '@timestamp',
           notExpandable: true,
           attributes: {},
+          score: 1,
           references: [],
+          namespaces: ['default'],
         },
       ],
     };
@@ -99,6 +99,9 @@ describe('GET /api/saved_objects/_find', () => {
       .expect(200);
 
     expect(result.body).toEqual(findResponse);
+    expect(coreUsageStatsClient.incrementSavedObjectsFind).toHaveBeenCalledWith({
+      request: expect.anything(),
+    });
   });
 
   it('calls upon savedObjectClient.find with defaults', async () => {
@@ -114,6 +117,7 @@ describe('GET /api/saved_objects/_find', () => {
       page: 1,
       type: ['foo', 'bar'],
       defaultSearchOperator: 'OR',
+      hasReferenceOperator: 'OR',
     });
   });
 
@@ -125,13 +129,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({ perPage: 10, page: 50, type: ['foo'], defaultSearchOperator: 'OR' });
+    expect(options).toEqual(expect.objectContaining({ perPage: 10, page: 50 }));
   });
 
   it('accepts the optional query parameter has_reference', async () => {
-    await supertest(httpSetup.server.listener)
-      .get('/api/saved_objects/_find?type=foo')
-      .expect(200);
+    await supertest(httpSetup.server.listener).get('/api/saved_objects/_find?type=foo').expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -139,7 +141,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(options.hasReference).toBe(undefined);
   });
 
-  it('accepts the query parameter has_reference', async () => {
+  it('accepts the query parameter has_reference as an object', async () => {
     const references = querystring.escape(
       JSON.stringify({
         id: '1',
@@ -159,6 +161,53 @@ describe('GET /api/saved_objects/_find', () => {
     });
   });
 
+  it('accepts the query parameter has_reference as an array', async () => {
+    const references = querystring.escape(
+      JSON.stringify([
+        {
+          id: '1',
+          type: 'reference',
+        },
+        {
+          id: '2',
+          type: 'reference',
+        },
+      ])
+    );
+    await supertest(httpSetup.server.listener)
+      .get(`/api/saved_objects/_find?type=foo&has_reference=${references}`)
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options.hasReference).toEqual([
+      {
+        id: '1',
+        type: 'reference',
+      },
+      {
+        id: '2',
+        type: 'reference',
+      },
+    ]);
+  });
+
+  it('accepts the query parameter has_reference_operator', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&has_reference_operator=AND')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual(
+      expect.objectContaining({
+        hasReferenceOperator: 'AND',
+      })
+    );
+  });
+
   it('accepts the query parameter search_fields', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&search_fields=title')
@@ -167,13 +216,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      searchFields: ['title'],
-      type: ['foo'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        searchFields: ['title'],
+      })
+    );
   });
 
   it('accepts the query parameter fields as a string', async () => {
@@ -184,13 +231,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      fields: ['title'],
-      type: ['foo'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        fields: ['title'],
+      })
+    );
   });
 
   it('accepts the query parameter fields as an array', async () => {
@@ -201,13 +246,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      fields: ['title', 'description'],
-      type: ['foo'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        fields: ['title', 'description'],
+      })
+    );
   });
 
   it('accepts the query parameter type as a string', async () => {
@@ -218,12 +261,11 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      type: ['index-pattern'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        type: ['index-pattern'],
+      })
+    );
   });
 
   it('accepts the query parameter type as an array', async () => {
@@ -234,11 +276,40 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
     const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual({
-      perPage: 20,
-      page: 1,
-      type: ['index-pattern', 'visualization'],
-      defaultSearchOperator: 'OR',
-    });
+    expect(options).toEqual(
+      expect.objectContaining({
+        type: ['index-pattern', 'visualization'],
+      })
+    );
+  });
+
+  it('accepts the query parameter namespaces as a string', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern&namespaces=foo')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual(
+      expect.objectContaining({
+        namespaces: ['foo'],
+      })
+    );
+  });
+
+  it('accepts the query parameter namespaces as an array', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern&namespaces=default&namespaces=foo')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual(
+      expect.objectContaining({
+        namespaces: ['default', 'foo'],
+      })
+    );
   });
 });

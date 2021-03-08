@@ -1,0 +1,3 @@
+- [docs](../../docs/state_sync)
+- [demo plugins](../../../../../examples/state_containers_examples): run Kibana with `--run-examples` flag.
+- [api reference](https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync)

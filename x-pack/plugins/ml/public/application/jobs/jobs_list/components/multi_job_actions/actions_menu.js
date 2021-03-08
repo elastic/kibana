@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { checkPermission } from '../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -26,10 +27,11 @@ class MultiJobActionsMenuUI extends Component {
     this.canDeleteJob = checkPermission('canDeleteJob');
     this.canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
     this.canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
+    this.canCreateMlAlerts = checkPermission('canCreateMlAlerts');
   }
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isOpen: !prevState.isOpen,
     }));
   };
@@ -41,7 +43,7 @@ class MultiJobActionsMenuUI extends Component {
   };
 
   render() {
-    const anyJobsDeleting = this.props.jobs.some(j => j.deleting);
+    const anyJobsDeleting = this.props.jobs.some((j) => j.deleting);
     const button = (
       <EuiButtonIcon
         size="s"
@@ -57,6 +59,7 @@ class MultiJobActionsMenuUI extends Component {
         disabled={
           anyJobsDeleting || (this.canDeleteJob === false && this.canStartStopDatafeed === false)
         }
+        data-test-subj="mlADJobListMultiSelectManagementActionsButton"
       />
     );
 
@@ -69,6 +72,7 @@ class MultiJobActionsMenuUI extends Component {
           this.props.showDeleteJobModal(this.props.jobs);
           this.closePopover();
         }}
+        data-test-subj="mlADJobListMultiSelectDeleteJobActionButton"
       >
         <FormattedMessage
           id="xpack.ml.jobsList.multiJobsActions.deleteJobsLabel"
@@ -88,6 +92,7 @@ class MultiJobActionsMenuUI extends Component {
             closeJobs(this.props.jobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectCloseJobActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.closeJobsLabel"
@@ -108,6 +113,7 @@ class MultiJobActionsMenuUI extends Component {
             stopDatafeeds(this.props.jobs, this.props.refreshJobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectStopDatafeedActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.stopDatafeedsLabel"
@@ -128,11 +134,32 @@ class MultiJobActionsMenuUI extends Component {
             this.props.showStartDatafeedModal(this.props.jobs);
             this.closePopover();
           }}
+          data-test-subj="mlADJobListMultiSelectStartDatafeedActionButton"
         >
           <FormattedMessage
             id="xpack.ml.jobsList.multiJobsActions.startDatafeedsLabel"
             defaultMessage="Start {jobsCount, plural, one {datafeed} other {datafeeds}}"
             values={{ jobsCount: this.props.jobs.length }}
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (this.canCreateMlAlerts) {
+      items.push(
+        <EuiContextMenuItem
+          key="create alert"
+          icon="bell"
+          disabled={false}
+          onClick={() => {
+            this.props.showCreateAlertFlyout(this.props.jobs.map(({ id }) => id));
+            this.closePopover();
+          }}
+          data-test-subj="mlADJobListMultiSelectCreateAlertActionButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobsActions.createAlertsLabel"
+            defaultMessage="Create alert"
           />
         </EuiContextMenuItem>
       );
@@ -156,6 +183,7 @@ MultiJobActionsMenuUI.propTypes = {
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  showCreateAlertFlyout: PropTypes.func.isRequired,
 };
 
 export const MultiJobActionsMenu = MultiJobActionsMenuUI;

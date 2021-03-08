@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -36,6 +38,7 @@ interface Props {
   config: FieldConfig;
   options: Options;
   mapOptionsToSubOptions: MapOptionsToSubOptions;
+  'data-test-subj'?: string;
 }
 
 export const AnalyzerParameterSelects = ({
@@ -45,18 +48,20 @@ export const AnalyzerParameterSelects = ({
   config,
   options,
   mapOptionsToSubOptions,
+  'data-test-subj': dataTestSubj,
 }: Props) => {
   const { form } = useForm({ defaultValue: { main: mainDefaultValue, sub: subDefaultValue } });
+  const { subscribe } = form;
 
   useEffect(() => {
-    const subscription = form.subscribe(updateData => {
-      const formData = updateData.data.raw;
+    const subscription = subscribe((updateData) => {
+      const formData = updateData.data.internal;
       const value = formData.sub ? formData.sub : formData.main;
       onChange(value);
     });
 
     return subscription.unsubscribe;
-  }, [form, onChange]);
+  }, [subscribe, onChange]);
 
   const getSubOptionsMeta = useCallback(
     (mainValue: string) =>
@@ -76,11 +81,16 @@ export const AnalyzerParameterSelects = ({
     const isSuperSelect = areOptionsSuperSelect(opts);
 
     return isSuperSelect ? (
-      <SuperSelectField field={field} euiFieldProps={{ options: opts }} />
+      <SuperSelectField
+        field={field}
+        euiFieldProps={{ options: opts }}
+        data-test-subj={dataTestSubj}
+      />
     ) : (
       <SelectField
         field={field}
         euiFieldProps={{ options: opts as any, hasNoInitialSelection: false }}
+        data-test-subj={dataTestSubj}
       />
     );
   };
@@ -95,20 +105,20 @@ export const AnalyzerParameterSelects = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <UseField path="main" config={config} onChange={onMainValueChange}>
-                  {field => renderSelect(field, options)}
+                  {(field) => renderSelect(field, options)}
                 </UseField>
               </EuiFlexItem>
               {subOptions && (
                 <EuiFlexItem>
                   <UseField
                     path="sub"
-                    defaultValue={subOptions.options[0].value}
                     config={{
                       ...config,
+                      defaultValue: subOptions.options[0].value,
                       label: subOptions.label,
                     }}
                   >
-                    {field => renderSelect(field, subOptions.options)}
+                    {(field) => renderSelect(field, subOptions.options)}
                   </UseField>
                 </EuiFlexItem>
               )}

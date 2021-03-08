@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiButton } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, IBasePath } from 'src/core/public';
+import type { CoreStart, IBasePath } from 'src/core/public';
+
+import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
 interface Props {
@@ -25,7 +29,7 @@ export function LoggedOutPage({ basePath }: Props) {
         />
       }
     >
-      <EuiButton href={basePath.prepend('/')}>
+      <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />
       </EuiButton>
     </AuthenticationStatePage>

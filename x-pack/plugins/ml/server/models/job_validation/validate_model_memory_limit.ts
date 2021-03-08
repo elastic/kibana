@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import numeral from '@elastic/numeral';
-import { APICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
+import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client';
 
 // The minimum value the backend expects is 1MByte
 const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;
 
 export async function validateModelMemoryLimit(
-  callWithRequest: APICaller,
+  client: IScopedClusterClient,
+  mlClient: MlClient,
   job: CombinedJob,
   duration?: { start?: number; end?: number }
 ) {
@@ -50,28 +54,29 @@ export async function validateModelMemoryLimit(
 
   // retrieve the max_model_memory_limit value from the server
   // this will be unset unless the user has set this on their cluster
-  const maxModelMemoryLimit: string | undefined = (
-    await callWithRequest('ml.info')
-  )?.limits?.max_model_memory_limit?.toUpperCase();
+  const { body } = await mlClient.info<MlInfoResponse>();
+  const maxModelMemoryLimit = body.limits.max_model_memory_limit?.toUpperCase();
+  const effectiveMaxModelMemoryLimit = body.limits.effective_max_model_memory_limit?.toUpperCase();
 
   if (runCalcModelMemoryTest) {
-    const { modelMemoryLimit } = await calculateModelMemoryLimitProvider(callWithRequest)(
+    const { modelMemoryLimit } = await calculateModelMemoryLimitProvider(client, mlClient)(
       job.analysis_config,
       job.datafeed_config.indices.join(','),
       job.datafeed_config.query,
       job.data_description.time_field,
       duration!.start as number,
       duration!.end as number,
-      true
+      true,
+      job.datafeed_config
     );
-    // @ts-ignore
+    // @ts-expect-error
     const mmlEstimateBytes: number = numeral(modelMemoryLimit).value();
 
     let runEstimateGreaterThenMml = true;
     // if max_model_memory_limit has been set,
     // make sure the estimated value is not greater than it.
     if (typeof maxModelMemoryLimit !== 'undefined') {
-      // @ts-ignore
+      // @ts-expect-error
       const maxMmlBytes: number = numeral(maxModelMemoryLimit).value();
       if (mmlEstimateBytes > maxMmlBytes) {
         runEstimateGreaterThenMml = false;
@@ -88,7 +93,7 @@ export async function validateModelMemoryLimit(
     // do not run this if we've already found that it's larger than
     // the max mml
     if (runEstimateGreaterThenMml && mml !== null) {
-      // @ts-ignore
+      // @ts-expect-error
       const mmlBytes: number = numeral(mml).value();
       if (mmlBytes < MODEL_MEMORY_LIMIT_MINIMUM_BYTES) {
         messages.push({
@@ -113,17 +118,35 @@ export async function validateModelMemoryLimit(
 
   // if max_model_memory_limit has been set,
   // make sure the user defined MML is not greater than it
-  if (maxModelMemoryLimit !== undefined && mml !== null) {
-    // @ts-ignore
-    const maxMmlBytes = numeral(maxModelMemoryLimit).value();
-    // @ts-ignore
+  if (mml !== null) {
+    let maxMmlExceeded = false;
+    // @ts-expect-error
     const mmlBytes = numeral(mml).value();
-    if (mmlBytes > maxMmlBytes) {
-      messages.push({
-        id: 'mml_greater_than_max_mml',
-        maxModelMemoryLimit,
-        mml,
-      });
+
+    if (maxModelMemoryLimit !== undefined) {
+      // @ts-expect-error
+      const maxMmlBytes = numeral(maxModelMemoryLimit).value();
+      if (mmlBytes > maxMmlBytes) {
+        maxMmlExceeded = true;
+        messages.push({
+          id: 'mml_greater_than_max_mml',
+          maxModelMemoryLimit,
+          mml,
+        });
+      }
+    }
+
+    if (effectiveMaxModelMemoryLimit !== undefined && maxMmlExceeded === false) {
+      // @ts-expect-error
+      const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
+      if (mmlBytes > effectiveMaxMmlBytes) {
+        messages.push({
+          id: 'mml_greater_than_effective_max_mml',
+          maxModelMemoryLimit,
+          mml,
+          effectiveMaxModelMemoryLimit,
+        });
+      }
     }
   }
 

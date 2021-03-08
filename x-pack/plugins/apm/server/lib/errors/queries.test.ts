@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getErrorGroup } from './get_error_group';
+import { getErrorGroupSample } from './get_error_group_sample';
 import { getErrorGroups } from './get_error_groups';
 import {
   SearchParamsMock,
-  inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+  inspectSearchParams,
+} from '../../utils/test_helpers';
 
 describe('error queries', () => {
   let mock: SearchParamsMock;
@@ -19,11 +20,11 @@ describe('error queries', () => {
   });
 
   it('fetches a single error group', async () => {
-    mock = await inspectSearchParams(setup =>
-      getErrorGroup({
+    mock = await inspectSearchParams((setup) =>
+      getErrorGroupSample({
         groupId: 'groupId',
         serviceName: 'serviceName',
-        setup
+        setup,
       })
     );
 
@@ -31,12 +32,12 @@ describe('error queries', () => {
   });
 
   it('fetches multiple error groups', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorGroups({
         sortDirection: 'asc',
         sortField: 'foo',
         serviceName: 'serviceName',
-        setup
+        setup,
       })
     );
 
@@ -44,12 +45,12 @@ describe('error queries', () => {
   });
 
   it('fetches multiple error groups when sortField = latestOccurrenceAt', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorGroups({
         sortDirection: 'asc',
         sortField: 'latestOccurrenceAt',
         serviceName: 'serviceName',
-        setup
+        setup,
       })
     );
 

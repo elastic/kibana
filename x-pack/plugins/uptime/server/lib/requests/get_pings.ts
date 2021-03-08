@@ -1,120 +1,109 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
-  PingResults,
+  GetPingsParams,
+  HttpResponseBody,
+  PingsResponse,
   Ping,
-  HttpBody,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../common/runtime_types';
 
-export interface GetPingsParams {
-  /** @member dateRangeStart timestamp bounds */
-  dateRangeStart: string;
+const DEFAULT_PAGE_SIZE = 25;
 
-  /** @member dateRangeEnd timestamp bounds */
-  dateRangeEnd: string;
+/**
+ * This branch of filtering is used for monitors of type `browser`. This monitor
+ * type represents an unbounded set of steps, with each `check_group` representing
+ * a distinct journey. The document containing the `summary` field is indexed last, and
+ * contains the data necessary for querying a journey.
+ *
+ * Because of this, when querying for "pings", it is important that we treat `browser` summary
+ * checks as the "ping" we want. Without this filtering, we will receive >= N pings for a journey
+ * of N steps, because an individual step may also contain multiple documents.
+ */
+const REMOVE_NON_SUMMARY_BROWSER_CHECKS = {
+  must_not: [
+    {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.type': 'browser',
+            },
+          },
+          {
+            bool: {
+              must_not: [
+                {
+                  exists: {
+                    field: 'summary',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+};
 
-  /** @member monitorId optional limit by monitorId */
-  monitorId?: string | null;
-
-  /** @member status optional limit by check statuses */
-  status?: string | null;
-
-  /** @member sort optional sort by timestamp */
-  sort?: string | null;
-
-  /** @member size optional limit query size */
-  size?: number | null;
-
-  /** @member location optional location value for use in filtering*/
-  location?: string | null;
-
-  /** @member page the number to provide to Elasticsearch as the "from" parameter */
-  page?: number;
-}
-
-export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = async ({
-  callES,
-  dynamicSettings,
-  dateRangeStart,
-  dateRangeEnd,
+export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
+  uptimeEsClient,
+  dateRange: { from, to },
+  index,
   monitorId,
   status,
   sort,
-  size,
-  location,
-  page,
+  size: sizeParam,
+  locations,
 }) => {
-  const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
-  const sizeParam = size ? { size } : undefined;
-  const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
-  if (monitorId) {
-    filter.push({ term: { 'monitor.id': monitorId } });
-  }
-  if (status) {
-    filter.push({ term: { 'monitor.status': status } });
-  }
+  const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
-  let postFilterClause = {};
-  if (location) {
-    postFilterClause = { post_filter: { term: { 'observer.geo.name': location } } };
-  }
-  const queryContext = { bool: { filter } };
-  const params: any = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        ...queryContext,
+  const searchBody = {
+    size,
+    ...(index ? { from: index * size } : {}),
+    query: {
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: from, lte: to } } },
+          ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
+          ...(status ? [{ term: { 'monitor.status': status } }] : []),
+        ],
+        ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
       },
-      ...sortParam,
-      ...sizeParam,
-      aggregations: {
-        locations: {
-          terms: {
-            field: 'observer.geo.name',
-            missing: 'N/A',
-            size: 1000,
-          },
-        },
-      },
-      ...postFilterClause,
     },
+    sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
+    ...((locations ?? []).length > 0
+      ? { post_filter: { terms: { 'observer.geo.name': locations } } }
+      : {}),
   };
 
-  if (page) {
-    params.body.from = page * (size ?? 25);
-  }
-
   const {
-    hits: { hits, total },
-    aggregations: aggs,
-  } = await callES('search', params);
+    body: {
+      hits: { hits, total },
+    },
+  } = await uptimeEsClient.search({ body: searchBody });
 
-  const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
-
-  const pings: Ping[] = hits.map(({ _id, _source }: any) => {
-    const timestamp = _source['@timestamp'];
-
+  const pings: Ping[] = hits.map((doc: any) => {
+    const { _id, _source } = doc;
     // Calculate here the length of the content string in bytes, this is easier than in client JS, where
     // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
     // client but this is cleaner.
-    const httpBody: HttpBody | undefined = _source?.http?.response?.body;
+    const httpBody: HttpResponseBody | undefined = _source?.http?.response?.body;
     if (httpBody && httpBody.content) {
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    return { id: _id, timestamp, ..._source };
+    return { ..._source, timestamp: _source['@timestamp'], docId: _id };
   });
 
-  const results: PingResults = {
+  return {
     total: total.value,
-    locations: locations.buckets.map((bucket: { key: string }) => bucket.key),
     pings,
   };
-
-  return results;
 };

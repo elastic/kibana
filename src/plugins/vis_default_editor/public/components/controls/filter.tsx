@@ -1,27 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, Query, QueryStringInput } from '../../../../data/public';
+import {
+  IAggConfig,
+  Query,
+  QueryStringInput,
+  DataPublicPluginStart,
+} from '../../../../data/public';
+import { useKibana } from '../../../../kibana_react/public';
 
 interface FilterRowProps {
   id: string;
@@ -48,6 +43,7 @@ function FilterRow({
   onChangeValue,
   onRemoveFilter,
 }: FilterRowProps) {
+  const { services } = useKibana<{ data: DataPublicPluginStart; appName: string }>();
   const [showCustomLabel, setShowCustomLabel] = useState(false);
   const filterLabel = i18n.translate('visDefaultEditor.controls.filters.filterLabel', {
     defaultMessage: 'Filter {index}',
@@ -55,6 +51,13 @@ function FilterRow({
       index: arrayIndex + 1,
     },
   });
+
+  const onBlur = () => {
+    if (value.query.length > 0) {
+      // Store filter to the query log so that it is available in autocomplete.
+      services.data.query.addToQueryLog(services.appName, value);
+    }
+  };
 
   const FilterControl = (
     <div>
@@ -96,10 +99,12 @@ function FilterRow({
           query={value}
           indexPatterns={[agg.getIndexPattern()]}
           onChange={(query: Query) => onChangeValue(id, query, customLabel)}
+          onBlur={onBlur}
           disableAutoFocus={!autoFocus}
           dataTestSubj={dataTestSubj}
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
+          size="s"
         />
       </EuiFormRow>
       {showCustomLabel ? (
@@ -114,14 +119,14 @@ function FilterRow({
             },
           })}
           fullWidth={true}
-          compressed
+          display="rowCompressed"
         >
           <EuiFieldText
             value={customLabel}
             placeholder={i18n.translate('visDefaultEditor.controls.filters.labelPlaceholder', {
               defaultMessage: 'Label',
             })}
-            onChange={ev => onChangeValue(id, value, ev.target.value)}
+            onChange={(ev) => onChangeValue(id, value, ev.target.value)}
             fullWidth={true}
             compressed
           />

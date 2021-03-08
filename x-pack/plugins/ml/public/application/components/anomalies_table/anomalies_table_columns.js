@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 
 import React from 'react';
-import _ from 'lodash';
+import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,14 +17,14 @@ import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
-} from '../../util/date_utils';
+} from '../../../../common/util/date_utils';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
 import { EntityCell } from '../entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
-import { checkPermission } from '../../privilege/check_privilege';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { formatValue } from '../../formatters/format_value';
@@ -76,7 +77,7 @@ export function getColumns(
           </p>
         </EuiScreenReaderOnly>
       ),
-      render: item => (
+      render: (item) => (
         <EuiButtonIcon
           onClick={() => toggleRow(item)}
           iconType={itemIdToExpandedRowMap[item.rowId] ? 'arrowDown' : 'arrowRight'}
@@ -102,7 +103,7 @@ export function getColumns(
       }),
       dataType: 'date',
       scope: 'row',
-      render: date => renderTime(date, interval),
+      render: (date) => renderTime(date, interval),
       textOnly: true,
       sortable: true,
     },
@@ -131,7 +132,7 @@ export function getColumns(
     },
   ];
 
-  if (items.some(item => item.entityValue !== undefined)) {
+  if (items.some((item) => item.entityValue !== undefined)) {
     columns.push({
       field: 'entityValue',
       'data-test-subj': 'mlAnomaliesListColumnFoundFor',
@@ -151,14 +152,14 @@ export function getColumns(
     });
   }
 
-  if (items.some(item => item.influencers !== undefined)) {
+  if (items.some((item) => item.influencers !== undefined)) {
     columns.push({
       field: 'influencers',
       'data-test-subj': 'mlAnomaliesListColumnInfluencers',
       name: i18n.translate('xpack.ml.anomaliesTable.influencersColumnName', {
         defaultMessage: 'influenced by',
       }),
-      render: influencers => (
+      render: (influencers) => (
         <InfluencersCell
           limit={INFLUENCERS_LIMIT}
           influencers={influencers}
@@ -173,7 +174,7 @@ export function getColumns(
   // Map the additional 'sort' fields to the actual, typical and description
   // fields to ensure sorting is done correctly on the underlying metric value
   // and not on e.g. the actual values array as a String.
-  if (items.some(item => item.actual !== undefined)) {
+  if (items.some((item) => item.actual !== undefined)) {
     columns.push({
       field: 'actualSort',
       'data-test-subj': 'mlAnomaliesListColumnActual',
@@ -191,7 +192,7 @@ export function getColumns(
     });
   }
 
-  if (items.some(item => item.typical !== undefined)) {
+  if (items.some((item) => item.typical !== undefined)) {
     columns.push({
       field: 'typicalSort',
       'data-test-subj': 'mlAnomaliesListColumnTypical',
@@ -210,7 +211,7 @@ export function getColumns(
 
     // Assume that if we are showing typical, there will be an actual too,
     // so we can add a column to describe how actual compares to typical.
-    const nonTimeOfDayOrWeek = items.some(item => {
+    const nonTimeOfDayOrWeek = items.some((item) => {
       const summaryRecFunc = item.source.function;
       return summaryRecFunc !== 'time_of_day' && summaryRecFunc !== 'time_of_week';
     });
@@ -241,17 +242,16 @@ export function getColumns(
     });
   }
 
-  const showExamples = items.some(item => item.entityName === 'mlcategory');
+  const showExamples = items.some((item) => item.entityName === 'mlcategory');
   if (showExamples === true) {
     columns.push({
       'data-test-subj': 'mlAnomaliesListColumnCategoryExamples',
       name: i18n.translate('xpack.ml.anomaliesTable.categoryExamplesColumnName', {
         defaultMessage: 'category examples',
       }),
-      sortable: false,
       truncateText: true,
-      render: item => {
-        const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
+      render: (item) => {
+        const examples = get(examplesByJobId, [item.jobId, item.entityValue], []);
         return (
           <EuiLink
             className="mlAnomalyCategoryExamples__link"
@@ -267,12 +267,11 @@ export function getColumns(
           </EuiLink>
         );
       },
-      textOnly: true,
       width: '13%',
     });
   }
 
-  const showLinks = items.some(item => showLinksMenuForItem(item, showViewSeriesLink));
+  const showLinks = items.some((item) => showLinksMenuForItem(item, showViewSeriesLink));
 
   if (showLinks === true) {
     columns.push({
@@ -280,7 +279,7 @@ export function getColumns(
       name: i18n.translate('xpack.ml.anomaliesTable.actionsColumnName', {
         defaultMessage: 'actions',
       }),
-      render: item => {
+      render: (item) => {
         if (showLinksMenuForItem(item, showViewSeriesLink) === true) {
           return (
             <LinksMenu

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { each } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
@@ -147,8 +148,8 @@ export class InfluencersCell extends Component {
     const recordInfluencers = this.props.influencers || [];
 
     const influencers = [];
-    recordInfluencers.forEach(influencer => {
-      _.each(influencer, (influencerFieldValue, influencerFieldName) => {
+    recordInfluencers.forEach((influencer) => {
+      each(influencer, (influencerFieldValue, influencerFieldName) => {
         influencers.push({
           influencerFieldName,
           influencerFieldValue,

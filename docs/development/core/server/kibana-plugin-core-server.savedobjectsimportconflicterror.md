@@ -16,5 +16,6 @@ export interface SavedObjectsImportConflictError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [destinationId](./kibana-plugin-core-server.savedobjectsimportconflicterror.destinationid.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectsimportconflicterror.type.md) | <code>'conflict'</code> |  |
 

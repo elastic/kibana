@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useCallback } from 'react';
@@ -24,7 +25,7 @@ export const useBulkGetSavedObject = (type: string) => {
           if (!savedObjectsClient) {
             throw new Error('Saved objects client is unavailable');
           }
-          const d = await savedObjectsClient.bulkGet(ids.map(i => ({ type, id: i })));
+          const d = await savedObjectsClient.bulkGet(ids.map((i) => ({ type, id: i })));
           setError(null);
           setLoading(false);
           setData(d);

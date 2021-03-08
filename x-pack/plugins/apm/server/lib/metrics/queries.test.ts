@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getCPUChartData } from './by_agent/shared/cpu';
@@ -11,8 +12,8 @@ import { getNonHeapMemoryChart } from './by_agent/java/non_heap_memory';
 import { getThreadCountChart } from './by_agent/java/thread_count';
 import {
   SearchParamsMock,
-  inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+  inspectSearchParams,
+} from '../../utils/test_helpers';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 
 describe('metrics queries', () => {
@@ -20,40 +21,40 @@ describe('metrics queries', () => {
 
   const createTests = (serviceNodeName?: string) => {
     it('fetches cpu chart data', async () => {
-      mock = await inspectSearchParams(setup =>
-        getCPUChartData(setup, 'foo', serviceNodeName)
+      mock = await inspectSearchParams((setup) =>
+        getCPUChartData({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('fetches memory chart data', async () => {
-      mock = await inspectSearchParams(setup =>
-        getMemoryChartData(setup, 'foo', serviceNodeName)
+      mock = await inspectSearchParams((setup) =>
+        getMemoryChartData({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('fetches heap memory chart data', async () => {
-      mock = await inspectSearchParams(setup =>
-        getHeapMemoryChart(setup, 'foo', serviceNodeName)
+      mock = await inspectSearchParams((setup) =>
+        getHeapMemoryChart({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('fetches non heap memory chart data', async () => {
-      mock = await inspectSearchParams(setup =>
-        getNonHeapMemoryChart(setup, 'foo', serviceNodeName)
+      mock = await inspectSearchParams((setup) =>
+        getNonHeapMemoryChart({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('fetches thread count chart data', async () => {
-      mock = await inspectSearchParams(setup =>
-        getThreadCountChart(setup, 'foo', serviceNodeName)
+      mock = await inspectSearchParams((setup) =>
+        getThreadCountChart({ setup, serviceName: 'foo', serviceNodeName })
       );
 
       expect(mock.params).toMatchSnapshot();

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { take } from 'rxjs/operators';
@@ -38,11 +27,7 @@ const nodeInfo = {
 
 describe('calculateStatus', () => {
   it('starts in unavailable', async () => {
-    expect(
-      await calculateStatus$(new Subject())
-        .pipe(take(1))
-        .toPromise()
-    ).toEqual({
+    expect(await calculateStatus$(new Subject()).pipe(take(1)).toPromise()).toEqual({
       level: ServiceStatusLevels.unavailable,
       summary: 'Waiting for Elasticsearch',
       meta: {
@@ -69,7 +54,7 @@ describe('calculateStatus', () => {
     });
   });
 
-  it('changes to degraded when isCompatible and warningNodes present', async () => {
+  it('changes to available with a differemnt message when isCompatible and warningNodes present', async () => {
     expect(
       await calculateStatus$(
         of({
@@ -85,7 +70,7 @@ describe('calculateStatus', () => {
         .pipe(take(2))
         .toPromise()
     ).toEqual({
-      level: ServiceStatusLevels.degraded,
+      level: ServiceStatusLevels.available,
       summary: 'Some nodes are a different version',
       meta: {
         incompatibleNodes: [],
@@ -123,7 +108,7 @@ describe('calculateStatus', () => {
     const nodeCompat$ = new Subject<NodesVersionCompatibility>();
 
     const statusUpdates: ServiceStatus[] = [];
-    const subscription = calculateStatus$(nodeCompat$).subscribe(status =>
+    const subscription = calculateStatus$(nodeCompat$).subscribe((status) =>
       statusUpdates.push(status)
     );
 
@@ -192,7 +177,7 @@ describe('calculateStatus', () => {
           "summary": "Incompatible with Elasticsearch",
         },
         Object {
-          "level": degraded,
+          "level": available,
           "meta": Object {
             "incompatibleNodes": Array [],
             "warningNodes": Array [

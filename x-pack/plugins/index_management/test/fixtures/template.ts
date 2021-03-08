@@ -1,11 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getRandomString, getRandomNumber } from '../../../../test_utils';
-import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
+import { getRandomString, getRandomNumber } from '@kbn/test/jest';
+import { TemplateDeserialized, TemplateType, TemplateListItem } from '../../common';
+
+const objHasProperties = (obj?: Record<string, any>): boolean => {
+  return obj === undefined || Object.keys(obj).length === 0 ? false : true;
+};
+
+export const getComposableTemplate = ({
+  name = getRandomString(),
+  version = getRandomNumber(),
+  priority = getRandomNumber(),
+  indexPatterns = [],
+  template: { settings, aliases, mappings } = {},
+  hasDatastream = false,
+  isLegacy = false,
+  type = 'default',
+}: Partial<
+  TemplateDeserialized & {
+    isLegacy?: boolean;
+    type?: TemplateType;
+    hasDatastream: boolean;
+  }
+> = {}): TemplateDeserialized => {
+  const indexTemplate = {
+    name,
+    version,
+    priority,
+    indexPatterns,
+    template: {
+      aliases,
+      mappings,
+      settings,
+    },
+    _kbnMeta: {
+      type,
+      hasDatastream,
+      isLegacy,
+    },
+  };
+
+  return indexTemplate;
+};
 
 export const getTemplate = ({
   name = getRandomString(),
@@ -13,24 +54,37 @@ export const getTemplate = ({
   order = getRandomNumber(),
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
-  isManaged = false,
-  templateFormatVersion = DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+  dataStream,
+  hasDatastream = false,
+  isLegacy = false,
+  type = 'default',
 }: Partial<
   TemplateDeserialized & {
-    templateFormatVersion?: 1 | 2;
+    isLegacy?: boolean;
+    type?: TemplateType;
+    hasDatastream: boolean;
   }
-> = {}): TemplateDeserialized => ({
-  name,
-  version,
-  order,
-  indexPatterns,
-  template: {
-    aliases,
-    mappings,
-    settings,
-  },
-  isManaged,
-  _kbnMeta: {
-    formatVersion: templateFormatVersion,
-  },
-});
+> = {}): TemplateDeserialized & TemplateListItem => {
+  const indexTemplate = {
+    name,
+    version,
+    order,
+    indexPatterns,
+    template: {
+      aliases,
+      mappings,
+      settings,
+    },
+    dataStream,
+    hasSettings: objHasProperties(settings),
+    hasMappings: objHasProperties(mappings),
+    hasAliases: objHasProperties(aliases),
+    _kbnMeta: {
+      type,
+      hasDatastream: dataStream !== undefined ? true : hasDatastream,
+      isLegacy,
+    },
+  };
+
+  return indexTemplate;
+};

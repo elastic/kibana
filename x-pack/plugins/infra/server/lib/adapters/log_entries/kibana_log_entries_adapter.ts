@@ -1,19 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
 import { timeMilliseconds } from 'd3-time';
-import * as runtimeTypes from 'io-ts';
-import { compact, first, get, has } from 'lodash';
+import { fold, map } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
-import { identity, constant } from 'fp-ts/lib/function';
-import { RequestHandlerContext } from 'src/core/server';
-import { JsonObject, JsonValue } from '../../../../common/typed_json';
+import * as runtimeTypes from 'io-ts';
+import { compact } from 'lodash';
+import { JsonArray } from '../../../../../../../src/plugins/kibana_utils/common';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesAdapter,
   LogEntriesParams,
@@ -28,23 +27,17 @@ import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';
 
-interface LogItemHit {
-  _index: string;
-  _id: string;
-  _source: JsonObject;
-  sort: [number, number];
-}
-
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: KibanaFramework) {}
 
   public async getLogEntries(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
-  ): Promise<LogEntryDocument[]> {
-    const { startTimestamp, endTimestamp, query, cursor, size, highlightTerm } = params;
+  ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
+    const { startTimestamp, endTimestamp, query, cursor, highlightTerm } = params;
+    const size = params.size ?? LOG_ENTRIES_PAGE_SIZE;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
 
@@ -80,9 +73,10 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       index: sourceConfiguration.logAlias,
       ignoreUnavailable: true,
       body: {
-        size: typeof size !== 'undefined' ? size : LOG_ENTRIES_PAGE_SIZE,
+        size: size + 1, // Extra one to test if it has more before or after
         track_total_hits: false,
-        _source: fields,
+        _source: false,
+        fields,
         query: {
           bool: {
             filter: [
@@ -111,12 +105,26 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       esQuery
     );
 
-    const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
-    return mapHitsToLogEntryDocuments(hits, fields);
+    const hits = esResult.hits.hits;
+    const hasMore = hits.length > size;
+
+    if (hasMore) {
+      hits.pop();
+    }
+
+    if (sortDirection === 'desc') {
+      hits.reverse();
+    }
+
+    return {
+      documents: mapHitsToLogEntryDocuments(hits, fields),
+      hasMoreBefore: sortDirection === 'desc' ? hasMore : undefined,
+      hasMoreAfter: sortDirection === 'asc' ? hasMore : undefined,
+    };
   }
 
   public async getContainedLogSummaryBuckets(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     startTimestamp: number,
     endTimestamp: number,
@@ -139,7 +147,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
             date_range: {
               field: sourceConfiguration.fields.timestamp,
               format: TIMESTAMP_FORMAT,
-              ranges: bucketIntervalStarts.map(bucketIntervalStart => ({
+              ranges: bucketIntervalStarts.map((bucketIntervalStart) => ({
                 from: bucketIntervalStart.getTime(),
                 to: bucketIntervalStart.getTime() + bucketSize,
               })),
@@ -183,7 +191,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
     return pipe(
       LogSummaryResponseRuntimeType.decode(response),
-      map(logSummaryResponse =>
+      map((logSummaryResponse) =>
         logSummaryResponse.aggregations.count_by_date.buckets.map(
           convertDateRangeBucketToSummaryBucket
         )
@@ -191,55 +199,24 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       fold(constant([]), identity)
     );
   }
-
-  public async getLogItem(
-    requestContext: RequestHandlerContext,
-    id: string,
-    sourceConfiguration: InfraSourceConfiguration
-  ) {
-    const search = (searchOptions: object) =>
-      this.framework.callWithRequest<LogItemHit, {}>(requestContext, 'search', searchOptions);
-
-    const params = {
-      index: sourceConfiguration.logAlias,
-      terminate_after: 1,
-      body: {
-        size: 1,
-        sort: [
-          { [sourceConfiguration.fields.timestamp]: 'desc' },
-          { [sourceConfiguration.fields.tiebreaker]: 'desc' },
-        ],
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-      },
-    };
-
-    const response = await search(params);
-    const document = first(response.hits.hits);
-    if (!document) {
-      throw new Error('Document not found');
-    }
-    return document;
-  }
 }
 
 function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): LogEntryDocument[] {
-  return hits.map(hit => {
-    const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
-      (flattenedFields, field) => {
-        if (has(hit._source, field)) {
-          flattenedFields[field] = get(hit._source, field);
-        }
-        return flattenedFields;
-      },
+  return hits.map((hit) => {
+    const logFields = fields.reduce<{ [fieldName: string]: JsonArray }>(
+      (flattenedFields, field) =>
+        field in hit.fields
+          ? {
+              ...flattenedFields,
+              [field]: hit.fields[field],
+            }
+          : flattenedFields,
       {}
     );
 
     return {
       id: hit._id,
+      index: hit._index,
       cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
       highlights: hit.highlight || {},
@@ -253,7 +230,7 @@ const convertDateRangeBucketToSummaryBucket = (
   entriesCount: bucket.doc_count,
   start: bucket.from || 0,
   end: bucket.to || 0,
-  topEntryKeys: bucket.top_hits_by_key.hits.hits.map(hit => ({
+  topEntryKeys: bucket.top_hits_by_key.hits.hits.map((hit) => ({
     tiebreaker: hit.sort[1],
     time: hit.sort[0],
   })),
@@ -335,8 +312,9 @@ const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
   }),
 ]);
 
-export interface LogSummaryDateRangeBucket
-  extends runtimeTypes.TypeOf<typeof LogSummaryDateRangeBucketRuntimeType> {}
+export type LogSummaryDateRangeBucket = runtimeTypes.TypeOf<
+  typeof LogSummaryDateRangeBucketRuntimeType
+>;
 
 const LogSummaryResponseRuntimeType = runtimeTypes.type({
   aggregations: runtimeTypes.type({
@@ -346,5 +324,4 @@ const LogSummaryResponseRuntimeType = runtimeTypes.type({
   }),
 });
 
-export interface LogSummaryResponse
-  extends runtimeTypes.TypeOf<typeof LogSummaryResponseRuntimeType> {}
+export type LogSummaryResponse = runtimeTypes.TypeOf<typeof LogSummaryResponseRuntimeType>;

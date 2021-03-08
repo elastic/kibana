@@ -29,7 +29,8 @@
     "mappings": {
       "properties": {
         "timestamp": {
-          "type": "date_nanos"
+          "type": "date_nanos",
+          "format": "strict_date_optional_time_nanos"
         }
       }
     },

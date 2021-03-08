@@ -20,4 +20,5 @@ export interface LegacyServiceSetupDeps
 |  --- | --- | --- |
 |  [core](./kibana-plugin-core-server.legacyservicesetupdeps.core.md) | <code>LegacyCoreSetup</code> |  |
 |  [plugins](./kibana-plugin-core-server.legacyservicesetupdeps.plugins.md) | <code>Record&lt;string, unknown&gt;</code> |  |
+|  [uiPlugins](./kibana-plugin-core-server.legacyservicesetupdeps.uiplugins.md) | <code>UiPlugins</code> |  |
 

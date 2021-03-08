@@ -1,7 +1,13 @@
 .dshAppContainer {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+}
+
+.dashboardViewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .dshStartScreen {
@@ -18,8 +24,9 @@
 }
 
 .dshEmptyWidget {
+  background-color: $euiColorLightestShade;
   border: $euiBorderThin;
-  border-style:  dashed;
+  border-style: dashed;
   border-radius: $euiBorderRadius;
   padding: $euiSizeXXL * 2;
   max-width: 400px;
@@ -27,10 +34,36 @@
   text-align: center;
 }
 
-.dshEmptyWidget {
-  border: 2px dashed $euiColorLightShade;
-  padding: 4 * $euiSize;
-  max-width: 20em;
-  margin-left: 10px;
-  text-align: center;
+.dshUnsavedListingItem {
+  margin-top: $euiSizeM;
+}
+
+.dshUnsavedListingItem__icon {
+  margin-right: $euiSizeM;
+}
+
+.dshUnsavedListingItem__title {
+  margin-bottom: 0 !important;
+}
+
+.dshUnsavedListingItem__loading {
+  color: $euiTextSubduedColor !important;
+}
+
+.dshUnsavedListingItem__actions {
+  margin-left: $euiSizeL + $euiSizeXS;
+}
+
+@include euiBreakpoint('xs', 's') {
+  .dshUnsavedListingItem {
+    margin-top: $euiSize;
+  }
+
+  .dshUnsavedListingItem__heading {
+    margin-bottom: $euiSizeXS;
+  }
+
+  .dshUnsavedListingItem__actions {
+    flex-direction: column;
+  }
 }

@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { getSeriesRequestParams } from './series/get_request_params';
 import { handleResponseBody } from './series/handle_response_body';
 import { handleErrorResponse } from './handle_error_response';
@@ -28,7 +18,6 @@ export async function getSeriesData(req, panel) {
     searchStrategy,
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
-  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
   const meta = {
     type: panel.type,
@@ -36,7 +25,7 @@ export async function getSeriesData(req, panel) {
   };
 
   try {
-    const bodiesPromises = getActiveSeries(panel).map(series =>
+    const bodiesPromises = getActiveSeries(panel).map((series) =>
       getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities)
     );
 
@@ -44,9 +33,16 @@ export async function getSeriesData(req, panel) {
       (acc, items) => acc.concat(items),
       []
     );
+    const data = await searchStrategy.search(req, searches);
 
-    const data = await searchRequest.search(searches);
-    const series = data.map(handleResponseBody(panel));
+    const handleResponseBodyFn = handleResponseBody(panel, req, searchStrategy, capabilities);
+
+    const series = await Promise.all(
+      data.map(
+        async (resp) => await handleResponseBodyFn(resp.rawResponse ? resp.rawResponse : resp)
+      )
+    );
+
     let annotations = null;
 
     if (panel.annotations && panel.annotations.length) {

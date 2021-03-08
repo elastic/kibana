@@ -2,48 +2,58 @@
 [[upgrade-assistant]]
 == Upgrade Assistant
 
-The Upgrade Assistant helps you prepare for your upgrade to {es} 9.0. 
-To access the assistant, go to *Management > 9.0 Upgrade Assistant*. 
+The Upgrade Assistant helps you prepare for your upgrade to the next major {es} version.
+For example, if you are using 6.8, the Upgrade Assistant helps you to upgrade to 7.0.
+To access the assistant, open the main menu, then click *Stack Management > Upgrade Assistant*.
 
-The assistant identifies the deprecated settings in your cluster and indices 
-and guides you through the process of resolving issues, including reindexing. 
+The assistant identifies the deprecated settings in your cluster and indices
+and guides you through the process of resolving issues, including reindexing.
 
-Before upgrading to Elasticsearch 9.0, make sure that you are using the final 
-8.x minor release to see the most up-to-date deprecation issues. 
+Before you upgrade, make sure that you are using the latest released minor
+version of {es} to see the most up-to-date deprecation issues.
+For example, if you want to upgrade to to 7.0, make sure that you are using 6.8.
+
+[float]
+=== Required permissions
+
+The `manage` cluster privilege is required to access the *Upgrade assistant*.
+Additional privileges may be needed to perform certain actions.
+
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
 [float]
 === Reindexing
 
-The *Indices* page lists the indices that are incompatible with the next 
+The *Indices* page lists the indices that are incompatible with the next
 major version of {es}. You can initiate a reindex to resolve the issues.
 
 [role="screenshot"]
 image::images/management-upgrade-assistant-9.0.png[]
 
-For a preview of how the data will change during the reindex, select the 
-index name. A warning appears if the index requires destructive changes.  
-Back up your index, then proceed with the reindex by accepting each breaking change.  
+For a preview of how the data will change during the reindex, select the
+index name. A warning appears if the index requires destructive changes.
+Back up your index, then proceed with the reindex by accepting each breaking change.
 
-You can follow the progress as the Upgrade Assistant makes the index read-only, 
-creates a new index, reindexes the documents, and creates an alias that points 
-from the old index to the new one. 
+You can follow the progress as the Upgrade Assistant makes the index read-only,
+creates a new index, reindexes the documents, and creates an alias that points
+from the old index to the new one.
 
-If the reindexing fails or is cancelled, the changes are rolled back, the 
-new index is deleted, and the original index becomes writable. An error 
+If the reindexing fails or is cancelled, the changes are rolled back, the
+new index is deleted, and the original index becomes writable. An error
 message explains the reason for the failure.
 
-You can reindex multiple indices at a time, but keep an eye on the 
-{es} metrics, including CPU usage, memory pressure, and disk usage. If a 
-metric is so high it affects query performance, cancel the reindex and 
+You can reindex multiple indices at a time, but keep an eye on the
+{es} metrics, including CPU usage, memory pressure, and disk usage. If a
+metric is so high it affects query performance, cancel the reindex and
 continue by reindexing fewer indices at a time.
 
 Additional considerations:
 
 * If you use {alert-features}, when you reindex the internal indices
-(`.watches`), the {watcher} process pauses and no alerts are triggered.  
+(`.watches`), the {watcher} process pauses and no alerts are triggered.
 
 * If you use {ml-features}, when you reindex the internal indices (`.ml-state`),
-the {ml} jobs pause and models are not trained or updated. 
+the {ml} jobs pause and models are not trained or updated.
 
 * If you use {security-features}, before you reindex the internal indices
 (`.security*`), it is a good idea to create a temporary superuser account in the

@@ -1,28 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'dashboard', 'spaceSelector', 'header']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
-  describe('preserve url', function() {
-    before(async function() {
+  describe('preserve url', function () {
+    before(async function () {
       await esArchiver.load('spaces/multi_space');
     });
 
-    after(function() {
+    after(function () {
       return esArchiver.unload('spaces/multi_space');
     });
 
-    it('goes back to last opened url', async function() {
+    it('goes back to last opened url', async function () {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
       await PageObjects.common.navigateToApp('home');
@@ -33,7 +34,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       expect(activeTitle).to.be('A Dashboard');
     });
 
-    it('remembers url after switching spaces', async function() {
+    it('remembers url after switching spaces', async function () {
       // default space
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard');

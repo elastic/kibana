@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import {
   AnnotationDomainTypes,
   Axis,
@@ -105,7 +106,9 @@ export const WatchVisualization = () => {
     threshold,
   } = watch;
 
-  const domain = getDomain(watch);
+  // Only recalculate the domain if the watch configuration changes. This prevents the visualization
+  // request's resolution from re-triggering itself in an infinite loop.
+  const domain = useMemo(() => getDomain(watch), [watch]);
   const timeBuckets = createTimeBuckets();
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
@@ -124,7 +127,7 @@ export const WatchVisualization = () => {
     isLoading,
     data: watchVisualizationData,
     error,
-    sendRequest: reload,
+    resendRequest: reload,
   } = useGetWatchVisualizationData(watchWithoutActions, visualizeOptions);
 
   useEffect(
@@ -193,7 +196,7 @@ export const WatchVisualization = () => {
     const actualThreshold = getThreshold(watch);
     let maxY = actualThreshold[actualThreshold.length - 1];
 
-    (Object.values(watchVisualizationData) as number[][][]).forEach(watchData => {
+    (Object.values(watchVisualizationData) as number[][][]).forEach((watchData) => {
       watchData.forEach(([, y]) => {
         if (y > maxY) {
           maxY = y;

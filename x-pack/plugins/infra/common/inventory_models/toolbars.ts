@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReactNode, FunctionComponent } from 'react';
@@ -11,7 +12,7 @@ import { HostToolbarItems } from './host/toolbar_items';
 import { ContainerToolbarItems } from './container/toolbar_items';
 import { PodToolbarItems } from './pod/toolbar_items';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../public/components/inventory/toolbars/toolbar';
+import { ToolbarProps } from '../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
 import { AwsEC2ToolbarItems } from './aws_ec2/toolbar_items';
 import { AwsS3ToolbarItems } from './aws_s3/toolbar_items';
 import { AwsRDSToolbarItems } from './aws_rds/toolbar_items';

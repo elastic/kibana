@@ -1,16 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { BASE_PATH } from '../../../../../common/constants';
 
 import { EuiCard, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useAppContext } from '../../../app_context';
 
-export const AddLicense = ({ uploadPath = `#${BASE_PATH}upload_license` }) => {
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+
+export const AddLicense = ({ uploadPath = `/upload_license` }) => {
+  const { services } = useAppContext();
+
   return (
     <EuiCard
       title={
@@ -26,7 +31,10 @@ export const AddLicense = ({ uploadPath = `#${BASE_PATH}upload_license` }) => {
         />
       }
       footer={
-        <EuiButton data-test-subj="updateLicenseButton" href={uploadPath}>
+        <EuiButton
+          data-test-subj="updateLicenseButton"
+          {...reactRouterNavigate(services.history, uploadPath)}
+        >
           <FormattedMessage
             id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseButtonLabel"
             defaultMessage="Update license"

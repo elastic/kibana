@@ -1,21 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { toasts, fatalError } from '../../services/notification';
-import { CRUD_APP_BASE_PATH } from '../../constants';
 import { loadClusters } from './load_clusters';
 
-import {
-  editCluster as sendEditClusterRequest,
-  extractQueryParams,
-  getRouter,
-  redirect,
-} from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
+import { editCluster as sendEditClusterRequest, getRouter, redirect } from '../../services';
 
 import {
   EDIT_CLUSTER_START,
@@ -26,7 +22,7 @@ import {
   CLEAR_EDIT_CLUSTER_ERRORS,
 } from '../action_types';
 
-export const editCluster = cluster => async dispatch => {
+export const editCluster = (cluster) => async (dispatch) => {
   dispatch({
     type: EDIT_CLUSTER_SAVE,
   });
@@ -35,7 +31,7 @@ export const editCluster = cluster => async dispatch => {
     await Promise.all([
       sendEditClusterRequest(cluster),
       // Wait at least half a second to avoid a weird flicker of the saving feedback.
-      new Promise(resolve => setTimeout(resolve, 500)),
+      new Promise((resolve) => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
     if (error) {
@@ -95,13 +91,13 @@ export const editCluster = cluster => async dispatch => {
     // This will open the edited cluster in the detail panel. Note that we're *not* showing a success toast
     // here, because it would partially obscure the detail panel.
     history.push({
-      pathname: `${CRUD_APP_BASE_PATH}/list`,
+      pathname: `/list`,
       search: `?cluster=${cluster.name}`,
     });
   }
 };
 
-export const startEditingCluster = ({ clusterName }) => dispatch => {
+export const startEditingCluster = ({ clusterName }) => (dispatch) => {
   dispatch(loadClusters());
 
   dispatch({
@@ -110,7 +106,7 @@ export const startEditingCluster = ({ clusterName }) => dispatch => {
   });
 };
 
-export const stopEditingCluster = () => dispatch => {
+export const stopEditingCluster = () => (dispatch) => {
   // Load the clusters to refresh the one we just edited.
   dispatch(loadClusters());
 
@@ -119,7 +115,7 @@ export const stopEditingCluster = () => dispatch => {
   });
 };
 
-export const clearEditClusterErrors = () => dispatch => {
+export const clearEditClusterErrors = () => (dispatch) => {
   dispatch({
     type: CLEAR_EDIT_CLUSTER_ERRORS,
   });

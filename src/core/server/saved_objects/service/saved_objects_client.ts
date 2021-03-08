@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
@@ -37,11 +27,35 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   id?: string;
   /** Overwrite existing documents (defaults to false) */
   overwrite?: boolean;
+  /**
+   * An opaque version number which changes on each successful write operation.
+   * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.
+   **/
+  version?: string;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /**
+   * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
+   * Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the
+   * current Kibana version, it will result in an error.
+   *
+   * @remarks
+   * Do not attempt to set this manually. It should only be used if you retrieved an existing object that had the `coreMigrationVersion`
+   * field set and you want to create it again.
+   */
+  coreMigrationVersion?: string;
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
+  /**
+   * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsCreateOptions}.
+   *
+   * Note: this can only be used for multi-namespace object types.
+   */
+  initialNamespaces?: string[];
 }
 
 /**
@@ -52,9 +66,29 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   id?: string;
   type: string;
   attributes: T;
+  version?: string;
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /**
+   * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
+   * Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the
+   * current Kibana version, it will result in an error.
+   *
+   * @remarks
+   * Do not attempt to set this manually. It should only be used if you retrieved an existing object that had the `coreMigrationVersion`
+   * field set and you want to create it again.
+   */
+  coreMigrationVersion?: string;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
+  /**
+   * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsCreateOptions}.
+   *
+   * Note: this can only be used for multi-namespace object types.
+   */
+  initialNamespaces?: string[];
 }
 
 /**
@@ -69,6 +103,13 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
   type: string;
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: Partial<T>;
+  /**
+   * Optional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsBulkUpdateOptions}.
+   *
+   * Note: the default namespace's string representation is `'default'`, and its ID representation is `undefined`.
+   **/
+  namespace?: string;
 }
 
 /**
@@ -80,6 +121,46 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 }
 
 /**
+ *
+ * @public
+ */
+export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
+  /**
+   * The Elasticsearch `_score` of this result.
+   */
+  score: number;
+  /**
+   * The Elasticsearch `sort` value of this result.
+   *
+   * @remarks
+   * This can be passed directly to the `searchAfter` param in the {@link SavedObjectsFindOptions}
+   * in order to page through large numbers of hits. It is recommended you use this alongside
+   * a Point In Time (PIT) that was opened with {@link SavedObjectsClient.openPointInTimeForType}.
+   *
+   * @example
+   * ```ts
+   * const { id } = await savedObjectsClient.openPointInTimeForType('visualization');
+   * const page1 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id },
+   * });
+   * const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+   * const page2 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id: page1.pit_id },
+   *   searchAfter: lastHit.sort,
+   * });
+   * await savedObjectsClient.closePointInTime(page2.pit_id);
+   * ```
+   */
+  sort?: unknown[];
+}
+
+/**
  * Return type of the Saved Objects `find()` method.
  *
  * *Note*: this type is different between the Public and Server Saved Objects
@@ -88,10 +169,32 @@ export interface SavedObjectsBulkResponse<T = unknown> {
  * @public
  */
 export interface SavedObjectsFindResponse<T = unknown> {
-  saved_objects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObjectsFindResult<T>>;
   total: number;
   per_page: number;
   page: number;
+  pit_id?: string;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsObject {
+  id: string;
+  type: string;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsResponse {
+  errors: Array<{
+    id: string;
+    type: string;
+    error: SavedObjectError;
+  }>;
 }
 
 /**
@@ -111,6 +214,62 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
+export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
+  version?: string;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsAddToNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. */
+  namespaces: string[];
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  namespaces: string[];
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation. Defaults to `true` */
+  refresh?: boolean;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions {
+  /** The number of objects that have been updated by this operation */
+  updated: number;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -123,6 +282,8 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
 }
 
 /**
@@ -166,6 +327,72 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  *
  * @public
  */
+export interface SavedObjectsResolveResponse<T = unknown> {
+  saved_object: SavedObject<T>;
+  /**
+   * The outcome for a successful `resolve` call is one of the following values:
+   *
+   *  * `'exactMatch'` -- One document exactly matched the given ID.
+   *  * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different
+   *    than the given ID.
+   *  * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the
+   *    `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
+   */
+  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+  /**
+   * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
+   */
+  aliasTargetId?: string;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+  /**
+   * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
+   */
+  keepAlive?: string;
+  /**
+   * An optional ES preference value to be used for the query.
+   */
+  preference?: string;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeResponse {
+  /**
+   * PIT ID returned from ES.
+   */
+  id: string;
+}
+
+/**
+ * @public
+ */
+export type SavedObjectsClosePointInTimeOptions = SavedObjectsBaseOptions;
+
+/**
+ * @public
+ */
+export interface SavedObjectsClosePointInTimeResponse {
+  /**
+   * If true, all search contexts associated with the PIT id are
+   * successfully closed.
+   */
+  succeeded: boolean;
+  /**
+   * The number of search contexts that have been successfully closed.
+   */
+  num_freed: number;
+}
+
+/**
+ *
+ * @public
+ */
 export class SavedObjectsClient {
   public static errors = SavedObjectsErrorHelpers;
   public errors = SavedObjectsErrorHelpers;
@@ -199,6 +426,20 @@ export class SavedObjectsClient {
     options?: SavedObjectsCreateOptions
   ) {
     return await this._repository.bulkCreate(objects, options);
+  }
+
+  /**
+   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
+   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   *
+   * @param objects
+   * @param options
+   */
+  async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsCheckConflictsResponse> {
+    return await this._repository.checkConflicts(objects, options);
   }
 
   /**
@@ -255,6 +496,21 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param type - The type of SavedObject to retrieve
+   * @param id - The ID of the SavedObject to retrieve
+   * @param options
+   */
+  async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    return await this._repository.resolve(type, id, options);
+  }
+
+  /**
    * Updates an SavedObject
    *
    * @param type
@@ -271,6 +527,40 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Adds namespaces to a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  async addToNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsAddToNamespacesOptions = {}
+  ): Promise<SavedObjectsAddToNamespacesResponse> {
+    return await this._repository.addToNamespaces(type, id, namespaces, options);
+  }
+
+  /**
+   * Removes namespaces from a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  async deleteFromNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsDeleteFromNamespacesOptions = {}
+  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
+    return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
+  }
+
+  /**
    * Bulk Updates multiple SavedObject at once
    *
    * @param objects
@@ -280,5 +570,37 @@ export class SavedObjectsClient {
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
+  }
+
+  /**
+   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
+   */
+  async removeReferencesTo(
+    type: string,
+    id: string,
+    options?: SavedObjectsRemoveReferencesToOptions
+  ) {
+    return await this._repository.removeReferencesTo(type, id, options);
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to {@link SavedObjectsClient.find} to search
+   * against that PIT.
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    return await this._repository.openPointInTimeForType(type, options);
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the
+   * Elasticsearch client, and is included in the Saved Objects Client as a convenience
+   * for consumers who are using {@link SavedObjectsClient.openPointInTimeForType}.
+   */
+  async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this._repository.closePointInTime(id, options);
   }
 }

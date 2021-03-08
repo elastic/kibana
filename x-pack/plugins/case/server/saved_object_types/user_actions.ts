@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { userActionsMigrations } from './migrations';
 
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 
 export const caseUserActionSavedObjectType: SavedObjectsType = {
   name: CASE_USER_ACTION_SAVED_OBJECT,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       action_field: {
@@ -44,4 +46,5 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: userActionsMigrations,
 };

@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { CalendarsListTable } from './table';
+import { MemoryRouter } from 'react-router-dom';
+
+jest.mock('../../../../contexts/kibana/use_create_url', () => ({
+  useCreateAndNavigateToMlLink: jest.fn(),
+}));
 
 const calendars = [
   {
@@ -42,7 +48,11 @@ describe('CalendarsListTable', () => {
   });
 
   test('New button enabled if permission available', () => {
-    const wrapper = mountWithIntl(<CalendarsListTable {...props} />);
+    const wrapper = mountWithIntl(
+      <MemoryRouter>
+        <CalendarsListTable {...props} />
+      </MemoryRouter>
+    );
 
     const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');
@@ -56,7 +66,11 @@ describe('CalendarsListTable', () => {
       canCreateCalendar: false,
     };
 
-    const wrapper = mountWithIntl(<CalendarsListTable {...disableProps} />);
+    const wrapper = mountWithIntl(
+      <MemoryRouter>
+        <CalendarsListTable {...disableProps} />
+      </MemoryRouter>
+    );
 
     const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');
@@ -70,7 +84,11 @@ describe('CalendarsListTable', () => {
       mlNodesAvailable: false,
     };
 
-    const wrapper = mountWithIntl(<CalendarsListTable {...disableProps} />);
+    const wrapper = mountWithIntl(
+      <MemoryRouter>
+        <CalendarsListTable {...disableProps} />
+      </MemoryRouter>
+    );
 
     const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
     const button = buttons.find('EuiButton');

@@ -1,18 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Logger } from 'src/core/server';
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'kibana/server';
+import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../licensing/server';
 import { LicenseType } from '../../../licensing/common/types';
+import type { SnapshotRestoreRequestHandlerContext } from '../types';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -35,7 +33,7 @@ export class License {
     { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
     { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
   ) {
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
 
@@ -53,12 +51,14 @@ export class License {
     });
   }
 
-  guardApiRoute(handler: RequestHandler) {
+  guardApiRoute<P, Q, B, Context extends SnapshotRestoreRequestHandlerContext>(
+    handler: RequestHandler<P, Q, B, Context>
+  ) {
     const license = this;
 
     return function licenseCheck(
-      ctx: RequestHandlerContext,
-      request: KibanaRequest,
+      ctx: Context,
+      request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
     ) {
       const licenseStatus = license.getStatus();

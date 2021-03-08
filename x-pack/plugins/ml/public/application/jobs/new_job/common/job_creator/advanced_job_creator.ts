@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
@@ -193,7 +194,7 @@ export class AdvancedJobCreator extends JobCreator {
     const detectors = getRichDetectors(job, datafeed, this.additionalFields, true);
 
     // keep track of the custom rules for each detector
-    const customRules = this._detectors.map(d => d.custom_rules);
+    const customRules = this._detectors.map((d) => d.custom_rules);
 
     this.removeAllDetectors();
     this._richDetectors.length = 0;

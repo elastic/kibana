@@ -1,31 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IClusterClient, Logger } from 'src/core/server';
-import { APMConfig } from '../../..';
+import { ElasticsearchClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
-  Mappings
-} from '../../helpers/create_or_update_index';
+  MappingsDefinition,
+} from '../../../../../observability/server';
+import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function createApmAgentConfigurationIndex({
-  esClient,
+  client,
   config,
-  logger
+  logger,
 }: {
-  esClient: IClusterClient;
+  client: ElasticsearchClient;
   config: APMConfig;
   logger: Logger;
 }) {
   const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
-  return createOrUpdateIndex({ index, esClient, logger, mappings });
+  return createOrUpdateIndex({
+    index,
+    client,
+    logger,
+    mappings,
+  });
 }
 
-const mappings: Mappings = {
+const mappings: MappingsDefinition = {
   dynamic: 'strict',
   dynamic_templates: [
     {
@@ -34,42 +40,42 @@ const mappings: Mappings = {
         match_mapping_type: 'string',
         mapping: {
           type: 'keyword',
-          ignore_above: 1024
-        }
-      }
-    }
+          ignore_above: 1024,
+        },
+      },
+    },
   ],
   properties: {
     '@timestamp': {
-      type: 'date'
+      type: 'date',
     },
     service: {
       properties: {
         name: {
           type: 'keyword',
-          ignore_above: 1024
+          ignore_above: 1024,
         },
         environment: {
           type: 'keyword',
-          ignore_above: 1024
-        }
-      }
+          ignore_above: 1024,
+        },
+      },
     },
     settings: {
       // allowing dynamic fields without specifying anything specific
       dynamic: true,
-      properties: {}
+      properties: {},
     },
     applied_by_agent: {
-      type: 'boolean'
+      type: 'boolean',
     },
     agent_name: {
       type: 'keyword',
-      ignore_above: 1024
+      ignore_above: 1024,
     },
     etag: {
       type: 'keyword',
-      ignore_above: 1024
-    }
-  }
+      ignore_above: 1024,
+    },
+  },
 };

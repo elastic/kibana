@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { padLeft } from 'lodash';
+import { padStart } from 'lodash';
 
 /*
  * The logic for ID is: XXYYZZAA, where XX is major version, YY is minor
@@ -27,7 +28,7 @@ export function getTemplateVersion(versionStr: string): number {
   const padded = splitted.map((v: string) => {
     const vMatches = v.match(/\d+/);
     if (vMatches) {
-      return padLeft(vMatches[0], 2, '0');
+      return padStart(vMatches[0], 2, '0');
     }
     return '00';
   });
@@ -39,13 +40,13 @@ export function getTemplateVersion(versionStr: string): number {
     const matches = minorStr.match(/alpha(?<alpha>\d+)/);
     if (matches != null && matches.groups != null) {
       const alphaVerInt = parseInt(matches.groups.alpha, 10); // alpha build indicator
-      buildV = padLeft(`${alphaVerInt}`, 2, '0');
+      buildV = padStart(`${alphaVerInt}`, 2, '0');
     }
   } else if (minorStr.match('beta')) {
     const matches = minorStr.match(/beta(?<beta>\d+)/);
     if (matches != null && matches.groups != null) {
       const alphaVerInt = parseInt(matches.groups.beta, 10) + 25; // beta build indicator
-      buildV = padLeft(`${alphaVerInt}`, 2, '0');
+      buildV = padStart(`${alphaVerInt}`, 2, '0');
     }
   } else {
     buildV = '99'; // release build indicator

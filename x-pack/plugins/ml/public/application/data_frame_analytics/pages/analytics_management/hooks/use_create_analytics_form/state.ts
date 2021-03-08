@@ -1,37 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
-import { checkPermission } from '../../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
+import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
+import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 import {
-  isClassificationAnalysis,
-  isRegressionAnalysis,
-  DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common/analytics';
-import { CloneDataFrameAnalyticsConfig } from '../../components/analytics_list/action_clone';
-
+  DataFrameAnalyticsId,
+  DataFrameAnalysisConfigType,
+} from '../../../../../../../common/types/data_frame_analytics';
+import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
-  // eslint-disable-next-line @typescript-eslint/camelcase
   outlier_detection = '50mb',
   classification = '100mb',
 }
 
-export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 2;
+export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 0;
+export const DEFAULT_MAX_NUM_THREADS = 1;
+export const UNSET_CONFIG_ITEM = '--';
 
 export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
-export type AnalyticsJobType = ANALYSIS_CONFIG_TYPE | undefined;
+export type AnalyticsJobType = DataFrameAnalysisConfigType | undefined;
 type IndexPatternId = string;
 export type SourceIndexMap = Record<
   IndexPatternTitle,
@@ -46,52 +46,72 @@ export interface FormMessage {
 export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
+  disableSwitchToForm: boolean;
   form: {
+    alpha: undefined | number;
+    computeFeatureInfluence: string;
     createIndexPattern: boolean;
+    classAssignmentObjective: undefined | string;
     dependentVariable: DependentVariable;
-    dependentVariableFetchFail: boolean;
-    dependentVariableOptions: EuiComboBoxOptionOption[];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
-    excludes: string[];
-    excludesOptions: EuiComboBoxOptionOption[];
-    fieldOptionsFetchFail: boolean;
+    earlyStoppingEnabled: undefined | boolean;
+    downsampleFactor: undefined | number;
+    eta: undefined | number;
+    etaGrowthRatePerTree: undefined | number;
+    featureBagFraction: undefined | number;
+    featureInfluenceThreshold: undefined | number;
+    gamma: undefined | number;
+    includes: string[];
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
-    loadingDepVarOptions: boolean;
+    jobConfigQuery: any;
+    jobConfigQueryString: string | undefined;
+    lambda: number | undefined;
     loadingFieldOptions: boolean;
-    maxDistinctValuesError: string | undefined;
+    maxNumThreads: undefined | number;
+    maxOptimizationRoundsPerHyperparameter: undefined | number;
+    maxTrees: undefined | number;
+    method: undefined | string;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
     modelMemoryLimitValidationResult: any;
+    nNeighbors: undefined | number;
     numTopFeatureImportanceValues: number | undefined;
     numTopFeatureImportanceValuesValid: boolean;
+    numTopClasses: number;
+    outlierFraction: undefined | number;
+    predictionFieldName: undefined | string;
     previousJobType: null | AnalyticsJobType;
-    previousSourceIndex: EsIndexName | undefined;
+    requiredFieldsError: string | undefined;
+    randomizeSeed: undefined | number;
+    resultsField: undefined | string;
+    softTreeDepthLimit: undefined | number;
+    softTreeDepthTolerance: undefined | number;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
     sourceIndexContainsNumericalFields: boolean;
     sourceIndexFieldsCheckFailed: boolean;
+    standardizationEnabled: undefined | string;
     trainingPercent: number;
+    useEstimatedMml: boolean;
   };
   disabled: boolean;
-  indexNames: EsIndexName[];
   indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isAdvancedEditorValidJson: boolean;
+  hasSwitchedToEditor: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
-  isModalButtonDisabled: boolean;
-  isModalVisible: boolean;
   isValid: boolean;
   jobConfig: DeepPartial<DataFrameAnalyticsConfig>;
   jobIds: DataFrameAnalyticsId[];
@@ -103,110 +123,81 @@ export interface State {
 export const getInitialState = (): State => ({
   advancedEditorMessages: [],
   advancedEditorRawString: '',
+  disableSwitchToForm: false,
   form: {
-    createIndexPattern: false,
+    alpha: undefined,
+    computeFeatureInfluence: 'true',
+    createIndexPattern: true,
+    classAssignmentObjective: undefined,
     dependentVariable: '',
-    dependentVariableFetchFail: false,
-    dependentVariableOptions: [],
     description: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
-    excludes: [],
-    fieldOptionsFetchFail: false,
-    excludesOptions: [],
+    earlyStoppingEnabled: undefined,
+    downsampleFactor: undefined,
+    eta: undefined,
+    etaGrowthRatePerTree: undefined,
+    featureBagFraction: undefined,
+    featureInfluenceThreshold: undefined,
+    gamma: undefined,
+    includes: [],
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    loadingDepVarOptions: false,
+    jobConfigQuery: defaultSearchQuery,
+    jobConfigQueryString: undefined,
+    lambda: undefined,
     loadingFieldOptions: false,
-    maxDistinctValuesError: undefined,
+    maxNumThreads: DEFAULT_MAX_NUM_THREADS,
+    maxOptimizationRoundsPerHyperparameter: undefined,
+    maxTrees: undefined,
+    method: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
     modelMemoryLimitValidationResult: null,
+    nNeighbors: undefined,
     numTopFeatureImportanceValues: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
     numTopFeatureImportanceValuesValid: true,
+    numTopClasses: -1,
+    outlierFraction: undefined,
+    predictionFieldName: undefined,
     previousJobType: null,
-    previousSourceIndex: undefined,
+    requiredFieldsError: undefined,
+    randomizeSeed: undefined,
+    resultsField: undefined,
+    softTreeDepthLimit: undefined,
+    softTreeDepthTolerance: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
     sourceIndexContainsNumericalFields: true,
     sourceIndexFieldsCheckFailed: false,
+    standardizationEnabled: 'true',
     trainingPercent: 80,
+    useEstimatedMml: true,
   },
   jobConfig: {},
   disabled:
     !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
-  indexNames: [],
   indexPatternsMap: {},
   isAdvancedEditorEnabled: false,
   isAdvancedEditorValidJson: true,
+  hasSwitchedToEditor: false,
   isJobCreated: false,
   isJobStarted: false,
-  isModalVisible: false,
-  isModalButtonDisabled: false,
   isValid: false,
   jobIds: [],
   requestMessages: [],
   estimatedModelMemoryLimit: '',
 });
-
-const getExcludesFields = (excluded: string[]) => {
-  const { fields } = newJobCapsService;
-  const updatedExcluded: string[] = [];
-  // Loop through excluded fields to check for multiple types of same field
-  for (let i = 0; i < excluded.length; i++) {
-    const fieldName = excluded[i];
-    let mainField;
-
-    // No dot in fieldName - it is the main field
-    if (fieldName.includes('.') === false) {
-      mainField = fieldName;
-    } else {
-      // Dot in fieldName - check if there's a field whose name equals the fieldName with the last dot suffix removed
-      const regex = /\.[^.]*$/;
-      const suffixRemovedField = fieldName.replace(regex, '');
-      const fieldMatch = newJobCapsService.getFieldById(suffixRemovedField);
-
-      // There's a match - set as the main field
-      if (fieldMatch !== null) {
-        mainField = suffixRemovedField;
-      } else {
-        // No main field to be found - add the fieldName to updatedExcluded array if it's not already there
-        if (updatedExcluded.includes(fieldName) === false) {
-          updatedExcluded.push(fieldName);
-        }
-      }
-    }
-
-    if (mainField !== undefined) {
-      // Add the main field to the updatedExcluded array if it's not already there
-      if (updatedExcluded.includes(mainField) === false) {
-        updatedExcluded.push(mainField);
-      }
-      // Create regex to find all other fields whose names begin with main field followed by a dot
-      const regex = new RegExp(`${mainField}\\..+`);
-
-      // Loop through fields and add fields matching the pattern to updatedExcluded array
-      for (let j = 0; j < fields.length; j++) {
-        const field = fields[j].name;
-        if (updatedExcluded.includes(field) === false && field.match(regex) !== null) {
-          updatedExcluded.push(field);
-        }
-      }
-    }
-  }
-
-  return updatedExcluded;
-};
 
 export const getJobConfigFromFormState = (
   formState: State['form']
@@ -218,14 +209,15 @@ export const getJobConfigFromFormState = (
       // the into an array of indices to be in the correct format for
       // the data frame analytics API.
       index: formState.sourceIndex.includes(',')
-        ? formState.sourceIndex.split(',').map(d => d.trim())
+        ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
+      query: formState.jobConfigQuery,
     },
     dest: {
       index: formState.destinationIndex,
     },
     analyzed_fields: {
-      excludes: getExcludesFields(formState.excludes),
+      includes: formState.includes,
     },
     analysis: {
       outlier_detection: {},
@@ -233,50 +225,136 @@ export const getJobConfigFromFormState = (
     model_memory_limit: formState.modelMemoryLimit,
   };
 
+  if (formState.maxNumThreads !== undefined) {
+    jobConfig.max_num_threads = formState.maxNumThreads;
+  }
+
+  const resultsFieldEmpty =
+    typeof formState?.resultsField === 'string' && formState?.resultsField.trim() === '';
+
+  if (jobConfig.dest && !resultsFieldEmpty) {
+    jobConfig.dest.results_field = formState.resultsField;
+  }
+
   if (
     formState.jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
     formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
   ) {
-    jobConfig.analysis = {
-      [formState.jobType]: {
-        dependent_variable: formState.dependentVariable,
-        num_top_feature_importance_values: formState.numTopFeatureImportanceValues,
-        training_percent: formState.trainingPercent,
-      },
+    let analysis = {
+      dependent_variable: formState.dependentVariable,
+      num_top_feature_importance_values: formState.numTopFeatureImportanceValues,
+      training_percent: formState.trainingPercent,
     };
+
+    analysis = Object.assign(
+      analysis,
+      formState.alpha && { alpha: formState.alpha },
+      formState.eta && { eta: formState.eta },
+      formState.etaGrowthRatePerTree && {
+        eta_growth_rate_per_tree: formState.etaGrowthRatePerTree,
+      },
+      formState.downsampleFactor && { downsample_factor: formState.downsampleFactor },
+      formState.featureBagFraction && {
+        feature_bag_fraction: formState.featureBagFraction,
+      },
+      formState.gamma && { gamma: formState.gamma },
+      formState.lambda && { lambda: formState.lambda },
+      formState.maxOptimizationRoundsPerHyperparameter && {
+        max_optimization_rounds_per_hyperparameter:
+          formState.maxOptimizationRoundsPerHyperparameter,
+      },
+      formState.maxTrees && { max_trees: formState.maxTrees },
+      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed },
+      formState.earlyStoppingEnabled !== undefined && {
+        early_stopping_enabled: formState.earlyStoppingEnabled,
+      },
+      formState.predictionFieldName && { prediction_field_name: formState.predictionFieldName },
+      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed },
+      formState.softTreeDepthLimit && { soft_tree_depth_limit: formState.softTreeDepthLimit },
+      formState.softTreeDepthTolerance && {
+        soft_tree_depth_tolerance: formState.softTreeDepthTolerance,
+      }
+    );
+
+    jobConfig.analysis = {
+      [formState.jobType]: analysis,
+    };
+  }
+
+  if (jobConfig?.analysis !== undefined && isClassificationAnalysis(jobConfig?.analysis)) {
+    if (formState.numTopClasses !== undefined) {
+      jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+    }
+    if (formState.classAssignmentObjective !== undefined) {
+      jobConfig.analysis.classification.class_assignment_objective =
+        formState.classAssignmentObjective;
+    }
+  }
+
+  if (formState.jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
+    const analysis = Object.assign(
+      {},
+      formState.method && { method: formState.method },
+      formState.nNeighbors && {
+        n_neighbors: formState.nNeighbors,
+      },
+      formState.outlierFraction && { outlier_fraction: formState.outlierFraction },
+      formState.featureInfluenceThreshold && {
+        feature_influence_threshold: formState.featureInfluenceThreshold,
+      },
+      formState.standardizationEnabled && {
+        standardization_enabled: formState.standardizationEnabled,
+      }
+    );
+    // @ts-ignore
+    jobConfig.analysis.outlier_detection = analysis;
   }
 
   return jobConfig;
 };
 
+function toCamelCase(property: string): string {
+  const camelCased = property.replace(/_([a-z])/g, function (g) {
+    return g[1].toUpperCase();
+  });
+
+  return camelCased;
+}
+
 /**
  * Extracts form state for a job clone from the analytics job configuration.
  * For cloning we keep job id and destination index empty.
  */
-export function getCloneFormStateFromJobConfig(
-  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>
+export function getFormStateFromJobConfig(
+  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
+  isClone: boolean = true
 ): Partial<State['form']> {
-  const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
-
+  const jobType = getAnalysisType(analyticsJobConfig.analysis) as DataFrameAnalysisConfigType;
   const resultState: Partial<State['form']> = {
     jobType,
     description: analyticsJobConfig.description ?? '',
+    resultsField: analyticsJobConfig.dest.results_field,
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
-    excludes: analyticsJobConfig.analyzed_fields.excludes,
+    maxNumThreads: analyticsJobConfig.max_num_threads,
+    includes: analyticsJobConfig.analyzed_fields?.includes ?? [],
+    jobConfigQuery: analyticsJobConfig.source.query || defaultSearchQuery,
   };
 
-  if (
-    isRegressionAnalysis(analyticsJobConfig.analysis) ||
-    isClassificationAnalysis(analyticsJobConfig.analysis)
-  ) {
-    const analysisConfig = analyticsJobConfig.analysis[jobType];
+  if (isClone === false) {
+    resultState.destinationIndex = analyticsJobConfig?.dest.index ?? '';
+  }
 
-    resultState.dependentVariable = analysisConfig.dependent_variable;
-    resultState.numTopFeatureImportanceValues = analysisConfig.num_top_feature_importance_values;
-    resultState.trainingPercent = analysisConfig.training_percent;
+  const analysisConfig = analyticsJobConfig.analysis[jobType];
+
+  for (const key in analysisConfig) {
+    if (analysisConfig.hasOwnProperty(key)) {
+      const camelCased = toCamelCase(key);
+      // @ts-ignore
+      resultState[camelCased] = analysisConfig[key];
+    }
   }
 
   return resultState;

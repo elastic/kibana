@@ -1,59 +1,81 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import moment from 'moment';
-import { Logger } from '../../../../../../src/core/server';
-import { AlertCommonPerClusterState } from '../../alerts/types';
+
+import { AlertInstanceState } from '../../../common/types/alerts';
 import { AlertsClient } from '../../../../alerting/server';
+import { AlertsFactory } from '../../alerts';
+import {
+  CommonAlertStatus,
+  CommonAlertState,
+  CommonAlertFilter,
+} from '../../../common/types/alerts';
+import { ALERTS } from '../../../common/constants';
+import { MonitoringLicenseService } from '../../types';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
-  alertTypes: string[],
-  start: number,
-  end: number,
-  log: Logger
-): Promise<any[]> {
-  const statuses = await Promise.all(
-    alertTypes.map(
-      type =>
-        new Promise(async (resolve, reject) => {
-          // We need to get the id from the alertTypeId
-          const alerts = await alertsClient.find({
-            options: {
-              filter: `alert.attributes.alertTypeId:${type}`,
-            },
-          });
-          if (alerts.total === 0) {
-            return resolve(false);
+  licenseService: MonitoringLicenseService,
+  alertTypes: string[] | undefined,
+  clusterUuids: string[],
+  filters: CommonAlertFilter[] = []
+): Promise<{ [type: string]: CommonAlertStatus }> {
+  const types: Array<{ type: string; result: CommonAlertStatus }> = [];
+  const byType: { [type: string]: CommonAlertStatus } = {};
+  await Promise.all(
+    (alertTypes || ALERTS).map(async (type) => {
+      const alert = await AlertsFactory.getByType(type, alertsClient);
+      if (!alert || !alert.rawAlert) {
+        return;
+      }
+
+      const result: CommonAlertStatus = {
+        states: [],
+        rawAlert: alert.rawAlert,
+      };
+
+      types.push({ type, result });
+
+      const id = alert.getId();
+      if (!id) {
+        return result;
+      }
+
+      // Now that we have the id, we can get the state
+      const states = await alert.getStates(alertsClient, id, filters);
+      if (!states) {
+        return result;
+      }
+
+      result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
+        const alertInstanceState = instance.state as AlertInstanceState;
+        if (!alertInstanceState.alertStates) {
+          return accum;
+        }
+        for (const state of alertInstanceState.alertStates) {
+          const meta = instance.meta;
+          if (clusterUuids && !clusterUuids.includes(state.cluster.clusterUuid)) {
+            return accum;
           }
 
-          if (alerts.total !== 1) {
-            log.warn(`Found more than one alert for type ${type} which is unexpected.`);
+          let firing = false;
+          if (state.ui.isFiring) {
+            firing = true;
           }
-
-          const id = alerts.data[0].id;
-
-          // Now that we have the id, we can get the state
-          const states = await alertsClient.getAlertState({ id });
-          if (!states || !states.alertTypeState) {
-            log.warn(`No alert states found for type ${type} which is unexpected.`);
-            return resolve(false);
-          }
-
-          const state = Object.values(states.alertTypeState)[0] as AlertCommonPerClusterState;
-          const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
-          if (state.ui.isFiring || isInBetween) {
-            return resolve({
-              type,
-              ...state.ui,
-            });
-          }
-          return resolve(false);
-        })
-    )
+          accum.push({ firing, state, meta });
+        }
+        return accum;
+      }, []);
+    })
   );
 
-  return statuses.filter(Boolean);
+  types.sort((a, b) => (a.type === b.type ? 0 : a.type.length > b.type.length ? 1 : -1));
+  for (const { type, result } of types) {
+    byType[type] = result;
+  }
+
+  return byType;
 }

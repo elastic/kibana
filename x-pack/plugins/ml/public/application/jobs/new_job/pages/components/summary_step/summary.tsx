@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,22 +17,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
-import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
-import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';
 import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
+import { StartDatafeedSwitch } from './components/start_datafeed_switch';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,
   resetJob,
@@ -40,8 +42,14 @@ import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      http: { basePath },
+    },
   } = useMlKibana();
+
+  const navigateToPath = useNavigateToPath();
+
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
     JobCreatorContext
   );
@@ -49,56 +57,69 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
+  const [startDatafeed, setStartDatafeed] = useState(true);
+  const [showJobAssignWarning, setShowJobAssignWarning] = useState(false);
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);
+  const jsonEditorMode = isAdvanced ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
   }, []);
 
+  useEffect(() => {
+    let s: Subscription | null = null;
+    if (jobRunner !== null) {
+      s = jobRunner.subscribeToJobAssignment((assigned: boolean) =>
+        setShowJobAssignWarning(!assigned)
+      );
+    }
+    return () => {
+      if (s !== null) {
+        s?.unsubscribe();
+      }
+    };
+  }, [jobRunner]);
+
   async function start() {
-    if (jobCreator.type === JOB_TYPE.ADVANCED) {
-      await startAdvanced();
+    setCreatingJob(true);
+    if (isAdvanced) {
+      await createAdvancedJob();
+    } else if (startDatafeed === true) {
+      await createAndStartJob();
     } else {
-      await startInline();
+      await createAdvancedJob(false);
     }
   }
 
-  async function startInline() {
-    setCreatingJob(true);
+  async function createAndStartJob() {
     try {
       const jr = await jobCreator.createAndStartJob();
       setJobRunner(jr);
     } catch (error) {
-      // catch and display all job creation errors
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
-          defaultMessage: `Job creation error`,
-        }),
-        text: getErrorMessage(error),
-      });
-      setCreatingJob(false);
+      handleJobCreationError(error);
     }
   }
 
-  async function startAdvanced() {
-    setCreatingJob(true);
+  async function createAdvancedJob(showStartModal: boolean = true) {
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
-      advancedStartDatafeed(jobCreator);
+      advancedStartDatafeed(showStartModal ? jobCreator : null, navigateToPath);
     } catch (error) {
-      // catch and display all job creation errors
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
-          defaultMessage: `Job creation error`,
-        }),
-        text: getErrorMessage(error),
-      });
-      setCreatingJob(false);
+      handleJobCreationError(error);
     }
+  }
+
+  function handleJobCreationError(error: any) {
+    const { displayErrorToast } = toastNotificationServiceProvider(notifications.toasts);
+    displayErrorToast(
+      error,
+      i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
+        defaultMessage: `Job creation error`,
+      })
+    );
+    setCreatingJob(false);
   }
 
   function viewResults() {
@@ -108,15 +129,15 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       jobCreator.end,
       isSingleMetricJobCreator(jobCreator) === true ? 'timeseriesexplorer' : 'explorer'
     );
-    window.open(url, '_blank');
+    navigateToPath(`${basePath.get()}/app/ml/${url}`);
   }
 
   function clickResetJob() {
-    resetJob(jobCreator);
+    resetJob(jobCreator, navigateToPath);
   }
 
   const convertToAdvanced = () => {
-    convertToAdvancedJob(jobCreator);
+    convertToAdvancedJob(jobCreator, navigateToPath);
   };
 
   useEffect(() => {
@@ -134,6 +155,14 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           <EuiSpacer size="m" />
           <JobDetails />
 
+          {isAdvanced === false && (
+            <StartDatafeedSwitch
+              startDatafeed={startDatafeed}
+              setStartDatafeed={setStartDatafeed}
+              disabled={creatingJob}
+            />
+          )}
+
           {isAdvanced && (
             <Fragment>
               <EuiHorizontalRule />
@@ -144,6 +173,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           )}
 
           <EuiHorizontalRule />
+          {showJobAssignWarning && <NewJobAwaitingNodeWarning jobType="anomaly-detector" />}
           <EuiFlexGroup>
             {progress < 100 && (
               <Fragment>
@@ -173,15 +203,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 <EuiFlexItem grow={false}>
                   <JsonEditorFlyout
                     isDisabled={progress > 0}
-                    jobEditorMode={EDITOR_MODE.READONLY}
-                    datafeedEditorMode={EDITOR_MODE.READONLY}
+                    jobEditorMode={jsonEditorMode}
+                    datafeedEditorMode={jsonEditorMode}
                   />
                 </EuiFlexItem>
-                {jobCreator.type === JOB_TYPE.ADVANCED ? (
-                  <EuiFlexItem grow={false}>
-                    <DatafeedPreviewFlyout isDisabled={false} />
-                  </EuiFlexItem>
-                ) : (
+                {isAdvanced === false && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty onClick={convertToAdvanced}>
                       <FormattedMessage

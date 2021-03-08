@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq } from 'lodash';
-import { SecurityLicense } from '../../../common/licensing';
-import { Feature } from '../../../../features/server';
-import { RawKibanaPrivileges } from '../../../common/model';
-import { Actions } from '../actions';
+
+import type {
+  PluginSetupContract as FeaturesPluginSetup,
+  KibanaFeature,
+} from '../../../../features/server';
+import type { SecurityLicense } from '../../../common/licensing';
+import type { RawKibanaPrivileges } from '../../../common/model';
+import type { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
-import { FeaturesService } from '../../plugin';
 import {
   featurePrivilegeIterator,
   subFeaturePrivilegeIterator,
@@ -22,23 +26,27 @@ export interface PrivilegesService {
 
 export function privilegesFactory(
   actions: Actions,
-  featuresService: FeaturesService,
-  licenseService: Pick<SecurityLicense, 'getFeatures'>
+  featuresService: FeaturesPluginSetup,
+  licenseService: Pick<SecurityLicense, 'getFeatures' | 'getType'>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
   return {
     get() {
-      const features = featuresService.getFeatures();
+      const features = featuresService.getKibanaFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
-      const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
+      const licenseType = licenseService.getType()!;
+      const basePrivilegeFeatures = features.filter(
+        (feature) => !feature.excludeFromBasePrivileges
+      );
 
       let allActions: string[] = [];
       let readActions: string[] = [];
 
-      basePrivilegeFeatures.forEach(feature => {
+      basePrivilegeFeatures.forEach((feature) => {
         for (const { privilegeId, privilege } of featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
+          licenseType,
           predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
         })) {
           const privilegeActions = featurePrivilegeBuilder.getActions(privilege, feature);
@@ -57,6 +65,7 @@ export function privilegesFactory(
         featurePrivileges[feature.id] = {};
         for (const featurePrivilege of featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
+          licenseType,
         })) {
           featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
             actions.login,
@@ -68,6 +77,7 @@ export function privilegesFactory(
         if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
           for (const featurePrivilege of featurePrivilegeIterator(feature, {
             augmentWithSubFeaturePrivileges: false,
+            licenseType,
           })) {
             featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
               actions.login,
@@ -76,7 +86,7 @@ export function privilegesFactory(
             ];
           }
 
-          for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
+          for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, licenseType)) {
             featurePrivileges[feature.id][subFeaturePrivilege.id] = [
               actions.login,
               actions.version,
@@ -89,7 +99,6 @@ export function privilegesFactory(
           delete featurePrivileges[feature.id];
         }
       }
-
       return {
         features: featurePrivileges,
         global: {
@@ -100,6 +109,8 @@ export function privilegesFactory(
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
+            actions.ui.get('catalogue', 'spaces'),
+            actions.ui.get('enterpriseSearch', 'all'),
             ...allActions,
           ],
           read: [actions.login, actions.version, ...readActions],
@@ -108,9 +119,9 @@ export function privilegesFactory(
           all: [actions.login, actions.version, ...allActions],
           read: [actions.login, actions.version, ...readActions],
         },
-        reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {
+        reserved: features.reduce((acc: Record<string, string[]>, feature: KibanaFeature) => {
           if (feature.reserved) {
-            feature.reserved.privileges.forEach(reservedPrivilege => {
+            feature.reserved.privileges.forEach((reservedPrivilege) => {
               acc[reservedPrivilege.id] = [
                 actions.version,
                 ...uniq(featurePrivilegeBuilder.getActions(reservedPrivilege.privilege, feature)),

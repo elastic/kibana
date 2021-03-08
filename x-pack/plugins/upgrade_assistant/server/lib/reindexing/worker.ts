@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
 import moment from 'moment';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
@@ -57,7 +59,7 @@ export class ReindexWorker {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
 
-    const callAsInternalUser = this.clusterClient.callAsInternalUser.bind(this.clusterClient);
+    const callAsInternalUser = this.clusterClient.asInternalUser;
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
@@ -102,7 +104,7 @@ export class ReindexWorker {
    * Returns whether or not the given ReindexOperation is in the worker's queue.
    */
   public includes = (reindexOp: ReindexSavedObject) => {
-    return this.inProgressOps.map(o => o.id).includes(reindexOp.id);
+    return this.inProgressOps.map((o) => o.id).includes(reindexOp.id);
   };
 
   /**
@@ -121,11 +123,11 @@ export class ReindexWorker {
 
         if (
           this.inProgressOps.length &&
-          this.inProgressOps.every(op => !this.credentialStore.get(op))
+          this.inProgressOps.every((op) => !this.credentialStore.get(op))
         ) {
           // TODO: This tight loop needs something to relax potentially high CPU demands so this padding is added.
           // This scheduler should be revisited in future.
-          await new Promise(resolve => setTimeout(resolve, WORKER_PADDING_MS));
+          await new Promise((resolve) => setTimeout(resolve, WORKER_PADDING_MS));
         }
       }
     } finally {
@@ -146,7 +148,7 @@ export class ReindexWorker {
   private getCredentialScopedReindexService = (credential: Credential) => {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
-    const callAsCurrentUser = scopedClusterClient.callAsCurrentUser.bind(scopedClusterClient);
+    const callAsCurrentUser = scopedClusterClient.asCurrentUser;
     const actions = reindexActionsFactory(this.client, callAsCurrentUser);
     return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
   };

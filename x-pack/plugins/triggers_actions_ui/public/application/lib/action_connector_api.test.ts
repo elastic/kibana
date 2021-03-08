@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
@@ -12,6 +13,7 @@ import {
   loadActionTypes,
   loadAllActions,
   updateActionConnector,
+  executeAction,
 } from './action_connector_api';
 
 const http = httpServiceMock.createStartContract();
@@ -36,7 +38,7 @@ describe('loadActionTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/types",
+        "/api/actions/list_action_types",
       ]
     `);
   });
@@ -50,7 +52,7 @@ describe('loadAllActions', () => {
     expect(result).toEqual([]);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/_getAll",
+        "/api/actions",
       ]
     `);
   });
@@ -58,7 +60,7 @@ describe('loadAllActions', () => {
 
 describe('createActionConnector', () => {
   test('should call create action API', async () => {
-    const connector: ActionConnectorWithoutId = {
+    const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
       name: 'My test',
@@ -72,7 +74,7 @@ describe('createActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action",
+        "/api/actions/action",
         Object {
           "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
@@ -84,7 +86,7 @@ describe('createActionConnector', () => {
 describe('updateActionConnector', () => {
   test('should call the update API', async () => {
     const id = '123';
-    const connector: ActionConnectorWithoutId = {
+    const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
       name: 'My test',
@@ -98,7 +100,7 @@ describe('updateActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/123",
+        "/api/actions/action/123",
         Object {
           "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
@@ -116,14 +118,43 @@ describe('deleteActions', () => {
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/action/1",
+          "/api/actions/action/1",
         ],
         Array [
-          "/api/action/2",
+          "/api/actions/action/2",
         ],
         Array [
-          "/api/action/3",
+          "/api/actions/action/3",
         ],
+      ]
+    `);
+  });
+});
+
+describe('executeAction', () => {
+  test('should call execute API', async () => {
+    const id = '123';
+    const params = {
+      stringParams: 'someString',
+      numericParams: 123,
+    };
+
+    http.post.mockResolvedValueOnce({
+      actionId: id,
+      status: 'ok',
+    });
+
+    const result = await executeAction({ id, http, params });
+    expect(result).toEqual({
+      actionId: id,
+      status: 'ok',
+    });
+    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/api/actions/action/123/_execute",
+        Object {
+          "body": "{\\"params\\":{\\"stringParams\\":\\"someString\\",\\"numericParams\\":123}}",
+        },
       ]
     `);
   });

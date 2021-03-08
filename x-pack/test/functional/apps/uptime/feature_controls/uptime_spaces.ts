@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
@@ -30,7 +32,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Uptime');
       });
 
@@ -57,7 +59,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Uptime');
       });
 

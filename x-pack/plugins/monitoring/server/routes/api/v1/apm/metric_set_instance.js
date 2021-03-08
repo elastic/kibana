@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const metricSet = [
@@ -58,5 +59,28 @@ export const metricSet = [
       'apm_processor_metric_transformations',
     ],
     name: 'apm_transformations',
+  },
+  {
+    keys: [
+      'apm_acm_response_count',
+      'apm_acm_response_errors_count',
+      'apm_acm_response_valid_ok',
+      'apm_acm_response_valid_notmodified',
+    ],
+    name: 'apm_acm_response',
+  },
+  {
+    keys: [
+      'apm_acm_response_errors_forbidden',
+      'apm_acm_response_errors_unauthorized',
+      'apm_acm_response_errors_unavailable',
+      'apm_acm_response_errors_method',
+      'apm_acm_response_errors_invalidquery',
+    ],
+    name: 'apm_acm_response_errors',
+  },
+  {
+    keys: ['apm_acm_request_count'],
+    name: 'apm_acm_request_count',
   },
 ];

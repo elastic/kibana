@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 declare module 'rison-node' {
-  export type RisonValue = null | boolean | number | string | RisonObject | RisonArray;
+  export type RisonValue = undefined | null | boolean | number | string | RisonObject | RisonArray;
 
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface RisonArray extends Array<RisonValue> {}
@@ -16,11 +17,14 @@ declare module 'rison-node' {
 
   export const decode: (input: string) => RisonValue;
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   export const decode_object: (input: string) => RisonObject;
 
   export const encode: <Input extends RisonValue>(input: Input) => string;
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   export const encode_object: <Input extends RisonObject>(input: Input) => string;
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  export const encode_array: <Input extends RisonArray>(input: Input) => string;
 }

@@ -1,5 +1,25 @@
-@include euiBreakpoint('xs', 's', 'm') {
-  .homHome__synopsisItem {
-    flex-basis: 100% !important;
+@import '../../../../../core/public/mixins';
+
+.homWrapper {
+  @include kibanaFullBodyMinHeight();
+  background-color: $euiColorEmptyShade;
+  display: flex;
+  flex-direction: column;
+}
+
+.homContent {
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: $euiSizeXL $euiSize;
+  width: 100%;
+}
+
+.homData--expanded {
+  flex-direction: column;
+
+  &,
+  & > * {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
   }
 }

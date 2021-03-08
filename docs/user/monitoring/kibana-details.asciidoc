@@ -1,6 +1,6 @@
 [role="xpack"]
 [[kibana-page]]
-== {kib} Monitoring Metrics
+= {kib} Monitoring Metrics
 [subs="attributes"]
 ++++
 <titleabbrev>{kib} Metrics</titleabbrev>

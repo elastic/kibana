@@ -4,8 +4,12 @@
 
 ## IndexPatternField.lang property
 
+Script field language
+
 <b>Signature:</b>
 
 ```typescript
-lang?: string;
+get lang(): string | undefined;
+
+set lang(lang: string | undefined);
 ```

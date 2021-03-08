@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
-  const retry = getService('retry');
 
   describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
@@ -52,16 +53,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_all_role'),
           security.user.delete('global_infrastructure_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Metrics', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -95,24 +96,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await testSubjects.existOrFail('~waffleMap');
-        });
-
-        describe('context menu', () => {
-          before(async () => {
-            await testSubjects.click('~nodeContainer');
-          });
-
-          it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewLogsContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
-
-          it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -168,16 +151,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_read_role'),
           security.user.delete('global_infrastructure_read_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Metrics', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -211,24 +194,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await testSubjects.existOrFail('~waffleMap');
-        });
-
-        describe('context menu', () => {
-          before(async () => {
-            await testSubjects.click('~nodeContainer');
-          });
-
-          it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewLogsContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
-
-          it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
-            expect(await link.isEnabled()).to.be(false);
-          });
         });
 
         it(`shows read-only badge`, async () => {
@@ -300,19 +265,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         after(async () => {
           await esArchiver.unload('infra/metrics_and_logs');
         });
-
-        it(`context menu allows user to view logs`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('~waffleMap');
-          await testSubjects.click('~nodeContainer');
-          await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-          await testSubjects.click('~viewLogsContextMenuItem');
-          await testSubjects.existOrFail('~infraLogsPage');
-        });
       });
     });
 
@@ -366,19 +318,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         after(async () => {
           await esArchiver.unload('infra/metrics_and_logs');
         });
-
-        it(`context menu allows user to view APM traces`, async () => {
-          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-            ensureCurrentUrl: true,
-            shouldLoginIfPrompted: false,
-          });
-          await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('~waffleMap');
-          await testSubjects.click('~nodeContainer');
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.click('~viewApmTracesContextMenuItem');
-          await testSubjects.existOrFail('~apmMainContainer');
-        });
       });
     });
 
@@ -419,23 +358,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show metrics navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.not.contain(['Metrics']);
       });
 
-      it(`metrics app is inaccessible and Application Not Found message is rendered`, async () => {
-        await PageObjects.common.navigateToApp('infraOps');
-        await testSubjects.existOrFail('~appNotFoundPageContent');
-        await PageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraOps',
-          '/inventory',
-          undefined,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('~appNotFoundPageContent');
+      it(`metrics app is inaccessible and returns a 403`, async () => {
+        await PageObjects.common.navigateToActualUrl('infraOps', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        PageObjects.error.expectForbidden();
       });
     });
   });

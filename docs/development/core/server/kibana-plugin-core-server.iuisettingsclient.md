@@ -21,6 +21,7 @@ export interface IUiSettingsClient
 |  [getRegistered](./kibana-plugin-core-server.iuisettingsclient.getregistered.md) | <code>() =&gt; Readonly&lt;Record&lt;string, PublicUiSettingsParams&gt;&gt;</code> | Returns registered uiSettings values [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) |
 |  [getUserProvided](./kibana-plugin-core-server.iuisettingsclient.getuserprovided.md) | <code>&lt;T = any&gt;() =&gt; Promise&lt;Record&lt;string, UserProvidedValues&lt;T&gt;&gt;&gt;</code> | Retrieves a set of all uiSettings values set by the user. |
 |  [isOverridden](./kibana-plugin-core-server.iuisettingsclient.isoverridden.md) | <code>(key: string) =&gt; boolean</code> | Shows whether the uiSettings value set by the user. |
+|  [isSensitive](./kibana-plugin-core-server.iuisettingsclient.issensitive.md) | <code>(key: string) =&gt; boolean</code> | Shows whether the uiSetting is a sensitive value. Used by telemetry to not send sensitive values. |
 |  [remove](./kibana-plugin-core-server.iuisettingsclient.remove.md) | <code>(key: string) =&gt; Promise&lt;void&gt;</code> | Removes uiSettings value by key. |
 |  [removeMany](./kibana-plugin-core-server.iuisettingsclient.removemany.md) | <code>(keys: string[]) =&gt; Promise&lt;void&gt;</code> | Removes multiple uiSettings values by keys. |
 |  [set](./kibana-plugin-core-server.iuisettingsclient.set.md) | <code>(key: string, value: any) =&gt; Promise&lt;void&gt;</code> | Writes uiSettings value and marks it as set by the user. |

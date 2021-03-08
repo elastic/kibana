@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { merge } from 'lodash';
@@ -77,21 +78,6 @@ describe('useCreateAnalyticsForm', () => {
       type: ACTION.RESET_FORM,
     });
     expect(resettedState).toEqual(initialState);
-  });
-
-  test('reducer(): open/close the modal', () => {
-    const initialState = getInitialState();
-    expect(initialState.isModalVisible).toBe(false);
-
-    const openModalState = reducer(initialState, {
-      type: ACTION.OPEN_MODAL,
-    });
-    expect(openModalState.isModalVisible).toBe(true);
-
-    const closedModalState = reducer(openModalState, {
-      type: ACTION.CLOSE_MODAL,
-    });
-    expect(closedModalState.isModalVisible).toBe(false);
   });
 
   test('reducer(): add/reset request messages', () => {

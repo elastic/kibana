@@ -1,102 +1,41 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
 
-import normalizePath from 'normalize-path';
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-ignore
+// @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-ignore
 import webpackMerge from 'webpack-merge';
-// @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { Bundle, BundleRefs, WorkerConfig } from '../common';
+import { BundleRefsPlugin } from './bundle_refs_plugin';
+import { BundleMetricsPlugin } from './bundle_metrics_plugin';
+import { EmitStatsPlugin } from './emit_stats_plugin';
+import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
-const STATIC_BUNDLE_PLUGINS = [
-  // { id: 'data', dirname: 'data' },
-  { id: 'kibanaReact', dirname: 'kibana_react' },
-  { id: 'kibanaUtils', dirname: 'kibana_utils' },
-  { id: 'esUiShared', dirname: 'es_ui_shared' },
-];
+export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+  const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
-/**
- * Determine externals statements for require/import statements by looking
- * for requests resolving to the primary public export of the data, kibanaReact,
- * amd kibanaUtils plugins. If this module is being imported then rewrite
- * the import to access the global `__kbnBundles__` variables and access
- * the relavent properties from that global object.
- *
- * @param bundle
- * @param context the directory containing the module which made `request`
- * @param request the request for a module from a commonjs require() call or import statement
- */
-function dynamicExternals(bundle: Bundle, context: string, request: string) {
-  // ignore imports that have loaders defined
-  if (request.includes('!')) {
-    return;
-  }
-
-  // don't allow any static bundle to rely on other static bundles
-  if (STATIC_BUNDLE_PLUGINS.some(p => bundle.id === p.id)) {
-    return;
-  }
-
-  // ignore requests that don't include a /data/public, /kibana_react/public, or
-  // /kibana_utils/public segment as a cheap way to avoid doing path resolution
-  // for paths that couldn't possibly resolve to what we're looking for
-  const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some(p =>
-    request.includes(`/${p.dirname}/public`)
-  );
-  if (!reqToStaticBundle) {
-    return;
-  }
-
-  // determine the most acurate resolution string we can without running full resolution
-  const rootRelative = normalizePath(
-    Path.relative(bundle.sourceRoot, Path.resolve(context, request))
-  );
-  for (const { id, dirname } of STATIC_BUNDLE_PLUGINS) {
-    if (rootRelative === `src/plugins/${dirname}/public`) {
-      return `__kbnBundles__['plugin/${id}']`;
-    }
-  }
-
-  // import doesn't match a root public import
-  return undefined;
-}
-
-export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
   const commonConfig: webpack.Configuration = {
     node: { fs: 'empty' },
     context: bundle.contextDir,
     cache: true,
     entry: {
-      [bundle.id]: bundle.entry,
+      [bundle.id]: ENTRY_CREATOR,
     },
 
     devtool: worker.dist ? false : '#cheap-source-map',
@@ -104,48 +43,79 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     output: {
       path: bundle.outputDir,
-      filename: '[name].plugin.js',
-      publicPath: PUBLIC_PATH_PLACEHOLDER,
-      devtoolModuleFilenameTemplate: info =>
+      filename: `${bundle.id}.${bundle.type}.js`,
+      chunkFilename: `${bundle.id}.chunk.[id].js`,
+      devtoolModuleFilenameTemplate: (info) =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
       jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
-      ...(bundle.type === 'plugin'
-        ? {
-            // When the entry point is loaded, assign it's exported `plugin`
-            // value to a key on the global `__kbnBundles__` object.
-            library: ['__kbnBundles__', `plugin/${bundle.id}`],
-          }
-        : {}),
     },
 
     optimization: {
       noEmitOnErrors: true,
+      splitChunks: {
+        maxAsyncRequests: 10,
+        cacheGroups: {
+          default: {
+            reuseExistingChunk: false,
+          },
+        },
+      },
     },
 
-    externals: [
-      UiSharedDeps.externals,
-      function(context, request, cb) {
-        try {
-          cb(undefined, dynamicExternals(bundle, context, request));
-        } catch (error) {
-          cb(error, undefined);
-        }
-      },
-    ],
+    externals: [UiSharedDeps.externals],
 
-    plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
+    plugins: [
+      new CleanWebpackPlugin(),
+      new BundleRefsPlugin(bundle, bundleRefs),
+      new PopulateBundleCachePlugin(worker, bundle),
+      new BundleMetricsPlugin(bundle),
+      ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
+      ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
+    ],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary depedencies
       noParse: [
-        /[\///]node_modules[\///]elasticsearch-browser[\///]/,
-        /[\///]node_modules[\///]lodash[\///]index\.js/,
+        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
       ],
 
       rules: [
+        {
+          include: [ENTRY_CREATOR],
+          use: [
+            {
+              loader: UiSharedDeps.publicPathLoader,
+              options: {
+                key: bundle.id,
+              },
+            },
+            {
+              loader: require.resolve('val-loader'),
+              options: {
+                entries: bundle.publicDirNames.map((name) => {
+                  const absolute = Path.resolve(bundle.contextDir, name);
+                  const newContext = Path.dirname(ENTRY_CREATOR);
+                  const importId = `${bundle.type}/${bundle.id}/${name}`;
+
+                  // relative path from context of the ENTRY_CREATOR, with linux path separators
+                  let requirePath = Path.relative(newContext, absolute).split('\\').join('/');
+                  if (!requirePath.startsWith('.')) {
+                    // ensure requirePath is identified by node as relative
+                    requirePath = `./${requirePath}`;
+                  }
+
+                  return { importId, requirePath };
+                }),
+              },
+            },
+          ],
+        },
         {
           test: /\.css$/,
           include: /node_modules/,
@@ -165,8 +135,8 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           test: /\.scss$/,
           exclude: /node_modules/,
           oneOf: [
-            {
-              resourceQuery: /dark|light/,
+            ...worker.themeTags.map((theme) => ({
+              resourceQuery: `?${theme}`,
               use: [
                 {
                   loader: 'style-loader',
@@ -182,79 +152,39 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                   options: {
                     sourceMap: !worker.dist,
                     config: {
-                      path: require.resolve('./postcss.config'),
-                    },
-                  },
-                },
-                {
-                  loader: 'resolve-url-loader',
-                  options: {
-                    join: (_: string, __: any) => (uri: string, base?: string) => {
-                      // apply only to legacy platform styles
-                      if (!base || !parseDirPath(base).dirs.includes('legacy')) {
-                        return null;
-                      }
-
-                      if (uri.startsWith('ui/assets')) {
-                        return Path.resolve(
-                          worker.repoRoot,
-                          'src/core/server/core_app/',
-                          uri.replace('ui/', '')
-                        );
-                      }
-
-                      // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/')) {
-                        return Path.resolve(
-                          worker.repoRoot,
-                          'src/legacy/ui/public',
-                          uri.replace('ui/', '')
-                        );
-                      }
-
-                      return null;
+                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
                     },
                   },
                 },
                 {
                   loader: 'sass-loader',
                   options: {
-                    // must always be enabled as long as we're using the `resolve-url-loader` to
-                    // rewrite `ui/*` urls. They're dropped by subsequent loaders though
-                    sourceMap: true,
                     prependData(loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          'src/legacy/ui/public/styles/_styling_constants.scss'
+                          `src/core/public/core_app/styles/_globals_${theme}.scss`
                         )
                       )};\n`;
                     },
                     webpackImporter: false,
                     implementation: require('node-sass'),
-                    sassOptions(loaderContext: webpack.loader.LoaderContext) {
-                      const darkMode = loaderContext.resourceQuery === '?dark';
-
-                      return {
-                        outputStyle: 'nested',
-                        includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                        sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                        importer: (url: string) => {
-                          if (darkMode && url.includes('eui_colors_light')) {
-                            return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
-                          }
-
-                          return { file: url };
-                        },
-                      };
+                    sassOptions: {
+                      outputStyle: 'nested',
+                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
+                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
                   },
                 },
               ],
-            },
+            })),
             {
               loader: require.resolve('./theme_loader'),
+              options: {
+                bundleId: bundle.id,
+                themeTags: worker.themeTags,
+              },
             },
           ],
         },
@@ -272,6 +202,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
             loader: 'babel-loader',
             options: {
               babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
               presets: IS_CODE_COVERAGE
                 ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
                 : [BABEL_PRESET_PATH],
@@ -289,8 +220,9 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
+      mainFields: ['browser', 'main'],
       alias: {
-        tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
+        core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
       },
     },
 
@@ -314,6 +246,18 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
+      }),
+      new CompressionPlugin({
+        algorithm: 'brotliCompress',
+        filename: '[path].br',
+        test: /\.(js|css)$/,
+        cache: false,
+      }),
+      new CompressionPlugin({
+        algorithm: 'gzip',
+        filename: '[path].gz',
+        test: /\.(js|css)$/,
+        cache: false,
       }),
     ],
 

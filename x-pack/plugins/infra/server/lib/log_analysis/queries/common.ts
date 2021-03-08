@@ -1,12 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-const ML_ANOMALY_INDEX_PREFIX = '.ml-anomalies-';
-
-export const getMlResultIndex = (jobId: string) => `${ML_ANOMALY_INDEX_PREFIX}${jobId}`;
 
 export const defaultRequestParameters = {
   allowNoIndices: true,
@@ -14,6 +11,24 @@ export const defaultRequestParameters = {
   trackScores: false,
   trackTotalHits: false,
 };
+
+export const createJobIdFilters = (jobId: string) => [
+  {
+    term: {
+      job_id: {
+        value: jobId,
+      },
+    },
+  },
+];
+
+export const createJobIdsFilters = (jobIds: string[]) => [
+  {
+    terms: {
+      job_id: jobIds,
+    },
+  },
+];
 
 export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   {
@@ -26,12 +41,23 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   },
 ];
 
-export const createResultTypeFilters = (resultType: 'model_plot' | 'record') => [
+export const createLogTimeRangeFilters = (startTime: number, endTime: number) => [
   {
-    term: {
-      result_type: {
-        value: resultType,
+    range: {
+      log_time: {
+        gte: startTime,
+        lte: endTime,
       },
+    },
+  },
+];
+
+export const createResultTypeFilters = (
+  resultTypes: Array<'categorizer_stats' | 'model_plot' | 'record'>
+) => [
+  {
+    terms: {
+      result_type: resultTypes,
     },
   },
 ];
@@ -43,3 +69,14 @@ export const createCategoryIdFilters = (categoryIds: number[]) => [
     },
   },
 ];
+
+export const createDatasetsFilters = (datasets?: string[]) =>
+  datasets && datasets.length > 0
+    ? [
+        {
+          terms: {
+            partition_field_value: datasets,
+          },
+        },
+      ]
+    : [];

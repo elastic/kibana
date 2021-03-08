@@ -1,20 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
-import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
-import {
-  ABSOLUTE_MAX_BYTES,
-  FILE_SIZE_DISPLAY_FORMAT,
-} from '../../../../../../common/constants/file_datavisualizer';
-import { getMlConfig } from '../../../../util/dependency_cache';
+import { MB } from '../../../../../../../file_upload/public';
 
-const DEFAULT_LINES_TO_SAMPLE = 1000;
+export const DEFAULT_LINES_TO_SAMPLE = 1000;
+const UPLOAD_SIZE_MB = 5;
 
 const overrideDefaults = {
   timestampFormat: undefined,
@@ -34,15 +31,22 @@ export function readFile(file: File) {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
       const reader = new FileReader();
-      reader.readAsText(file);
+      reader.readAsArrayBuffer(file);
 
       reader.onload = (() => {
         return () => {
+          const decoder = new TextDecoder();
           const data = reader.result;
-          if (data === '') {
+          if (data === null || typeof data === 'string') {
+            return reject();
+          }
+          const size = UPLOAD_SIZE_MB * MB;
+          const fileContents = decoder.decode(data.slice(0, size));
+
+          if (fileContents === '') {
             reject();
           } else {
-            resolve({ data });
+            resolve({ fileContents, data });
           }
         };
       })();
@@ -50,23 +54,6 @@ export function readFile(file: File) {
       reject();
     }
   });
-}
-
-export function reduceData(data: string, mb: number) {
-  // assuming ascii characters in the file where 1 char is 1 byte
-  // TODO -  change this when other non UTF-8 formats are
-  // supported for the read data
-  const size = mb * Math.pow(2, 20);
-  return data.length >= size ? data.slice(0, size) : data;
-}
-
-export function getMaxBytes() {
-  const maxBytes = getMlConfig().file_data_visualizer.max_file_size_bytes;
-  return maxBytes < ABSOLUTE_MAX_BYTES ? maxBytes : ABSOLUTE_MAX_BYTES;
-}
-
-export function getMaxBytesFormatted() {
-  return numeral(getMaxBytes()).format(FILE_SIZE_DISPLAY_FORMAT);
 }
 
 export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {
@@ -82,7 +69,7 @@ export function createUrlOverrides(overrides: InputOverrides, originalSettings: 
         value = '';
       }
 
-      const snakeCaseO = o.replace(/([A-Z])/g, $1 => `_${$1.toLowerCase()}`);
+      const snakeCaseO = o.replace(/([A-Z])/g, ($1) => `_${$1.toLowerCase()}`);
       formattedOverrides[snakeCaseO] = value;
     }
   }
@@ -158,7 +145,7 @@ export function processResults({ results, overrides }: AnalysisResult) {
  */
 export async function hasImportPermission(indexName: string) {
   const priv: { cluster: string[]; index?: any } = {
-    cluster: ['cluster:monitor/nodes/info', 'cluster:admin/ingest/pipeline/put'],
+    cluster: ['cluster:admin/ingest/pipeline/put'],
   };
 
   if (indexName !== undefined) {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -37,7 +38,7 @@ export function SaveModal({
   const [dataConsent, setDataConsent] = useState(false);
   return (
     <SavedObjectSaveModal
-      onSave={props => {
+      onSave={(props) => {
         onSave({ ...props, newDescription, dataConsent });
       }}
       onClose={onClose}
@@ -58,7 +59,7 @@ export function SaveModal({
             <EuiTextArea
               data-test-subj="dashboardDescription"
               value={newDescription}
-              onChange={e => {
+              onChange={(e) => {
                 setDescription(e.target.value);
               }}
               fullWidth
@@ -80,7 +81,7 @@ export function SaveModal({
                   defaultMessage: 'Save graph content',
                 })}
                 checked={dataConsent}
-                onChange={e => {
+                onChange={(e) => {
                   setDataConsent(e.target.checked);
                 }}
               />

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
@@ -10,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 
 import { SearchResult } from '../../../types';
 import { TYPE_DEFINITION } from '../../../constants';
-import { useDispatch } from '../../../mappings_state';
-import { getTypeLabelFromType } from '../../../lib';
+import { useDispatch } from '../../../mappings_state_context';
+import { getTypeLabelFromField } from '../../../lib';
 import { DeleteFieldProvider } from '../fields/delete_field_provider';
 
 interface Props {
@@ -68,7 +70,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
 
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
-            {deleteField => (
+            {(deleteField) => (
               <EuiToolTip content={deleteButtonLabel}>
                 <EuiButtonIcon
                   iconType="trash"
@@ -89,8 +91,11 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
     <div className={classNames('mappingsEditor__fieldsListItem')} data-test-subj="fieldsListItem">
       <div
         className={classNames('mappingsEditor__fieldsListItem__field', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--selected': isHighlighted,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
       >
@@ -99,7 +104,9 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
             gutterSize="s"
             alignItems="center"
             className={classNames('mappingsEditor__fieldsListItem__content', {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
             })}
           >
@@ -116,7 +123,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
                         dataType: TYPE_DEFINITION[source.type].label,
                       },
                     })
-                  : getTypeLabelFromType(source.type)}
+                  : getTypeLabelFromField(source)}
               </EuiBadge>
             </EuiFlexItem>
 

@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CoreSetup, Logger } from '../../../../../src/core/server';
-import { FeaturesService } from '../plugin';
-import { Authorization } from '.';
+import type { HttpServiceSetup, Logger } from 'src/core/server';
+
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
+import type { AuthorizationServiceSetup } from './authorization_service';
 
 class ProtectedApplications {
   private applications: Set<string> | null = null;
-  constructor(private readonly featuresService: FeaturesService) {}
+  constructor(private readonly featuresService: FeaturesPluginSetup) {}
 
   public shouldProtect(appId: string) {
     // Currently, once we get the list of features we essentially "lock" additional
@@ -19,8 +21,8 @@ class ProtectedApplications {
     if (this.applications == null) {
       this.applications = new Set(
         this.featuresService
-          .getFeatures()
-          .map(feature => feature.app)
+          .getKibanaFeatures()
+          .map((feature) => feature.app)
           .flat()
       );
     }
@@ -30,14 +32,14 @@ class ProtectedApplications {
 }
 
 export function initAppAuthorization(
-  http: CoreSetup['http'],
+  http: HttpServiceSetup,
   {
     actions,
     checkPrivilegesDynamicallyWithRequest,
     mode,
-  }: Pick<Authorization, 'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'mode'>,
+  }: Pick<AuthorizationServiceSetup, 'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'mode'>,
   logger: Logger,
-  featuresService: FeaturesService
+  featuresService: FeaturesPluginSetup
 ) {
   const protectedApplications = new ProtectedApplications(featuresService);
 
@@ -63,7 +65,7 @@ export function initAppAuthorization(
 
     const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
     const appAction = actions.app.get(appId);
-    const checkPrivilegesResponse = await checkPrivileges(appAction);
+    const checkPrivilegesResponse = await checkPrivileges({ kibana: appAction });
 
     logger.debug(`authorizing access to "${appId}"`);
     // we've actually authorized the request
@@ -73,6 +75,6 @@ export function initAppAuthorization(
     }
 
     logger.debug(`not authorized for "${appId}"`);
-    return response.notFound();
+    return response.forbidden();
   });
 }

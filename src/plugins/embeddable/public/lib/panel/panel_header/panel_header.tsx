@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import {
   EuiContextMenuPanelDescriptor,
@@ -23,55 +13,96 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiScreenReaderOnly,
+  EuiNotificationBadge,
+  EuiLink,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
-import { EmbeddableContext } from '../../triggers';
+import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
+import { uiToReactComponent } from '../../../../../kibana_react/public';
+import { CustomizePanelTitleAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;
   isViewMode: boolean;
-  hidePanelTitles: boolean;
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
+  hidePanelTitle: boolean;
+  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
+  notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
+  showPlaceholderTitle?: boolean;
+  customizeTitle: CustomizePanelTitleAction;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
-  return badges.map(badge => (
+  return badges.map((badge) => (
     <EuiBadge
       key={badge.id}
       className="embPanel__headerBadge"
-      iconType={badge.getIconType({ embeddable })}
-      onClick={() => badge.execute({ embeddable })}
-      onClickAriaLabel={badge.getDisplayName({ embeddable })}
+      iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
+      onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
+      onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     >
-      {badge.getDisplayName({ embeddable })}
+      {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     </EuiBadge>
   ));
 }
 
-function renderTooltip(description: string) {
-  return (
-    description !== '' && (
-      <EuiToolTip content={description} delay="regular" position="right">
-        <EuiIcon type="iInCircle" />
-      </EuiToolTip>
-    )
-  );
+function renderNotifications(
+  notifications: Array<Action<EmbeddableContext>>,
+  embeddable: IEmbeddable
+) {
+  return notifications.map((notification) => {
+    const context = { embeddable };
+
+    let badge = notification.MenuItem ? (
+      React.createElement(uiToReactComponent(notification.MenuItem), {
+        key: notification.id,
+        context: {
+          embeddable,
+          trigger: panelNotificationTrigger,
+        },
+      })
+    ) : (
+      <EuiNotificationBadge
+        data-test-subj={`embeddablePanelNotification-${notification.id}`}
+        key={notification.id}
+        style={{ marginTop: '4px', marginRight: '4px' }}
+        onClick={() => notification.execute({ ...context, trigger: panelNotificationTrigger })}
+      >
+        {notification.getDisplayName({ ...context, trigger: panelNotificationTrigger })}
+      </EuiNotificationBadge>
+    );
+
+    if (notification.getDisplayNameTooltip) {
+      const tooltip = notification.getDisplayNameTooltip({
+        ...context,
+        trigger: panelNotificationTrigger,
+      });
+
+      if (tooltip) {
+        badge = (
+          <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
+            {badge}
+          </EuiToolTip>
+        );
+      }
+    }
+
+    return badge;
+  });
 }
 
-const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-type VisualizeEmbeddable = any;
+type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
 
-function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
-  if (embeddable.type === VISUALIZE_EMBEDDABLE_TYPE) {
-    const description = embeddable.getVisualizationDescription();
+function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription) {
+  if ('getDescription' in embeddable) {
+    const description = embeddable.getDescription();
 
     if (description) {
       return description;
@@ -84,19 +115,41 @@ function getViewDescription(embeddable: IEmbeddable | VisualizeEmbeddable) {
 export function PanelHeader({
   title,
   isViewMode,
-  hidePanelTitles,
+  hidePanelTitle,
   getActionContextMenuPanel,
   closeContextMenu,
   badges,
+  notifications,
   embeddable,
   headerId,
+  customizeTitle,
 }: PanelHeaderProps) {
-  const viewDescription = getViewDescription(embeddable);
-  const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
-  const showPanelBar = badges.length > 0 || showTitle;
+  const description = getViewDescription(embeddable);
+  const showTitle = !hidePanelTitle && (!isViewMode || title);
+  const showPanelBar =
+    !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle || description;
   const classes = classNames('embPanel__header', {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
+  const placeholderTitle = i18n.translate('embeddableApi.panel.placeholderTitle', {
+    defaultMessage: '[No Title]',
+  });
+
+  const getAriaLabel = () => {
+    return (
+      <span id={headerId}>
+        {showPanelBar && title
+          ? i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
+              defaultMessage: 'Dashboard panel: {title}',
+              values: { title: title || placeholderTitle },
+            })
+          : i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
+              defaultMessage: 'Dashboard panel',
+            })}
+      </span>
+    );
+  };
 
   if (!showPanelBar) {
     return (
@@ -107,47 +160,68 @@ export function PanelHeader({
           closeContextMenu={closeContextMenu}
           title={title}
         />
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
     );
   }
+
+  const renderTitle = () => {
+    let titleComponent;
+    if (showTitle) {
+      titleComponent = isViewMode ? (
+        <span
+          className={classNames('embPanel__titleText', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            embPanel__placeholderTitleText: !title,
+          })}
+        >
+          {title || placeholderTitle}
+        </span>
+      ) : (
+        <EuiLink
+          color="text"
+          data-test-subj={'embeddablePanelTitleLink'}
+          className={classNames('embPanel__titleText', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            embPanel__placeholderTitleText: !title,
+          })}
+          aria-label={i18n.translate('embeddableApi.panel.editTitleAriaLabel', {
+            defaultMessage: 'Click to edit title: {title}',
+            values: { title: title || placeholderTitle },
+          })}
+          onClick={() => customizeTitle.execute({ embeddable })}
+        >
+          {title || placeholderTitle}
+        </EuiLink>
+      );
+    }
+    return description ? (
+      <EuiToolTip
+        content={description}
+        delay="regular"
+        position="top"
+        anchorClassName="embPanel__titleTooltipAnchor"
+      >
+        <span className="embPanel__titleInner">
+          {titleComponent} <EuiIcon type="iInCircle" color="subdued" />
+        </span>
+      </EuiToolTip>
+    ) : (
+      <span className="embPanel__titleInner">{titleComponent}</span>
+    );
+  };
 
   return (
     <figcaption
       className={classes}
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
-      <h2
-        id={headerId}
-        data-test-subj="dashboardPanelTitle"
-        className="embPanel__title embPanel__dragger"
-      >
-        {showTitle ? (
-          <span className="embPanel__titleInner">
-            <span className="embPanel__titleText" aria-hidden="true">
-              {title}
-            </span>
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('embeddableApi.panel.enhancedDashboardPanelAriaLabel', {
-                  defaultMessage: 'Dashboard panel: {title}',
-                  values: { title },
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            {renderTooltip(viewDescription)}
-          </span>
-        ) : (
-          <EuiScreenReaderOnly>
-            <span>
-              {i18n.translate('embeddableApi.panel.dashboardPanelAriaLabel', {
-                defaultMessage: 'Dashboard panel',
-              })}
-            </span>
-          </EuiScreenReaderOnly>
-        )}
+      <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+        {renderTitle()}
         {renderBadges(badges, embeddable)}
       </h2>
-
+      {renderNotifications(notifications, embeddable)}
       <PanelOptionsMenu
         isViewMode={isViewMode}
         getActionContextMenuPanel={getActionContextMenuPanel}

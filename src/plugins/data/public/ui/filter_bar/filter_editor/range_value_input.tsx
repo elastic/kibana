@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiLink, EuiFormHelpText, EuiFormControlLayoutDelimited } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import moment from 'moment';
+import { EuiFormControlLayoutDelimited } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React from 'react';
 import { useKibana } from '../../../../../kibana_react/public';
@@ -37,12 +27,22 @@ interface Props {
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;
+  fullWidth?: boolean;
 }
 
 function RangeValueInputUI(props: Props) {
   const kibana = useKibana();
-  const dataMathDocLink = kibana.services.docLinks!.links.date.dateMath;
   const type = props.field ? props.field.type : 'string';
+  const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
+
+  const formatDateChange = (value: string | number | boolean) => {
+    if (typeof value !== 'string' && typeof value !== 'number') return value;
+
+    const momentParsedValue = moment(value).tz(tzConfig);
+    if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
+    return value;
+  };
 
   const onFromChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') {
@@ -61,6 +61,7 @@ function RangeValueInputUI(props: Props) {
   return (
     <div>
       <EuiFormControlLayoutDelimited
+        fullWidth={props.fullWidth}
         aria-label={props.intl.formatMessage({
           id: 'data.filter.filterEditor.rangeInputLabel',
           defaultMessage: 'Range',
@@ -71,6 +72,9 @@ function RangeValueInputUI(props: Props) {
             type={type}
             value={props.value ? props.value.from : undefined}
             onChange={onFromChange}
+            onBlur={(value) => {
+              onFromChange(formatDateChange(value));
+            }}
             placeholder={props.intl.formatMessage({
               id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
               defaultMessage: 'Start of the range',
@@ -83,6 +87,9 @@ function RangeValueInputUI(props: Props) {
             type={type}
             value={props.value ? props.value.to : undefined}
             onChange={onToChange}
+            onBlur={(value) => {
+              onToChange(formatDateChange(value));
+            }}
             placeholder={props.intl.formatMessage({
               id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
               defaultMessage: 'End of the range',
@@ -90,19 +97,6 @@ function RangeValueInputUI(props: Props) {
           />
         }
       />
-      {type === 'date' ? (
-        <EuiFormHelpText>
-          <EuiLink target="_blank" href={dataMathDocLink}>
-            <FormattedMessage
-              id="data.filter.filterEditor.dateFormatHelpLinkLabel"
-              defaultMessage="Accepted date formats"
-            />{' '}
-            <EuiIcon type="popout" size="s" />
-          </EuiLink>
-        </EuiFormHelpText>
-      ) : (
-        ''
-      )}
     </div>
   );
 }

@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Create a mock for the canDeleteFilter privilege check.
 // The mock is hoisted to the top, so need to prefix the mock function
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = jest.fn(() => true);
-jest.mock('../../../../privilege/check_privilege', () => ({
-  checkPermission: privilege => mockCheckPermission(privilege),
+jest.mock('../../../../capabilities/check_capabilities', () => ({
+  checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 jest.mock('../../../../services/ml_api_service', () => 'ml');
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { DeleteFilterListModal } from './delete_filter_list_modal';

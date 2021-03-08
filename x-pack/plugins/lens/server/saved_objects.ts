@@ -1,30 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'kibana/server';
 import { getEditPath } from '../common';
+import { migrations } from './migrations';
 
 export function setupSavedObjects(core: CoreSetup) {
   core.savedObjects.registerType({
     name: 'lens',
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     management: {
       icon: 'lensApp',
       defaultSearchField: 'title',
       importableAndExportable: true,
       getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
       getInAppUrl: (obj: { id: string }) => ({
-        path: getEditPath(obj.id),
+        path: `/app/lens${getEditPath(obj.id)}`,
         uiCapabilitiesPath: 'visualize.show',
       }),
     },
+    migrations,
     mappings: {
       properties: {
         title: {
+          type: 'text',
+        },
+        description: {
           type: 'text',
         },
         visualizationType: {
@@ -35,6 +41,7 @@ export function setupSavedObjects(core: CoreSetup) {
         },
         expression: {
           index: false,
+          doc_values: false,
           type: 'keyword',
         },
       },
@@ -44,7 +51,7 @@ export function setupSavedObjects(core: CoreSetup) {
   core.savedObjects.registerType({
     name: 'lens-ui-telemetry',
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     mappings: {
       properties: {
         name: {

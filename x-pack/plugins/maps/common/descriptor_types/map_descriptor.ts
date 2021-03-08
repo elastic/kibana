@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from '../../../../../src/plugins/data/public';
+import { GeoJsonProperties } from 'geojson';
+import { Query } from '../../../../../src/plugins/data/common';
 import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {
-  maxLat: number;
-  maxLon: number;
-  minLat: number;
   minLon: number;
+  minLat: number;
+  maxLon: number;
+  maxLat: number;
 };
 
 export type MapQuery = Query & {
-  queryLastTriggeredAt: string;
+  queryLastTriggeredAt?: string;
 };
 
 export type MapRefreshConfig = {
@@ -39,8 +42,9 @@ export type Goto = {
 };
 
 export type TooltipFeature = {
-  id: number;
+  id?: number | string;
   layerId: string;
+  mbProperties: GeoJsonProperties;
 };
 
 export type TooltipState = {
@@ -51,6 +55,7 @@ export type TooltipState = {
 };
 
 export type DrawState = {
+  actionId: string;
   drawType: DRAW_TYPE;
   filterLabel?: string; // point radius filter alias
   geoFieldName?: string;

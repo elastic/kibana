@@ -32,7 +32,7 @@ are consumed over time.
 
 [source,js]
 --------------------------------------------------
-POST /api/upgrade_assistant/reindex/batch
+$ curl -X POST api/upgrade_assistant/reindex/batch
 {
   "indexNames": [ <1>
     "index1",
@@ -40,7 +40,9 @@ POST /api/upgrade_assistant/reindex/batch
   ]
 }
 --------------------------------------------------
-<1> The order in which the indices are provided here determines the order in which the reindex tasks will be executed.
+// KIBANA
+
+<1> The order of the indices determines the order that the reindex tasks are executed.
 
 Similar to the <<start-resume-reindex, start or resume endpoint>>, the API returns the following:
 

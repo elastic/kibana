@@ -7,6 +7,7 @@
 
 Having trouble? Here are solutions to common problems you might encounter while using Reporting.
 
+* <<reporting-diagnostics>>
 * <<reporting-troubleshooting-system-dependencies>>
 * <<reporting-troubleshooting-text-incorrect>>
 * <<reporting-troubleshooting-missing-data>>
@@ -14,6 +15,15 @@ Having trouble? Here are solutions to common problems you might encounter while 
 * <<reporting-troubleshooting-error-messages>>
 * <<reporting-troubleshooting-puppeteer-debug-logs>>
 * <<reporting-troubleshooting-system-requirements>>
+* <<reporting-troubleshooting-arm-systems>>
+
+[float]
+[[reporting-diagnostics]]
+=== Reporting diagnostics
+Reporting comes with a built-in utility to try to automatically find common issues.
+When {kib} is running, navigate to the Report Listing page, and click *Run reporting diagnostics*.
+This will open up a diagnostic tool that checks various parts of the {kib} deployment and
+come up with any relevant recommendations.
 
 [float]
 [[reporting-troubleshooting-system-dependencies]]
@@ -147,3 +157,9 @@ requests to render.
 
 If the {kib} instance doesn't have enough memory to run the report, the report fails with an error such as `Error: Page crashed!`
 In this case, try increasing the memory for the {kib} instance to 2GB.
+
+[float]
+[[reporting-troubleshooting-arm-systems]]
+=== ARM systems
+
+Chromium is not compatible with ARM RHEL/CentOS.

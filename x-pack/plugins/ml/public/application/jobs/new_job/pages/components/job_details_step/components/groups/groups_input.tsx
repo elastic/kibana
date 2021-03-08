@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, useState, useContext, useEffect } from 'react';
+import React, { FC, useState, useContext, useEffect, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -17,7 +18,19 @@ export const GroupsInput: FC = () => {
   );
   const { existingJobsAndGroups } = useContext(JobCreatorContext);
   const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
-  const [validation, setValidation] = useState(jobValidator.groupIds);
+
+  const validation = useMemo(() => {
+    const valid =
+      jobValidator.groupIds.valid === true &&
+      jobValidator.latestValidationResult.groupIdsExist?.valid === true;
+    const message =
+      jobValidator.groupIds.message ?? jobValidator.latestValidationResult.groupIdsExist?.message;
+
+    return {
+      valid,
+      message,
+    };
+  }, [jobValidatorUpdated]);
 
   useEffect(() => {
     jobCreator.groups = selectedGroups;
@@ -35,7 +48,7 @@ export const GroupsInput: FC = () => {
   }));
 
   function onChange(optionsIn: EuiComboBoxOptionOption[]) {
-    setSelectedGroups(optionsIn.map(g => g.label));
+    setSelectedGroups(optionsIn.map((g) => g.label));
   }
 
   function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionOption[]) {
@@ -52,18 +65,14 @@ export const GroupsInput: FC = () => {
 
     if (
       flattenedOptions.findIndex(
-        option => option.label.trim().toLowerCase() === normalizedSearchValue
+        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
       ) === -1
     ) {
       options.push(newGroup);
     }
 
-    setSelectedGroups([...selectedOptions, newGroup].map(g => g.label));
+    setSelectedGroups([...selectedOptions, newGroup].map((g) => g.label));
   }
-
-  useEffect(() => {
-    setValidation(jobValidator.groupIds);
-  }, [jobValidatorUpdated]);
 
   return (
     <Description validation={validation}>

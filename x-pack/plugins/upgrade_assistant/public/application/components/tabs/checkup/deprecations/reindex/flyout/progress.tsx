@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -116,7 +117,7 @@ const orderedSteps = Object.values(ReindexStep).sort() as number[];
 export const ReindexProgress: React.FunctionComponent<{
   reindexState: ReindexState;
   cancelReindex: () => void;
-}> = props => {
+}> = (props) => {
   const { errorMessage, indexGroup, lastCompletedStep = -1, status } = props.reindexState;
   const stepDetails = (thisStep: ReindexStep): Pick<StepProgressStep, 'status' | 'children'> => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];

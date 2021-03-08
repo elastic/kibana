@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
+import type { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 
 export class SubFeaturePrivilegeGroup {
@@ -19,7 +20,7 @@ export class SubFeaturePrivilegeGroup {
 
   public get privileges() {
     return this.config.privileges.map(
-      p => new SubFeaturePrivilege(p, this.actionMapping[p.id] || [])
+      (p) => new SubFeaturePrivilege(p, this.actionMapping[p.id] || [])
     );
   }
 }

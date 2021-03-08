@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
 import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ReactWrapper } from 'enzyme';
-import { PrivilegeSpaceTable } from './privilege_space_table';
-import { PrivilegeDisplay } from './privilege_display';
-import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+
+import { KibanaFeature } from '../../../../../../../../features/public';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { Feature } from '../../../../../../../../features/public';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { PrivilegeDisplay } from './privilege_display';
+import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface TableRow {
   spaces: string[];
@@ -24,10 +26,11 @@ interface TableRow {
 }
 
 const features = [
-  new Feature({
+  new KibanaFeature({
     id: 'normal',
     name: 'normal feature',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: { all: [], read: [] },
@@ -39,10 +42,11 @@ const features = [
       },
     },
   }),
-  new Feature({
+  new KibanaFeature({
     id: 'normal_with_sub',
     name: 'normal feature with sub features',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: { all: [], read: [] },
@@ -92,10 +96,11 @@ const features = [
       },
     ],
   }),
-  new Feature({
+  new KibanaFeature({
     id: 'bothPrivilegesExcludedFromBase',
     name: 'bothPrivilegesExcludedFromBase',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         excludeFromBasePrivileges: true,
@@ -109,10 +114,11 @@ const features = [
       },
     },
   }),
-  new Feature({
+  new KibanaFeature({
     id: 'allPrivilegeExcludedFromBase',
     name: 'allPrivilegeExcludedFromBase',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         excludeFromBasePrivileges: true,
@@ -176,7 +182,7 @@ const getTableFromComponent = (
     return [
       ...acc,
       {
-        spaces: spacesBadge.map(badge => badge.text().trim()),
+        spaces: spacesBadge.map((badge) => badge.text().trim()),
         privileges: {
           summary: privilegesDisplay.text().trim(),
           overridden:

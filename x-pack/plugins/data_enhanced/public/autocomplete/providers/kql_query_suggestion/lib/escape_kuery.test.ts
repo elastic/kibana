@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { escapeQuotes, escapeKuery } from './escape_kuery';
@@ -10,6 +11,13 @@ describe('Kuery escape', () => {
   test('should escape quotes', () => {
     const value = 'I said, "Hello."';
     const expected = 'I said, \\"Hello.\\"';
+
+    expect(escapeQuotes(value)).toBe(expected);
+  });
+
+  test('should escape backslashes and quotes', () => {
+    const value = 'Backslashes \\" in the middle and ends with quotes \\"';
+    const expected = 'Backslashes \\\\\\" in the middle and ends with quotes \\\\\\"';
 
     expect(escapeQuotes(value)).toBe(expected);
   });

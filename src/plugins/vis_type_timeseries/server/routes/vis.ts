@@ -1,65 +1,53 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { IRouter, KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { ensureNoUnsafeProperties } from '@kbn/std';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
-import { visPayloadSchema } from './post_vis_schema';
-import { Framework, ValidationTelemetryServiceSetup } from '../index';
+import { visPayloadSchema } from '../../common/vis_schema';
+import { ROUTES } from '../../common/constants';
+import { Framework } from '../plugin';
+import type { VisTypeTimeseriesRouter } from '../types';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-export const visDataRoutes = (
-  router: IRouter,
-  framework: Framework,
-  { logFailedValidation }: ValidationTelemetryServiceSetup
-) => {
+export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framework) => {
   router.post(
     {
-      path: '/api/metrics/vis/data',
+      path: ROUTES.VIS_DATA,
       validate: {
         body: escapeHatch,
       },
     },
     async (requestContext, request, response) => {
-      const { error: validationError } = visPayloadSchema.validate(request.body);
-      if (validationError) {
-        logFailedValidation();
-        const savedObjectId =
-          (typeof request.body === 'object' && (request.body as any).savedObjectId) ||
-          'unavailable';
-        framework.logger.warn(
-          `Request validation error: ${validationError.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
-        );
-      }
       try {
-        const results = await getVisData(
-          requestContext,
-          request as KibanaRequest<{}, {}, GetVisDataOptions>,
-          framework
-        );
-        return response.ok({ body: results });
+        ensureNoUnsafeProperties(request.body);
       } catch (error) {
-        return response.internalError({
+        return response.badRequest({
           body: error.message,
         });
       }
+
+      try {
+        visPayloadSchema.validate(request.body);
+      } catch (error) {
+        framework.logger.debug(
+          `Request validation error: ${error.message}. This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
+        );
+      }
+
+      const results = await getVisData(
+        requestContext,
+        request as KibanaRequest<{}, {}, GetVisDataOptions>,
+        framework
+      );
+      return response.ok({ body: results });
     }
   );
 };

@@ -1,8 +1,0 @@
-{
-  "id": "siem",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
-  "configPath": ["xpack", "siem"],
-  "server": true,
-  "ui": false
-}

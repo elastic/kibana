@@ -1,0 +1,38 @@
+.mlJobMapLegend__container {
+  background-color: '#FFFFFF';
+}
+
+.mlJobMapLegend__indexPattern {
+  height: $euiSizeM;
+  width: $euiSizeM;
+  background-color: $euiColorGhost;
+  border: $euiBorderWidthThick solid $euiColorVis2;
+  transform: rotate(45deg);
+  display: 'inline-block';
+}
+
+.mlJobMapLegend__transform {
+  height: $euiSizeM;
+  width: $euiSizeM;
+  background-color: $euiColorGhost;
+  border: $euiBorderWidthThick solid $euiColorVis1;
+  display: 'inline-block';
+}
+
+.mlJobMapLegend__analytics {
+  height: $euiSizeM;
+  width: $euiSizeM;
+  background-color: $euiColorGhost;
+  border: $euiBorderWidthThick solid $euiColorVis0;
+  border-radius: 50%;
+  display: 'inline-block';
+}
+
+.mlJobMapLegend__sourceNode {
+  height: $euiSizeM;
+  width: $euiSizeM;
+  background-color: $euiColorWarning;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  display: 'inline-block';
+}

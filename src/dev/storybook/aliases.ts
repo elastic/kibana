@@ -1,29 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+// Please also add new aliases to test/scripts/jenkins_storybook.sh
 export const storybookAliases = {
-  apm: 'x-pack/legacy/plugins/apm/scripts/storybook.js',
-  canvas: 'x-pack/legacy/plugins/canvas/scripts/storybook_new.js',
-  codeeditor: 'src/plugins/kibana_react/public/code_editor/scripts/storybook.ts',
-  drilldowns: 'x-pack/plugins/drilldowns/scripts/storybook.js',
-  embeddable: 'src/plugins/embeddable/scripts/storybook.js',
-  infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
-  siem: 'x-pack/legacy/plugins/siem/scripts/storybook.js',
-  ui_actions: 'x-pack/plugins/advanced_ui_actions/scripts/storybook.js',
+  apm: 'x-pack/plugins/apm/.storybook',
+  canvas: 'x-pack/plugins/canvas/storybook',
+  codeeditor: 'src/plugins/kibana_react/public/code_editor/.storybook',
+  ci_composite: '.ci/.storybook',
+  url_template_editor: 'src/plugins/kibana_react/public/url_template_editor/.storybook',
+  dashboard: 'src/plugins/dashboard/.storybook',
+  dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
+  data_enhanced: 'x-pack/plugins/data_enhanced/.storybook',
+  embeddable: 'src/plugins/embeddable/.storybook',
+  infra: 'x-pack/plugins/infra/.storybook',
+  security_solution: 'x-pack/plugins/security_solution/.storybook',
+  ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
+  observability: 'x-pack/plugins/observability/.storybook',
+  presentation: 'src/plugins/presentation_util/storybook',
 };

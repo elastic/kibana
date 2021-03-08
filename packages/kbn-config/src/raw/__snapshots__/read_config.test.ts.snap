@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`different cwd() resolves relative files based on the cwd 1`] = `
+Object {
+  "abc": Object {
+    "def": "test",
+    "qwe": 1,
+    "zyx": Object {
+      "val": 1,
+    },
+  },
+  "bar": true,
+  "empty_arr": Array [],
+  "foo": 1,
+  "pom": Object {
+    "bom": 3,
+  },
+  "xyz": Array [
+    "1",
+    "2",
+  ],
+}
+`;
+
+exports[`reads and merges multiple yaml files from file system and parses to json 1`] = `
+Object {
+  "abc": Object {
+    "def": "test",
+    "ghi": "test2",
+    "qwe": 2,
+    "zyx": Object {},
+  },
+  "arr": Array [
+    1,
+  ],
+  "bar": true,
+  "baz": "bonkers",
+  "empty_arr": Array [],
+  "foo": 2,
+  "pom": Object {
+    "bom": 3,
+    "mob": 4,
+  },
+  "xyz": Array [
+    "3",
+    "4",
+  ],
+}
+`;
+
+exports[`reads single yaml from file system and parses to json 1`] = `
+Object {
+  "arr": Array [
+    1,
+    2,
+  ],
+  "empty_arr": Array [],
+  "empty_obj": Object {},
+  "obj": Object {
+    "val": 3,
+  },
+  "pid": Object {
+    "arr": Array [
+      1,
+    ],
+    "empty_arr": Array [],
+    "empty_obj": Object {},
+    "enabled": true,
+    "file": "/var/run/kibana.pid",
+    "obj": Object {
+      "val": 3,
+    },
+  },
+}
+`;
+
+exports[`returns a deep object 1`] = `
+Object {
+  "pid": Object {
+    "arr": Array [
+      1,
+      2,
+    ],
+    "empty_arr": Array [],
+    "empty_obj": Object {},
+    "enabled": true,
+    "file": "/var/run/kibana.pid",
+    "obj": Object {
+      "val": 3,
+    },
+  },
+}
+`;
+
+exports[`should inject an environment variable value when setting a value with \${ENV_VAR} 1`] = `
+Object {
+  "bar": "pre-val1-mid-val2-post",
+  "elasticsearch": Object {
+    "requestHeadersWhitelist": Array [
+      "val1",
+      "val2",
+    ],
+  },
+  "foo": 1,
+}
+`;
+
+exports[`should throw an exception when referenced environment variable in a config value does not exist 1`] = `"Unknown environment variable referenced in config : KBN_ENV_VAR1"`;

@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+.appSearchNavEngineLabel {
+  padding-top: $euiSizeS;
+  padding-bottom: $euiSizeS;
+
+  .euiText {
+    font-weight: $euiFontWeightMedium;
+  }
+  .euiBadge {
+    margin-top: $euiSizeXS;
+  }
+}
+
+.appSearchNavIcons {
+  // EUI override
+  &.euiFlexItem {
+    flex-grow: 0;
+    flex-direction: row;
+  }
+}

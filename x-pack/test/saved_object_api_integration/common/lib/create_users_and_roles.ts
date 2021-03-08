@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SuperTest } from 'supertest';
+import { Client } from '@elastic/elasticsearch';
 import { AUTHENTICATION } from './authentication';
 
-export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) => {
+export const createUsersAndRoles = async (es: Client, supertest: SuperTest<any>) => {
   await supertest
     .put('/api/security/role/kibana_legacy_user')
     .send({
@@ -130,7 +133,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     })
     .expect(204);
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.NOT_A_KIBANA_USER.username,
     body: {
       password: AUTHENTICATION.NOT_A_KIBANA_USER.password,
@@ -140,7 +143,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_LEGACY_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_LEGACY_USER.password,
@@ -150,7 +153,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER.password,
@@ -160,7 +163,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER.password,
@@ -170,7 +173,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_RBAC_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_RBAC_USER.password,
@@ -180,7 +183,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER.password,
@@ -190,7 +193,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER.password,
@@ -200,7 +203,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER.password,
@@ -210,7 +213,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER.password,
@@ -220,7 +223,7 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     },
   });
 
-  await es.shield.putUser({
+  await es.security.putUser({
     username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.username,
     body: {
       password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER.password,

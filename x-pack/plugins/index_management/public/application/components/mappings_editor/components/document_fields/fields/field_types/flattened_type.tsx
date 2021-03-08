@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
@@ -19,6 +20,8 @@ import {
   NullValueParameter,
   SimilarityParameter,
   SplitQueriesOnWhitespaceParameter,
+  MetaParameter,
+  IgnoreAboveParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
@@ -29,6 +32,8 @@ interface Props {
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'boost':
+    case 'ignore_above':
+    case 'meta':
     case 'similarity': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
@@ -66,28 +71,9 @@ export const FlattenedType = React.memo(({ field }: Props) => {
           <UseField path="depth_limit" config={getFieldConfig('depth_limit')} component={Field} />
         </EditFieldFormRow>
 
-        {/* ignore_above */}
-        <EditFieldFormRow
-          title={i18n.translate('xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldTitle', {
-            defaultMessage: 'Set length limit',
-          })}
-          description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldDescription',
-            {
-              defaultMessage:
-                'Prevent leaf values from being indexed if they are beyond a certain length. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
-            }
-          )}
-          docLink={{
-            text: i18n.translate('xpack.idxMgmt.mappingsEditor.flattened.ignoreAboveDocLinkText', {
-              defaultMessage: 'Ignore above documentation',
-            }),
-            href: documentationService.getIgnoreAboveLink(),
-          }}
+        <IgnoreAboveParameter
           defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
-        >
-          <UseField path="ignore_above" config={getFieldConfig('ignore_above')} component={Field} />
-        </EditFieldFormRow>
+        />
 
         <SplitQueriesOnWhitespaceParameter />
 
@@ -100,6 +86,8 @@ export const FlattenedType = React.memo(({ field }: Props) => {
         <NullValueParameter
           defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
         />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
         <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,6 +11,7 @@ import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createFilebeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -30,9 +20,9 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Filebeat',
       }),
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.filebeat}/filebeat-getting-started.html',
+          linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -46,9 +36,9 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Filebeat',
       }),
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.debTextPre', {
-        defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.filebeat}/filebeat-getting-started.html',
+          linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -67,9 +57,9 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
         defaultMessage: 'Download and install Filebeat',
       }),
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.rpmTextPre', {
-        defaultMessage: 'First time using Filebeat? See the [Getting Started Guide]({linkUrl}).',
+        defaultMessage: 'First time using Filebeat? See the [Quick Start]({linkUrl}).',
         values: {
-          linkUrl: '{config.docs.beats.filebeat}/filebeat-getting-started.html',
+          linkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
         },
       }),
       commands: [
@@ -89,7 +79,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
       }),
       textPre: i18n.translate('home.tutorials.common.filebeatInstructions.install.windowsTextPre', {
         defaultMessage:
-          'First time using Filebeat? See the [Getting Started Guide]({guideLinkUrl}).\n\
+          'First time using Filebeat? See the [Quick Start]({guideLinkUrl}).\n\
  1. Download the Filebeat Windows zip file from the [Download]({filebeatLinkUrl}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the `{directoryName}` directory to `Filebeat`.\n\
@@ -98,7 +88,7 @@ export const createFilebeatInstructions = (context?: TutorialContext) => ({
  5. From the PowerShell prompt, run the following commands to install Filebeat as a Windows service.',
         values: {
           folderPath: '`C:\\Program Files`',
-          guideLinkUrl: '{config.docs.beats.filebeat}/filebeat-getting-started.html',
+          guideLinkUrl: '{config.docs.beats.filebeat}/filebeat-installation-configuration.html',
           filebeatLinkUrl: 'https://www.elastic.co/downloads/beats/filebeat',
           directoryName: 'filebeat-{config.kibana.version}-windows',
         },
@@ -299,13 +289,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.osxTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.debTitle', {
@@ -318,13 +302,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.debTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.rpmTitle', {
@@ -337,13 +315,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.rpmTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     WINDOWS: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.windowsTitle', {
@@ -359,13 +331,7 @@ export const createFilebeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.windowsTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
   },
 });

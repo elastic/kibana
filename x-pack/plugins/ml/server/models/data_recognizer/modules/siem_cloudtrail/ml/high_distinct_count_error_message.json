@@ -1,0 +1,33 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "Security: Cloudtrail - Looks for a spike in the rate of an error message which may simply indicate an impending service failure but these can also be byproducts of attempted or successful persistence, privilege escalation, defense evasion, discovery, lateral movement, or collection activity by a threat actor.",
+  "groups": [
+    "security",
+    "cloudtrail"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high_distinct_count(\"aws.cloudtrail.error_message\")",
+        "function": "high_distinct_count",
+        "field_name": "aws.cloudtrail.error_message"
+      }
+    ],
+    "influencers": [
+      "aws.cloudtrail.user_identity.arn",
+      "source.ip",
+      "source.geo.city_name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "16mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-siem-cloudtrail"
+  }
+}

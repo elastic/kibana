@@ -1,6 +1,6 @@
 [role="xpack"]
 [[xpack-graph]]
-= Graph data connections
+= Graph
 
 [partintro]
 --

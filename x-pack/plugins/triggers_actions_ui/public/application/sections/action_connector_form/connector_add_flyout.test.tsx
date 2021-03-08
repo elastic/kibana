@@ -1,24 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ConnectorAddFlyout } from './connector_add_flyout';
-import {
-  ActionsConnectorsContextProvider,
-  ActionsConnectorsContextValue,
-} from '../../context/actions_connectors_context';
+import ConnectorAddFlyout from './connector_add_flyout';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
+import { ConnectorValidationResult, GenericValidationResult } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
+jest.mock('../../../common/lib/kibana');
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('connector_add_flyout', () => {
-  let deps: ActionsConnectorsContextValue;
-
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
     const [
@@ -26,18 +25,13 @@ describe('connector_add_flyout', () => {
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
-    deps = {
-      toastNotifications: mocks.notifications.toasts,
-      http: mocks.http,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: true,
+        delete: true,
       },
-      actionTypeRegistry: actionTypeRegistry as any,
     };
   });
 
@@ -47,38 +41,31 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          toastNotifications: deps!.toastNotifications,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ConnectorAddFlyout
+        onClose={() => {}}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
           },
+        ]}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
         }}
-      >
-        <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
     expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
     expect(wrapper.find(`[data-test-subj="${actionType.id}-card"]`).exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="cancelButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="backButton"]').exists()).toBeFalsy();
   });
 
-  it('renders banner with subscription links when features are disbaled due to licensing ', () => {
+  it('renders banner with subscription links when gold features are disabled due to licensing ', () => {
     const actionType = createActionType();
     const disabledActionType = createActionType();
 
@@ -86,40 +73,31 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          toastNotifications: deps!.toastNotifications,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ConnectorAddFlyout
+        onClose={() => {}}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
           },
+          {
+            id: disabledActionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: false,
+            minimumLicenseRequired: 'gold',
+          },
+        ]}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
         }}
-      >
-        <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: disabledActionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: false,
-              minimumLicenseRequired: 'gold',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
     const callout = wrapper.find('UpgradeYourLicenseCallOut');
     expect(callout).toHaveLength(1);
@@ -127,7 +105,7 @@ describe('connector_add_flyout', () => {
     const manageLink = callout.find('EuiButton');
     expect(manageLink).toHaveLength(1);
     expect(manageLink.getElements()[0].props.href).toMatchInlineSnapshot(
-      `"/app/kibana#/management/elasticsearch/license_management/"`
+      `"/app/management/stack/license_management"`
     );
 
     const subscriptionLink = callout.find('EuiButtonEmpty');
@@ -136,22 +114,97 @@ describe('connector_add_flyout', () => {
       `"https://www.elastic.co/subscriptions"`
     );
   });
+
+  it('does not render banner with subscription links when only platinum features are disabled due to licensing ', () => {
+    const actionType = createActionType();
+    const disabledActionType = createActionType();
+
+    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+    actionTypeRegistry.has.mockReturnValue(true);
+
+    const wrapper = mountWithIntl(
+      <ConnectorAddFlyout
+        onClose={() => {}}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+          },
+          {
+            id: disabledActionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: false,
+            minimumLicenseRequired: 'platinum',
+          },
+        ]}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
+        }}
+        actionTypeRegistry={actionTypeRegistry}
+      />
+    );
+    const callout = wrapper.find('UpgradeYourLicenseCallOut');
+    expect(callout).toHaveLength(0);
+  });
+
+  it('does not render banner with subscription links when only enterprise features are disabled due to licensing ', () => {
+    const actionType = createActionType();
+    const disabledActionType = createActionType();
+
+    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+    actionTypeRegistry.has.mockReturnValue(true);
+
+    const wrapper = mountWithIntl(
+      <ConnectorAddFlyout
+        onClose={() => {}}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+          },
+          {
+            id: disabledActionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: false,
+            minimumLicenseRequired: 'enterprise',
+          },
+        ]}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
+        }}
+        actionTypeRegistry={actionTypeRegistry}
+      />
+    );
+    const callout = wrapper.find('UpgradeYourLicenseCallOut');
+    expect(callout).toHaveLength(0);
+  });
 });
 
 let count = 0;
 function createActionType() {
-  return {
+  return actionTypeRegistryMock.createMockActionTypeModel({
     id: `my-action-type-${++count}`,
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+  });
 }

@@ -1,0 +1,52 @@
+<div sv-root
+  sv-part="state.sheet"
+  sv-on-sort="dropCell($item, $partFrom, $partTo, $indexFrom, $indexTo)"
+  >
+
+  <div sv-element
+    ng-repeat="cell in state.sheet track by $index"
+    class="timCell col-md-{{12 / state.columns}} col-sm-12 col-xs-12"
+    timelion-grid timelion-grid-rows="state.rows"
+    ng-click="onSelect($index)"
+    ng-class="{active: $index === state.selected}"
+    kbn-accessible-click
+    aria-label="Timelion chart {{$index + 1}}"
+    aria-current="{{$index === state.selected}}"
+    >
+
+    <div chart="sheet[$index]" class="timChart" search="onSearch" interval="state.interval"></div>
+    <div class="timCell__actions">
+      <div class="timCell__id"><span>{{$index + 1}}</span></div>
+
+      <button
+        class="timCell__action"
+        ng-click="removeCell($index)"
+        tooltip="{{ ::'timelion.cells.actions.removeTooltip' | i18n: { defaultMessage: 'Remove' } }}"
+        tooltip-append-to-body="1"
+        aria-label="{{ ::'timelion.cells.actions.removeAriaLabel' | i18n: { defaultMessage: 'Remove chart' } }}"
+      >
+         <icon type="'cross'"></icon>
+      </button>
+      <button
+        class="timCell__action"
+        tooltip="{{ ::'timelion.cells.actions.reorderTooltip' | i18n: { defaultMessage: 'Drag to reorder' } }}"
+        tooltip-append-to-body="1"
+        sv-handle
+        aria-label="{{ ::'timelion.cells.actions.reorderAriaLabel' | i18n: { defaultMessage: 'Drag to reorder' } }}"
+        tabindex="-1"
+      >
+        <icon type="'grab'"></icon>
+      </button>
+      <button
+        class="timCell__action"
+        ng-click="transient.fullscreen = true"
+        tooltip="{{ ::'timelion.cells.actions.fullscreenTooltip' | i18n: { defaultMessage: 'Full screen' } }}"
+        tooltip-append-to-body="1"
+        aria-label="{{ ::'timelion.cells.actions.fullscreenAriaLabel' | i18n: { defaultMessage: 'Full screen chart' } }}"
+      >
+        <icon type="'expandMini'"></icon>
+      </button>
+    </div>
+  </div>
+
+</div>

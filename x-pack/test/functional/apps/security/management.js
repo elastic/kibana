@@ -1,25 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import {
-  USERS_PATH,
-  EDIT_USERS_PATH,
-  ROLES_PATH,
-  EDIT_ROLES_PATH,
-  CLONE_ROLES_PATH,
-} from '../../../../plugins/security/public/management/management_urls';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', function() {
+  const USERS_PATH = 'security/users';
+  const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
+
+  const ROLES_PATH = 'security/roles';
+  const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
+  const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
+
+  // FLAKY: https://github.com/elastic/kibana/issues/61173
+  describe.skip('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {

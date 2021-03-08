@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Moment } from 'moment';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
-declare interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
+export interface TimeRangeBounds {
+  min?: Moment;
+  max?: Moment;
 }
 
 export declare interface TimeBucketsInterval {
@@ -17,11 +19,28 @@ export declare interface TimeBucketsInterval {
   expression: string;
 }
 
-export class TimeBuckets {
-  setBarTarget: (barTarget: number) => void;
-  setMaxBars: (maxBars: number) => void;
-  setInterval: (interval: string) => void;
-  setBounds: (bounds: TimeRangeBounds) => void;
-  getBounds: () => { min: any; max: any };
-  getInterval: () => TimeBucketsInterval;
+export interface TimeBucketsConfig {
+  'histogram:maxBars': number;
+  'histogram:barTarget': number;
+  dateFormat: string;
+  'dateFormat:scaled': string[][];
 }
+
+export declare class TimeBuckets {
+  constructor(timeBucketsConfig: TimeBucketsConfig);
+  public setBarTarget(barTarget: number): void;
+  public setMaxBars(maxBars: number): void;
+  public setInterval(interval: string): void;
+  public setBounds(bounds: TimeRangeBounds): void;
+  public getBounds(): { min: any; max: any };
+  public getInterval(): TimeBucketsInterval;
+  public getScaledDateFormat(): string;
+}
+
+export declare function getTimeBucketsFromCache(): InstanceType<typeof TimeBuckets>;
+
+export declare function getBoundsRoundedToInterval(
+  bounds: TimeRangeBounds,
+  interval: TimeBucketsInterval,
+  inclusiveEnd?: boolean
+): Required<TimeRangeBounds>;

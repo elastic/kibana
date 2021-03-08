@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'kibana/public';
 import { $Keys } from 'utility-types';
-import { flatten, uniq } from 'lodash';
+import { flatten, uniqBy } from 'lodash';
 import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
@@ -21,7 +22,7 @@ import {
 const cursorSymbol = '@kuery-cursor@';
 
 const dedup = (suggestions: QuerySuggestion[]): QuerySuggestion[] =>
-  uniq(suggestions, ({ type, text, start, end }) => [type, text, start, end].join('|'));
+  uniqBy(suggestions, ({ type, text, start, end }) => [type, text, start, end].join('|'));
 
 export const KUERY_LANGUAGE_NAME = 'kuery';
 
@@ -51,7 +52,7 @@ export const setupKqlQuerySuggestionProvider = (core: CoreSetup): QuerySuggestio
     }
   };
 
-  return querySuggestionsArgs => {
+  return (querySuggestionsArgs) => {
     const { query, selectionStart, selectionEnd } = querySuggestionsArgs;
     const cursoredQuery = `${query.substr(0, selectionStart)}${cursorSymbol}${query.substr(
       selectionEnd
@@ -59,6 +60,6 @@ export const setupKqlQuerySuggestionProvider = (core: CoreSetup): QuerySuggestio
 
     return Promise.all(
       getSuggestionsByType(cursoredQuery, querySuggestionsArgs)
-    ).then(suggestionsByType => dedup(flatten(suggestionsByType)));
+    ).then((suggestionsByType) => dedup(flatten(suggestionsByType)));
   };
 };

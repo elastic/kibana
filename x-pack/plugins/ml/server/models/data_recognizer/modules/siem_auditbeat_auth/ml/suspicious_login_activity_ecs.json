@@ -1,8 +1,8 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Auditbeat: Detect unusually high number of authentication attempts (beta)",
+  "description": "Security: Auditbeat - Detect unusually high number of authentication attempts.",
   "groups": [
-    "siem",
+    "security",
     "auditbeat",
     "authentication"
   ],
@@ -33,7 +33,7 @@
     "custom_urls": [
       {
         "url_name": "IP Address Details",
-        "url_value": "siem#/ml-network/ip/$source.ip$?_g=()&query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "security/network/ml-network/ip/$source.ip$?_g=()&query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ]
   }

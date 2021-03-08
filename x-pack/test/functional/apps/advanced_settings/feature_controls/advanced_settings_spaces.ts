@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
@@ -14,8 +16,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const config = getService('config');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/57413
-  describe.skip('spaces feature controls', () => {
+  describe('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
@@ -42,15 +43,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Management');
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`allows settings to be changed`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
         const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
@@ -58,8 +60,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('space with Advanced Settings disabled', function() {
-      this.tags('skipCoverage');
+    describe('space with Advanced Settings disabled', function () {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -77,10 +78,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`redirects to management home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
         await testSubjects.existOrFail('managementHome', {
           timeout: config.get('timeouts.waitFor'),

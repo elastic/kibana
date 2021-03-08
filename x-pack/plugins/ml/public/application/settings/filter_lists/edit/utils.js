@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,19 +22,19 @@ export function saveFilterList(filterId, description, items, loadedFilterList) {
     if (loadedFilterList === undefined || loadedFilterList.filter_id === undefined) {
       // Create a new filter.
       addFilterList(filterId, description, items)
-        .then(newFilter => {
+        .then((newFilter) => {
           resolve(newFilter);
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     } else {
       // Edit to existing filter.
       updateFilterList(loadedFilterList, description, items)
-        .then(updatedFilter => {
+        .then((updatedFilter) => {
           resolve(updatedFilter);
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     }
@@ -55,16 +56,16 @@ export function addFilterList(filterId, description, items) {
     // First check the filterId isn't already in use by loading the current list of filters.
     ml.filters
       .filtersStats()
-      .then(filterLists => {
-        const savedFilterIds = filterLists.map(filterList => filterList.filter_id);
+      .then((filterLists) => {
+        const savedFilterIds = filterLists.map((filterList) => filterList.filter_id);
         if (savedFilterIds.indexOf(filterId) === -1) {
           // Save the new filter.
           ml.filters
             .addFilter(filterId, description, items)
-            .then(newFilter => {
+            .then((newFilter) => {
               resolve(newFilter);
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error);
             });
         } else {
@@ -73,7 +74,7 @@ export function addFilterList(filterId, description, items) {
           reject(new Error(filterWithIdExistsErrorMessage));
         }
       })
-      .catch(error => {
+      .catch((error) => {
         reject(error);
       });
   });
@@ -83,15 +84,15 @@ export function updateFilterList(loadedFilterList, description, items) {
   return new Promise((resolve, reject) => {
     // Get items added and removed from loaded filter.
     const loadedItems = loadedFilterList.items;
-    const addItems = items.filter(item => loadedItems.includes(item) === false);
-    const removeItems = loadedItems.filter(item => items.includes(item) === false);
+    const addItems = items.filter((item) => loadedItems.includes(item) === false);
+    const removeItems = loadedItems.filter((item) => items.includes(item) === false);
 
     ml.filters
       .updateFilter(loadedFilterList.filter_id, description, addItems, removeItems)
-      .then(updatedFilter => {
+      .then((updatedFilter) => {
         resolve(updatedFilter);
       })
-      .catch(error => {
+      .catch((error) => {
         reject(error);
       });
   });

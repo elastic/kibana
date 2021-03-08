@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
 import supertest from 'supertest';
-import { Server as HapiServer } from 'hapi';
+import { Server as HapiServer } from '@hapi/hapi';
 import { createHttpServer } from '../../http/test_utils';
 import { HttpService, IRouter } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
@@ -34,7 +23,7 @@ describe('ServerMetricsCollector', () => {
   let hapiServer: HapiServer;
   let router: IRouter;
 
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
@@ -81,7 +70,7 @@ describe('ServerMetricsCollector', () => {
   });
 
   it('collect disconnects requests infos', async () => {
-    const never = new Promise(resolve => undefined);
+    const never = new Promise((resolve) => undefined);
     const hitSubject = new BehaviorSubject(0);
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
@@ -100,7 +89,7 @@ describe('ServerMetricsCollector', () => {
 
     await hitSubject
       .pipe(
-        filter(count => count >= 2),
+        filter((count) => count >= 2),
         take(1)
       )
       .toPromise();
@@ -177,7 +166,7 @@ describe('ServerMetricsCollector', () => {
     const waitForHits = (hits: number) =>
       hitSubject
         .pipe(
-          filter(count => count >= hits),
+          filter((count) => count >= hits),
           take(1)
         )
         .toPromise();
@@ -185,18 +174,22 @@ describe('ServerMetricsCollector', () => {
     let metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
 
-    sendGet('/').end(() => null);
+    // supertest requests are executed when calling `.then` (or awaiting them).
+    // however in this test we need to send the request now and await for it later in the code.
+    // also using `.end` is not possible as it would execute the request twice.
+    // so the only option is this noop `.then`.
+    const res1 = sendGet('/').then((res) => res);
     await waitForHits(1);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(1);
 
-    sendGet('/').end(() => null);
+    const res2 = sendGet('/').then((res) => res);
     await waitForHits(2);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(2);
 
     waitSubject.next('go');
-    await delay(requestWaitDelay);
+    await Promise.all([res1, res2]);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
   });

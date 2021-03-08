@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SubFeaturePrivilegeConfig } from '../../../../../features/common';
-import { Feature } from '../../../../../features/server';
+import type { KibanaFeature, SubFeaturePrivilegeConfig } from '../../../../../features/common';
+import type { LicenseType } from '../../../../../licensing/server';
 
 export function* subFeaturePrivilegeIterator(
-  feature: Feature
+  feature: KibanaFeature,
+  licenseType: LicenseType
 ): IterableIterator<SubFeaturePrivilegeConfig> {
   for (const subFeature of feature.subFeatures) {
     for (const group of subFeature.privilegeGroups) {
-      yield* group.privileges;
+      yield* group.privileges.filter(
+        (privilege) => !privilege.minimumLicense || privilege.minimumLicense <= licenseType
+      );
     }
   }
 }

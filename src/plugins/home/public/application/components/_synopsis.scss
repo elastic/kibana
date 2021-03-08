@@ -5,6 +5,10 @@
     box-shadow: none;
   }
 
+  .homSynopsis__cardTitle {
+    display: flex;
+  }
+
   // SASSTODO: Fix in EUI
   .euiCard__content {
     padding-top: 0 !important;

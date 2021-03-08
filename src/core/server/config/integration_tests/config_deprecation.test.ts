@@ -1,28 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { mockLoggingService } from './config_deprecation.test.mocks';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import { mockLoggingSystem } from './config_deprecation.test.mocks';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('configuration deprecations', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   afterEach(async () => {
     if (root) {
@@ -35,14 +28,8 @@ describe('configuration deprecations', () => {
 
     await root.setup();
 
-    const logs = loggingServiceMock.collect(mockLoggingService);
-    const warnings = logs.warn.flatMap(i => i);
-    expect(warnings).not.toContain(
-      '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
-    );
-    expect(warnings).not.toContain(
-      '"optimize.lazyPort" is deprecated and has been replaced by "optimize.watchPort"'
-    );
+    const logs = loggingSystemMock.collect(mockLoggingSystem);
+    expect(logs.warn.flat()).toMatchInlineSnapshot(`Array []`);
   });
 
   it('should log deprecation warnings for core deprecations', async () => {
@@ -55,13 +42,12 @@ describe('configuration deprecations', () => {
 
     await root.setup();
 
-    const logs = loggingServiceMock.collect(mockLoggingService);
-    const warnings = logs.warn.flatMap(i => i);
-    expect(warnings).toContain(
-      '"optimize.lazy" is deprecated and has been replaced by "optimize.watch"'
-    );
-    expect(warnings).toContain(
-      '"optimize.lazyPort" is deprecated and has been replaced by "optimize.watchPort"'
-    );
+    const logs = loggingSystemMock.collect(mockLoggingSystem);
+    expect(logs.warn.flat()).toMatchInlineSnapshot(`
+      Array [
+        "optimize.lazy is deprecated and is no longer used",
+        "optimize.lazyPort is deprecated and is no longer used",
+      ]
+    `);
   });
 });

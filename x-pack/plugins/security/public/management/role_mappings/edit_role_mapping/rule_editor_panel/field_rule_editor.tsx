@@ -1,24 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component, ChangeEvent } from 'react';
 import {
   EuiButtonIcon,
+  EuiComboBox,
   EuiExpression,
+  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
-  EuiComboBox,
-  EuiSelect,
-  EuiFieldNumber,
   EuiIcon,
+  EuiSelect,
 } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { FieldRule, FieldRuleValue } from '../../model';
+
+import type { FieldRuleValue } from '../../model';
+import { FieldRule } from '../../model';
 
 interface Props {
   rule: FieldRule;
@@ -41,7 +46,7 @@ const userFields = [
   },
 ];
 
-const fieldOptions = userFields.map(f => ({ label: f.name }));
+const fieldOptions = userFields.map((f) => ({ label: f.name }));
 
 type ComparisonOption = 'text' | 'number' | 'null' | 'boolean';
 const comparisonOptions: Record<
@@ -151,7 +156,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
                 )}
               />
             ) : (
-              <EuiIcon size="l" type="empty" aria-hidden={true} />
+              <EuiIcon size="l" type="empty" />
             )}
           </EuiFormRow>
         </EuiFlexItem>
@@ -196,7 +201,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
           ]}
           data-test-subj={`fieldRuleEditorValueType-${valueIndex}`}
           value={inputType}
-          onChange={e =>
+          onChange={(e) =>
             this.onComparisonTypeChange(valueIndex, e.target.value as ComparisonOption)
           }
         />

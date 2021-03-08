@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -22,7 +23,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
       navLinksBuilder = new NavLinksBuilder(features);
     });
 
-    UserScenarios.forEach(scenario => {
+    UserScenarios.forEach((scenario) => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
           credentials: {
@@ -37,13 +38,25 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'all':
-          case 'read':
           case 'dual_privileges_all':
-          case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except('ml', 'monitoring')
+            );
+            break;
+          case 'read':
+          case 'dual_privileges_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except(
+                'ml',
+                'monitoring',
+                'enterpriseSearch',
+                'appSearch',
+                'workplaceSearch'
+              )
             );
             break;
           case 'foo_all':
@@ -51,7 +64,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.only('management', 'foo')
+              navLinksBuilder.only('management', 'foo', 'kibana')
             );
             break;
           case 'legacy_all':

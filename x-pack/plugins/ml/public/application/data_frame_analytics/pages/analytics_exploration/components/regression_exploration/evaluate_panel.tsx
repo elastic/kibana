@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { ErrorCallout } from '../error_callout';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 import {
   getValuesFromResponse,
   getDependentVar,
@@ -27,33 +27,47 @@ import {
   Eval,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-import { EvaluateStat } from './evaluate_stat';
+import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,
-  ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
+  REGRESSION_STATS,
+  EMPTY_STAT,
 } from '../../../../common/analytics';
+
+import { ExpandableSection } from '../expandable_section';
+
+import { EvaluateStat } from './evaluate_stat';
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus?: DATA_FRAME_TASK_STATE;
-  searchQuery: ResultsSearchQuery;
+  jobStatus?: DataFrameTaskStateType;
+  searchQuery: SavedSearchQuery;
 }
 
-const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
+const EMPTY_STATS = {
+  mse: EMPTY_STAT,
+  msle: EMPTY_STAT,
+  huber: EMPTY_STAT,
+  rSquared: EMPTY_STAT,
+};
+
+const defaultEval: Eval = {
+  ...EMPTY_STATS,
+  error: null,
+};
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docLink = docLinks.links.ml.regressionEvaluation;
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
+  const [isTrainingFilter, setIsTrainingFilter] = useState<boolean | undefined>(undefined);
   const [trainingDocsCount, setTrainingDocsCount] = useState<null | number>(null);
   const [generalizationDocsCount, setGeneralizationDocsCount] = useState<null | number>(null);
 
@@ -82,18 +96,20 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
-      const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { mse, msle, huber, r_squared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
-        meanSquaredError,
-        rSquared,
+        mse,
+        msle,
+        huber,
+        rSquared: r_squared,
         error: null,
       });
       setIsLoadingGeneralization(false);
     } else {
       setIsLoadingGeneralization(false);
       setGeneralizationEval({
-        meanSquaredError: '',
-        rSquared: '',
+        ...EMPTY_STATS,
         error: genErrorEval.error,
       });
     }
@@ -118,254 +134,326 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
-      const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { mse, msle, huber, r_squared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
-        meanSquaredError,
-        rSquared,
+        mse,
+        msle,
+        huber,
+        rSquared: r_squared,
         error: null,
       });
       setIsLoadingTraining(false);
     } else {
       setIsLoadingTraining(false);
       setTrainingEval({
-        meanSquaredError: '',
-        rSquared: '',
+        ...EMPTY_STATS,
         error: trainingErrorEval.error,
       });
     }
   };
 
-  const loadData = async ({
-    isTrainingClause,
-  }: {
-    isTrainingClause?: { query: string; operator: string };
-  }) => {
-    // searchBar query is filtering for testing data
-    if (isTrainingClause !== undefined && isTrainingClause.query === 'false') {
-      loadGeneralizationData();
-
-      const docsCountResp = await loadDocsCount({
-        isTraining: false,
-        searchQuery,
-        resultsField,
-        destIndex: jobConfig.dest.index,
-      });
-
-      if (docsCountResp.success === true) {
-        setGeneralizationDocsCount(docsCountResp.docsCount);
-      } else {
-        setGeneralizationDocsCount(null);
-      }
-
-      setTrainingDocsCount(0);
-      setTrainingEval({
-        meanSquaredError: '--',
-        rSquared: '--',
-        error: null,
-      });
-    } else if (isTrainingClause !== undefined && isTrainingClause.query === 'true') {
-      // searchBar query is filtering for training data
-      loadTrainingData();
-
-      const docsCountResp = await loadDocsCount({
-        isTraining: true,
-        searchQuery,
-        resultsField,
-        destIndex: jobConfig.dest.index,
-      });
-
-      if (docsCountResp.success === true) {
-        setTrainingDocsCount(docsCountResp.docsCount);
-      } else {
-        setTrainingDocsCount(null);
-      }
-
-      setGeneralizationDocsCount(0);
-      setGeneralizationEval({
-        meanSquaredError: '--',
-        rSquared: '--',
-        error: null,
-      });
+  const loadData = async () => {
+    loadGeneralizationData(false);
+    const genDocsCountResp = await loadDocsCount({
+      ignoreDefaultQuery: false,
+      isTraining: false,
+      searchQuery,
+      resultsField,
+      destIndex: jobConfig.dest.index,
+    });
+    if (genDocsCountResp.success === true) {
+      setGeneralizationDocsCount(genDocsCountResp.docsCount);
     } else {
-      // No is_training clause/filter from search bar so load both
-      loadGeneralizationData(false);
-      const genDocsCountResp = await loadDocsCount({
-        ignoreDefaultQuery: false,
-        isTraining: false,
-        searchQuery,
-        resultsField,
-        destIndex: jobConfig.dest.index,
-      });
-      if (genDocsCountResp.success === true) {
-        setGeneralizationDocsCount(genDocsCountResp.docsCount);
-      } else {
-        setGeneralizationDocsCount(null);
-      }
+      setGeneralizationDocsCount(null);
+    }
 
-      loadTrainingData(false);
-      const trainDocsCountResp = await loadDocsCount({
-        ignoreDefaultQuery: false,
-        isTraining: true,
-        searchQuery,
-        resultsField,
-        destIndex: jobConfig.dest.index,
-      });
-      if (trainDocsCountResp.success === true) {
-        setTrainingDocsCount(trainDocsCountResp.docsCount);
-      } else {
-        setTrainingDocsCount(null);
-      }
+    loadTrainingData(false);
+    const trainDocsCountResp = await loadDocsCount({
+      ignoreDefaultQuery: false,
+      isTraining: true,
+      searchQuery,
+      resultsField,
+      destIndex: jobConfig.dest.index,
+    });
+    if (trainDocsCountResp.success === true) {
+      setTrainingDocsCount(trainDocsCountResp.docsCount);
+    } else {
+      setTrainingDocsCount(null);
     }
   };
 
   useEffect(() => {
-    const hasIsTrainingClause =
-      isResultsSearchBoolQuery(searchQuery) &&
-      searchQuery.bool.must.filter(
-        (clause: any) => clause.match && clause.match[`${resultsField}.is_training`] !== undefined
-      );
-    const isTrainingClause =
-      hasIsTrainingClause &&
-      hasIsTrainingClause[0] &&
-      hasIsTrainingClause[0].match[`${resultsField}.is_training`];
+    let isTraining: boolean | undefined;
+    const query =
+      isResultsSearchBoolQuery(searchQuery) && (searchQuery.bool.should || searchQuery.bool.filter);
 
-    loadData({ isTrainingClause });
+    if (query !== undefined && query !== false) {
+      for (let i = 0; i < query.length; i++) {
+        const clause = query[i];
+
+        if (clause.match && clause.match[`${resultsField}.is_training`] !== undefined) {
+          isTraining = clause.match[`${resultsField}.is_training`];
+          break;
+        } else if (
+          clause.bool &&
+          (clause.bool.should !== undefined || clause.bool.filter !== undefined)
+        ) {
+          const innerQuery = clause.bool.should || clause.bool.filter;
+          if (innerQuery !== undefined) {
+            for (let j = 0; j < innerQuery.length; j++) {
+              const innerClause = innerQuery[j];
+              if (
+                innerClause.match &&
+                innerClause.match[`${resultsField}.is_training`] !== undefined
+              ) {
+                isTraining = innerClause.match[`${resultsField}.is_training`];
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    setIsTrainingFilter(isTraining);
+    loadData();
   }, [JSON.stringify(searchQuery)]);
 
   return (
-    <EuiPanel data-test-subj="mlDFAnalyticsRegressionExplorationEvaluatePanel">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <span>
-              {i18n.translate(
-                'xpack.ml.dataframe.analytics.regressionExploration.evaluateJobIdTitle',
-                {
-                  defaultMessage: 'Evaluation of regression job ID {jobId}',
-                  values: { jobId: jobConfig.id },
-                }
-              )}
-            </span>
-          </EuiTitle>
-        </EuiFlexItem>
-        {jobStatus !== undefined && (
-          <EuiFlexItem grow={false}>
-            <span>{getTaskStateBadge(jobStatus)}</span>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <EuiSpacer />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+    <>
+      <ExpandableSection
+        urlStateKey={'evaluation'}
+        dataTestId="RegressionEvaluation"
+        title={
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.regressionExploration.evaluateSectionTitle"
+            defaultMessage="Model evaluation"
+          />
+        }
+        docsLink={
           <EuiButtonEmpty
             target="_blank"
             iconType="help"
             iconSide="left"
             color="primary"
-            href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
+            href={docLink}
           >
             {i18n.translate(
-              'xpack.ml.dataframe.analytics.classificationExploration.regressionDocsLink',
+              'xpack.ml.dataframe.analytics.regressionExploration.regressionDocsLink',
               {
                 defaultMessage: 'Regression evaluation docs ',
               }
             )}
           </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+        headerItems={
+          jobStatus !== undefined
+            ? [
+                {
+                  id: 'jobStatus',
+                  label: i18n.translate(
+                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateJobStatusLabel',
+                    {
+                      defaultMessage: 'Job status',
+                    }
+                  ),
+                  value: jobStatus,
+                },
+              ]
+            : []
+        }
+        contentPadding={true}
+        content={
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <span>
+                  {i18n.translate(
+                    'xpack.ml.dataframe.analytics.regressionExploration.generalizationErrorTitle',
+                    {
+                      defaultMessage: 'Generalization error',
+                    }
+                  )}
+                </span>
+              </EuiTitle>
+              {generalizationDocsCount !== null && (
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.regressionExploration.generalizationDocsCount"
+                    defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
+                    values={{ docsCount: generalizationDocsCount }}
+                  />
+                  {isTrainingFilter === true && generalizationDocsCount === 0 && (
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.regressionExploration.generalizationFilterText"
+                      defaultMessage=". Filtering for training data."
+                    />
+                  )}
+                </EuiText>
+              )}
+              <EuiSpacer />
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    {/* First row stats */}
+                    <EuiFlexItem>
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EvaluateStat
+                            dataTestSubj={'mlDFAnalyticsRegressionGenMSEstat'}
+                            isLoading={isLoadingGeneralization}
+                            title={generalizationEval.mse}
+                            statType={REGRESSION_STATS.MSE}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EvaluateStat
+                            dataTestSubj={'mlDFAnalyticsRegressionGenRSquaredStat'}
+                            isLoading={isLoadingGeneralization}
+                            title={generalizationEval.rSquared}
+                            statType={REGRESSION_STATS.R_SQUARED}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    {/* Second row stats */}
+                    <EuiFlexItem>
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EvaluateStat
+                            dataTestSubj={'mlDFAnalyticsRegressionGenMsleStat'}
+                            isLoading={isLoadingGeneralization}
+                            title={generalizationEval.msle}
+                            statType={REGRESSION_STATS.MSLE}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EvaluateStat
+                            dataTestSubj={'mlDFAnalyticsRegressionGenHuberStat'}
+                            isLoading={isLoadingGeneralization}
+                            title={generalizationEval.huber}
+                            statType={REGRESSION_STATS.HUBER}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {generalizationEval.error !== null && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="danger">
+                      {isTrainingFilter === true &&
+                      generalizationDocsCount === 0 &&
+                      generalizationEval.error.includes('No documents found')
+                        ? i18n.translate(
+                            'xpack.ml.dataframe.analytics.regressionExploration.evaluateNoTestingDocsError',
+                            {
+                              defaultMessage: 'No testing documents found',
+                            }
+                          )
+                        : generalizationEval.error}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <span>
+                  {i18n.translate(
+                    'xpack.ml.dataframe.analytics.regressionExploration.trainingErrorTitle',
+                    {
+                      defaultMessage: 'Training error',
+                    }
+                  )}
+                </span>
+              </EuiTitle>
+              {trainingDocsCount !== null && (
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.regressionExploration.trainingDocsCount"
+                    defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
+                    values={{ docsCount: trainingDocsCount }}
+                  />
+                  {isTrainingFilter === false && trainingDocsCount === 0 && (
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.regressionExploration.trainingFilterText"
+                      defaultMessage=". Filtering for testing data."
+                    />
+                  )}
+                </EuiText>
+              )}
+              <EuiSpacer />
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    {/* First row stats */}
+                    <EuiFlexItem>
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EvaluateStat
+                            dataTestSubj={'mlDFAnalyticsRegressionTrainingMSEstat'}
+                            isLoading={isLoadingTraining}
+                            title={trainingEval.mse}
+                            statType={REGRESSION_STATS.MSE}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EvaluateStat
+                            dataTestSubj={'mlDFAnalyticsRegressionTrainingRSquaredStat'}
+                            isLoading={isLoadingTraining}
+                            title={trainingEval.rSquared}
+                            statType={REGRESSION_STATS.R_SQUARED}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    {/* Second row stats */}
+                    <EuiFlexItem>
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EvaluateStat
+                            dataTestSubj={'mlDFAnalyticsRegressionTrainingMsleStat'}
+                            isLoading={isLoadingTraining}
+                            title={trainingEval.msle}
+                            statType={REGRESSION_STATS.MSLE}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EvaluateStat
+                            dataTestSubj={'mlDFAnalyticsRegressionTrainingHuberStat'}
+                            isLoading={isLoadingTraining}
+                            title={trainingEval.huber}
+                            statType={REGRESSION_STATS.HUBER}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {trainingEval.error !== null && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="danger">
+                      {isTrainingFilter === false &&
+                      trainingDocsCount === 0 &&
+                      trainingEval.error.includes('No documents found')
+                        ? i18n.translate(
+                            'xpack.ml.dataframe.analytics.regressionExploration.evaluateNoTrainingDocsError',
+                            {
+                              defaultMessage: 'No training documents found',
+                            }
+                          )
+                        : trainingEval.error}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
       <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <span>
-              {i18n.translate(
-                'xpack.ml.dataframe.analytics.regressionExploration.generalizationErrorTitle',
-                {
-                  defaultMessage: 'Generalization error',
-                }
-              )}
-            </span>
-          </EuiTitle>
-          {generalizationDocsCount !== null && (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.regressionExploration.generalizationDocsCount"
-                defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
-                values={{ docsCount: generalizationDocsCount }}
-              />
-            </EuiText>
-          )}
-          <EuiSpacer />
-          <EuiFlexGroup>
-            {generalizationEval.error !== null && <ErrorCallout error={generalizationEval.error} />}
-            {generalizationEval.error === null && (
-              <Fragment>
-                <EuiFlexItem>
-                  <EvaluateStat
-                    dataTestSubj={'mlDFAnalyticsRegressionGenMSEstat'}
-                    isLoading={isLoadingGeneralization}
-                    title={generalizationEval.meanSquaredError}
-                    isMSE
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EvaluateStat
-                    dataTestSubj={'mlDFAnalyticsRegressionGenRSquaredStat'}
-                    isLoading={isLoadingGeneralization}
-                    title={generalizationEval.rSquared}
-                    isMSE={false}
-                  />
-                </EuiFlexItem>
-              </Fragment>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <span>
-              {i18n.translate(
-                'xpack.ml.dataframe.analytics.regressionExploration.trainingErrorTitle',
-                {
-                  defaultMessage: 'Training error',
-                }
-              )}
-            </span>
-          </EuiTitle>
-          {trainingDocsCount !== null && (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.regressionExploration.trainingDocsCount"
-                defaultMessage="{docsCount, plural, one {# doc} other {# docs}} evaluated"
-                values={{ docsCount: trainingDocsCount }}
-              />
-            </EuiText>
-          )}
-          <EuiSpacer />
-          <EuiFlexGroup>
-            {trainingEval.error !== null && <ErrorCallout error={trainingEval.error} />}
-            {trainingEval.error === null && (
-              <Fragment>
-                <EuiFlexItem>
-                  <EvaluateStat
-                    dataTestSubj={'mlDFAnalyticsRegressionTrainingMSEstat'}
-                    isLoading={isLoadingTraining}
-                    title={trainingEval.meanSquaredError}
-                    isMSE
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EvaluateStat
-                    dataTestSubj={'mlDFAnalyticsRegressionTrainingRSquaredStat'}
-                    isLoading={isLoadingTraining}
-                    title={trainingEval.rSquared}
-                    isMSE={false}
-                  />
-                </EuiFlexItem>
-              </Fragment>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    </>
   );
 };

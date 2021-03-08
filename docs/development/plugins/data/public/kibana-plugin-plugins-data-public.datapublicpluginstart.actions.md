@@ -4,10 +4,10 @@
 
 ## DataPublicPluginStart.actions property
 
+filter creation utilities [DataPublicPluginStartActions](./kibana-plugin-plugins-data-public.datapublicpluginstartactions.md)
+
 <b>Signature:</b>
 
 ```typescript
-actions: {
-        createFiltersFromEvent: typeof createFiltersFromEvent;
-    };
+actions: DataPublicPluginStartActions;
 ```

@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
-import { Role, RoleMapping } from '../../../../../common/model';
-import { RolesAPIClient } from '../../../roles';
-import { DocumentationLinksService } from '../../documentation_links';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { coreMock } from 'src/core/public/mocks';
+
+import type { Role, RoleMapping } from '../../../../../common/model';
+import type { RolesAPIClient } from '../../../roles';
+import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
 import { RoleSelector } from '../role_selector';
 import { RoleTemplateEditor } from '../role_selector/role_template_editor';
-import { MappingInfoPanel } from '.';
-
-import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { MappingInfoPanel } from './mapping_info_panel';
 
 describe('MappingInfoPanel', () => {
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;
@@ -38,7 +39,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'create',
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 
@@ -85,7 +86,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'edit',
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 
@@ -111,7 +112,7 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: true,
       canUseStoredScripts: false,
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     };
 
@@ -152,7 +153,7 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: false,
       canUseStoredScripts: true,
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     };
 
@@ -193,7 +194,7 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: false,
       canUseStoredScripts: false,
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     };
 
@@ -218,7 +219,7 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'edit',
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
       rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 

@@ -9,5 +9,5 @@ Creates a [Saved Objects repository](./kibana-plugin-core-server.isavedobjectsre
 <b>Signature:</b>
 
 ```typescript
-createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
 ```

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import JoiNamespace from 'joi';
 
 export interface KbnServer extends Server {
@@ -19,9 +20,7 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     fields: Joi.object({
       container: Joi.string(),
       host: Joi.string(),
-      message: Joi.array()
-        .items(Joi.string())
-        .single(),
+      message: Joi.array().items(Joi.string()).single(),
       pod: Joi.string(),
       tiebreaker: Joi.string(),
       timestamp: Joi.string(),

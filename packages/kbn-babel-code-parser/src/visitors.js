@@ -1,8 +1,15 @@
-/* eslint-disable @kbn/eslint/require-license-header */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 
 import { matches } from 'lodash';
 
-/* @notice
+/**
+ * @notice
  *
  * This product has relied on ASTExplorer that is licensed under MIT.
  */
@@ -21,7 +28,7 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on require + require.resolve
       CallExpression: ({ node }) => {
         // AST check for require expressions
-        const isRequire = node => {
+        const isRequire = (node) => {
           return matches({
             callee: {
               type: 'Identifier',
@@ -31,7 +38,7 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
         };
 
         // AST check for require.resolve expressions
-        const isRequireResolve = node => {
+        const isRequireResolve = (node) => {
           return matches({
             callee: {
               type: 'MemberExpression',
@@ -66,7 +73,7 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on import
       ImportDeclaration: ({ node }) => {
         // AST check for supported import expressions
-        const isImport = node => {
+        const isImport = (node) => {
           return matches({
             type: 'ImportDeclaration',
             source: {
@@ -85,7 +92,7 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on export from
       ExportNamedDeclaration: ({ node }) => {
         // AST check for supported export from expressions
-        const isExportFrom = node => {
+        const isExportFrom = (node) => {
           return matches({
             type: 'ExportNamedDeclaration',
             source: {
@@ -104,7 +111,7 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on export * from
       ExportAllDeclaration: ({ node }) => {
         // AST check for supported export * from expressions
-        const isExportAllFrom = node => {
+        const isExportAllFrom = (node) => {
           return matches({
             type: 'ExportAllDeclaration',
             source: {

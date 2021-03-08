@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './index.scss';
@@ -23,48 +12,77 @@ import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export {
-  Adapters,
   ACTION_ADD_PANEL,
+  ACTION_EDIT_PANEL,
+  Adapters,
   AddPanelAction,
-  ACTION_APPLY_FILTER,
+  ReferenceOrValueEmbeddable,
+  isReferenceOrValueEmbeddable,
+  ChartActionContext,
   Container,
   ContainerInput,
   ContainerOutput,
   CONTEXT_MENU_TRIGGER,
   contextMenuTrigger,
-  ACTION_EDIT_PANEL,
+  defaultEmbeddableFactoryProvider,
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
   EmbeddableContext,
-  EmbeddableFactoryDefinition,
   EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
-  EmbeddableFactoryRenderer,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePanel,
   EmbeddableRoot,
-  EmbeddableVisTriggerContext,
+  ValueClickContext,
+  RangeSelectContext,
   ErrorEmbeddable,
   IContainer,
   IEmbeddable,
+  isEmbeddable,
   isErrorEmbeddable,
   openAddPanelFlyout,
   OutputSpec,
   PANEL_BADGE_TRIGGER,
   panelBadgeTrigger,
+  PANEL_NOTIFICATION_TRIGGER,
+  panelNotificationTrigger,
   PanelNotFoundError,
   PanelState,
   PropertySpec,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
+  SavedObjectEmbeddableInput,
+  isSavedObjectEmbeddableInput,
+  isRangeSelectTriggerContext,
+  isValueClickTriggerContext,
+  isRowClickTriggerContext,
+  isContextMenuTriggerContext,
+  EmbeddableStateTransfer,
+  EmbeddableEditorState,
+  EmbeddablePackageState,
+  EmbeddableRenderer,
+  EmbeddableRendererProps,
 } from './lib';
+
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
+
+export { EnhancementRegistryDefinition } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { EmbeddableSetup, EmbeddableStart } from './plugin';
+export {
+  EmbeddableSetup,
+  EmbeddableStart,
+  EmbeddableSetupDependencies,
+  EmbeddableStartDependencies,
+  EmbeddablePanelHOC,
+} from './plugin';

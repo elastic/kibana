@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 
-import { CaseUserActionsResponseRt } from '../../../../../common/api';
-import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../../saved_object_types';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_USER_ACTIONS_URL, SUB_CASE_USER_ACTIONS_URL } from '../../../../../common/constants';
 
-export function initGetAllUserActionsApi({ userActionService, router }: RouteDeps) {
+export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{case_id}/user_actions',
+      path: CASE_USER_ACTIONS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -23,22 +23,54 @@ export function initGetAllUserActionsApi({ userActionService, router }: RouteDep
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
-        const userActions = await userActionService.getUserActions({
-          client,
-          caseId: request.params.case_id,
-        });
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
+        const caseClient = context.case.getCaseClient();
+        const caseId = request.params.case_id;
+
         return response.ok({
-          body: CaseUserActionsResponseRt.encode(
-            userActions.saved_objects.map(ua => ({
-              ...ua.attributes,
-              action_id: ua.id,
-              case_id: ua.references.find(r => r.type === CASE_SAVED_OBJECT)?.id ?? '',
-              comment_id: ua.references.find(r => r.type === CASE_COMMENT_SAVED_OBJECT)?.id ?? null,
-            }))
-          ),
+          body: await caseClient.getUserActions({ caseId }),
         });
       } catch (error) {
+        logger.error(
+          `Failed to retrieve case user actions in route case id: ${request.params.case_id}: ${error}`
+        );
+        return response.customError(wrapError(error));
+      }
+    }
+  );
+}
+
+export function initGetAllSubCaseUserActionsApi({ router, logger }: RouteDeps) {
+  router.get(
+    {
+      path: SUB_CASE_USER_ACTIONS_URL,
+      validate: {
+        params: schema.object({
+          case_id: schema.string(),
+          sub_case_id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+
+        const caseClient = context.case.getCaseClient();
+        const caseId = request.params.case_id;
+        const subCaseId = request.params.sub_case_id;
+
+        return response.ok({
+          body: await caseClient.getUserActions({ caseId, subCaseId }),
+        });
+      } catch (error) {
+        logger.error(
+          `Failed to retrieve sub case user actions in route case id: ${request.params.case_id} sub case id: ${request.params.sub_case_id}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

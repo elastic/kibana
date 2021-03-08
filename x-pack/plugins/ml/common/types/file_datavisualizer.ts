@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 export interface InputOverrides {
   [key: string]: string;
@@ -29,20 +32,34 @@ export interface FindFileStructureResponse {
       count: number;
       cardinality: number;
       top_hits: Array<{ count: number; value: any }>;
+      mean_value?: number;
+      median_value?: number;
+      max_value?: number;
+      min_value?: number;
+      earliest?: string;
+      latest?: string;
     };
   };
   sample_start: string;
   num_messages_analyzed: number;
   mappings: {
-    [fieldName: string]: {
-      type: string;
+    properties: {
+      [fieldName: string]: {
+        // including all possible Elasticsearch types
+        // since find_file_structure API can be enhanced to include new fields in the future
+        type: Exclude<
+          ES_FIELD_TYPES,
+          ES_FIELD_TYPES._ID | ES_FIELD_TYPES._INDEX | ES_FIELD_TYPES._SOURCE | ES_FIELD_TYPES._TYPE
+        >;
+        format?: string;
+      };
     };
   };
   quote: string;
   delimiter: string;
   need_client_timezone: boolean;
   num_lines_analyzed: number;
-  column_names: string[];
+  column_names?: string[];
   explanation?: string[];
   grok_pattern?: string;
   multiline_start_pattern?: string;
@@ -51,46 +68,4 @@ export interface FindFileStructureResponse {
   joda_timestamp_formats?: string[];
   timestamp_field?: string;
   should_trim_fields?: boolean;
-}
-
-export interface ImportResponse {
-  success: boolean;
-  id: string;
-  index?: string;
-  pipelineId?: string;
-  docCount: number;
-  failures: ImportFailure[];
-  error?: any;
-  ingestError?: boolean;
-}
-
-export interface ImportFailure {
-  item: number;
-  reason: string;
-  doc: Doc;
-}
-
-export interface Doc {
-  message: string;
-}
-
-export interface Settings {
-  pipeline?: string;
-  index: string;
-  body: any[];
-  [key: string]: any;
-}
-
-export interface Mappings {
-  [key: string]: any;
-}
-
-export interface IngestPipelineWrapper {
-  id: string;
-  pipeline: IngestPipeline;
-}
-
-export interface IngestPipeline {
-  description: string;
-  processors: any[];
 }

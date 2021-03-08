@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Builtin ES Privileges', () => {
@@ -25,11 +26,11 @@ export default function({ getService }: FtrProviderContext) {
             const payload = response.body;
             expect(Object.keys(payload).sort()).to.eql(['cluster', 'index']);
 
-            sampleOfExpectedClusterPrivileges.forEach(privilege =>
+            sampleOfExpectedClusterPrivileges.forEach((privilege) =>
               expect(payload.cluster).to.contain(privilege)
             );
 
-            sampleOfExpectedIndexPrivileges.forEach(privilege =>
+            sampleOfExpectedIndexPrivileges.forEach((privilege) =>
               expect(payload.index).to.contain(privilege)
             );
 

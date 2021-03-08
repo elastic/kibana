@@ -1,0 +1,62 @@
+[[actions-and-connectors-api-get-all]]
+=== Get all actions API
+++++
+<titleabbrev>Get all actions API</titleabbrev>
+++++
+
+Retrieves all connectors.
+
+[[actions-and-connectors-api-get-all-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/actions/connectors`
+
+`GET <kibana host>:<port>/s/<space_id>/api/actions/connectors`
+
+[[actions-and-connectors-api-get-all-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[actions-and-connectors-api-get-all-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-get-all-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions/connectors
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "id": "preconfigured-mail-connector",
+    "connector_type_id": ".email",
+    "name": "email: preconfigured-mail-connector",
+    "is_preconfigured": true,
+    "referenced_by_count": 1
+  },
+  {
+    "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+    "connector_type_id": ".index",
+    "name": "my-connector",
+    "config": {
+      "index": "test-index",
+      "refresh": false,
+      "executionTimeField": null
+    },
+    "is_preconfigured": false,
+    "referenced_by_count": 3
+  }
+]
+--------------------------------------------------

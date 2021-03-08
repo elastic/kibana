@@ -1,0 +1,25 @@
+{
+  "job": {
+    "properties": {
+      "job_id": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "datafeed_id": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
+  }
+}

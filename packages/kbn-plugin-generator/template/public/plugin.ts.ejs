@@ -1,0 +1,42 @@
+import { i18n } from '@kbn/i18n';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '<%= importFromRoot('src/core/public') %>';
+import { <%= upperCamelCase(name) %>PluginSetup, <%= upperCamelCase(name) %>PluginStart, AppPluginStartDependencies } from './types';
+import { PLUGIN_NAME } from '../common';
+
+export class <%= upperCamelCase(name) %>Plugin
+  implements Plugin<<%= upperCamelCase(name) %>PluginSetup, <%= upperCamelCase(name) %>PluginStart> {
+
+  public setup(core: CoreSetup): <%= upperCamelCase(name) %>PluginSetup {
+    // Register an application into the side navigation menu
+    core.application.register({
+      id: '<%= camelCase(name) %>',
+      title: PLUGIN_NAME,
+      async mount(params: AppMountParameters) {
+        // Load application bundle
+        const { renderApp } = await import('./application');
+        // Get start services as specified in kibana.json
+        const [coreStart, depsStart] = await core.getStartServices();
+        // Render the application
+        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+      },
+    });
+
+    // Return methods that should be available to other plugins
+    return {
+      getGreeting() {
+        return i18n.translate('<%= camelCase(name) %>.greetingText', {
+          defaultMessage: 'Hello from {name}!',
+          values: {
+            name: PLUGIN_NAME,
+          },
+        });
+      },
+    };
+  }
+
+  public start(core: CoreStart): <%= upperCamelCase(name) %>PluginStart {
+    return {};
+  }
+
+  public stop() {}
+}

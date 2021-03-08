@@ -4,6 +4,8 @@
 
 ## DataPublicPluginStart.autocomplete property
 
+autocomplete service [AutocompleteStart](./kibana-plugin-plugins-data-public.autocompletestart.md)
+
 <b>Signature:</b>
 
 ```typescript

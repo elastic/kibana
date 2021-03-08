@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -13,7 +14,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
   describe('create email action', () => {
     it('should return 403 when creating an email action', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',

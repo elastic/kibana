@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -36,7 +37,7 @@ function getErrorTitle(count, name = null) {
   }
 }
 
-export const removeClusters = names => async (dispatch, getState) => {
+export const removeClusters = (names) => async (dispatch, getState) => {
   dispatch({
     type: REMOVE_CLUSTERS_START,
   });
@@ -45,13 +46,13 @@ export const removeClusters = names => async (dispatch, getState) => {
   let errors = [];
 
   await Promise.all([
-    sendRemoveClusterRequest(names.join(',')).then(response => {
+    sendRemoveClusterRequest(names.join(',')).then((response) => {
       ({ itemsDeleted, errors } = response);
     }),
     // Wait at least half a second to avoid a weird flicker of the saving feedback (only visible
     // when requests resolve very quickly).
-    new Promise(resolve => setTimeout(resolve, 500)),
-  ]).catch(error => {
+    new Promise((resolve) => setTimeout(resolve, 500)),
+  ]).catch((error) => {
     const errorTitle = getErrorTitle(names.length, names[0]);
     toasts.addDanger({
       title: errorTitle,

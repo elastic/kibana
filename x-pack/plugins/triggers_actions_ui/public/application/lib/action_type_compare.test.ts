@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionType } from '../../types';
@@ -33,11 +34,20 @@ test('should sort enabled action types first', async () => {
       enabledInConfig: true,
       enabledInLicense: true,
     },
+    {
+      id: '4',
+      minimumLicenseRequired: 'basic',
+      name: 'x-fourth',
+      enabled: true,
+      enabledInConfig: false,
+      enabledInLicense: true,
+    },
   ];
   const result = [...actionTypes].sort(actionTypeCompare);
   expect(result[0]).toEqual(actionTypes[0]);
   expect(result[1]).toEqual(actionTypes[2]);
-  expect(result[2]).toEqual(actionTypes[1]);
+  expect(result[2]).toEqual(actionTypes[3]);
+  expect(result[3]).toEqual(actionTypes[1]);
 });
 
 test('should sort by name when all enabled', async () => {
@@ -66,9 +76,18 @@ test('should sort by name when all enabled', async () => {
       enabledInConfig: true,
       enabledInLicense: true,
     },
+    {
+      id: '4',
+      minimumLicenseRequired: 'basic',
+      name: 'x-fourth',
+      enabled: true,
+      enabledInConfig: false,
+      enabledInLicense: true,
+    },
   ];
   const result = [...actionTypes].sort(actionTypeCompare);
   expect(result[0]).toEqual(actionTypes[1]);
   expect(result[1]).toEqual(actionTypes[2]);
   expect(result[2]).toEqual(actionTypes[0]);
+  expect(result[3]).toEqual(actionTypes[3]);
 });

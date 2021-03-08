@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useRef, FC } from 'react';
 import d3 from 'd3';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 const COLOR_RANGE_RESOLUTION = 10;
 
@@ -36,7 +37,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
 }) => {
   const d3Container = useRef<null | SVGSVGElement>(null);
 
-  const scale = d3.range(COLOR_RANGE_RESOLUTION + 1).map(d => ({
+  const scale = d3.range(COLOR_RANGE_RESOLUTION + 1).map((d) => ({
     offset: (d / COLOR_RANGE_RESOLUTION) * 100,
     stopColor: colorRange(d / COLOR_RANGE_RESOLUTION),
   }));
@@ -59,9 +60,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
     const legendHeight = wrapperHeight - margin.top - margin.bottom;
 
     // remove, then redraw the legend
-    d3.select(d3Container.current)
-      .selectAll('*')
-      .remove();
+    d3.select(d3Container.current).selectAll('*').remove();
 
     const wrapper = d3
       .select(d3Container.current)
@@ -82,7 +81,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
       .attr('y2', '0%')
       .attr('spreadMethod', 'pad');
 
-    scale.forEach(function(d) {
+    scale.forEach(function (d) {
       gradient
         .append('stop')
         .attr('offset', `${d.offset}%`)
@@ -98,10 +97,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
       .attr('height', legendHeight)
       .style('fill', 'url(#mlColorRangeGradient)');
 
-    const axisScale = d3.scale
-      .linear()
-      .domain([0, 1])
-      .range([0, legendWidth]);
+    const axisScale = d3.scale.linear().domain([0, 1]).range([0, legendWidth]);
 
     // Using this formatter ensures we get e.g. `0` and not `0.0`, but still `0.1`, `0.2` etc.
     const tickFormat = d3.format('');
@@ -139,15 +135,11 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <strong>{title}</strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <svg ref={d3Container} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiText size="xs" color="subdued">
+        <p>{title}</p>
+      </EuiText>
+      <svg ref={d3Container} />
+    </>
   );
 };

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Duration } from 'moment';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { Dictionary } from '../../../../../common/types/common';
 
@@ -16,13 +18,15 @@ import {
   AnomaliesTableData,
   ExplorerJob,
   AppStateSelectedCells,
+  OverallSwimlaneData,
   SwimlaneData,
-  TimeRangeBounds,
+  ViewBySwimLaneData,
 } from '../../explorer_utils';
+import { AnnotationsTable } from '../../../../../common/types/annotations';
+import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 
 export interface ExplorerState {
-  annotationsData: any[];
-  bounds: TimeRangeBounds | undefined;
+  annotations: AnnotationsTable;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
   filterActive: boolean;
@@ -35,20 +39,22 @@ export interface ExplorerState {
   loading: boolean;
   maskAll: boolean;
   noInfluencersConfigured: boolean;
-  overallSwimlaneData: SwimlaneData;
+  overallSwimlaneData: SwimlaneData | OverallSwimlaneData;
   queryString: string;
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
-  swimlaneBucketInterval: any;
+  swimlaneBucketInterval: Duration | undefined;
   swimlaneContainerWidth: number;
-  swimlaneLimit: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
   viewByLoadedForTimeFormatted: string | null;
-  viewBySwimlaneData: SwimlaneData;
+  viewBySwimlaneData: SwimlaneData | ViewBySwimLaneData;
   viewBySwimlaneDataLoading: boolean;
   viewBySwimlaneFieldName?: string;
+  viewByPerPage: number;
+  viewByFromPage: number;
   viewBySwimlaneOptions: string[];
+  swimlaneLimit?: number;
 }
 
 function getDefaultIndexPattern() {
@@ -57,8 +63,11 @@ function getDefaultIndexPattern() {
 
 export function getExplorerDefaultState(): ExplorerState {
   return {
-    annotationsData: [],
-    bounds: undefined,
+    annotations: {
+      error: undefined,
+      annotationsData: [],
+      aggregations: {},
+    },
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,
@@ -77,7 +86,6 @@ export function getExplorerDefaultState(): ExplorerState {
     selectedJobs: null,
     swimlaneBucketInterval: undefined,
     swimlaneContainerWidth: 0,
-    swimlaneLimit: 10,
     tableData: {
       anomalies: [],
       examplesByJobId: [''],
@@ -91,5 +99,8 @@ export function getExplorerDefaultState(): ExplorerState {
     viewBySwimlaneDataLoading: false,
     viewBySwimlaneFieldName: undefined,
     viewBySwimlaneOptions: [],
+    viewByPerPage: SWIM_LANE_DEFAULT_PAGE_SIZE,
+    viewByFromPage: 1,
+    swimlaneLimit: undefined,
   };
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // inner angular imports
@@ -9,35 +10,41 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import '../../../../webpackShims/ace';
-// required for i18nIdDirective
+
+import 'brace';
+import 'brace/mode/json';
+import '@elastic/ui-ace/ui-ace';
+
+// required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
 // type imports
 import {
-  AppMountContext,
   ChromeStart,
   CoreStart,
   PluginInitializerContext,
   SavedObjectsClientContract,
   ToastsStart,
-  IUiSettingsClient,
   OverlayStart,
+  AppMountParameters,
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
 import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
-  addAppRedirectMessageToUrl,
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
+  KibanaLegacyStart,
 } from '../../../../src/plugins/kibana_legacy/public';
 
 import './index.scss';
+import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -48,14 +55,13 @@ import './index.scss';
 export interface GraphDependencies {
   pluginInitializerContext: PluginInitializerContext;
   core: CoreStart;
+  coreStart: CoreStart;
   element: HTMLElement;
   appBasePath: string;
   capabilities: Record<string, boolean | Record<string, boolean>>;
-  coreStart: AppMountContext['core'];
   navigation: NavigationStart;
-  licensing: LicensingPluginSetup;
+  licensing: LicensingPluginStart;
   chrome: ChromeStart;
-  config: IUiSettingsClient;
   toastNotifications: ToastsStart;
   indexPatterns: IndexPatternsContract;
   data: ReturnType<DataPlugin['start']>;
@@ -66,9 +72,13 @@ export interface GraphDependencies {
   canEditDrillDownUrls: boolean;
   graphSavePolicy: string;
   overlays: OverlayStart;
+  savedObjects: SavedObjectsStart;
+  kibanaLegacy: KibanaLegacyStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
+export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {
+  kibanaLegacy.loadFontAwesome();
   const graphAngularModule = createLocalAngularModule(deps.navigation);
   configureAppAngularModule(
     graphAngularModule,
@@ -76,13 +86,18 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
     true
   );
 
-  const licenseSubscription = deps.licensing.license$.subscribe(license => {
+  const licenseSubscription = deps.licensing.license$.subscribe((license) => {
     const info = checkLicense(license);
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 
     if (!licenseAllowsToShowThisPage) {
-      const newUrl = addAppRedirectMessageToUrl(deps.addBasePath('/app/kibana'), info.message);
-      window.location.href = newUrl;
+      deps.core.notifications.toasts.addDanger(info.message);
+      // This has to happen in the next tick because otherwise the original navigation
+      // bringing us to the graph app in the first place
+      // never completes and the browser enters are redirect loop
+      setTimeout(() => {
+        deps.core.application.navigateToApp('home');
+      }, 0);
     }
   });
 
@@ -94,7 +109,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
   };
 };
 
-const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
+const mainTemplate = (basePath: string) => `<div ng-view class="gphAppWrapper">
   <base href="${basePath}" />
 </div>
 `;
@@ -105,14 +120,14 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.boo
 
 function mountGraphApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
-  // eslint-disable-next-line
+  mountpoint.setAttribute('class', 'gphAppWrapper');
+  // eslint-disable-next-line no-unsanitized/property
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
   element.appendChild(mountpoint);
-  element.setAttribute('class', 'kbnLocalApplicationWrapper');
+  element.setAttribute('class', 'gphAppWrapper');
   return $injector;
 }
 

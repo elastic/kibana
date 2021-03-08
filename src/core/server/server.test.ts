@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -30,23 +19,29 @@ import {
   mockRenderingService,
   mockMetricsService,
   mockStatusService,
+  mockLoggingService,
+  mockI18nService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
 import { Env } from './config';
 import { Server } from './server';
 
-import { getEnvOptions } from './config/__mocks__/env';
-import { loggingServiceMock } from './logging/logging_service.mock';
-import { rawConfigServiceMock } from './config/raw_config_service.mock';
+import { loggingSystemMock } from './logging/logging_system.mock';
 
-const env = new Env('.', getEnvOptions());
-const logger = loggingServiceMock.create();
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
+const logger = loggingSystemMock.create();
 const rawConfigService = rawConfigServiceMock.create({});
 
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
-  mockPluginsService.discover.mockResolvedValue(new Map());
+  mockPluginsService.discover.mockResolvedValue({
+    pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
+    pluginPaths: [],
+    uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
+  });
 });
 
 afterEach(() => {
@@ -65,6 +60,8 @@ test('sets up services on "setup"', async () => {
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -77,6 +74,8 @@ test('sets up services on "setup"', async () => {
   expect(mockRenderingService.setup).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.setup).toHaveBeenCalledTimes(1);
   expect(mockStatusService.setup).toHaveBeenCalledTimes(1);
+  expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -88,7 +87,11 @@ test('injects legacy dependency to context#setup()', async () => {
     [pluginA, []],
     [pluginB, [pluginA]],
   ]);
-  mockPluginsService.discover.mockResolvedValue(pluginDependencies);
+  mockPluginsService.discover.mockResolvedValue({
+    pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
+    pluginPaths: [],
+    uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
+  });
 
   await server.setup();
 
@@ -145,6 +148,7 @@ test('stops services on "stop"', async () => {
   expect(mockUiSettingsService.stop).not.toHaveBeenCalled();
   expect(mockMetricsService.stop).not.toHaveBeenCalled();
   expect(mockStatusService.stop).not.toHaveBeenCalled();
+  expect(mockLoggingService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
@@ -156,6 +160,7 @@ test('stops services on "stop"', async () => {
   expect(mockUiSettingsService.stop).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.stop).toHaveBeenCalledTimes(1);
   expect(mockStatusService.stop).toHaveBeenCalledTimes(1);
+  expect(mockLoggingService.stop).toHaveBeenCalledTimes(1);
 });
 
 test(`doesn't setup core services if config validation fails`, async () => {
@@ -169,10 +174,13 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
+  expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
 
 test(`doesn't setup core services if legacy config validation fails`, async () => {
@@ -194,4 +202,22 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
+});
+
+test(`doesn't validate config if env.isDevCliParent is true`, async () => {
+  const devParentEnv = Env.createDefault(REPO_ROOT, {
+    ...getEnvOptions(),
+    isDevCliParent: true,
+  });
+
+  const server = new Server(rawConfigService, devParentEnv, logger);
+  await server.setup();
+
+  expect(mockEnsureValidConfiguration).not.toHaveBeenCalled();
+  expect(mockContextService.setup).toHaveBeenCalled();
+  expect(mockHttpService.setup).toHaveBeenCalled();
+  expect(mockElasticsearchService.setup).toHaveBeenCalled();
+  expect(mockSavedObjectsService.setup).toHaveBeenCalled();
 });

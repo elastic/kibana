@@ -7,5 +7,8 @@
 <b>Signature:</b>
 
 ```typescript
-formatHit: any;
+formatHit: {
+        (hit: Record<string, any>, type?: string): any;
+        formatField: FormatFieldFn;
+    };
 ```

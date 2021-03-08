@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
-import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 
 export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -17,20 +18,20 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
       monitorId: schema.string(),
       dateStart: schema.maybe(schema.string()),
       dateEnd: schema.maybe(schema.string()),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeEsClient, context, request }): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
-    return response.ok({
-      body: {
-        ...(await libs.requests.getMonitorDetails({
-          callES,
-          dynamicSettings,
-          monitorId,
-          dateStart,
-          dateEnd,
-        })),
-      },
+
+    const alertsClient = context.alerting?.getAlertsClient();
+
+    return await libs.requests.getMonitorDetails({
+      uptimeEsClient,
+      monitorId,
+      dateStart,
+      dateEnd,
+      alertsClient,
     });
   },
 });

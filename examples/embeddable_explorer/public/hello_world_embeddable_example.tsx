@@ -1,45 +1,33 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import {
-  EuiPanel,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiTitle,
+  EuiPanel,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
 import {
-  EmbeddableStart,
-  EmbeddableFactoryRenderer,
-  EmbeddableRoot,
-} from '../../../src/plugins/embeddable/public';
-import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from '../../embeddable_examples/public';
+  HelloWorldEmbeddable,
+  HelloWorldEmbeddableFactory,
+} from '../../embeddable_examples/public';
 
 interface Props {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  helloWorldEmbeddableFactory: HelloWorldEmbeddableFactory;
 }
 
-export function HelloWorldEmbeddableExample({ getEmbeddableFactory }: Props) {
+export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Props) {
   return (
     <EuiPageBody>
       <EuiPageHeader>
@@ -53,28 +41,25 @@ export function HelloWorldEmbeddableExample({ getEmbeddableFactory }: Props) {
         <EuiPageContentBody>
           <EuiText>
             Here the embeddable is rendered without the factory. A developer may use this method if
-            they want to statically embed a single embeddable into their application or page.
+            they want to statically embed a single embeddable into their application or page. Also
+            `input` prop may be used to declaratively update current embeddable input
           </EuiText>
           <EuiPanel data-test-subj="helloWorldEmbeddablePanel" paddingSize="none" role="figure">
-            <EmbeddableRoot embeddable={new HelloWorldEmbeddable({ id: 'hello' })} />
+            <EmbeddableRenderer embeddable={new HelloWorldEmbeddable({ id: 'hello' })} />
           </EuiPanel>
 
           <EuiText>
-            Here the embeddable is rendered using the factory.create method. This method is used
-            programatically when a container embeddable attempts to initialize it&#39;s children
-            embeddables. This method can be used when you only have a string representing the type
-            of embeddable, and input data.
+            Here the embeddable is rendered using the factory. Internally it creates embeddable
+            using factory.create(). This method is used programatically when a container embeddable
+            attempts to initialize it&#39;s children embeddables. This method can be used when you
+            only have a access to a factory.
           </EuiText>
           <EuiPanel
             data-test-subj="helloWorldEmbeddableFromFactory"
             paddingSize="none"
             role="figure"
           >
-            <EmbeddableFactoryRenderer
-              getEmbeddableFactory={getEmbeddableFactory}
-              type={HELLO_WORLD_EMBEDDABLE}
-              input={{ id: '1234' }}
-            />
+            <EmbeddableRenderer factory={helloWorldEmbeddableFactory} input={{ id: '1234' }} />
           </EuiPanel>
         </EuiPageContentBody>
       </EuiPageContent>

@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
 import numeral from '@elastic/numeral';
 import { ErrorResponse } from '../../../../../../common/types/errors';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../../common/constants/file_datavisualizer';
+import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../../../file_upload/public';
 
 interface FileTooLargeProps {
   fileSize: number;
@@ -77,34 +78,57 @@ export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) =
 interface FileCouldNotBeReadProps {
   error: ErrorResponse;
   loaded: boolean;
+  showEditFlyout(): void;
 }
 
-export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({ error, loaded }) => {
+export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
+  error,
+  loaded,
+  showEditFlyout,
+}) => {
   const message = error?.body?.message || '';
   return (
-    <EuiCallOut
-      title={
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileCouldNotBeReadTitle"
-          defaultMessage="File could not be read"
-        />
-      }
-      color="danger"
-      iconType="cross"
-      data-test-subj="mlFileUploadErrorCallout fileCouldNotBeRead"
-    >
-      {message}
-      <Explanation error={error} />
-      {loaded && (
-        <>
-          <EuiSpacer size="s" />
+    <>
+      <EuiCallOut
+        title={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.fileErrorCallouts.revertingToPreviousSettingsDescription"
-            defaultMessage="Reverting to previous settings"
+            id="xpack.ml.fileDatavisualizer.fileErrorCallouts.fileCouldNotBeReadTitle"
+            defaultMessage="File structure cannot be determined"
           />
-        </>
-      )}
-    </EuiCallOut>
+        }
+        color="danger"
+        iconType="cross"
+        data-test-subj="mlFileUploadErrorCallout fileCouldNotBeRead"
+      >
+        {loaded === false && (
+          <>
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.fileErrorCallouts.applyOverridesDescription"
+              defaultMessage="If you know something about this data, such as the file format or timestamp format, adding initial overrides may help us to infer the rest of the structure."
+            />
+            <br />
+            <EuiButtonEmpty onClick={showEditFlyout} flush="left" size="xs">
+              <FormattedMessage
+                id="xpack.ml.fileDatavisualizer.fileErrorCallouts.overrideButton"
+                defaultMessage="Apply override settings"
+              />
+            </EuiButtonEmpty>
+            <EuiHorizontalRule />
+          </>
+        )}
+        {message}
+        <Explanation error={error} />
+        {loaded && (
+          <>
+            <EuiSpacer size="s" />
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.fileErrorCallouts.revertingToPreviousSettingsDescription"
+              defaultMessage="Reverting to previous settings"
+            />
+          </>
+        )}
+      </EuiCallOut>
+    </>
   );
 };
 

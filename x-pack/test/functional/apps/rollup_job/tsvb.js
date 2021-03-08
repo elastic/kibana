@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import mockRolledUpData from './hybrid_index_helper';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const PageObjects = getPageObjects([
     'common',
     'settings',
@@ -19,7 +21,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('tsvb integration', function() {
+  describe('tsvb integration', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `tsvb-test-rollup-job-${Date.now()}`;
@@ -67,7 +69,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      await pastDates.map(async day => {
+      await pastDates.map(async (day) => {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 
@@ -96,8 +98,7 @@ export default function({ getService, getPageObjects }) {
         method: 'DELETE',
       });
 
-      await es.indices.delete({ index: rollupTargetIndexName });
-      await es.indices.delete({ index: rollupSourceIndexName });
+      await esDeleteAllIndices([rollupTargetIndexName, rollupSourceIndexName]);
       await esArchiver.load('empty_kibana');
     });
   });

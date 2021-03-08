@@ -1,13 +1,13 @@
 {
   "id": "sample_data_weblogs",
   "title": "Kibana sample data web logs",
-  "description": "Find anomalies in Kibana sample web logs data",
+  "description": "Find anomalies in Kibana sample web logs data.",
   "type": "Sample Dataset",
   "logoFile": "logo.json",
   "defaultIndexPattern": "kibana_sample_data_logs",
   "query": {
     "bool": {
-      "filter": [{ "term": { "_index": "kibana_sample_data_logs" } }]
+      "filter": [{ "term": { "event.dataset": "sample_web_logs" } }]
     }
   },
   "jobs": [

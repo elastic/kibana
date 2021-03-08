@@ -9,5 +9,5 @@ a WHATWG URL standard object.
 <b>Signature:</b>
 
 ```typescript
-readonly url: Url;
+readonly url: URL;
 ```

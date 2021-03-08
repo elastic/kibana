@@ -3,7 +3,37 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "server": true,
-  "ui": false,
-  "optionalPlugins": ["usageCollection", "taskManager"],
-  "configPath": ["xpack", "lens"]
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "charts",
+    "expressions",
+    "navigation",
+    "urlForwarding",
+    "visualizations",
+    "dashboard",
+    "uiActions",
+    "embeddable",
+    "share",
+    "presentationUtil"
+  ],
+  "optionalPlugins": [
+    "usageCollection",
+    "taskManager",
+    "globalSearch",
+    "savedObjectsTagging"
+  ],
+  "configPath": [
+    "xpack",
+    "lens"
+  ],
+  "extraPublicDirs": [
+    "common/constants"
+  ],
+  "requiredBundles": [
+    "savedObjects",
+    "kibanaUtils",
+    "kibanaReact",
+    "embeddable"
+  ]
 }

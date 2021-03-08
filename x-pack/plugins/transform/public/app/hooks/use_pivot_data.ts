@@ -1,0 +1,246 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import moment from 'moment-timezone';
+import { useEffect, useMemo, useState } from 'react';
+
+import { EuiDataGridColumn } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+
+import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
+import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
+import { getNestedProperty } from '../../../common/utils/object_utils';
+
+import { RenderCellValue, UseIndexDataReturnType, HITS_TOTAL_RELATION } from '../../shared_imports';
+import { getErrorMessage } from '../../../common/utils/errors';
+
+import { useAppDependencies } from '../app_dependencies';
+import { getPreviewTransformRequestBody, PivotQuery } from '../common';
+
+import { SearchItems } from './use_search_items';
+import { useApi } from './use_api';
+import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import {
+  isLatestPartialRequest,
+  isPivotPartialRequest,
+} from '../sections/create_transform/components/step_define/common/types';
+
+function sortColumns(groupByArr: string[]) {
+  return (a: string, b: string) => {
+    // make sure groupBy fields are always most left columns
+    if (
+      groupByArr.some((aggName) => aggName === a) &&
+      groupByArr.some((aggName) => aggName === b)
+    ) {
+      return a.localeCompare(b);
+    }
+    if (groupByArr.some((aggName) => aggName === a)) {
+      return -1;
+    }
+    if (groupByArr.some((aggName) => aggName === b)) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  };
+}
+
+function sortColumnsForLatest(sortField: string) {
+  return (a: string, b: string) => {
+    // make sure sort field is always the most left column
+    if (sortField === a && sortField === b) {
+      return a.localeCompare(b);
+    }
+    if (sortField === a) {
+      return -1;
+    }
+    if (sortField === b) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  };
+}
+
+export const usePivotData = (
+  indexPatternTitle: SearchItems['indexPattern']['title'],
+  query: PivotQuery,
+  validationStatus: StepDefineExposedState['validationStatus'],
+  requestPayload: StepDefineExposedState['previewRequest'],
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
+): UseIndexDataReturnType => {
+  const [
+    previewMappingsProperties,
+    setPreviewMappingsProperties,
+  ] = useState<PreviewMappingsProperties>({});
+  const api = useApi();
+  const {
+    ml: {
+      getDataGridSchemaFromESFieldType,
+      formatHumanReadableDateTimeSeconds,
+      multiColumnSortFactory,
+      useDataGrid,
+      INDEX_STATUS,
+    },
+  } = useAppDependencies();
+
+  // Filters mapping properties of type `object`, which get returned for nested field parents.
+  const columnKeys = Object.keys(previewMappingsProperties).filter(
+    (key) => previewMappingsProperties[key].type !== 'object'
+  );
+
+  if (isPivotPartialRequest(requestPayload)) {
+    const groupByArr = Object.keys(requestPayload.pivot.group_by);
+    columnKeys.sort(sortColumns(groupByArr));
+  } else if (isLatestPartialRequest(requestPayload)) {
+    columnKeys.sort(sortColumnsForLatest(requestPayload.latest.sort));
+  }
+
+  // EuiDataGrid State
+  const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
+    const field = previewMappingsProperties[id];
+    const schema = getDataGridSchemaFromESFieldType(field?.type);
+
+    return { id, schema };
+  });
+
+  const dataGrid = useDataGrid(columns);
+
+  const {
+    pagination,
+    resetPagination,
+    setErrorMessage,
+    setNoDataMessage,
+    setRowCount,
+    setRowCountRelation,
+    setStatus,
+    setTableItems,
+    sortingColumns,
+    tableItems,
+  } = dataGrid;
+
+  const getPreviewData = async () => {
+    if (!validationStatus.isValid) {
+      setTableItems([]);
+      setRowCount(0);
+      setRowCountRelation(HITS_TOTAL_RELATION.EQ);
+      setNoDataMessage(validationStatus.errorMessage!);
+      return;
+    }
+
+    setErrorMessage('');
+    setNoDataMessage('');
+    setStatus(INDEX_STATUS.LOADING);
+
+    const previewRequest = getPreviewTransformRequestBody(
+      indexPatternTitle,
+      query,
+      requestPayload,
+      combinedRuntimeMappings
+    );
+    const resp = await api.getTransformsPreview(previewRequest);
+
+    if (!isPostTransformsPreviewResponseSchema(resp)) {
+      setErrorMessage(getErrorMessage(resp));
+      setTableItems([]);
+      setRowCount(0);
+      setRowCountRelation(HITS_TOTAL_RELATION.EQ);
+      setPreviewMappingsProperties({});
+      setStatus(INDEX_STATUS.ERROR);
+      return;
+    }
+
+    setTableItems(resp.preview);
+    setRowCount(resp.preview.length);
+    setRowCountRelation(HITS_TOTAL_RELATION.EQ);
+    setPreviewMappingsProperties(resp.generated_dest_index.mappings.properties);
+    setStatus(INDEX_STATUS.LOADED);
+
+    if (resp.preview.length === 0) {
+      setNoDataMessage(
+        i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
+          defaultMessage:
+            'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
+        })
+      );
+    }
+  };
+
+  useEffect(() => {
+    resetPagination();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(query)]);
+
+  useEffect(() => {
+    getPreviewData();
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [indexPatternTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
+
+  if (sortingColumns.length > 0) {
+    tableItems.sort(multiColumnSortFactory(sortingColumns));
+  }
+
+  const pageData = tableItems.slice(
+    pagination.pageIndex * pagination.pageSize,
+    (pagination.pageIndex + 1) * pagination.pageSize
+  );
+
+  const renderCellValue: RenderCellValue = useMemo(() => {
+    return ({
+      rowIndex,
+      columnId,
+      setCellProps,
+    }: {
+      rowIndex: number;
+      columnId: string;
+      setCellProps: any;
+    }) => {
+      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+
+      const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
+        ? getNestedProperty(pageData[adjustedRowIndex], columnId, null)
+        : null;
+
+      if (typeof cellValue === 'object' && cellValue !== null) {
+        return JSON.stringify(cellValue);
+      }
+
+      if (cellValue === undefined || cellValue === null) {
+        return null;
+      }
+
+      if (
+        [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS].includes(
+          previewMappingsProperties[columnId].type
+        )
+      ) {
+        return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
+      }
+
+      if (previewMappingsProperties[columnId].type === ES_FIELD_TYPES.BOOLEAN) {
+        return cellValue ? 'true' : 'false';
+      }
+
+      return cellValue;
+    };
+  }, [
+    pageData,
+    pagination.pageIndex,
+    pagination.pageSize,
+    previewMappingsProperties,
+    formatHumanReadableDateTimeSeconds,
+  ]);
+
+  return {
+    ...dataGrid,
+    chartsButtonVisible: false,
+    renderCellValue,
+  };
+};

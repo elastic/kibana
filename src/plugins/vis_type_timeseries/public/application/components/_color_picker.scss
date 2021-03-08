@@ -1,0 +1,13 @@
+// EUITODO: Convert to EuiColorPicker
+
+@import 'node_modules/@elastic/eui/src/components/color_picker/index';
+
+.tvbColorPicker {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.tvbColorPicker__clear {
+  margin-left: $euiSizeXS;
+}

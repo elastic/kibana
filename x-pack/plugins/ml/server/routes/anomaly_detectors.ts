@@ -1,21 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+import { RequestParams } from '@elastic/elasticsearch';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
+  jobIdSchema,
+  getRecordsSchema,
+  getBucketsSchema,
+  getOverallBucketsSchema,
+  getCategoriesSchema,
+  forecastAnomalyDetector,
+  getBucketParamsSchema,
+  getModelSnapshotsSchema,
+  updateModelSnapshotSchema,
 } from './schemas/anomaly_detectors_schema';
+
+import { Job, JobStats } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for the anomaly detectors
  */
-export function jobRoutes({ router, mlLicense }: RouteInitialization) {
+export function jobRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
@@ -30,12 +43,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobs');
+        const { body } = await mlClient.getJobs<{ jobs: Job[] }>();
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -50,23 +66,24 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetAnomalyDetectorsById
    * @apiDescription Returns the anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobs', { jobId });
+        const { body } = await mlClient.getJobs<{ jobs: Job[] }>({ job_id: jobId });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -88,12 +105,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/_stats',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobStats');
+        const { body } = await mlClient.getJobStats<{ jobs: JobStats[] }>();
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -108,23 +128,24 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetAnomalyDetectorsStatsById
    * @apiDescription Returns anomaly detection job statistics.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_stats',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.jobStats', { jobId });
+        const { body } = await mlClient.getJobStats({ job_id: jobId });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -135,31 +156,36 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {put} /api/ml/anomaly_detectors/:jobId Instantiate an anomaly detection job
+   * @api {put} /api/ml/anomaly_detectors/:jobId Create an anomaly detection job
    * @apiName CreateAnomalyDetectors
    * @apiDescription Creates an anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) anomalyDetectionJobSchema
+   *
+   * @apiSuccess {Object} job the configuration of the job that has been created.
    */
   router.put(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
         body: schema.object(anomalyDetectionJobSchema),
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.addJob', {
-          jobId,
+        const { body } = await mlClient.putJob({
+          job_id: jobId,
           body: request.body,
         });
+
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -174,27 +200,29 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName UpdateAnomalyDetectors
    * @apiDescription Updates certain properties of an anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) anomalyDetectionUpdateJobSchema
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_update',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
-        body: schema.object({ ...anomalyDetectionUpdateJobSchema }),
+        params: jobIdSchema,
+        body: anomalyDetectionUpdateJobSchema,
+      },
+      options: {
+        tags: ['access:ml:canUpdateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.updateJob', {
-          jobId,
+        const { body } = await mlClient.updateJob({
+          job_id: jobId,
           body: request.body,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -209,25 +237,24 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName OpenAnomalyDetectorsJob
    * @apiDescription Opens an anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_open',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canOpenJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.openJob', {
-          jobId,
-        });
+        const { body } = await mlClient.openJob({ job_id: jobId });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -242,29 +269,30 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName CloseAnomalyDetectorsJob
    * @apiDescription Closes an anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_close',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canCloseJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: { jobId: string; force?: boolean } = {
-          jobId: request.params.jobId,
+        const options: RequestParams.MlCloseJob = {
+          job_id: request.params.jobId,
         };
         const force = request.query.force;
         if (force !== undefined) {
           options.force = force;
         }
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.closeJob', options);
+        const { body } = await mlClient.closeJob(options);
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -279,29 +307,31 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName DeleteAnomalyDetectorsJob
    * @apiDescription Deletes specified anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.delete(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: { jobId: string; force?: boolean } = {
-          jobId: request.params.jobId,
+        const options: RequestParams.MlDeleteJob = {
+          job_id: request.params.jobId,
+          wait_for_completion: false,
         };
         const force = request.query.force;
         if (force !== undefined) {
           options.force = force;
         }
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.deleteJob', options);
+        const { body } = await mlClient.deleteJob(options);
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -315,8 +345,6 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/anomaly_detectors/_validate/detector Validate detector
    * @apiName ValidateAnomalyDetector
    * @apiDescription Validates specified detector.
-   *
-   * @apiParam {String} jobId Job ID.
    */
   router.post(
     {
@@ -324,14 +352,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: schema.any(),
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.validateDetector', {
-          body: request.body,
-        });
+        const { body } = await mlClient.validateDetector({ body: request.body });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -346,28 +375,30 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName ForecastAnomalyDetector
    * @apiDescription Creates a forecast for the specified anomaly detection job, predicting the future behavior of a time series by using its historical behavior.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) forecastAnomalyDetector
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_forecast',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
-        body: schema.object({ duration: schema.any() }),
+        params: jobIdSchema,
+        body: forecastAnomalyDetector,
+      },
+      options: {
+        tags: ['access:ml:canForecastJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const jobId = request.params.jobId;
         const duration = request.body.duration;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.forecast', {
-          jobId,
+        const { body } = await mlClient.forecast({
+          job_id: jobId,
           duration,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -382,7 +413,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetRecords
    * @apiDescription Retrieves anomaly records for a job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) getRecordsSchema
    *
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} records
@@ -391,33 +423,21 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/records',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
-        body: schema.object({
-          desc: schema.maybe(schema.boolean()),
-          end: schema.maybe(schema.string()),
-          exclude_interim: schema.maybe(schema.boolean()),
-          page: schema.maybe(
-            schema.object({
-              from: schema.maybe(schema.number()),
-              size: schema.maybe(schema.number()),
-            })
-          ),
-          record_score: schema.maybe(schema.number()),
-          sort: schema.maybe(schema.string()),
-          start: schema.maybe(schema.string()),
-        }),
+        params: jobIdSchema,
+        body: getRecordsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.records', {
-          jobId: request.params.jobId,
+        const { body } = await mlClient.getRecords({
+          job_id: request.params.jobId,
           body: request.body,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -432,8 +452,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetBuckets
    * @apiDescription The get buckets API presents a chronological view of the records, grouped by bucket.
    *
-   * @apiParam {String} jobId Job ID.
-   * @apiParam {String} timestamp.
+   * @apiSchema (params) getBucketParamsSchema
+   * @apiSchema (body) getBucketsSchema
    *
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} buckets
@@ -442,36 +462,22 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/buckets/{timestamp?}',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-          timestamp: schema.maybe(schema.string()),
-        }),
-        body: schema.object({
-          anomaly_score: schema.maybe(schema.number()),
-          desc: schema.maybe(schema.boolean()),
-          end: schema.maybe(schema.string()),
-          exclude_interim: schema.maybe(schema.boolean()),
-          expand: schema.maybe(schema.boolean()),
-          page: schema.maybe(
-            schema.object({
-              from: schema.maybe(schema.number()),
-              size: schema.maybe(schema.number()),
-            })
-          ),
-          sort: schema.maybe(schema.string()),
-          start: schema.maybe(schema.string()),
-        }),
+        params: getBucketParamsSchema,
+        body: getBucketsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.buckets', {
-          jobId: request.params.jobId,
+        const { body } = await mlClient.getBuckets({
+          job_id: request.params.jobId,
           timestamp: request.params.timestamp,
           body: request.body,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -486,7 +492,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetOverallBuckets
    * @apiDescription Retrieves overall bucket results that summarize the bucket results of multiple anomaly detection jobs.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) getOverallBucketsSchema
    *
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} overall_buckets
@@ -495,28 +502,24 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/overall_buckets',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
-        body: schema.object({
-          topN: schema.number(),
-          bucketSpan: schema.string(),
-          start: schema.number(),
-          end: schema.number(),
-        }),
+        params: jobIdSchema,
+        body: getOverallBucketsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.overallBuckets', {
-          jobId: request.params.jobId,
+        const { body } = await mlClient.getOverallBuckets({
+          job_id: request.params.jobId,
           top_n: request.body.topN,
           bucket_span: request.body.bucketSpan,
           start: request.body.start,
           end: request.body.end,
         });
         return response.ok({
-          body: results,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -527,32 +530,168 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {get} /api/ml/anomaly_detectors/:jobId/results/categories/:categoryId Get results category data by job id and category id
+   * @api {get} /api/ml/anomaly_detectors/:jobId/results/categories/:categoryId Get results category data by job ID and category ID
    * @apiName GetCategories
    * @apiDescription Returns the categories results for the specified job ID and category ID.
    *
-   * @apiParam {String} jobId Job ID.
-   * @apiParam {String} categoryId Category ID.
+   * @apiSchema (params) getCategoriesSchema
    */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/categories/{categoryId}',
       validate: {
-        params: schema.object({
-          categoryId: schema.string(),
-          jobId: schema.string(),
-        }),
+        params: getCategoriesSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options = {
-          jobId: request.params.jobId,
-          categoryId: request.params.categoryId,
-        };
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.categories', options);
+        const { body } = await mlClient.getCategories({
+          job_id: request.params.jobId,
+          category_id: request.params.categoryId,
+        });
         return response.ok({
-          body: results,
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors/:jobId/model_snapshots Get model snapshots by job ID
+   * @apiName GetModelSnapshots
+   * @apiDescription Returns the model snapshots for the specified job ID
+   *
+   * @apiSchema (params) getModelSnapshotsSchema
+   */
+  router.get(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots',
+      validate: {
+        params: getModelSnapshotsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { body } = await mlClient.getModelSnapshots({
+          job_id: request.params.jobId,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {get} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Get model snapshots by job ID and snapshot ID
+   * @apiName GetModelSnapshotsById
+   * @apiDescription Returns the model snapshots for the specified job ID and snapshot ID
+   *
+   * @apiSchema (params) getModelSnapshotsSchema
+   */
+  router.get(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}',
+      validate: {
+        params: getModelSnapshotsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { body } = await mlClient.getModelSnapshots({
+          job_id: request.params.jobId,
+          snapshot_id: request.params.snapshotId,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {post} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId/_update update model snapshot by snapshot ID
+   * @apiName UpdateModelSnapshotsById
+   * @apiDescription Updates the model snapshot for the specified snapshot ID
+   *
+   * @apiSchema (params) getModelSnapshotsSchema
+   * @apiSchema (body) updateModelSnapshotSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}/_update',
+      validate: {
+        params: getModelSnapshotsSchema,
+        body: updateModelSnapshotSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { body } = await mlClient.updateModelSnapshot({
+          job_id: request.params.jobId,
+          snapshot_id: request.params.snapshotId,
+          body: request.body,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup AnomalyDetectors
+   *
+   * @api {delete} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId Delete model snapshots by snapshot ID
+   * @apiName GetModelSnapshotsById
+   * @apiDescription Deletes the model snapshot for the specified snapshot ID
+   *
+   * @apiSchema (params) getModelSnapshotsSchema
+   */
+  router.delete(
+    {
+      path: '/api/ml/anomaly_detectors/{jobId}/model_snapshots/{snapshotId}',
+      validate: {
+        params: getModelSnapshotsSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { body } = await mlClient.deleteModelSnapshot({
+          job_id: request.params.jobId,
+          snapshot_id: request.params.snapshotId,
+        });
+        return response.ok({
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

@@ -2,8 +2,24 @@
   "configPath": ["xpack", "uptime"],
   "id": "uptime",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["alerting", "features", "licensing", "usageCollection"],
+  "optionalPlugins": ["data", "home", "observability", "ml"],
+  "requiredPlugins": [
+    "alerting",
+    "embeddable",
+    "features",
+    "licensing",
+    "triggersActionsUi",
+    "usageCollection"
+  ],
   "server": true,
-  "ui": false,
-  "version": "8.0.0"
+  "ui": true,
+  "version": "8.0.0",
+  "requiredBundles": [
+    "observability",
+    "kibanaReact",
+    "home",
+    "data",
+    "ml",
+    "maps"
+  ]
 }

@@ -16,6 +16,8 @@ export interface OpsOsMetrics
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [cpu](./kibana-plugin-core-server.opsosmetrics.cpu.md) | <code>{</code><br/><code>        control_group: string;</code><br/><code>        cfs_period_micros: number;</code><br/><code>        cfs_quota_micros: number;</code><br/><code>        stat: {</code><br/><code>            number_of_elapsed_periods: number;</code><br/><code>            number_of_times_throttled: number;</code><br/><code>            time_throttled_nanos: number;</code><br/><code>        };</code><br/><code>    }</code> | cpu cgroup metrics, undefined when not running in a cgroup |
+|  [cpuacct](./kibana-plugin-core-server.opsosmetrics.cpuacct.md) | <code>{</code><br/><code>        control_group: string;</code><br/><code>        usage_nanos: number;</code><br/><code>    }</code> | cpu accounting metrics, undefined when not running in a cgroup |
 |  [distro](./kibana-plugin-core-server.opsosmetrics.distro.md) | <code>string</code> | The os distrib. Only present for linux platforms |
 |  [distroRelease](./kibana-plugin-core-server.opsosmetrics.distrorelease.md) | <code>string</code> | The os distrib release, prefixed by the os distrib. Only present for linux platforms |
 |  [load](./kibana-plugin-core-server.opsosmetrics.load.md) | <code>{</code><br/><code>        '1m': number;</code><br/><code>        '5m': number;</code><br/><code>        '15m': number;</code><br/><code>    }</code> | cpu load metrics |

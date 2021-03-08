@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { merge } from 'lodash';
-import { Logger, CallAPIOptions } from 'kibana/server';
-import { IndicesStatsParams, Client } from 'elasticsearch';
+import { Logger } from 'kibana/server';
+import { RequestParams } from '@elastic/elasticsearch';
 import {
   ESSearchRequest,
-  ESSearchResponse
-} from '../../../../typings/elasticsearch';
+  ESSearchResponse,
+} from '../../../../../../typings/elasticsearch';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';
@@ -20,9 +22,17 @@ type TelemetryTaskExecutor = (params: {
     params: TSearchRequest
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
-    params: IndicesStatsParams,
-    options?: CallAPIOptions
-  ): ReturnType<Client['indices']['stats']>;
+    params: RequestParams.IndicesStats
+    // promise returned by client has an abort property
+    // so we cannot use its ReturnType
+  ): Promise<{
+    _all?: {
+      total?: { store?: { size_in_bytes?: number }; docs?: { count?: number } };
+    };
+    _shards?: {
+      total?: number;
+    };
+  }>;
   transportRequest: (params: {
     path: string;
     method: 'get';
@@ -43,10 +53,10 @@ export function collectDataTelemetry({
   indices,
   logger,
   indicesStats,
-  transportRequest
+  transportRequest,
 }: CollectTelemetryParams) {
   return tasks.reduce((prev, task) => {
-    return prev.then(async data => {
+    return prev.then(async (data) => {
       logger.debug(`Executing APM telemetry task ${task.name}`);
       try {
         const time = process.hrtime();
@@ -54,7 +64,7 @@ export function collectDataTelemetry({
           search,
           indices,
           indicesStats,
-          transportRequest
+          transportRequest,
         });
         const took = process.hrtime(time);
 
@@ -62,10 +72,10 @@ export function collectDataTelemetry({
           tasks: {
             [task.name]: {
               took: {
-                ms: Math.round(took[0] * 1000 + took[1] / 1e6)
-              }
-            }
-          }
+                ms: Math.round(took[0] * 1000 + took[1] / 1e6),
+              },
+            },
+          },
         });
       } catch (err) {
         logger.warn(`Failed executing APM telemetry task ${task.name}`);

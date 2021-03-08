@@ -1,4 +1,4 @@
-  // SASSTODO: This file has several direct EUI overwrites that need to be removed
+// SASSTODO: This file has several direct EUI overwrites that need to be removed
 .ml-anomalies-table {
   .ml-icon-severity-critical,
   .ml-icon-severity-major,
@@ -53,7 +53,7 @@
 
     .detector-rules-icon {
       margin-left: $euiSizeXS;
-      opacity: 0.5;
+      opacity: .5;
     }
   }
 
@@ -98,7 +98,7 @@
     .anomaly-description-list {
 
       .euiDescriptionList__title {
-        margin-top: 0px;
+        margin-top: 0;
         flex-basis: 15%;
         font-size: inherit;
         line-height: 1.5rem;
@@ -106,7 +106,7 @@
       }
 
       .euiDescriptionList__description {
-        margin-top: 0px;
+        margin-top: 0;
         flex-basis: 85%;
         font-size: inherit;
         line-height: 1.5rem;
@@ -116,4 +116,3 @@
   }
 
 }
-

@@ -1,99 +1,55 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
+import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
-import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { Storage } from '../../kibana_utils/public';
-import { KibanaContextProvider } from '../../kibana_react/public';
-import { DefaultEditor } from './default_editor';
-import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
+import { IEditorController, EditorRenderProps } from 'src/plugins/visualize/public';
 
-const localStorage = new Storage(window.localStorage);
+// @ts-ignore
+const DefaultEditor = lazy(() => import('./default_editor'));
 
-export interface DefaultEditorControllerState {
-  vis: Vis;
-  eventEmitter: EventEmitter;
-  embeddableHandler: VisualizeEmbeddableContract;
-  optionTabs: OptionTab[];
-}
+class DefaultEditorController implements IEditorController {
+  constructor(
+    private el: HTMLElement,
+    private vis: Vis,
+    private eventEmitter: EventEmitter,
+    private embeddableHandler: VisualizeEmbeddableContract
+  ) {}
 
-class DefaultEditorController {
-  private el: HTMLElement;
-  private state: DefaultEditorControllerState;
-
-  constructor(el: HTMLElement, vis: Vis, eventEmitter: EventEmitter, embeddableHandler: any) {
-    this.el = el;
-    const { type: visType } = vis;
-
-    const optionTabs = [
-      ...(visType.schemas.buckets || visType.schemas.metrics
-        ? [
-            {
-              name: 'data',
-              title: i18n.translate('visDefaultEditor.sidebar.tabs.dataLabel', {
-                defaultMessage: 'Data',
-              }),
-              editor: DefaultEditorDataTab,
-            },
-          ]
-        : []),
-
-      ...(!visType.editorConfig.optionTabs && visType.editorConfig.optionsTemplate
-        ? [
-            {
-              name: 'options',
-              title: i18n.translate('visDefaultEditor.sidebar.tabs.optionsLabel', {
-                defaultMessage: 'Options',
-              }),
-              editor: visType.editorConfig.optionsTemplate,
-            },
-          ]
-        : visType.editorConfig.optionTabs),
-    ];
-
-    this.state = {
-      vis,
-      optionTabs,
-      eventEmitter,
-      embeddableHandler,
-    };
-  }
-
-  render({ data, core, ...props }: EditorRenderProps) {
+  render(props: EditorRenderProps) {
     render(
-      <core.i18n.Context>
-        <KibanaContextProvider
-          services={{
-            appName: 'vis_default_editor',
-            storage: localStorage,
-            data,
-            ...core,
-          }}
+      <EuiErrorBoundary>
+        <Suspense
+          fallback={
+            <div
+              style={{
+                display: 'flex',
+                flex: '1 1 auto',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <EuiLoadingChart size="xl" mono />
+            </div>
+          }
         >
-          <DefaultEditor {...this.state} {...props} />
-        </KibanaContextProvider>
-      </core.i18n.Context>,
+          <DefaultEditor
+            eventEmitter={this.eventEmitter}
+            embeddableHandler={this.embeddableHandler}
+            vis={this.vis}
+            {...props}
+          />
+        </Suspense>
+      </EuiErrorBoundary>,
       this.el
     );
   }

@@ -15,8 +15,8 @@ $mlAnnotationBorderWidth: 2px;
 
 // Instead of different EUI colors we use opacity settings
 // here to avoid opaque layers on top of existing chart elements.
-$mlAnnotationRectDefaultStrokeOpacity: 0.2;
-$mlAnnotationRectDefaultFillOpacity: 0.05;
+$mlAnnotationRectDefaultStrokeOpacity: .2;
+$mlAnnotationRectDefaultFillOpacity: .05;
 
 .mlAnnotationRect {
   stroke: $euiColorFullShade;
@@ -32,7 +32,7 @@ $mlAnnotationRectDefaultFillOpacity: 0.05;
 }
 
 .mlAnnotationRect-isHighlight {
-  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity * 2;;
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity * 2;
   transition: stroke-opacity $euiAnimSpeedFast;
 
   fill-opacity: $mlAnnotationRectDefaultFillOpacity * 2;
@@ -75,4 +75,26 @@ $mlAnnotationRectDefaultFillOpacity: 0.05;
 
 .mlAnnotationHidden {
   display: none;
+}
+
+// context annotation marker
+.mlContextAnnotationRect {
+  stroke: $euiColorFullShade;
+  stroke-width: $mlAnnotationBorderWidth;
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity;
+  transition: stroke-opacity $euiAnimSpeedFast;
+
+  fill: $euiColorFullShade;
+  fill-opacity: $mlAnnotationRectDefaultFillOpacity;
+  transition: fill-opacity $euiAnimSpeedFast;
+
+  shape-rendering: geometricPrecision;
+}
+
+.mlContextAnnotationRect-isBlur {
+  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity / 2;
+  transition: stroke-opacity $euiAnimSpeedFast;
+
+  fill-opacity: $mlAnnotationRectDefaultFillOpacity / 2;
+  transition: fill-opacity $euiAnimSpeedFast;
 }

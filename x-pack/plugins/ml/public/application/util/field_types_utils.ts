@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,10 @@ export function kbnTypeToMLJobType(field: IFieldType) {
     case KBN_FIELD_TYPES.GEO_POINT:
       type = ML_JOB_FIELD_TYPES.GEO_POINT;
       break;
+    case KBN_FIELD_TYPES.GEO_SHAPE:
+      type = ML_JOB_FIELD_TYPES.GEO_SHAPE;
+      break;
+
     default:
       break;
   }
@@ -73,7 +78,7 @@ export const mlJobTypeAriaLabels = {
 
 export const getMLJobTypeAriaLabel = (type: string) => {
   const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(
-    k => ML_JOB_FIELD_TYPES[k as keyof typeof ML_JOB_FIELD_TYPES] === type
+    (k) => ML_JOB_FIELD_TYPES[k as keyof typeof ML_JOB_FIELD_TYPES] === type
   );
   if (requestedFieldType === undefined) {
     return null;

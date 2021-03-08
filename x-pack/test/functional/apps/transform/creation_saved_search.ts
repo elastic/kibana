@@ -1,38 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import expect from '@kbn/expect';
+
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  GroupByEntry,
+  isLatestTransformTestData,
+  isPivotTransformTestData,
+  LatestTransformTestData,
+  PivotTransformTestData,
+} from './index';
 
-interface GroupByEntry {
-  identifier: string;
-  label: string;
-  intervalLabel?: string;
-}
-
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_saved_search', function() {
-    this.tags(['smoke']);
+  describe('creation_saved_search', function () {
     before(async () => {
-      await esArchiver.load('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
+      await transform.testResources.setKibanaTimeZoneToUTC();
+
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await transform.api.cleanTransformIndices();
     });
 
-    const testDataList = [
+    const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
+        type: 'pivot',
         suiteTitle: 'batch transform with terms groups and avg agg with saved search filter',
-        source: 'farequote_filter',
+        source: 'ft_farequote_filter',
         groupByEntries: [
           {
             identifier: 'terms(airline)',
@@ -52,207 +58,246 @@ export default function({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: ['ASA'],
           },
           row: {
-            status: 'stopped',
+            status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
           },
-          sourceIndex: 'farequote',
-          sourcePreview: {
+          sourceIndex: 'ft_farequote',
+          indexPreview: {
             column: 2,
             values: ['ASA'],
           },
         },
-      },
+      } as PivotTransformTestData,
+      {
+        type: 'latest',
+        suiteTitle: 'batch transform with unique term and sort by time with saved search filter',
+        source: 'ft_farequote_filter',
+        uniqueKeys: [
+          {
+            identifier: 'airline',
+            label: 'airline',
+          },
+        ],
+        sortField: {
+          identifier: '@timestamp',
+          label: '@timestamp',
+        },
+        transformId: `fq_2_${Date.now()}`,
+        transformDescription:
+          'farequote batch transform with airline unique key and sort by timestamp with saved search filter',
+        get destinationIndex(): string {
+          return `user-latest-${this.transformId}`;
+        },
+        expected: {
+          transformPreview: {
+            column: 0,
+            values: ['February 11th 2016, 23:59:54'],
+          },
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+          sourceIndex: 'ft_farequote',
+          indexPreview: {
+            column: 2,
+            values: ['ASA'],
+          },
+        },
+      } as LatestTransformTestData,
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
-        it('loads the home page', async () => {
+        it('loads the wizard for the source data', async () => {
+          await transform.testExecution.logTestStep('loads the home page');
           await transform.navigation.navigateTo();
           await transform.management.assertTransformListPageExists();
-        });
 
-        it('displays the stats bar', async () => {
+          await transform.testExecution.logTestStep('displays the stats bar');
           await transform.management.assertTransformStatsBarExists();
-        });
 
-        it('loads the source selection modal', async () => {
+          await transform.testExecution.logTestStep('loads the source selection modal');
           await transform.management.startTransformCreation();
-        });
 
-        it('selects the source data', async () => {
+          await transform.testExecution.logTestStep('selects the source data');
           await transform.sourceSelection.selectSource(testData.source);
         });
 
-        it('displays the define pivot step', async () => {
+        it('navigates through the wizard and sets all needed fields', async () => {
+          await transform.testExecution.logTestStep('displays the define pivot step');
           await transform.wizard.assertDefineStepActive();
-        });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
-        });
+          await transform.testExecution.logTestStep('has correct transform function selected');
+          await transform.wizard.assertSelectedTransformFunction('pivot');
 
-        it('shows the filtered source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewColumnValues(
-            testData.expected.sourcePreview.column,
-            testData.expected.sourcePreview.values
+          await transform.testExecution.logTestStep('loads the index preview');
+          await transform.wizard.assertIndexPreviewLoaded();
+
+          await transform.testExecution.logTestStep('shows the filtered index preview');
+          await transform.wizard.assertIndexPreviewColumnValues(
+            testData.expected.indexPreview.column,
+            testData.expected.indexPreview.values
           );
-        });
 
-        it('displays an empty pivot preview', async () => {
-          await transform.wizard.assertPivotPreviewEmpty();
-        });
+          await transform.testExecution.logTestStep('displays an empty transform preview');
+          await transform.wizard.assertTransformPreviewEmpty();
 
-        it('hides the query input', async () => {
+          await transform.testExecution.logTestStep('hides the query input');
           await transform.wizard.assertQueryInputMissing();
-        });
 
-        it('hides the advanced query editor switch', async () => {
+          await transform.testExecution.logTestStep('hides the advanced query editor switch');
           await transform.wizard.assertAdvancedQueryEditorSwitchMissing();
-        });
 
-        it('adds the group by entries', async () => {
-          for (const [index, entry] of testData.groupByEntries.entries()) {
-            await transform.wizard.assertGroupByInputExists();
-            await transform.wizard.assertGroupByInputValue([]);
-            await transform.wizard.addGroupByEntry(
-              index,
-              entry.identifier,
-              entry.label,
-              entry.intervalLabel
+          if (isPivotTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('adds the group by entries');
+            for (const [index, entry] of testData.groupByEntries.entries()) {
+              await transform.wizard.assertGroupByInputExists();
+              await transform.wizard.assertGroupByInputValue([]);
+              await transform.wizard.addGroupByEntry(
+                index,
+                entry.identifier,
+                entry.label,
+                entry.intervalLabel
+              );
+            }
+            await transform.testExecution.logTestStep('adds the aggregation entries');
+            for (const [index, agg] of testData.aggregationEntries.entries()) {
+              await transform.wizard.assertAggregationInputExists();
+              await transform.wizard.assertAggregationInputValue([]);
+              await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label);
+            }
+
+            await transform.testExecution.logTestStep('displays the advanced pivot editor switch');
+            await transform.wizard.assertAdvancedPivotEditorSwitchExists();
+            await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
+          }
+
+          if (isLatestTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('sets latest transform method');
+            await transform.wizard.selectTransformFunction('latest');
+            await transform.testExecution.logTestStep('adds unique keys');
+            for (const { identifier, label } of testData.uniqueKeys) {
+              await transform.wizard.assertUniqueKeysInputExists();
+              await transform.wizard.assertUniqueKeysInputValue([]);
+              await transform.wizard.addUniqueKeyEntry(identifier, label);
+            }
+            await transform.testExecution.logTestStep('sets the sort field');
+            await transform.wizard.assertSortFieldInputExists();
+            await transform.wizard.assertSortFieldInputValue('');
+            await transform.wizard.setSortFieldValue(
+              testData.sortField.identifier,
+              testData.sortField.label
             );
           }
-        });
 
-        it('adds the aggregation entries', async () => {
-          for (const [index, agg] of testData.aggregationEntries.entries()) {
-            await transform.wizard.assertAggregationInputExists();
-            await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label);
-          }
-        });
-
-        it('displays the advanced pivot editor switch', async () => {
-          await transform.wizard.assertAdvancedPivotEditorSwitchExists();
-          await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
-        });
-
-        it('loads the pivot preview', async () => {
+          await transform.testExecution.logTestStep('loads the pivot preview');
           await transform.wizard.assertPivotPreviewLoaded();
-        });
 
-        it('shows the pivot preview', async () => {
+          await transform.testExecution.logTestStep('shows the pivot preview');
           await transform.wizard.assertPivotPreviewColumnValues(
-            testData.expected.pivotPreview.column,
-            testData.expected.pivotPreview.values
+            testData.expected.transformPreview.column,
+            testData.expected.transformPreview.values
           );
-        });
 
-        it('loads the details step', async () => {
+          await transform.testExecution.logTestStep('loads the details step');
           await transform.wizard.advanceToDetailsStep();
-        });
 
-        it('inputs the transform id', async () => {
+          await transform.testExecution.logTestStep('inputs the transform id');
           await transform.wizard.assertTransformIdInputExists();
           await transform.wizard.assertTransformIdValue('');
           await transform.wizard.setTransformId(testData.transformId);
-        });
 
-        it('inputs the transform description', async () => {
+          await transform.testExecution.logTestStep('inputs the transform description');
           await transform.wizard.assertTransformDescriptionInputExists();
           await transform.wizard.assertTransformDescriptionValue('');
           await transform.wizard.setTransformDescription(testData.transformDescription);
-        });
 
-        it('inputs the destination index', async () => {
+          await transform.testExecution.logTestStep('inputs the destination index');
           await transform.wizard.assertDestinationIndexInputExists();
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
-        });
 
-        it('displays the create index pattern switch', async () => {
+          await transform.testExecution.logTestStep('displays the create index pattern switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
-        });
 
-        it('displays the continuous mode switch', async () => {
+          await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
-        });
 
-        it('loads the create step', async () => {
+          await transform.testExecution.logTestStep('loads the create step');
           await transform.wizard.advanceToCreateStep();
-        });
 
-        it('displays the create and start button', async () => {
+          await transform.testExecution.logTestStep('displays the create and start button');
           await transform.wizard.assertCreateAndStartButtonExists();
           await transform.wizard.assertCreateAndStartButtonEnabled(true);
-        });
 
-        it('displays the create button', async () => {
+          await transform.testExecution.logTestStep('displays the create button');
           await transform.wizard.assertCreateButtonExists();
           await transform.wizard.assertCreateButtonEnabled(true);
-        });
 
-        it('displays the copy to clipboard button', async () => {
+          await transform.testExecution.logTestStep('displays the copy to clipboard button');
           await transform.wizard.assertCopyToClipboardButtonExists();
           await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
-        it('creates the transform', async () => {
+        it('runs the transform and displays it correctly in the job list', async () => {
+          await transform.testExecution.logTestStep('creates the transform');
           await transform.wizard.createTransform();
-        });
 
-        it('starts the transform and finishes processing', async () => {
+          await transform.testExecution.logTestStep('starts the transform and finishes processing');
           await transform.wizard.startTransform();
           await transform.wizard.waitForProgressBarComplete();
-        });
 
-        it('returns to the management page', async () => {
+          await transform.testExecution.logTestStep('returns to the management page');
           await transform.wizard.returnToManagement();
-        });
 
-        it('displays the transforms table', async () => {
+          await transform.testExecution.logTestStep('displays the transforms table');
           await transform.management.assertTransformsTableExists();
-        });
 
-        it('displays the created transform in the transform list', async () => {
+          await transform.testExecution.logTestStep(
+            'displays the created transform in the transform list'
+          );
           await transform.table.refreshTransformList();
-          await transform.table.filterWithSearchString(testData.transformId);
-          const rows = await transform.table.parseTransformTable();
-          expect(rows.filter(row => row.id === testData.transformId)).to.have.length(1);
-        });
+          await transform.table.filterWithSearchString(testData.transformId, 1);
 
-        it('job creation displays details for the created job in the job list', async () => {
+          await transform.testExecution.logTestStep(
+            'transform creation displays details for the created transform in the transform list'
+          );
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
-            sourceIndex: testData.expected.sourceIndex,
-            destinationIndex: testData.destinationIndex,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
           });
-        });
 
-        it('expands the transform management table row and walks through available tabs', async () => {
-          await transform.table.assertTransformExpandedRow();
-        });
-
-        it('displays the transform preview in the expanded row', async () => {
-          await transform.table.assertTransformsExpandedRowPreviewColumnValues(
-            testData.expected.pivotPreview.column,
-            testData.expected.pivotPreview.values
+          await transform.testExecution.logTestStep(
+            'expands the transform management table row and walks through available tabs'
           );
+          await transform.table.assertTransformExpandedRow();
+
+          await transform.testExecution.logTestStep(
+            'displays the transform preview in the expanded row'
+          );
+          // cell virtualization means the last column is cutoff in the functional tests
+          // https://github.com/elastic/eui/issues/4470
+          // await transform.table.assertTransformsExpandedRowPreviewColumnValues(
+          //   testData.expected.transformPreview.column,
+          //   testData.expected.transformPreview.values
+          // );
         });
       });
     }

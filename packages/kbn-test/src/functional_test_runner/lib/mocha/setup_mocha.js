@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Mocha from 'mocha';
 import { relative } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { loadTestFiles } from './load_test_files';
 import { filterSuitesByTags } from './filter_suites_by_tags';
@@ -42,7 +31,7 @@ export async function setupMocha(lifecycle, log, config, providers) {
   });
 
   // global beforeEach hook in root suite triggers before all others
-  mocha.suite.beforeEach('global before each', async function() {
+  mocha.suite.beforeEach('global before each', async function () {
     await lifecycle.beforeEachTest.trigger(this.currentTest);
   });
 
@@ -53,6 +42,7 @@ export async function setupMocha(lifecycle, log, config, providers) {
     providers,
     paths: config.get('testFiles'),
     updateBaselines: config.get('updateBaselines'),
+    updateSnapshots: config.get('updateSnapshots'),
   });
 
   // Each suite has a tag that is the path relative to the root of the repo
@@ -62,15 +52,15 @@ export async function setupMocha(lifecycle, log, config, providers) {
   filterSuitesByTags({
     log,
     mocha,
-    include: config.get('suiteFiles.include').map(file => relative(REPO_ROOT, file)),
-    exclude: config.get('suiteFiles.exclude').map(file => relative(REPO_ROOT, file)),
+    include: config.get('suiteFiles.include').map((file) => relative(REPO_ROOT, file)),
+    exclude: config.get('suiteFiles.exclude').map((file) => relative(REPO_ROOT, file)),
   });
 
   filterSuitesByTags({
     log,
     mocha,
-    include: config.get('suiteTags.include').map(tag => tag.replace(/-\d+$/, '')),
-    exclude: config.get('suiteTags.exclude').map(tag => tag.replace(/-\d+$/, '')),
+    include: config.get('suiteTags.include').map((tag) => tag.replace(/-\d+$/, '')),
+    exclude: config.get('suiteTags.exclude').map((tag) => tag.replace(/-\d+$/, '')),
   });
 
   return mocha;

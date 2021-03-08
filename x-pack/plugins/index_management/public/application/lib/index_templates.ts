@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { parse } from 'query-string';
 import { Location } from 'history';
 
-export const getFormatVersionFromQueryparams = (location: Location): 1 | 2 | undefined => {
-  const { v: version } = parse(location.search.substring(1));
+export const getIsLegacyFromQueryParams = (location: Location): boolean => {
+  const { legacy } = parse(location.search.substring(1));
 
-  if (!Boolean(version) || typeof version !== 'string') {
-    return undefined;
+  if (!Boolean(legacy) || typeof legacy !== 'string') {
+    return false;
   }
 
-  return +version as 1 | 2;
+  return legacy === 'true';
 };

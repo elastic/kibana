@@ -1,0 +1,87 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana_1",
+    "source": {
+      "migrationVersion": {
+        "space": "6.6.0"
+      },
+      "references": [],
+      "space": {
+        "_reserved": true,
+        "description": "This is the default space!",
+        "disabledFeatures": [],
+        "name": "Default"
+      },
+      "type": "space"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:lens-rolled-up-data",
+    "index": ".kibana_1",
+    "source": {
+      "index-pattern" : {
+        "title" : "lens_rolled_up_data",
+        "timeFieldName" : "@timestamp",
+        "fields" : "[]",
+        "type" : "rollup",
+        "typeMeta" : "{\"params\":{\"rollup_index\":\"lens_rolled_up_data\"},\"aggs\":{\"date_histogram\":{\"@timestamp\":{\"agg\":\"date_histogram\",\"fixed_interval\":\"60m\",\"time_zone\":\"UTC\"}},\"sum\":{\"bytes\":{\"agg\":\"sum\"}},\"max\":{\"bytes\":{\"agg\":\"max\"}},\"terms\":{\"geo.src\":{\"agg\":\"terms\"}}}}"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "7.6.0"
+      },
+      "updated_at" : "2020-08-19T08:39:09.998Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:lens-regular-data",
+    "index": ".kibana_1",
+    "source": {
+      "index-pattern" : {
+        "title" : "lens_regular_data",
+        "timeFieldName" : "@timestamp",
+        "fields" : "[]"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "7.6.0"
+      },
+      "updated_at" : "2020-08-19T08:39:09.998Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "config:8.0.0",
+    "index": ".kibana_1",
+    "source": {
+      "config": {
+        "accessibility:disableAnimations": true,
+        "buildNum": 9007199254740991,
+        "dateFormat:tz": "UTC",
+        "defaultIndex": "lens-rolled-up-data"
+      },
+      "references": [],
+      "type": "config",
+      "updated_at": "2019-09-04T18:47:24.761Z"
+    },
+    "type": "_doc"
+  }
+}

@@ -70,6 +70,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
             <EuiButtonGroup
               color="primary"
               idSelected="onPrem"
+              legend="Deployment type"
               onChange={[Function]}
               options={
                 Array [

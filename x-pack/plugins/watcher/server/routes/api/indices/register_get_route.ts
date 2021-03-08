@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { reduce, size } from 'lodash';
-import { isEsError } from '../../../lib/is_es_error';
+import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
@@ -27,7 +28,7 @@ function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   );
 }
 
-function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
+function getIndices(dataClient: ILegacyScopedClusterClient, pattern: string, limit = 10) {
   return dataClient
     .callAsCurrentUser('indices.getAlias', {
       index: pattern,
@@ -85,7 +86,7 @@ export function registerGetRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

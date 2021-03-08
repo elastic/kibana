@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFormRow, EuiComboBox, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -62,15 +63,17 @@ interface Props {
 export const PathParameter = ({ field, allFields }: Props) => {
   const suggestedFields = getSuggestedFields(allFields, field);
 
+  const fieldConfig = useMemo(
+    () => ({
+      ...getFieldConfig('path'),
+      deserializer: getDeserializer(allFields),
+    }),
+    [allFields]
+  );
+
   return (
-    <UseField
-      path="path"
-      config={{
-        ...getFieldConfig('path'),
-        deserializer: getDeserializer(allFields),
-      }}
-    >
-      {pathField => {
+    <UseField path="path" config={fieldConfig}>
+      {(pathField) => {
         const error = pathField.getErrorsMessages();
         const isInvalid = error ? Boolean(error.length) : false;
 
@@ -91,17 +94,17 @@ export const PathParameter = ({ field, allFields }: Props) => {
             <>
               {!Boolean(suggestedFields.length) && (
                 <>
-                  <EuiCallOut color="warning">
-                    <p>
-                      {i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.aliasType.noFieldsAddedWarningMessage',
-                        {
-                          defaultMessage:
-                            'You need to add at least one field before creating an alias.',
-                        }
-                      )}
-                    </p>
-                  </EuiCallOut>
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    title={i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.aliasType.noFieldsAddedWarningMessage',
+                      {
+                        defaultMessage:
+                          'You need to add at least one field before creating an alias.',
+                      }
+                    )}
+                  />
                   <EuiSpacer />
                 </>
               )}
@@ -123,7 +126,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
                   singleSelection={{ asPlainText: true }}
                   options={suggestedFields}
                   selectedOptions={pathField.value as AliasOption[]}
-                  onChange={value => pathField.setValue(value)}
+                  onChange={(value) => pathField.setValue(value)}
                   isClearable={false}
                   fullWidth
                 />

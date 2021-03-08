@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import 'react-grid-layout/css/styles.css';
@@ -29,11 +18,11 @@ import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
-import { ViewMode, EmbeddableChildPanel } from '../../../embeddable_plugin';
+import { GridData } from '../../../../common';
+import { ViewMode, EmbeddableChildPanel } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import { DashboardPanelState, GridData } from '../types';
-import { withKibana } from '../../../../../kibana_react/public';
-import { DashboardContainerInput } from '../dashboard_container';
+import { DashboardPanelState } from '../types';
+import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 
 let lastValidGridSize = 0;
@@ -176,18 +165,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       isLayoutInvalid,
     });
 
-    this.subscription = this.props.container
-      .getInput$()
-      .subscribe((input: DashboardContainerInput) => {
-        if (this.mounted) {
-          this.setState({
-            panels: input.panels,
-            viewMode: input.viewMode,
-            useMargins: input.useMargins,
-            expandedPanelId: input.expandedPanelId,
-          });
-        }
-      });
+    this.subscription = this.props.container.getInput$().subscribe(() => {
+      const { panels, viewMode, useMargins, expandedPanelId } = this.props.container.getInput();
+      if (this.mounted) {
+        this.setState({
+          panels,
+          viewMode,
+          useMargins,
+          expandedPanelId,
+        });
+      }
+    });
   }
 
   public componentWillUnmount() {
@@ -198,7 +186,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 
   public buildLayoutFromPanels = (): GridData[] => {
-    return _.map(this.state.panels, panel => {
+    return _.map(this.state.panels, (panel) => {
       return panel.gridData;
     });
   };
@@ -249,34 +237,33 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    return _.map(panelsInOrder, panel => {
+    return _.map(panelsInOrder, (panel) => {
       const expandPanel =
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
       const classes = classNames({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--expanded': expandPanel,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--hidden': hidePanel,
       });
       return (
         <div
           style={{ zIndex: focusedPanelIndex === panel.explicitInput.id ? 2 : 'auto' }}
           className={classes}
+          // This key is required for the ReactGridLayout to work properly
           key={panel.explicitInput.id}
           data-test-subj="dashboardPanel"
-          ref={reactGridItem => {
+          ref={(reactGridItem) => {
             this.gridItems[panel.explicitInput.id] = reactGridItem;
           }}
         >
           <EmbeddableChildPanel
+            // This key is used to force rerendering on embeddable type change while the id remains the same
+            key={panel.type}
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
-            getActions={this.props.kibana.services.uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={this.props.kibana.services.embeddable.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
-            overlays={this.props.kibana.services.overlays}
-            notifications={this.props.kibana.services.notifications}
-            inspector={this.props.kibana.services.inspector}
-            SavedObjectFinder={this.props.kibana.services.SavedObjectFinder}
+            PanelComponent={this.props.kibana.services.embeddable.EmbeddablePanel}
           />
         </div>
       );

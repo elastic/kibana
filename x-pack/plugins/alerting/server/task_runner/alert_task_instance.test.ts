@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import uuid from 'uuid';
 import { SanitizedAlert } from '../types';
 
-const alert: SanitizedAlert = {
+const alert: SanitizedAlert<{
+  bar: boolean;
+}> = {
   id: 'alert-123',
   alertTypeId: '123',
   schedule: { interval: '10s' },
@@ -27,8 +30,13 @@ const alert: SanitizedAlert = {
   updatedAt: new Date(),
   apiKeyOwner: null,
   throttle: null,
+  notifyWhen: null,
   muteAll: false,
   mutedInstanceIds: [],
+  executionStatus: {
+    status: 'unknown',
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+  },
 };
 
 describe('Alert Task Instance', () => {

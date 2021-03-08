@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { findAlertRoute } from './find';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
@@ -23,21 +24,14 @@ beforeEach(() => {
 
 describe('findAlertRoute', () => {
   it('finds alerts with proper parameters', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     findAlertRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/_find"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_find"`);
 
     const findResult = {
       page: 1,
@@ -76,13 +70,8 @@ describe('findAlertRoute', () => {
         Object {
           "options": Object {
             "defaultSearchOperator": "OR",
-            "fields": undefined,
-            "filter": undefined,
             "page": 1,
             "perPage": 1,
-            "search": undefined,
-            "sortField": undefined,
-            "sortOrder": undefined,
           },
         },
       ]
@@ -94,8 +83,8 @@ describe('findAlertRoute', () => {
   });
 
   it('ensures the license allows finding alerts', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     findAlertRoute(router, licenseState);
 
@@ -108,13 +97,16 @@ describe('findAlertRoute', () => {
       data: [],
     });
 
-    const [context, req, res] = mockHandlerArguments(alertsClient, {
-      query: {
-        per_page: 1,
-        page: 1,
-        default_search_operator: 'OR',
-      },
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        query: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
+        },
+      }
+    );
 
     await handler(context, req, res);
 
@@ -122,8 +114,8 @@ describe('findAlertRoute', () => {
   });
 
   it('ensures the license check prevents finding alerts', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');

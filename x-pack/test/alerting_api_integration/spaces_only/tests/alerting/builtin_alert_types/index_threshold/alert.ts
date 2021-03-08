@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -85,17 +86,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
       const docs = await waitForDocs(2);
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name, value, title, message } = doc._source.params;
+        const { name, title, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         expect(group).to.be('all documents');
 
         // we'll check title and message in this test, but not subsequent ones
-        expect(title).to.be('alert always fire group all documents exceeded threshold');
+        expect(title).to.be('alert always fire group all documents met threshold');
 
-        const expectedPrefix = `alert always fire group all documents value ${value} exceeded threshold count > -1 over`;
-        const messagePrefix = message.substr(0, expectedPrefix.length);
-        expect(messagePrefix).to.be(expectedPrefix);
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: count is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -128,10 +128,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
+
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: count is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-0, rando split between others
@@ -163,9 +166,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       const docs = await waitForDocs(2);
       for (const doc of docs) {
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
+
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: \d+\n- Conditions Met: sum\(testedValue\) is between 0 and 1000000 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -195,9 +201,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       const docs = await waitForDocs(4);
       for (const doc of docs) {
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
+
+        const messagePattern = /alert 'always fire' is active for group \'all documents\':\n\n- Value: .*\n- Conditions Met: avg\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -232,10 +241,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-2') inGroup2++;
+
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: max\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-2, rando split between others
@@ -274,10 +286,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
+
+        const messagePattern = /alert 'always fire' is active for group \'group-\d\':\n\n- Value: \d+\n- Conditions Met: min\(testedValue\) is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-0, rando split between others
@@ -342,11 +357,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
       };
 
       const { status, body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: params.name,
-          consumer: 'function test',
+          consumer: 'alerts',
           enabled: true,
           alertTypeId: ALERT_TYPE_ID,
           schedule: { interval: `${ALERT_INTERVAL_SECONDS}s` },
@@ -372,7 +387,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
 
       const alertId = createdAlert.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'alert');
+      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       return alertId;
     }
@@ -381,7 +396,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
 async function createAction(supertest: any, objectRemover: ObjectRemover): Promise<string> {
   const { statusCode, body: createdAction } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'index action for index threshold FT',
@@ -398,7 +413,7 @@ async function createAction(supertest: any, objectRemover: ObjectRemover): Promi
   expect(statusCode).to.be(200);
 
   const actionId = createdAction.id;
-  objectRemover.add(Spaces.space1.id, actionId, 'action');
+  objectRemover.add(Spaces.space1.id, actionId, 'action', 'actions');
 
   return actionId;
 }

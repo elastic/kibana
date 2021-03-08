@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { updateAlertRoute } from './update';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
+import { AlertNotifyWhenType } from '../../common';
 
 const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -41,24 +44,18 @@ describe('updateAlertRoute', () => {
         },
       },
     ],
+    notifyWhen: 'onActionGroupChange' as AlertNotifyWhenType,
   };
 
   it('updates an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     updateAlertRoute(router, licenseState);
 
     const [config, handler] = router.put.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-all",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
     alertsClient.update.mockResolvedValueOnce(mockedResponse);
 
@@ -85,6 +82,7 @@ describe('updateAlertRoute', () => {
               },
             },
           ],
+          notifyWhen: 'onActionGroupChange',
         },
       },
       ['ok']
@@ -107,6 +105,7 @@ describe('updateAlertRoute', () => {
               },
             ],
             "name": "abc",
+            "notifyWhen": "onActionGroupChange",
             "params": Object {
               "otherField": false,
             },
@@ -127,8 +126,8 @@ describe('updateAlertRoute', () => {
   });
 
   it('ensures the license allows updating alerts', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     updateAlertRoute(router, licenseState);
 
@@ -170,8 +169,8 @@ describe('updateAlertRoute', () => {
   });
 
   it('ensures the license check prevents updating alerts', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -214,5 +213,25 @@ describe('updateAlertRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the alert type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateAlertRoute(router, licenseState);
+
+    const [, handler] = router.put.mock.calls[0];
+
+    alertsClient.update.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
+      'ok',
+      'forbidden',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

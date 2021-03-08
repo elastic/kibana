@@ -1,58 +1,33 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 
 import { FormData } from '../types';
-import { useFormContext } from '../form_context';
+import { useFormData } from '../hooks';
 
-interface Props {
-  children: (formData: FormData) => JSX.Element | null;
+interface Props<I> {
+  children: (formData: I) => JSX.Element | null;
   pathsToWatch?: string | string[];
 }
 
-export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) => {
-  const form = useFormContext();
-  const previousRawData = useRef<FormData>(form.__formData$.current.value);
-  const [formData, setFormData] = useState<FormData>(previousRawData.current);
+const FormDataProviderComp = function <I extends FormData = FormData>({
+  children,
+  pathsToWatch,
+}: Props<I>) {
+  const { 0: formData, 2: isReady } = useFormData<I>({ watch: pathsToWatch });
 
-  useEffect(() => {
-    const subscription = form.subscribe(({ data: { raw } }) => {
-      // To avoid re-rendering the children for updates on the form data
-      // that we are **not** interested in, we can specify one or multiple path(s)
-      // to watch.
-      if (pathsToWatch) {
-        const valuesToWatchArray = Array.isArray(pathsToWatch)
-          ? (pathsToWatch as string[])
-          : ([pathsToWatch] as string[]);
-
-        if (valuesToWatchArray.some(value => previousRawData.current[value] !== raw[value])) {
-          previousRawData.current = raw;
-          setFormData(raw);
-        }
-      } else {
-        setFormData(raw);
-      }
-    });
-
-    return subscription.unsubscribe;
-  }, [form, pathsToWatch]);
+  if (!isReady) {
+    // No field has mounted yet, don't render anything
+    return null;
+  }
 
   return children(formData);
-});
+};
+
+export const FormDataProvider = React.memo(FormDataProviderComp) as typeof FormDataProviderComp;

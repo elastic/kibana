@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { relationsSerializer, relationsDeserializer } from './relations_parameter';
@@ -45,6 +46,8 @@ export * from './term_vector_parameter';
 
 export * from './type_parameter';
 
+export * from './subtype_parameter';
+
 export * from './ignore_z_value_parameter';
 
 export * from './orientation_parameter';
@@ -66,6 +69,10 @@ export * from './relations_parameter';
 export * from './other_type_name_parameter';
 
 export * from './other_type_json_parameter';
+
+export * from './meta_parameter';
+
+export * from './ignore_above_parameter';
 
 export const PARAMETER_SERIALIZERS = [relationsSerializer, dynamicSerializer];
 

@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-export default function({ loadTestFile }) {
-  describe('Monitoring app', function() {
+export default function ({ loadTestFile }) {
+  describe('Monitoring app', function () {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./feature_controls'));
 
     loadTestFile(require.resolve('./cluster/list'));
     loadTestFile(require.resolve('./cluster/overview'));
-    loadTestFile(require.resolve('./cluster/alerts'));
     // loadTestFile(require.resolve('./cluster/license'));
 
     loadTestFile(require.resolve('./elasticsearch/overview'));
@@ -40,5 +40,7 @@ export default function({ loadTestFile }) {
 
     loadTestFile(require.resolve('./time_filter'));
     loadTestFile(require.resolve('./enable_monitoring'));
+
+    loadTestFile(require.resolve('./setup/metricbeat_migration'));
   });
 }

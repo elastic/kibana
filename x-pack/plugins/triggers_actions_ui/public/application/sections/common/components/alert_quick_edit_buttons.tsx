@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { Alert } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
+import { AlertTableItem } from '../../../../types';
 import {
   withBulkAlertOperations,
   ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_alert_api_operations';
+import './alert_quick_edit_buttons.scss';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export type ComponentOpts = {
-  selectedItems: Alert[];
+  selectedItems: AlertTableItem[];
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
   setAlertsToDelete: React.Dispatch<React.SetStateAction<string[]>>;
@@ -33,7 +35,9 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   disableAlerts,
   setAlertsToDelete,
 }: ComponentOpts) => {
-  const { toastNotifications } = useAppDependencies();
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
 
   const [isMutingAlerts, setIsMutingAlerts] = useState<boolean>(false);
   const [isUnmutingAlerts, setIsUnmutingAlerts] = useState<boolean>(false);
@@ -46,13 +50,17 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   const isPerformingAction =
     isMutingAlerts || isUnmutingAlerts || isEnablingAlerts || isDisablingAlerts || isDeletingAlerts;
 
+  const hasDisabledByLicenseAlertTypes = !!selectedItems.find(
+    (alertItem) => !alertItem.enabledInLicense
+  );
+
   async function onmMuteAllClick() {
     onPerformingAction();
     setIsMutingAlerts(true);
     try {
       await muteAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToMuteAlertsMessage',
           {
@@ -72,7 +80,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await unmuteAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToUnmuteAlertsMessage',
           {
@@ -92,7 +100,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await enableAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToEnableAlertsMessage',
           {
@@ -112,7 +120,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await disableAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDisableAlertsMessage',
           {
@@ -132,7 +140,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       setAlertsToDelete(selectedItems.map((selected: any) => selected.id));
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDeleteAlertsMessage',
           {
@@ -147,82 +155,94 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   return (
-    <Fragment>
+    <EuiFlexGroup alignItems="baseline" direction="column" gutterSize="none">
       {!allAlertsMuted && (
-        <EuiButtonEmpty
-          onClick={onmMuteAllClick}
-          isLoading={isMutingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="muteAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
-            defaultMessage="Mute"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onmMuteAllClick}
+            isLoading={isMutingAlerts}
+            isDisabled={isPerformingAction || hasDisabledByLicenseAlertTypes}
+            data-test-subj="muteAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
+              defaultMessage="Mute"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {allAlertsMuted && (
-        <EuiButtonEmpty
-          onClick={onUnmuteAllClick}
-          isLoading={isUnmutingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="unmuteAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
-            defaultMessage="Unmute"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onUnmuteAllClick}
+            isLoading={isUnmutingAlerts}
+            isDisabled={isPerformingAction || hasDisabledByLicenseAlertTypes}
+            data-test-subj="unmuteAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
+              defaultMessage="Unmute"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {allAlertsDisabled && (
-        <EuiButtonEmpty
-          onClick={onEnableAllClick}
-          isLoading={isEnablingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="enableAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
-            defaultMessage="Enable"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onEnableAllClick}
+            isLoading={isEnablingAlerts}
+            isDisabled={isPerformingAction || hasDisabledByLicenseAlertTypes}
+            data-test-subj="enableAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
+              defaultMessage="Enable"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {!allAlertsDisabled && (
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onDisableAllClick}
+            isLoading={isDisablingAlerts}
+            isDisabled={isPerformingAction || hasDisabledByLicenseAlertTypes}
+            data-test-subj="disableAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
+              defaultMessage="Disable"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
         <EuiButtonEmpty
-          onClick={onDisableAllClick}
-          isLoading={isDisablingAlerts}
+          onClick={deleteSelectedItems}
+          isLoading={isDeletingAlerts}
+          iconType="trash"
+          color="danger"
           isDisabled={isPerformingAction}
-          data-test-subj="disableAll"
+          data-test-subj="deleteAll"
+          className="actBulkActionPopover__deleteAll"
         >
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
-            defaultMessage="Disable"
+            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
+            defaultMessage="Delete"
           />
         </EuiButtonEmpty>
-      )}
-
-      <EuiButtonEmpty
-        onClick={deleteSelectedItems}
-        isLoading={isDeletingAlerts}
-        isDisabled={isPerformingAction}
-        data-test-subj="deleteAll"
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
-          defaultMessage="Delete"
-        />
-      </EuiButtonEmpty>
-    </Fragment>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
 export const AlertQuickEditButtonsWithApi = withBulkAlertOperations(AlertQuickEditButtons);
 
-function isAlertDisabled(alert: Alert) {
+function isAlertDisabled(alert: AlertTableItem) {
   return alert.enabled === false;
 }
 
-function isAlertMuted(alert: Alert) {
+function isAlertMuted(alert: AlertTableItem) {
   return alert.muteAll === true;
 }
 

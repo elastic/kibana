@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ml } from './ml_api_service';
@@ -53,10 +54,11 @@ export function isCloud(): boolean {
 }
 
 export function getCloudDeploymentId(): string | null {
-  if (cloudInfo.cloudId === null) {
-    return null;
-  }
-  const tempCloudId = cloudInfo.cloudId.replace(/^.+:/, '');
+  return cloudInfo.cloudId === null ? null : extractDeploymentId(cloudInfo.cloudId);
+}
+
+export function extractDeploymentId(cloudId: string) {
+  const tempCloudId = cloudId.replace(/^(.+)?:/, '');
   try {
     const matches = atob(tempCloudId).match(/^.+\$(.+)(?=\$)/);
     return matches !== null && matches.length === 2 ? matches[1] : null;

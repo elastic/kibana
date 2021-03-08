@@ -1,57 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-
+import Boom from '@hapi/boom';
 import {
   getLogEntryCategoryDatasetsRequestPayloadRT,
   getLogEntryCategoryDatasetsSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_DATASETS_PATH,
 } from '../../../../common/http_api/log_analysis';
-import { throwErrors } from '../../../../common/runtime_types';
-import { InfraBackendLibs } from '../../../lib/infra_types';
-import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
+import { createValidationFunction } from '../../../../common/runtime_types';
+import type { InfraBackendLibs } from '../../../lib/infra_types';
+import { getLogEntryCategoryDatasets } from '../../../lib/log_analysis';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
+import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
-const anyObject = schema.object({}, { unknowns: 'allow' });
-
-export const initGetLogEntryCategoryDatasetsRoute = ({
-  framework,
-  logEntryCategoriesAnalysis,
-}: InfraBackendLibs) => {
+export const initGetLogEntryCategoryDatasetsRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
       path: LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_DATASETS_PATH,
       validate: {
-        // short-circuit forced @kbn/config-schema validation so we can do io-ts validation
-        body: anyObject,
+        body: createValidationFunction(getLogEntryCategoryDatasetsRequestPayloadRT),
       },
     },
-    async (requestContext, request, response) => {
+    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
         data: {
           sourceId,
           timeRange: { startTime, endTime },
         },
-      } = pipe(
-        getLogEntryCategoryDatasetsRequestPayloadRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+      } = request.body;
 
       try {
-        const {
-          data: logEntryCategoryDatasets,
-          timing,
-        } = await logEntryCategoriesAnalysis.getLogEntryCategoryDatasets(
+        assertHasInfraMlPlugins(requestContext);
+
+        const { data: logEntryCategoryDatasets, timing } = await getLogEntryCategoryDatasets(
           requestContext,
-          request,
           sourceId,
           startTime,
           endTime
@@ -65,18 +52,27 @@ export const initGetLogEntryCategoryDatasetsRoute = ({
             timing,
           }),
         });
-      } catch (e) {
-        const { statusCode = 500, message = 'Unknown error occurred' } = e;
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          throw error;
+        }
 
-        if (e instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message } });
+        if (isMlPrivilegesError(error)) {
+          return response.customError({
+            statusCode: 403,
+            body: {
+              message: error.message,
+            },
+          });
         }
 
         return response.customError({
-          statusCode,
-          body: { message },
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
         });
       }
-    }
+    })
   );
 };

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -19,6 +21,7 @@ import {
   IgnoreMalformedParameter,
   FormatParameter,
   LocaleParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
@@ -26,6 +29,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'locale':
     case 'format':
+    case 'meta':
     case 'boost': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
@@ -72,6 +76,8 @@ export const DateType = ({ field }: Props) => {
         />
 
         <StoreParameter />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
         <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>

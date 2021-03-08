@@ -1,23 +1,10 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-/* eslint-disable no-console */
 
 import { ToolingLog } from '@kbn/dev-utils';
 import {
@@ -35,6 +22,11 @@ import fs from 'fs';
 import path from 'path';
 import getopts from 'getopts';
 
+const log = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
+
 /*
  * Step 1: execute build:types
  * This users tsconfig.types.json to generate types in `target/types`
@@ -43,7 +35,18 @@ import getopts from 'getopts';
  */
 
 const getReportFileName = (folder: string) => {
-  return folder.indexOf('public') > -1 ? 'public' : 'server';
+  switch (true) {
+    case folder.includes('public'):
+      return 'public';
+    case folder.includes('server'):
+      return 'server';
+    case folder.includes('common'):
+      return 'common';
+    default:
+      throw new Error(
+        `folder "${folder}" expected to include one of ["public", "server", "common"]`
+      );
+  }
 };
 
 const apiExtractorConfig = (folder: string): ExtractorConfig => {
@@ -81,13 +84,13 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
       },
     },
   };
-  const con = ExtractorConfig.prepare({
+  const cfg = ExtractorConfig.prepare({
     configObject: config,
     configObjectFullPath: undefined,
     packageJsonFullPath: path.resolve('package.json'),
   });
 
-  return con;
+  return cfg;
 };
 
 const runBuildTypes = async () => {
@@ -97,7 +100,7 @@ const runBuildTypes = async () => {
 const runApiDocumenter = async (folder: string) => {
   const sourceFolder = `./build/${folder}`;
   const targetFolder = `./docs/development/${folder}`;
-  console.log(`Generating docs from ${sourceFolder} into ${targetFolder}...`);
+  log.info(`Generating docs from ${sourceFolder} into ${targetFolder}...`);
   await execa('api-documenter', ['generate', '-i', sourceFolder, '-o', targetFolder], {
     preferLocal: true,
   });
@@ -106,7 +109,7 @@ const runApiDocumenter = async (folder: string) => {
 const renameExtractedApiPackageName = async (folder: string) => {
   const fname = getReportFileName(folder);
   const jsonApiFile = `build/${folder}/${fname}.api.json`;
-  console.log(`Updating ${jsonApiFile}...`);
+  log.info(`Updating ${jsonApiFile}...`);
   const json = JSON.parse(fs.readFileSync(jsonApiFile).toString());
   json.name = json.canonicalReference = `kibana-plugin-${folder.replace(/\//g, '-')}`;
   fs.writeFileSync(jsonApiFile, JSON.stringify(json, null, 2));
@@ -116,11 +119,7 @@ const renameExtractedApiPackageName = async (folder: string) => {
  * Runs api-extractor with a custom logger in order to extract results from the process
  *
  */
-const runApiExtractor = (
-  log: ToolingLog,
-  folder: string,
-  acceptChanges: boolean = false
-): ExtractorResult => {
+const runApiExtractor = (folder: string, acceptChanges: boolean = false): ExtractorResult => {
   const config = apiExtractorConfig(folder);
   const options = {
     // Indicates that API Extractor is running as part of a local build,
@@ -131,7 +130,7 @@ const runApiExtractor = (
     messageCallback: (message: ExtractorMessage) => {
       if (message.messageId === 'console-api-report-not-copied') {
         // ConsoleMessageId.ApiReportNotCopied
-        log.warning(`You have changed the signature of the ${folder} Core API`);
+        log.warning(`You have changed the signature of the ${folder} public API`);
         log.warning(
           'To accept these changes run `node scripts/check_published_api_changes.js --accept` and then:\n' +
             "\t 1. Commit the updated documentation and API review file '" +
@@ -142,7 +141,7 @@ const runApiExtractor = (
         message.handled = true;
       } else if (message.messageId === 'console-api-report-copied') {
         // ConsoleMessageId.ApiReportCopied
-        log.warning(`You have changed the signature of the ${folder} Core API`);
+        log.warning(`You have changed the signature of the ${folder} public API`);
         log.warning(
           "Please commit the updated API documentation and the API review file: '" +
             config.reportFilePath
@@ -150,7 +149,7 @@ const runApiExtractor = (
         message.handled = true;
       } else if (message.messageId === 'console-api-report-unchanged') {
         // ConsoleMessageId.ApiReportUnchanged
-        log.info(`Core ${folder} API: no changes detected ✔`);
+        log.info(`${folder} API: no changes detected ✔`);
         message.handled = true;
       }
     },
@@ -166,13 +165,10 @@ interface Options {
   filter: string;
 }
 
-async function run(
-  folder: string,
-  { log, opts }: { log: ToolingLog; opts: Options }
-): Promise<boolean> {
-  log.info(`Core ${folder} API: checking for changes in API signature...`);
+async function run(folder: string, { opts }: { opts: Options }): Promise<boolean> {
+  log.info(`${folder} API: checking for changes in API signature...`);
 
-  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
+  const { apiReportChanged, succeeded } = runApiExtractor(folder, opts.accept);
 
   // If we're not accepting changes and there's a failure, exit.
   if (!opts.accept && !succeeded) {
@@ -188,7 +184,7 @@ async function run(
       log.error(e);
       return false;
     }
-    log.info(`Core ${folder} API: updated documentation ✔`);
+    log.info(`${folder} API: updated documentation ✔`);
   }
 
   // If the api signature changed or any errors or warnings occured, exit with an error
@@ -198,11 +194,6 @@ async function run(
 }
 
 (async () => {
-  const log = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  });
-
   const extraFlags: string[] = [];
   const opts = (getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
@@ -224,24 +215,36 @@ async function run(
     opts.help = true;
   }
 
-  const folders = ['core/public', 'core/server', 'plugins/data/server', 'plugins/data/public'];
+  const core = ['core/public', 'core/server'];
+  const plugins = [
+    'plugins/data/server',
+    'plugins/data/public',
+    'plugins/expressions/server',
+    'plugins/expressions/public',
+    'plugins/ui_actions/public',
+    'plugins/embeddable/server',
+    'plugins/embeddable/public',
+    'plugins/kibana_utils/common/state_containers',
+    'plugins/kibana_utils/public/state_sync',
+  ];
+  const folders = [...core, ...plugins];
 
   if (opts.help) {
     process.stdout.write(
       dedent(chalk`
         {dim usage:} node scripts/check_published_api_changes [...options]
 
-        Checks for any changes to the Kibana Core API
+        Checks for any changes to the Kibana shared API
 
         Examples:
 
-          {dim # Checks for any changes to the Kibana Core API}
+          {dim # Checks for any changes to the Kibana shared API}
           {dim $} node scripts/check_published_api_changes
 
-          {dim # Checks for any changes to the Kibana Core API and updates the documentation}
+          {dim # Checks for any changes to the Kibana shared API and updates the documentation}
           {dim $} node scripts/check_published_api_changes --docs
 
-          {dim # Checks for and automatically accepts and updates documentation for any changes to the Kibana Core API}
+          {dim # Checks for and automatically accepts and updates documentation for any changes to the Kibana shared API}
           {dim $} node scripts/check_published_api_changes --accept
 
           {dim # Only checks the core/public directory}
@@ -249,8 +252,8 @@ async function run(
 
         Options:
           --accept    {dim Accepts all changes by updating the API Review files and documentation}
-          --docs      {dim Updates the Core API documentation}
-          --only      {dim RegExp that folder names must match, folders: [${folders.join(', ')}]}
+          --docs      {dim Updates the API documentation}
+          --filter    {dim RegExp that folder names must match, folders: [${folders.join(', ')}]}
           --help      {dim Show this message}
       `)
     );
@@ -258,24 +261,22 @@ async function run(
     return !(extraFlags.length > 0);
   }
 
-  try {
-    log.info(`Core: Building types...`);
-    await runBuildTypes();
-  } catch (e) {
-    log.error(e);
-    return false;
+  log.info('Building types for api extractor...');
+  await runBuildTypes();
+  log.info('Types for api extractor has been built');
+
+  const filteredFolders = folders.filter((folder) =>
+    opts.filter.length ? folder.match(opts.filter) : true
+  );
+  const results = [];
+  for (const folder of filteredFolders) {
+    results.push(await run(folder, { opts }));
   }
 
-  const results = await Promise.all(
-    folders
-      .filter(folder => (opts.filter.length ? folder.match(opts.filter) : true))
-      .map(folder => run(folder, { log, opts }))
-  );
-
-  if (results.find(r => r === false) !== undefined) {
+  if (results.includes(false)) {
     process.exitCode = 1;
   }
-})().catch(e => {
-  console.log(e);
+})().catch((e) => {
+  log.error(e);
   process.exitCode = 1;
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -22,7 +23,7 @@ const initialState = {
 
 // Convert an  Array of clusters to an object where
 // each key is the cluster name
-const mapClustersToNames = clusters =>
+const mapClustersToNames = (clusters) =>
   clusters.reduce(
     (byName, cluster) => ({
       ...byName,
@@ -31,7 +32,7 @@ const mapClustersToNames = clusters =>
     {}
   );
 
-const getClustersNames = clusters => clusters.map(cluster => cluster.name);
+const getClustersNames = (clusters) => clusters.map((cluster) => cluster.name);
 
 export function clusters(state = initialState, action) {
   const { type, payload } = action;
@@ -69,8 +70,8 @@ export function clusters(state = initialState, action) {
       const clustersRemoved = payload;
 
       const updatedList = Object.keys(state.byName)
-        .filter(name => clustersRemoved.indexOf(name) < 0)
-        .map(name => state.byName[name]);
+        .filter((name) => clustersRemoved.indexOf(name) < 0)
+        .map((name) => state.byName[name]);
 
       return {
         ...state,

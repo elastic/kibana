@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
 
 import jestDiff from 'jest-diff';
-import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { reformatJestDiff, getOptimizerCacheKey, diffCacheKey } from './cache_keys';
 import { OptimizerConfig } from './optimizer_config';
@@ -35,7 +25,7 @@ jest.mock('./get_changes.ts', () => ({
 }));
 
 jest.mock('./get_mtimes.ts', () => ({
-  getMtimes: async (paths: string[]) => new Map(paths.map(path => [path, 12345])),
+  getMtimes: async (paths: string[]) => new Map(paths.map((path) => [path, 12345])),
 }));
 
 jest.mock('execa');
@@ -100,12 +90,13 @@ describe('getOptimizerCacheKey()', () => {
               },
               "workerConfig": Object {
                 "browserslistEnv": "dev",
-                "cache": true,
                 "dist": false,
                 "optimizerCacheKey": "♻",
-                "profileWebpack": false,
                 "repoRoot": <absolute path>,
-                "watch": false,
+                "themeTags": Array [
+                  "v7dark",
+                  "v7light",
+                ],
               },
             }
           `);
@@ -136,13 +127,13 @@ describe('diffCacheKey()', () => {
       "[32m- Expected[39m
       [31m+ Received[39m
 
-      [2m  Array [[22m
+      [2m  [[22m
       [2m    \\"1\\",[22m
       [2m    \\"2\\",[22m
-      [2m    Object {[22m
-      [32m-     \\"a\\": \\"b\\",[39m
-      [31m+     \\"b\\": \\"a\\",[39m
-      [2m    },[22m
+      [2m    {[22m
+      [32m-     \\"a\\": \\"b\\"[39m
+      [31m+     \\"b\\": \\"a\\"[39m
+      [2m    }[22m
       [2m  ][22m"
     `);
     expect(
@@ -160,11 +151,11 @@ describe('diffCacheKey()', () => {
       "[32m- Expected[39m
       [31m+ Received[39m
 
-      [2m  Object {[22m
+      [2m  {[22m
       [32m-   \\"a\\": \\"1\\",[39m
-      [32m-   \\"b\\": \\"1\\",[39m
+      [32m-   \\"b\\": \\"1\\"[39m
       [31m+   \\"a\\": \\"2\\",[39m
-      [31m+   \\"b\\": \\"2\\",[39m
+      [31m+   \\"b\\": \\"2\\"[39m
       [2m  }[22m"
     `);
   });

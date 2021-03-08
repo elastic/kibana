@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor, ApplicationSetup, AppMountParameters } from 'src/core/public';
-import { AuthenticationServiceSetup } from '../authentication';
-import { UserAPIClient } from '../management';
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
+
+import { AppNavLinkStatus } from '../../../../../src/core/public';
+import type { AuthenticationServiceSetup } from '../authentication';
 
 interface CreateDeps {
   application: ApplicationSetup;
@@ -24,13 +26,17 @@ export const accountManagementApp = Object.freeze({
     application.register({
       id: this.id,
       title,
-      // TODO: switch to proper enum once https://github.com/elastic/kibana/issues/58327 is resolved.
-      navLinkStatus: 3,
+      navLinkStatus: AppNavLinkStatus.hidden,
       appRoute: '/security/account',
       async mount({ element }: AppMountParameters) {
-        const [[coreStart], { renderAccountManagementPage }] = await Promise.all([
+        const [
+          [coreStart],
+          { renderAccountManagementPage },
+          { UserAPIClient },
+        ] = await Promise.all([
           getStartServices(),
           import('./account_management_page'),
+          import('../management'),
         ]);
 
         coreStart.chrome.setBreadcrumbs([{ text: title }]);

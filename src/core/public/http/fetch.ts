@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { merge } from 'lodash';
+import { omitBy } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
 
@@ -41,6 +30,10 @@ interface Params {
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
+
+const removedUndefined = (obj: Record<string, any> | undefined) => {
+  return omitBy(obj, (v) => v === undefined);
+};
 
 export class Fetch {
   private readonly interceptors = new Set<HttpInterceptor>();
@@ -119,24 +112,23 @@ export class Fetch {
       asResponse,
       asSystemRequest,
       ...fetchOptions
-    } = merge(
-      {
-        method: 'GET',
-        credentials: 'same-origin',
-        prependBasePath: true,
-      },
-      options,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-          'kbn-version': this.params.kibanaVersion,
-        },
-      }
-    );
+    } = {
+      method: 'GET',
+      credentials: 'same-origin',
+      prependBasePath: true,
+      ...options,
+      // options can pass an `undefined` Content-Type to erase the default value.
+      // however we can't pass it to `fetch` as it will send an `Content-Type: Undefined` header
+      headers: removedUndefined({
+        'Content-Type': 'application/json',
+        ...options.headers,
+        'kbn-version': this.params.kibanaVersion,
+      }),
+    };
+
     const url = format({
       pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
-      query,
+      query: removedUndefined(query),
     });
 
     // Make sure the system request header is only present if `asSystemRequest` is true.
@@ -144,7 +136,7 @@ export class Fetch {
       fetchOptions.headers['kbn-system-request'] = 'true';
     }
 
-    return new Request(url, fetchOptions);
+    return new Request(url, fetchOptions as RequestInit);
   }
 
   private async fetchResponse(fetchOptions: HttpFetchOptionsWithPath): Promise<HttpResponse<any>> {
@@ -212,7 +204,7 @@ const validateFetchArguments = (
     );
   }
 
-  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter(headerName =>
+  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
     headerName.startsWith('kbn-')
   );
   if (invalidHeaders.length) {

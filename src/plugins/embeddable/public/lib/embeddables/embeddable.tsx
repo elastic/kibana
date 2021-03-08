@@ -1,29 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import { isEqual, cloneDeep } from 'lodash';
+
+import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
+import { merge } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, mapTo, skip } from 'rxjs/operators';
+import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
-import { ViewMode } from '../types';
-import { TriggerContextMapping } from '../ui_actions';
-import { EmbeddableActionStorage } from './embeddable_action_storage';
+import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableInput, ViewMode } from '../../../common/types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -33,10 +24,15 @@ export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
 > implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
+  static runtimeId: number = 0;
+
+  public readonly runtimeId = Embeddable.runtimeId++;
+
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public abstract readonly type: string;
   public readonly id: string;
+  public fatalError?: Error;
 
   protected output: TEmbeddableOutput;
   protected input: TEmbeddableInput;
@@ -44,17 +40,13 @@ export abstract class Embeddable<
   private readonly input$: Rx.BehaviorSubject<TEmbeddableInput>;
   private readonly output$: Rx.BehaviorSubject<TEmbeddableOutput>;
 
+  protected renderComplete = new RenderCompleteDispatcher();
+
   // Listener to parent changes, if this embeddable exists in a parent, in order
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
-  // TODO: Rename to destroyed.
-  private destoyed: boolean = false;
-
-  private __actionStorage?: EmbeddableActionStorage;
-  public get actionStorage(): EmbeddableActionStorage {
-    return this.__actionStorage || (this.__actionStorage = new EmbeddableActionStorage(this));
-  }
+  private destroyed: boolean = false;
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
@@ -80,6 +72,18 @@ export abstract class Embeddable<
         this.onResetInput(newInput);
       });
     }
+
+    this.getOutput$()
+      .pipe(
+        map(({ title }) => title || ''),
+        distinctUntilChanged()
+      )
+      .subscribe(
+        (title) => {
+          this.renderComplete.setTitle(title);
+        },
+        () => {}
+      );
   }
 
   public getIsContainer(): this is IContainer {
@@ -89,8 +93,30 @@ export abstract class Embeddable<
   /**
    * Reload will be called when there is a request to refresh the data or view, even if the
    * input data did not change.
+   *
+   * In case if input data did change and reload is requested input$ and output$ would still emit before `reload` is called
+   *
+   * The order would be as follows:
+   * input$
+   * output$
+   * reload()
+   * ----
+   * updated$
    */
   public abstract reload(): void;
+
+  /**
+   * Merges input$ and output$ streams and debounces emit till next macro-task.
+   * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously.
+   * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
+   * which allows to skip any state handling in case `reload` already handled it.
+   */
+  public getUpdated$(): Readonly<Rx.Observable<void>> {
+    return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
+      debounceTime(0),
+      mapTo(undefined)
+    );
+  }
 
   public getInput$(): Readonly<Rx.Observable<TEmbeddableInput>> {
     return this.input$.asObservable();
@@ -108,8 +134,8 @@ export abstract class Embeddable<
     return this.input;
   }
 
-  public getTitle() {
-    return this.output.title;
+  public getTitle(): string {
+    return this.output.title || '';
   }
 
   /**
@@ -125,7 +151,7 @@ export abstract class Embeddable<
   }
 
   public updateInput(changes: Partial<TEmbeddableInput>): void {
-    if (this.destoyed) {
+    if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
     if (this.parent) {
@@ -136,8 +162,11 @@ export abstract class Embeddable<
     }
   }
 
-  public render(domNode: HTMLElement | Element): void {
-    if (this.destoyed) {
+  public render(el: HTMLElement): void {
+    this.renderComplete.setEl(el);
+    this.renderComplete.setTitle(this.output.title || '');
+
+    if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
     return;
@@ -157,9 +186,11 @@ export abstract class Embeddable<
    * implementors to add any additional clean up tasks, like unmounting and unsubscribing.
    */
   public destroy(): void {
-    this.destoyed = true;
+    this.destroyed = true;
+
     this.input$.complete();
     this.output$.complete();
+
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
@@ -177,16 +208,22 @@ export abstract class Embeddable<
     }
   }
 
+  protected onFatalError(e: Error) {
+    this.fatalError = e;
+    this.output$.error(e);
+  }
+
   private onResetInput(newInput: TEmbeddableInput) {
     if (!isEqual(this.input, newInput)) {
-      if (this.input.lastReloadRequestTime !== newInput.lastReloadRequestTime) {
-        this.reload();
-      }
+      const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
       this.input = newInput;
       this.input$.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
+      if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
+        this.reload();
+      }
     }
   }
 
@@ -199,7 +236,7 @@ export abstract class Embeddable<
     this.onResetInput(newInput);
   }
 
-  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+  public supportedTriggers(): string[] {
     return [];
   }
 }

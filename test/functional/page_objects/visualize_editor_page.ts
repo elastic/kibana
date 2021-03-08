@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect/expect.js';
@@ -27,6 +16,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const elasticChart = getService('elasticChart');
   const { common, header, visChart } = getPageObjects(['common', 'header', 'visChart']);
 
   interface IntervalOptions {
@@ -73,6 +63,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickGo() {
+      if (await visChart.isNewChartsLibraryEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
+
       const prevRenderingCount = await visChart.getVisualizationRenderingCount();
       log.debug(`Before Rendering count ${prevRenderingCount}`);
       await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
@@ -97,9 +91,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickSplitDirection(direction: string) {
-      const radioBtn = await find.byCssSelector(
-        `[data-test-subj="visEditorSplitBy"][title="${direction}"]`
-      );
+      const radioBtn = await find.byCssSelector(`[data-test-subj="visEditorSplitBy-${direction}"]`);
       await radioBtn.click();
     }
 
@@ -130,7 +122,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(`heatmapColorRange__addRangeButton`);
     }
 
-    public async setCustomRangeByIndex(index: string, from: string, to: string) {
+    public async setCustomRangeByIndex(index: string | number, from: string, to: string) {
       await testSubjects.setValue(`heatmapColorRange${index}__from`, from);
       await testSubjects.setValue(`heatmapColorRange${index}__to`, to);
     }
@@ -157,14 +149,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     public async selectField(
       fieldValue: string,
       groupName = 'buckets',
-      childAggregationType = false
+      isChildAggregation = false
     ) {
       log.debug(`selectField ${fieldValue}`);
       const selector = `
           [data-test-subj="${groupName}AggGroup"]
           [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
           [data-test-subj="visAggEditorParams"]
-          ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
+          ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
           [data-test-subj="visDefaultEditorField"]
         `;
       const fieldEl = await find.byCssSelector(selector);
@@ -186,12 +178,12 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     public async selectAggregation(
       aggValue: string,
       groupName = 'buckets',
-      childAggregationType = false
+      isChildAggregation = false
     ) {
       const comboBoxElement = await find.byCssSelector(`
           [data-test-subj="${groupName}AggGroup"]
           [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
-          ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
+          ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
           [data-test-subj="defaultEditorAggSelect"]
         `);
 
@@ -228,6 +220,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
     public async clickDropPartialBuckets() {
       await testSubjects.click('dropPartialBucketsCheckbox');
+    }
+
+    public async expectMarkdownTextArea() {
+      await testSubjects.existOrFail('markdownTextarea');
     }
 
     public async setMarkdownTxt(markdownTxt: string) {
@@ -268,7 +264,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       });
     }
 
-    public async setCustomLabel(label: string, index = 1) {
+    public async setCustomLabel(label: string, index: number | string = 1) {
       const customLabel = await testSubjects.find(`visEditorStringInput${index}customLabel`);
       customLabel.type(label);
     }
@@ -300,28 +296,28 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async sizeUpEditor() {
-      const resizerPanel = await testSubjects.find('splitPanelResizer');
+      const resizerPanel = await testSubjects.find('euiResizableButton');
       // Drag panel 100 px left
       await browser.dragAndDrop({ location: resizerPanel }, { location: { x: -100, y: 0 } });
     }
 
-    public async toggleDisabledAgg(agg: string) {
+    public async toggleDisabledAgg(agg: string | number) {
       await testSubjects.click(`visEditorAggAccordion${agg} > ~toggleDisableAggregationBtn`);
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async toggleAggregationEditor(agg: string) {
+    public async toggleAggregationEditor(agg: string | number) {
       await find.clickByCssSelector(
         `[data-test-subj="visEditorAggAccordion${agg}"] .euiAccordion__button`
       );
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async toggleOtherBucket(agg = 2) {
+    public async toggleOtherBucket(agg: string | number = 2) {
       await testSubjects.click(`visEditorAggAccordion${agg} > otherBucketSwitch`);
     }
 
-    public async toggleMissingBucket(agg = 2) {
+    public async toggleMissingBucket(agg: string | number = 2) {
       await testSubjects.click(`visEditorAggAccordion${agg} > missingBucketSwitch`);
     }
 
@@ -330,10 +326,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async toggleAutoMode() {
-      // this is a temporary solution, should be replaced with initial after fixing the EuiToggleButton
-      // passing the data-test-subj attribute to a checkbox
-      await find.clickByCssSelector('.visEditorSidebar__controls input[type="checkbox"]');
-      // await testSubjects.click('visualizeEditorAutoButton');
+      await testSubjects.click('visualizeEditorAutoButton');
     }
 
     public async isApplyEnabled() {
@@ -389,7 +382,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       }
     }
 
-    public async setSize(newValue: string, aggId: string) {
+    public async setSize(newValue: number, aggId?: number) {
       const dataTestSubj = aggId
         ? `visEditorAggAccordion${aggId} > sizeParamEditor`
         : 'sizeParamEditor';
@@ -433,18 +426,28 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.selectValue('visDefaultEditorAggregateWith', fieldValue);
     }
 
-    public async setInterval(newValue: string, options: IntervalOptions = {}) {
+    public async setInterval(newValue: string | number, options: IntervalOptions = {}) {
+      const newValueString = `${newValue}`;
       const { type = 'default', aggNth = 2, append = false } = options;
-      log.debug(`visEditor.setInterval(${newValue}, {${type}, ${aggNth}, ${append}})`);
+      log.debug(`visEditor.setInterval(${newValueString}, {${type}, ${aggNth}, ${append}})`);
       if (type === 'default') {
-        await comboBox.set('visEditorInterval', newValue);
+        await comboBox.set('visEditorInterval', newValueString);
       } else if (type === 'custom') {
-        await comboBox.setCustom('visEditorInterval', newValue);
+        await comboBox.setCustom('visEditorInterval', newValueString);
       } else {
+        if (type === 'numeric') {
+          const autoMode = await testSubjects.getAttribute(
+            `visEditorIntervalSwitch${aggNth}`,
+            'aria-checked'
+          );
+          if (autoMode === 'true') {
+            await testSubjects.click(`visEditorIntervalSwitch${aggNth}`);
+          }
+        }
         if (append) {
-          await testSubjects.append(`visEditorInterval${aggNth}`, String(newValue));
+          await testSubjects.append(`visEditorInterval${aggNth}`, String(newValueString));
         } else {
-          await testSubjects.setValue(`visEditorInterval${aggNth}`, String(newValue));
+          await testSubjects.setValue(`visEditorInterval${aggNth}`, String(newValueString));
         }
       }
     }
@@ -453,8 +456,8 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
 
-    public async getNumericInterval(agg = 2) {
-      return await testSubjects.getAttribute(`visEditorInterval${agg}`, 'value');
+    public async getNumericInterval(aggNth = 2) {
+      return await testSubjects.getAttribute(`visEditorInterval${aggNth}`, 'value');
     }
 
     public async clickMetricEditor() {
@@ -475,7 +478,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       const $ = await selectField.parseDomContent();
       const optionsText = $('option')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
       const optionIndex = optionsText.indexOf(optionText);
 
       if (optionIndex === -1) {
@@ -486,6 +489,37 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
         );
       }
       await options[optionIndex].click();
+    }
+
+    // point series
+
+    async clickAddAxis() {
+      return await testSubjects.click('visualizeAddYAxisButton');
+    }
+
+    async setAxisTitle(title: string, aggNth = 0) {
+      return await testSubjects.setValue(`valueAxisTitle${aggNth}`, title);
+    }
+
+    public async toggleGridCategoryLines() {
+      return await testSubjects.click('showCategoryLines');
+    }
+
+    public async toggleValuesOnChart() {
+      return await testSubjects.click('showValuesOnChart');
+    }
+
+    public async setGridValueAxis(axis: string) {
+      log.debug(`setGridValueAxis(${axis})`);
+      await find.selectValue('select#gridAxis', axis);
+    }
+
+    public async setSeriesAxis(seriesNth: number, axis: string) {
+      await find.selectValue(`select#seriesValueAxis${seriesNth}`, axis);
+    }
+
+    public async setSeriesType(seriesNth: number, type: string) {
+      await find.selectValue(`select#seriesType${seriesNth}`, type);
     }
   }
 

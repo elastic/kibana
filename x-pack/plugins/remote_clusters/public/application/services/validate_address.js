@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export function isAddressValid(seedNode) {
@@ -11,7 +12,7 @@ export function isAddressValid(seedNode) {
 
   const portParts = seedNode.split(':');
   const parts = portParts[0].split('.');
-  const containsInvalidCharacters = parts.some(part => {
+  const containsInvalidCharacters = parts.some((part) => {
     if (!part) {
       // no need to wait for regEx if the part is empty
       return true;

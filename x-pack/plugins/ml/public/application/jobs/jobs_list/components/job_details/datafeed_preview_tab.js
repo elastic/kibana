@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -10,7 +11,7 @@ import React, { Component } from 'react';
 import { EuiSpacer, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 
 import { mlJobService } from '../../../../services/job_service';
-import { checkPermission } from '../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
 import { MLJobEditor } from '../ml_job_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -62,10 +63,10 @@ export class DatafeedPreviewPane extends Component {
     this.setState({ canPreviewDatafeed });
 
     updateDatafeedPreview(this.props.job, canPreviewDatafeed)
-      .then(previewJson => {
+      .then((previewJson) => {
         this.setState({ previewJson, loading: false });
       })
-      .catch(error => {
+      .catch((error) => {
         console.log('Datafeed preview could not be loaded', error);
         this.setState({ loading: false });
       });
@@ -89,7 +90,7 @@ function updateDatafeedPreview(job, canPreviewDatafeed) {
     if (canPreviewDatafeed) {
       mlJobService
         .getDatafeedPreview(job.datafeed_config.datafeed_id)
-        .then(resp => {
+        .then((resp) => {
           if (Array.isArray(resp)) {
             resolve(JSON.stringify(resp.slice(0, ML_DATA_PREVIEW_COUNT), null, 2));
           } else {
@@ -97,7 +98,7 @@ function updateDatafeedPreview(job, canPreviewDatafeed) {
             console.log('Datafeed preview could not be loaded', resp);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     }

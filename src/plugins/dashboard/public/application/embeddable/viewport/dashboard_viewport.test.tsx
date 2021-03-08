@@ -1,39 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
-import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
+import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-} from '../../../embeddable_plugin_test_samples';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
-// eslint-disable-next-line
+import { KibanaContextProvider } from '../../../services/kibana_react';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import {
+  applicationServiceMock,
+  coreMock,
+  uiSettingsServiceMock,
+} from '../../../../../../core/public/mocks';
+import {
+  ContactCardEmbeddableFactory,
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../../../../embeddable/public/lib/test_samples';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -41,7 +33,7 @@ const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">
 
 function getProps(
   props?: Partial<DashboardViewportProps>
-): { props: DashboardViewportProps; options: DashboardContainerOptions } {
+): { props: DashboardViewportProps; options: DashboardContainerServices } {
   const { setup, doStart } = embeddablePluginMock.createInstance();
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
@@ -49,10 +41,13 @@ function getProps(
   );
 
   const start = doStart();
-  const options: DashboardContainerOptions = {
-    application: {} as any,
+  const options: DashboardContainerServices = {
+    application: applicationServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreMock.createStart().http,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
+      getEmbeddablePanel: jest.fn(),
       getEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory: start.getEmbeddableFactory,
     } as any,
@@ -124,9 +119,8 @@ test('renders DashboardViewport with no visualizations', () => {
 });
 
 test('renders DashboardEmptyScreen', () => {
-  const renderEmptyScreen = jest.fn();
-  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
-  props.container.updateInput({ isEmptyState: true });
+  const { props, options } = getProps();
+  props.container.updateInput({ panels: {} });
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
@@ -136,7 +130,6 @@ test('renders DashboardEmptyScreen', () => {
   );
   const dashboardEmptyScreenDiv = component.find('.dshDashboardEmptyScreen');
   expect(dashboardEmptyScreenDiv.length).toBe(1);
-  expect(renderEmptyScreen).toHaveBeenCalled();
 
   component.unmount();
 });
@@ -152,32 +145,24 @@ test('renders exit full screen button when in full screen mode', async () => {
     </I18nProvider>
   );
 
-  expect(
-    (component
-      .find('.dshDashboardViewport')
-      .childAt(0)
-      .type() as any).name
-  ).toBe('ExitFullScreenButton');
+  expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).toBe(
+    'ExitFullScreenButton'
+  );
 
   props.container.updateInput({ isFullScreenMode: false });
   component.update();
   await nextTick();
 
-  expect(
-    (component
-      .find('.dshDashboardViewport')
-      .childAt(0)
-      .type() as any).name
-  ).not.toBe('ExitFullScreenButton');
+  expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).not.toBe(
+    'ExitFullScreenButton'
+  );
 
   component.unmount();
 });
 
 test('renders exit full screen button when in full screen mode and empty screen', async () => {
-  const renderEmptyScreen = jest.fn();
-  renderEmptyScreen.mockReturnValue(React.createElement('div'));
-  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
-  props.container.updateInput({ isEmptyState: true, isFullScreenMode: true });
+  const { props, options } = getProps();
+  props.container.updateInput({ panels: {}, isFullScreenMode: true });
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
@@ -185,28 +170,22 @@ test('renders exit full screen button when in full screen mode and empty screen'
       </KibanaContextProvider>
     </I18nProvider>
   );
-  expect(
-    (component
-      .find('.dshDashboardEmptyScreen')
-      .childAt(0)
-      .type() as any).name
-  ).toBe('ExitFullScreenButton');
+  expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).toBe(
+    'ExitFullScreenButton'
+  );
 
   props.container.updateInput({ isFullScreenMode: false });
   component.update();
   await nextTick();
 
-  expect(
-    (component
-      .find('.dshDashboardEmptyScreen')
-      .childAt(0)
-      .type() as any).name
-  ).not.toBe('ExitFullScreenButton');
+  expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).not.toBe(
+    'ExitFullScreenButton'
+  );
 
   component.unmount();
 });
 
-test('DashboardViewport unmount unsubscribes', async done => {
+test('DashboardViewport unmount unsubscribes', async (done) => {
   const { props, options } = getProps();
   const component = mount(
     <I18nProvider>

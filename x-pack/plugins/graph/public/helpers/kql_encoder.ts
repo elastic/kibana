@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import rison from 'rison-node';
@@ -15,7 +16,7 @@ function escapeQuotes(str: string) {
 export function asKQL(workspace: Workspace, joinBy: 'and' | 'or') {
   const nodes = workspace.returnUnpackedGroupeds(workspace.getSelectedOrAllNodes());
   const clauses = nodes.map(
-    node => `"${escapeQuotes(node.data.field)}" : "${escapeQuotes(node.data.term)}"`
+    (node) => `"${escapeQuotes(node.data.field)}" : "${escapeQuotes(node.data.term)}"`
   );
 
   const expression = clauses.join(` ${joinBy} `);

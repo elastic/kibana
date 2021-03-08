@@ -1,40 +1,33 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { isJSON } from '../../../static/validators/string';
 
-export type OnJsonEditorUpdateHandler<T = { [key: string]: any }> = (arg: {
+export interface JsonEditorState<T = { [key: string]: any }> {
   data: {
     raw: string;
     format(): T;
   };
   validate(): boolean;
   isValid: boolean | undefined;
-}) => void;
+}
+
+export type OnJsonEditorUpdateHandler<T = { [key: string]: any }> = (
+  arg: JsonEditorState<T>
+) => void;
 
 interface Parameters<T extends object> {
   onUpdate: OnJsonEditorUpdateHandler<T>;
   defaultValue?: T;
-  isControlled?: boolean;
+  value?: string;
 }
 
 const stringifyJson = (json: { [key: string]: any }) =>
@@ -43,13 +36,16 @@ const stringifyJson = (json: { [key: string]: any }) =>
 export const useJson = <T extends object = { [key: string]: any }>({
   defaultValue = {} as T,
   onUpdate,
-  isControlled = false,
+  value,
 }: Parameters<T>) => {
-  const didMount = useRef(false);
-  const [content, setContent] = useState<string>(stringifyJson(defaultValue));
+  const isControlled = value !== undefined;
+  const isMounted = useRef(false);
+  const [content, setContent] = useState<string>(
+    isControlled ? value! : stringifyJson(defaultValue)
+  );
   const [error, setError] = useState<string | null>(null);
 
-  const validate = () => {
+  const validate = useCallback(() => {
     // We allow empty string as it will be converted to "{}""
     const isValid = content.trim() === '' ? true : isJSON(content);
     if (!isValid) {
@@ -62,33 +58,43 @@ export const useJson = <T extends object = { [key: string]: any }>({
       setError(null);
     }
     return isValid;
-  };
+  }, [content]);
 
-  const formatContent = () => {
+  const formatContent = useCallback(() => {
     const isValid = validate();
     const data = isValid && content.trim() !== '' ? JSON.parse(content) : {};
     return data as T;
-  };
+  }, [validate, content]);
 
   useEffect(() => {
-    if (didMount.current) {
-      const isValid = isControlled ? undefined : validate();
-      onUpdate({
-        data: {
-          raw: content,
-          format: formatContent,
-        },
-        validate,
-        isValid,
-      });
-    } else {
-      didMount.current = true;
+    if (!isMounted.current || isControlled) {
+      return;
     }
-  }, [content]);
+
+    const isValid = validate();
+
+    onUpdate({
+      data: {
+        raw: content,
+        format: formatContent,
+      },
+      validate,
+      isValid,
+    });
+  }, [onUpdate, content, formatContent, validate, isControlled]);
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   return {
     content,
     setContent,
     error,
+    isControlled,
   };
 };

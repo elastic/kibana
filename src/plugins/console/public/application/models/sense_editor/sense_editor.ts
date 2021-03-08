@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
-import { collapseLiteralStrings } from '../../../../../es_ui_shared/console_lang/lib';
+import { XJson } from '../../../../../es_ui_shared/public';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore
@@ -29,6 +18,8 @@ import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 
 import Autocomplete from '../../../lib/autocomplete/autocomplete';
+
+const { collapseLiteralStrings } = XJson;
 
 export class SenseEditor {
   currentReqRange: (Range & { markerRef: any }) | null;
@@ -425,8 +416,8 @@ export class SenseEditor {
     }
 
     const column =
-        (this.coreEditor.getLineValue(curLineNumber) || '').length +
-        1 /* Range goes to 1 after last char */;
+      (this.coreEditor.getLineValue(curLineNumber) || '').length +
+      1; /* Range goes to 1 after last char */
 
     return {
       lineNumber: curLineNumber,
@@ -467,7 +458,7 @@ export class SenseEditor {
 
   getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
-    const result = _.map(requests, req => {
+    const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
         // no request block
         return req;
@@ -484,8 +475,9 @@ export class SenseEditor {
       if (esData && esData.length) {
         ret += " -H 'Content-Type: application/json' -d'\n";
         const dataAsString = collapseLiteralStrings(esData.join('\n'));
-        // since Sense doesn't allow single quote json string any single qoute is within a string.
-        ret += dataAsString.replace(/'/g, '\\"');
+
+        // We escape single quoted strings that that are wrapped in single quoted strings
+        ret += dataAsString.replace(/'/g, "'\\''");
         if (esData.length > 1) {
           ret += '\n';
         } // end with a new line

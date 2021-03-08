@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`text_field_value TextFieldValue should render long text correctly, when there is limit 1`] = `
+<EuiToolTip
+  content={
+    <EuiFlexGroup
+      data-test-subj="dates-container"
+      direction="column"
+      gutterSize="none"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        field 1
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+         super long text part 0  super long text part 1  super long text part 2  super long text part 3  super long text part 4  super long text part 5  super long text part 6  super long text part 7  super long text part 8  super long text part 9  super long text part 10  super long text part 11  super long text part 12  super long text part 13  super long text part 14  super long text part 15  super long text part 16  super long text part 17  super long text part 18  super long text part 19
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  }
+  delay="regular"
+  position="top"
+>
+  <span>
+     super long text part 0  super long text part 1  super long text part 2  super long text part 3  sup...
+  </span>
+</EuiToolTip>
+`;
+
+exports[`text_field_value TextFieldValue should render long text correctly, when there is no limit 1`] = `
+<EuiToolTip
+  content={
+    <EuiFlexGroup
+      data-test-subj="dates-container"
+      direction="column"
+      gutterSize="none"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        field 1
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+         super long text part 0  super long text part 1  super long text part 2  super long text part 3  super long text part 4  super long text part 5  super long text part 6  super long text part 7  super long text part 8  super long text part 9  super long text part 10  super long text part 11  super long text part 12  super long text part 13  super long text part 14  super long text part 15  super long text part 16  super long text part 17  super long text part 18  super long text part 19
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  }
+  delay="regular"
+  position="top"
+>
+  <span>
+     super long text part 0  super long text part 1  super long text part 2  super long text part 3  super long text part 4  super long text part 5  super long text part 6  super long text part 7  super long text part 8  super long text part 9  super long text part 10  super long text part 11  super long text part 12  super long text part 13  super long text part 14  super long text part 15  super long text part 16  super long text part 17  super long text part 18  super long text part 19
+  </span>
+</EuiToolTip>
+`;
+
+exports[`text_field_value TextFieldValue should render small text correctly, when there is limit 1`] = `
+<EuiToolTip
+  content={
+    <EuiFlexGroup
+      data-test-subj="dates-container"
+      direction="column"
+      gutterSize="none"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        field 1
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        value 1
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  }
+  delay="regular"
+  position="top"
+>
+  <span>
+    value 1
+  </span>
+</EuiToolTip>
+`;
+
+exports[`text_field_value TextFieldValue should render small text correctly, when there is no limit 1`] = `
+<EuiToolTip
+  content={
+    <EuiFlexGroup
+      data-test-subj="dates-container"
+      direction="column"
+      gutterSize="none"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        field 1
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        value 1
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  }
+  delay="regular"
+  position="top"
+>
+  <span>
+    value 1
+  </span>
+</EuiToolTip>
+`;

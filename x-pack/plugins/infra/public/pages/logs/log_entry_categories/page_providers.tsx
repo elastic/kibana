@@ -1,27 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-
-import { useSourceContext } from '../../../containers/source';
-import { useKibanaSpaceId } from '../../../utils/use_kibana_space_id';
-import { LogEntryCategoriesModuleProvider } from './use_log_entry_categories_module';
+import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 
 export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ children }) => {
-  const { sourceId, source } = useSourceContext();
-  const spaceId = useKibanaSpaceId();
+  const { sourceConfiguration, sourceId } = useLogSourceContext();
+  const { space } = useActiveKibanaSpace();
+
+  // This is a rather crude way of guarding the dependent providers against
+  // arguments that are only made available asynchronously. Ideally, we'd use
+  // React concurrent mode and Suspense in order to handle that more gracefully.
+  if (sourceConfiguration?.configuration.logAlias == null || space == null) {
+    return null;
+  }
 
   return (
     <LogEntryCategoriesModuleProvider
-      indexPattern={source ? source.configuration.logAlias : ''}
+      indexPattern={sourceConfiguration.configuration.logAlias}
       sourceId={sourceId}
-      spaceId={spaceId}
-      timestampField={source ? source.configuration.fields.timestamp : ''}
+      spaceId={space.id}
+      timestampField={sourceConfiguration.configuration.fields.timestamp}
     >
-      {children}
+      <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
     </LogEntryCategoriesModuleProvider>
   );
 };

@@ -3,8 +3,25 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["monitoring"],
-  "requiredPlugins": ["licensing", "features"],
-  "optionalPlugins": ["alerting", "actions", "infra", "telemetryCollectionManager", "usageCollection"],
+  "requiredPlugins": [
+    "licensing",
+    "features",
+    "data",
+    "navigation",
+    "kibanaLegacy",
+    "observability"
+  ],
+  "optionalPlugins": [
+    "infra",
+    "usageCollection",
+    "home",
+    "cloud",
+    "triggersActionsUi",
+    "alerting",
+    "actions",
+    "encryptedSavedObjects"
+  ],
   "server": true,
-  "ui": false
+  "ui": true,
+  "requiredBundles": ["kibanaUtils", "home", "alerting", "kibanaReact", "licenseManagement"]
 }

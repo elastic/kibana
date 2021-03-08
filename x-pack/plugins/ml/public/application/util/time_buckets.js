@@ -1,32 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { isPlainObject, isString, ary, sortBy, assign } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { getFieldFormats, getUiSettings } from './dependency_cache';
-import { FIELD_FORMAT_IDS } from '../../../../../../src/plugins/data/public';
+import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
-const largeMax = unitsDesc.indexOf('w'); // Multiple units of week or longer converted to days for ES intervals.
+
+// Index of the list of time interval units at which larger units (i.e. weeks, months, years) need
+// need to be converted to multiples of the largest unit supported in ES aggregation intervals (i.e. days).
+// Note that similarly the largest interval supported for ML bucket spans is 'd'.
+const timeUnitsMaxSupportedIndex = unitsDesc.indexOf('w');
 
 const calcAuto = timeBucketsCalcAutoIntervalProvider();
+
+export function getTimeBucketsFromCache() {
+  const uiSettings = getUiSettings();
+  return new TimeBuckets({
+    [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+    [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+    dateFormat: uiSettings.get('dateFormat'),
+    'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+  });
+}
 
 /**
  * Helper object for wrapping the concept of an "Interval", which
  * describes a timespan that will separate buckets of time,
  * for example the interval between points on a time series chart.
  */
-export function TimeBuckets() {
-  const uiSettings = getUiSettings();
-  this.barTarget = uiSettings.get('histogram:barTarget');
-  this.maxBars = uiSettings.get('histogram:maxBars');
+export function TimeBuckets(timeBucketsConfig) {
+  this._timeBucketsConfig = timeBucketsConfig;
+  this.barTarget = this._timeBucketsConfig[UI_SETTINGS.HISTOGRAM_BAR_TARGET];
+  this.maxBars = this._timeBucketsConfig[UI_SETTINGS.HISTOGRAM_MAX_BARS];
 }
 
 /**
@@ -36,7 +51,7 @@ export function TimeBuckets() {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setBarTarget = function(bt) {
+TimeBuckets.prototype.setBarTarget = function (bt) {
   this.barTarget = bt;
 };
 
@@ -47,7 +62,7 @@ TimeBuckets.prototype.setBarTarget = function(bt) {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setMaxBars = function(mb) {
+TimeBuckets.prototype.setMaxBars = function (mb) {
   this.maxBars = mb;
 };
 
@@ -62,22 +77,20 @@ TimeBuckets.prototype.setMaxBars = function(mb) {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setBounds = function(input) {
+TimeBuckets.prototype.setBounds = function (input) {
   if (!input) return this.clearBounds();
 
   let bounds;
-  if (_.isPlainObject(input)) {
+  if (isPlainObject(input)) {
     // accept the response from timefilter.getActiveBounds()
     bounds = [input.min, input.max];
   } else {
     bounds = Array.isArray(input) ? input : [];
   }
 
-  const moments = _(bounds)
-    .map(_.ary(moment, 1))
-    .sortBy(Number);
+  const moments = sortBy(bounds.map(ary(moment, 1)), Number);
 
-  const valid = moments.size() === 2 && moments.every(isValidMoment);
+  const valid = moments.length === 2 && moments.every(isValidMoment);
   if (!valid) {
     this.clearBounds();
     throw new Error('invalid bounds set: ' + input);
@@ -95,7 +108,7 @@ TimeBuckets.prototype.setBounds = function(input) {
  *
  * @return {undefined}
  */
-TimeBuckets.prototype.clearBounds = function() {
+TimeBuckets.prototype.clearBounds = function () {
   this._lb = this._ub = null;
 };
 
@@ -104,7 +117,7 @@ TimeBuckets.prototype.clearBounds = function() {
  *
  * @return {Boolean}
  */
-TimeBuckets.prototype.hasBounds = function() {
+TimeBuckets.prototype.hasBounds = function () {
   return isValidMoment(this._ub) && isValidMoment(this._lb);
 };
 
@@ -120,7 +133,7 @@ TimeBuckets.prototype.hasBounds = function() {
  *                      min and max. Each property will be a moment()
  *                      object
  */
-TimeBuckets.prototype.getBounds = function() {
+TimeBuckets.prototype.getBounds = function () {
   if (!this.hasBounds()) return;
   return {
     min: this._lb,
@@ -135,7 +148,7 @@ TimeBuckets.prototype.getBounds = function() {
  *
  * @return {moment.duration|undefined}
  */
-TimeBuckets.prototype.getDuration = function() {
+TimeBuckets.prototype.getDuration = function () {
   if (!this.hasBounds()) return;
   return moment.duration(this._ub - this._lb, 'ms');
 };
@@ -151,7 +164,7 @@ TimeBuckets.prototype.getDuration = function() {
  *
  * @param {string|moment.duration} input - see desc
  */
-TimeBuckets.prototype.setInterval = function(input) {
+TimeBuckets.prototype.setInterval = function (input) {
   // Preserve the original units because they're lost when the interval is converted to a
   // moment duration object.
   this.originalInterval = input;
@@ -163,7 +176,7 @@ TimeBuckets.prototype.setInterval = function(input) {
     return;
   }
 
-  if (_.isString(interval)) {
+  if (isString(interval)) {
     input = interval;
     interval = parseInterval(interval);
     if (+interval === 0) {
@@ -213,7 +226,7 @@ TimeBuckets.prototype.setInterval = function(input) {
  *
  * @return {[type]} [description]
  */
-TimeBuckets.prototype.getInterval = function() {
+TimeBuckets.prototype.getInterval = function () {
   const self = this;
   const duration = self.getDuration();
   return decorateInterval(maybeScaleInterval(readInterval()), duration);
@@ -244,7 +257,7 @@ TimeBuckets.prototype.getInterval = function() {
     if (+scaled === +interval) return interval;
 
     decorateInterval(interval, duration);
-    return _.assign(scaled, {
+    return assign(scaled, {
       preScaled: interval,
       scale: interval / scaled,
       scaled: true,
@@ -258,7 +271,7 @@ TimeBuckets.prototype.getInterval = function() {
  *
  * @return {moment.duration|undefined}
  */
-TimeBuckets.prototype.getIntervalToNearestMultiple = function(divisorSecs) {
+TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
   const interval = this.getInterval();
   const intervalSecs = interval.asSeconds();
 
@@ -275,7 +288,7 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function(divisorSecs) {
   decorateInterval(nearestMultipleInt, this.getDuration());
 
   // Check to see if the new interval is scaled compared to the original.
-  const preScaled = _.get(interval, 'preScaled');
+  const preScaled = interval.preScaled;
   if (preScaled !== undefined && preScaled < nearestMultipleInt) {
     nearestMultipleInt.preScaled = preScaled;
     nearestMultipleInt.scale = preScaled / nearestMultipleInt;
@@ -296,10 +309,9 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function(divisorSecs) {
  *
  * @return {string}
  */
-TimeBuckets.prototype.getScaledDateFormat = function() {
-  const uiSettings = getUiSettings();
+TimeBuckets.prototype.getScaledDateFormat = function () {
   const interval = this.getInterval();
-  const rules = uiSettings.get('dateFormat:scaled');
+  const rules = this._timeBucketsConfig['dateFormat:scaled'];
 
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
@@ -308,19 +320,18 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
     }
   }
 
-  return uiSettings.get('dateFormat');
+  return this._timeBucketsConfig.dateFormat;
 };
 
-TimeBuckets.prototype.getScaledDateFormatter = function() {
+TimeBuckets.prototype.getScaledDateFormatter = function () {
   const fieldFormats = getFieldFormats();
-  const uiSettings = getUiSettings();
   const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
   return new DateFieldFormat(
     {
       pattern: this.getScaledDateFormat(),
     },
     // getConfig
-    uiSettings.get
+    this._timeBucketsConfig
   );
 };
 
@@ -377,9 +388,11 @@ export function calcEsInterval(duration) {
     const val = duration.as(unit);
     // find a unit that rounds neatly
     if (val >= 1 && Math.floor(val) === val) {
-      // if the unit is "large", like years, but isn't set to 1, ES will throw an error.
+      // Apart from for date histograms, ES only supports time units up to 'd',
+      // meaning we can't for example use 'w' for job bucket spans.
+      // See https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#time-units
       // So keep going until we get out of the "large" units.
-      if (i <= largeMax && val !== 1) {
+      if (i <= timeUnitsMaxSupportedIndex) {
         continue;
       }
 

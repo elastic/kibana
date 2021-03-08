@@ -1,0 +1,15 @@
+import { PluginInitializerContext } from '<%= importFromRoot('src/core/server') %>';
+import { <%= upperCamelCase(name) %>Plugin } from './plugin';
+
+
+//  This exports static code and TypeScript types,
+//  as well as, Kibana Platform `plugin()` initializer.
+
+ export function plugin(initializerContext: PluginInitializerContext) {
+  return new <%= upperCamelCase(name) %>Plugin(initializerContext);
+}
+
+export {
+  <%= upperCamelCase(name) %>PluginSetup,
+  <%= upperCamelCase(name) %>PluginStart,
+} from './types';

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { scaleLinear, scaleTime } from 'd3-scale';
@@ -9,7 +10,7 @@ import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogEntriesSummaryBucket } from '../../../../common/http_api';
 
 interface DensityChartProps {
@@ -31,20 +32,16 @@ export const DensityChart: React.FC<DensityChartProps> = ({
     return null;
   }
 
-  const yScale = scaleTime()
-    .domain([start, end])
-    .range([0, height]);
+  const yScale = scaleTime().domain([start, end]).range([0, height]);
 
-  const xMax = max(buckets.map(bucket => bucket.entriesCount)) || 0;
-  const xScale = scaleLinear()
-    .domain([0, xMax])
-    .range([0, width]);
+  const xMax = max(buckets.map((bucket) => bucket.entriesCount)) || 0;
+  const xScale = scaleLinear().domain([0, xMax]).range([0, width]);
 
   const path = area<LogEntriesSummaryBucket>()
     .x0(xScale(0))
-    .x1(bucket => xScale(bucket.entriesCount))
-    .y0(bucket => yScale(bucket.start))
-    .y1(bucket => yScale(bucket.end))
+    .x1((bucket) => xScale(bucket.entriesCount))
+    .y0((bucket) => yScale(bucket.start))
+    .y1((bucket) => yScale(bucket.end))
     .curve(curveMonotoneY);
 
   const firstBucket = buckets[0];
@@ -69,14 +66,14 @@ export const DensityChart: React.FC<DensityChartProps> = ({
 };
 
 const DensityChartPositiveBackground = euiStyled.rect`
-  fill: ${props =>
+  fill: ${(props) =>
     props.theme.darkMode
       ? props.theme.eui.euiColorLightShade
       : props.theme.eui.euiColorLightestShade};
 `;
 
 const PositiveAreaPath = euiStyled.path`
-  fill: ${props =>
+  fill: ${(props) =>
     props.theme.darkMode
       ? props.theme.eui.euiColorMediumShade
       : props.theme.eui.euiColorLightShade};

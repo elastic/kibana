@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -136,10 +137,7 @@ describe('graph_visualization', () => {
         edges={edges}
       />
     );
-    instance
-      .find('.gphNode')
-      .first()
-      .simulate('click', {});
+    instance.find('.gphNode').first().simulate('click', {});
     expect(nodeClickSpy).toHaveBeenCalledWith(nodes[0], {});
   });
 
@@ -153,10 +151,7 @@ describe('graph_visualization', () => {
         edges={edges}
       />
     );
-    instance
-      .find('.gphEdge')
-      .first()
-      .simulate('click');
+    instance.find('.gphEdge').first().simulate('click');
     expect(edgeClickSpy).toHaveBeenCalledWith(edges[0]);
   });
 });

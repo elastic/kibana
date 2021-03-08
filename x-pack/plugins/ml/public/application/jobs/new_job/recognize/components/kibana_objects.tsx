@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo } from 'react';
@@ -18,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaObjectUi } from '../page';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 export interface KibanaObjectItemProps {
   objectType: string;
@@ -46,7 +48,7 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
         </EuiTitle>
         <EuiSpacer size="s" />
         <ul>
-          {kibanaObjects.map(({ id, title, success, exists }, i) => (
+          {kibanaObjects.map(({ id, title, success, exists, error }, i) => (
             <li key={id}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
@@ -55,6 +57,11 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
                       <EuiText size="s" color={exists ? 'subdued' : 'secondary'}>
                         {title}
                       </EuiText>
+                      {success === false && error !== undefined && (
+                        <EuiText size="xs" color="danger">
+                          {extractErrorMessage(error)}
+                        </EuiText>
+                      )}
                     </EuiFlexItem>
                     {exists && (
                       <EuiFlexItem grow={false}>

@@ -1,29 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { has, get } from 'lodash';
-import { ConfigDeprecationProvider, ConfigDeprecation } from './types';
+import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'CONFIG_PATH')) {
     log(
-      `Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder`
+      `Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder`
     );
   }
   return settings;
@@ -33,19 +22,6 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'DATA_PATH')) {
     log(
       `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`
-    );
-  }
-  return settings;
-};
-
-const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if (
-    has(settings, 'server.xsrf.whitelist') &&
-    get<unknown[]>(settings, 'server.xsrf.whitelist').length > 0
-  ) {
-    log(
-      'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
-        'It will be removed in 8.0 release. Instead, supply the "kbn-xsrf" header.'
     );
   }
   return settings;
@@ -63,6 +39,17 @@ const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) 
   return settings;
 };
 
+const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, log) => {
+  const corsSettings = get(settings, 'server.cors');
+  if (typeof get(settings, 'server.cors') === 'boolean') {
+    log('"server.cors" is deprecated and has been replaced by "server.cors.enabled"');
+    settings.server.cors = {
+      enabled: corsSettings,
+    };
+  }
+  return settings;
+};
+
 const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   const NONCE_STRING = `{nonce}`;
   // Policies that should include the 'self' source
@@ -72,26 +59,26 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   const rules: string[] = get(settings, 'csp.rules');
   if (rules) {
     const parsed = new Map(
-      rules.map(ruleStr => {
+      rules.map((ruleStr) => {
         const parts = ruleStr.split(/\s+/);
         return [parts[0], parts.slice(1)];
       })
     );
 
     settings.csp.rules = [...parsed].map(([policy, sourceList]) => {
-      if (sourceList.find(source => source.includes(NONCE_STRING))) {
+      if (sourceList.find((source) => source.includes(NONCE_STRING))) {
         log(`csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`);
-        sourceList = sourceList.filter(source => !source.includes(NONCE_STRING));
+        sourceList = sourceList.filter((source) => !source.includes(NONCE_STRING));
 
         // Add 'self' if not present
-        if (!sourceList.find(source => source.includes(SELF_STRING))) {
+        if (!sourceList.find((source) => source.includes(SELF_STRING))) {
           sourceList.push(SELF_STRING);
         }
       }
 
       if (
         SELF_POLICIES.includes(policy) &&
-        !sourceList.find(source => source.includes(SELF_STRING))
+        !sourceList.find((source) => source.includes(SELF_STRING))
       ) {
         log(`csp.rules must contain the 'self' source. Automatically adding to ${policy}.`);
         sourceList.push(SELF_STRING);
@@ -116,72 +103,77 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
   return settings;
 };
 
-export const coreDeprecationProvider: ConfigDeprecationProvider = ({
-  unusedFromRoot,
-  renameFromRoot,
-}) => [
+const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.ops')) {
+    log(
+      '"logging.events.ops" has been deprecated and will be removed ' +
+        'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
+        '"metrics.ops" context in your logging configuration. For more details, see ' +
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
+    );
+  }
+  return settings;
+};
+
+const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.request') || has(settings, 'logging.events.response')) {
+    log(
+      '"logging.events.request" and "logging.events.response" have been deprecated and will be removed ' +
+        'in 8.0. To access request and/or response data moving forward, please enable debug logs for the ' +
+        '"http.server.response" context in your logging configuration. For more details, see ' +
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
+    );
+  }
+  return settings;
+};
+
+const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.timezone')) {
+    log(
+      '"logging.timezone" has been deprecated and will be removed ' +
+        'in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern ' +
+        'in your logging configuration. For more details, see ' +
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
+    );
+  }
+  return settings;
+};
+
+export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
   unusedFromRoot('maps.manifestServiceUrl'),
-  renameFromRoot('optimize.lazy', 'optimize.watch'),
-  renameFromRoot('optimize.lazyPort', 'optimize.watchPort'),
-  renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
-  renameFromRoot('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
-  renameFromRoot('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
-  // Monitoring renames
-  // TODO: Remove these from here once the monitoring plugin is migrated to NP
-  renameFromRoot('xpack.monitoring.enabled', 'monitoring.enabled'),
-  renameFromRoot('xpack.monitoring.ui.enabled', 'monitoring.ui.enabled'),
-  renameFromRoot(
-    'xpack.monitoring.kibana.collection.enabled',
-    'monitoring.kibana.collection.enabled'
-  ),
-  renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size'),
-  renameFromRoot('xpack.monitoring.min_interval_seconds', 'monitoring.ui.min_interval_seconds'),
-  renameFromRoot(
-    'xpack.monitoring.show_license_expiration',
-    'monitoring.ui.show_license_expiration'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.ui.container.elasticsearch.enabled',
-    'monitoring.ui.container.elasticsearch.enabled'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.ui.container.logstash.enabled',
-    'monitoring.ui.container.logstash.enabled'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.tests.cloud_detector.enabled',
-    'monitoring.tests.cloud_detector.enabled'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.kibana.collection.interval',
-    'monitoring.kibana.collection.interval'
-  ),
-  renameFromRoot('xpack.monitoring.elasticsearch.hosts', 'monitoring.ui.elasticsearch.hosts'),
-  renameFromRoot('xpack.monitoring.elasticsearch.username', 'monitoring.ui.elasticsearch.username'),
-  renameFromRoot('xpack.monitoring.elasticsearch.password', 'monitoring.ui.elasticsearch.password'),
-  renameFromRoot(
-    'xpack.monitoring.xpack_api_polling_frequency_millis',
-    'monitoring.xpack_api_polling_frequency_millis'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.cluster_alerts.email_notifications.enabled',
-    'monitoring.cluster_alerts.email_notifications.enabled'
-  ),
-  renameFromRoot(
-    'xpack.monitoring.cluster_alerts.email_notifications.email_address',
-    'monitoring.cluster_alerts.email_notifications.email_address'
-  ),
-  renameFromRoot('xpack.monitoring.ccs.enabled', 'monitoring.ui.ccs.enabled'),
-  renameFromRoot(
-    'xpack.monitoring.elasticsearch.logFetchCount',
-    'monitoring.ui.elasticsearch.logFetchCount'
-  ),
+  unusedFromRoot('optimize.lazy'),
+  unusedFromRoot('optimize.lazyPort'),
+  unusedFromRoot('optimize.lazyHost'),
+  unusedFromRoot('optimize.lazyPrebuild'),
+  unusedFromRoot('optimize.lazyProxyTimeout'),
+  unusedFromRoot('optimize.enabled'),
+  unusedFromRoot('optimize.bundleFilter'),
+  unusedFromRoot('optimize.bundleDir'),
+  unusedFromRoot('optimize.viewCaching'),
+  unusedFromRoot('optimize.watch'),
+  unusedFromRoot('optimize.watchPort'),
+  unusedFromRoot('optimize.watchHost'),
+  unusedFromRoot('optimize.watchPrebuild'),
+  unusedFromRoot('optimize.watchProxyTimeout'),
+  unusedFromRoot('optimize.useBundleCache'),
+  unusedFromRoot('optimize.sourceMaps'),
+  unusedFromRoot('optimize.workers'),
+  unusedFromRoot('optimize.profile'),
+  unusedFromRoot('optimize.validateSyntaxOfNodeModules'),
+  unusedFromRoot('elasticsearch.preserveHost'),
+  unusedFromRoot('elasticsearch.startupTimeout'),
+  rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
+  rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
+  rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
+  rewriteCorsSettings,
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
-  xsrfDeprecation,
+  opsLoggingEventDeprecation,
+  requestLoggingEventDeprecation,
+  timezoneLoggingDeprecation,
 ];

@@ -1,0 +1,12 @@
+{
+  "configPath": ["xpack", "lists"],
+  "extraPublicDirs": ["common"],
+  "id": "lists",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [],
+  "optionalPlugins": ["spaces", "security"],
+  "requiredBundles": ["securitySolution"],
+  "server": true,
+  "ui": true,
+  "version": "8.0.0"
+}

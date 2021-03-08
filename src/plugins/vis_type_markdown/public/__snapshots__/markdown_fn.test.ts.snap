@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interpreter/functions#markdown returns an object with the correct structure 1`] = `
+Object {
+  "as": "markdown_vis",
+  "type": "render",
+  "value": Object {
+    "visParams": Object {
+      "fontSize": 12,
+      "markdown": "## hello _markdown_",
+      "openLinksInNewTab": true,
+    },
+    "visType": "markdown",
+  },
+}
+`;

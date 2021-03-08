@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isWebUrl, relativeToAbsolute } from './url_utils';
 
 describe('ML - URL utils', () => {
   const TEST_DISCOVER_URL =
-    "kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))" +
+    "discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))" +
     "&_a=(index:'38288750-1884-11e8-b207-d9cfd2566581',query:(language:lucene,query:'airline:$airline$'))";
 
   const TEST_DASHBOARD_URL =
-    'kibana#/dashboard/cc295990-1d19-11e8-b271-015e33f55cb6?' +
+    'dashboards#/view/cc295990-1d19-11e8-b271-015e33f55cb6?' +
     "_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))" +
     "&_a=(filters:!(),query:(language:lucene,query:'instance:$instance$ AND region:$region$'))";
   describe('isWebUrl', () => {

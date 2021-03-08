@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,22 +10,18 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasExpressionTest({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  // const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
+  const esArchiver = getService('esArchiver');
 
-  describe('expression editor', function() {
+  describe('expression editor', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
     before(async () => {
-      // init data
-      await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('canvas/default');
-
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',

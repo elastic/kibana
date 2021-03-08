@@ -1,33 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
-import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
-import { ActionParamsType, ActionTypeConfigType } from './es_index';
+import { actionsMock } from '../mocks';
+import {
+  ActionParamsType,
+  ActionTypeConfigType,
+  ESIndexActionType,
+  ESIndexActionTypeExecutorOptions,
+} from './es_index';
 
 const ACTION_TYPE_ID = '.index';
-const NO_OP_FN = () => {};
 
-const services = {
-  log: NO_OP_FN,
-  callCluster: jest.fn(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: ESIndexActionType;
 
 beforeAll(() => {
   const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<ActionTypeConfigType, {}, ActionParamsType>(ACTION_TYPE_ID);
 });
 
 beforeEach(() => {
@@ -43,7 +43,7 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, unknown> = {
       index: 'testing-123',
       refresh: false,
     };
@@ -97,7 +97,7 @@ describe('config validation', () => {
   });
 
   test('config validation fails when config is not valid', () => {
-    const baseConfig: Record<string, any> = {
+    const baseConfig: Record<string, unknown> = {
       indeX: 'bob',
     };
 
@@ -111,7 +111,7 @@ describe('config validation', () => {
 
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       documents: [{ rando: 'thing' }],
     };
     expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
@@ -149,12 +149,12 @@ describe('params validation', () => {
 describe('execute()', () => {
   test('ensure parameters are as expected', async () => {
     const secrets = {};
-    let config: Partial<ActionTypeConfigType>;
+    let config: ActionTypeConfigType;
     let params: ActionParamsType;
-    let executorOptions: ActionTypeExecutorOptions;
+    let executorOptions: ESIndexActionTypeExecutorOptions;
 
     // minimal params
-    config = { index: 'index-value', refresh: false };
+    config = { index: 'index-value', refresh: false, executionTimeField: null };
     params = {
       documents: [{ jim: 'bob' }],
     };
@@ -196,9 +196,9 @@ describe('execute()', () => {
     await actionType.executor(executorOptions);
 
     const calls = services.callCluster.mock.calls;
-    const timeValue = calls[0][1].body[1].field_to_use_for_time;
+    const timeValue = calls[0][1]?.body[1].field_to_use_for_time;
     expect(timeValue).toBeInstanceOf(Date);
-    delete calls[0][1].body[1].field_to_use_for_time;
+    delete calls[0][1]?.body[1].field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -220,7 +220,7 @@ describe('execute()', () => {
     `);
 
     // minimal params
-    config = { index: 'index-value', executionTimeField: undefined, refresh: false };
+    config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
       documents: [{ jim: 'bob' }],
     };
@@ -250,7 +250,7 @@ describe('execute()', () => {
     `);
 
     // multiple documents
-    config = { index: 'index-value', executionTimeField: undefined, refresh: false };
+    config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
       documents: [{ a: 1 }, { b: 2 }],
     };
@@ -283,6 +283,49 @@ describe('execute()', () => {
               },
             ],
           ]
+    `);
+  });
+
+  test('resolves with an error when an error occurs in the indexing operation', async () => {
+    const secrets = {};
+    // minimal params
+    const config = { index: 'index-value', refresh: false, executionTimeField: null };
+    const params = {
+      documents: [{ '': 'bob' }],
+    };
+
+    const actionId = 'some-id';
+
+    services.callCluster.mockResolvedValue({
+      took: 0,
+      errors: true,
+      items: [
+        {
+          index: {
+            _index: 'indexme',
+            _id: '7buTjHQB0SuNSiS9Hayt',
+            status: 400,
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'failed to parse',
+              caused_by: {
+                type: 'illegal_argument_exception',
+                reason: 'field name cannot be an empty string',
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    expect(await actionType.executor({ actionId, config, secrets, params, services }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "error indexing documents",
+        "serviceMessage": "failed to parse (field name cannot be an empty string)",
+        "status": "error",
+      }
     `);
   });
 });

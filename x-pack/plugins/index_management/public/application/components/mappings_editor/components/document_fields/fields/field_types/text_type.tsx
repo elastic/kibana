@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +30,7 @@ import {
   CopyToParameter,
   TermVectorParameter,
   FieldDataParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
@@ -40,6 +43,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
     case 'boost':
     case 'position_increment_gap':
     case 'similarity':
+    case 'meta':
     case 'term_vector': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
@@ -47,7 +51,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;
     }
     case 'copy_to': {
-      return field.null_value !== undefined && field.null_value !== '';
+      return field[param] !== undefined && field[param] !== '';
     }
     case 'indexPrefixes': {
       if (field.index_prefixes === undefined) {
@@ -182,7 +186,7 @@ export const TextType = React.memo(({ field }: Props) => {
           defaultToggleValue={getDefaultToggleValue('position_increment_gap', field.source)}
         >
           <FormDataProvider pathsToWatch="index_options">
-            {formData => {
+            {(formData) => {
               return (
                 <>
                   <UseField
@@ -240,6 +244,8 @@ export const TextType = React.memo(({ field }: Props) => {
         <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
         <StoreParameter />
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
         <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>

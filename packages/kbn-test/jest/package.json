@@ -1,0 +1,4 @@
+{
+  "main": "../target/jest",
+  "types": "../target/types/jest/index.d.ts"
+}

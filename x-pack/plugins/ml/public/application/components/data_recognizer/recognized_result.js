@@ -1,19 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiIcon, EuiFlexItem } from '@elastic/eui';
-import { CreateJobLinkCard } from '../create_job_link_card';
+import { LinkCard } from '../link_card';
+import { useMlKibana } from '../../contexts/kibana';
 
 export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useMlKibana();
   const id = savedSearch === null ? `index=${indexPattern.id}` : `savedSearchId=${savedSearch.id}`;
-
-  const href = `#/jobs/new_job/recognize?id=${config.id}&${id}`;
+  const href = `${basePath.get()}/app/ml/jobs/new_job/recognize?id=${config.id}&${id}`;
 
   let logo = null;
   // if a logo is available, use that, otherwise display the id
@@ -28,8 +34,8 @@ export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
 
   return (
     <EuiFlexItem>
-      <CreateJobLinkCard
-        data-test-subj={id}
+      <LinkCard
+        data-test-subj={`mlRecognizerCard ${config.id}`}
         href={href}
         title={config.title}
         description={config.description}

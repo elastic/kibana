@@ -55,6 +55,8 @@ core.chrome.setHelpExtension(elem => {
 |  [getBadge$()](./kibana-plugin-core-public.chromestart.getbadge_.md) | Get an observable of the current badge |
 |  [getBrand$()](./kibana-plugin-core-public.chromestart.getbrand_.md) | Get an observable of the current brand information. |
 |  [getBreadcrumbs$()](./kibana-plugin-core-public.chromestart.getbreadcrumbs_.md) | Get an observable of the current list of breadcrumbs |
+|  [getBreadcrumbsAppendExtension$()](./kibana-plugin-core-public.chromestart.getbreadcrumbsappendextension_.md) | Get an observable of the current extension appended to breadcrumbs |
+|  [getCustomNavLink$()](./kibana-plugin-core-public.chromestart.getcustomnavlink_.md) | Get an observable of the current custom nav link |
 |  [getHelpExtension$()](./kibana-plugin-core-public.chromestart.gethelpextension_.md) | Get an observable of the current custom help conttent |
 |  [getIsNavDrawerLocked$()](./kibana-plugin-core-public.chromestart.getisnavdrawerlocked_.md) | Get an observable of the current locked state of the nav drawer. |
 |  [getIsVisible$()](./kibana-plugin-core-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
@@ -63,6 +65,9 @@ core.chrome.setHelpExtension(elem => {
 |  [setBadge(badge)](./kibana-plugin-core-public.chromestart.setbadge.md) | Override the current badge |
 |  [setBrand(brand)](./kibana-plugin-core-public.chromestart.setbrand.md) | Set the brand configuration. |
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-core-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
+|  [setBreadcrumbsAppendExtension(breadcrumbsAppendExtension)](./kibana-plugin-core-public.chromestart.setbreadcrumbsappendextension.md) | Mount an element next to the last breadcrumb |
+|  [setCustomNavLink(newCustomNavLink)](./kibana-plugin-core-public.chromestart.setcustomnavlink.md) | Override the current set of custom nav link |
+|  [setHeaderBanner(headerBanner)](./kibana-plugin-core-public.chromestart.setheaderbanner.md) | Set the banner that will appear on top of the chrome header. |
 |  [setHelpExtension(helpExtension)](./kibana-plugin-core-public.chromestart.sethelpextension.md) | Override the current set of custom help content |
 |  [setHelpSupportUrl(url)](./kibana-plugin-core-public.chromestart.sethelpsupporturl.md) | Override the default support URL shown in the help menu |
 |  [setIsVisible(isVisible)](./kibana-plugin-core-public.chromestart.setisvisible.md) | Set the temporary visibility for the chrome. This does nothing if the chrome is hidden by default and should be used to hide the chrome for things like full-screen modes with an exit button. |

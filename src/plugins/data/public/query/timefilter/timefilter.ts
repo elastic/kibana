@@ -1,32 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import { parseQueryString } from './lib/parse_querystring';
-import { calculateBounds, getTime } from './get_time';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { RefreshInterval, TimeRange } from '../../../common';
+import { NowProviderInternalContract } from '../../now_provider';
+import {
+  calculateBounds,
+  getAbsoluteTimeRange,
+  getTime,
+  IIndexPattern,
+  RefreshInterval,
+  TimeRange,
+} from '../../../common';
 import { TimeHistoryContract } from './time_history';
-import { IndexPattern } from '../../index_patterns';
 
 // TODO: remove!
 
@@ -42,6 +37,8 @@ export class Timefilter {
   private fetch$ = new Subject();
 
   private _time: TimeRange;
+  // Denotes whether setTime has been called, can be used to determine if the constructor defaults are being used.
+  private _isTimeTouched: boolean = false;
   private _refreshInterval!: RefreshInterval;
   private _history: TimeHistoryContract;
 
@@ -53,7 +50,11 @@ export class Timefilter {
   private readonly timeDefaults: TimeRange;
   private readonly refreshIntervalDefaults: RefreshInterval;
 
-  constructor(config: TimefilterConfig, timeHistory: TimeHistoryContract) {
+  constructor(
+    config: TimefilterConfig,
+    timeHistory: TimeHistoryContract,
+    private readonly nowProvider: NowProviderInternalContract
+  ) {
     this._history = timeHistory;
     this.timeDefaults = config.timeDefaults;
     this.refreshIntervalDefaults = config.refreshIntervalDefaults;
@@ -67,6 +68,10 @@ export class Timefilter {
 
   public isAutoRefreshSelectorEnabled() {
     return this._isAutoRefreshSelectorEnabled;
+  }
+
+  public isTimeTouched() {
+    return this._isTimeTouched;
   }
 
   public getEnabledUpdated$ = () => {
@@ -99,6 +104,13 @@ export class Timefilter {
   };
 
   /**
+   * Same as {@link getTime}, but also converts relative time range to absolute time range
+   */
+  public getAbsoluteTime() {
+    return getAbsoluteTimeRange(this._time, { forceNow: this.nowProvider.get() });
+  }
+
+  /**
    * Updates timefilter time.
    * Emits 'timeUpdate' and 'fetch' events when time changes
    * @param {Object} time
@@ -113,6 +125,7 @@ export class Timefilter {
         from: newTime.from,
         to: newTime.to,
       };
+      this._isTimeTouched = true;
       this._history.add(this._time);
       this.timeUpdate$.next();
       this.fetch$.next();
@@ -163,8 +176,10 @@ export class Timefilter {
     }
   };
 
-  public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
-    return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
+  public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
+    return getTime(indexPattern, timeRange ? timeRange : this._time, {
+      forceNow: this.nowProvider.get(),
+    });
   };
 
   public getBounds(): TimeRangeBounds {
@@ -172,7 +187,7 @@ export class Timefilter {
   }
 
   public calculateBounds(timeRange: TimeRange): TimeRangeBounds {
-    return calculateBounds(timeRange, { forceNow: this.getForceNow() });
+    return calculateBounds(timeRange, { forceNow: this.nowProvider.get() });
   }
 
   public getActiveBounds(): TimeRangeBounds | undefined {
@@ -220,19 +235,6 @@ export class Timefilter {
   public getRefreshIntervalDefaults(): RefreshInterval {
     return _.cloneDeep(this.refreshIntervalDefaults);
   }
-
-  private getForceNow = () => {
-    const forceNow = parseQueryString().forceNow as string;
-    if (!forceNow) {
-      return;
-    }
-
-    const ticks = Date.parse(forceNow);
-    if (isNaN(ticks)) {
-      throw new Error(`forceNow query parameter, ${forceNow}, can't be parsed by Date.parse`);
-    }
-    return new Date(ticks);
-  };
 }
 
 export type TimefilterContract = PublicMethodsOf<Timefilter>;

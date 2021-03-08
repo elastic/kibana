@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectAttributes } from 'kibana/public';
 import { Datafeed, Job } from './anomaly_detection_jobs';
+import { ErrorType } from '../util/errors';
 
 export interface ModuleJob {
   id: string;
   config: Omit<Job, 'job_id'>;
 }
 
-export interface ModuleDataFeed {
+export interface ModuleDatafeed {
   id: string;
   config: Omit<Datafeed, 'datafeed_id'>;
 }
@@ -30,6 +33,7 @@ export interface KibanaObject {
   title: string;
   config: KibanaObjectConfig;
   exists?: boolean;
+  error?: any;
 }
 
 export interface KibanaObjects {
@@ -48,7 +52,7 @@ export interface Module {
   defaultIndexPattern: string;
   query: any;
   jobs: ModuleJob[];
-  datafeeds: ModuleDataFeed[];
+  datafeeds: ModuleDatafeed[];
   kibana: KibanaObjects;
 }
 
@@ -62,22 +66,14 @@ export interface KibanaObjectResponse extends ResultItem {
   error?: any;
 }
 
-export interface SetupError {
-  body: string;
-  msg: string;
-  path: string;
-  query: {};
-  response: string;
-  statusCode: number;
-}
-
 export interface DatafeedResponse extends ResultItem {
   started: boolean;
-  error?: SetupError;
+  awaitingMlNodeAllocation?: boolean;
+  error?: ErrorType;
 }
 
 export interface JobResponse extends ResultItem {
-  error?: SetupError;
+  error?: ErrorType;
 }
 
 export interface DataRecognizerConfigResponse {

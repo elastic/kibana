@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { range } from 'lodash';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { EuiBadge, EuiPagination } from '@elastic/eui';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GroupByOption, LevelFilterOption } from '../../../types';
 import { DeprecationAccordion, filterDeps, GroupedDeprecations } from './grouped';
 
@@ -97,10 +96,7 @@ describe('GroupedDeprecations', () => {
       const wrapper = mountWithIntl(<GroupedDeprecations {...defaultProps} />);
 
       // Open a single deprecation
-      wrapper
-        .find('button.euiAccordion__button')
-        .first()
-        .simulate('click');
+      wrapper.find('button.euiAccordion__button').first().simulate('click');
       expectNumOpen(wrapper, 1);
 
       // Test expand all
@@ -108,10 +104,7 @@ describe('GroupedDeprecations', () => {
       expectNumOpen(wrapper, 2);
 
       // Close a single deprecation
-      wrapper
-        .find('button.euiAccordion__button')
-        .first()
-        .simulate('click');
+      wrapper.find('button.euiAccordion__button').first().simulate('click');
       expectNumOpen(wrapper, 1);
 
       // Test collapse all
@@ -123,7 +116,7 @@ describe('GroupedDeprecations', () => {
   describe('pagination', () => {
     const paginationProps = {
       ...defaultProps,
-      allDeprecations: range(0, 40).map(i => ({
+      allDeprecations: range(0, 40).map((i) => ({
         message: `Message ${i}`,
         level: 'warning',
       })) as DeprecationInfo[],
@@ -216,11 +209,6 @@ describe('DeprecationAccordion', () => {
 
   test('shows indices count badge', () => {
     const wrapper = mountWithIntl(<DeprecationAccordion {...defaultProps} />);
-    expect(
-      wrapper
-        .find(EuiBadge)
-        .find('[data-test-subj="indexCount"]')
-        .text()
-    ).toEqual('2');
+    expect(wrapper.find(EuiBadge).find('[data-test-subj="indexCount"]').text()).toEqual('2');
   });
 });

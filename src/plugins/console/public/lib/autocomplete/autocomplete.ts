@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -308,7 +297,7 @@ export function getCurrentMethodAndTokenPaths(
 }
 
 // eslint-disable-next-line
-export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
+export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
   function isUrlPathToken(token: Token | null) {
     switch ((token || ({} as any)).type) {
       case 'url.slash':
@@ -321,7 +310,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
   }
 
   function addMetaToTermsList(list: any, meta: any, template?: string) {
-    return _.map(list, function(t: any) {
+    return _.map(list, function (t: any) {
       if (typeof t !== 'object') {
         t = { name: t };
       }
@@ -548,7 +537,6 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
     if (editor.getLineValue(pos.lineNumber).trim() === '') {
       // check if the previous line is a single line beginning of a new request
       rowMode = parser.getRowParseMode(pos.lineNumber - 1);
-      // eslint-disable-next-line no-bitwise
       if (
         // eslint-disable-next-line no-bitwise
         rowMode & parser.MODE.REQUEST_START &&
@@ -955,7 +943,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
       } else {
         const terms = _.map(
           context.autoCompleteSet.filter((term: any) => Boolean(term) && term.name != null),
-          function(term: any) {
+          function (term: any) {
             if (typeof term !== 'object') {
               term = {
                 name: term,
@@ -981,7 +969,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
           }
         );
 
-        terms.sort(function(t1: any, t2: any) {
+        terms.sort(function (t1: any, t2: any) {
           /* score sorts from high to low */
           if (t1.score > t2.score) {
             return -1;
@@ -1001,7 +989,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
 
         callback(
           null,
-          _.map(terms, function(t: any, i: any) {
+          _.map(terms, function (t: any, i: any) {
             t.insertValue = t.insertValue || t.value;
             t.value = '' + t.value; // normalize to strings
             t.score = -i;

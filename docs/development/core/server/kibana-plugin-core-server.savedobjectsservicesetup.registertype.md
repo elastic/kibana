@@ -14,10 +14,6 @@ See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdef
 registerType: (type: SavedObjectsType) => void;
 ```
 
-## Remarks
-
-The type definition is an aggregation of the legacy savedObjects `schema`<!-- -->, `mappings` and `migration` concepts. This API is the single entry point to register saved object types in the new platform.
-
 ## Example
 
 
@@ -29,7 +25,7 @@ import * as migrations from './migrations';
 export const myType: SavedObjectsType = {
   name: 'MyType',
   hidden: false,
-  namespaceAgnostic: true,
+  namespaceType: 'multiple',
   mappings: {
     properties: {
       textField: {

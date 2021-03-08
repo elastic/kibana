@@ -1,0 +1,42 @@
+{
+  "type": "query",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "logs-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "filters": [],
+  "language": "kuery",
+  "query": "host.name: *",
+  "author": [],
+  "false_positives": [],
+  "references": [],
+  "risk_score": 50,
+  "risk_score_mapping": [],
+  "severity": "low",
+  "severity_mapping": [],
+  "threat": [],
+  "name": "Host Name Test",
+  "description": "Host Name Test",
+  "tags": [],
+  "license": "",
+  "interval": "5m",
+  "from": "now-30s",
+  "to": "now",
+  "actions": [
+    {
+      "group": "default",
+      "id": "4c42ecf2-5e9b-4ce6-8a7a-ab620fd8b169",
+      "params": {
+        "body": "{}"
+      },
+      "action_type_id": ".webhook"
+    }
+  ],
+  "enabled": true,
+  "throttle": "rule"
+}

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface CalendarEvent {
   calendar_id?: string;
@@ -17,51 +17,42 @@ export interface CalendarEvent {
 }
 
 export class EventManager {
-  private _client: any;
-  constructor(client: any) {
-    this._client = client;
+  private _mlClient: MlClient;
+  constructor(mlClient: MlClient) {
+    this._mlClient = mlClient;
   }
 
   async getCalendarEvents(calendarId: string) {
-    try {
-      const resp = await this._client('ml.events', { calendarId });
+    const { body } = await this._mlClient.getCalendarEvents({ calendar_id: calendarId });
 
-      return resp.events;
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
+    return body.events;
   }
 
   // jobId is optional
   async getAllEvents(jobId?: string) {
     const calendarId = GLOBAL_CALENDAR;
-    try {
-      const resp = await this._client('ml.events', {
-        calendarId,
-        jobId,
-      });
+    const { body } = await this._mlClient.getCalendarEvents({
+      calendar_id: calendarId,
+      job_id: jobId,
+    });
 
-      return resp.events;
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
+    return body.events;
   }
 
   async addEvents(calendarId: string, events: CalendarEvent[]) {
     const body = { events };
 
-    try {
-      return await this._client('ml.addEvent', {
-        calendarId,
-        body,
-      });
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
+    return await this._mlClient.postCalendarEvents({
+      calendar_id: calendarId,
+      body,
+    });
   }
 
   async deleteEvent(calendarId: string, eventId: string) {
-    return this._client('ml.deleteEvent', { calendarId, eventId });
+    return this._mlClient.deleteCalendarEvent({
+      calendar_id: calendarId,
+      event_id: eventId,
+    });
   }
 
   isEqual(ev1: CalendarEvent, ev2: CalendarEvent) {

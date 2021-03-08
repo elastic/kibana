@@ -1,30 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { http } from '../http_service';
+import { Observable } from 'rxjs';
+import { HttpService } from '../http_service';
 
-import { basePath } from './index';
-import { Dictionary } from '../../../../common/types/common';
-import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
-import { JobMessage } from '../../../../common/types/audit_message';
-import { AggFieldNamePair } from '../../../../common/types/fields';
-import { ExistingJobsAndGroups } from '../job_service';
-import {
+import type { Dictionary } from '../../../../common/types/common';
+import type {
+  MlJobWithTimeRange,
+  MlSummaryJobs,
+  CombinedJobWithStats,
+  Job,
+  Datafeed,
+} from '../../../../common/types/anomaly_detection_jobs';
+import type { JobMessage } from '../../../../common/types/audit_message';
+import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
+import type { ExistingJobsAndGroups } from '../job_service';
+import type {
   CategorizationAnalyzer,
   CategoryFieldExample,
   FieldExampleCheck,
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
-import { Category } from '../../../../common/types/categories';
+import type { Category } from '../../../../common/types/categories';
+import type { JobsExistResponse } from '../../../../common/types/job_service';
+import { ML_BASE_PATH } from '../../../../common/constants/app';
 
-export const jobs = {
+export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<MlSummaryJobs>({
-      path: `${basePath()}/jobs/jobs_summary`,
+    return httpService.http<MlSummaryJobs>({
+      path: `${ML_BASE_PATH}/jobs/jobs_summary`,
       method: 'POST',
       body,
     });
@@ -32,8 +41,20 @@ export const jobs = {
 
   jobsWithTimerange(dateFormatTz: string) {
     const body = JSON.stringify({ dateFormatTz });
-    return http<{ jobs: MlJobWithTimeRange[]; jobsMap: Dictionary<MlJobWithTimeRange> }>({
-      path: `${basePath()}/jobs/jobs_with_time_range`,
+    return httpService.http<{
+      jobs: MlJobWithTimeRange[];
+      jobsMap: Dictionary<MlJobWithTimeRange>;
+    }>({
+      path: `${ML_BASE_PATH}/jobs/jobs_with_time_range`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  jobForCloning(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return httpService.http<{ job?: Job; datafeed?: Datafeed } | undefined>({
+      path: `${ML_BASE_PATH}/jobs/job_for_cloning`,
       method: 'POST',
       body,
     });
@@ -41,24 +62,24 @@ export const jobs = {
 
   jobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
-      path: `${basePath()}/jobs/jobs`,
+    return httpService.http<CombinedJobWithStats[]>({
+      path: `${ML_BASE_PATH}/jobs/jobs`,
       method: 'POST',
       body,
     });
   },
 
   groups() {
-    return http<any>({
-      path: `${basePath()}/jobs/groups`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/groups`,
       method: 'GET',
     });
   },
 
   updateGroups(updatedJobs: string[]) {
     const body = JSON.stringify({ jobs: updatedJobs });
-    return http<any>({
-      path: `${basePath()}/jobs/update_groups`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/update_groups`,
       method: 'POST',
       body,
     });
@@ -71,8 +92,8 @@ export const jobs = {
       end,
     });
 
-    return http<any>({
-      path: `${basePath()}/jobs/force_start_datafeeds`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/force_start_datafeeds`,
       method: 'POST',
       body,
     });
@@ -80,8 +101,8 @@ export const jobs = {
 
   stopDatafeeds(datafeedIds: string[]) {
     const body = JSON.stringify({ datafeedIds });
-    return http<any>({
-      path: `${basePath()}/jobs/stop_datafeeds`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/stop_datafeeds`,
       method: 'POST',
       body,
     });
@@ -89,8 +110,8 @@ export const jobs = {
 
   deleteJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
-      path: `${basePath()}/jobs/delete_jobs`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/delete_jobs`,
       method: 'POST',
       body,
     });
@@ -98,8 +119,17 @@ export const jobs = {
 
   closeJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
-      path: `${basePath()}/jobs/close_jobs`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/close_jobs`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  forceStopAndCloseJob(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return httpService.http<{ success: boolean }>({
+      path: `${ML_BASE_PATH}/jobs/force_stop_and_close_job`,
       method: 'POST',
       body,
     });
@@ -108,24 +138,33 @@ export const jobs = {
   jobAuditMessages(jobId: string, from?: number) {
     const jobIdString = jobId !== undefined ? `/${jobId}` : '';
     const query = from !== undefined ? { from } : {};
-    return http<JobMessage[]>({
-      path: `${basePath()}/job_audit_messages/messages${jobIdString}`,
+    return httpService.http<JobMessage[]>({
+      path: `${ML_BASE_PATH}/job_audit_messages/messages${jobIdString}`,
       method: 'GET',
       query,
     });
   },
 
   deletingJobTasks() {
-    return http<any>({
-      path: `${basePath()}/jobs/deleting_jobs_tasks`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/deleting_jobs_tasks`,
       method: 'GET',
     });
   },
 
-  jobsExist(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
-    return http<any>({
-      path: `${basePath()}/jobs/jobs_exist`,
+  jobsExist(jobIds: string[], allSpaces: boolean = false) {
+    const body = JSON.stringify({ jobIds, allSpaces });
+    return httpService.http<JobsExistResponse>({
+      path: `${ML_BASE_PATH}/jobs/jobs_exist`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  jobsExist$(jobIds: string[], allSpaces: boolean = false): Observable<JobsExistResponse> {
+    const body = JSON.stringify({ jobIds, allSpaces });
+    return httpService.http$({
+      path: `${ML_BASE_PATH}/jobs/jobs_exist`,
       method: 'POST',
       body,
     });
@@ -133,8 +172,8 @@ export const jobs = {
 
   newJobCaps(indexPatternTitle: string, isRollup: boolean = false) {
     const query = isRollup === true ? { rollup: true } : {};
-    return http<any>({
-      path: `${basePath()}/jobs/new_job_caps/${indexPatternTitle}`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/new_job_caps/${indexPatternTitle}`,
       method: 'GET',
       query,
     });
@@ -149,7 +188,8 @@ export const jobs = {
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
-    splitFieldValue: string | null
+    splitFieldValue: string | null,
+    runtimeMappings?: RuntimeMappings
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -161,9 +201,10 @@ export const jobs = {
       aggFieldNamePairs,
       splitFieldName,
       splitFieldValue,
+      runtimeMappings,
     });
-    return http<any>({
-      path: `${basePath()}/jobs/new_job_line_chart`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/new_job_line_chart`,
       method: 'POST',
       body,
     });
@@ -177,7 +218,8 @@ export const jobs = {
     intervalMs: number,
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
-    splitFieldName: string
+    splitFieldName: string,
+    runtimeMappings?: RuntimeMappings
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -188,17 +230,18 @@ export const jobs = {
       query,
       aggFieldNamePairs,
       splitFieldName,
+      runtimeMappings,
     });
-    return http<any>({
-      path: `${basePath()}/jobs/new_job_population_chart`,
+    return httpService.http<any>({
+      path: `${ML_BASE_PATH}/jobs/new_job_population_chart`,
       method: 'POST',
       body,
     });
   },
 
   getAllJobAndGroupIds() {
-    return http<ExistingJobsAndGroups>({
-      path: `${basePath()}/jobs/all_jobs_and_group_ids`,
+    return httpService.http<ExistingJobsAndGroups>({
+      path: `${ML_BASE_PATH}/jobs/all_jobs_and_group_ids`,
       method: 'GET',
     });
   },
@@ -209,8 +252,8 @@ export const jobs = {
       start,
       end,
     });
-    return http<{ progress: number; isRunning: boolean; isJobClosed: boolean }>({
-      path: `${basePath()}/jobs/look_back_progress`,
+    return httpService.http<{ progress: number; isRunning: boolean; isJobClosed: boolean }>({
+      path: `${ML_BASE_PATH}/jobs/look_back_progress`,
       method: 'POST',
       body,
     });
@@ -224,7 +267,8 @@ export const jobs = {
     timeField: string,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings?: RuntimeMappings
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -235,14 +279,15 @@ export const jobs = {
       start,
       end,
       analyzer,
+      runtimeMappings,
     });
-    return http<{
+    return httpService.http<{
       examples: CategoryFieldExample[];
       sampleSize: number;
       overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
       validationChecks: FieldExampleCheck[];
     }>({
-      path: `${basePath()}/jobs/categorization_field_examples`,
+      path: `${ML_BASE_PATH}/jobs/categorization_field_examples`,
       method: 'POST',
       body,
     });
@@ -250,10 +295,31 @@ export const jobs = {
 
   topCategories(jobId: string, count: number) {
     const body = JSON.stringify({ jobId, count });
-    return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({
-      path: `${basePath()}/jobs/top_categories`,
+    return httpService.http<{
+      total: number;
+      categories: Array<{ count?: number; category: Category }>;
+    }>({
+      path: `${ML_BASE_PATH}/jobs/top_categories`,
       method: 'POST',
       body,
     });
   },
-};
+
+  revertModelSnapshot(
+    jobId: string,
+    snapshotId: string,
+    replay: boolean,
+    end?: number,
+    calendarEvents?: Array<{ start: number; end: number; description: string }>
+  ) {
+    const body = JSON.stringify({ jobId, snapshotId, replay, end, calendarEvents });
+    return httpService.http<{
+      total: number;
+      categories: Array<{ count?: number; category: Category }>;
+    }>({
+      path: `${ML_BASE_PATH}/jobs/revert_model_snapshot`,
+      method: 'POST',
+      body,
+    });
+  },
+});

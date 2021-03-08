@@ -1,0 +1,30 @@
+.kbnDocTableCell__toggleDetails {
+  padding: $euiSizeXS 0 0 0!important;
+}
+
+.kbnDocTableCell__filter {
+  position: absolute;
+  white-space: nowrap;
+  right: 0;
+}
+
+/**
+ * 1. Align icon with text in cell.
+ * 2. Use opacity to make this element accessible to screen readers and keyboard.
+ * 3. Show on focus to enable keyboard accessibility.
+ */
+
+.kbnDocTableRowFilterButton {
+  appearance: none;
+  background-color: $euiColorEmptyShade;
+  border: none;
+  padding: 0 $euiSizeXS;
+  font-size: $euiFontSizeS;
+  line-height: 1; /* 1 */
+  display: inline-block;
+  opacity: 0; /* 2 */
+
+  &:focus {
+    opacity: 1; /* 3 */
+  }
+}

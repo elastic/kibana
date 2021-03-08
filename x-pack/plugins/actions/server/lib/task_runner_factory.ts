@@ -1,30 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { pick } from 'lodash';
+import type { Request } from '@hapi/hapi';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
+import { addSpaceIdToPath } from '../../../spaces/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  KibanaRequest,
+  SavedObjectReference,
+  IBasePath,
+} from '../../../../../src/core/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { Logger, CoreStart } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
-  GetBasePathFunction,
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
 } from '../types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { asSavedObjectExecutionSource } from './action_execution_source';
 
 export interface TaskRunnerContext {
   logger: Logger;
   actionTypeRegistry: ActionTypeRegistryContract;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  getBasePath: GetBasePathFunction;
-  getScopedSavedObjectsClient: CoreStart['savedObjects']['getScopedClient'];
+  basePathService: IBasePath;
+  getUnsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
 }
 
 export class TaskRunnerFactory {
@@ -52,21 +65,22 @@ export class TaskRunnerFactory {
     const { actionExecutor } = this;
     const {
       logger,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       spaceIdToNamespace,
-      getBasePath,
-      getScopedSavedObjectsClient,
+      basePathService,
+      getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
     return {
       async run() {
-        const { spaceId, actionTaskParamsId } = taskInstance.params;
+        const { spaceId, actionTaskParamsId } = taskInstance.params as Record<string, string>;
         const namespace = spaceIdToNamespace(spaceId);
 
         const {
           attributes: { actionId, params, apiKey },
-        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<ActionTaskParams>(
-          'action_task_params',
+          references,
+        } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           actionTaskParamsId,
           { namespace }
         );
@@ -76,11 +90,12 @@ export class TaskRunnerFactory {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 
+        const path = addSpaceIdToPath('/', spaceId);
+
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
-        const fakeRequest: any = {
+        const fakeRequest = KibanaRequest.from(({
           headers: requestHeaders,
-          getBasePath: () => getBasePath(spaceId),
           path: '/',
           route: { settings: {} },
           url: {
@@ -91,14 +106,17 @@ export class TaskRunnerFactory {
               url: '/',
             },
           },
-        };
+        } as unknown) as Request);
 
-        let executorResult: ActionTypeExecutorResult;
+        basePathService.set(fakeRequest, path);
+
+        let executorResult: ActionTypeExecutorResult<unknown>;
         try {
           executorResult = await actionExecutor.execute({
             params,
             actionId,
             request: fakeRequest,
+            ...getSourceFromReferences(references),
           });
         } catch (e) {
           if (e instanceof ActionTypeDisabledError) {
@@ -120,15 +138,31 @@ export class TaskRunnerFactory {
 
         // Cleanup action_task_params object now that we're done with it
         try {
-          const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-          await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
+          // If the request has reached this far we can assume the user is allowed to run clean up
+          // We would idealy secure every operation but in order to support clean up of legacy alerts
+          // we allow this operation in an unsecured manner
+          // Once support for legacy alert RBAC is dropped, this can be secured
+          await getUnsecuredSavedObjectsClient(fakeRequest).delete(
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+            actionTaskParamsId
+          );
         } catch (e) {
           // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
           logger.error(
-            `Failed to cleanup action_task_params object [id="${actionTaskParamsId}"]: ${e.message}`
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskParamsId}"]: ${e.message}`
           );
         }
       },
     };
   }
+}
+
+function getSourceFromReferences(references: SavedObjectReference[]) {
+  return pipe(
+    fromNullable(references.find((ref) => ref.name === 'source')),
+    map((source) => ({
+      source: asSavedObjectExecutionSource(pick(source, 'id', 'type')),
+    })),
+    getOrElse(() => ({}))
+  );
 }

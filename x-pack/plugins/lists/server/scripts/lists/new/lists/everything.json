@@ -1,0 +1,13 @@
+{
+  "id": "ip_everything_list",
+  "name": "Simple list with an ip",
+  "description": "This list describes bad internet ip",
+  "type": "ip",
+  "meta": {
+    "level_1_meta": {
+      "level_2_meta": {
+        "level_3_key": "some_value_ui"
+      }
+    }
+  }
+}

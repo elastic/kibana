@@ -16,6 +16,8 @@ Options:
   --bail                         Stop the test run at the first failure. 
   --grep <pattern>               Pattern to select which tests to run. 
   --updateBaselines              Replace baseline screenshots with whatever is generated from the test. 
+  --updateSnapshots              Replace inline and file snapshots with whatever is generated from the test. 
+  --u                            Replace both baseline screenshots and snapshots 
   --include <file>               Files that must included to be run, can be included multiple times. 
   --exclude <file>               Files that must NOT be included to be run, can be included multiple times. 
   --include-tag <tag>            Tags that suites must include to be run, can be included multiple times. 

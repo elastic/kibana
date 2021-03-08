@@ -1,40 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { defineSessionRoutes } from './session';
-import { defineSAMLRoutes } from './saml';
-import { defineBasicRoutes } from './basic';
+import type { RouteDefinitionParams } from '../';
 import { defineCommonRoutes } from './common';
 import { defineOIDCRoutes } from './oidc';
-import { RouteDefinitionParams } from '..';
-
-export function createCustomResourceResponse(body: string, contentType: string, cspHeader: string) {
-  return {
-    body,
-    headers: {
-      'content-type': contentType,
-      'content-security-policy': cspHeader,
-    },
-    statusCode: 200,
-  };
-}
+import { defineSAMLRoutes } from './saml';
 
 export function defineAuthenticationRoutes(params: RouteDefinitionParams) {
-  defineSessionRoutes(params);
   defineCommonRoutes(params);
 
-  if (params.authc.isProviderTypeEnabled('basic') || params.authc.isProviderTypeEnabled('token')) {
-    defineBasicRoutes(params);
-  }
-
-  if (params.authc.isProviderTypeEnabled('saml')) {
+  if (params.config.authc.sortedProviders.some(({ type }) => type === 'saml')) {
     defineSAMLRoutes(params);
   }
 
-  if (params.authc.isProviderTypeEnabled('oidc')) {
+  if (params.config.authc.sortedProviders.some(({ type }) => type === 'oidc')) {
     defineOIDCRoutes(params);
   }
 }

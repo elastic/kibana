@@ -1,74 +1,87 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Snapshot } from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
+import { CONTEXT_DEFAULTS } from '../../../common/constants';
+import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 
 export interface GetSnapshotCountParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string | null;
-  statusFilter?: string;
+  query?: string;
 }
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
-  callES,
-  dynamicSettings: { heartbeatIndices },
+  uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
   filters,
-  statusFilter,
+  query,
 }): Promise<Snapshot> => {
-  if (!(statusFilter === 'up' || statusFilter === 'down' || statusFilter === undefined)) {
-    throw new Error(`Invalid status filter value '${statusFilter}'`);
-  }
-
   const context = new QueryContext(
-    callES,
-    heartbeatIndices,
+    uptimeEsClient,
     dateRangeStart,
     dateRangeEnd,
     CONTEXT_DEFAULTS.CURSOR_PAGINATION,
     filters && filters !== '' ? JSON.parse(filters) : null,
     Infinity,
-    statusFilter
+    undefined,
+    query
   );
 
   // Calculate the total, up, and down counts.
-  const counts = await statusCount(context);
+  const count = await statusCount(context);
 
-  return {
-    total: statusFilter ? counts[statusFilter] : counts.total,
-    up: statusFilter === 'down' ? 0 : counts.up,
-    down: statusFilter === 'up' ? 0 : counts.down,
-  };
+  return { total: count.total, up: count.up, down: count.down };
 };
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
-  const res = await context.search({
-    index: context.heartbeatIndices,
-    body: statusCountBody(await context.dateAndCustomFilters()),
+  const { body: res } = await context.search({
+    body: statusCountBody(await context.dateAndCustomFilters(), context),
   });
 
-  return res.aggregations.counts.value;
+  return (
+    (res.aggregations?.counts?.value as Snapshot) ?? {
+      total: 0,
+      up: 0,
+      down: 0,
+    }
+  );
 };
 
-const statusCountBody = (filters: any): any => {
+const statusCountBody = (filters: ESFilter[], context: QueryContext) => {
   return {
     size: 0,
     query: {
       bool: {
+        ...(context.query
+          ? {
+              minimum_should_match: 1,
+              should: [
+                {
+                  multi_match: {
+                    query: escape(context.query),
+                    type: 'phrase_prefix',
+                    fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
+                  },
+                },
+              ],
+            }
+          : {}),
         filter: [
           {
             exists: {
               field: 'summary',
             },
           },
+
           ...filters,
         ],
       },

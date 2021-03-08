@@ -2,8 +2,9 @@
 
 #
 # Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-# or more contributor license agreements. Licensed under the Elastic License;
-# you may not use this file except in compliance with the Elastic License.
+# or more contributor license agreements. Licensed under the Elastic License
+# 2.0; you may not use this file except in compliance with the Elastic License
+# 2.0.
 #
 
 # returns case/comment data as { commentId, commentVersion, caseId, caseVersion }
@@ -22,9 +23,9 @@ POSTED_COMMENT="$(curl -s -k \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST "${KIBANA_URL}${SPACE_URL}/api/cases/$CASE_ID/comments" \
   -d @${COMMENT} \
-  | jq '{ commentId: .id, commentVersion: .version }'
-)"
+  | jq '{ commentId: .comments[0].id, commentVersion: .comments[0].version }' \
+-j)"
 POSTED_CASE=$(./get_case.sh $CASE_ID | jq '{ caseId: .id, caseVersion: .version }' -j)
 
 echo ${POSTED_COMMENT} ${POSTED_CASE} \
-  | jq -s add;
+| jq -s add;

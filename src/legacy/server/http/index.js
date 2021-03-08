@@ -1,49 +1,28 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { format } from 'url';
-import _ from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
 
-export default async function(kbnServer, server, config) {
+export default async function (kbnServer, server) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
 
   await registerHapiPlugins(server);
 
-  // helper for creating view managers for servers
-  server.decorate('server', 'setupViews', function(path, engines) {
-    this.views({
-      path: path,
-      isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ pug: require('pug') }, engines || {}),
-    });
-  });
-
   server.route({
     method: 'GET',
     path: '/{p*}',
-    handler: function(req, h) {
+    handler: function (req, h) {
       const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         throw Boom.notFound();

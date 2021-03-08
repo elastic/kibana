@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -100,7 +101,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
       encoder:
         currentTemplate.encoder.type === 'kql'
           ? currentTemplate.encoder
-          : outlinkEncoders.find(enc => enc.type === 'kql')!,
+          : outlinkEncoders.find((enc) => enc.type === 'kql')!,
     });
     setAutoformatUrl(false);
   }
@@ -128,16 +129,17 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         props.initialTemplate.icon && <LegacyIcon asListIcon icon={props.initialTemplate.icon} />
       }
       className={classNames('gphUrlTemplateList__accordion', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'gphUrlTemplateList__accordion--isOpen': open,
       })}
       buttonClassName="gphUrlTemplateList__accordionbutton"
-      onToggle={isOpen => {
+      onToggle={(isOpen) => {
         setOpen(isOpen);
       }}
       paddingSize="m"
     >
       <form
-        onSubmit={e => {
+        onSubmit={(e) => {
           e.preventDefault();
           onSubmit(currentTemplate);
           if (!isUpdateForm(props)) {
@@ -157,7 +159,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             fullWidth
             value={currentTemplate.description}
             isInvalid={touched.description && !currentTemplate.description}
-            onChange={e => setValue('description', e.target.value)}
+            onChange={(e) => setValue('description', e.target.value)}
             placeholder={i18n.translate(
               'xpack.graph.settings.drillDowns.urlDescriptionInputPlaceholder',
               { defaultMessage: 'Search on Google' }
@@ -212,11 +214,11 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             fullWidth
             placeholder="https://www.google.co.uk/#q={{gquery}}"
             value={currentTemplate.url}
-            onChange={e => {
+            onChange={(e) => {
               setValue('url', e.target.value);
               setAutoformatUrl(false);
             }}
-            onPaste={e => {
+            onPaste={(e) => {
               e.preventDefault();
               const pastedUrl = e.clipboardData.getData('text/plain');
               if (isKibanaUrl(pastedUrl)) {
@@ -238,14 +240,14 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             fullWidth
             singleSelection={{ asPlainText: true }}
             isClearable={false}
-            options={outlinkEncoders.map(encoder => ({ label: encoder.title, value: encoder }))}
+            options={outlinkEncoders.map((encoder) => ({ label: encoder.title, value: encoder }))}
             selectedOptions={[
               {
                 label: currentTemplate.encoder.title,
                 value: currentTemplate.encoder,
               },
             ]}
-            onChange={choices => {
+            onChange={(choices) => {
               // choices[0].value can't be null because `isClearable` is set to false above
               setValue('encoder', choices[0].value!);
             }}
@@ -258,7 +260,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           })}
         >
           <div role="listbox">
-            {urlTemplateIconChoices.map(icon => (
+            {urlTemplateIconChoices.map((icon) => (
               <LegacyIcon
                 key={icon.class}
                 selected={icon === currentTemplate.icon}

@@ -2,14 +2,19 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [ICustomClusterClient](./kibana-plugin-core-server.icustomclusterclient.md)
 
-## ICustomClusterClient type
+## ICustomClusterClient interface
 
-Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via `asScoped(...)`<!-- -->).
-
-See [ClusterClient](./kibana-plugin-core-server.clusterclient.md)<!-- -->.
+See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)
 
 <b>Signature:</b>
 
 ```typescript
-export declare type ICustomClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+export interface ICustomClusterClient extends IClusterClient 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [close](./kibana-plugin-core-server.icustomclusterclient.close.md) | <code>() =&gt; Promise&lt;void&gt;</code> | Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API. |
+

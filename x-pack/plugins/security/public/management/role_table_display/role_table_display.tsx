@@ -1,24 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { EuiLink, EuiToolTip, EuiIcon } from '@elastic/eui';
-import { Role, isRoleDeprecated, getExtendedRoleDeprecationNotice } from '../../../common/model';
-import { getEditRoleHref } from '../management_urls';
+
+import type { ApplicationStart } from 'src/core/public';
+
+import type { Role } from '../../../common/model';
+import { getExtendedRoleDeprecationNotice, isRoleDeprecated } from '../../../common/model';
 
 interface Props {
   role: Role | string;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export const RoleTableDisplay = ({ role }: Props) => {
+export const RoleTableDisplay = ({ role, navigateToApp }: Props) => {
   let content;
-  let href;
+  let path: string;
   if (typeof role === 'string') {
     content = <div>{role}</div>;
-    href = getEditRoleHref(role);
+    path = `security/roles/edit/${encodeURIComponent(role)}`;
   } else if (isRoleDeprecated(role)) {
     content = (
       <EuiToolTip
@@ -30,10 +35,11 @@ export const RoleTableDisplay = ({ role }: Props) => {
         </div>
       </EuiToolTip>
     );
-    href = getEditRoleHref(role.name);
+    path = `security/roles/edit/${encodeURIComponent(role.name)}`;
   } else {
     content = <div>{role.name}</div>;
-    href = getEditRoleHref(role.name);
+    path = `security/roles/edit/${encodeURIComponent(role.name)}`;
   }
-  return <EuiLink href={href}>{content}</EuiLink>;
+
+  return <EuiLink onClick={() => navigateToApp('management', { path })}>{content}</EuiLink>;
 };

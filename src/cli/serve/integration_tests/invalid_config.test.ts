@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { spawnSync } from 'child_process';
-import { resolve } from 'path';
 
-const ROOT_DIR = resolve(__dirname, '../../../../');
-const INVALID_CONFIG_PATH = resolve(__dirname, '__fixtures__/invalid_config.yml');
+import { REPO_ROOT } from '@kbn/dev-utils';
+
+const INVALID_CONFIG_PATH = require.resolve('./__fixtures__/invalid_config.yml');
 
 interface LogEntry {
   message: string;
@@ -29,17 +18,17 @@ interface LogEntry {
   type: string;
 }
 
-describe('cli invalid config support', function() {
+describe('cli invalid config support', function () {
   it(
     'exits with statusCode 64 and logs a single line when config is invalid',
-    function() {
+    function () {
       // Unused keys only throw once LegacyService starts, so disable migrations so that Core
       // will finish the start lifecycle without a running Elasticsearch instance.
-      const { error, status, stdout } = spawnSync(
+      const { error, status, stdout, stderr } = spawnSync(
         process.execPath,
-        ['src/cli', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
+        ['scripts/kibana', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
         {
-          cwd: ROOT_DIR,
+          cwd: REPO_ROOT,
         }
       );
 
@@ -47,9 +36,9 @@ describe('cli invalid config support', function() {
         .toString('utf8')
         .split('\n')
         .filter(Boolean)
-        .map(line => JSON.parse(line) as LogEntry)
-        .filter(line => line.tags.includes('fatal'))
-        .map(obj => ({
+        .map((line) => JSON.parse(line) as LogEntry)
+        .filter((line) => line.tags.includes('fatal'))
+        .map((obj) => ({
           ...obj,
           pid: '## PID ##',
           '@timestamp': '## @timestamp ##',
@@ -57,13 +46,21 @@ describe('cli invalid config support', function() {
         }));
 
       expect(error).toBe(undefined);
-      expect(status).toBe(64);
+
+      if (!fatalLogLine) {
+        throw new Error(
+          `cli did not log the expected fatal error message:\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`
+        );
+      }
+
       expect(fatalLogLine.message).toContain(
         'Error: Unknown configuration key(s): "unknown.key", "other.unknown.key", "other.third", "some.flat.key", ' +
           '"some.array". Check for spelling errors and ensure that expected plugins are installed.'
       );
       expect(fatalLogLine.tags).toEqual(['fatal', 'root']);
       expect(fatalLogLine.type).toEqual('log');
+
+      expect(status).toBe(64);
     },
     20 * 1000
   );

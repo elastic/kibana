@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
@@ -30,14 +32,14 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
         });
 
         // Filter to snapshot-recovered shards only
-        Object.keys(recoveryByIndexName).forEach(index => {
+        Object.keys(recoveryByIndexName).forEach((index) => {
           const recovery = recoveryByIndexName[index];
           let latestActivityTimeInMillis: number = 0;
           let latestEndTimeInMillis: number | null = null;
           const snapshotShards = (recovery.shards || [])
-            .filter(shard => shard.type === 'SNAPSHOT')
+            .filter((shard) => shard.type === 'SNAPSHOT')
             .sort((a, b) => a.id - b.id)
-            .map(shard => {
+            .map((shard) => {
               const deserializedShard = deserializeRestoreShard(shard);
               const { startTimeInMillis, stopTimeInMillis } = deserializedShard;
 
@@ -85,7 +87,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -122,7 +124,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

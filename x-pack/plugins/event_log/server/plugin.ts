@@ -1,36 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
   Logger,
   Plugin as CorePlugin,
   PluginInitializerContext,
-  ClusterClient,
+  IClusterClient,
   SharedGlobalConfig,
   IContextProvider,
-  RequestHandler,
 } from 'src/core/server';
+import { SpacesPluginStart } from '../../spaces/server';
 
-import {
+import type {
+  EventLogRequestHandlerContext,
   IEventLogConfig,
   IEventLogService,
   IEventLogger,
-  IEventLogConfig$,
   IEventLogClientService,
 } from './types';
 import { findRoute } from './routes';
 import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_start_service';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import { findByIdsRoute } from './routes/find_by_ids';
 
-export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 
 const PROVIDER = 'eventLog';
 
@@ -39,41 +40,50 @@ const ACTIONS = {
   stopping: 'stopping',
 };
 
+interface PluginStartDeps {
+  spaces?: SpacesPluginStart;
+}
+
 export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {
-  private readonly config$: IEventLogConfig$;
+  private readonly config: IEventLogConfig;
   private systemLogger: Logger;
-  private eventLogService?: IEventLogService;
+  private eventLogService?: EventLogService;
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
-  private globalConfig$: Observable<SharedGlobalConfig>;
+  private globalConfig: SharedGlobalConfig;
   private eventLogClientService?: EventLogClientService;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
+  private kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
-    this.config$ = this.context.config.create<IEventLogConfig>();
-    this.globalConfig$ = this.context.config.legacy.globalConfig$;
+    this.config = this.context.config.get<IEventLogConfig>();
+    this.globalConfig = this.context.config.legacy.get();
+    this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
+    this.kibanaVersion = this.context.env.packageInfo.version;
   }
 
-  async setup(core: CoreSetup): Promise<IEventLogService> {
-    const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
-    const kibanaIndex = globalConfig.kibana.index;
+  setup(core: CoreSetup): IEventLogService {
+    const kibanaIndex = this.globalConfig.kibana.index;
 
     this.systemLogger.debug('setting up plugin');
-
-    const config = await this.config$.pipe(first()).toPromise();
 
     this.esContext = createEsContext({
       logger: this.systemLogger,
       // TODO: get index prefix from config.get(kibana.index)
       indexNameRoot: kibanaIndex,
-      clusterClient: core.elasticsearch.adminClient,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      kibanaVersion: this.kibanaVersion,
     });
 
     this.eventLogService = new EventLogService({
-      config,
+      config: this.config,
       esContext: this.esContext,
       systemLogger: this.systemLogger,
-      kibanaUUID: core.uuid.getInstanceUuid(),
+      kibanaUUID: this.context.env.instanceUuid,
+      savedObjectProviderRegistry: this.savedObjectProviderRegistry,
     });
 
     this.eventLogService.registerProviderActions(PROVIDER, Object.values(ACTIONS));
@@ -82,17 +92,21 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { provider: PROVIDER },
     });
 
-    core.http.registerRouteHandlerContext('eventLog', this.createRouteHandlerContext());
+    core.http.registerRouteHandlerContext<EventLogRequestHandlerContext, 'eventLog'>(
+      'eventLog',
+      this.createRouteHandlerContext()
+    );
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<EventLogRequestHandlerContext>();
     // Register routes
-    findRoute(router);
+    findRoute(router, this.systemLogger);
+    findByIdsRoute(router, this.systemLogger);
 
     return this.eventLogService;
   }
 
-  async start(core: CoreStart): Promise<IEventLogClientService> {
+  start(core: CoreStart, { spaces }: PluginStartDeps): IEventLogClientService {
     this.systemLogger.debug('starting plugin');
 
     if (!this.esContext) throw new Error('esContext not initialized');
@@ -104,32 +118,38 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       this.esContext.initialize();
     }
 
+    // Log an error if initialiization didn't succeed.
+    // Note that waitTillReady() is used elsewhere as a gate to having the
+    // event log initialization complete - successfully or not.  Other uses
+    // of this do not bother logging when success is false, as they are in
+    // paths that would cause log spamming.  So we do it once, here, just to
+    // ensure an unsucccess initialization is logged when it occurs.
+    this.esContext.waitTillReady().then((success) => {
+      if (!success) {
+        this.systemLogger.error(`initialization failed, events will not be indexed`);
+      }
+    });
+
     // will log the event after initialization
     this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
       message: 'eventLog starting',
     });
 
+    this.savedObjectProviderRegistry.registerDefaultProvider((request) => {
+      const client = core.savedObjects.getScopedClient(request);
+      return client.bulkGet.bind(client);
+    });
+
     this.eventLogClientService = new EventLogClientService({
       esContext: this.esContext,
-      savedObjectsService: core.savedObjects,
+      savedObjectProviderRegistry: this.savedObjectProviderRegistry,
+      spacesService: spaces?.spacesService,
     });
     return this.eventLogClientService;
   }
 
-  private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<any, any, any>,
-    'eventLog'
-  > => {
-    return async (context, request) => {
-      return {
-        getEventLogClient: () =>
-          this.eventLogClientService!.getClient(request, context.core.savedObjects.client),
-      };
-    };
-  };
-
-  stop() {
+  async stop(): Promise<void> {
     this.systemLogger.debug('stopping plugin');
 
     if (!this.eventLogger) throw new Error('eventLogger not initialized');
@@ -140,5 +160,20 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { action: ACTIONS.stopping },
       message: 'eventLog stopping',
     });
+
+    this.systemLogger.debug('shutdown: waiting to finish');
+    await this.esContext?.shutdown();
+    this.systemLogger.debug('shutdown: finished');
   }
+
+  private createRouteHandlerContext = (): IContextProvider<
+    EventLogRequestHandlerContext,
+    'eventLog'
+  > => {
+    return async (context, request) => {
+      return {
+        getEventLogClient: () => this.eventLogClientService!.getClient(request),
+      };
+    };
+  };
 }

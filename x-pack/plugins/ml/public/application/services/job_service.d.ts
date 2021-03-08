@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { TimeRange } from 'src/plugins/data/common/query/timefilter/types';
+import { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
 import { Calendar } from '../../../common/types/calendars';
 
 export interface ExistingJobsAndGroups {
@@ -15,17 +17,19 @@ export interface ExistingJobsAndGroups {
 
 declare interface JobService {
   jobs: CombinedJob[];
-  createResultsUrlForJobs: (jobs: any[], target: string) => string;
+  createResultsUrlForJobs: (jobs: any[], target: string, timeRange?: TimeRange) => string;
   tempJobCloningObjects: {
-    job: any;
+    createdBy?: string;
+    datafeed?: Datafeed;
+    job?: Job;
     skipTimeRangeStep: boolean;
     start?: number;
     end?: number;
     calendars: Calendar[] | undefined;
   };
   skipTimeRangeStep: boolean;
-  saveNewJob(job: any): Promise<any>;
-  cloneJob(job: any): any;
+  saveNewJob(job: Job): Promise<any>;
+  cloneDatafeed(Datafeed: Datafeed): Datafeed;
   openJob(jobId: string): Promise<any>;
   saveNewDatafeed(datafeedConfig: any, jobId: string): Promise<any>;
   startDatafeed(

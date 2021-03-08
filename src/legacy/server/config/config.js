@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Joi from 'joi';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import override from './override';
+import { override } from './override';
 import createDefaultSchema from './schema';
 import { unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -47,7 +37,7 @@ export class Config {
     }
 
     if (!key) {
-      return _.each(extension._inner.children, child => {
+      return _.each(extension._inner.children, (child) => {
         this.extendSchema(child.schema, _.get(settings, child.key), child.key);
       });
     }
@@ -56,7 +46,7 @@ export class Config {
       throw new Error(`Config schema already has key: ${key}`);
     }
 
-    _.set(this[schemaExts], key, extension);
+    set(this[schemaExts], key, extension);
     this[schema] = null;
 
     this.set(key, settings);
@@ -82,7 +72,7 @@ export class Config {
     if (_.isPlainObject(key)) {
       config = override(config, key);
     } else {
-      _.set(config, key, value);
+      set(config, key, value);
     }
 
     // attempt to validate the config value
@@ -193,9 +183,7 @@ export class Config {
   getSchema() {
     if (!this[schema]) {
       this[schema] = (function convertToSchema(children) {
-        let schema = Joi.object()
-          .keys({})
-          .default();
+        let schema = Joi.object().keys({}).default();
 
         for (const key of Object.keys(children)) {
           const child = children[key];

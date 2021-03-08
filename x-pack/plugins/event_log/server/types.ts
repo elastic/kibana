@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
 export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
-import { KibanaRequest } from 'kibana/server';
 import { IEvent } from '../generated/schemas';
 import { FindOptionsType } from './event_log_client';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+export { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import { SavedObjectProvider } from './saved_object_provider_registry';
+
+export const SAVED_OBJECT_REL_PRIMARY = 'primary';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -20,15 +24,6 @@ export const ConfigSchema = schema.object({
 });
 
 export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
-export type IEventLogConfig$ = Observable<Readonly<IEventLogConfig>>;
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    eventLog?: {
-      getEventLogClient: () => IEventLogClient;
-    };
-  }
-}
 
 // the object exposed by plugin.setup()
 export interface IEventLogService {
@@ -38,7 +33,7 @@ export interface IEventLogService {
   registerProviderActions(provider: string, actions: string[]): void;
   isProviderActionRegistered(provider: string, action: string): boolean;
   getProviderActions(): Map<string, Set<string>>;
-
+  registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
   getLogger(properties: IEvent): IEventLogger;
 }
 
@@ -47,9 +42,9 @@ export interface IEventLogClientService {
 }
 
 export interface IEventLogClient {
-  findEventsBySavedObject(
+  findEventsBySavedObjectIds(
     type: string,
-    id: string,
+    ids: string[],
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult>;
 }
@@ -59,3 +54,22 @@ export interface IEventLogger {
   startTiming(event: IEvent): void;
   stopTiming(event: IEvent): void;
 }
+
+/**
+ * @internal
+ */
+export interface EventLogApiRequestHandlerContext {
+  getEventLogClient(): IEventLogClient;
+}
+
+/**
+ * @internal
+ */
+export interface EventLogRequestHandlerContext extends RequestHandlerContext {
+  eventLog: EventLogApiRequestHandlerContext;
+}
+
+/**
+ * @internal
+ */
+export type EventLogRouter = IRouter<EventLogRequestHandlerContext>;

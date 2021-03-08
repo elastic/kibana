@@ -1,35 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createPermissionFailureMessage } from '../../../../../privilege/check_privilege';
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
-export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
-  const { disabled } = props.state;
-  const { openModal } = props.actions;
+interface Props {
+  isDisabled: boolean;
+  setIsSourceIndexModalVisible: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, setIsSourceIndexModalVisible }) => {
+  const handleClick = () => {
+    setIsSourceIndexModalVisible(true);
+  };
 
   const button = (
     <EuiButton
-      disabled={disabled}
+      disabled={isDisabled}
       fill
-      onClick={openModal}
+      onClick={handleClick}
       iconType="plusInCircle"
       size="s"
       data-test-subj="mlAnalyticsButtonCreate"
     >
       {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
-        defaultMessage: 'Create analytics job',
+        defaultMessage: 'Create job',
       })}
     </EuiButton>
   );
 
-  if (disabled) {
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"

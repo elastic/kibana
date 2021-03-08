@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { withTimeout, isPromise } from '@kbn/std';
 import { PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
@@ -28,7 +18,6 @@ import {
 } from './plugin_context';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
 import { InjectedPluginMetadata } from '../injected_metadata';
-import { withTimeout } from '../../utils';
 
 const Sec = 1000;
 /** @internal */
@@ -60,14 +49,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   constructor(private readonly coreContext: CoreContext, plugins: InjectedPluginMetadata[]) {
     // Generate opaque ids
-    const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map(p => [p.id, Symbol(p.id)]));
+    const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 
     // Setup dependency map and plugin wrappers
     plugins.forEach(({ id, plugin, config = {} }) => {
       // Setup map of dependencies
       this.pluginDependencies.set(id, [
         ...plugin.requiredPlugins,
-        ...plugin.optionalPlugins.filter(optPlugin => opaqueIds.has(optPlugin)),
+        ...plugin.optionalPlugins.filter((optPlugin) => opaqueIds.has(optPlugin)),
       ]);
 
       // Construct plugin wrappers, depending on the topological order set by the server.
@@ -87,15 +76,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     return new Map(
       [...this.pluginDependencies].map(([id, deps]) => [
         this.plugins.get(id)!.opaqueId,
-        deps.map(depId => this.plugins.get(depId)!.opaqueId),
+        deps.map((depId) => this.plugins.get(depId)!.opaqueId),
       ])
     );
   }
 
   public async setup(deps: PluginsServiceSetupDeps): Promise<PluginsServiceSetup> {
-    // Load plugin bundles
-    await this.loadPluginBundles(deps.http.basePath.prepend);
-
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -112,16 +98,36 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         {} as Record<PluginName, unknown>
       );
 
-      const contract = await withTimeout({
-        promise: plugin.setup(
-          createPluginSetupContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
-      contracts.set(pluginName, contract);
+      let contract: unknown;
+      const contractOrPromise = plugin.setup(
+        createPluginSetupContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
 
+        const contractMaybe = await withTimeout({
+          promise: contractOrPromise,
+          timeoutMs: 10 * Sec,
+        });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
+      } else {
+        contract = contractOrPromise;
+      }
+
+      contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
 
@@ -146,14 +152,35 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         {} as Record<PluginName, unknown>
       );
 
-      const contract = await withTimeout({
-        promise: plugin.start(
-          createPluginStartContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
+      let contract: unknown;
+      const contractOrPromise = plugin.start(
+        createPluginStartContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+
+        const contractMaybe = await withTimeout({
+          promise: contractOrPromise,
+          timeoutMs: 10 * Sec,
+        });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
+      } else {
+        contract = contractOrPromise;
+      }
+
       contracts.set(pluginName, contract);
     }
 
@@ -166,10 +193,5 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     for (const pluginName of this.satupPlugins.reverse()) {
       this.plugins.get(pluginName)!.stop();
     }
-  }
-
-  private loadPluginBundles(addBasePath: (path: string) => string) {
-    // Load all bundles in parallel
-    return Promise.all([...this.plugins.values()].map(plugin => plugin.load(addBasePath)));
   }
 }

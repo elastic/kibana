@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { caseMigrations } from './migrations';
 
 export const CASE_SAVED_OBJECT = 'cases';
 
 export const caseSavedObjectType: SavedObjectsType = {
   name: CASE_SAVED_OBJECT,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       closed_at: {
@@ -48,6 +50,29 @@ export const caseSavedObjectType: SavedObjectsType = {
       },
       description: {
         type: 'text',
+      },
+      connector: {
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          name: {
+            type: 'text',
+          },
+          type: {
+            type: 'keyword',
+          },
+          fields: {
+            properties: {
+              key: {
+                type: 'text',
+              },
+              value: {
+                type: 'text',
+              },
+            },
+          },
+        },
       },
       external_service: {
         properties: {
@@ -93,7 +118,10 @@ export const caseSavedObjectType: SavedObjectsType = {
       tags: {
         type: 'keyword',
       },
-
+      // collection or individual
+      type: {
+        type: 'keyword',
+      },
       updated_at: {
         type: 'date',
       },
@@ -110,6 +138,14 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
         },
       },
+      settings: {
+        properties: {
+          syncAlerts: {
+            type: 'boolean',
+          },
+        },
+      },
     },
   },
+  migrations: caseMigrations,
 };

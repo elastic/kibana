@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
@@ -11,10 +12,10 @@ import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../../common/util/date_utils';
 
 import { DataFrameAnalyticsListRow } from './common';
-import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ProgressBar } from './progress_bar';
 import {
@@ -24,11 +25,13 @@ import {
   loadEvalData,
   Eval,
 } from '../../../../common';
-import { getTaskStateBadge } from './columns';
-import { isCompletedAnalyticsJob } from './common';
+import { getTaskStateBadge } from './use_columns';
+import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
 import {
   isRegressionAnalysis,
+  getAnalysisType,
   ANALYSIS_CONFIG_TYPE,
+  REGRESSION_STATS,
   isRegressionEvaluateResponse,
 } from '../../../../common/analytics';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
@@ -44,7 +47,7 @@ function getItemDescription(value: any) {
 interface LoadedStatProps {
   isLoading: boolean;
   evalData: Eval;
-  resultProperty: 'meanSquaredError' | 'rSquared';
+  resultProperty: REGRESSION_STATS;
 }
 
 const LoadedStat: FC<LoadedStatProps> = ({ isLoading, evalData, resultProperty }) => {
@@ -61,7 +64,7 @@ interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
-const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
+const defaultEval: Eval = { mse: '', msle: '', huber: '', rSquared: '', error: null };
 
 export const ExpandedRow: FC<Props> = ({ item }) => {
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
@@ -75,6 +78,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const resultsField = item.config.dest.results_field;
   const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
   const isRegressionJob = isRegressionAnalysis(item.config.analysis);
+  const analysisType = getAnalysisType(item.config.analysis);
 
   const loadData = async () => {
     setIsLoadingGeneralization(true);
@@ -94,17 +98,22 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       genErrorEval.eval &&
       isRegressionEvaluateResponse(genErrorEval.eval)
     ) {
-      const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { mse, msle, huber, r_squared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
-        meanSquaredError,
-        rSquared,
+        mse,
+        msle,
+        huber,
+        rSquared: r_squared,
         error: null,
       });
       setIsLoadingGeneralization(false);
     } else {
       setIsLoadingGeneralization(false);
       setGeneralizationEval({
-        meanSquaredError: '',
+        mse: '',
+        msle: '',
+        huber: '',
         rSquared: '',
         error: genErrorEval.error,
       });
@@ -124,17 +133,22 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       trainingErrorEval.eval &&
       isRegressionEvaluateResponse(trainingErrorEval.eval)
     ) {
-      const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { mse, msle, huber, r_squared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
-        meanSquaredError,
-        rSquared,
+        mse,
+        msle,
+        huber,
+        rSquared: r_squared,
         error: null,
       });
       setIsLoadingTraining(false);
     } else {
       setIsLoadingTraining(false);
       setTrainingEval({
-        meanSquaredError: '',
+        mse: '',
+        msle: '',
+        huber: '',
         rSquared: '',
         error: genErrorEval.error,
       });
@@ -149,40 +163,60 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
 
   const stateValues: any = { ...item.stats };
 
+  const analysisStatsValues = stateValues.analysis_stats
+    ? stateValues.analysis_stats[`${analysisType}_stats`]
+    : undefined;
+
   if (item.config?.description) {
     stateValues.description = item.config.description;
   }
   delete stateValues.progress;
 
-  const state: SectionConfig = {
-    title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
-      defaultMessage: 'State',
-    }),
-    items: Object.entries(stateValues).map(([stateKey, stateValue]) => {
+  const stateItems = Object.entries(stateValues)
+    .map(([stateKey, stateValue]) => {
       const title = stateKey.toString();
       if (title === 'state') {
         return {
           title,
           description: getTaskStateBadge(getItemDescription(stateValue)),
         };
+      } else if (title !== 'analysis_stats') {
+        return { title, description: getItemDescription(stateValue) };
       }
-      return { title, description: getItemDescription(stateValue) };
+    })
+    .filter((stateItem) => stateItem !== undefined);
+
+  const state: SectionConfig = {
+    title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
+      defaultMessage: 'State',
     }),
+    items: stateItems as SectionItem[],
     position: 'left',
   };
+
+  const { currentPhase, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
 
   const progress: SectionConfig = {
     title: i18n.translate(
       'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.progress',
       { defaultMessage: 'Progress' }
     ),
-    items: item.stats.progress.map(s => {
-      return {
-        title: s.phase,
-        description: <ProgressBar progress={s.progress_percent} />,
-      };
-    }),
-    position: 'left',
+    items: [
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.phase',
+          { defaultMessage: 'Phase' }
+        ),
+        description: `${currentPhase}/${totalPhases}`,
+      },
+      ...item.stats.progress.map((s) => {
+        return {
+          title: s.phase,
+          description: <ProgressBar progress={s.progress_percent} />,
+        };
+      }),
+    ],
+    position: 'right',
   };
 
   const stats: SectionConfig = {
@@ -199,8 +233,38 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       { title: 'model_memory_limit', description: item.config.model_memory_limit },
       { title: 'version', description: item.config.version },
     ],
-    position: 'right',
+    position: 'left',
   };
+
+  const analysisStats: SectionConfig | undefined = analysisStatsValues
+    ? {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.analysisStats',
+          {
+            defaultMessage: 'Analysis stats',
+          }
+        ),
+        items: [
+          {
+            title: 'timestamp',
+            description: formatHumanReadableDateTimeSeconds(
+              moment(analysisStatsValues.timestamp).unix() * 1000
+            ),
+          },
+          {
+            title: 'timing_stats',
+            description: getItemDescription(analysisStatsValues.timing_stats),
+          },
+          ...Object.entries(
+            analysisStatsValues.parameters || analysisStatsValues.hyperparameters || {}
+          ).map(([stateKey, stateValue]) => {
+            const title = stateKey.toString();
+            return { title, description: getItemDescription(stateValue) };
+          }),
+        ],
+        position: 'right',
+      }
+    : undefined;
 
   if (jobIsCompleted && isRegressionJob) {
     stats.items.push(
@@ -210,7 +274,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           <LoadedStat
             isLoading={isLoadingGeneralization}
             evalData={generalizationEval}
-            resultProperty={'meanSquaredError'}
+            resultProperty={REGRESSION_STATS.MSE}
+          />
+        ),
+      },
+      {
+        title: 'generalization mean squared logarithmic error',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingGeneralization}
+            evalData={generalizationEval}
+            resultProperty={REGRESSION_STATS.MSLE}
           />
         ),
       },
@@ -220,7 +294,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           <LoadedStat
             isLoading={isLoadingGeneralization}
             evalData={generalizationEval}
-            resultProperty={'rSquared'}
+            resultProperty={REGRESSION_STATS.R_SQUARED}
+          />
+        ),
+      },
+      {
+        title: 'generalization pseudo huber loss function',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingTraining}
+            evalData={generalizationEval}
+            resultProperty={REGRESSION_STATS.HUBER}
           />
         ),
       },
@@ -230,7 +314,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           <LoadedStat
             isLoading={isLoadingTraining}
             evalData={trainingEval}
-            resultProperty={'meanSquaredError'}
+            resultProperty={REGRESSION_STATS.MSE}
+          />
+        ),
+      },
+      {
+        title: 'training mean squared logarithmic error',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingTraining}
+            evalData={trainingEval}
+            resultProperty={REGRESSION_STATS.MSLE}
           />
         ),
       },
@@ -240,11 +334,28 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           <LoadedStat
             isLoading={isLoadingTraining}
             evalData={trainingEval}
-            resultProperty={'rSquared'}
+            resultProperty={REGRESSION_STATS.R_SQUARED}
+          />
+        ),
+      },
+      {
+        title: 'training pseudo huber loss function',
+        description: (
+          <LoadedStat
+            isLoading={isLoadingTraining}
+            evalData={trainingEval}
+            resultProperty={REGRESSION_STATS.HUBER}
           />
         ),
       }
     );
+  }
+
+  const detailsSections: SectionConfig[] = [state, progress];
+  const statsSections: SectionConfig[] = [stats];
+
+  if (analysisStats !== undefined) {
+    statsSections.push(analysisStats);
   }
 
   const tabs = [
@@ -253,7 +364,17 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel', {
         defaultMessage: 'Job details',
       }),
-      content: <ExpandedRowDetailsPane sections={[state, progress, stats]} />,
+      content: <ExpandedRowDetailsPane sections={detailsSections} />,
+    },
+    {
+      id: 'ml-analytics-job-stats',
+      name: i18n.translate(
+        'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsStatsLabel',
+        {
+          defaultMessage: 'Job stats',
+        }
+      ),
+      content: <ExpandedRowDetailsPane sections={statsSections} />,
     },
     {
       id: 'ml-analytics-job-json',

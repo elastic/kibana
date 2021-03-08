@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -10,9 +11,9 @@
  * And a minimum bucket span
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 
-export function polledDataCheckerFactory(callAsCurrentUser) {
+export function polledDataCheckerFactory({ asCurrentUser }) {
   class PolledDataChecker {
     constructor(index, timeField, duration, query) {
       this.index = index;
@@ -28,8 +29,8 @@ export function polledDataCheckerFactory(callAsCurrentUser) {
       return new Promise((resolve, reject) => {
         const interval = { name: '1m', ms: 60000 };
         this.performSearch(interval.ms)
-          .then(resp => {
-            const fullBuckets = _.get(resp, 'aggregations.non_empty_buckets.buckets', []);
+          .then((resp) => {
+            const fullBuckets = get(resp, 'aggregations.non_empty_buckets.buckets', []);
             const result = this.isPolledData(fullBuckets, interval);
             if (result.pass) {
               // data is polled, return a flag and the minimumBucketSpan which should be
@@ -42,7 +43,7 @@ export function polledDataCheckerFactory(callAsCurrentUser) {
               minimumBucketSpan: this.minimumBucketSpan,
             });
           })
-          .catch(resp => {
+          .catch((resp) => {
             reject(resp);
           });
       });
@@ -56,7 +57,7 @@ export function polledDataCheckerFactory(callAsCurrentUser) {
             date_histogram: {
               min_doc_count: 1,
               field: this.timeField,
-              interval: `${intervalMs}ms`,
+              fixed_interval: `${intervalMs}ms`,
             },
           },
         },
@@ -65,14 +66,15 @@ export function polledDataCheckerFactory(callAsCurrentUser) {
       return search;
     }
 
-    performSearch(intervalMs) {
-      const body = this.createSearch(intervalMs);
+    async performSearch(intervalMs) {
+      const searchBody = this.createSearch(intervalMs);
 
-      return callAsCurrentUser('search', {
+      const { body } = await asCurrentUser.search({
         index: this.index,
         size: 0,
-        body,
+        body: searchBody,
       });
+      return body;
     }
 
     // test that the coefficient of variation of time difference between non-empty buckets is small

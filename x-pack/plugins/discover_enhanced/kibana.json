@@ -1,0 +1,11 @@
+{
+  "id": "discoverEnhanced",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["uiActions", "embeddable", "discover"],
+  "optionalPlugins": ["share", "kibanaLegacy", "usageCollection"],
+  "configPath": ["xpack", "discoverEnhanced"],
+  "requiredBundles": ["kibanaUtils", "data", "share"]
+}

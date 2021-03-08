@@ -1,65 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
+import { wrapError, escapeHatch } from '../utils';
 
-import { flattenCaseSavedObject, transformNewCase, wrapError, escapeHatch } from '../utils';
-
-import { CasePostRequestRt, throwErrors, excess, CaseResponseRt } from '../../../../common/api';
-import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
+import { CASES_URL } from '../../../../common/constants';
+import { CasePostRequest } from '../../../../common/api';
 
-export function initPostCaseApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPostCaseApi({ router, logger }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases',
+      path: CASES_URL,
       validate: {
         body: escapeHatch,
       },
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
-        const query = pipe(
-          excess(CasePostRequestRt).decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+        const caseClient = context.case.getCaseClient();
+        const theCase = request.body as CasePostRequest;
 
-        const { username, full_name, email } = await caseService.getUser({ request, response });
-        const createdDate = new Date().toISOString();
-        const newCase = await caseService.postNewCase({
-          client,
-          attributes: transformNewCase({
-            createdDate,
-            newCase: query,
-            username,
-            full_name,
-            email,
-          }),
+        return response.ok({
+          body: await caseClient.create({ ...theCase }),
         });
-
-        await userActionService.postUserActions({
-          client,
-          actions: [
-            buildCaseUserActionItem({
-              action: 'create',
-              actionAt: createdDate,
-              actionBy: { username, full_name, email },
-              caseId: newCase.id,
-              fields: ['description', 'status', 'tags', 'title'],
-              newValue: JSON.stringify(query),
-            }),
-          ],
-        });
-
-        return response.ok({ body: CaseResponseRt.encode(flattenCaseSavedObject(newCase, [])) });
       } catch (error) {
+        logger.error(`Failed to post case in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

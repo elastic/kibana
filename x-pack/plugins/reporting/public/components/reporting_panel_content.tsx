@@ -1,28 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import url from 'url';
 import { ToastsSetup } from 'src/core/public';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import url from 'url';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import {
+  CSV_REPORT_TYPE_DEPRECATED,
+  PDF_REPORT_TYPE,
+  PNG_REPORT_TYPE,
+} from '../../common/constants';
+import { BaseParams } from '../../common/types';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-interface Props {
+export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
   layoutId: string | undefined;
   objectId?: string;
-  objectType: string;
-  getJobParams: () => any;
+  getJobParams: () => BaseParams;
   options?: ReactElement<any>;
-  isDirty: boolean;
-  onClose: () => void;
+  isDirty?: boolean;
+  onClose?: () => void;
   intl: InjectedIntl;
 }
 
@@ -30,6 +36,7 @@ interface State {
   isStale: boolean;
   absoluteUrl: string;
   layoutId: string;
+  objectType: string;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -38,10 +45,14 @@ class ReportingPanelContentUi extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    // Get objectType from job params
+    const { objectType } = props.getJobParams();
+
     this.state = {
       isStale: false,
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
+      objectType,
     };
   }
 
@@ -102,7 +113,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         description="Here 'reportingType' can be 'PDF' or 'CSV'"
         values={{
           reportingType: this.prettyPrintReportingType(),
-          objectType: this.props.objectType,
+          objectType: this.state.objectType,
         }}
       />
     );
@@ -130,7 +141,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         <EuiSpacer size="s" />
 
         <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
-          {copy => (
+          {(copy) => (
             <EuiButton fullWidth onClick={copy} size="s">
               <FormattedMessage
                 id="xpack.reporting.panelContent.copyUrlButtonLabel"
@@ -164,12 +175,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   private prettyPrintReportingType = () => {
     switch (this.props.reportType) {
-      case 'printablePdf':
+      case PDF_REPORT_TYPE:
         return 'PDF';
       case 'csv':
-        return 'CSV';
+        return CSV_REPORT_TYPE_DEPRECATED;
       case 'png':
-        return 'PNG';
+        return PNG_REPORT_TYPE;
       default:
         return this.props.reportType;
     }
@@ -207,7 +218,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
               id: 'xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle',
               defaultMessage: 'Queued report for {objectType}',
             },
-            { objectType: this.props.objectType }
+            { objectType: this.state.objectType }
           ),
           text: toMountPoint(
             <FormattedMessage
@@ -217,7 +228,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
           ),
           'data-test-subj': 'queueReportSuccess',
         });
-        this.props.onClose();
+        if (this.props.onClose) {
+          this.props.onClose();
+        }
       })
       .catch((error: any) => {
         if (error.message === 'not exportable') {
@@ -227,7 +240,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
                 id: 'xpack.reporting.panelContent.whatCanBeExportedWarningTitle',
                 defaultMessage: 'Only saved {objectType} can be exported',
               },
-              { objectType: this.props.objectType }
+              { objectType: this.state.objectType }
             ),
             text: toMountPoint(
               <FormattedMessage

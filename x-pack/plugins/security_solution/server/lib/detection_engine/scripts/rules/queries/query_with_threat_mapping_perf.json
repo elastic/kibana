@@ -1,0 +1,32 @@
+{
+  "concurrent_searches": 10,
+  "items_per_search": 10,
+  "index": ["auditbeat-*", "endgame-*", "filebeat-*", "logs-*", "packetbeat-*", "winlogbeat-*"],
+  "name": "Indicator Match Concurrent Searches",
+  "description": "Does 100 Concurrent searches with 10 items per search",
+  "rule_id": "indicator_concurrent_search",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "threat_match",
+  "query": "*:*",
+  "tags": ["concurrent_searches_test", "from_script"],
+  "threat_index": ["mock-threat-list-1"],
+  "threat_language": "kuery",
+  "threat_query": "*:*",
+  "threat_mapping": [
+    {
+      "entries": [
+        {
+          "field": "source.port",
+          "type": "mapping",
+          "value": "source.port"
+        },
+        {
+          "field": "source.ip",
+          "type": "mapping",
+          "value": "source.ip"
+        }
+      ]
+    }
+  ]
+}

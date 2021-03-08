@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subscription } from 'rxjs';
@@ -24,6 +13,7 @@ import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
+import { validateTimeRange } from '../timefilter';
 
 /**
  * Helper to setup two-way syncing of global data and a state container
@@ -34,14 +24,23 @@ export const connectToQueryState = <S extends QueryState>(
   {
     timefilter: { timefilter },
     filterManager,
+    queryString,
     state$,
-  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'state$'>,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   stateContainer: BaseStateContainer<S>,
-  syncConfig: { time?: boolean; refreshInterval?: boolean; filters?: FilterStateStore | boolean }
+  syncConfig: {
+    time?: boolean;
+    refreshInterval?: boolean;
+    filters?: FilterStateStore | boolean;
+    query?: boolean;
+  }
 ) => {
   const syncKeys: Array<keyof QueryStateChange> = [];
   if (syncConfig.time) {
     syncKeys.push('time');
+  }
+  if (syncConfig.query) {
+    syncKeys.push('query');
   }
   if (syncConfig.refreshInterval) {
     syncKeys.push('refreshInterval');
@@ -125,12 +124,15 @@ export const connectToQueryState = <S extends QueryState>(
       .pipe(
         filter(({ changes, state }) => {
           if (updateInProgress) return false;
-          return syncKeys.some(syncKey => changes[syncKey]);
+          return syncKeys.some((syncKey) => changes[syncKey]);
         }),
         map(({ changes }) => {
           const newState: QueryState = {};
           if (syncConfig.time && changes.time) {
             newState.time = timefilter.getTime();
+          }
+          if (syncConfig.query && changes.query) {
+            newState.query = queryString.getQuery();
           }
           if (syncConfig.refreshInterval && changes.refreshInterval) {
             newState.refreshInterval = timefilter.getRefreshInterval();
@@ -150,18 +152,18 @@ export const connectToQueryState = <S extends QueryState>(
           return newState;
         })
       )
-      .subscribe(newState => {
+      .subscribe((newState) => {
         stateContainer.set({ ...stateContainer.get(), ...newState });
       }),
-    stateContainer.state$.subscribe(state => {
+    stateContainer.state$.subscribe((state) => {
       updateInProgress = true;
 
       // cloneDeep is required because services are mutating passed objects
       // and state in state container is frozen
       if (syncConfig.time) {
-        const time = state.time || timefilter.getTimeDefaults();
+        const time = validateTimeRange(state.time) ? state.time : timefilter.getTimeDefaults();
         if (!_.isEqual(time, timefilter.getTime())) {
-          timefilter.setTime(_.cloneDeep(time));
+          timefilter.setTime(_.cloneDeep(time!));
         }
       }
 
@@ -169,6 +171,13 @@ export const connectToQueryState = <S extends QueryState>(
         const refreshInterval = state.refreshInterval || timefilter.getRefreshIntervalDefaults();
         if (!_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
           timefilter.setRefreshInterval(_.cloneDeep(refreshInterval));
+        }
+      }
+
+      if (syncConfig.query) {
+        const curQuery = state.query || queryString.getQuery();
+        if (!_.isEqual(curQuery, queryString.getQuery())) {
+          queryString.setQuery(_.cloneDeep(curQuery));
         }
       }
 
@@ -204,6 +213,6 @@ export const connectToQueryState = <S extends QueryState>(
   ];
 
   return () => {
-    subs.forEach(s => s.unsubscribe());
+    subs.forEach((s) => s.unsubscribe());
   };
 };

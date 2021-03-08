@@ -1,21 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { APICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import {
   AnalysisResult,
   FormattedOverrides,
   InputOverrides,
+  FindFileStructureResponse,
 } from '../../../common/types/file_datavisualizer';
 
 export type InputData = any[];
 
-export function fileDataVisualizerProvider(callAsCurrentUser: APICaller) {
-  async function analyzeFile(data: any, overrides: any): Promise<AnalysisResult> {
-    const results = await callAsCurrentUser('ml.fileStructure', {
+export function fileDataVisualizerProvider(client: IScopedClusterClient) {
+  async function analyzeFile(data: InputData, overrides: InputOverrides): Promise<AnalysisResult> {
+    overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
+    const {
+      body,
+    } = await client.asInternalUser.textStructure.findStructure<FindFileStructureResponse>({
       body: data,
       ...overrides,
     });
@@ -24,7 +29,7 @@ export function fileDataVisualizerProvider(callAsCurrentUser: APICaller) {
 
     return {
       ...(hasOverrides && { overrides: reducedOverrides }),
-      results,
+      results: body,
     };
   }
 

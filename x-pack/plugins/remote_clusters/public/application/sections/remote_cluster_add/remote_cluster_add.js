@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent } from 'react';
@@ -10,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiPageContent } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouter, redirect, extractQueryParams } from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
+import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
@@ -32,7 +33,7 @@ export class RemoteClusterAdd extends PureComponent {
     this.props.clearAddClusterErrors();
   }
 
-  save = clusterConfig => {
+  save = (clusterConfig) => {
     this.props.addCluster(clusterConfig);
   };
 
@@ -49,7 +50,7 @@ export class RemoteClusterAdd extends PureComponent {
       const decodedRedirect = decodeURIComponent(redirectUrl);
       redirect(decodedRedirect);
     } else {
-      history.push(CRUD_APP_BASE_PATH);
+      history.push('/list');
     }
   };
 
@@ -57,7 +58,11 @@ export class RemoteClusterAdd extends PureComponent {
     const { isAddingCluster, addClusterError } = this.props;
 
     return (
-      <EuiPageContent horizontalPosition="center" className="remoteClusterAddPage">
+      <EuiPageContent
+        horizontalPosition="center"
+        className="remoteClusterAddPage"
+        data-test-subj="remoteClusterAddPage"
+      >
         <RemoteClusterPageTitle
           title={
             <FormattedMessage

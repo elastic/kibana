@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -48,6 +37,8 @@ import {
   IUiSettingsClient,
   SavedObjectsStart,
 } from 'src/core/public';
+
+import { LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -128,10 +119,10 @@ class SavedObjectFinderUi extends React.Component<
     const metaDataMap = this.getSavedObjectMetaDataMap();
 
     const fields = Object.values(metaDataMap)
-      .map(metaData => metaData.includeFields || [])
+      .map((metaData) => metaData.includeFields || [])
       .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
 
-    const perPage = this.props.uiSettings.get('savedObjects:listingLimit');
+    const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
     const resp = await this.props.savedObjects.client.find<FinderAttributes>({
       type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
@@ -142,7 +133,7 @@ class SavedObjectFinderUi extends React.Component<
       defaultSearchOperator: 'AND',
     });
 
-    resp.savedObjects = resp.savedObjects.filter(savedObject => {
+    resp.savedObjects = resp.savedObjects.filter((savedObject) => {
       const metaData = metaDataMap[savedObject.type];
       if (metaData.showSavedObject) {
         return metaData.showSavedObject(savedObject);
@@ -161,7 +152,7 @@ class SavedObjectFinderUi extends React.Component<
       this.setState({
         isFetchingItems: false,
         page: 0,
-        items: resp.savedObjects.map(savedObject => {
+        items: resp.savedObjects.map((savedObject) => {
           const {
             attributes: { title },
             id,
@@ -225,7 +216,7 @@ class SavedObjectFinderUi extends React.Component<
       (this.state.filteredTypes.length === 0
         ? this.state.items.length
         : this.state.items.filter(
-            item =>
+            (item) =>
               this.state.filteredTypes.length === 0 || this.state.filteredTypes.includes(item.type)
           ).length) / this.state.perPage
     );
@@ -257,7 +248,7 @@ class SavedObjectFinderUi extends React.Component<
     const lastIndex = startIndex + this.state.perPage;
     return items
       .filter(
-        item =>
+        (item) =>
           this.state.filteredTypes.length === 0 || this.state.filteredTypes.includes(item.type)
       )
       .slice(startIndex, lastIndex);
@@ -274,10 +265,10 @@ class SavedObjectFinderUi extends React.Component<
 
   private getAvailableSavedObjectMetaData() {
     const typesInItems = new Set<string>();
-    this.state.items.forEach(item => {
+    this.state.items.forEach((item) => {
       typesInItems.add(item.type);
     });
-    return this.props.savedObjectMetaData.filter(metaData => typesInItems.has(metaData.type));
+    return this.props.savedObjectMetaData.filter((metaData) => typesInItems.has(metaData.type));
   }
 
   private getSortOptions() {
@@ -349,7 +340,7 @@ class SavedObjectFinderUi extends React.Component<
             })}
             fullWidth
             value={this.state.query}
-            onChange={e => {
+            onChange={(e) => {
               this.setState(
                 {
                   query: e.target.value,
@@ -420,7 +411,7 @@ class SavedObjectFinderUi extends React.Component<
               >
                 <EuiContextMenuPanel
                   watchedItemProps={['icon', 'disabled']}
-                  items={this.props.savedObjectMetaData.map(metaData => (
+                  items={this.props.savedObjectMetaData.map((metaData) => (
                     <EuiContextMenuItem
                       key={metaData.type}
                       disabled={!availableSavedObjectMetaData.includes(metaData)}
@@ -429,7 +420,7 @@ class SavedObjectFinderUi extends React.Component<
                       onClick={() => {
                         this.setState(({ filteredTypes }) => ({
                           filteredTypes: filteredTypes.includes(metaData.type)
-                            ? filteredTypes.filter(t => t !== metaData.type)
+                            ? filteredTypes.filter((t) => t !== metaData.type)
                             : [...filteredTypes, metaData.type],
                           page: 0,
                         }));
@@ -464,9 +455,9 @@ class SavedObjectFinderUi extends React.Component<
         )}
         {items.length > 0 ? (
           <EuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false}>
-            {items.map(item => {
+            {items.map((item) => {
               const currentSavedObjectMetaData = savedObjectMetaData.find(
-                metaData => metaData.type === item.type
+                (metaData) => metaData.type === item.type
               )!;
               const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
                 ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
@@ -503,7 +494,7 @@ class SavedObjectFinderUi extends React.Component<
             <EuiPagination
               activePage={this.state.page}
               pageCount={this.getPageCount()}
-              onPageClick={page => {
+              onPageClick={(page) => {
                 this.setState({
                   page,
                 });
@@ -513,12 +504,12 @@ class SavedObjectFinderUi extends React.Component<
             <EuiTablePagination
               activePage={this.state.page}
               pageCount={this.getPageCount()}
-              onChangePage={page => {
+              onChangePage={(page) => {
                 this.setState({
                   page,
                 });
               }}
-              onChangeItemsPerPage={perPage => {
+              onChangeItemsPerPage={(perPage) => {
                 this.setState({
                   perPage,
                 });

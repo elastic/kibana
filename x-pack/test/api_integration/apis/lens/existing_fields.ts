@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,6 +21,8 @@ const fieldsWithData = [
   '@tags',
   '@tags.raw',
   '@timestamp',
+  '_id',
+  '_index',
   'agent',
   'agent.raw',
   'bytes',
@@ -57,6 +60,7 @@ const fieldsWithData = [
   'utc_time',
   'xss',
   'xss.raw',
+  'runtime_number',
 
   'relatedContent.article:modified_time',
   'relatedContent.article:published_time',
@@ -96,27 +100,49 @@ const fieldsWithData = [
 
 const metricBeatData = [
   '@timestamp',
+  '_id',
+  '_index',
   'agent.ephemeral_id',
+  'agent.ephemeral_id.keyword',
   'agent.hostname',
+  'agent.hostname.keyword',
   'agent.id',
+  'agent.id.keyword',
   'agent.type',
+  'agent.type.keyword',
   'agent.version',
+  'agent.version.keyword',
   'ecs.version',
+  'ecs.version.keyword',
   'event.dataset',
+  'event.dataset.keyword',
   'event.duration',
   'event.module',
+  'event.module.keyword',
   'host.architecture',
+  'host.architecture.keyword',
   'host.hostname',
+  'host.hostname.keyword',
   'host.id',
+  'host.id.keyword',
   'host.name',
+  'host.name.keyword',
   'host.os.build',
+  'host.os.build.keyword',
   'host.os.family',
+  'host.os.family.keyword',
   'host.os.kernel',
+  'host.os.kernel.keyword',
   'host.os.name',
+  'host.os.name.keyword',
   'host.os.platform',
+  'host.os.platform.keyword',
   'host.os.version',
+  'host.os.version.keyword',
   'metricset.name',
+  'metricset.name.keyword',
   'service.type',
+  'service.type.keyword',
   'system.cpu.cores',
   'system.cpu.idle.pct',
   'system.cpu.iowait.pct',
@@ -129,7 +155,6 @@ const metricBeatData = [
   'system.cpu.user.pct',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -186,6 +211,8 @@ export default ({ getService }: FtrProviderContext) => {
           '@tags',
           '@tags.raw',
           '@timestamp',
+          '_id',
+          '_index',
           'agent',
           'agent.raw',
           'bytes',
@@ -203,6 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
           'request.raw',
           'response',
           'response.raw',
+          'runtime_number',
           'spaces',
           'spaces.raw',
           'type',

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Fs from 'fs';
@@ -49,7 +38,7 @@ export async function addMessagesToReport(options: {
   for (const testCase of makeFailedTestCaseIter(report)) {
     const { classname, name } = testCase.$;
     const messageList = messages
-      .filter(u => u.classname === classname && u.name === name)
+      .filter((u) => u.classname === classname && u.name === name)
       .reduce((acc, u) => `${acc}\n  - ${u.message}`, '');
 
     if (!messageList) {
@@ -59,10 +48,14 @@ export async function addMessagesToReport(options: {
     log.info(`${classname} - ${name}:${messageList}`);
     const output = `Failed Tests Reporter:${messageList}\n\n`;
 
-    if (!testCase['system-out']) {
-      testCase['system-out'] = [output];
+    if (typeof testCase.failure[0] === 'object' && testCase.failure[0].$.message) {
+      // failure with "messages" ignore the system-out on jenkins
+      // so we instead extend the failure message
+      testCase.failure[0]._ = output + testCase.failure[0]._;
+    } else if (!testCase['system-out']) {
+      testCase['system-out'] = [{ _: output }];
     } else if (typeof testCase['system-out'][0] === 'string') {
-      testCase['system-out'][0] = output + String(testCase['system-out'][0]);
+      testCase['system-out'][0] = { _: output + testCase['system-out'][0] };
     } else {
       testCase['system-out'][0]._ = output + testCase['system-out'][0]._;
     }
@@ -76,7 +69,7 @@ export async function addMessagesToReport(options: {
   const xml = builder
     .buildObject(report)
     .split('\n')
-    .map(line => (line.trim() === '' ? '' : line))
+    .map((line) => (line.trim() === '' ? '' : line))
     .join('\n');
 
   if (dryRun) {

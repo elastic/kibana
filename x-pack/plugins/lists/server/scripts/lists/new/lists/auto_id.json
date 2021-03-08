@@ -1,0 +1,5 @@
+{
+  "name": "Simple list with a type of ip and an auto created id",
+  "description": "list with an auto created id",
+  "type": "ip"
+}

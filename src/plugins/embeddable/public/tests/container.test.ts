@@ -1,26 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { isErrorEmbeddable, EmbeddableOutput, ContainerInput, ViewMode } from '../lib';
 import {
+  isErrorEmbeddable,
+  EmbeddableOutput,
+  ContainerInput,
+  ViewMode,
+  SavedObjectEmbeddableInput,
+} from '../lib';
+import {
+  MockFilter,
   FilterableEmbeddableInput,
   FilterableEmbeddable,
   FILTERABLE_EMBEDDABLE,
@@ -29,10 +25,7 @@ import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import {
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactory,
-} from '../../../../../examples/embeddable_examples/public';
+import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from './fixtures';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import {
   ContactCardEmbeddableInput,
@@ -43,11 +36,10 @@ import {
   FilterableContainer,
   FilterableContainerInput,
 } from '../lib/test_samples/embeddables/filterable_container';
-// eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
-import { esFilters, Filter } from '../../../../plugins/data/public';
+import { createEmbeddablePanelMock } from '../mocks';
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
@@ -60,7 +52,7 @@ async function creatHelloWorldContainerAndEmbeddable(
   const slowContactCardFactory = new SlowContactCardEmbeddableFactory({
     execAction: uiActions.executeTriggerActions,
   });
-  const helloWorldFactory = new HelloWorldEmbeddableFactory();
+  const helloWorldFactory = new HelloWorldEmbeddableFactoryDefinition();
 
   setup.registerEmbeddableFactory(filterableFactory.type, filterableFactory);
   setup.registerEmbeddableFactory(slowContactCardFactory.type, slowContactCardFactory);
@@ -68,15 +60,20 @@ async function creatHelloWorldContainerAndEmbeddable(
 
   const start = doStart();
 
-  const container = new HelloWorldContainer(containerInput, {
+  const testPanel = createEmbeddablePanelMock({
     getActions: uiActions.getTriggerCompatibleActions,
     getEmbeddableFactory: start.getEmbeddableFactory,
     getAllEmbeddableFactories: start.getEmbeddableFactories,
     overlays: coreStart.overlays,
     notifications: coreStart.notifications,
-    inspector: {} as any,
-    SavedObjectFinder: () => null,
+    application: coreStart.application,
   });
+
+  const container = new HelloWorldContainer(containerInput, {
+    getEmbeddableFactory: start.getEmbeddableFactory,
+    panelComponent: testPanel,
+  });
+
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -87,10 +84,10 @@ async function creatHelloWorldContainerAndEmbeddable(
     throw new Error('Error adding embeddable');
   }
 
-  return { container, embeddable, coreSetup, coreStart, setup, start, uiActions };
+  return { container, embeddable, coreSetup, coreStart, setup, start, uiActions, testPanel };
 }
 
-test('Container initializes embeddables', async done => {
+test('Container initializes embeddables', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
@@ -129,8 +126,9 @@ test('Container.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
-test('Container.removeEmbeddable removes and cleans up', async done => {
-  const { start, coreStart, uiActions } = await creatHelloWorldContainerAndEmbeddable();
+test('Container.removeEmbeddable removes and cleans up', async (done) => {
+  const { start, testPanel } = await creatHelloWorldContainerAndEmbeddable();
+
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -142,13 +140,8 @@ test('Container.removeEmbeddable removes and cleans up', async done => {
       },
     },
     {
-      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      getAllEmbeddableFactories: start.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector: {} as any,
-      SavedObjectFinder: () => null,
+      panelComponent: testPanel,
     }
   );
   const embeddable = await container.addNewEmbeddable<
@@ -292,7 +285,7 @@ test('Container view mode change propagates to children', async () => {
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
 });
 
-test(`Container updates its state when a child's input is updated`, async done => {
+test(`Container updates its state when a child's input is updated`, async (done) => {
   const {
     container,
     embeddable,
@@ -321,14 +314,17 @@ test(`Container updates its state when a child's input is updated`, async done =
         // Make sure a brand new container built off the output of container also creates an embeddable
         // with "Dr.", not the default the embeddable was first added with. Makes sure changed input
         // is preserved with the container.
-        const containerClone = new HelloWorldContainer(container.getInput(), {
+        const testPanel = createEmbeddablePanelMock({
           getActions: uiActions.getTriggerCompatibleActions,
-          getAllEmbeddableFactories: start.getEmbeddableFactories,
           getEmbeddableFactory: start.getEmbeddableFactory,
-          notifications: coreStart.notifications,
+          getAllEmbeddableFactories: start.getEmbeddableFactories,
           overlays: coreStart.overlays,
-          inspector: {} as any,
-          SavedObjectFinder: () => null,
+          notifications: coreStart.notifications,
+          application: coreStart.application,
+        });
+        const containerClone = new HelloWorldContainer(container.getInput(), {
+          getEmbeddableFactory: start.getEmbeddableFactory,
+          panelComponent: testPanel,
         });
         const cloneSubscription = Rx.merge(
           containerClone.getOutput$(),
@@ -378,7 +374,7 @@ test(`Derived container state passed to children`, async () => {
   subscription.unsubscribe();
 });
 
-test(`Can subscribe to children embeddable updates`, async done => {
+test(`Can subscribe to children embeddable updates`, async (done) => {
   const { embeddable } = await creatHelloWorldContainerAndEmbeddable(
     {
       id: 'hello container',
@@ -401,7 +397,7 @@ test(`Can subscribe to children embeddable updates`, async done => {
   embeddable.updateInput({ nameTitle: 'Dr.' });
 });
 
-test('Test nested reactions', async done => {
+test('Test nested reactions', async (done) => {
   const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
     {
@@ -439,8 +435,8 @@ test('Test nested reactions', async done => {
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const { start } = await creatHelloWorldContainerAndEmbeddable();
-  const derivedFilter: Filter = {
-    $state: { store: esFilters.FilterStateStore.APP_STATE },
+  const derivedFilter: MockFilter = {
+    $state: { store: 'appState' },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };
@@ -469,7 +465,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   ]);
 });
 
-test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
+test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({ id: 'hello', panels: {} });
 
   const embeddable = await container.addNewEmbeddable<
@@ -520,7 +516,7 @@ test('Panel removed from input state', async () => {
   };
 
   container.updateInput(newInput);
-  await new Promise(r => setTimeout(r, 1));
+  await new Promise((r) => setTimeout(r, 1));
 
   expect(container.getChild(embeddable.id)).toBeUndefined();
   expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
@@ -551,7 +547,7 @@ test('Panel added to input state', async () => {
   );
 
   container2.updateInput(container.getInput());
-  await new Promise(r => setTimeout(r, 1));
+  await new Promise((r) => setTimeout(r, 1));
 
   expect(container.getChild(embeddable.id)).toBeDefined();
   expect(container.getOutput().embeddableLoaded[embeddable.id]).toBe(true);
@@ -559,7 +555,7 @@ test('Panel added to input state', async () => {
   expect(container.getOutput().embeddableLoaded[embeddable2.id]).toBe(true);
 });
 
-test('Container changes made directly after adding a new embeddable are propagated', async done => {
+test('Container changes made directly after adding a new embeddable are propagated', async (done) => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
@@ -572,6 +568,14 @@ test('Container changes made directly after adding a new embeddable are propagat
 
   const start = doStart();
 
+  const testPanel = createEmbeddablePanelMock({
+    getActions: uiActions.getTriggerCompatibleActions,
+    getEmbeddableFactory: start.getEmbeddableFactory,
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    overlays: coreStart.overlays,
+    notifications: coreStart.notifications,
+    application: coreStart.application,
+  });
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -579,13 +583,8 @@ test('Container changes made directly after adding a new embeddable are propagat
       viewMode: ViewMode.EDIT,
     },
     {
-      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      getAllEmbeddableFactories: start.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector: {} as any,
-      SavedObjectFinder: () => null,
+      panelComponent: testPanel,
     }
   );
 
@@ -614,7 +613,7 @@ test('Container changes made directly after adding a new embeddable are propagat
   container.updateInput({ viewMode: ViewMode.VIEW });
 });
 
-test('container stores ErrorEmbeddables when a factory for a child cannot be found (so the panel can be removed)', async done => {
+test('container stores ErrorEmbeddables when a factory for a child cannot be found (so the panel can be removed)', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
@@ -635,14 +634,13 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
   });
 });
 
-test('container stores ErrorEmbeddables when a saved object cannot be found', async done => {
+test('container stores ErrorEmbeddables when a saved object cannot be found', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123' },
-        savedObjectId: '456',
+        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
       },
     },
     viewMode: ViewMode.EDIT,
@@ -657,14 +655,13 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
   });
 });
 
-test('ErrorEmbeddables get updated when parent does', async done => {
+test('ErrorEmbeddables get updated when parent does', async (done) => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123' },
-        savedObjectId: '456',
+        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
       },
     },
     viewMode: ViewMode.EDIT,
@@ -699,19 +696,22 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
     coreMock.createStart()
   );
   const start = doStart();
+  const testPanel = createEmbeddablePanelMock({
+    getActions: uiActions.getTriggerCompatibleActions,
+    getEmbeddableFactory: start.getEmbeddableFactory,
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    overlays: coreStart.overlays,
+    notifications: coreStart.notifications,
+    application: coreStart.application,
+  });
   const container = new HelloWorldContainer(
     {
       id: 'hello',
       panels: {},
     },
     {
-      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      getAllEmbeddableFactories: start.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector: {} as any,
-      SavedObjectFinder: () => null,
+      panelComponent: testPanel,
     }
   );
 
@@ -720,14 +720,22 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
   expect(error.message).toMatchInlineSnapshot(`"Panel not found"`);
 });
 
-test('untilEmbeddableLoaded() resolves if child is loaded in the container', async done => {
+test('untilEmbeddableLoaded() resolves if child is loaded in the container', async (done) => {
   const { setup, doStart, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
   );
-  const factory = new HelloWorldEmbeddableFactory();
+  const factory = new HelloWorldEmbeddableFactoryDefinition();
   setup.registerEmbeddableFactory(factory.type, factory);
   const start = doStart();
+  const testPanel = createEmbeddablePanelMock({
+    getActions: uiActions.getTriggerCompatibleActions,
+    getEmbeddableFactory: start.getEmbeddableFactory,
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    overlays: coreStart.overlays,
+    notifications: coreStart.notifications,
+    application: coreStart.application,
+  });
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -739,13 +747,8 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
       },
     },
     {
-      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      getAllEmbeddableFactories: start.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector: {} as any,
-      SavedObjectFinder: () => null,
+      panelComponent: testPanel,
     }
   );
 
@@ -755,7 +758,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
   done();
 });
 
-test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async done => {
+test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async (done) => {
   const { doStart, setup, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -767,6 +770,14 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
   setup.registerEmbeddableFactory(factory.type, factory);
 
   const start = doStart();
+  const testPanel = createEmbeddablePanelMock({
+    getActions: uiActions.getTriggerCompatibleActions,
+    getEmbeddableFactory: start.getEmbeddableFactory,
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    overlays: coreStart.overlays,
+    notifications: coreStart.notifications,
+    application: coreStart.application,
+  });
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -778,17 +789,12 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
       },
     },
     {
-      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      getAllEmbeddableFactories: start.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector: {} as any,
-      SavedObjectFinder: () => null,
+      panelComponent: testPanel,
     }
   );
 
-  container.untilEmbeddableLoaded('123').then(embed => {
+  container.untilEmbeddableLoaded('123').then((embed) => {
     expect(embed).toBeUndefined();
     done();
   });
@@ -796,7 +802,7 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
   container.updateInput({ panels: {} });
 });
 
-test('adding a panel then subsequently removing it before its loaded removes the panel', async done => {
+test('adding a panel then subsequently removing it before its loaded removes the panel', async (done) => {
   const { doStart, coreStart, uiActions, setup } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -807,6 +813,14 @@ test('adding a panel then subsequently removing it before its loaded removes the
   });
   setup.registerEmbeddableFactory(factory.type, factory);
   const start = doStart();
+  const testPanel = createEmbeddablePanelMock({
+    getActions: uiActions.getTriggerCompatibleActions,
+    getEmbeddableFactory: start.getEmbeddableFactory,
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    overlays: coreStart.overlays,
+    notifications: coreStart.notifications,
+    application: coreStart.application,
+  });
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -818,13 +832,8 @@ test('adding a panel then subsequently removing it before its loaded removes the
       },
     },
     {
-      getActions: uiActions.getTriggerCompatibleActions,
       getEmbeddableFactory: start.getEmbeddableFactory,
-      getAllEmbeddableFactories: start.getEmbeddableFactories,
-      overlays: coreStart.overlays,
-      notifications: coreStart.notifications,
-      inspector: {} as any,
-      SavedObjectFinder: () => null,
+      panelComponent: testPanel,
     }
   );
 

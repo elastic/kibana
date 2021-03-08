@@ -4,6 +4,8 @@
 
 ## SearchSource.createCopy() method
 
+creates a copy of this search source (without its children)
+
 <b>Signature:</b>
 
 ```typescript

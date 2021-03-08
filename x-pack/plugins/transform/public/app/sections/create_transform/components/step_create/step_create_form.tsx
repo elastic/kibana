@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
@@ -9,13 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
-  // Module '"@elastic/eui"' has no exported member 'EuiCard'.
-  // @ts-ignore
   EuiCard,
   EuiCopy,
-  // Module '"@elastic/eui"' has no exported member 'EuiDescribedFormGroup'.
-  // @ts-ignore
-  EuiDescribedFormGroup,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,15 +26,29 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
+import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
+import {
+  isGetTransformsStatsResponseSchema,
+  isPutTransformsResponseSchema,
+  isStartTransformsResponseSchema,
+} from '../../../../../../common/api_schemas/type_guards';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
-import { getErrorMessage } from '../../../../../shared_imports';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { getTransformProgress, getDiscoverUrl } from '../../../../common';
 import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
+import { DuplicateIndexPatternError } from '../../../../../../../../../src/plugins/data/public';
+import {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../../../../common/api_schemas/transforms';
+import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+import { isPopulatedObject } from '../../../../common/utils/object_utils';
+import { isLatestTransform } from '../../../../../../common/types/transform';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -54,16 +64,17 @@ export function getDefaultStepCreateState(): StepDetailsExposedState {
   };
 }
 
-interface Props {
+export interface StepCreateFormProps {
   createIndexPattern: boolean;
   transformId: string;
-  transformConfig: any;
+  transformConfig: PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema;
   overrides: StepDetailsExposedState;
+  timeFieldName?: string | undefined;
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: FC<Props> = React.memo(
-  ({ createIndexPattern, transformConfig, transformId, onChange, overrides }) => {
+export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
+  ({ createIndexPattern, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
@@ -78,7 +89,6 @@ export const StepCreateForm: FC<Props> = React.memo(
 
     const deps = useAppDependencies();
     const indexPatterns = deps.data.indexPatterns;
-    const uiSettings = deps.uiSettings;
     const toastNotifications = useToastNotifications();
 
     useEffect(() => {
@@ -92,40 +102,43 @@ export const StepCreateForm: FC<Props> = React.memo(
     async function createTransform() {
       setLoading(true);
 
-      try {
-        const resp = await api.createTransform(transformId, transformConfig);
-        if (resp.errors !== undefined && Array.isArray(resp.errors)) {
-          if (resp.errors.length === 1) {
-            throw resp.errors[0];
-          }
+      const resp = await api.createTransform(transformId, transformConfig);
 
-          if (resp.errors.length > 1) {
-            throw resp.errors;
-          }
+      if (!isPutTransformsResponseSchema(resp) || resp.errors.length > 0) {
+        let respErrors:
+          | PutTransformsResponseSchema['errors']
+          | PutTransformsResponseSchema['errors'][number]
+          | undefined;
+
+        if (isPutTransformsResponseSchema(resp) && resp.errors.length > 0) {
+          respErrors = resp.errors.length === 1 ? resp.errors[0] : resp.errors;
         }
 
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
-            defaultMessage: 'Request to create transform {transformId} acknowledged.',
-            values: { transformId },
-          })
-        );
-        setCreated(true);
-        setLoading(false);
-      } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
             defaultMessage: 'An error occurred creating the transform {transformId}:',
             values: { transformId },
           }),
           text: toMountPoint(
-            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            <ToastNotificationText
+              overlays={deps.overlays}
+              text={getErrorMessage(isPutTransformsResponseSchema(resp) ? respErrors : resp)}
+            />
           ),
         });
         setCreated(false);
         setLoading(false);
         return false;
       }
+
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
+          defaultMessage: 'Request to create transform {transformId} acknowledged.',
+          values: { transformId },
+        })
+      );
+      setCreated(true);
+      setLoading(false);
 
       if (createIndexPattern) {
         createKibanaIndexPattern();
@@ -137,37 +150,36 @@ export const StepCreateForm: FC<Props> = React.memo(
     async function startTransform() {
       setLoading(true);
 
-      try {
-        const resp = await api.startTransforms([{ id: transformId }]);
-        if (typeof resp === 'object' && resp !== null && resp[transformId]?.success === true) {
-          toastNotifications.addSuccess(
-            i18n.translate('xpack.transform.stepCreateForm.startTransformSuccessMessage', {
-              defaultMessage: 'Request to start transform {transformId} acknowledged.',
-              values: { transformId },
-            })
-          );
-          setStarted(true);
-          setLoading(false);
-        } else {
-          const errorMessage =
-            typeof resp === 'object' && resp !== null && resp[transformId]?.success === false
-              ? resp[transformId].error
-              : resp;
-          throw new Error(errorMessage);
-        }
-      } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
-            defaultMessage: 'An error occurred starting the transform {transformId}:',
+      const resp = await api.startTransforms([{ id: transformId }]);
+
+      if (isStartTransformsResponseSchema(resp) && resp[transformId]?.success === true) {
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.transform.stepCreateForm.startTransformSuccessMessage', {
+            defaultMessage: 'Request to start transform {transformId} acknowledged.',
             values: { transformId },
-          }),
-          text: toMountPoint(
-            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
-          ),
-        });
-        setStarted(false);
+          })
+        );
+        setStarted(true);
         setLoading(false);
+        return;
       }
+
+      const errorMessage =
+        isStartTransformsResponseSchema(resp) && resp[transformId]?.success === false
+          ? resp[transformId].error
+          : resp;
+
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
+          defaultMessage: 'An error occurred starting the transform {transformId}:',
+          values: { transformId },
+        }),
+        text: toMountPoint(
+          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(errorMessage)} />
+        ),
+      });
+      setStarted(false);
+      setLoading(false);
     }
 
     async function createAndStartTransform() {
@@ -180,37 +192,23 @@ export const StepCreateForm: FC<Props> = React.memo(
     const createKibanaIndexPattern = async () => {
       setLoading(true);
       const indexPatternName = transformConfig.dest.index;
+      const runtimeMappings = transformConfig.source.runtime_mappings as Record<
+        string,
+        RuntimeField
+      >;
 
       try {
-        const newIndexPattern = await indexPatterns.make();
-
-        Object.assign(newIndexPattern, {
-          id: '',
-          title: indexPatternName,
-        });
-
-        const id = await newIndexPattern.create();
-
-        await indexPatterns.clearCache();
-
-        // id returns false if there's a duplicate index pattern.
-        if (id === false) {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
-              defaultMessage:
-                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
-              values: { indexPatternName },
-            })
-          );
-          setLoading(false);
-          return;
-        }
-
-        // check if there's a default index pattern, if not,
-        // set the newly created one as the default index pattern.
-        if (!uiSettings.get('defaultIndex')) {
-          await uiSettings.set('defaultIndex', id);
-        }
+        const newIndexPattern = await indexPatterns.createAndSave(
+          {
+            title: indexPatternName,
+            timeFieldName,
+            ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
+              ? { runtimeFieldMap: runtimeMappings }
+              : {}),
+          },
+          false,
+          true
+        );
 
         toastNotifications.addSuccess(
           i18n.translate('xpack.transform.stepCreateForm.createIndexPatternSuccessMessage', {
@@ -219,22 +217,32 @@ export const StepCreateForm: FC<Props> = React.memo(
           })
         );
 
-        setIndexPatternId(id);
+        setIndexPatternId(newIndexPattern.id);
         setLoading(false);
         return true;
       } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
-            defaultMessage:
-              'An error occurred creating the Kibana index pattern {indexPatternName}:',
-            values: { indexPatternName },
-          }),
-          text: toMountPoint(
-            <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
-          ),
-        });
-        setLoading(false);
-        return false;
+        if (e instanceof DuplicateIndexPatternError) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
+              defaultMessage:
+                'An error occurred creating the Kibana index pattern {indexPatternName}: The index pattern already exists.',
+              values: { indexPatternName },
+            })
+          );
+        } else {
+          toastNotifications.addDanger({
+            title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
+              defaultMessage:
+                'An error occurred creating the Kibana index pattern {indexPatternName}:',
+              values: { indexPatternName },
+            }),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
+          });
+          setLoading(false);
+          return false;
+        }
       }
     };
 
@@ -249,27 +257,33 @@ export const StepCreateForm: FC<Props> = React.memo(
       // wrapping in function so we can keep the interval id in local scope
       function startProgressBar() {
         const interval = setInterval(async () => {
-          try {
-            const stats = await api.getTransformsStats(transformId);
-            if (stats && Array.isArray(stats.transforms) && stats.transforms.length > 0) {
-              const percent =
-                getTransformProgress({
-                  id: transformConfig.id,
-                  config: transformConfig,
-                  stats: stats.transforms[0],
-                }) || 0;
-              setProgressPercentComplete(percent);
-              if (percent >= 100) {
-                clearInterval(interval);
-              }
+          const stats = await api.getTransformStats(transformId);
+
+          if (
+            isGetTransformsStatsResponseSchema(stats) &&
+            Array.isArray(stats.transforms) &&
+            stats.transforms.length > 0
+          ) {
+            const percent =
+              getTransformProgress({
+                id: transformId,
+                config: {
+                  ...transformConfig,
+                  id: transformId,
+                },
+                stats: stats.transforms[0],
+              }) || 0;
+            setProgressPercentComplete(percent);
+            if (percent >= 100) {
+              clearInterval(interval);
             }
-          } catch (e) {
+          } else {
             toastNotifications.addDanger({
               title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
                 defaultMessage: 'An error occurred getting the progress percentage:',
               }),
               text: toMountPoint(
-                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(stats)} />
               ),
             });
             clearInterval(interval);

@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
 import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
@@ -28,10 +17,9 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-// eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { mount } from 'enzyme';
-import { embeddablePluginMock } from '../../mocks';
+import { embeddablePluginMock, createEmbeddablePanelMock } from '../../mocks';
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const inspector = inspectorPluginMock.createStartContract();
@@ -58,17 +46,17 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 
   expect(newEmbeddable.id).toBeDefined();
 
+  const testPanel = createEmbeddablePanelMock({
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    getEmbeddableFactory,
+    inspector,
+  });
+
   const component = mount(
     <EmbeddableChildPanel
       container={container}
       embeddableId={newEmbeddable.id}
-      getActions={() => Promise.resolve([])}
-      getAllEmbeddableFactories={start.getEmbeddableFactories}
-      getEmbeddableFactory={getEmbeddableFactory}
-      notifications={{} as any}
-      overlays={{} as any}
-      inspector={inspector}
-      SavedObjectFinder={() => null}
+      PanelComponent={testPanel}
     />
   );
 
@@ -96,18 +84,9 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
     { getEmbeddableFactory } as any
   );
 
+  const testPanel = createEmbeddablePanelMock({ inspector });
   const component = mount(
-    <EmbeddableChildPanel
-      container={container}
-      embeddableId={'1'}
-      getActions={() => Promise.resolve([])}
-      getAllEmbeddableFactories={(() => []) as any}
-      getEmbeddableFactory={(() => undefined) as any}
-      notifications={{} as any}
-      overlays={{} as any}
-      inspector={inspector}
-      SavedObjectFinder={() => null}
-    />
+    <EmbeddableChildPanel container={container} embeddableId={'1'} PanelComponent={testPanel} />
   );
 
   await nextTick();

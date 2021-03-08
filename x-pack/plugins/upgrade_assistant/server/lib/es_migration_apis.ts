@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'src/core/server';
-import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
-import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
+import {
+  DeprecationAPIResponse,
+  EnrichedDeprecationInfo,
+  UpgradeAssistantStatus,
+} from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 
@@ -14,10 +18,9 @@ export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
-  const deprecations = await dataClient.callAsCurrentUser('transport.request', {
-    path: '/_migration/deprecations',
-    method: 'GET',
-  });
+  const {
+    body: deprecations,
+  } = await dataClient.asCurrentUser.migration.deprecations<DeprecationAPIResponse>();
 
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations);
@@ -27,18 +30,15 @@ export async function getUpgradeAssistantStatus(
   // If we have found deprecation information for index/indices check whether the index is
   // open or closed.
   if (indexNames.length) {
-    const indexStates = await esIndicesStateCheck(
-      dataClient.callAsCurrentUser.bind(dataClient),
-      indexNames
-    );
+    const indexStates = await esIndicesStateCheck(dataClient.asCurrentUser, indexNames);
 
-    indices.forEach(indexData => {
+    indices.forEach((indexData) => {
       indexData.blockerForReindexing =
-        indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
+        indexStates[indexData.index!] === 'closed' ? 'index-closed' : undefined;
     });
   }
 
-  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
+  const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
 
   return {
     readyForUpgrade: criticalWarnings.length === 0,
@@ -52,7 +52,7 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
   Object.keys(deprecations.index_settings).reduce((indexDeprecations, indexName) => {
     return indexDeprecations.concat(
       deprecations.index_settings[indexName].map(
-        d =>
+        (d) =>
           ({
             ...d,
             index: indexName,
@@ -69,7 +69,7 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
 
   if (isCloudEnabled) {
     // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+    return combined.filter((d) => d.message !== 'Security realm settings structure changed');
   } else {
     return combined;
   }

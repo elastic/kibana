@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useMemo } from 'react';
@@ -26,7 +27,7 @@ export const WithLogTextviewUrlState = () => {
       urlState={urlState}
       urlStateKey="logTextview"
       mapToUrlState={mapToUrlState}
-      onChange={newUrlState => {
+      onChange={(newUrlState) => {
         if (newUrlState && newUrlState.textScale) {
           setTextScale(newUrlState.textScale);
         }
@@ -34,7 +35,7 @@ export const WithLogTextviewUrlState = () => {
           setTextWrap(newUrlState.wrap);
         }
       }}
-      onInitialize={newUrlState => {
+      onInitialize={(newUrlState) => {
         if (newUrlState && newUrlState.textScale) {
           setTextScale(newUrlState.textScale);
         }

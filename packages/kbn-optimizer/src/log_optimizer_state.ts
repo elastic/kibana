@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { inspect } from 'util';
@@ -24,7 +13,7 @@ import { tap } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
-import { CompilerMsg, pipeClosure } from './common';
+import { CompilerMsg, pipeClosure, ALL_THEMES } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
@@ -33,16 +22,11 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
     let loggedInit = false;
 
     return update$.pipe(
-      tap(update => {
+      tap((update) => {
         const { event, state } = update;
 
         if (event?.type === 'worker stdio') {
-          const chunk = event.chunk.toString('utf8');
-          log.warning(
-            `worker`,
-            event.stream,
-            chunk.slice(0, chunk.length - (chunk.endsWith('\n') ? 1 : 0))
-          );
+          log.warning(`worker`, event.stream, event.line);
         }
 
         if (event?.type === 'bundle not cached') {
@@ -59,12 +43,18 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
         if (event?.type === 'worker started') {
           let moduleCount = 0;
+          let workUnits = 0;
           for (const bundle of event.bundles) {
             moduleCount += bundle.cache.getModuleCount() ?? NaN;
+            workUnits += bundle.cache.getWorkUnits() ?? NaN;
           }
-          const mcString = isFinite(moduleCount) ? String(moduleCount) : '?';
-          const bcString = String(event.bundles.length);
-          log.info(`starting worker [${bcString} bundles, ${mcString} modules]`);
+
+          log.info(
+            `starting worker [${event.bundles.length} ${
+              event.bundles.length === 1 ? 'bundle' : 'bundles'
+            }]`
+          );
+          log.debug(`modules [${moduleCount}] work units [${workUnits}]`);
         }
 
         if (state.phase === 'reallocating') {
@@ -76,6 +66,11 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           if (!loggedInit) {
             loggedInit = true;
             log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
+            if (config.themeTags.length !== ALL_THEMES.length) {
+              log.warning(
+                `only building [${config.themeTags}] themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
+              );
+            }
           }
           return;
         }
@@ -98,7 +93,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (state.phase === 'running' || state.phase === 'initializing') {
-          return true;
+          return;
         }
 
         if (state.phase === 'issue') {
@@ -113,7 +108,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             }
           }
           log.indent(-4);
-          return true;
+          return;
         }
 
         if (state.phase === 'success') {
@@ -129,7 +124,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             );
           }
 
-          return true;
+          return;
         }
 
         throw new Error(`unhandled optimizer message: ${inspect(update)}`);

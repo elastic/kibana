@@ -1,37 +1,56 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
-
-import { euiStyled } from '../../../../../observability/public';
+import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useUiTracker } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
-import {
-  LogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
-  isMessageLogColumnConfiguration,
-  isFieldLogColumnConfiguration,
-} from '../../../utils/source_configuration';
 import { TextScale } from '../../../../common/log_text_scale';
 import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
 import { LogEntryFieldColumn } from './log_entry_field_column';
-import { LogEntryActionsColumn } from './log_entry_actions_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
-import { LogEntry, LogColumn } from '../../../../common/http_api';
+import { LogEntry, LogColumn } from '../../../../common/log_entry';
+import { LogEntryContextMenu } from './log_entry_context_menu';
+import {
+  LogColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  isFieldColumnRenderConfiguration,
+} from '../../../utils/log_column_render_configuration';
+
+const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
+  defaultMessage: 'View actions for line',
+});
+
+const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetailsButton', {
+  defaultMessage: 'View details',
+});
+
+const LOG_VIEW_IN_CONTEXT_LABEL = i18n.translate(
+  'xpack.infra.lobs.logEntryActionsViewInContextButton',
+  {
+    defaultMessage: 'View in context',
+  }
+);
 
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   columnWidths: LogEntryColumnWidths;
   highlights: LogEntry[];
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   logEntry: LogEntry;
   openFlyoutWithItem?: (id: string) => void;
+  openViewLogInContext?: (entry: LogEntry) => void;
   scale: TextScale;
   wrap: boolean;
 }
@@ -46,9 +65,12 @@ export const LogEntryRow = memo(
     isHighlighted,
     logEntry,
     openFlyoutWithItem,
+    openViewLogInContext,
     scale,
     wrap,
   }: LogEntryRowProps) => {
+    const trackMetric = useUiTracker({ app: 'infra_logs' });
+
     const [isHovered, setIsHovered] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -61,6 +83,39 @@ export const LogEntryRow = memo(
     const openFlyout = useCallback(() => openFlyoutWithItem?.(logEntry.id), [
       openFlyoutWithItem,
       logEntry.id,
+    ]);
+
+    const handleOpenViewLogInContext = useCallback(() => {
+      openViewLogInContext?.(logEntry);
+      trackMetric({ metric: 'view_in_context__stream' });
+    }, [openViewLogInContext, logEntry, trackMetric]);
+
+    const hasContext = useMemo(() => !isEmpty(logEntry.context), [logEntry]);
+    const hasActionFlyoutWithItem = openFlyoutWithItem !== undefined;
+    const hasActionViewLogInContext = hasContext && openViewLogInContext !== undefined;
+    const hasActionsMenu = hasActionFlyoutWithItem || hasActionViewLogInContext;
+
+    const menuItems = useMemo(() => {
+      const items = [];
+      if (hasActionFlyoutWithItem) {
+        items.push({
+          label: LOG_DETAILS_LABEL,
+          onClick: openFlyout,
+        });
+      }
+      if (hasActionViewLogInContext) {
+        items.push({
+          label: LOG_VIEW_IN_CONTEXT_LABEL,
+          onClick: handleOpenViewLogInContext,
+        });
+      }
+
+      return items;
+    }, [
+      hasActionFlyoutWithItem,
+      hasActionViewLogInContext,
+      openFlyout,
+      handleOpenViewLogInContext,
     ]);
 
     const logEntryColumnsById = useMemo(
@@ -107,8 +162,8 @@ export const LogEntryRow = memo(
         isHighlighted={isHighlighted}
         scale={scale}
       >
-        {columnConfigurations.map(columnConfiguration => {
-          if (isTimestampLogColumnConfiguration(columnConfiguration)) {
+        {columnConfigurations.map((columnConfiguration) => {
+          if (isTimestampColumnRenderConfiguration(columnConfiguration)) {
             const column = logEntryColumnsById[columnConfiguration.timestampColumn.id];
             const columnWidth = columnWidths[columnConfiguration.timestampColumn.id];
 
@@ -119,11 +174,14 @@ export const LogEntryRow = memo(
                 {...columnWidth}
               >
                 {isTimestampColumn(column) ? (
-                  <LogEntryTimestampColumn time={column.timestamp} />
+                  <LogEntryTimestampColumn
+                    time={column.timestamp}
+                    render={columnConfiguration.timestampColumn.render}
+                  />
                 ) : null}
               </LogEntryColumn>
             );
-          } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
+          } else if (isMessageColumnRenderConfiguration(columnConfiguration)) {
             const column = logEntryColumnsById[columnConfiguration.messageColumn.id];
             const columnWidth = columnWidths[columnConfiguration.messageColumn.id];
 
@@ -139,11 +197,12 @@ export const LogEntryRow = memo(
                     highlights={highlightsByColumnId[column.columnId] || []}
                     isActiveHighlight={isActiveHighlight}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
+                    render={columnConfiguration.messageColumn.render}
                   />
                 ) : null}
               </LogEntryColumn>
             );
-          } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
+          } else if (isFieldColumnRenderConfiguration(columnConfiguration)) {
             const column = logEntryColumnsById[columnConfiguration.fieldColumn.id];
             const columnWidth = columnWidths[columnConfiguration.fieldColumn.id];
 
@@ -159,24 +218,29 @@ export const LogEntryRow = memo(
                     highlights={highlightsByColumnId[column.columnId] || []}
                     isActiveHighlight={isActiveHighlight}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
+                    render={columnConfiguration.fieldColumn.render}
                   />
                 ) : null}
               </LogEntryColumn>
             );
           }
         })}
-        <LogEntryColumn
-          key="logColumn iconLogColumn iconLogColumn:details"
-          {...columnWidths[iconColumnId]}
-        >
-          <LogEntryActionsColumn
-            isHovered={isHovered}
-            isMenuOpen={isMenuOpen}
-            onOpenMenu={openMenu}
-            onCloseMenu={closeMenu}
-            onViewDetails={openFlyout}
-          />
-        </LogEntryColumn>
+        {hasActionsMenu ? (
+          <LogEntryColumn
+            key="logColumn iconLogColumn iconLogColumn:details"
+            {...columnWidths[iconColumnId]}
+          >
+            {isHovered || isMenuOpen ? (
+              <LogEntryContextMenu
+                aria-label={MENU_LABEL}
+                isOpen={isMenuOpen}
+                onOpen={openMenu}
+                onClose={closeMenu}
+                items={menuItems}
+              />
+            ) : null}
+          </LogEntryColumn>
+        ) : null}
       </LogEntryRowWrapper>
     );
   }
@@ -191,15 +255,15 @@ export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
 }))<LogEntryRowWrapperProps>`
   align-items: stretch;
-  color: ${props => props.theme.eui.euiTextColor};
+  color: ${(props) => props.theme.eui.euiTextColor};
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
   overflow: hidden;
 
-  ${props => monospaceTextStyle(props.scale)};
-  ${props => (props.isHighlighted ? highlightedContentStyle : '')}
+  ${(props) => monospaceTextStyle(props.scale)};
+  ${(props) => (props.isHighlighted ? highlightedContentStyle : '')}
 
   &:hover {
     ${hoveredContentStyle}

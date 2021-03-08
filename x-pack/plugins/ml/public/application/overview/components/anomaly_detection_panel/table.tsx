@@ -1,29 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useState } from 'react';
 import {
+  Direction,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
+  EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  mlInMemoryTableFactory,
-  SortDirection,
-  SORT_DIRECTION,
-  OnTableChangeArg,
-  ColumnType,
-} from '../../../components/ml_in_memory_table';
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { ExplorerLink } from './actions';
 import { getJobsFromGroup } from './utils';
 import { GroupsDictionary, Group } from './anomaly_detection_panel';
@@ -32,9 +30,10 @@ import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
 // @ts-ignore
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge/index';
 import { toLocaleString } from '../../../util/string_utils';
-import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
-
-const MlInMemoryTable = mlInMemoryTableFactory<Group>();
+import {
+  getFormattedSeverityScore,
+  getSeverityColor,
+} from '../../../../../common/util/anomaly_utils';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
@@ -45,6 +44,15 @@ export enum AnomalyDetectionListColumns {
   docsProcessed = 'docs_processed',
   jobsInGroup = 'jobs_in_group',
 }
+
+type AnomalyDetectionTableColumns = [
+  EuiTableFieldDataColumnType<Group>,
+  EuiTableFieldDataColumnType<Group>,
+  EuiTableFieldDataColumnType<Group>,
+  EuiTableFieldDataColumnType<Group>,
+  EuiTableFieldDataColumnType<Group>,
+  EuiTableComputedColumnType<Group>
+];
 
 interface Props {
   items: GroupsDictionary;
@@ -58,10 +66,10 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const [pageSize, setPageSize] = useState(10);
 
   const [sortField, setSortField] = useState<string>(AnomalyDetectionListColumns.id);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
+  const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
-  const columns: Array<ColumnType<Group>> = [
+  const columns: AnomalyDetectionTableColumns = [
     {
       field: AnomalyDetectionListColumns.id,
       name: i18n.translate('xpack.ml.overview.anomalyDetection.tableId', {
@@ -84,7 +92,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
           <span>
             {i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScore', {
               defaultMessage: 'Max anomaly score',
-            })}{' '}
+            })}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
         </EuiToolTip>
@@ -120,7 +128,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
           return (
             // @ts-ignore
             <EuiHealth color={color} compressed="true">
-              {score >= 1 ? Math.floor(score) : '< 1'}
+              {getFormattedSeverityScore(score)}
             </EuiHealth>
           );
         }
@@ -169,17 +177,17 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
     },
   ];
 
-  const onTableChange = ({
+  const onTableChange: EuiInMemoryTable<Group>['onTableChange'] = ({
     page = { index: 0, size: 10 },
-    sort = { field: AnomalyDetectionListColumns.id, direction: SORT_DIRECTION.ASC },
-  }: OnTableChangeArg) => {
+    sort = { field: AnomalyDetectionListColumns.id, direction: 'asc' },
+  }) => {
     const { index, size } = page;
     setPageIndex(index);
     setPageSize(size);
 
     const { field, direction } = sort;
-    setSortField(field);
-    setSortDirection(direction);
+    setSortField(field as string);
+    setSortDirection(direction as Direction);
   };
 
   const pagination = {
@@ -199,6 +207,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
 
   return (
     <Fragment>
+      <EuiSpacer />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="m">
@@ -214,7 +223,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <MlInMemoryTable
+      <EuiInMemoryTable
         allowNeutralSort={false}
         className="mlAnomalyDetectionTable"
         columns={columns}

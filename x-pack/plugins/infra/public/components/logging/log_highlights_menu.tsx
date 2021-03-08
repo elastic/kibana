@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { useVisibilityState } from '../../utils/use_visibility_state';
 
 interface LogHighlightsMenuProps {
@@ -51,8 +52,8 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
 
   const debouncedOnChange = useMemo(() => debounce(onChange, 275), [onChange]);
   const setHighlightTerm = useCallback<typeof _setHighlightTerm>(
-    valueOrUpdater =>
-      _setHighlightTerm(previousHighlightTerm => {
+    (valueOrUpdater) =>
+      _setHighlightTerm((previousHighlightTerm) => {
         const newHighlightTerm =
           typeof valueOrUpdater === 'function'
             ? valueOrUpdater(previousHighlightTerm)
@@ -67,7 +68,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     [debouncedOnChange]
   );
   const changeHighlightTerm = useCallback(
-    e => {
+    (e) => {
       const value = e.target.value;
       setHighlightTerm(value);
     },
@@ -166,9 +167,9 @@ const goToNextHighlightLabel = i18n.translate(
 const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs(({ theme }) => ({
   type: 'checkInCircleFilled',
   size: 'm',
-  color: theme.eui.euiColorAccent,
+  color: theme?.eui.euiColorAccent,
 }))`
-  padding-left: ${props => props.theme.eui.paddingSizes.xs};
+  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
 `;
 
 const LogHighlightsMenuContent = euiStyled.div`

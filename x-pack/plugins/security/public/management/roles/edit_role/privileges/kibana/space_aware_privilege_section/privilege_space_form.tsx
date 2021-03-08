@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { ButtonColor } from '@elastic/eui';
 import {
-  ButtonColor,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -18,21 +22,22 @@ import {
   EuiFormRow,
   EuiOverlayMask,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
   EuiTitle,
-  EuiErrorBoundary,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
-import { Space } from '../../../../../../../../spaces/public';
-import { Role, copyRole } from '../../../../../../../common/model';
-import { SpaceSelector } from './space_selector';
-import { FeatureTable } from '../feature_table';
+
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role } from '../../../../../../../common/model';
+import { copyRole } from '../../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../../model';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
+import { FeatureTable } from '../feature_table';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { KibanaPrivileges } from '../../../../model';
+import { SpaceSelector } from './space_selector';
 
 interface Props {
   role: Role;
@@ -88,14 +93,14 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiOverlayMask>
+      <EuiOverlayMask headerZindexLocation="below">
         <EuiFlyout onClose={this.closeFlyout} size="m" maxWidth={true}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
                 <FormattedMessage
                   id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
-                  defaultMessage="Space privileges"
+                  defaultMessage="Kibana privileges"
                 />
               </h2>
             </EuiTitle>
@@ -164,6 +169,13 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               defaultMessage: 'Spaces',
             }
           )}
+          helpText={i18n.translate(
+            'xpack.security.management.editRole.spacePrivilegeForm.spaceSelectorFormHelpText',
+            {
+              defaultMessage:
+                'Select one or more Kibana spaces to which you wish to assign privileges.',
+            }
+          )}
         >
           <SpaceSelector
             selectedSpaceIds={this.state.selectedSpaceIds}
@@ -179,104 +191,52 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           label={i18n.translate(
             'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel',
             {
-              defaultMessage: 'Privilege',
+              defaultMessage: 'Privileges for all features',
+            }
+          )}
+          helpText={i18n.translate(
+            'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormHelpText',
+            {
+              defaultMessage:
+                'Assign the privilege level you wish to grant to all present and future features across this space.',
             }
           )}
         >
-          <EuiSuperSelect
-            data-test-subj={'basePrivilegeComboBox'}
-            fullWidth
-            onChange={this.onSpaceBasePrivilegeChange}
+          <EuiButtonGroup
+            name={`basePrivilegeButtonGroup`}
+            data-test-subj={`basePrivilegeButtonGroup`}
+            isFullWidth={true}
+            color={'primary'}
             options={[
               {
-                value: 'basePrivilege_custom',
-                inputDisplay: (
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDisplay"
-                      defaultMessage="Custom"
-                    />
-                  </EuiText>
-                ),
-                dropdownDisplay: (
-                  <EuiText>
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDropdownDisplay"
-                        defaultMessage="Custom"
-                      />
-                    </strong>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDetails"
-                        defaultMessage="Customize access by feature in selected spaces."
-                      />
-                    </p>
-                  </EuiText>
-                ),
+                id: 'basePrivilege_all',
+                label: 'All',
+                ['data-test-subj']: 'basePrivilege_all',
               },
               {
-                value: 'basePrivilege_read',
-                inputDisplay: (
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay"
-                      defaultMessage="Read"
-                    />
-                  </EuiText>
-                ),
-                dropdownDisplay: (
-                  <EuiText>
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDropdownDisplay"
-                        defaultMessage="Read"
-                      />
-                    </strong>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails"
-                        defaultMessage="Grant read-only access to all features in selected spaces."
-                      />
-                    </p>
-                  </EuiText>
-                ),
+                id: 'basePrivilege_read',
+                label: 'Read',
+                ['data-test-subj']: 'basePrivilege_read',
               },
               {
-                value: 'basePrivilege_all',
-                inputDisplay: (
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay"
-                      defaultMessage="All"
-                    />
-                  </EuiText>
-                ),
-                dropdownDisplay: (
-                  <EuiText>
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDropdownDisplay"
-                        defaultMessage="All"
-                      />
-                    </strong>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails"
-                        defaultMessage="Grant full access to all features in selected spaces."
-                      />
-                    </p>
-                  </EuiText>
-                ),
+                id: 'basePrivilege_custom',
+                label: 'Customize',
+                ['data-test-subj']: 'basePrivilege_custom',
               },
             ]}
-            hasDividers
-            valueOfSelected={this.getDisplayedBasePrivilege()}
-            disabled={!hasSelectedSpaces}
+            idSelected={this.getDisplayedBasePrivilege()}
+            isDisabled={!hasSelectedSpaces}
+            onChange={this.onSpaceBasePrivilegeChange}
+            legend={i18n.translate(
+              'xpack.security.management.editRole.spacePrivilegeForm.basePrivilegeControlLegend',
+              {
+                defaultMessage: 'Privileges for all features',
+              }
+            )}
           />
         </EuiFormRow>
 
-        <EuiSpacer size="s" />
+        <EuiSpacer />
 
         <EuiTitle size="xxs">
           <h3>{this.getFeatureListLabel(this.state.selectedBasePrivilege.length > 0)}</h3>
@@ -338,7 +298,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           buttonText = (
             <FormattedMessage
               id="xpack.security.management.editRolespacePrivilegeForm.createPrivilegeButton"
-              defaultMessage="Create space privilege"
+              defaultMessage="Add Kibana privilege"
             />
           );
         }
@@ -452,8 +412,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     // remove any spaces that no longer exist
     if (!this.isDefiningGlobalPrivilege()) {
-      form.spaces = form.spaces.filter(spaceId =>
-        this.props.spaces.find(space => space.id === spaceId)
+      form.spaces = form.spaces.filter((spaceId) =>
+        this.props.spaces.find((space) => space.id === spaceId)
       );
     }
 
@@ -532,10 +492,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     if (privileges.length === 0) {
       entry.feature = {};
     } else {
-      this.props.kibanaPrivileges.getSecuredFeatures().forEach(feature => {
+      this.props.kibanaPrivileges.getSecuredFeatures().forEach((feature) => {
         const nextFeaturePrivilege = feature
           .getPrimaryFeaturePrivileges()
-          .find(pfp => privileges.includes(pfp.id));
+          .find((pfp) => privileges.includes(pfp.id));
         if (nextFeaturePrivilege) {
           entry.feature[feature.id] = [nextFeaturePrivilege.id];
         }

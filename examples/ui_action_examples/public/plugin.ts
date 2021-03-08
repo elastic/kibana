@@ -1,44 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from '../../../src/core/public';
-import { UiActionsSetup } from '../../../src/plugins/ui_actions/public';
-import { createHelloWorldAction, ACTION_HELLO_WORLD } from './hello_world_action';
-import { helloWorldTrigger, HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
+import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
+import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import { createHelloWorldAction } from './hello_world_action';
+import { helloWorldTrigger } from './hello_world_trigger';
 
-interface UiActionExamplesSetupDependencies {
+export interface UiActionExamplesSetupDependencies {
   uiActions: UiActionsSetup;
 }
 
-declare module '../../../src/plugins/ui_actions/public' {
-  export interface TriggerContextMapping {
-    [HELLO_WORLD_TRIGGER_ID]: {};
-  }
-
-  export interface ActionContextMapping {
-    [ACTION_HELLO_WORLD]: {};
-  }
+export interface UiActionExamplesStartDependencies {
+  uiActions: UiActionsStart;
 }
 
 export class UiActionExamplesPlugin
-  implements Plugin<void, void, UiActionExamplesSetupDependencies> {
-  public setup(core: CoreSetup, { uiActions }: UiActionExamplesSetupDependencies) {
+  implements
+    Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies> {
+  public setup(
+    core: CoreSetup<UiActionExamplesStartDependencies>,
+    { uiActions }: UiActionExamplesSetupDependencies
+  ) {
     uiActions.registerTrigger(helloWorldTrigger);
 
     const helloWorldAction = createHelloWorldAction(async () => ({
@@ -46,9 +33,10 @@ export class UiActionExamplesPlugin
     }));
 
     uiActions.registerAction(helloWorldAction);
-    uiActions.attachAction(helloWorldTrigger.id, helloWorldAction);
+    uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: UiActionExamplesStartDependencies) {}
+
   public stop() {}
 }

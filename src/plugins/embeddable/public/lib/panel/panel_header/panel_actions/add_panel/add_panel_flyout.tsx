@@ -1,38 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ReactElement } from 'react';
 import { CoreSetup } from 'src/core/public';
 
-import {
-  EuiContextMenuItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
+import { SavedObjectEmbeddableInput } from '../../../../embeddables';
 
 interface Props {
   onClose: () => void;
@@ -98,16 +83,29 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     }
   };
 
-  public onAddPanel = async (id: string, type: string, name: string) => {
-    this.props.container.addSavedObjectEmbeddable(type, id);
+  public onAddPanel = async (savedObjectId: string, savedObjectType: string, name: string) => {
+    const factoryForSavedObjectType = [...this.props.getAllFactories()].find(
+      (factory) =>
+        factory.savedObjectMetaData && factory.savedObjectMetaData.type === savedObjectType
+    );
+    if (!factoryForSavedObjectType) {
+      throw new EmbeddableFactoryNotFoundError(savedObjectType);
+    }
+
+    this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+      factoryForSavedObjectType.type,
+      { savedObjectId }
+    );
 
     this.showToast(name);
   };
 
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
-      .filter(factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew())
-      .map(factory => (
+      .filter(
+        (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
+      )
+      .map((factory) => (
         <EuiContextMenuItem
           key={factory.type}
           data-test-subj={`createNew-${factory.type}`}
@@ -123,7 +121,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     const SavedObjectFinder = this.props.SavedObjectFinder;
     const metaData = [...this.props.getAllFactories()]
       .filter(
-        embeddableFactory =>
+        (embeddableFactory) =>
           Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
       )
       .map(({ savedObjectMetaData }) => savedObjectMetaData as any);
@@ -141,16 +139,19 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     );
 
     return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
+      <>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <FormattedMessage id="embeddableApi.addPanel.Title" defaultMessage="Add panels" />
+              <FormattedMessage
+                id="embeddableApi.addPanel.Title"
+                defaultMessage="Add from library"
+              />
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
-      </EuiFlyout>
+      </>
     );
   }
 }

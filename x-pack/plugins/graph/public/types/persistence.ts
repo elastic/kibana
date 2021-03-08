@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
@@ -27,13 +28,17 @@ export interface GraphWorkspaceSavedObject {
   type: string;
   version?: number;
   wsState: string;
+  // the title of the index pattern used by this workspace.
+  // Only set for legacy saved objects.
+  legacyIndexPatternRef?: string;
   _source: Record<string, unknown>;
 }
 
 export interface SerializedWorkspaceState {
+  // the id of the index pattern saved object
   indexPattern: string;
   selectedFields: SerializedField[];
-  blacklist: SerializedNode[];
+  blocklist: SerializedNode[];
   vertices: SerializedNode[];
   links: SerializedEdge[];
   urlTemplates: SerializedUrlTemplate[];

@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getAlertRoute } from './get';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { Alert } from '../../common';
 
 const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -21,7 +23,9 @@ beforeEach(() => {
 });
 
 describe('getAlertRoute', () => {
-  const mockedAlert = {
+  const mockedAlert: Alert<{
+    bar: true;
+  }> = {
     id: '1',
     alertTypeId: '1',
     schedule: { interval: '10s' },
@@ -45,29 +49,27 @@ describe('getAlertRoute', () => {
     tags: ['foo'],
     enabled: true,
     muteAll: false,
+    notifyWhen: 'onActionGroupChange',
     createdBy: '',
     updatedBy: '',
     apiKey: '',
     apiKeyOwner: '',
     throttle: '30s',
     mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
   };
 
   it('gets an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertRoute(router, licenseState);
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-read",
-        ],
-      }
-    `);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
     alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
@@ -89,8 +91,8 @@ describe('getAlertRoute', () => {
   });
 
   it('ensures the license allows getting alerts', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertRoute(router, licenseState);
 
@@ -99,7 +101,7 @@ describe('getAlertRoute', () => {
     alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      alertsClient,
+      { alertsClient },
       {
         params: { id: '1' },
       },
@@ -112,8 +114,8 @@ describe('getAlertRoute', () => {
   });
 
   it('ensures the license check prevents getting alerts', async () => {
-    const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -126,7 +128,7 @@ describe('getAlertRoute', () => {
     alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      alertsClient,
+      { alertsClient },
       {
         params: { id: '1' },
       },

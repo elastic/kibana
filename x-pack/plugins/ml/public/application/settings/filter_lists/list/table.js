@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -10,6 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -17,7 +19,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
-  EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -26,6 +27,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 function UsedByIcon({ usedBy }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
@@ -38,6 +41,7 @@ function UsedByIcon({ usedBy }) {
         aria-label={i18n.translate('xpack.ml.settings.filterLists.table.inUseAriaLabel', {
           defaultMessage: 'In use',
         })}
+        data-test-subj="mlFilterListUsedByIcon inUse"
       />
     );
   } else {
@@ -47,6 +51,7 @@ function UsedByIcon({ usedBy }) {
         aria-label={i18n.translate('xpack.ml.settings.filterLists.table.notInUseAriaLabel', {
           defaultMessage: 'Not in use',
         })}
+        data-test-subj="mlFilterListUsedByIcon notInUse"
       />
     );
   }
@@ -59,10 +64,12 @@ UsedByIcon.propTypes = {
 };
 
 function NewFilterButton({ canCreateFilter }) {
+  const redirectToNewFilterListPage = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_NEW);
+
   return (
     <EuiButton
       key="new_filter_list"
-      href="#/settings/filter_lists/new_filter_list"
+      onClick={redirectToNewFilterListPage}
       isDisabled={canCreateFilter === false}
       data-test-subj="mlFilterListsButtonCreate"
     >
@@ -81,9 +88,14 @@ function getColumns() {
       name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
         defaultMessage: 'ID',
       }),
-      render: id => <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`}>{id}</EuiLink>,
+      render: (id) => (
+        <Link to={`/${ML_PAGES.FILTER_LISTS_EDIT}/${id}`} data-test-subj="mlEditFilterListLink">
+          {id}
+        </Link>
+      ),
       sortable: true,
       scope: 'row',
+      'data-test-subj': 'mlFilterListColumnId',
     },
     {
       field: 'description',
@@ -91,6 +103,7 @@ function getColumns() {
         defaultMessage: 'Description',
       }),
       sortable: true,
+      'data-test-subj': 'mlFilterListColumnDescription',
     },
     {
       field: 'item_count',
@@ -98,14 +111,16 @@ function getColumns() {
         defaultMessage: 'Item count',
       }),
       sortable: true,
+      'data-test-subj': 'mlFilterListColumnItemCount',
     },
     {
       field: 'used_by',
       name: i18n.translate('xpack.ml.settings.filterLists.table.inUseColumnName', {
         defaultMessage: 'In use',
       }),
-      render: usedBy => <UsedByIcon usedBy={usedBy} />,
+      render: (usedBy) => <UsedByIcon usedBy={usedBy} />,
       sortable: true,
+      'data-test-subj': 'mlFilterListColumnInUse',
     },
   ];
 
@@ -157,10 +172,10 @@ export function FilterListsTable({
   };
 
   const tableSelection = {
-    selectable: filterList =>
+    selectable: (filterList) =>
       filterList.used_by === undefined || filterList.used_by.jobs.length === 0,
     selectableMessage: () => undefined,
-    onSelectionChange: selection => setSelectedFilterLists(selection),
+    onSelectionChange: (selection) => setSelectedFilterLists(selection),
   };
 
   return (
@@ -187,7 +202,7 @@ export function FilterListsTable({
           </EuiFlexGroup>
         </React.Fragment>
       ) : (
-        <React.Fragment>
+        <div data-test-subj="mlFilterListTableContainer">
           <EuiInMemoryTable
             className="ml-filter-lists-table"
             items={filterLists}
@@ -199,8 +214,11 @@ export function FilterListsTable({
             selection={tableSelection}
             isSelectable={true}
             data-test-subj="mlFilterListsTable"
+            rowProps={(item) => ({
+              'data-test-subj': `mlFilterListRow row-${item.filter_id}`,
+            })}
           />
-        </React.Fragment>
+        </div>
       )}
     </React.Fragment>
   );

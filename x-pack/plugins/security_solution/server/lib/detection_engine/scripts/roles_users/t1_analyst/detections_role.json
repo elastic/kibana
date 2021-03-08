@@ -1,0 +1,31 @@
+{
+  "elasticsearch": {
+    "cluster": [],
+    "indices": [
+      { "names": [".siem-signals-*"], "privileges": ["read", "write", "maintenance"] },
+      {
+        "names": [
+          "apm-*-transaction*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "winlogbeat-*"
+        ],
+        "privileges": ["read"]
+      }
+    ]
+  },
+  "kibana": [
+    {
+      "feature": {
+        "ml": ["read"],
+        "siem": ["read"],
+        "actions": ["read"],
+        "builtInAlerts": ["read"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}

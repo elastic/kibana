@@ -1,0 +1,99 @@
+/*
+ ******
+ ****** This is a collection of CSS overrides that make Kibana look better for
+ ****** generating PDF reports with headless browser
+ ******
+ */
+
+ /**
+ *  global
+ */
+
+/* elements can hide themselves when shared */
+.hide-for-sharing {
+  display: none !important;
+}
+
+/* hide unusable controls */
+kbn-top-nav,
+filter-bar,
+.kbnTopNavMenu__wrapper,
+::-webkit-scrollbar,
+.euiNavDrawer {
+  display: none !important;
+}
+
+/* override open/closed positioning of the app wrapper/nav */
+.app-wrapper {
+  left: 0px !important;
+}
+
+/**
+ *  Discover Tweaks
+ */
+
+
+/* hide unusable controls */
+discover-app .dscTimechart,
+discover-app .dscSidebar__container,
+discover-app .dscCollapsibleSidebar__collapseButton,
+discover-app .discover-table-footer {
+  display: none;
+}
+
+
+/**
+ * The global banner (e.g. "Help us improve Elastic...") should not print.
+ */
+#globalBannerList {
+  display: none;
+}
+
+/**
+ *  Visualize Editor Tweaks
+ */
+
+/* hide unusable controls
+*  !important is required to override resizable panel inline display */
+.visEditor__content .visEditor--default > :not(.visEditor__visualization__wrapper) {
+  display: none !important;
+}
+
+/** THIS IS FOR TSVB UNTIL REFACTOR **/
+.tvbEditorVisualization {
+  position: static !important;
+}
+.visualize .tvbVisTimeSeries__legendToggle,
+.tvbEditor--hideForReporting {
+  /* all non-content rows in interface */
+  display: none;
+}
+/**  END TSVB BAD BAD HACKS **/
+
+/* remove left padding from visualizations so that map lines up with .leaflet-container and
+*  setting the position to be fixed and to take up the entire screen, because some zoom levels/viewports
+*  are triggering the media breakpoints that cause the .visEditor__canvas to take up more room than the viewport */
+.visEditor .visEditor__canvas {
+  padding-left: 0px;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0; left: 0;
+}
+
+/**
+ *  Visualization tweaks
+ */
+
+/* hide unusable controls */
+.visualize .visLegend__toggle,
+.visualize .kbnAggTable__controls/* export raw, export formatted, etc. */ ,
+.visualize .leaflet-container .leaflet-top.leaflet-left/* tilemap controls */ ,
+.visualize paginate-controls /* page numbers */ {
+  display: none;
+}
+
+/* Ensure the min-height of the small breakpoint isn't used */
+.vis-editor visualization {
+  min-height: 0 !important;
+}

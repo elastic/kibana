@@ -1,23 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { Fragment } from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+
+import React, { Fragment, lazy } from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { EuiAccordion } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Alert, AlertAction } from '../../../types';
-import { ActionForm } from './action_form';
+import {
+  ValidationResult,
+  Alert,
+  AlertAction,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
+import ActionForm from './action_form';
+import { useKibana } from '../../../common/lib/kibana';
+import {
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '../../../../../alerting/common';
+
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
-const actionTypeRegistry = actionTypeRegistryMock.create();
+const setHasActionsWithBrokenConnector = jest.fn();
 describe('action_form', () => {
-  let deps: any;
+  const mockedActionParamsFields = lazy(async () => ({
+    default() {
+      return <Fragment />;
+    },
+  }));
+
   const alertType = {
     id: 'my-alert-type',
     iconClass: 'test',
@@ -26,57 +46,90 @@ describe('action_form', () => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
+    requiresAppContext: false,
   };
 
   const actionType = {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
+    actionParamsFields: mockedActionParamsFields,
   };
 
   const disabledByConfigActionType = {
     id: 'disabled-by-config',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
+    },
+    validateParams: (): GenericValidationResult<unknown> => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+  };
+
+  const disabledByActionType = {
+    id: '.jira',
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
     validateParams: (): ValidationResult => {
       const validationResult = { errors: {} };
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
+    actionParamsFields: mockedActionParamsFields,
   };
 
   const disabledByLicenseActionType = {
     id: 'disabled-by-license',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
+    actionParamsFields: mockedActionParamsFields,
   };
 
-  describe('action_form in alert', () => {
-    let wrapper: ReactWrapper<any>;
+  const preconfiguredOnly = {
+    id: 'preconfigured',
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
+    },
+    validateParams: (): GenericValidationResult<unknown> => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+  };
 
-    async function setup() {
+  const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+  describe('action_form in alert', () => {
+    async function setup(customActions?: AlertAction[], customRecoveredActionGroup?: string) {
+      const actionTypeRegistry = actionTypeRegistryMock.create();
+
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
       loadAllActions.mockResolvedValueOnce([
         {
@@ -87,59 +140,138 @@ describe('action_form', () => {
           config: {},
           isPreconfigured: false,
         },
+        {
+          secrets: {},
+          id: 'test2',
+          actionTypeId: actionType.id,
+          name: 'Test connector 2',
+          config: {},
+          isPreconfigured: true,
+        },
+        {
+          secrets: {},
+          id: 'test3',
+          actionTypeId: preconfiguredOnly.id,
+          name: 'Preconfigured Only',
+          config: {},
+          isPreconfigured: true,
+        },
+        {
+          secrets: {},
+          id: 'test4',
+          actionTypeId: preconfiguredOnly.id,
+          name: 'Regular connector',
+          config: {},
+          isPreconfigured: false,
+        },
+        {
+          secrets: {},
+          id: '.servicenow',
+          actionTypeId: '.servicenow',
+          name: 'Non consumer connector',
+          config: {},
+          isPreconfigured: false,
+        },
+        {
+          secrets: {},
+          id: '.jira',
+          actionTypeId: disabledByActionType.id,
+          name: 'Connector with disabled action group',
+          config: {},
+          isPreconfigured: false,
+        },
       ]);
-      const mockes = coreMock.createSetup();
-      deps = {
-        toastNotifications: mockes.notifications.toasts,
-        http: mockes.http,
-        actionTypeRegistry: actionTypeRegistry as any,
+      const mocks = coreMock.createSetup();
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.application.capabilities = {
+        ...capabilities,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
+        },
       };
       actionTypeRegistry.list.mockReturnValue([
         actionType,
         disabledByConfigActionType,
         disabledByLicenseActionType,
+        disabledByActionType,
+        preconfiguredOnly,
       ]);
       actionTypeRegistry.has.mockReturnValue(true);
-
+      actionTypeRegistry.get.mockReturnValue(actionType);
       const initialAlert = ({
         name: 'test',
         params: {},
-        consumer: 'alerting',
+        consumer: 'alerts',
         alertTypeId: alertType.id,
         schedule: {
           interval: '1m',
         },
-        actions: [
-          {
-            group: 'default',
-            id: 'test',
-            actionTypeId: actionType.id,
-            params: {
-              message: '',
-            },
-          },
-        ],
+        actions: customActions
+          ? customActions
+          : [
+              {
+                group: 'default',
+                id: 'test',
+                actionTypeId: actionType.id,
+                params: {
+                  message: '',
+                },
+              },
+            ],
         tags: [],
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
       } as unknown) as Alert;
 
-      wrapper = mountWithIntl(
+      const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
+      const wrapper = mountWithIntl(
         <ActionForm
           actions={initialAlert.actions}
-          messageVariables={['test var1', 'test var2']}
+          messageVariables={{
+            params: [
+              { name: 'testVar1', description: 'test var1' },
+              { name: 'testVar2', description: 'test var2' },
+            ],
+            state: [],
+            context: [{ name: 'contextVar', description: 'context var1' }],
+          }}
           defaultActionGroupId={'default'}
+          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
+            const recoveryActionGroupId = customRecoveredActionGroup
+              ? customRecoveredActionGroup
+              : 'recovered';
+            return isActionGroupDisabledForActionTypeId(
+              actionGroupId === recoveryActionGroupId ? RecoveredActionGroup.id : actionGroupId,
+              actionTypeId
+            );
+          }}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
           }}
-          setAlertProperty={(_updatedActions: AlertAction[]) => {}}
+          actionGroups={[
+            { id: 'default', name: 'Default', defaultActionMessage },
+            {
+              id: customRecoveredActionGroup ? customRecoveredActionGroup : 'recovered',
+              name: customRecoveredActionGroup ? 'I feel better' : 'Recovered',
+            },
+          ]}
+          setActionGroupIdByIndex={(group: string, index: number) => {
+            initialAlert.actions[index].group = group;
+          }}
+          setActions={(_updatedActions: AlertAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
-          http={deps!.http}
-          actionTypeRegistry={deps!.actionTypeRegistry}
-          defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
+          actionTypeRegistry={actionTypeRegistry}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           actionTypes={[
             {
               id: actionType.id,
@@ -154,6 +286,14 @@ describe('action_form', () => {
               name: 'Index',
               enabled: true,
               enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
+            },
+            {
+              id: 'preconfigured',
+              name: 'Preconfigured only',
+              enabled: true,
+              enabledInConfig: false,
               enabledInLicense: true,
               minimumLicenseRequired: 'basic',
             },
@@ -173,8 +313,15 @@ describe('action_form', () => {
               enabledInLicense: false,
               minimumLicenseRequired: 'gold',
             },
+            {
+              id: '.jira',
+              name: 'Disabled by action type',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
+            },
           ]}
-          toastNotifications={deps!.toastNotifications}
         />
       );
 
@@ -183,10 +330,12 @@ describe('action_form', () => {
         await nextTick();
         wrapper.update();
       });
+
+      return wrapper;
     }
 
     it('renders available action cards', async () => {
-      await setup();
+      const wrapper = await setup();
       const actionOption = wrapper.find(
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
@@ -196,20 +345,175 @@ describe('action_form', () => {
           .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
           .exists()
       ).toBeFalsy();
+      expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
     });
 
-    it(`doesn't render action types disabled by config`, async () => {
-      await setup();
+    it('does not render action types disabled by config', async () => {
+      const wrapper = await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="disabled-by-config-ActionTypeSelectOption"]`
+        '[data-test-subj="disabled-by-config-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });
 
-    it('renders action types disabled by license', async () => {
-      await setup();
+    it('render action types which is preconfigured only (disabled by config and with preconfigured connectors)', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      expect(actionOption.exists()).toBeTruthy();
+    });
+
+    it('renders available action groups for the selected action type', async () => {
+      const wrapper = await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="disabled-by-license-ActionTypeSelectOption"]`
+        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+      );
+      actionOption.first().simulate('click');
+      const actionGroupsSelect = wrapper.find(
+        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
+      );
+      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "disabled": false,
+            "inputDisplay": "Default",
+            "value": "default",
+          },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
+            "disabled": false,
+            "inputDisplay": "Recovered",
+            "value": "recovered",
+          },
+        ]
+      `);
+    });
+
+    it('renders disabled action groups for selected action type', async () => {
+      const wrapper = await setup([
+        {
+          group: 'recovered',
+          id: 'test',
+          actionTypeId: disabledByActionType.id,
+          params: {
+            message: '',
+          },
+        },
+      ]);
+      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
+      actionOption.first().simulate('click');
+      const actionGroupsSelect = wrapper.find(
+        `[data-test-subj="addNewActionConnectorActionGroup-1"]`
+      );
+      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-default",
+            "disabled": false,
+            "inputDisplay": "Default",
+            "value": "default",
+          },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-recovered",
+            "disabled": true,
+            "inputDisplay": "Recovered (Not Currently Supported)",
+            "value": "recovered",
+          },
+        ]
+      `);
+    });
+
+    it('renders disabled action groups for custom recovered action groups', async () => {
+      const wrapper = await setup(
+        [
+          {
+            group: 'iHaveRecovered',
+            id: 'test',
+            actionTypeId: disabledByActionType.id,
+            params: {
+              message: '',
+            },
+          },
+        ],
+        'iHaveRecovered'
+      );
+      const actionOption = wrapper.find(`[data-test-subj=".jira-ActionTypeSelectOption"]`);
+      actionOption.first().simulate('click');
+      const actionGroupsSelect = wrapper.find(
+        `[data-test-subj="addNewActionConnectorActionGroup-1"]`
+      );
+      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-default",
+            "disabled": false,
+            "inputDisplay": "Default",
+            "value": "default",
+          },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-iHaveRecovered",
+            "disabled": true,
+            "inputDisplay": "I feel better (Not Currently Supported)",
+            "value": "iHaveRecovered",
+          },
+        ]
+      `);
+    });
+
+    it('renders available connectors for the selected action type', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+      );
+      actionOption.first().simulate('click');
+      const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
+      expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "id": "test",
+                  "key": "test",
+                  "label": "Test connector ",
+                },
+                Object {
+                  "id": "test2",
+                  "key": "test2",
+                  "label": "Test connector 2 (preconfigured)",
+                },
+              ]
+            `);
+    });
+
+    it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      actionOption.first().simulate('click');
+      const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured"]');
+      expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "id": "test3",
+                  "key": "test3",
+                  "label": "Preconfigured Only (preconfigured)",
+                },
+              ]
+            `);
+    });
+
+    it('does not render "Add connector" button for preconfigured only action type', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      actionOption.first().simulate('click');
+      const preconfigPannel = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
+      const addNewConnectorButton = preconfigPannel.find(
+        '[data-test-subj="addNewActionConnectorButton-preconfigured"]'
+      );
+      expect(addNewConnectorButton.exists()).toBeFalsy();
+    });
+
+    it('renders action types disabled by license', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        '[data-test-subj="disabled-by-license-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeTruthy();
       expect(
@@ -217,6 +521,40 @@ describe('action_form', () => {
           .find('EuiToolTip [data-test-subj="disabled-by-license-ActionTypeSelectOption"]')
           .exists()
       ).toBeTruthy();
+    });
+
+    it('recognizes actions with broken connectors', async () => {
+      const wrapper = await setup([
+        {
+          group: 'default',
+          id: 'test',
+          actionTypeId: actionType.id,
+          params: {
+            message: '',
+          },
+        },
+        {
+          group: 'default',
+          id: 'connector-doesnt-exist',
+          actionTypeId: actionType.id,
+          params: {
+            message: 'broken',
+          },
+        },
+        {
+          group: 'not the default',
+          id: 'connector-doesnt-exist',
+          actionTypeId: actionType.id,
+          params: {
+            message: 'broken',
+          },
+        },
+      ]);
+      expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
+      expect(wrapper.find(EuiAccordion)).toHaveLength(3);
+      expect(
+        wrapper.find(`EuiIconTip[data-test-subj="alertActionAccordionErrorTooltip"]`)
+      ).toHaveLength(2);
     });
   });
 });

@@ -1,29 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { Logger } from '../../../../../src/core/server';
+import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
-import { getActionType } from './slack';
+import { getActionType, SlackActionType, SlackActionTypeExecutorOptions } from './slack';
 import { actionsConfigMock } from '../actions_config.mock';
+import { actionsMock } from '../mocks';
+import { createActionTypeRegistry } from './index.test';
+
+jest.mock('@slack/webhook', () => {
+  return {
+    IncomingWebhook: jest.fn().mockImplementation(() => {
+      return { send: (message: string) => {} };
+    }),
+  };
+});
 
 const ACTION_TYPE_ID = '.slack';
 
-const services: Services = {
-  callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: SlackActionType;
+let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
+  const { logger } = createActionTypeRegistry();
   actionType = getActionType({
-    async executor(options: ActionTypeExecutorOptions): Promise<any> {},
+    async executor(options) {
+      return { status: 'ok', actionId: options.actionId };
+    },
     configurationUtilities: actionsConfigMock.create(),
+    logger,
   });
+  mockedLogger = logger;
+  expect(actionType).toBeTruthy();
 });
 
 describe('action registeration', () => {
@@ -82,11 +97,12 @@ describe('validateActionTypeSecrets()', () => {
     );
   });
 
-  test('should validate and pass when the slack webhookUrl is whitelisted', () => {
+  test('should validate and pass when the slack webhookUrl is added to allowedHosts', () => {
     actionType = getActionType({
+      logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: url => {
+        ensureUriAllowed: (url) => {
           expect(url).toEqual('https://api.slack.com/');
         },
       },
@@ -97,12 +113,13 @@ describe('validateActionTypeSecrets()', () => {
     });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
+      logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedHostname: url => {
-          throw new Error(`target hostname is not whitelisted`);
+        ensureUriAllowed: () => {
+          throw new Error(`target hostname is not added to allowedHosts`);
         },
       },
     });
@@ -110,14 +127,14 @@ describe('validateActionTypeSecrets()', () => {
     expect(() => {
       validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: target hostname is not whitelisted"`
+      `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
     );
   });
 });
 
 describe('execute()', () => {
   beforeAll(() => {
-    async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<any> {
+    async function mockSlackExecutor(options: SlackActionTypeExecutorOptions) {
       const { params } = options;
       const { message } = params;
       if (message == null) throw new Error('message property required in parameter');
@@ -130,11 +147,14 @@ describe('execute()', () => {
 
       return {
         text: `slack mockExecutor success: ${message}`,
-      };
+        actionId: '',
+        status: 'ok',
+      } as ActionTypeExecutorResult<void>;
     }
 
     actionType = getActionType({
       executor: mockSlackExecutor,
+      logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
     });
   });
@@ -148,10 +168,12 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
     });
     expect(response).toMatchInlineSnapshot(`
-Object {
-  "text": "slack mockExecutor success: this invocation should succeed",
-}
-`);
+      Object {
+        "actionId": "",
+        "status": "ok",
+        "text": "slack mockExecutor success: this invocation should succeed",
+      }
+    `);
   });
 
   test('calls the mock executor with failure', async () => {
@@ -166,5 +188,39 @@ Object {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"slack mockExecutor failure: this invocation should fail"`
     );
+  });
+
+  test('calls the mock executor with success proxy', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxyRejectUnauthorizedCertificates: false,
+    });
+    const actionTypeProxy = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+    await actionTypeProxy.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+    });
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      'IncomingWebhook was called with proxyUrl https://someproxyhost'
+    );
+  });
+
+  test('renders parameter templates as expected', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      message: '{{rogue}}',
+    };
+    const variables = {
+      rogue: '*bold*',
+    };
+    const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+    expect(params.message).toBe('`*bold*`');
   });
 });

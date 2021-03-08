@@ -1,32 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+export default function ({ getService }: FtrProviderContext) {
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('find', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await kibanaServer.version.get();
+      expect(typeof KIBANA_VERSION).to.eql('string');
+      expect(KIBANA_VERSION.length).to.be.greaterThan(0);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -44,11 +42,13 @@ export default function({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 'WzIsMV0=',
+                  version: 'WzE4LDJd',
                   attributes: {
                     title: 'Count of requests',
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
+                  namespaces: ['default'],
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -56,16 +56,18 @@ export default function({ getService }: FtrProviderContext) {
                       type: 'index-pattern',
                     },
                   ],
+                  score: 0,
                   updated_at: '2017-09-21T18:51:23.794Z',
                   meta: {
                     editUrl:
                       '/management/kibana/objects/savedVisualizations/dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     icon: 'visualizeApp',
                     inAppUrl: {
-                      path: '/app/kibana#/visualize/edit/dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                      path: '/app/visualize#/edit/dd7caf20-9efd-11e7-acb3-3dab96693fab',
                       uiCapabilitiesPath: 'visualize.show',
                     },
                     title: 'Count of requests',
+                    namespaceType: 'single',
                   },
                 },
               ],
@@ -117,16 +119,72 @@ export default function({ getService }: FtrProviderContext) {
               });
             }));
       });
+
+      describe('`hasReference` and `hasReferenceOperator` parameters', () => {
+        before(() => esArchiver.load('saved_objects/references'));
+        after(() => esArchiver.unload('saved_objects/references'));
+
+        it('search for a reference', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql(['only-ref-1', 'ref-1-and-ref-2']);
+            });
+        });
+
+        it('search for multiple references with OR operator', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              hasReferenceOperator: 'OR',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql([
+                'only-ref-1',
+                'ref-1-and-ref-2',
+                'only-ref-2',
+              ]);
+            });
+        });
+
+        it('search for multiple references with AND operator', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              hasReference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              hasReferenceOperator: 'AND',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj: any) => obj.id)).to.eql(['ref-1-and-ref-2']);
+            });
+        });
+      });
     });
 
     describe('without kibana index', () => {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana',
-            ignore: [404],
-          })
+          await esDeleteAllIndices('.kibana*')
       );
 
       it('should return 200 with empty response', async () =>
@@ -220,9 +278,10 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -238,9 +297,10 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/kibana#/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -256,9 +316,10 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
+              namespaceType: 'single',
             });
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
@@ -266,9 +327,10 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -281,12 +343,14 @@ export default function({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'indexPatternApp',
               title: 'saved_objects*',
-              editUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl:
+                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path:
-                  '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.index_patterns',
+                  '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
+              namespaceType: 'single',
             });
           }));
     });

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiButton, EuiText } from '@elastic/eui';
 
-import { useDispatch, useMappingsState } from '../../mappings_state';
+import { useDispatch, useMappingsState } from '../../mappings_state_context';
 import { FieldsEditor } from '../../types';
 import { canUseMappingsEditor, normalize } from '../../lib';
 

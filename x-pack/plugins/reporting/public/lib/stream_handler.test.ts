@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
-import { SourceJob, JobSummary } from '../../index.d';
+import { JobSummary, ReportDocument } from '../../common/types';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
@@ -23,7 +24,7 @@ const mockJobsFound = [
     _source: {
       status: 'completed',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
   {
@@ -31,7 +32,7 @@ const mockJobsFound = [
     _source: {
       status: 'failed',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
   {
@@ -39,14 +40,14 @@ const mockJobsFound = [
     _source: {
       status: 'pending',
       output: { max_size_reached: false, csv_contains_formulas: false },
-      payload: { type: 'spectacular', title: 'specimen' },
+      payload: { title: 'specimen' },
     },
   },
 ];
 
 const jobQueueClientMock: ReportingAPIClient = {
   findForJobIds: async (jobIds: string[]) => {
-    return mockJobsFound as SourceJob[];
+    return mockJobsFound as ReportDocument[];
   },
   getContent: (): Promise<any> => {
     return Promise.resolve({ content: 'this is the completed report data' });
@@ -77,16 +78,16 @@ describe('stream handler', () => {
   });
 
   describe('findChangedStatusJobs', () => {
-    it('finds no changed status jobs from empty', done => {
+    it('finds no changed status jobs from empty', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       const findJobs = sh.findChangedStatusJobs([]);
-      findJobs.subscribe(data => {
+      findJobs.subscribe((data) => {
         expect(data).toEqual({ completed: [], failed: [] });
         done();
       });
     });
 
-    it('finds changed status jobs', done => {
+    it('finds changed status jobs', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       const findJobs = sh.findChangedStatusJobs([
         'job-source-mock1',
@@ -94,7 +95,7 @@ describe('stream handler', () => {
         'job-source-mock3',
       ]);
 
-      findJobs.subscribe(data => {
+      findJobs.subscribe((data) => {
         expect(data).toMatchSnapshot();
         done();
       });
@@ -102,14 +103,14 @@ describe('stream handler', () => {
   });
 
   describe('showNotifications', () => {
-    it('show success', done => {
+    it('show success', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
           {
             id: 'yas1',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
           } as JobSummary,
         ],
@@ -123,14 +124,14 @@ describe('stream handler', () => {
       });
     });
 
-    it('show max length warning', done => {
+    it('show max length warning', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
           {
             id: 'yas2',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             maxSizeReached: true,
           } as JobSummary,
@@ -145,14 +146,14 @@ describe('stream handler', () => {
       });
     });
 
-    it('show csv formulas warning', done => {
+    it('show csv formulas warning', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
           {
             id: 'yas3',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             csvContainsFormulas: true,
           } as JobSummary,
@@ -167,7 +168,7 @@ describe('stream handler', () => {
       });
     });
 
-    it('show failed job toast', done => {
+    it('show failed job toast', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [],
@@ -175,7 +176,7 @@ describe('stream handler', () => {
           {
             id: 'yas7',
             title: 'Yas 7',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'failed',
           } as JobSummary,
         ],
@@ -188,27 +189,27 @@ describe('stream handler', () => {
       });
     });
 
-    it('show multiple toast', done => {
+    it('show multiple toast', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
           {
             id: 'yas8',
             title: 'Yas 8',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
           } as JobSummary,
           {
             id: 'yas9',
             title: 'Yas 9',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             csvContainsFormulas: true,
           } as JobSummary,
           {
             id: 'yas10',
             title: 'Yas 10',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             maxSizeReached: true,
           } as JobSummary,
@@ -217,7 +218,7 @@ describe('stream handler', () => {
           {
             id: 'yas13',
             title: 'Yas 13',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'failed',
           } as JobSummary,
         ],

@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandlerContext,
+import type {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from 'kibana/server';
+  Logger,
+} from 'src/core/server';
+import type { EventLogRouter, EventLogRequestHandlerContext } from '../types';
 import { BASE_EVENT_LOG_API_PATH } from '../../common';
 import { findOptionsSchema, FindOptionsType } from '../event_log_client';
 
@@ -20,7 +21,7 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const findRoute = (router: IRouter) => {
+export const findRoute = (router: EventLogRouter, systemLogger: Logger) => {
   router.get(
     {
       path: `${BASE_EVENT_LOG_API_PATH}/{type}/{id}/_find`,
@@ -29,11 +30,11 @@ export const findRoute = (router: IRouter) => {
         query: findOptionsSchema,
       },
     },
-    router.handleLegacyErrors(async function(
-      context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, any, any>,
+    router.handleLegacyErrors(async function (
+      context: EventLogRequestHandlerContext,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       if (!context.eventLog) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for eventLog' });
       }
@@ -42,9 +43,16 @@ export const findRoute = (router: IRouter) => {
         params: { id, type },
         query,
       } = req;
-      return res.ok({
-        body: await eventLogClient.findEventsBySavedObject(type, id, query),
-      });
+
+      try {
+        return res.ok({
+          body: await eventLogClient.findEventsBySavedObjectIds(type, [id], query),
+        });
+      } catch (err) {
+        const call = `findEventsBySavedObjectIds(${type}, [${id}], ${JSON.stringify(query)})`;
+        systemLogger.debug(`error calling eventLog ${call}: ${err.message}`);
+        return res.notFound();
+      }
     })
   );
 };

@@ -2,12 +2,14 @@
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { set } = require('@elastic/safer-lodash-set');
 const lodash = require('lodash');
 
 const LineWriter = require('./lib/line_writer');
@@ -49,7 +51,7 @@ function getEventLogMappings(ecsSchema, exportedProperties) {
   // copy the leaf values of the properties
   for (const prop of leafProperties) {
     const value = lodash.get(ecsSchema.mappings.properties, prop);
-    lodash.set(result.mappings.properties, prop, value);
+    set(result.mappings.properties, prop, value);
   }
 
   // set the non-leaf values as appropriate
@@ -118,7 +120,7 @@ function augmentMappings(mappings, multiValuedProperties) {
     const metaPropName = `${fullProp}.meta`;
     const meta = lodash.get(mappings.properties, metaPropName) || {};
     meta.isArray = 'true';
-    lodash.set(mappings.properties, metaPropName, meta);
+    set(mappings.properties, metaPropName, meta);
   }
 }
 
@@ -260,8 +262,9 @@ function logError(message) {
 const SchemaFileTemplate = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // ---------------------------------- WARNING ----------------------------------

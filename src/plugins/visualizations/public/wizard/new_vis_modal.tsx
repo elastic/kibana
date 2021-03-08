@@ -1,33 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 
-import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
-import { IUiSettingsClient, SavedObjectsStart } from '../../../../core/public';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import {
+  ApplicationStart,
+  IUiSettingsClient,
+  SavedObjectsStart,
+  DocLinksStart,
+} from '../../../../core/public';
 import { SearchSelection } from './search_selection';
-import { TypeSelection } from './type_selection';
-import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
+import { GroupSelection } from './group_selection';
+import { AggBasedSelection } from './agg_based_selection';
+import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { EmbeddableStateTransfer } from '../../../embeddable/public';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import './dialog.scss';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -36,18 +34,25 @@ interface TypeSelectionProps {
   editorParams?: string[];
   addBasePath: (path: string) => string;
   uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
+  application: ApplicationStart;
+  outsideVisualizeApp?: boolean;
+  stateTransfer?: EmbeddableStateTransfer;
+  originatingApp?: string;
 }
 
 interface TypeSelectionState {
   showSearchVisModal: boolean;
-  visType?: VisType;
+  showGroups: boolean;
+  visType?: BaseVisType;
 }
 
 // TODO: redirect logic is specific to visualise & dashboard
 // but it is likely should be decoupled. e.g. handled by the container instead
-const baseUrl = `#/visualize/create?`;
+const basePath = `/create?`;
+const baseUrl = `/app/visualize#${basePath}`;
 
 class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState> {
   public static defaultProps = {
@@ -56,18 +61,19 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   private readonly isLabsEnabled: boolean;
   private readonly trackUiMetric:
-    | ((type: UiStatsMetricType, eventNames: string | string[], count?: number) => void)
+    | ((type: UiCounterMetricType, eventNames: string | string[], count?: number) => void)
     | undefined;
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = props.uiSettings.get('visualize:enableLabs');
+    this.isLabsEnabled = props.uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
 
     this.state = {
       showSearchVisModal: false,
+      showGroups: true,
     };
 
-    this.trackUiMetric = this.props.usageCollection?.reportUiStats.bind(
+    this.trackUiMetric = this.props.usageCollection?.reportUiCounter.bind(
       this.props.usageCollection,
       'visualize'
     );
@@ -86,6 +92,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       }
     );
 
+    const WizardComponent = this.state.showGroups ? GroupSelection : AggBasedSelection;
+
     const selectionModal =
       this.state.showSearchVisModal && this.state.visType ? (
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
@@ -94,25 +102,26 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             visType={this.state.visType}
             uiSettings={this.props.uiSettings}
             savedObjects={this.props.savedObjects}
+            goBack={() => this.setState({ showSearchVisModal: false })}
           />
         </EuiModal>
       ) : (
         <EuiModal
           onClose={this.onCloseModal}
-          className="visNewVisDialog"
+          className={this.state.showGroups ? 'visNewVisDialog' : 'visNewVisDialog--aggbased'}
           aria-label={visNewVisDialogAriaLabel}
-          role="menu"
         >
-          <TypeSelection
+          <WizardComponent
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
-            addBasePath={this.props.addBasePath}
+            docLinks={this.props.docLinks}
+            toggleGroups={(flag: boolean) => this.setState({ showGroups: flag })}
           />
         </EuiModal>
       );
 
-    return <EuiOverlayMask>{selectionModal}</EuiOverlayMask>;
+    return selectionModal;
   }
 
   private onCloseModal = () => {
@@ -120,8 +129,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.props.onClose();
   };
 
-  private onVisTypeSelected = (visType: VisType | VisTypeAlias) => {
-    if (!('aliasUrl' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
+  private onVisTypeSelected = (visType: BaseVisType | VisTypeAlias) => {
+    if (!('aliasPath' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
         visType,
@@ -135,19 +144,20 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.redirectToVis(this.state.visType!, searchType, searchId);
   };
 
-  private redirectToVis(visType: VisType | VisTypeAlias, searchType?: string, searchId?: string) {
+  private redirectToVis(
+    visType: BaseVisType | VisTypeAlias,
+    searchType?: string,
+    searchId?: string
+  ) {
     if (this.trackUiMetric) {
       this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
     }
 
     let params;
-    if ('aliasUrl' in visType) {
-      params = this.props.addBasePath(visType.aliasUrl);
-      if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
-        params = `${params}?addToDashboard`;
-      }
+    if ('aliasPath' in visType) {
+      params = visType.aliasPath;
       this.props.onClose();
-      window.location.assign(params);
+      this.navigate(visType.aliasApp, visType.aliasPath);
       return;
     }
 
@@ -159,8 +169,29 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     params = params.concat(this.props.editorParams!);
 
     this.props.onClose();
-    location.assign(`${baseUrl}${params.join('&')}`);
+    if (this.props.outsideVisualizeApp) {
+      this.navigate('visualize', `#${basePath}${params.join('&')}`);
+    } else {
+      location.assign(this.props.addBasePath(`${baseUrl}${params.join('&')}`));
+    }
+  }
+
+  private navigate(appId: string, params: string) {
+    if (this.props.stateTransfer && this.props.originatingApp) {
+      this.props.stateTransfer.navigateToEditor(appId, {
+        path: params,
+        state: {
+          originatingApp: this.props.originatingApp,
+        },
+      });
+    } else {
+      this.props.application.navigateToApp(appId, {
+        path: params,
+      });
+    }
   }
 }
 
-export { NewVisModal };
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export { NewVisModal as default };

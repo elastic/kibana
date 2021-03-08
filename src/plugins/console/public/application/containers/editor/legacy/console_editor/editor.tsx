@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
@@ -22,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { useUIAceKeyboardMode } from '../../../../../../../es_ui_shared/public';
+import { ace } from '../../../../../../../es_ui_shared/public';
 // @ts-ignore
-import mappings from '../../../../../lib/mappings/mappings';
+import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
@@ -37,6 +26,8 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
+
+const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
@@ -65,9 +56,8 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService },
+    services: { history, notifications, settings: settingsService, esHostService },
     docLinkVersion,
-    elasticsearchUrl,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
@@ -96,6 +86,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
     if (textareaElement) {
       textareaElement.setAttribute('id', inputId);
+      textareaElement.setAttribute('data-test-subj', 'console-textarea');
     }
 
     const readQueryParams = () => {
@@ -119,7 +110,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
         }
 
         // Fire and forget.
-        $.ajax(loadFrom).done(async data => {
+        $.ajax(loadFrom).done(async (data) => {
           const coreEditor = editor.getCoreEditor();
           await editor.update(data, true);
           editor.moveToNextRequestEdge(false);
@@ -172,15 +163,18 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    mappings.retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
+    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      mappings.clearSubscriptions();
+      clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.getCoreEditor().destroy();
+      }
     };
   }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
 
@@ -188,10 +182,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     const { current: editor } = editorInstanceRef;
     applyCurrentSettings(editor!.getCoreEditor(), settings);
     // Preserve legacy focus behavior after settings have updated.
-    editor!
-      .getCoreEditor()
-      .getContainer()
-      .focus();
+    editor!.getCoreEditor().getContainer().focus();
   }, [settings]);
 
   useEffect(() => {
@@ -203,7 +194,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
   }, [sendCurrentRequestToES, openDocumentation]);
 
   return (
-    <div style={abs} className="conApp">
+    <div style={abs} data-test-subj="console-application" className="conApp">
       <div className="conApp__editor">
         <ul className="conApp__autoComplete" id="autocomplete" />
         <EuiFlexGroup
@@ -233,7 +224,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <ConsoleMenu
               getCurl={() => {
-                return editorInstanceRef.current!.getRequestsAsCURL(elasticsearchUrl);
+                return editorInstanceRef.current!.getRequestsAsCURL(esHostService.getHost());
               }}
               getDocumentation={() => {
                 return getDocumentation(editorInstanceRef.current!, docLinkVersion);

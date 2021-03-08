@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiButton, EuiWindowEvent } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
+
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
+
+import * as i18n from './translations';
+
+const StyledEuiButton = styled(EuiButton)`
+  margin: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
+export const ExitFullScreen: React.FC = () => {
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+
+  const exitFullScreen = useCallback(() => {
+    setGlobalFullScreen(false);
+  }, [setGlobalFullScreen]);
+
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+
+        exitFullScreen();
+      }
+    },
+    [exitFullScreen]
+  );
+
+  if (!globalFullScreen) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiWindowEvent event="keydown" handler={onKeyDown} />
+      <StyledEuiButton
+        data-test-subj="exit-full-screen"
+        iconType="fullScreen"
+        isDisabled={!globalFullScreen}
+        onClick={exitFullScreen}
+      >
+        {i18n.EXIT_FULL_SCREEN}
+      </StyledEuiButton>
+    </>
+  );
+};

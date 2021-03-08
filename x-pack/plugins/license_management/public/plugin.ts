@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { TelemetryPluginSetup } from '../../../../src/plugins/telemetry/public';
+import { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../../plugins/licensing/public';
 import { PLUGIN } from '../common/constants';
@@ -14,10 +16,13 @@ import { ClientConfigType } from './types';
 import { AppDependencies } from './application';
 import { BreadcrumbService } from './application/breadcrumbs';
 
-interface PluginsDependencies {
+interface PluginsDependenciesSetup {
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
-  telemetry?: TelemetryPluginSetup;
+}
+
+interface PluginsDependenciesStart {
+  telemetry?: TelemetryPluginStart;
 }
 
 export interface LicenseManagementUIPluginSetup {
@@ -31,7 +36,10 @@ export class LicenseManagementUIPlugin
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup, plugins: PluginsDependencies): LicenseManagementUIPluginSetup {
+  setup(
+    coreSetup: CoreSetup<PluginsDependenciesStart>,
+    plugins: PluginsDependenciesSetup
+  ): LicenseManagementUIPluginSetup {
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     if (!config.ui.enabled) {
@@ -42,29 +50,32 @@ export class LicenseManagementUIPlugin
     }
 
     const { getStartServices } = coreSetup;
-    const { management, telemetry, licensing } = plugins;
+    const { management, licensing } = plugins;
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.section.stack.registerApp({
       id: PLUGIN.id,
       title: PLUGIN.title,
-      order: 99,
-      mount: async ({ element, setBreadcrumbs }) => {
-        const [core] = await getStartServices();
+      order: 0,
+      mount: async ({ element, setBreadcrumbs, history }) => {
+        const [coreStart, { telemetry }] = await getStartServices();
         const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
 
         // Setup documentation links
-        const { docLinks } = core;
-        const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-        const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
+        const {
+          docLinks,
+          chrome: { docTitle },
+        } = coreStart;
         const appDocLinks = {
-          security: `${esBase}/security-settings.html`,
+          security: docLinks.links.security.elasticsearchSettings,
         };
+
+        docTitle.change(PLUGIN.title);
 
         // Setup services
         this.breadcrumbService.setup(setBreadcrumbs);
 
         const appDependencies: AppDependencies = {
-          core,
+          core: coreStart,
           config,
           plugins: {
             licensing,
@@ -72,6 +83,7 @@ export class LicenseManagementUIPlugin
           },
           services: {
             breadcrumbService: this.breadcrumbService,
+            history,
           },
           store: {
             initialLicense,
@@ -80,8 +92,12 @@ export class LicenseManagementUIPlugin
         };
 
         const { renderApp } = await import('./application');
+        const unmountAppCallback = renderApp(element, appDependencies);
 
-        return renderApp(element, appDependencies);
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
 

@@ -47,6 +47,7 @@ Object {
   "jobId": "mock-job-id",
   "metricFieldName": "responsetime",
   "metricFunction": "avg",
+  "summaryCountFieldName": undefined,
   "timeField": "@timestamp",
 }
 `;

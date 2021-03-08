@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -123,7 +124,7 @@ const AllValidationChecks: FC<{ validationChecks: FieldExampleCheck[] }> = ({
   validationChecks,
 }) => {
   const list: EuiListGroupItemProps[] = Object.keys(VALIDATION_CHECK_DESCRIPTION).map((k, i) => {
-    const failedCheck = validationChecks.find(vc => vc.id === i);
+    const failedCheck = validationChecks.find((vc) => vc.id === i);
     if (
       failedCheck !== undefined &&
       failedCheck?.valid !== CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID

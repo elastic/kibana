@@ -1,31 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { Type } from '@kbn/config-schema';
+import { isPromise } from '@kbn/std';
+import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
 import {
   Plugin,
+  AsyncPlugin,
   PluginInitializerContext,
   PluginManifest,
   PluginInitializer,
@@ -53,13 +44,16 @@ export class PluginWrapper<
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredPlugins: PluginManifest['requiredPlugins'];
   public readonly optionalPlugins: PluginManifest['optionalPlugins'];
+  public readonly requiredBundles: PluginManifest['requiredBundles'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
 
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
 
-  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private instance?:
+    | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
@@ -81,6 +75,7 @@ export class PluginWrapper<
     this.configPath = params.manifest.configPath;
     this.requiredPlugins = params.manifest.requiredPlugins;
     this.optionalPlugins = params.manifest.optionalPlugins;
+    this.requiredBundles = params.manifest.requiredBundles;
     this.includesServerPlugin = params.manifest.server;
     this.includesUiPlugin = params.manifest.ui;
   }
@@ -92,11 +87,11 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
+  public setup(
+    setupContext: CoreSetup<TPluginsStart>,
+    plugins: TPluginsSetup
+  ): TSetup | Promise<TSetup> {
     this.instance = this.createPluginInstance();
-
-    this.log.debug('Setting up plugin');
-
     return this.instance.setup(setupContext, plugins);
   }
 
@@ -107,16 +102,21 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public async start(startContext: CoreStart, plugins: TPluginsStart) {
+  public start(startContext: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart> {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    this.log.debug('Starting plugin');
-
-    const startContract = await this.instance.start(startContext, plugins);
-    this.startDependencies$.next([startContext, plugins, startContract]);
-    return startContract;
+    const startContract = this.instance.start(startContext, plugins);
+    if (isPromise(startContract)) {
+      return startContract.then((resolvedContract) => {
+        this.startDependencies$.next([startContext, plugins, resolvedContract]);
+        return resolvedContract;
+      });
+    } else {
+      this.startDependencies$.next([startContext, plugins, startContract]);
+      return startContract;
+    }
   }
 
   /**
@@ -126,8 +126,6 @@ export class PluginWrapper<
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
-
-    this.log.info('Stopping plugin');
 
     if (typeof this.instance.stop === 'function') {
       await this.instance.stop();
@@ -150,7 +148,7 @@ export class PluginWrapper<
     }
 
     const configDescriptor = pluginDefinition.config;
-    if (!(configDescriptor.schema instanceof Type)) {
+    if (!isConfigSchema(configDescriptor.schema)) {
       throw new Error('Configuration schema expected to be an instance of Type');
     }
     return configDescriptor;

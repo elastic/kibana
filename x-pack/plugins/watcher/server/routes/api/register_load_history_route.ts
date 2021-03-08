@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../lib/is_es_error';
+import { ILegacyScopedClusterClient } from 'kibana/server';
+import { isEsError } from '../../shared_imports';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
@@ -18,7 +19,7 @@ const paramsSchema = schema.object({
   id: schema.string(),
 });
 
-function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: string) {
+function fetchHistoryItem(dataClient: ILegacyScopedClusterClient, watchHistoryItemId: string) {
   return dataClient.callAsCurrentUser('search', {
     index: INDEX_NAMES.WATCHER_HISTORY,
     body: {
@@ -68,7 +69,7 @@ export function registerLoadHistoryRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

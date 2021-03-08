@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -25,8 +27,9 @@ import {
 
 import 'brace/theme/textmate';
 
-import { useServices } from '../../../../app_context';
-import { documentationLinksService } from '../../../../services/documentation';
+import { SectionError, Error } from '../../../../../shared_imports';
+
+import { useCore, useServices } from '../../../../app_context';
 import {
   useLoadRepository,
   verifyRepository as verifyRepositoryRequest,
@@ -35,7 +38,8 @@ import {
 import { textService } from '../../../../services/text';
 import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
-import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../../../common';
+
 import {
   Repository,
   RepositoryVerification,
@@ -43,12 +47,13 @@ import {
 } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
-  SectionError,
   SectionLoading,
   RepositoryVerificationBadge,
-  Error,
 } from '../../../../components';
 import { TypeDetails } from './type_details';
+
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { getRepositoryTypeDocUrl } from '../../../../lib/type_to_doc_url';
 
 interface Props {
   repositoryName: Repository['name'];
@@ -61,7 +66,8 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   onClose,
   onRepositoryDeleted,
 }) => {
-  const { i18n } = useServices();
+  const { i18n, history } = useServices();
+  const { docLinks } = useCore();
   const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
   const [cleanup, setCleanup] = useState<RepositoryCleanup | undefined>(undefined);
@@ -161,7 +167,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       );
     }
     return (
-      <EuiLink href={linkToSnapshots(repositoryName)}>
+      <EuiLink {...reactRouterNavigate(history, linkToSnapshots(repositoryName))}>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.snapshotsDescription"
           defaultMessage="{count} {count, plural, one {snapshot} other {snapshots}} found"
@@ -218,7 +224,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={documentationLinksService.getRepositoryTypeDocUrl(type)}
+              href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               iconType="help"
               data-test-subj="documentationLink"
@@ -276,7 +282,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           </EuiTitle>
           <EuiSpacer size="s" />
           {verification ? (
-            <EuiCodeBlock language="json" inline={false} data-test-subj="verificationCodeBlock">
+            <EuiCodeBlock language="json" data-test-subj="verificationCodeBlock">
               {JSON.stringify(
                 verification.valid ? verification.response : verification.error,
                 null,
@@ -345,7 +351,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
                   />
                 </h4>
               </EuiTitle>
-              <EuiCodeBlock language="json" inline={false} data-test-subj="cleanupCodeBlock">
+              <EuiCodeBlock language="json" data-test-subj="cleanupCodeBlock">
                 {JSON.stringify(cleanup.response, null, 2)}
               </EuiCodeBlock>
             </div>
@@ -405,7 +411,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <RepositoryDeleteProvider>
-                  {deleteRepositoryPrompt => {
+                  {(deleteRepositoryPrompt) => {
                     return (
                       <EuiButtonEmpty
                         color="danger"
@@ -436,7 +442,11 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton href={linkToEditRepository(repositoryName)} fill color="primary">
+                <EuiButton
+                  {...reactRouterNavigate(history, linkToEditRepository(repositoryName))}
+                  fill
+                  color="primary"
+                >
                   <FormattedMessage
                     id="xpack.snapshotRestore.repositoryDetails.editButtonLabel"
                     defaultMessage="Edit"

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
@@ -116,7 +117,7 @@ export function FieldEditor({
 
   return (
     <EuiPopover
-      id="graphFieldEditor"
+      id={`graphFieldEditor-${initialField.name}`}
       anchorPosition="downLeft"
       ownFocus
       panelPaddingSize="none"
@@ -125,11 +126,12 @@ export function FieldEditor({
           color={initialField.color}
           iconSide="right"
           className={classNames('gphFieldEditor__badge', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphFieldEditor__badge--disabled': isDisabled,
           })}
           onClickAriaLabel={badgeDescription}
           title=""
-          onClick={e => {
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             if (e.shiftKey) {
               toggleDisabledState();
             } else {
@@ -215,7 +217,7 @@ export function FieldEditor({
                   })}
                 >
                   <EuiComboBox
-                    onChange={choices => {
+                    onChange={(choices) => {
                       // value is always defined because it's an unclearable single selection
                       const newFieldName = choices[0].value!;
 
@@ -260,7 +262,7 @@ export function FieldEditor({
                 >
                   <EuiColorPicker
                     color={color}
-                    onChange={newColor => {
+                    onChange={(newColor) => {
                       updateProp('color', newColor);
                     }}
                     compressed
@@ -286,7 +288,7 @@ export function FieldEditor({
                         </span>
                       );
                     }}
-                    options={iconChoices.map(currentIcon => ({
+                    options={iconChoices.map((currentIcon) => ({
                       label: currentIcon.label,
                       value: currentIcon,
                     }))}
@@ -296,7 +298,7 @@ export function FieldEditor({
                         value: icon,
                       },
                     ]}
-                    onChange={choices => {
+                    onChange={(choices) => {
                       updateProp('icon', choices[0].value!);
                     }}
                     compressed
@@ -378,7 +380,7 @@ function toOptions(
   currentField: WorkspaceField
 ): Array<{ label: string; value: string; type: ButtonHTMLAttributes<HTMLButtonElement>['type'] }> {
   return fields
-    .filter(field => !field.selected || field === currentField)
+    .filter((field) => !field.selected || field === currentField)
     .map(({ name, type }) => ({
       label: name,
       value: name,

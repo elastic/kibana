@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SessionExpired } from './session_expired';
@@ -11,8 +12,6 @@ describe('#logout', () => {
   const CURRENT_URL = '/foo/bar?baz=quz#quuz';
   const LOGOUT_URL = '/logout';
   const TENANT = '/some-basepath';
-
-  let newUrlPromise: Promise<string>;
 
   beforeAll(() => {
     Object.defineProperty(window, 'sessionStorage', {
@@ -24,13 +23,16 @@ describe('#logout', () => {
   });
 
   beforeEach(() => {
-    window.history.pushState({}, '', CURRENT_URL);
-    mockGetItem.mockReset();
-    newUrlPromise = new Promise<string>(resolve => {
-      jest.spyOn(window.location, 'assign').mockImplementation(url => {
-        resolve(url);
-      });
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: jest.fn(),
+        pathname: CURRENT_URL,
+        search: '',
+        hash: '',
+      },
+      configurable: true,
     });
+    mockGetItem.mockReset();
   });
 
   afterAll(() => {
@@ -42,7 +44,9 @@ describe('#logout', () => {
     sessionExpired.logout();
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
-    await expect(newUrlPromise).resolves.toBe(`${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`);
+    await expect(window.location.assign).toHaveBeenCalledWith(
+      `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`
+    );
   });
 
   it(`adds 'provider' parameter when sessionStorage contains the provider name for this tenant`, async () => {
@@ -57,7 +61,7 @@ describe('#logout', () => {
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
     const provider = `&provider=${providerName}`;
-    await expect(newUrlPromise).resolves.toBe(
+    await expect(window.location.assign).toBeCalledWith(
       `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}${provider}`
     );
   });

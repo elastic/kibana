@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -13,7 +14,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiOverlayMask,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -84,10 +84,10 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
   componentDidMount() {
     const { toasts } = this.props.kibana.services.notifications;
     loadSavedDashboards(MAX_NUMBER_DASHBOARDS)
-      .then(dashboards => {
+      .then((dashboards) => {
         this.setState({ dashboards });
       })
-      .catch(resp => {
+      .catch((resp) => {
         // eslint-disable-next-line no-console
         console.error('Error loading list of dashboards:', resp);
         toasts.addDanger(
@@ -101,10 +101,10 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       });
 
     loadIndexPatterns(MAX_NUMBER_INDEX_PATTERNS)
-      .then(indexPatterns => {
+      .then((indexPatterns) => {
         this.setState({ indexPatterns });
       })
-      .catch(resp => {
+      .catch((resp) => {
         // eslint-disable-next-line no-console
         console.error('Error loading list of dashboards:', resp);
         toasts.addDanger(
@@ -120,7 +120,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
 
   editNewCustomUrl = () => {
     // Opens the editor for configuring a new custom URL.
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const { dashboards, indexPatterns } = prevState;
 
       return {
@@ -138,7 +138,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
 
   addNewCustomUrl = () => {
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
-      .then(customUrl => {
+      .then((customUrl) => {
         const customUrls = [...this.state.customUrls, customUrl];
         this.props.setCustomUrls(customUrls);
         this.setState({ editorOpen: false });
@@ -160,15 +160,18 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
   };
 
   onTestButtonClick = () => {
-    const { toasts } = this.props.kibana.services.notifications;
+    const {
+      http: { basePath },
+      notifications: { toasts },
+    } = this.props.kibana.services;
     const job = this.props.job;
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
-      .then(customUrl => {
+      .then((customUrl) => {
         getTestUrl(job, customUrl)
-          .then(testUrl => {
-            openCustomUrlWindow(testUrl, customUrl);
+          .then((testUrl) => {
+            openCustomUrlWindow(testUrl, customUrl, basePath.get());
           })
-          .catch(resp => {
+          .catch((resp) => {
             // eslint-disable-next-line no-console
             console.error('Error obtaining URL for test:', resp);
             toasts.addWarning(
@@ -181,7 +184,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
             );
           });
       })
-      .catch(resp => {
+      .catch((resp) => {
         // eslint-disable-next-line no-console
         console.error('Error building custom URL from settings:', resp);
         toasts.addWarning(
@@ -278,30 +281,28 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         </EuiFlexGroup>
       </EuiPanel>
     ) : (
-      <EuiOverlayMask>
-        <EuiModal
-          onClose={this.closeEditor}
-          initialFocus="[name=label]"
-          style={{ width: 500 }}
-          data-test-subj="mlJobNewCustomUrlFormModal"
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
-                defaultMessage="Add custom URL"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <EuiModal
+        onClose={this.closeEditor}
+        initialFocus="[name=label]"
+        style={{ width: 500 }}
+        data-test-subj="mlJobNewCustomUrlFormModal"
+      >
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
+              defaultMessage="Add custom URL"
+            />
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody>{editor}</EuiModalBody>
+        <EuiModalBody>{editor}</EuiModalBody>
 
-          <EuiModalFooter>
-            {testButton}
-            {addButton}
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+        <EuiModalFooter>
+          {testButton}
+          {addButton}
+        </EuiModalFooter>
+      </EuiModal>
     );
   }
 

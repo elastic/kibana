@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,14 +10,18 @@ import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'roleMappings']);
+  const pageObjects = getPageObjects(['common', 'security', 'roleMappings']);
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const aceEditor = getService('aceEditor');
 
-  describe('Role Mappings', function() {
+  describe('Role Mappings', function () {
     before(async () => {
+      // Delete any existing role mappings. ESS commonly sets up a role mapping automatically.
+      const existingMappings = await security.roleMappings.getAll();
+      await Promise.all(existingMappings.map((m) => security.roleMappings.delete(m.name)));
+
       await pageObjects.common.navigateToApp('roleMappings');
     });
 
@@ -28,8 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('allows a role mapping to be created', async () => {
       await testSubjects.click('createRoleMappingButton');
       await testSubjects.setValue('roleMappingFormNameInput', 'new_role_mapping');
-      await testSubjects.setValue('rolesDropdown', 'superuser');
-      await browser.pressKeys(browser.keys.ENTER);
+      await pageObjects.security.selectRole('superuser');
 
       await testSubjects.click('roleMappingsAddRuleButton');
 
@@ -83,17 +87,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays an error and returns to the listing page when navigating to a role mapping which does not exist', async () => {
-      await pageObjects.common.navigateToActualUrl(
-        'kibana',
-        '#/management/security/role_mappings/edit/i-do-not-exist',
-        { ensureCurrentUrl: false }
+      await pageObjects.common.navigateToUrl(
+        'management',
+        'security/role_mappings/edit/i-do-not-exist',
+        { ensureCurrentUrl: false, shouldUseHashForSubUrl: false }
       );
 
       await testSubjects.existOrFail('errorLoadingRoleMappingEditorToast');
 
       const url = parse(await browser.getCurrentUrl());
 
-      expect(url.hash).to.eql('#/management/security/role_mappings');
+      expect(url.pathname).to.eql('/app/management/security/role_mappings/');
     });
 
     describe('with role mappings', () => {
@@ -124,7 +128,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       before(async () => {
         await Promise.all(
-          mappings.map(mapping => {
+          mappings.map((mapping) => {
             const { name, ...payload } = mapping;
             return security.roleMappings.create(name, payload);
           })
@@ -134,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await Promise.all(mappings.map(mapping => security.roleMappings.delete(mapping.name)));
+        await Promise.all(mappings.map((mapping) => security.roleMappings.delete(mapping.name)));
       });
 
       it('displays a table of all role mappings', async () => {

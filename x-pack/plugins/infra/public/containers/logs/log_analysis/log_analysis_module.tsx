@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useMemo } from 'react';
-
+import { DatasetFilter } from '../../../../common/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
+import { useUiTracker } from '../../../../../observability/public';
 
 export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration,
@@ -17,17 +20,20 @@ export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration: ModuleSourceConfiguration;
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const { spaceId, sourceId, timestampField } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
+
+  const trackMetric = useUiTracker({ app: 'infra_logs' });
 
   const [, fetchJobStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
-        return await moduleDescriptor.getJobSummary(spaceId, sourceId);
+        return await moduleDescriptor.getJobSummary(spaceId, sourceId, services.http.fetch);
       },
-      onResolve: jobResponse => {
+      onResolve: (jobResponse) => {
         dispatchModuleStatus({
           type: 'fetchedJobStatuses',
           payload: jobResponse,
@@ -48,19 +54,49 @@ export const useLogAnalysisModule = <JobType extends string>({
       createPromise: async (
         selectedIndices: string[],
         start: number | undefined,
-        end: number | undefined
+        end: number | undefined,
+        datasetFilter: DatasetFilter
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
-        const setupResult = await moduleDescriptor.setUpModule(start, end, {
-          indices: selectedIndices,
-          sourceId,
+        const setupResult = await moduleDescriptor.setUpModule(
+          start,
+          end,
+          datasetFilter,
+          {
+            indices: selectedIndices,
+            sourceId,
+            spaceId,
+            timestampField,
+          },
+          services.http.fetch
+        );
+        const jobSummaries = await moduleDescriptor.getJobSummary(
           spaceId,
-          timestampField,
-        });
-        const jobSummaries = await moduleDescriptor.getJobSummary(spaceId, sourceId);
+          sourceId,
+          services.http.fetch
+        );
         return { setupResult, jobSummaries };
       },
       onResolve: ({ setupResult: { datafeeds, jobs }, jobSummaries }) => {
+        // Track failures
+        if (
+          [...datafeeds, ...jobs]
+            .reduce<string[]>((acc, resource) => [...acc, ...Object.keys(resource)], [])
+            .some((key) => key === 'error')
+        ) {
+          const reasons = [...datafeeds, ...jobs]
+            .filter((resource) => resource.error !== undefined)
+            .map((resource) => resource.error?.error?.reason ?? '');
+          // NOTE: Lack of indices and a missing field mapping have the same error
+          if (
+            reasons.filter((reason) => reason.includes('because it has no mappings')).length > 0
+          ) {
+            trackMetric({ metric: 'logs_ml_setup_error_bad_indices_or_mappings' });
+          } else {
+            trackMetric({ metric: 'logs_ml_setup_error_unknown_cause' });
+          }
+        }
+
         dispatchModuleStatus({
           type: 'finishedSetup',
           datafeedSetupResults: datafeeds,
@@ -70,8 +106,11 @@ export const useLogAnalysisModule = <JobType extends string>({
           sourceId,
         });
       },
-      onReject: () => {
+      onReject: (e: any) => {
         dispatchModuleStatus({ type: 'failedSetup' });
+        if (e?.body?.statusCode === 403) {
+          trackMetric({ metric: 'logs_ml_setup_error_lack_of_privileges' });
+        }
       },
     },
     [moduleDescriptor.setUpModule, spaceId, sourceId, timestampField]
@@ -81,7 +120,7 @@ export const useLogAnalysisModule = <JobType extends string>({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await moduleDescriptor.cleanUpModule(spaceId, sourceId);
+        return await moduleDescriptor.cleanUpModule(spaceId, sourceId, services.http.fetch);
       },
     },
     [spaceId, sourceId]
@@ -92,11 +131,16 @@ export const useLogAnalysisModule = <JobType extends string>({
   ]);
 
   const cleanUpAndSetUpModule = useCallback(
-    (selectedIndices: string[], start: number | undefined, end: number | undefined) => {
+    (
+      selectedIndices: string[],
+      start: number | undefined,
+      end: number | undefined,
+      datasetFilter: DatasetFilter
+    ) => {
       dispatchModuleStatus({ type: 'startedSetup' });
       cleanUpModule()
         .then(() => {
-          setUpModule(selectedIndices, start, end);
+          setUpModule(selectedIndices, start, end, datasetFilter);
         })
         .catch(() => {
           dispatchModuleStatus({ type: 'failedSetup' });
@@ -104,14 +148,6 @@ export const useLogAnalysisModule = <JobType extends string>({
     },
     [cleanUpModule, dispatchModuleStatus, setUpModule]
   );
-
-  const viewSetupForReconfiguration = useCallback(() => {
-    dispatchModuleStatus({ type: 'requestedJobConfigurationUpdate' });
-  }, [dispatchModuleStatus]);
-
-  const viewSetupForUpdate = useCallback(() => {
-    dispatchModuleStatus({ type: 'requestedJobDefinitionUpdate' });
-  }, [dispatchModuleStatus]);
 
   const viewResults = useCallback(() => {
     dispatchModuleStatus({ type: 'viewedResults' });
@@ -137,7 +173,5 @@ export const useLogAnalysisModule = <JobType extends string>({
     setupStatus: moduleStatus.setupStatus,
     sourceConfiguration,
     viewResults,
-    viewSetupForReconfiguration,
-    viewSetupForUpdate,
   };
 };

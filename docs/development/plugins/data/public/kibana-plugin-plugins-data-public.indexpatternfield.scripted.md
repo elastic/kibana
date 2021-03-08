@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-scripted?: boolean;
+get scripted(): boolean;
 ```

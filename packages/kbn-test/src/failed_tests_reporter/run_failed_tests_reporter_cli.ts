@@ -1,23 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { REPO_ROOT, run, createFailError, createFlagError } from '@kbn/dev-utils';
+import Path from 'path';
+
+import { REPO_ROOT } from '@kbn/utils';
+import { run, createFailError, createFlagError } from '@kbn/dev-utils';
 import globby from 'globby';
 
 import { getFailures, TestFailure } from './get_failures';
@@ -27,6 +19,8 @@ import { getIssueMetadata } from './issue_metadata';
 import { readTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 import { getReportMessageIter } from './report_metadata';
+
+const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 
 export function runFailedTestsReporterCli() {
   run(
@@ -49,8 +43,7 @@ export function runFailedTestsReporterCli() {
         }
 
         const isPr = !!process.env.ghprbPullId;
-        const isMasterOrVersion =
-          branch.match(/^(origin\/){0,1}master$/) || branch.match(/^(origin\/){0,1}\d+\.(x|\d+)$/);
+        const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
           log.info('Failure issues only created on master/version branch jobs');
           updateGithub = false;
@@ -68,11 +61,17 @@ export function runFailedTestsReporterCli() {
         throw createFlagError('Missing --build-url or process.env.BUILD_URL');
       }
 
-      const reportPaths = await globby(['target/junit/**/*.xml'], {
-        cwd: REPO_ROOT,
+      const patterns = flags._.length ? flags._ : DEFAULT_PATTERNS;
+      log.info('Searching for reports at', patterns);
+      const reportPaths = await globby(patterns, {
         absolute: true,
       });
 
+      if (!reportPaths.length) {
+        throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
+      }
+
+      log.info('found', reportPaths.length, 'junit reports', reportPaths);
       const newlyCreatedIssues: Array<{
         failure: TestFailure;
         newIssue: GithubIssueMini;
@@ -100,7 +99,7 @@ export function runFailedTestsReporterCli() {
           }
 
           let existingIssue: GithubIssueMini | undefined = await githubApi.findFailedTestIssue(
-            i =>
+            (i) =>
               getIssueMetadata(i.body, 'test.class') === failure.classname &&
               getIssueMetadata(i.body, 'test.name') === failure.name
           );

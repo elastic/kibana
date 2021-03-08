@@ -1,186 +1,210 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PackageInfo,
-} from 'src/core/public';
-import { Storage, IStorageWrapper } from '../../kibana_utils/public';
+import './index.scss';
+
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { ConfigSchema } from '../config';
+import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  GetInternalStartServicesFn,
+  DataPublicPluginEnhancements,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService } from './index_patterns';
 import {
-  setFieldFormats,
-  setHttp,
+  IndexPatternsService,
+  onRedirectNoIndexPattern,
+  IndexPatternsApiClient,
+  UiSettingsPublicToCommon,
+} from './index_patterns';
+import {
   setIndexPatterns,
-  setInjectedMetadata,
   setNotifications,
   setOverlays,
-  setQueryService,
   setSearchService,
   setUiSettings,
-  getFieldFormats,
-  getNotifications,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { esaggs } from './search/expressions';
 import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-} from '../../ui_actions/public';
-import { ACTION_GLOBAL_APPLY_FILTER, createFilterAction, createFiltersFromEvent } from './actions';
-import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
-import {
-  selectRangeAction,
-  SelectRangeActionContext,
-  ACTION_SELECT_RANGE,
-} from './actions/select_range_action';
-import {
-  valueClickAction,
-  ACTION_VALUE_CLICK,
-  ValueClickActionContext,
-} from './actions/value_click_action';
+  ACTION_GLOBAL_APPLY_FILTER,
+  createFilterAction,
+  createFiltersFromValueClickAction,
+  createFiltersFromRangeSelectAction,
+  createValueClickAction,
+  createSelectRangeAction,
+} from './actions';
+import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
+import { SavedObjectsClientPublicToCommon } from './index_patterns';
+import { getIndexPatternLoad } from './index_patterns/expressions';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { getTableViewDescription } from './utils/table_inspector_view';
+import { NowProvider, NowProviderInternalContract } from './now_provider';
 
-declare module '../../ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
-    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
-    [ACTION_VALUE_CLICK]: ValueClickActionContext;
-  }
-}
-
-export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
-  private readonly autocomplete = new AutocompleteService();
+export class DataPublicPlugin
+  implements
+    Plugin<
+      DataPublicPluginSetup,
+      DataPublicPluginStart,
+      DataSetupDependencies,
+      DataStartDependencies
+    > {
+  private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
-  private readonly packageInfo: PackageInfo;
+  private usageCollection: UsageCollectionSetup | undefined;
+  private readonly nowProvider: NowProviderInternalContract;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.searchService = new SearchService();
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
+    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
-    this.packageInfo = initializerContext.env.packageInfo;
+    this.nowProvider = new NowProvider();
   }
 
   public setup(
-    core: CoreSetup,
-    { expressions, uiActions }: DataSetupDependencies
+    core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
+    { bfetch, expressions, uiActions, usageCollection, inspector }: DataSetupDependencies
   ): DataPublicPluginSetup {
-    setInjectedMetadata(core.injectedMetadata);
+    const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(esaggs);
+    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
 
-    const getInternalStartServices: GetInternalStartServicesFn = () => ({
-      fieldFormats: getFieldFormats(),
-      notifications: getNotifications(),
+    this.usageCollection = usageCollection;
+
+    const searchService = this.searchService.setup(core, {
+      bfetch,
+      usageCollection,
+      expressions,
+      nowProvider: this.nowProvider,
     });
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
+      nowProvider: this.nowProvider,
     });
 
+    uiActions.registerTrigger(applyFilterTrigger);
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.attachAction(
-      SELECT_RANGE_TRIGGER,
-      selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
-    );
-
-    uiActions.attachAction(
-      VALUE_CLICK_TRIGGER,
-      valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
+    inspector.registerView(
+      getTableViewDescription(() => ({
+        uiActions: startServices().plugins.uiActions,
+        uiSettings: startServices().core.uiSettings,
+        fieldFormats: startServices().self.fieldFormats,
+        isFilterable: startServices().self.search.aggs.datatableUtilities.isFilterable,
+      }))
     );
 
     return {
-      autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core, {
-        getInternalStartServices,
-        packageInfo: this.packageInfo,
-        query: queryService,
+      autocomplete: this.autocomplete.setup(core, {
+        timefilter: queryService.timefilter,
+        usageCollection,
       }),
+      search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
+      __enhance: (enhancements: DataPublicPluginEnhancements) => {
+        searchService.__enhance(enhancements.search);
+      },
     };
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays } = core;
-    setHttp(http);
+    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
 
     const fieldFormats = this.fieldFormatsService.start();
-    setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService({
+      uiSettings: new UiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new IndexPatternsApiClient(http),
+      fieldFormats,
+      onNotification: (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      onError: notifications.toasts.addError.bind(notifications.toasts),
+      onRedirectNoIndexPattern: onRedirectNoIndexPattern(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+    });
     setIndexPatterns(indexPatterns);
 
-    const query = this.queryService.start(savedObjects);
-    setQueryService(query);
+    const query = this.queryService.start({
+      storage: this.storage,
+      savedObjectsClient: savedObjects.client,
+      uiSettings,
+    });
 
-    const search = this.searchService.start(core);
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
 
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
+    uiActions.addTriggerAction(
+      'SELECT_RANGE_TRIGGER',
+      createSelectRangeAction(() => ({
+        uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
+      'VALUE_CLICK_TRIGGER',
+      createValueClickAction(() => ({
+        uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
+      APPLY_FILTER_TRIGGER,
+      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
+    );
 
     const dataServices = {
       actions: {
-        createFiltersFromEvent,
+        createFiltersFromValueClickAction,
+        createFiltersFromRangeSelectAction,
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,
       indexPatterns,
       query,
       search,
+      nowProvider: this.nowProvider,
     };
 
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
       storage: this.storage,
+      usageCollection: this.usageCollection,
     });
 
     return {
       ...dataServices,
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+        IndexPatternSelect: createIndexPatternSelect(indexPatterns),
         SearchBar,
       },
     };
@@ -188,5 +212,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
   public stop() {
     this.autocomplete.clearProviders();
+    this.queryService.stop();
+    this.searchService.stop();
   }
 }

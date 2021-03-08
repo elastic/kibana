@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import pipelinesFixture from './fixtures/pipelines';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -52,7 +53,7 @@ export default function({ getService }) {
           .send({ timeRange, pagination: { ...pagination, index: page }, sort })
           .expect(200);
 
-        return body.pipelines.map(pipeline => pipeline.id);
+        return body.pipelines.map((pipeline) => pipeline.id);
       }
 
       const ids = [...(await getIds(0)), ...(await getIds(1)), ...(await getIds(2))];

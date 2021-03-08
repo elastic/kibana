@@ -8,7 +8,7 @@ your application from one version of Kibana to another.
 
 * <<breaking-changes-8.0>>
 
-See also <<release-highlights>> and <<release-notes>>. 
+See also <<whats-new>> and <<release-notes>>. 
 --
 
 include::migration/migrate_8_0.asciidoc[]

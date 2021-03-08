@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, Fragment } from 'react';
@@ -35,9 +36,8 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { TimeBuckets } from '../../../../util/time_buckets';
+import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { expandCombinedJobConfig } from '../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
@@ -72,12 +72,16 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   let autoSetTimeRange = false;
 
-  if (mlJobService.tempJobCloningObjects.job !== undefined) {
+  if (
+    mlJobService.tempJobCloningObjects.job !== undefined &&
+    mlJobService.tempJobCloningObjects.datafeed !== undefined
+  ) {
     // cloning a job
-    const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
-    const { job, datafeed } = expandCombinedJobConfig(clonedJob);
+    const clonedJob = mlJobService.tempJobCloningObjects.job;
+    const clonedDatafeed = mlJobService.cloneDatafeed(mlJobService.tempJobCloningObjects.datafeed);
+
     initCategorizationSettings();
-    jobCreator.cloneFromExistingJob(job, datafeed);
+    jobCreator.cloneFromExistingJob(clonedJob, clonedDatafeed);
 
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
     if (mlJobService.tempJobCloningObjects.skipTimeRangeStep === false) {
@@ -88,6 +92,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
+    mlJobService.tempJobCloningObjects.datafeed = undefined;
+    mlJobService.tempJobCloningObjects.createdBy = undefined;
 
     if (
       mlJobService.tempJobCloningObjects.start !== undefined &&
@@ -125,6 +131,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     if (jobCreator.type === JOB_TYPE.SINGLE_METRIC) {
       jobCreator.modelPlot = true;
+      jobCreator.modelChangeAnnotations = true;
     }
 
     if (mlContext.currentSavedSearch !== null) {
@@ -174,14 +181,14 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
-  const chartInterval = new TimeBuckets();
+  const chartInterval = getTimeBucketsFromCache();
   chartInterval.setBarTarget(BAR_TARGET);
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
   const chartLoader = new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery);
 
-  const jobValidator = new JobValidator(jobCreator, existingJobsAndGroups);
+  const jobValidator = new JobValidator(jobCreator);
 
   const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
 
@@ -209,6 +216,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
                     : {jobCreatorTitle}
                   </h1>
                 </EuiTitle>
+
+                <FormattedMessage
+                  id="xpack.ml.newJob.page.createJob.indexPatternTitle"
+                  defaultMessage="Using index pattern {index}"
+                  values={{ index: jobCreator.indexPatternTitle }}
+                />
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
 

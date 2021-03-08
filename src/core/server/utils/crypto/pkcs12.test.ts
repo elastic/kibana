@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -65,7 +54,7 @@ describe('#readPkcs12Keystore', () => {
   };
 
   const expectCA = (pkcs12ReadResult: Pkcs12ReadResult, ca = [pemCA]) => {
-    const result = pkcs12ReadResult.ca?.map(x => reformatPem(x));
+    const result = pkcs12ReadResult.ca?.map((x) => reformatPem(x));
     expect(result).toEqual(ca);
   };
 
@@ -199,7 +188,7 @@ describe('#readPkcs12Keystore', () => {
 describe('#readPkcs12Truststore', () => {
   it('reads all certificates into one CA array and discards any certificates that have keys', () => {
     const ca = readPkcs12Truststore(ES_P12_PATH, ES_P12_PASSWORD);
-    const result = ca?.map(x => reformatPem(x));
+    const result = ca?.map((x) => reformatPem(x));
     expect(result).toEqual([pemCA]);
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -40,6 +41,7 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
             numActiveFilters={selectedValues.length}
             numFilters={selectedValues.length}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            data-test-subj="actionTypeFilterButton"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.actionTypeFilterLabel"
@@ -49,18 +51,19 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
         }
       >
         <div className="euiFilterSelect__items">
-          {actionTypes.map(item => (
+          {actionTypes.map((item) => (
             <EuiFilterSelectItem
               key={item.id}
               onClick={() => {
                 const isPreviouslyChecked = selectedValues.includes(item.id);
                 if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter(val => val !== item.id));
+                  setSelectedValues(selectedValues.filter((val) => val !== item.id));
                 } else {
                   setSelectedValues(selectedValues.concat(item.id));
                 }
               }}
               checked={selectedValues.includes(item.id) ? 'on' : undefined}
+              data-test-subj={`actionType${item.id}FilterOption`}
             >
               {item.name}
             </EuiFilterSelectItem>

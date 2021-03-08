@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,9 +16,9 @@ interface LinkToPageProps {
   match: RouteMatch<{}>;
 }
 
-const ITEM_TYPES = inventoryModels.map(m => m.id).join('|');
+const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
-export const LinkToMetricsPage: React.FC<LinkToPageProps> = props => {
+export const LinkToMetricsPage: React.FC<LinkToPageProps> = (props) => {
   return (
     <Switch>
       <Route

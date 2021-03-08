@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
@@ -13,9 +15,9 @@ const paramsSchema = schema.object({
 });
 
 function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string) {
-  const mapping = hit[indexName].mappings;
+  const mappings = hit[indexName].mappings;
   return {
-    mapping,
+    mappings,
   };
 }
 
@@ -30,7 +32,7 @@ export function registerMappingRoute({ router, license, lib }: RouteDependencies
       };
 
       try {
-        const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+        const hit = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.getMapping',
           params
         );
@@ -44,7 +46,7 @@ export function registerMappingRoute({ router, license, lib }: RouteDependencies
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

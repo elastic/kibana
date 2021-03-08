@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
@@ -24,8 +13,8 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
-} from '../../../../../test_utils/kbn_server';
-import { APICaller } from '../../../elasticsearch/';
+} from '../../../../test_helpers/kbn_server';
+import { LegacyAPICaller } from '../../../elasticsearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
@@ -37,16 +26,15 @@ let kbnServer: TestKibanaUtils['kbnServer'];
 interface AllServices {
   kbnServer: TestKibanaUtils['kbnServer'];
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   uiSettings: IUiSettingsClient;
-  deleteKibanaIndex: typeof deleteKibanaIndex;
 }
 
 let services: AllServices;
 
 export async function startServers() {
   servers = createTestServers({
-    adjustTimeout: t => jest.setTimeout(t),
+    adjustTimeout: (t) => jest.setTimeout(t),
     settings: {
       kbn: {
         uiSettings: {
@@ -62,20 +50,6 @@ export async function startServers() {
   kbnServer = kbn.kbnServer;
 }
 
-async function deleteKibanaIndex(callCluster: APICaller) {
-  const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
-  const indexNames = kibanaIndices.map((x: any) => x.index);
-  if (!indexNames.length) {
-    return;
-  }
-  await callCluster('indices.putSettings', {
-    index: indexNames,
-    body: { index: { blocks: { read_only: false } } },
-  });
-  await callCluster('indices.delete', { index: indexNames });
-  return indexNames;
-}
-
 export function getServices() {
   if (services) {
     return services;
@@ -83,21 +57,19 @@ export function getServices() {
 
   const callCluster = esServer.es.getCallCluster();
 
-  const savedObjects = kbnServer.server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+  const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
     httpServerMock.createKibanaRequest()
   );
 
-  const uiSettings = kbnServer.server.uiSettingsServiceFactory({
-    savedObjectsClient,
-  });
+  const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+    savedObjectsClient
+  );
 
   services = {
     kbnServer,
     callCluster,
     savedObjectsClient,
     uiSettings,
-    deleteKibanaIndex,
   };
 
   return services;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -44,7 +45,7 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
       collapse: {
         field: 'logstash_stats.logstash.uuid',
       },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
       _source: [
         'timestamp',
         'logstash_stats.process.cpu.percent',
@@ -64,10 +65,10 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then(resp => {
+  return callWithRequest(req, 'search', params).then((resp) => {
     const instances = get(resp, 'hits.hits', []);
 
-    return instances.map(hit => {
+    return instances.map((hit) => {
       return {
         ...get(hit, '_source.logstash_stats'),
         availability: calculateAvailability(get(hit, '_source.timestamp')),

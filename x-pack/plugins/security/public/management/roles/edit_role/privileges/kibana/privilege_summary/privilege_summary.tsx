@@ -1,34 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiModal,
-  EuiButtonEmpty,
-  EuiOverlayMask,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiOverlayMask,
+  EuiTitle,
 } from '@elastic/eui';
-import { Space } from '../../../../../../../../spaces/common/model/space';
-import { Role } from '../../../../../../../common/model';
+import React, { Fragment, useState } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role } from '../../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../../model';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
-import { KibanaPrivileges } from '../../../../model';
 
 interface Props {
   role: Role;
   spaces: Space[];
   kibanaPrivileges: KibanaPrivileges;
   canCustomizeSubFeaturePrivileges: boolean;
+  spacesApiUi: SpacesApiUi;
 }
 export const PrivilegeSummary = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const numberOfPrivilegeDefinitions = props.role.kibana.length;
+  const flyoutSize = numberOfPrivilegeDefinitions > 5 ? 'l' : 'm';
 
   return (
     <Fragment>
@@ -39,33 +47,36 @@ export const PrivilegeSummary = (props: Props) => {
         />
       </EuiButtonEmpty>
       {isOpen && (
-        <EuiOverlayMask>
-          <EuiModal onClose={() => setIsOpen(false)} maxWidth={false}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                <FormattedMessage
-                  id="xpack.security.management.editRole.privilegeSummary.modalHeaderTitle"
-                  defaultMessage="Privilege summary"
-                />
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
+        <EuiOverlayMask headerZindexLocation="below">
+          <EuiFlyout onClose={() => setIsOpen(false)} size={flyoutSize}>
+            <EuiFlyoutHeader>
+              <EuiTitle size="m">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.privilegeSummary.modalHeaderTitle"
+                    defaultMessage="Privilege summary"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
               <PrivilegeSummaryTable
                 role={props.role}
                 spaces={props.spaces}
                 kibanaPrivileges={props.kibanaPrivileges}
                 canCustomizeSubFeaturePrivileges={props.canCustomizeSubFeaturePrivileges}
+                spacesApiUi={props.spacesApiUi}
               />
-            </EuiModalBody>
-            <EuiModalFooter>
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
               <EuiButton onClick={() => setIsOpen(false)}>
                 <FormattedMessage
                   id="xpack.security.management.editRole.privilegeSummary.closeSummaryButtonText"
                   defaultMessage="Close"
                 />
               </EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
+            </EuiFlyoutFooter>
+          </EuiFlyout>
         </EuiOverlayMask>
       )}
     </Fragment>

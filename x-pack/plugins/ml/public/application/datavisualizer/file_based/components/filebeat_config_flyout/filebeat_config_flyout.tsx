@@ -1,12 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useEffect } from 'react';
@@ -55,9 +51,11 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   } = useMlKibana();
 
   useEffect(() => {
-    security.authc.getCurrentUser().then(user => {
-      setUsername(user.username === undefined ? null : user.username);
-    });
+    if (security !== undefined) {
+      security.authc.getCurrentUser().then((user) => {
+        setUsername(user.username === undefined ? null : user.username);
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -84,7 +82,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={fileBeatConfig}>
-              {copy => (
+              {(copy) => (
                 <EuiButton onClick={copy}>
                   <FormattedMessage
                     id="xpack.ml.fileDatavisualizer.fileBeatConfigFlyout.copyButton"

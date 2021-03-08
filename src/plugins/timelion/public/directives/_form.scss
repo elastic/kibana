@@ -1,0 +1,83 @@
+.form-control {
+  @include euiFontSizeS;
+  display: block;
+  width: 100%;
+  height: $euiFormControlCompressedHeight;
+  padding: $euiSizeXS $euiSizeM;
+  border: $euiBorderThin;
+  background-color: $euiFormBackgroundColor;
+  color: $euiTextColor;
+  border-radius: $euiBorderRadius;
+  cursor: pointer;
+
+  &:not([type='range']) {
+    appearance: none;
+  }
+
+  &:focus {
+    border-color: $euiColorPrimary;
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+select.form-control { // stylelint-disable-line selector-no-qualifying-type
+  // Makes the select arrow similar to EUI's arrowDown icon
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"%3E%3Cpath fill="#{hexToRGB($euiTextColor)}" d="M13.0688508,5.15725038 L8.38423975,9.76827428 C8.17054415,9.97861308 7.82999214,9.97914095 7.61576025,9.76827428 L2.93114915,5.15725038 C2.7181359,4.94758321 2.37277319,4.94758321 2.15975994,5.15725038 C1.94674669,5.36691756 1.94674669,5.70685522 2.15975994,5.9165224 L6.84437104,10.5275463 C7.48517424,11.1582836 8.51644979,11.1566851 9.15562896,10.5275463 L13.8402401,5.9165224 C14.0532533,5.70685522 14.0532533,5.36691756 13.8402401,5.15725038 C13.6272268,4.94758321 13.2818641,4.94758321 13.0688508,5.15725038 Z"/%3E%3C/svg%3E');
+  background-size: $euiSize;
+  background-repeat: no-repeat;
+  background-position: calc(100% - #{$euiSizeS});
+  padding-right: $euiSizeXL;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.timDropdownWarning {
+  margin-bottom: $euiSize;
+  padding: $euiSizeXS $euiSizeS;
+  color: $euiColorDarkestShade;
+  border-left: solid 2px $euiColorDanger;
+  font-size: $euiSizeM;
+}
+
+.timFormCheckbox {
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+  position: relative;
+}
+
+.timFormCheckbox__input {
+  appearance: none;
+  background-color: $euiColorLightestShade;
+  border: 1px solid $euiColorLightShade;
+  border-radius: $euiSizeXS;
+  width: $euiSize;
+  height: $euiSize;
+  font-size: $euiSizeM;
+  transition: background-color .1s linear;
+}
+
+.timFormCheckbox__input:checked {
+  border-color: $euiColorPrimary;
+  background-color: $euiColorPrimary;
+}
+
+.timFormCheckbox__icon {
+  position: absolute;
+  top: 0;
+  left: 2px;
+}
+
+.timFormTextarea {
+  padding: $euiSizeXS $euiSizeM;
+  font-size: $euiSize;
+  line-height: 1.5;
+  color: $euiColorDarkestShade;
+  background-color: $euiFormBackgroundColor;
+  border: 1px solid $euiColorLightShade;
+  border-radius: $euiSizeXS;
+  transition: border-color .1s linear;
+}

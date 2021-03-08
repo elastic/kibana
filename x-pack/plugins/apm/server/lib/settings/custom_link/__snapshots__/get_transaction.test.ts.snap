@@ -2,15 +2,15 @@
 
 exports[`custom link get transaction fetches with all filter 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
           Object {
             "terms": Object {
               "service.name": Array [
@@ -43,7 +43,6 @@ Object {
       },
     },
   },
-  "index": "myIndex",
   "size": 1,
   "terminateAfter": 1,
 }
@@ -51,20 +50,18 @@ Object {
 
 exports[`custom link get transaction fetches without filter 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-        ],
+        "filter": Array [],
       },
     },
   },
-  "index": "myIndex",
   "size": 1,
   "terminateAfter": 1,
 }

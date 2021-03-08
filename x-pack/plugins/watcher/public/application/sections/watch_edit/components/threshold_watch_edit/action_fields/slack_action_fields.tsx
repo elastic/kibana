@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import { EuiComboBox, EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +22,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
   children,
 }) => {
   const { text, to } = action;
-  const toOptions = to ? to.map(label => ({ label })) : [];
+  const toOptions = to ? to.map((label) => ({ label })) : [];
 
   return (
     <Fragment>
@@ -41,12 +43,12 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
           data-test-subj="slackRecipientComboBox"
           onCreateOption={(searchValue: string) => {
             const newOptions = [...toOptions, { label: searchValue }];
-            editAction({ key: 'to', value: newOptions.map(newOption => newOption.label) });
+            editAction({ key: 'to', value: newOptions.map((newOption) => newOption.label) });
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editAction({
               key: 'to',
-              value: selectedOptions.map(selectedOption => selectedOption.label),
+              value: selectedOptions.map((selectedOption) => selectedOption.label),
             });
           }}
         />
@@ -66,7 +68,7 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({
           name="text"
           value={text}
           data-test-subj="slackMessageTextarea"
-          onChange={e => {
+          onChange={(e) => {
             editAction({ key: 'text', value: e.target.value });
           }}
         />

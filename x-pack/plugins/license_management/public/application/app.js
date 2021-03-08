@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LicenseDashboard, UploadLicense } from './sections';
 import { Switch, Route } from 'react-router-dom';
-import { APP_PERMISSION, BASE_PATH } from '../../common/constants';
+import { APP_PERMISSION } from '../../common/constants';
 import { EuiPageBody, EuiEmptyPrompt, EuiText, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
 
 export class App extends Component {
@@ -85,12 +86,12 @@ export class App extends Component {
       );
     }
 
-    const withTelemetry = Component => props => <Component {...props} telemetry={telemetry} />;
+    const withTelemetry = (Component) => (props) => <Component {...props} telemetry={telemetry} />;
     return (
       <EuiPageBody>
         <Switch>
-          <Route path={`${BASE_PATH}upload_license`} component={withTelemetry(UploadLicense)} />
-          <Route path={BASE_PATH} component={withTelemetry(LicenseDashboard)} />
+          <Route path={`/upload_license`} component={withTelemetry(UploadLicense)} />
+          <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
         </Switch>
       </EuiPageBody>
     );

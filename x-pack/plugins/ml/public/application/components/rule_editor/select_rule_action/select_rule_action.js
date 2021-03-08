@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -32,7 +33,7 @@ export function SelectRuleAction({
   if (rules.length > 0) {
     ruleActionPanels = rules.map((rule, index) => {
       return (
-        <React.Fragment key={`rule_panel_${index}`}>
+        <React.Fragment key={`rule_panel_${index}_${rules.length}`}>
           <RuleActionPanel
             job={job}
             ruleIndex={index}

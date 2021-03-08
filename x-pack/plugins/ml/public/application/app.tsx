@@ -1,58 +1,104 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
+import './_index.scss';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { MlConfigType } from '../../common/types/ml_config';
 
 import { MlRouter } from './routing';
-
-type MlDependencies = MlSetupDependencies &
-  MlStartDependencies & {
-    mlConfig: MlConfigType;
-  };
+import { mlApiServicesProvider } from './services/ml_api_service';
+import { HttpService } from './services/http_service';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../common/constants/ml_url_generator';
+export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
+  MlStartDependencies;
 
 interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
+  appMountParams: AppMountParameters;
 }
 
 const localStorage = new Storage(window.localStorage);
 
-const App: FC<AppProps> = ({ coreStart, deps }) => {
+/**
+ * Provides global services available across the entire ML app.
+ */
+export function getMlGlobalServices(httpStart: HttpStart) {
+  const httpService = new HttpService(httpStart);
+  return {
+    httpService,
+    mlApiServices: mlApiServicesProvider(httpService),
+  };
+}
+
+export interface MlServicesContext {
+  mlServices: MlGlobalServices;
+}
+
+export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
+
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+  const redirectToMlAccessDeniedPage = async () => {
+    const accessDeniedPageUrl = await deps.share.urlGenerators
+      .getUrlGenerator(ML_APP_URL_GENERATOR)
+      .createUrl({
+        page: ML_PAGES.ACCESS_DENIED,
+      });
+    await coreStart.application.navigateToUrl(accessDeniedPageUrl);
+  };
+
   const pageDeps = {
+    history: appMountParams.history,
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    redirectToMlAccessDeniedPage,
   };
   const services = {
     appName: 'ML',
+    kibanaVersion: deps.kibanaVersion,
+    share: deps.share,
     data: deps.data,
     security: deps.security,
     licenseManagement: deps.licenseManagement,
+    lens: deps.lens,
     storage: localStorage,
+    embeddable: deps.embeddable,
+    maps: deps.maps,
+    triggersActionsUi: deps.triggersActionsUi,
+    fileUpload: deps.fileUpload,
     ...coreStart,
   };
 
   const I18nContext = coreStart.i18n.Context;
   return (
-    <I18nContext>
-      <KibanaContextProvider services={services}>
-        <MlRouter pageDeps={pageDeps} />
-      </KibanaContextProvider>
-    </I18nContext>
+    /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
+     * avoiding full page reload **/
+    <RedirectAppLinks application={coreStart.application}>
+      <I18nContext>
+        <KibanaContextProvider
+          services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
+        >
+          <MlRouter pageDeps={pageDeps} />
+        </KibanaContextProvider>
+      </I18nContext>
+    </RedirectAppLinks>
   );
 };
 
@@ -78,14 +124,19 @@ export const renderApp = (
     http: coreStart.http,
     security: deps.security,
     urlGenerators: deps.share.urlGenerators,
-    mlConfig: deps.mlConfig,
+    maps: deps.maps,
+    fileUpload: deps.fileUpload,
   });
 
-  const mlLicense = setLicenseCache(deps.licensing);
+  appMountParams.onAppLeave((actions) => actions.default());
 
-  appMountParams.onAppLeave(actions => actions.default());
-
-  ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element);
+  const mlLicense = setLicenseCache(deps.licensing, [
+    () =>
+      ReactDOM.render(
+        <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+        appMountParams.element
+      ),
+  ]);
 
   return () => {
     mlLicense.unsubscribe();

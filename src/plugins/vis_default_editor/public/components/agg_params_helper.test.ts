@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -23,8 +12,9 @@ import {
   IAggConfig,
   IAggType,
   IndexPattern,
-  IndexPatternField,
 } from 'src/plugins/data/public';
+import type { Schema } from 'src/plugins/visualizations/public';
+
 import {
   getAggParamsToRender,
   getAggTypeOptions,
@@ -32,18 +22,12 @@ import {
 } from './agg_params_helper';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
 import { EditorConfig } from './utils';
-import { Schema } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
+import { groupAndSortBy } from '../utils';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
 }));
-
-const mockFilter: any = {
-  filter(fields: IndexPatternField[]): IndexPatternField[] {
-    return fields;
-  },
-};
 
 describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
@@ -72,20 +56,14 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: 'metric',
       } as IAggConfig;
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
       agg = { schema: 'metric' } as IAggConfig;
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -101,10 +79,7 @@ describe('DefaultEditorAggParams helpers', () => {
           hidden: true,
         },
       };
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -116,10 +91,7 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: 'metric2',
       } as any) as IAggConfig;
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -152,16 +124,14 @@ describe('DefaultEditorAggParams helpers', () => {
             { name: '@timestamp', type: 'date' },
             { name: 'geo_desc', type: 'string' },
           ],
+          getAggregationRestrictions: jest.fn(),
         })),
         params: {
           orderBy: 'orderBy',
           field: 'field',
         },
       } as any) as IAggConfig;
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual({
         basic: [
@@ -190,7 +160,9 @@ describe('DefaultEditorAggParams helpers', () => {
         ],
         advanced: [],
       });
-      expect(agg.getIndexPattern).toBeCalledTimes(1);
+
+      // Should be grouped using displayName as label
+      expect(groupAndSortBy).toHaveBeenCalledWith(expect.anything(), 'type', 'displayName', 'name');
     });
   });
 

@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '../../services/data';
 
 /**
  * @typedef {Object} QueryFilter
@@ -37,9 +26,7 @@ export class FilterUtils {
    */
   public static convertTimeToUTCString(time?: string | Moment): undefined | string {
     if (moment(time).isValid()) {
-      return moment(time)
-        .utc()
-        .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+      return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
     } else {
       // If it's not a valid moment date, then it should be a string representing a relative time
       // like 'now' or 'now-15m'.
@@ -66,7 +53,7 @@ export class FilterUtils {
    * @returns {Array.<Object>}
    */
   public static cleanFiltersForComparison(filters: Filter[]) {
-    return _.map(filters, filter => {
+    return _.map(filters, (filter) => {
       const f: Partial<Filter> = _.omit(filter, ['$$hashKey', '$state']);
       if (f.meta) {
         // f.meta.value is the value displayed in the filter bar.

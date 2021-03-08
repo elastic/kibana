@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -32,6 +33,22 @@ export interface SecurityLicenseFeatures {
    * Indicates whether we show the Role Mappings UI.
    */
   readonly showRoleMappingsManagement: boolean;
+
+  /**
+   * Indicates whether we allow users to access agreement UI and acknowledge it.
+   */
+  readonly allowAccessAgreement: boolean;
+
+  /**
+   * Indicates whether we allow logging of audit events.
+   */
+  readonly allowAuditLogging: boolean;
+
+  /**
+   * Indicates whether we allow logging of legacy audit events.
+   * @deprecated
+   */
+  readonly allowLegacyAuditLogging: boolean;
 
   /**
    * Indicates whether we allow users to define document level security in roles.

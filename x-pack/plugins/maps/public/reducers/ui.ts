@@ -1,9 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
+
+import { getMapsCapabilities } from '../kibana_services';
 
 import {
   UPDATE_FLYOUT,
@@ -15,21 +19,13 @@ import {
   SET_OPEN_TOC_DETAILS,
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
-  UPDATE_INDEXING_STAGE,
-  // @ts-ignore
-} from '../actions/ui_actions';
+} from '../actions';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',
   LAYER_PANEL = 'LAYER_PANEL',
   ADD_LAYER_WIZARD = 'ADD_LAYER_WIZARD',
-}
-
-export enum INDEXING_STAGE {
-  READY = 'READY',
-  TRIGGERED = 'TRIGGERED',
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
+  MAP_SETTINGS_PANEL = 'MAP_SETTINGS_PANEL',
 }
 
 export type MapUiState = {
@@ -39,25 +35,23 @@ export type MapUiState = {
   isLayerTOCOpen: boolean;
   isSetViewOpen: boolean;
   openTOCDetails: string[];
-  importIndexingStage: INDEXING_STAGE | null;
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
 
-const INITIAL_STATE = {
+export const DEFAULT_MAP_UI_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
-  isReadOnly: false,
+  isReadOnly: !getMapsCapabilities().save,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
   isSetViewOpen: false,
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
-  importIndexingStage: null,
 };
 
 // Reducer
-export function ui(state: MapUiState = INITIAL_STATE, action: any) {
+export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
@@ -81,12 +75,10 @@ export function ui(state: MapUiState = INITIAL_STATE, action: any) {
     case HIDE_TOC_DETAILS:
       return {
         ...state,
-        openTOCDetails: state.openTOCDetails.filter(layerId => {
+        openTOCDetails: state.openTOCDetails.filter((layerId) => {
           return layerId !== action.layerId;
         }),
       };
-    case UPDATE_INDEXING_STAGE:
-      return { ...state, importIndexingStage: action.stage };
     default:
       return state;
   }

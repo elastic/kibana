@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -22,7 +23,7 @@ export function UrlTemplateList({
   const getListKey = useListKeys(urlTemplates);
 
   function removeUncommittedForm(id: string) {
-    setUncommittedForms(uncommittedForms.filter(formId => formId !== id));
+    setUncommittedForms(uncommittedForms.filter((formId) => formId !== id));
   }
 
   return (
@@ -39,7 +40,7 @@ export function UrlTemplateList({
           key={getListKey(template)}
           id={getListKey(template)}
           initialTemplate={template}
-          onSubmit={newTemplate => {
+          onSubmit={(newTemplate) => {
             saveTemplate({ index, template: newTemplate });
           }}
           onRemove={() => {
@@ -48,11 +49,11 @@ export function UrlTemplateList({
         />
       ))}
 
-      {uncommittedForms.map(id => (
+      {uncommittedForms.map((id) => (
         <UrlTemplateForm
           id={`accordion-new-${id}`}
           key={id}
-          onSubmit={newTemplate => {
+          onSubmit={(newTemplate) => {
             saveTemplate({ index: -1, template: newTemplate });
             removeUncommittedForm(id);
           }}

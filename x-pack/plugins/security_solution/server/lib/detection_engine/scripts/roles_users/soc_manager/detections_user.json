@@ -1,0 +1,6 @@
+{
+  "password": "changeme",
+  "roles": ["soc_manager"],
+  "full_name": "SOC manager",
+  "email": "detections-reader@example.com"
+}

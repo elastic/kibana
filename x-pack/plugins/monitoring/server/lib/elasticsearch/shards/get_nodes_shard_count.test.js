@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getNodesShardCount } from './get_nodes_shard_count';
@@ -25,7 +26,7 @@ describe('getNodeShardCount', () => {
               callWithRequest: () => ({
                 aggregations: {
                   nodes: {
-                    buckets: Object.keys(nodes).map(id => ({
+                    buckets: Object.keys(nodes).map((id) => ({
                       key: id,
                       doc_count: nodes[id].shardCount,
                     })),

@@ -1,28 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { cloneDeep, each, remove, sortBy, get } from 'lodash';
 
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 
 import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-export function estimateBucketSpanFactory(
-  callAsCurrentUser,
-  callAsInternalUser,
-  isSecurityDisabled
-) {
-  const PolledDataChecker = polledDataCheckerFactory(callAsCurrentUser);
-  const SingleSeriesChecker = singleSeriesCheckerFactory(callAsCurrentUser);
+export function estimateBucketSpanFactory(client) {
+  const { asCurrentUser, asInternalUser } = client;
+  const PolledDataChecker = polledDataCheckerFactory(client);
+  const SingleSeriesChecker = singleSeriesCheckerFactory(client);
 
   class BucketSpanEstimator {
     constructor(
-      { index, timeField, aggTypes, fields, duration, query, splitField },
+      { index, timeField, aggTypes, fields, duration, query, splitField, runtimeMappings },
       splitFieldValues,
       maxBuckets
     ) {
@@ -39,6 +37,9 @@ export function estimateBucketSpanFactory(
       this.thresholds = {
         minimumBucketSpanMS: 0,
       };
+
+      this.runtimeMappings =
+        runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {};
 
       // determine durations for bucket span estimation
       // taking into account the clusters' search.max_buckets settings
@@ -87,14 +88,15 @@ export function estimateBucketSpanFactory(
                 this.fields[i],
                 this.duration,
                 this.query,
-                this.thresholds
+                this.thresholds,
+                this.runtimeMappings
               ),
               result: null,
             });
           } else {
             // loop over partition values
             for (let j = 0; j < this.splitFieldValues.length; j++) {
-              const queryCopy = _.cloneDeep(this.query);
+              const queryCopy = cloneDeep(this.query);
               // add a term to the query to filter on the partition value
               queryCopy.bool.must.push({
                 term: {
@@ -109,7 +111,8 @@ export function estimateBucketSpanFactory(
                   this.fields[i],
                   this.duration,
                   queryCopy,
-                  this.thresholds
+                  this.thresholds,
+                  this.runtimeMappings
                 ),
                 result: null,
               });
@@ -128,7 +131,7 @@ export function estimateBucketSpanFactory(
 
         this.polledDataChecker
           .run()
-          .then(result => {
+          .then((result) => {
             // if the data is polled, set a minimum threshold
             // of bucket span
             if (result.isPolled) {
@@ -154,10 +157,10 @@ export function estimateBucketSpanFactory(
               }
             };
 
-            _.each(this.checkers, check => {
+            each(this.checkers, (check) => {
               check.check
                 .run()
-                .then(interval => {
+                .then((interval) => {
                   check.result = interval;
                   runComplete();
                 })
@@ -170,14 +173,14 @@ export function estimateBucketSpanFactory(
                 });
             });
           })
-          .catch(resp => {
+          .catch((resp) => {
             reject(resp);
           });
       });
     }
 
     processResults() {
-      const allResults = _.map(this.checkers, 'result');
+      const allResults = this.checkers.map((c) => c.result);
 
       let reducedResults = [];
       const numberOfSplitFields = this.splitFieldValues.length || 1;
@@ -188,8 +191,8 @@ export function estimateBucketSpanFactory(
         const pos = i * numberOfSplitFields;
         let resultsSubset = allResults.slice(pos, pos + numberOfSplitFields);
         // remove results of tests which have failed
-        resultsSubset = _.remove(resultsSubset, res => res !== null);
-        resultsSubset = _.sortBy(resultsSubset, r => r.ms);
+        resultsSubset = remove(resultsSubset, (res) => res !== null);
+        resultsSubset = sortBy(resultsSubset, (r) => r.ms);
 
         const tempMedian = this.findMedian(resultsSubset);
         if (tempMedian !== null) {
@@ -197,7 +200,7 @@ export function estimateBucketSpanFactory(
         }
       }
 
-      reducedResults = _.sortBy(reducedResults, r => r.ms);
+      reducedResults = sortBy(reducedResults, (r) => r.ms);
 
       return this.findMedian(reducedResults);
     }
@@ -243,76 +246,81 @@ export function estimateBucketSpanFactory(
     }
   }
 
-  const getFieldCardinality = function(index, field) {
+  const getFieldCardinality = function (index, field, runtimeMappings) {
     return new Promise((resolve, reject) => {
-      callAsCurrentUser('search', {
-        index,
-        size: 0,
-        body: {
-          aggs: {
-            field_count: {
-              cardinality: {
-                field,
+      asCurrentUser
+        .search({
+          index,
+          size: 0,
+          body: {
+            aggs: {
+              field_count: {
+                cardinality: {
+                  field,
+                },
               },
             },
+            ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
           },
-        },
-      })
-        .then(resp => {
-          const value = _.get(resp, ['aggregations', 'field_count', 'value'], 0);
+        })
+        .then(({ body }) => {
+          const value = get(body, ['aggregations', 'field_count', 'value'], 0);
           resolve(value);
         })
-        .catch(resp => {
+        .catch((resp) => {
           reject(resp);
         });
     });
   };
 
-  const getRandomFieldValues = function(index, field, query) {
+  const getRandomFieldValues = function (index, field, query, runtimeMappings) {
     let fieldValues = [];
     return new Promise((resolve, reject) => {
       const NUM_PARTITIONS = 10;
       // use a partitioned search to load 10 random fields
       // load ten fields, to test that there are at least 10.
       getFieldCardinality(index, field)
-        .then(value => {
+        .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
-          callAsCurrentUser('search', {
-            index,
-            size: 0,
-            body: {
-              query,
-              aggs: {
-                fields_bucket_counts: {
-                  terms: {
-                    field,
-                    include: {
-                      partition: 0,
-                      num_partitions: numPartitions,
+          asCurrentUser
+            .search({
+              index,
+              size: 0,
+              body: {
+                query,
+                aggs: {
+                  fields_bucket_counts: {
+                    terms: {
+                      field,
+                      include: {
+                        partition: 0,
+                        num_partitions: numPartitions,
+                      },
                     },
                   },
                 },
+                ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
               },
-            },
-          })
-            .then(partitionResp => {
-              if (_.has(partitionResp, 'aggregations.fields_bucket_counts.buckets')) {
-                const buckets = partitionResp.aggregations.fields_bucket_counts.buckets;
-                fieldValues = _.map(buckets, b => b.key);
+            })
+            .then(({ body }) => {
+              // eslint-disable-next-line camelcase
+              if (body.aggregations?.fields_bucket_counts?.buckets !== undefined) {
+                const buckets = body.aggregations.fields_bucket_counts.buckets;
+                fieldValues = buckets.map((b) => b.key);
               }
               resolve(fieldValues);
             })
-            .catch(resp => {
+            .catch((resp) => {
               reject(resp);
             });
         })
-        .catch(resp => {
+        .catch((resp) => {
           reject(resp);
         });
     });
   };
 
-  return function(formConfig) {
+  return function (formConfig) {
     if (typeof formConfig !== 'object' || formConfig === null) {
       throw new Error('Invalid formConfig: formConfig needs to be an object.');
     }
@@ -334,99 +342,70 @@ export function estimateBucketSpanFactory(
     }
 
     return new Promise((resolve, reject) => {
-      function getBucketSpanEstimation() {
-        // fetch the `search.max_buckets` cluster setting so we're able to
-        // adjust aggregations to not exceed that limit.
-        callAsInternalUser('cluster.getSettings', {
-          flatSettings: true,
-          includeDefaults: true,
-          filterPath: '*.*max_buckets',
+      // fetch the `search.max_buckets` cluster setting so we're able to
+      // adjust aggregations to not exceed that limit.
+      asInternalUser.cluster
+        .getSettings({
+          flat_settings: true,
+          include_defaults: true,
+          filter_path: '*.*max_buckets',
         })
-          .then(settings => {
-            if (typeof settings !== 'object') {
-              reject('Unable to retrieve cluster settings');
-            }
+        .then(({ body }) => {
+          if (typeof body !== 'object') {
+            reject('Unable to retrieve cluster settings');
+          }
 
-            // search.max_buckets could exist in default, persistent or transient cluster settings
-            const maxBucketsSetting = (settings.defaults ||
-              settings.persistent ||
-              settings.transient ||
-              {})['search.max_buckets'];
+          // search.max_buckets could exist in default, persistent or transient cluster settings
+          const maxBucketsSetting = (body.defaults || body.persistent || body.transient || {})[
+            'search.max_buckets'
+          ];
 
-            if (maxBucketsSetting === undefined) {
-              reject('Unable to retrieve cluster setting search.max_buckets');
-            }
+          if (maxBucketsSetting === undefined) {
+            reject('Unable to retrieve cluster setting search.max_buckets');
+          }
 
-            const maxBuckets = parseInt(maxBucketsSetting);
+          const maxBuckets = parseInt(maxBucketsSetting);
 
-            const runEstimator = (splitFieldValues = []) => {
-              const bucketSpanEstimator = new BucketSpanEstimator(
-                formConfig,
-                splitFieldValues,
-                maxBuckets
-              );
+          const runEstimator = (splitFieldValues = []) => {
+            const bucketSpanEstimator = new BucketSpanEstimator(
+              formConfig,
+              splitFieldValues,
+              maxBuckets
+            );
 
-              bucketSpanEstimator
-                .run()
-                .then(resp => {
-                  resolve(resp);
-                })
-                .catch(resp => {
-                  reject(resp);
-                });
-            };
+            bucketSpanEstimator
+              .run()
+              .then((resp) => {
+                resolve(resp);
+              })
+              .catch((resp) => {
+                reject(resp);
+              });
+          };
 
-            // a partition has been selected, so we need to load some field values to use in the
-            // bucket span tests.
-            if (formConfig.splitField !== undefined) {
-              getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
-                .then(splitFieldValues => {
-                  runEstimator(splitFieldValues);
-                })
-                .catch(resp => {
-                  reject(resp);
-                });
-            } else {
-              // no partition field selected or we're in the single metric config
-              runEstimator();
-            }
-          })
-          .catch(resp => {
-            reject(resp);
-          });
-      }
-
-      if (isSecurityDisabled) {
-        getBucketSpanEstimation();
-      } else {
-        // if security is enabled, check that the user has permission to
-        // view jobs before calling getBucketSpanEstimation.
-        // getBucketSpanEstimation calls the 'cluster.getSettings' endpoint as the internal user
-        // and so could give the user access to more information than
-        // they are entitled to.
-        const body = {
-          cluster: [
-            'cluster:monitor/xpack/ml/job/get',
-            'cluster:monitor/xpack/ml/job/stats/get',
-            'cluster:monitor/xpack/ml/datafeeds/get',
-            'cluster:monitor/xpack/ml/datafeeds/stats/get',
-          ],
-        };
-        callAsCurrentUser('ml.privilegeCheck', { body })
-          .then(resp => {
-            if (
-              resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']
-            ) {
-              getBucketSpanEstimation();
-            } else {
-              reject('Insufficient permissions to call bucket span estimation.');
-            }
-          })
-          .catch(reject);
-      }
+          // a partition has been selected, so we need to load some field values to use in the
+          // bucket span tests.
+          if (formConfig.splitField !== undefined) {
+            getRandomFieldValues(
+              formConfig.index,
+              formConfig.splitField,
+              formConfig.query,
+              formConfig.runtimeMappings
+            )
+              .then((splitFieldValues) => {
+                runEstimator(splitFieldValues);
+              })
+              .catch((resp) => {
+                reject(resp);
+              });
+          } else {
+            // no partition field selected or we're in the single metric config
+            runEstimator();
+          }
+        })
+        .catch((resp) => {
+          reject(resp);
+        });
     });
   };
 }

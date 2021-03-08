@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createIndexMap } from './build_index_map';
@@ -23,10 +12,10 @@ import { SavedObjectsType } from '../../types';
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
       migrations: {},
@@ -41,7 +30,7 @@ test('mappings without index pattern goes to default index', () => {
     kibanaIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
     }),
     indexMap: {
       type1: {
@@ -73,7 +62,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
     kibanaIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       indexPattern: '.other_kibana',
     }),
     indexMap: {
@@ -106,7 +95,7 @@ test('creating a script gets added to the index pattern', () => {
     kibanaIndexName: '.kibana',
     registry: createRegistry({
       name: 'type1',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       indexPattern: '.other_kibana',
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     }),
@@ -141,12 +130,12 @@ test('throws when two scripts are defined for an index pattern', () => {
   const registry = createRegistry(
     {
       name: 'type1',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     },
     {
       name: 'type2',
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     }
   );

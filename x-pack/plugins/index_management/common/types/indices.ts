@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 interface IndexModule {
@@ -15,6 +16,14 @@ interface IndexModule {
   number_of_replicas: number;
   auto_expand_replicas: false | string;
   lifecycle: LifecycleModule;
+  routing: {
+    allocation: {
+      enable: 'all' | 'primaries' | 'new_primaries' | 'none';
+    };
+    rebalance: {
+      enable: 'all' | 'primaries' | 'replicas' | 'none';
+    };
+  };
 }
 
 interface AnalysisModule {
@@ -39,5 +48,20 @@ interface LifecycleModule {
 export interface IndexSettings {
   index?: Partial<IndexModule>;
   analysis?: AnalysisModule;
+  [key: string]: any;
+}
+
+export interface Index {
+  health: string;
+  status: string;
+  name: string;
+  uuid: string;
+  primary: string;
+  replica: string;
+  documents: any;
+  size: any;
+  isFrozen: boolean;
+  aliases: string | string[];
+  data_stream?: string;
   [key: string]: any;
 }

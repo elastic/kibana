@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, Fragment } from 'react';
@@ -15,20 +16,21 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../../../common';
 import { Repository, RepositoryType } from '../../../../../../common/types';
-import { Error } from '../../../../components/section_error';
+import { UseRequestResponse } from '../../../../../shared_imports';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { textService } from '../../../../services/text';
 import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
-import { SendRequestResponse } from '../../../../../shared_imports';
+
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   repositories: Repository[];
   managedRepository?: string;
-  reload: () => Promise<SendRequestResponse<any, Error>>;
+  reload: UseRequestResponse['resendRequest'];
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
@@ -40,7 +42,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
 }) => {
-  const { i18n, uiMetricService } = useServices();
+  const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 
   const columns = [
@@ -54,10 +56,10 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       render: (name: Repository['name']) => {
         return (
           <Fragment>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
-              onClick={() => uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
-              href={openRepositoryDetailsUrl(name)}
+              {...reactRouterNavigate(history, openRepositoryDetailsUrl(name), () =>
+                uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)
+              )}
               data-test-subj="repositoryLink"
             >
               {name}
@@ -117,7 +119,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                   )}
                   iconType="pencil"
                   color="primary"
-                  href={linkToEditRepository(name)}
+                  {...reactRouterNavigate(history, linkToEditRepository(name))}
                   data-test-subj="editRepositoryButton"
                 />
               </EuiToolTip>
@@ -128,7 +130,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           render: ({ name }: Repository) => {
             return (
               <RepositoryDeleteProvider>
-                {deleteRepositoryPrompt => {
+                {(deleteRepositoryPrompt) => {
                   const label =
                     name !== managedRepository
                       ? i18n.translate(
@@ -210,7 +212,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             <EuiButton
               onClick={() =>
                 deleteRepositoryPrompt(
-                  selectedItems.map(repository => repository.name),
+                  selectedItems.map((repository) => repository.name),
                   onRepositoryDeleted
                 )
               }
@@ -232,9 +234,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           );
         }}
       </RepositoryDeleteProvider>
-    ) : (
-      undefined
-    ),
+    ) : undefined,
     toolsRight: [
       <EuiButton
         key="reloadButton"
@@ -250,7 +250,11 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       </EuiButton>,
       <EuiButton
         key="registerRepo"
-        href={linkToAddRepository()}
+        {...reactRouterNavigate(
+          history,
+          // @ts-expect-error
+          linkToAddRepository(name)
+        )}
         fill
         iconType="plusInCircle"
         data-test-subj="registerRepositoryButton"
@@ -278,7 +282,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             typeMap[repository.type] = true;
             return typeMap;
           }, {})
-        ).map(type => {
+        ).map((type) => {
           return {
             value: type,
             view: textService.getRepositoryTypeName(type),

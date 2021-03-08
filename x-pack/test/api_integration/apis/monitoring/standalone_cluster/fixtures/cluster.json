@@ -43,10 +43,10 @@
     "memTotal": 0,
     "apms": {
       "total": 0
+    },
+    "config": {
+      "container": false
     }
-  },
-  "alerts": {
-    "message": "Cluster Alerts are not displayed because the [production] cluster's license could not be determined."
   },
   "isPrimary": false
 }]

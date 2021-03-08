@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
-import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
-import { callWithRequestType } from '../../../../common/types/kibana';
+import { IScopedClusterClient } from 'kibana/server';
+import {
+  AggFieldNamePair,
+  EVENT_RATE_FIELD_ID,
+  RuntimeMappings,
+} from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
@@ -23,13 +28,13 @@ interface Result {
   values: Thing[];
 }
 
-interface ProcessedResults {
+export interface ProcessedResults {
   success: boolean;
   results: Record<number, Result[]>;
   totalResults: number;
 }
 
-export function newJobPopulationChartProvider(callWithRequest: callWithRequestType) {
+export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterClient) {
   async function newJobPopulationChart(
     indexPatternTitle: string,
     timeField: string,
@@ -38,7 +43,8 @@ export function newJobPopulationChartProvider(callWithRequest: callWithRequestTy
     intervalMs: number,
     query: object,
     aggFieldNamePairs: AggFieldNamePair[],
-    splitFieldName: string | null
+    splitFieldName: string | null,
+    runtimeMappings: RuntimeMappings | undefined
   ) {
     const json: object = getPopulationSearchJsonFromConfig(
       indexPatternTitle,
@@ -48,18 +54,15 @@ export function newJobPopulationChartProvider(callWithRequest: callWithRequestTy
       intervalMs,
       query,
       aggFieldNamePairs,
-      splitFieldName
+      splitFieldName,
+      runtimeMappings
     );
 
-    try {
-      const results = await callWithRequest('search', json);
-      return processSearchResults(
-        results,
-        aggFieldNamePairs.map(af => af.field)
-      );
-    } catch (error) {
-      return { error };
-    }
+    const { body } = await asCurrentUser.search(json);
+    return processSearchResults(
+      body,
+      aggFieldNamePairs.map((af) => af.field)
+    );
   }
 
   return {
@@ -122,7 +125,7 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   return {
     success: true,
     results: tempResults,
-    totalResults: resp.hits.total,
+    totalResults: resp.hits.total.value,
   };
 }
 
@@ -134,19 +137,20 @@ function getPopulationSearchJsonFromConfig(
   intervalMs: number,
   query: any,
   aggFieldNamePairs: AggFieldNamePair[],
-  splitFieldName: string | null
+  splitFieldName: string | null,
+  runtimeMappings: RuntimeMappings | undefined
 ): object {
   const json = {
     index: indexPatternTitle,
     size: 0,
-    rest_total_hits_as_int: true,
+    track_total_hits: true,
     body: {
       query: {},
       aggs: {
         times: {
           date_histogram: {
             field: timeField,
-            interval: intervalMs,
+            fixed_interval: `${intervalMs}ms`,
             min_doc_count: 0,
             extended_bounds: {
               min: start,
@@ -156,8 +160,17 @@ function getPopulationSearchJsonFromConfig(
           aggs: {},
         },
       },
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
   };
+
+  if (query.bool === undefined) {
+    query.bool = {
+      must: [],
+    };
+  } else if (query.bool.must === undefined) {
+    query.bool.must = [];
+  }
 
   query.bool.must.push({
     range: {
@@ -232,5 +245,6 @@ function getPopulationSearchJsonFromConfig(
   } else {
     json.body.aggs.times.aggs = aggs;
   }
+
   return json;
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ObjectType } from '@kbn/config-schema';
@@ -9,15 +10,13 @@ import {
   RequestHandler,
   RouteConfig,
   RouteMethod,
-  CallAPIOptions,
-  SavedObjectsClient,
-  RequestHandlerContext,
+  SavedObjectsClientContract,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
-} from 'src/core/server';
-import { DynamicSettings } from '../../../../legacy/plugins/uptime/common/runtime_types';
-import { UMServerLibs } from '../lib/lib';
+} from 'kibana/server';
+import { UMServerLibs, UptimeESClient } from '../lib/lib';
+import type { UptimeRequestHandlerContext } from '../types';
 
 /**
  * Defines the basic properties employed by Uptime routes.
@@ -40,7 +39,9 @@ export type UMRouteDefinition<T> = UMServerRoute<T> &
  * provided by the Kibana platform. Route objects must conform to this type in order
  * to successfully interact with the Kibana platform.
  */
-export type UMKibanaRoute = UMRouteDefinition<RequestHandler<ObjectType, ObjectType, ObjectType>>;
+export type UMKibanaRoute = UMRouteDefinition<
+  RequestHandler<ObjectType, ObjectType, ObjectType, UptimeRequestHandlerContext>
+>;
 
 /**
  * This is an abstraction over the default Kibana route type. This allows us to use custom
@@ -60,35 +61,18 @@ export type UMRestApiRouteFactory = (libs: UMServerLibs) => UptimeRoute;
 export type UMKibanaRouteWrapper = (uptimeRoute: UptimeRoute) => UMKibanaRoute;
 
 /**
- * This type can store custom parameters used by the internal Uptime route handlers.
- */
-export interface UMRouteParams {
-  callES: (
-    endpoint: string,
-    clientParams?: Record<string, any>,
-    options?: CallAPIOptions | undefined
-  ) => Promise<any>;
-  dynamicSettings: DynamicSettings;
-  savedObjectsClient: Pick<
-    SavedObjectsClient,
-    | 'errors'
-    | 'create'
-    | 'bulkCreate'
-    | 'delete'
-    | 'find'
-    | 'bulkGet'
-    | 'get'
-    | 'update'
-    | 'bulkUpdate'
-  >;
-}
-
-/**
  * This is the contract we specify internally for route handling.
  */
-export type UMRouteHandler = (
-  params: UMRouteParams,
-  context: RequestHandlerContext,
-  request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>,
-  response: KibanaResponseFactory
-) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type UMRouteHandler = ({
+  uptimeEsClient,
+  context,
+  request,
+  response,
+  savedObjectsClient,
+}: {
+  uptimeEsClient: UptimeESClient;
+  context: UptimeRequestHandlerContext;
+  request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>;
+  response: KibanaResponseFactory;
+  savedObjectsClient: SavedObjectsClientContract;
+}) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

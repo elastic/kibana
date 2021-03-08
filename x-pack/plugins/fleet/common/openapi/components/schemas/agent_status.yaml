@@ -1,0 +1,8 @@
+type: string
+title: AgentStatus
+enum:
+  - offline
+  - error
+  - online
+  - inactive
+  - warning

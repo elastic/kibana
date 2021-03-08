@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BaseAction } from './base_action';
@@ -74,21 +75,6 @@ export class IndexAction extends BaseAction {
             defaultMessage: 'JSON argument must contain an {actionJsonIndex} property',
             values: {
               actionJsonIndex: 'actionJson.index',
-            },
-          }
-        ),
-      });
-    }
-
-    if (json.index && !json.index.index) {
-      errors.push({
-        code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate(
-          'xpack.watcher.models.loggingAction.actionJsonIndexNamePropertyMissingBadRequestMessage',
-          {
-            defaultMessage: 'JSON argument must contain an {actionJsonIndexName} property',
-            values: {
-              actionJsonIndexName: 'actionJson.index.index',
             },
           }
         ),

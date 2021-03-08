@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { findIndex, get, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { findIndex, get } from 'lodash';
 import React from 'react';
 
 import {
@@ -188,6 +190,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
     return [
       {
         id: 'overview',
+        'data-test-subj': 'upgradeAssistantOverviewTab',
         name: i18n.translate('xpack.upgradeAssistant.overviewTab.overviewTabTitle', {
           defaultMessage: 'Overview',
         }),
@@ -195,6 +198,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
       },
       {
         id: 'cluster',
+        'data-test-subj': 'upgradeAssistantClusterTab',
         name: i18n.translate('xpack.upgradeAssistant.checkupTab.clusterTabLabel', {
           defaultMessage: 'Cluster',
         }),
@@ -211,6 +215,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
       },
       {
         id: 'indices',
+        'data-test-subj': 'upgradeAssistantIndicesTab',
         name: i18n.translate('xpack.upgradeAssistant.checkupTab.indicesTabLabel', {
           defaultMessage: 'Indices',
         }),
@@ -238,7 +243,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
 
     this.setState({ telemetryState: TelemetryState.Running });
 
-    await this.props.http.fetch('/api/upgrade_assistant/telemetry/ui_open', {
+    await this.props.http.fetch('/api/upgrade_assistant/stats/ui_open', {
       method: 'PUT',
       body: JSON.stringify(set({}, tabName, true)),
     });

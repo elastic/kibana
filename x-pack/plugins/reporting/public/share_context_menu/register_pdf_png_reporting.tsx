@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
-import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { checkLicense } from '../lib/license_check';
-import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
-import { LicensingPluginSetup } from '../../../licensing/public';
+import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { ShareContext } from '../../../../../src/plugins/share/public';
+import { LicensingPluginSetup } from '../../../licensing/public';
+import { LayoutParams } from '../../common/types';
+import { JobParamsPNG } from '../../server/export_types/png/types';
+import { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
+import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
+import { checkLicense } from '../lib/license_check';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface ReportingPDFPNGProvider {
   apiClient: ReportingAPIClient;
@@ -31,13 +35,21 @@ export const reportingPDFPNGProvider = ({
   let disabled = true;
   let hasPDFPNGReporting = false;
 
-  license$.subscribe(license => {
+  license$.subscribe((license) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
 
     toolTipContent = message;
     hasPDFPNGReporting = showLinks;
     disabled = !enableLinks;
   });
+
+  // If the TZ is set to the default "Browser", it will not be useful for
+  // server-side export. We need to derive the timezone and pass it as a param
+  // to the export API.
+  const browserTimezone =
+    uiSettings.get('dateFormat:tz') === 'Browser'
+      ? moment.tz.guess()
+      : uiSettings.get('dateFormat:tz');
 
   const getShareMenuItems = ({
     objectType,
@@ -57,7 +69,7 @@ export const reportingPDFPNGProvider = ({
       return [];
     }
 
-    const getReportingJobParams = () => {
+    const getPdfJobParams = (): JobParamsPDF => {
       // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
       // Replace hashes with original RISON values.
       const relativeUrl = shareableUrl.replace(
@@ -65,36 +77,28 @@ export const reportingPDFPNGProvider = ({
         ''
       );
 
-      const browserTimezone =
-        uiSettings.get('dateFormat:tz') === 'Browser'
-          ? moment.tz.guess()
-          : uiSettings.get('dateFormat:tz');
-
       return {
-        ...sharingData,
         objectType,
         browserTimezone,
-        relativeUrls: [relativeUrl],
+        relativeUrls: [relativeUrl], // multi URL for PDF
+        layout: sharingData.layout as LayoutParams,
+        title: sharingData.title as string,
       };
     };
 
-    const getPngJobParams = () => {
+    const getPngJobParams = (): JobParamsPNG => {
       // Replace hashes with original RISON values.
       const relativeUrl = shareableUrl.replace(
         window.location.origin + apiClient.getServerBasePath(),
         ''
       );
 
-      const browserTimezone =
-        uiSettings.get('dateFormat:tz') === 'Browser'
-          ? moment.tz.guess()
-          : uiSettings.get('dateFormat:tz');
-
       return {
-        ...sharingData,
         objectType,
         browserTimezone,
-        relativeUrl,
+        relativeUrl, // single URL for PNG
+        layout: sharingData.layout as LayoutParams,
+        title: sharingData.title as string,
       };
     };
 
@@ -132,7 +136,6 @@ export const reportingPDFPNGProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               reportType="png"
-              objectType={objectType}
               objectId={objectId}
               getJobParams={getPngJobParams}
               isDirty={isDirty}
@@ -159,9 +162,8 @@ export const reportingPDFPNGProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               reportType="printablePdf"
-              objectType={objectType}
               objectId={objectId}
-              getJobParams={getReportingJobParams}
+              getJobParams={getPdfJobParams}
               isDirty={isDirty}
               onClose={onClose}
             />

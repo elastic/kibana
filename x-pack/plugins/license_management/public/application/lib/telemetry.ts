@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TelemetryPluginSetup } from '../../../../../../src/plugins/telemetry/public';
+import type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
 
-export { OptInExampleFlyout } from '../../../../../../src/plugins/telemetry_management_section/public/components';
-export { PRIVACY_STATEMENT_URL } from '../../../../../../src/plugins/telemetry/common/constants';
-export { TelemetryPluginSetup, shouldShowTelemetryOptIn };
+export type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
+export { shouldShowTelemetryOptIn };
 
 function shouldShowTelemetryOptIn(
-  telemetry?: TelemetryPluginSetup
-): telemetry is TelemetryPluginSetup {
+  telemetry?: TelemetryPluginStart
+): telemetry is TelemetryPluginStart {
   if (telemetry) {
     const { telemetryService } = telemetry;
     const isOptedIn = telemetryService.getIsOptedIn();

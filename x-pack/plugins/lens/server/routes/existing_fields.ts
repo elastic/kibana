@@ -1,50 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
-import { CoreSetup } from 'src/core/server';
+import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
+import { IndexPattern, IndexPatternsService, RuntimeField } from 'src/plugins/data/common';
 import { BASE_API_URL } from '../../common';
-import {
-  IndexPatternsFetcher,
-  IndexPatternAttributes,
-} from '../../../../../src/plugins/data/server';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
+import { PluginStartContract } from '../plugin';
+
+export function isBoomError(error: { isBoom?: boolean }): error is Boom.Boom {
+  return error.isBoom === true;
+}
 
 /**
  * The number of docs to sample to determine field empty status.
  */
 const SAMPLE_SIZE = 500;
 
-interface MappingResult {
-  [indexPatternTitle: string]: {
-    mappings: {
-      properties: Record<string, { type: string; path: string }>;
-    };
-  };
-}
-
-interface FieldDescriptor {
-  name: string;
-  subType?: { multi?: { parent?: string } };
-}
-
 export interface Field {
   name: string;
   isScript: boolean;
-  isAlias: boolean;
-  path: string[];
+  isMeta: boolean;
   lang?: string;
   script?: string;
+  runtimeField?: RuntimeField;
 }
 
-// TODO: Pull this from kibana advanced settings
-const metaFields = ['_source', '_id', '_type', '_index', '_score'];
-
-export async function existingFieldsRoute(setup: CoreSetup) {
+export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>, logger: Logger) {
   const router = setup.http.createRouter();
 
   router.post(
@@ -63,27 +52,35 @@ export async function existingFieldsRoute(setup: CoreSetup) {
       },
     },
     async (context, req, res) => {
+      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const savedObjectsClient = savedObjects.getScopedClient(req);
+      const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
       try {
         return res.ok({
           body: await fetchFieldExistence({
             ...req.params,
             ...req.body,
+            indexPatternsService: await data.indexPatterns.indexPatternsServiceFactory(
+              savedObjectsClient,
+              esClient
+            ),
             context,
           }),
         });
       } catch (e) {
-        if (e.status === 404) {
-          return res.notFound();
+        logger.info(
+          `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
+        );
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
+          return res.notFound({ body: e.message });
         }
-        if (e.isBoom) {
+        if (isBoomError(e)) {
           if (e.output.statusCode === 404) {
-            return res.notFound();
+            return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError(e.output.message);
+          throw new Error(e.output.payload.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }
@@ -93,6 +90,7 @@ export async function existingFieldsRoute(setup: CoreSetup) {
 async function fetchFieldExistence({
   context,
   indexPatternId,
+  indexPatternsService,
   dslQuery = { match_all: {} },
   fromDate,
   toDate,
@@ -100,102 +98,48 @@ async function fetchFieldExistence({
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
+  indexPatternsService: IndexPatternsService;
   dslQuery: object;
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
 }) {
-  const {
-    indexPattern,
-    indexPatternTitle,
-    mappings,
-    fieldDescriptors,
-  } = await fetchIndexPatternDefinition(indexPatternId, context);
+  const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
+  const indexPattern = await indexPatternsService.get(indexPatternId);
 
-  const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
+  const fields = buildFieldList(indexPattern, metaFields);
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.dataClient,
-    index: indexPatternTitle,
-    timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
+    client: context.core.elasticsearch.client.asCurrentUser,
+    index: indexPattern.title,
+    timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
   });
 
   return {
-    indexPatternTitle,
+    indexPatternTitle: indexPattern.title,
     existingFieldNames: existingFields(docs, fields),
-  };
-}
-
-async function fetchIndexPatternDefinition(indexPatternId: string, context: RequestHandlerContext) {
-  const savedObjectsClient = context.core.savedObjects.client;
-  const requestClient = context.core.elasticsearch.dataClient;
-  const indexPattern = await savedObjectsClient.get<IndexPatternAttributes>(
-    'index-pattern',
-    indexPatternId
-  );
-  const indexPatternTitle = indexPattern.attributes.title;
-  // TODO: maybe don't use IndexPatternsFetcher at all, since we're only using it
-  // to look up field values in the resulting documents. We can accomplish the same
-  // using the mappings which we're also fetching here.
-  const indexPatternsFetcher = new IndexPatternsFetcher(requestClient.callAsCurrentUser);
-  const [mappings, fieldDescriptors] = await Promise.all([
-    requestClient.callAsCurrentUser('indices.getMapping', {
-      index: indexPatternTitle,
-    }),
-
-    indexPatternsFetcher.getFieldsForWildcard({
-      pattern: indexPatternTitle,
-      // TODO: Pull this from kibana advanced settings
-      metaFields,
-    }),
-  ]);
-
-  return {
-    indexPattern,
-    indexPatternTitle,
-    mappings,
-    fieldDescriptors,
   };
 }
 
 /**
  * Exported only for unit tests.
  */
-export function buildFieldList(
-  indexPattern: SavedObject<IndexPatternAttributes>,
-  mappings: MappingResult,
-  fieldDescriptors: FieldDescriptor[]
-): Field[] {
-  const aliasMap = Object.entries(Object.values(mappings)[0].mappings.properties)
-    .map(([name, v]) => ({ ...v, name }))
-    .filter(f => f.type === 'alias')
-    .reduce((acc, f) => {
-      acc[f.name] = f.path;
-      return acc;
-    }, {} as Record<string, string>);
-
-  const descriptorMap = fieldDescriptors.reduce((acc, f) => {
-    acc[f.name] = f;
-    return acc;
-  }, {} as Record<string, FieldDescriptor>);
-
-  return JSON.parse(indexPattern.attributes.fields).map(
-    (field: { name: string; lang: string; scripted?: boolean; script?: string }) => {
-      const path =
-        aliasMap[field.name] || descriptorMap[field.name]?.subType?.multi?.parent || field.name;
-      return {
-        name: field.name,
-        isScript: !!field.scripted,
-        isAlias: !!aliasMap[field.name],
-        path: path.split('.'),
-        lang: field.lang,
-        script: field.script,
-      };
-    }
-  );
+export function buildFieldList(indexPattern: IndexPattern, metaFields: string[]): Field[] {
+  return indexPattern.fields.map((field) => {
+    return {
+      name: field.name,
+      isScript: !!field.scripted,
+      lang: field.lang,
+      script: field.script,
+      // id is a special case - it doesn't show up in the meta field list,
+      // but as it's not part of source, it has to be handled separately.
+      isMeta: metaFields.includes(field.name) || field.name === '_id',
+      runtimeField: !field.isMapped ? field.runtimeField : undefined,
+    };
+  });
 }
 
 async function fetchIndexPatternStats({
@@ -207,7 +151,7 @@ async function fetchIndexPatternStats({
   toDate,
   fields,
 }: {
-  client: IScopedClusterClient;
+  client: ElasticsearchClient;
   index: string;
   dslQuery: object;
   timeFieldName?: string;
@@ -236,14 +180,21 @@ async function fetchIndexPatternStats({
     },
   };
 
-  const scriptedFields = fields.filter(f => f.isScript);
-  const result = await client.callAsCurrentUser('search', {
+  const scriptedFields = fields.filter((f) => f.isScript);
+  const runtimeFields = fields.filter((f) => f.runtimeField);
+  const { body: result } = await client.search({
     index,
     body: {
       size: SAMPLE_SIZE,
       query,
-      // _source is required because we are also providing script fields.
-      _source: '*',
+      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
+      fields: ['*'],
+      _source: false,
+      runtime_mappings: runtimeFields.reduce((acc, field) => {
+        if (!field.runtimeField) return acc;
+        acc[field.name] = field.runtimeField;
+        return acc;
+      }, {} as Record<string, unknown>),
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {
@@ -258,31 +209,11 @@ async function fetchIndexPatternStats({
   return result.hits.hits;
 }
 
-function exists(obj: unknown, path: string[], i = 0): boolean {
-  if (obj == null) {
-    return false;
-  }
-
-  if (path.length === i) {
-    return true;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.some(child => exists(child, path, i));
-  }
-
-  if (typeof obj === 'object') {
-    return exists((obj as Record<string, unknown>)[path[i]], path, i + 1);
-  }
-
-  return path.length === i;
-}
-
 /**
  * Exported only for unit tests.
  */
 export function existingFields(
-  docs: Array<{ _source: unknown; fields: unknown }>,
+  docs: Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>,
   fields: Field[]
 ): string[] {
   const missingFields = new Set(fields);
@@ -292,12 +223,19 @@ export function existingFields(
       break;
     }
 
-    missingFields.forEach(field => {
-      if (exists(field.isScript ? doc.fields : doc._source, field.path)) {
+    missingFields.forEach((field) => {
+      let fieldStore: Record<string, unknown> = doc.fields;
+      if (field.isMeta) {
+        fieldStore = doc;
+      }
+      const value = fieldStore[field.name];
+      if (Array.isArray(value) && value.length) {
+        missingFields.delete(field);
+      } else if (!Array.isArray(value) && value) {
         missingFields.delete(field);
       }
     });
   }
 
-  return fields.filter(field => !missingFields.has(field)).map(f => f.name);
+  return fields.filter((field) => !missingFields.has(field)).map((f) => f.name);
 }

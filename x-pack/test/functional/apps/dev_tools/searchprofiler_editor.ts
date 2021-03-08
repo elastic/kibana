@@ -1,24 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const aceEditor = getService('aceEditor');
   const retry = getService('retry');
+  const security = getService('security');
 
   const editorTestSubjectSelector = 'searchProfilerEditor';
 
   describe('Search Profiler Editor', () => {
     before(async () => {
+      await security.testUser.setRoles(['global_devtools_read']);
       await PageObjects.common.navigateToApp('searchProfiler');
       expect(await testSubjects.exists('searchProfilerEditor')).to.be(true);
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('correctly parses triple quotes in JSON', async () => {

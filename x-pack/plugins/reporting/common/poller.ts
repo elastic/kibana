@@ -1,11 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import { PollerOptions } from '..';
+
+interface PollerOptions {
+  functionToPoll: () => Promise<any>;
+  pollFrequencyInMillis: number;
+  trailing?: boolean;
+  continuePollingOnError?: boolean;
+  pollFrequencyErrorMultiplier?: number;
+  successFunction?: (...args: any) => any;
+  errorFunction?: (error: Error) => any;
+}
 
 // @TODO Maybe move to observables someday
 export class Poller {
@@ -46,7 +56,7 @@ export class Poller {
 
         this._timeoutId = setTimeout(this._poll.bind(this), this.pollFrequencyInMillis);
       })
-      .catch(e => {
+      .catch((e) => {
         this.errorFunction(e);
         if (!this._isRunning) {
           return;

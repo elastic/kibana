@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
 import fs from 'fs';
 import { services } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file =>
+  const plugins = allFiles.filter((file) =>
     fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
   );
 
@@ -39,10 +40,10 @@ export default async function({ readConfigFile }) {
           '..',
           'plugin_api_integration',
           'plugins',
-          'task_manager'
+          'sample_task_plugin'
         )}`,
         ...plugins.map(
-          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
       ],
     },

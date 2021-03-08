@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useState } from 'react';
@@ -36,28 +25,39 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
-import { SavedSearch } from 'src/plugins/discover/public';
+import { SavedObject } from 'src/plugins/saved_objects/public';
+import { ApplicationStart } from '../../../../../core/public';
+import { useKibana } from '../../../../kibana_react/public';
 
 interface LinkedSearchProps {
-  savedSearch: SavedSearch;
+  savedSearch: SavedObject;
   eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedObject;
   vis: Vis;
   eventEmitter: EventEmitter;
 }
 
 export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
+  const {
+    services: { application },
+  } = useKibana<{ application: ApplicationStart }>();
+
   const closePopover = useCallback(() => setShowPopover(false), []);
-  const onClickButtonLink = useCallback(() => setShowPopover(v => !v), []);
+  const onClickButtonLink = useCallback(() => setShowPopover((v) => !v), []);
   const onClickUnlikFromSavedSearch = useCallback(() => {
     setShowPopover(false);
     eventEmitter.emit('unlinkFromSavedSearch');
   }, [eventEmitter]);
+  const onClickViewInDiscover = useCallback(() => {
+    application.navigateToApp('discover', {
+      path: `#/view/${savedSearch.id}`,
+    });
+  }, [application, savedSearch.id]);
 
   const linkButtonAriaLabel = i18n.translate(
     'visDefaultEditor.sidebar.savedSearch.linkButtonAriaLabel',
@@ -118,7 +118,12 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           <div style={{ width: 260 }}>
             <EuiText size="s">
               <p>
-                <EuiButtonEmpty flush="left" href={`#/discover/${savedSearch.id}`} size="xs">
+                <EuiButtonEmpty
+                  data-test-subj="viewSavedSearch"
+                  flush="left"
+                  onClick={onClickViewInDiscover}
+                  size="xs"
+                >
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
                     defaultMessage="View this search in Discover"

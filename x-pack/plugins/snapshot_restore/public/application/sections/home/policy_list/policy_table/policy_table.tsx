@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -21,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
+import { UseRequestResponse } from '../../../../../shared_imports';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import {
@@ -28,13 +30,13 @@ import {
   PolicyExecuteProvider,
   PolicyDeleteProvider,
 } from '../../../../components';
-import { Error } from '../../../../components/section_error';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
-import { SendRequestResponse } from '../../../../../shared_imports';
+
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   policies: SlmPolicy[];
-  reload: () => Promise<SendRequestResponse<any, Error>>;
+  reload: UseRequestResponse['resendRequest'];
   openPolicyDetailsUrl: (name: SlmPolicy['name']) => string;
   onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
   onPolicyExecuted: () => void;
@@ -47,7 +49,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
   onPolicyDeleted,
   onPolicyExecuted,
 }) => {
-  const { i18n, uiMetricService } = useServices();
+  const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SlmPolicy[]>([]);
 
   const columns = [
@@ -62,10 +64,10 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
-                onClick={() => uiMetricService.trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
-                href={openPolicyDetailsUrl(name)}
+                {...reactRouterNavigate(history, openPolicyDetailsUrl(name), () =>
+                  uiMetricService.trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)
+                )}
                 data-test-subj="policyLink"
               >
                 {name}
@@ -198,7 +200,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <PolicyExecuteProvider>
-                    {executePolicyPrompt => {
+                    {(executePolicyPrompt) => {
                       return (
                         <EuiToolTip
                           content={
@@ -249,14 +251,14 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                       )}
                       iconType="pencil"
                       color="primary"
-                      href={linkToEditPolicy(name)}
+                      {...reactRouterNavigate(history, linkToEditPolicy(name))}
                       data-test-subj="editPolicyButton"
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <PolicyDeleteProvider>
-                    {deletePolicyPrompt => {
+                    {(deletePolicyPrompt) => {
                       const label = !isManagedPolicy
                         ? i18n.translate(
                             'xpack.snapshotRestore.policyList.table.actionDeleteTooltip',
@@ -357,9 +359,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           );
         }}
       </PolicyDeleteProvider>
-    ) : (
-      undefined
-    ),
+    ) : undefined,
     toolsRight: [
       <EuiButton
         key="reloadPolicies"
@@ -375,7 +375,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       </EuiButton>,
       <EuiButton
         key="createNewPolicy"
-        href={linkToAddPolicy()}
+        {...reactRouterNavigate(history, linkToAddPolicy())}
         fill
         iconType="plusInCircle"
         data-test-subj="createPolicyButton"
@@ -403,7 +403,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
             repositoriesMap[policy.repository] = true;
             return repositoriesMap;
           }, {})
-        ).map(repository => {
+        ).map((repository) => {
           return {
             value: repository,
             view: repository,

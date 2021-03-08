@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { KibanaRequest } from 'src/core/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
-import { KibanaRequest } from 'kibana/server';
-import { savedObjectsServiceMock } from 'src/core/server/saved_objects/saved_objects_service.mock';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
 
 jest.mock('./event_log_client');
 
@@ -17,31 +19,32 @@ describe('EventLogClientService', () => {
 
   describe('getClient', () => {
     test('creates a client with a scoped SavedObjects client', () => {
-      const savedObjectsService = savedObjectsServiceMock.createStartContract();
+      const savedObjectProviderRegistry = savedObjectProviderRegistryMock.create();
       const request = fakeRequest();
 
       const eventLogStartService = new EventLogClientService({
         esContext,
-        savedObjectsService,
+        savedObjectProviderRegistry,
       });
 
       eventLogStartService.getClient(request);
 
-      expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request);
-
-      const [{ value: savedObjectsClient }] = savedObjectsService.getScopedClient.mock.results;
-
+      const savedObjectGetter = savedObjectProviderRegistry.getProvidersClient(request);
       expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
         esContext,
-        savedObjectsClient,
+        request,
+        savedObjectGetter,
+        spacesService: undefined,
       });
+
+      expect(savedObjectProviderRegistry.getProvidersClient).toHaveBeenCalledWith(request);
     });
   });
 });
 
 function fakeRequest(): KibanaRequest {
   const savedObjectsClient = savedObjectsClientMock.create();
-  return {
+  return ({
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -55,5 +58,5 @@ function fakeRequest(): KibanaRequest {
       },
     },
     getSavedObjectsClient: () => savedObjectsClient,
-  } as any;
+  } as unknown) as KibanaRequest;
 }

@@ -1,18 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('search hits', () => {
     before(async () => {
+      await security.testUser.setRoles(
+        [
+          'global_maps_all',
+          'test_logstash_reader',
+          'antimeridian_points_reader',
+          'antimeridian_shapes_reader',
+        ],
+        false
+      );
       await PageObjects.maps.loadSavedMap('document example');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     async function getRequestTimestamp() {
@@ -69,14 +84,19 @@ export default function({ getPageObjects, getService }) {
         expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
       });
 
-      it('should apply query to fit to bounds', async () => {
+      // https://github.com/elastic/kibana/issues/93718
+      it.skip('should apply query to fit to bounds', async () => {
         // Set view to other side of world so no matching results
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');
         const { lat, lon, zoom } = await PageObjects.maps.getView();
         expect(Math.round(lat)).to.equal(41);
         expect(Math.round(lon)).to.equal(-102);
-        expect(Math.round(zoom)).to.equal(5);
+
+        // Centering is correct, but screen-size and dpi affect zoom level,
+        // causing this test to be brittle in different environments
+        // Expecting zoom-level to be between ]4,5]
+        expect(Math.ceil(zoom)).to.equal(5);
       });
     });
 
@@ -99,7 +119,7 @@ export default function({ getPageObjects, getService }) {
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');
         const { lat, lon, zoom } = await PageObjects.maps.getView();
-        expect(Math.round(lat)).to.equal(42);
+        expect(Math.round(lat)).to.equal(43);
         expect(Math.round(lon)).to.equal(-102);
         expect(Math.round(zoom)).to.equal(5);
       });

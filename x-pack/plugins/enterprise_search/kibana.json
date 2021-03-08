@@ -1,0 +1,11 @@
+{
+  "id": "enterpriseSearch",
+  "version": "kibana",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["features", "licensing", "charts"],
+  "configPath": ["enterpriseSearch"],
+  "optionalPlugins": ["usageCollection", "security", "home", "spaces", "cloud"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["home"]
+}

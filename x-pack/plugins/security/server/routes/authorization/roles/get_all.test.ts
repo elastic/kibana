@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import Boom from 'boom';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { LicenseCheck } from '../../../../../licensing/server';
-import { defineGetAllRolesRoutes } from './get_all';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-} from '../../../../../../../src/core/server/mocks';
+import Boom from '@hapi/boom';
+
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
+import type { LicenseCheck } from '../../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineGetAllRolesRoutes } from './get_all';
 
 const application = 'kibana-.kibana';
 const reservedPrivilegesApplicationWildcard = 'kibana-*';
@@ -32,11 +32,15 @@ describe('GET all roles', () => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       mockRouteDefinitionParams.authz.applicationName = application;
+      const mockContext = {
+        core: coreMock.createRequestHandlerContext(),
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+      };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       if (apiResponse) {
-        mockScopedClusterClient.callAsCurrentUser.mockImplementation(apiResponse);
+        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockImplementation(
+          (async () => ({ body: await apiResponse() })) as any
+        );
       }
 
       defineGetAllRolesRoutes(mockRouteDefinitionParams);
@@ -48,19 +52,15 @@ describe('GET all roles', () => {
         path: '/api/security/role',
         headers,
       });
-      const mockContext = ({
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
       if (apiResponse) {
-        expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.getRole');
-      } else {
-        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+        expect(
+          mockContext.core.elasticsearch.client.asCurrentUser.security.getRole
+        ).toHaveBeenCalled();
       }
       expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });

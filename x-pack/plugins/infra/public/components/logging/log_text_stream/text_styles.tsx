@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
 
-import { euiStyled, css } from '../../../../../observability/public';
+import { euiStyled, css } from '../../../../../../../src/plugins/kibana_react/common';
 import { TextScale } from '../../../../common/log_text_scale';
 
 export type WrapMode = 'none' | 'pre-wrapped' | 'long';
 
 export const monospaceTextStyle = (scale: TextScale) => css`
-  font-family: ${props => props.theme.eui.euiCodeFontFamily};
-  font-size: ${props => {
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  font-size: ${(props) => {
     switch (scale) {
       case 'large':
         return props.theme.eui.euiFontSizeM;
@@ -25,15 +26,15 @@ export const monospaceTextStyle = (scale: TextScale) => css`
         return props.theme.eui.euiFontSize;
     }
   }};
-  line-height: ${props => props.theme.eui.euiLineHeight};
+  line-height: ${(props) => props.theme.eui.euiLineHeight};
 `;
 
 export const hoveredContentStyle = css`
-  background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
+  background-color: ${(props) => props.theme.eui.euiFocusBackgroundColor};
 `;
 
 export const highlightedContentStyle = css`
-  background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
+  background-color: ${(props) => props.theme.eui.euiColorHighlight};
 `;
 
 export const longWrappedContentStyle = css`
@@ -104,5 +105,5 @@ const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs(() => ({
   padding: 0;
   margin: 0;
 
-  ${props => monospaceTextStyle(props.scale)};
+  ${(props) => monospaceTextStyle(props.scale)};
 `;

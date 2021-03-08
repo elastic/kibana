@@ -1,0 +1,49 @@
+[role="xpack"]
+[[xpack-security-session-management]]
+=== Session management
+
+When you log in, {kib} creates a session that is used to authenticate subsequent requests to {kib}. A session consists of two components: an encrypted cookie that is stored in your browser, and an encrypted document in a dedicated {es} hidden index. By default, the name of that index is `.kibana_security_session_1`, where the prefix is derived from the primary `.kibana` index. If either of these components are missing, the session is no longer valid.
+
+When your session expires, or you log out, {kib} will invalidate your cookie and remove session information from the index. {kib} also periodically invalidates and removes any expired sessions that weren't explicitly invalidated.
+
+[[session-idle-timeout]]
+==== Session idle timeout
+
+You can use `xpack.security.session.idleTimeout` to expire sessions after a period of inactivity. This and `xpack.security.session.lifespan` are both highly recommended.
+By default, sessions don't expire because of inactivity. To define a sliding session expiration, set the  property in the `kibana.yml` configuration file. The idle timeout is formatted as a duration of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '20m', '24h', '7d', '1w'). For example, set the idle timeout to expire sessions after 1 hour of inactivity:
+
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.session.idleTimeout: "1h"
+--------------------------------------------------------------------------------
+--
+
+[[session-lifespan]]
+==== Session lifespan
+
+You can use `xpack.security.session.lifespan` to configure the maximum session duration or "lifespan" -- also known as the "absolute timeout". This and `xpack.security.session.idleTimeout` are both highly recommended. By default, sessions don't have a fixed lifespan, and if an idle timeout is defined, a session can still be extended indefinitely. To define a maximum session lifespan, set the property in the `kibana.yml` configuration file. The lifespan is formatted as a duration of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '20m', '24h', '7d', '1w'). For example, set the lifespan to expire sessions after 30 days:
+
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.session.lifespan: "30d"
+--------------------------------------------------------------------------------
+--
+
+[[session-cleanup-interval]]
+==== Session cleanup interval
+
+[IMPORTANT]
+============================================================================
+If you specify neither session idle timeout nor lifespan, then {kib} will not automatically remove session information from the index unless you explicitly log out. This might lead to an infinitely growing session index. Configure the idle timeout and lifespan settings for the {kib} sessions so that they can be cleaned up even if you don't explicitly log out.
+============================================================================
+
+You can configure the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour and cannot be less than 10 seconds. To define another interval, set the `xpack.security.session.cleanupInterval` property in the `kibana.yml` configuration file. The interval is formatted as a duration of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '20m', '24h', '7d', '1w'). For example, schedule the session index cleanup to perform once a day:
+
+--
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.session.cleanupInterval: "1d"
+--------------------------------------------------------------------------------
+--

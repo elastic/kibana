@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { flatten } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,37 +32,38 @@ const getDescription = (field: IFieldType) => {
 
 const keywordComparator = (first: IFieldType, second: IFieldType) => {
   const extensions = ['raw', 'keyword'];
-  if (extensions.map(ext => `${first.name}.${ext}`).includes(second.name)) {
+  if (extensions.map((ext) => `${first.name}.${ext}`).includes(second.name)) {
     return 1;
-  } else if (extensions.map(ext => `${second.name}.${ext}`).includes(first.name)) {
+  } else if (extensions.map((ext) => `${second.name}.${ext}`).includes(first.name)) {
     return -1;
   }
 
   return first.name.localeCompare(second.name);
 };
 
-export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = core => {
+export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = (
+  core
+) => {
   return ({ indexPatterns }, { start, end, prefix, suffix, nestedPath = '' }) => {
     const allFields = flatten(
-      indexPatterns.map(indexPattern => {
+      indexPatterns.map((indexPattern) => {
         return indexPattern.fields.filter(indexPatternsUtils.isFilterable);
       })
     );
     const search = `${prefix}${suffix}`.trim().toLowerCase();
-    const matchingFields = allFields.filter(field => {
+    const matchingFields = allFields.filter((field) => {
       return (
         (!nestedPath ||
           (nestedPath &&
             field.subType &&
             field.subType.nested &&
             field.subType.nested.path.includes(nestedPath))) &&
-        field.name.toLowerCase().includes(search) &&
-        field.name !== search
+        field.name.toLowerCase().includes(search)
       );
     });
     const sortedFields = sortPrefixFirst(matchingFields.sort(keywordComparator), search, 'name');
 
-    const suggestions: QuerySuggestionField[] = sortedFields.map(field => {
+    const suggestions: QuerySuggestionField[] = sortedFields.map((field) => {
       const remainingPath =
         field.subType && field.subType.nested
           ? field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // ---------------------------------- WARNING ----------------------------------
@@ -18,7 +19,7 @@ type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U> ? Array<DeepPartial<U>> : DeepPartial<T[P]>;
 };
 
-export const ECS_VERSION = '1.5.0';
+export const ECS_VERSION = '1.6.0';
 
 // types and config-schema describing the es structures
 export type IValidatedEvent = TypeOf<typeof EventSchema>;
@@ -41,6 +42,8 @@ export const EventSchema = schema.maybe(
         start: ecsDate(),
         duration: ecsNumber(),
         end: ecsDate(),
+        outcome: ecsString(),
+        reason: ecsString(),
       })
     ),
     error: schema.maybe(
@@ -56,16 +59,19 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
-        namespace: ecsString(),
         alerting: schema.maybe(
           schema.object({
             instance_id: ecsString(),
+            action_group_id: ecsString(),
+            action_subgroup: ecsString(),
+            status: ecsString(),
           })
         ),
         saved_objects: schema.maybe(
           schema.arrayOf(
             schema.object({
-              store: ecsString(),
+              rel: ecsString(),
+              namespace: ecsString(),
               id: ecsString(),
               type: ecsString(),
             })

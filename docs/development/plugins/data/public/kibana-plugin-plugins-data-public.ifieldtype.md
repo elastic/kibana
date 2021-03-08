@@ -16,6 +16,7 @@ export interface IFieldType
 |  --- | --- | --- |
 |  [aggregatable](./kibana-plugin-plugins-data-public.ifieldtype.aggregatable.md) | <code>boolean</code> |  |
 |  [count](./kibana-plugin-plugins-data-public.ifieldtype.count.md) | <code>number</code> |  |
+|  [customLabel](./kibana-plugin-plugins-data-public.ifieldtype.customlabel.md) | <code>string</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-public.ifieldtype.displayname.md) | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.ifieldtype.estypes.md) | <code>string[]</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.ifieldtype.filterable.md) | <code>boolean</code> |  |
@@ -28,6 +29,7 @@ export interface IFieldType
 |  [searchable](./kibana-plugin-plugins-data-public.ifieldtype.searchable.md) | <code>boolean</code> |  |
 |  [sortable](./kibana-plugin-plugins-data-public.ifieldtype.sortable.md) | <code>boolean</code> |  |
 |  [subType](./kibana-plugin-plugins-data-public.ifieldtype.subtype.md) | <code>IFieldSubType</code> |  |
+|  [toSpec](./kibana-plugin-plugins-data-public.ifieldtype.tospec.md) | <code>(options?: {</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }) =&gt; FieldSpec</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.ifieldtype.type.md) | <code>string</code> |  |
 |  [visualizable](./kibana-plugin-plugins-data-public.ifieldtype.visualizable.md) | <code>boolean</code> |  |
 

@@ -1,13 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+
+import type { RouteDefinitionParams } from '../';
+import {
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+  NEXT_URL_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
+import type { LoginState } from '../../../common/login_state';
+import { shouldProviderUseLoginForm } from '../../../common/model';
 import { parseNext } from '../../../common/parse_next';
-import { LoginState } from '../../../common/login_state';
-import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for the Login view.
@@ -16,18 +23,18 @@ export function defineLoginRoutes({
   config,
   router,
   logger,
-  csp,
+  httpResources,
   basePath,
   license,
 }: RouteDefinitionParams) {
-  router.get(
+  httpResources.register(
     {
       path: '/login',
       validate: {
         query: schema.object(
           {
-            next: schema.maybe(schema.string()),
-            msg: schema.maybe(schema.string()),
+            [NEXT_URL_QUERY_STRING_PARAMETER]: schema.maybe(schema.string()),
+            [LOGOUT_REASON_QUERY_STRING_PARAMETER]: schema.maybe(schema.string()),
           },
           { unknowns: 'allow' }
         ),
@@ -45,10 +52,7 @@ export function defineLoginRoutes({
         });
       }
 
-      return response.ok({
-        body: await context.core.rendering.render({ includeUserSettings: false }),
-        headers: { 'content-security-policy': csp.header },
-      });
+      return response.renderAnonymousCoreApp();
     }
   );
 
@@ -58,23 +62,27 @@ export function defineLoginRoutes({
       const { allowLogin, layout = 'form' } = license.getFeatures();
       const { sortedProviders, selector } = config.authc;
 
-      let showLoginForm = false;
-      const providers = [];
-      for (const { type, name, options } of sortedProviders) {
-        if (options.showInSelector) {
-          if (type === 'basic' || type === 'token') {
-            showLoginForm = true;
-          } else if (selector.enabled) {
-            providers.push({ type, name, description: options.description });
-          }
-        }
-      }
+      const providers = sortedProviders.map(({ type, name }) => {
+        // Since `config.authc.sortedProviders` is based on `config.authc.providers` config we can
+        // be sure that config is present for every provider in `config.authc.sortedProviders`.
+        const { showInSelector, description, hint, icon } = config.authc.providers[type]?.[name]!;
+        const usesLoginForm = shouldProviderUseLoginForm(type);
+        return {
+          type,
+          name,
+          usesLoginForm,
+          showInSelector: showInSelector && (usesLoginForm || selector.enabled),
+          description,
+          hint,
+          icon,
+        };
+      });
 
       const loginState: LoginState = {
         allowLogin,
         layout,
         requiresSecureConnection: config.secureCookies,
-        showLoginForm,
+        loginHelp: config.loginHelp,
         selector: { enabled: selector.enabled, providers },
       };
 

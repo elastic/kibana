@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-type titleProp = string | ((previousTitle: string) => string);
+type TitleProp = string | ((previousTitle: string) => string);
 
 interface DocumentTitleProps {
-  title: titleProp;
+  title: TitleProp;
 }
 
 interface DocumentTitleState {
@@ -47,19 +48,19 @@ const wrapWithSharedState = () => {
       return null;
     }
 
-    private getTitle(title: titleProp) {
+    public getTitle(title: TitleProp) {
       return typeof title === 'function' ? title(titles[this.state.index - 1]) : title;
     }
 
-    private pushTitle(title: string) {
+    public pushTitle(title: string) {
       titles[this.state.index] = title;
     }
 
-    private removeTitle() {
+    public removeTitle() {
       titles.pop();
     }
 
-    private updateDocumentTitle() {
+    public updateDocumentTitle() {
       const title = (titles[titles.length - 1] || '') + TITLE_SUFFIX;
       if (title !== document.title) {
         document.title = title;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -15,10 +16,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
-import { USES_HEADLESS_JOB_TYPES } from '../../../constants';
-import { JobInfo, ReportingAPIClient } from '../../lib/reporting_api_client';
+import React, { Component, Fragment } from 'react';
+import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { ReportApiJSON } from '../../../common/types';
+import { ReportingAPIClient } from '../../lib/reporting_api_client';
 
 interface Props {
   jobId: string;
@@ -29,14 +31,14 @@ interface State {
   isLoading: boolean;
   isFlyoutVisible: boolean;
   calloutTitle: string;
-  info: JobInfo | null;
+  info: ReportApiJSON | null;
   error: Error | null;
 }
 
 const NA = 'n/a';
 const UNKNOWN = 'unknown';
 
-const getDimensions = (info: JobInfo): string => {
+const getDimensions = (info: ReportApiJSON): string => {
   const defaultDimensions = { width: null, height: null };
   const { width, height } = get(info, 'payload.layout.dimensions', defaultDimensions);
   if (width && height) {
@@ -85,7 +87,6 @@ export class ReportInfoButton extends Component<Props, State> {
 
     const attempts = info.attempts ? info.attempts.toString() : NA;
     const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
-    const priority = info.priority ? info.priority.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
     const warnings = info.output && info.output.warnings ? info.output.warnings.join(',') : null;
 
@@ -122,10 +123,6 @@ export class ReportInfoButton extends Component<Props, State> {
         description: get(info, 'payload.title') || NA,
       },
       {
-        title: 'Type',
-        description: get(info, 'payload.type') || NA,
-      },
-      {
         title: 'Layout',
         description: get(info, 'meta.layout') || NA,
       },
@@ -154,10 +151,6 @@ export class ReportInfoButton extends Component<Props, State> {
       {
         title: 'Max Attempts',
         description: maxAttempts,
-      },
-      {
-        title: 'Priority',
-        description: priority,
       },
       {
         title: 'Timeout',
@@ -263,7 +256,7 @@ export class ReportInfoButton extends Component<Props, State> {
   private loadInfo = async () => {
     this.setState({ isLoading: true });
     try {
-      const info: JobInfo = await this.props.apiClient.getInfo(this.props.jobId);
+      const info: ReportApiJSON = await this.props.apiClient.getInfo(this.props.jobId);
       if (this.mounted) {
         this.setState({ isLoading: false, info });
       }

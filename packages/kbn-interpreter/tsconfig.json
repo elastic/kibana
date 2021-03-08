@@ -1,4 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-interpreter"
+  },
   "include": ["index.d.ts", "src/**/*.d.ts"]
 }

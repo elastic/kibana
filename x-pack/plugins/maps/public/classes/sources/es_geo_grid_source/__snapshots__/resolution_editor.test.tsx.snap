@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolution editor should add super-fine option 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="columnCompressed"
+  fullWidth={false}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  label="Grid resolution"
+  labelType="label"
+>
+  <EuiSelect
+    compressed={true}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "text": "coarse",
+          "value": "COARSE",
+        },
+        Object {
+          "text": "fine",
+          "value": "FINE",
+        },
+        Object {
+          "text": "finest",
+          "value": "MOST_FINE",
+        },
+        Object {
+          "text": "super fine (beta)",
+          "value": "SUPER_FINE",
+        },
+      ]
+    }
+    value="COARSE"
+  />
+</EuiFormRow>
+`;
+
+exports[`resolution editor should omit super-fine option 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="columnCompressed"
+  fullWidth={false}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  label="Grid resolution"
+  labelType="label"
+>
+  <EuiSelect
+    compressed={true}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "text": "coarse",
+          "value": "COARSE",
+        },
+        Object {
+          "text": "fine",
+          "value": "FINE",
+        },
+        Object {
+          "text": "finest",
+          "value": "MOST_FINE",
+        },
+      ]
+    }
+    value="COARSE"
+  />
+</EuiFormRow>
+`;

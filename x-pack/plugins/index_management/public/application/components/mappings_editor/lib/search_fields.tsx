@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
 import { NormalizedFields, NormalizedField, SearchResult, SearchMetadata } from '../types';
@@ -160,7 +162,7 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
     // Execute all the regEx and sort them with the one that has the most
     // characters match first.
     const arrayMatch = searchRegexArray
-      .map(regex => regex.exec(fieldData.path))
+      .map((regex) => regex.exec(fieldData.path))
       .filter(Boolean)
       .sort((a, b) => b![0].length - a![0].length);
 
@@ -239,7 +241,7 @@ export const searchFields = (term: string, fields: NormalizedFields['byId']): Se
   }
 
   return Object.values(fields)
-    .map(field => ({
+    .map((field) => ({
       field,
       metadata: getSearchMetadata(searchData, {
         name: field.source.name,

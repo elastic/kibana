@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 declare module '*.html' {
@@ -22,28 +23,11 @@ declare module '*.svg' {
   export default content;
 }
 
-declare module 'lodash/internal/toPath' {
-  function toPath(value: string | string[]): string[];
-  export = toPath;
-}
-
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
 declare module 'axios/lib/adapters/xhr';
 
-type Writable<T> = {
-  -readonly [K in keyof T]: T[K];
-};
-
-// allow JSON files to be imported directly without lint errors
-// see: https://github.com/palantir/tslint/issues/1264#issuecomment-228433367
-// and: https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#arbitrary-expressions-are-forbidden-in-export-assignments-in-ambient-contexts
-declare module '*.json' {
-  const json: any;
-  // eslint-disable-next-line import/no-default-export
-  export default json;
-}
+// Storybook references this module. It's @ts-ignored in the codebase but when
+// built into its dist it strips that out. Add it here to avoid a type checking
+// error.
+//
+// See https://github.com/storybookjs/storybook/issues/11684
+declare module 'react-syntax-highlighter/dist/cjs/create-element';

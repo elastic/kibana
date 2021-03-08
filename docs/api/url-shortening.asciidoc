@@ -1,5 +1,5 @@
 [[url-shortening-api]]
-=== Shorten URL API
+== Shorten URL API
 ++++
 <titleabbrev>Shorten URL</titleabbrev>
 ++++
@@ -9,34 +9,39 @@ Internet Explorer has URL length restrictions, and some wiki and markup parsers 
 
 Short URLs are designed to make sharing {kib} URLs easier.
 
+[float]
 [[url-shortening-api-request]]
-==== Request
+=== Request
 
 `POST <kibana host>:<port>/api/shorten_url`
 
+[float]
 [[url-shortening-api-request-body]]
-==== Request body
+=== Request body
 
 `url`::
   (Required, string) The {kib} URL that you want to shorten, relative to `/app/kibana`.
 
+[float]
 [[url-shortening-api-response-body]]
-==== Response body
+=== Response body
 
 urlId:: A top-level property that contains the shortened URL token for the provided request body.
 
+[float]
 [[url-shortening-api-codes]]
-==== Response code
+=== Response code
 
 `200`::
   Indicates a successful call.
 
+[float]
 [[url-shortening-api-example]]
-==== Example
+=== Example
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/shorten_url"
+$ curl -X POST api/shorten_url
 {
   "url": "/app/kibana#/dashboard?_g=()&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),panels:!((embeddableConfig:(),gridData:(h:15,i:'1',w:24,x:0,y:0),id:'8f4d0c00-4c86-11e8-b3d7-01146121b73d',panelIndex:'1',type:visualization,version:'7.0.0-alpha1')),query:(language:lucene,query:''),timeRestore:!f,title:'New%20Dashboard',viewMode:edit)"
 }

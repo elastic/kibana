@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepIndexPattern renders errors when input is invalid 1`] = `
+Object {
+  "component": <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    data-test-subj="createIndexPatternStep1Header"
+    errors={
+      Array [
+        "A name cannot contain spaces or the characters: \\\\, /, ?, \\", <, >, |",
+      ]
+    }
+    goToNextStep={[Function]}
+    isIncludingSystemIndices={false}
+    isInputInvalid={true}
+    isNextStepDisabled={true}
+    onChangeIncludingSystemIndices={[Function]}
+    onQueryChanged={[Function]}
+    query="?"
+  />,
+}
+`;
+
+exports[`StepIndexPattern renders indices which match the initial query 1`] = `
+<IndicesList
+  data-test-subj="createIndexPatternStep1IndicesList"
+  indices={
+    Array [
+      Object {
+        "item": Object {},
+        "name": "kibana",
+      },
+    ]
+  }
+  query="kibana"
+/>
+`;
+
+exports[`StepIndexPattern renders matching indices when input is valid 1`] = `
+<IndicesList
+  data-test-subj="createIndexPatternStep1IndicesList"
+  indices={
+    Array [
+      Object {
+        "item": Object {},
+        "name": "kibana",
+      },
+    ]
+  }
+  query="k*"
+/>
+`;
+
+exports[`StepIndexPattern renders the loading state 1`] = `
+<LoadingIndices
+  data-test-subj="createIndexPatternStep1Loading"
+/>
+`;

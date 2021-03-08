@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { Observable } from 'rxjs';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
@@ -18,26 +19,26 @@ import {
   registerDeleteRoute,
 } from './routes/api';
 
-export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> {
+export interface RemoteClustersPluginSetup {
+  isUiEnabled: boolean;
+}
+
+export class RemoteClustersServerPlugin
+  implements Plugin<RemoteClustersPluginSetup, void, any, any> {
   licenseStatus: LicenseStatus;
   log: Logger;
-  config: Observable<ConfigType>;
+  config: ConfigType;
 
   constructor({ logger, config }: PluginInitializerContext) {
     this.log = logger.get();
-    this.config = config.create();
+    this.config = config.get();
     this.licenseStatus = { valid: false };
   }
 
-  async setup(
-    { http, elasticsearch: elasticsearchService }: CoreSetup,
-    { licensing, cloud }: Dependencies
-  ) {
-    const elasticsearch = await elasticsearchService.adminClient;
+  setup({ http }: CoreSetup, { features, licensing, cloud }: Dependencies) {
     const router = http.createRouter();
+
     const routeDependencies: RouteDependencies = {
-      elasticsearch,
-      elasticsearchService,
       router,
       getLicenseStatus: () => this.licenseStatus,
       config: {
@@ -45,13 +46,26 @@ export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> 
       },
     };
 
+    features.registerElasticsearchFeature({
+      id: 'remote_clusters',
+      management: {
+        data: ['remote_clusters'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage'],
+          ui: [],
+        },
+      ],
+    });
+
     // Register routes
     registerGetRoute(routeDependencies);
     registerAddRoute(routeDependencies);
     registerUpdateRoute(routeDependencies);
     registerDeleteRoute(routeDependencies);
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state, message } = license.check(PLUGIN.getI18nName(), PLUGIN.minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense) {
@@ -70,6 +84,10 @@ export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> 
         }
       }
     });
+
+    return {
+      isUiEnabled: this.config.ui.enabled,
+    };
   }
 
   start() {}

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import d3 from 'd3';
@@ -11,24 +12,19 @@ import { ANNOTATION_TYPE } from '../../../../../common/constants/annotations';
 import { Annotation, Annotations } from '../../../../../common/types/annotations';
 import { Dictionary } from '../../../../../common/types/common';
 
-// @ts-ignore
-import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
-
 import { TimeseriesChart } from './timeseries_chart';
 
-import { annotation$ } from '../../../services/annotations_service';
+import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
 export const ANNOTATION_MASK_ID = 'mlAnnotationMask';
 
 // getAnnotationBrush() is expected to be called like getAnnotationBrush.call(this)
 // so it gets passed on the context of the component it gets called from.
 export function getAnnotationBrush(this: TimeseriesChart) {
+  const { annotationUpdatesService } = this.props;
   const focusXScale = this.focusXScale;
 
-  const annotateBrush = d3.svg
-    .brush()
-    .x(focusXScale)
-    .on('brushend', brushend.bind(this));
+  const annotateBrush = d3.svg.brush().x(focusXScale).on('brushend', brushend.bind(this));
 
   // cast a reference to this so we get the latest state when brushend() gets called
   function brushend(this: TimeseriesChart) {
@@ -41,7 +37,7 @@ export function getAnnotationBrush(this: TimeseriesChart) {
     const endTimestamp = extent[1].getTime();
 
     if (timestamp === endTimestamp) {
-      annotation$.next(null);
+      annotationUpdatesService.setValue(null);
       return;
     }
 
@@ -53,7 +49,7 @@ export function getAnnotationBrush(this: TimeseriesChart) {
       type: ANNOTATION_TYPE.ANNOTATION,
     };
 
-    annotation$.next(annotation);
+    annotationUpdatesService.setValue(annotation);
   }
 
   return annotateBrush;
@@ -96,7 +92,7 @@ const ANNOTATION_DEFAULT_LEVEL = 1;
 const ANNOTATION_LEVEL_HEIGHT = 28;
 const ANNOTATION_UPPER_RECT_MARGIN = 0;
 const ANNOTATION_UPPER_TEXT_MARGIN = -7;
-const ANNOTATION_MIN_WIDTH = 2;
+export const ANNOTATION_MIN_WIDTH = 2;
 const ANNOTATION_RECT_BORDER_RADIUS = 2;
 const ANNOTATION_TEXT_VERTICAL_OFFSET = 26;
 const ANNOTATION_TEXT_RECT_VERTICAL_OFFSET = 12;
@@ -110,13 +106,15 @@ export function renderAnnotations(
   focusChartHeight: number,
   focusXScale: TimeseriesChart['focusXScale'],
   showAnnotations: boolean,
-  showFocusChartTooltip: (d: Annotation, t: object) => {}
+  showFocusChartTooltip: (d: Annotation, t: object) => {},
+  hideFocusChartTooltip: () => void,
+  annotationUpdatesService: AnnotationUpdatesService
 ) {
   const upperRectMargin = ANNOTATION_UPPER_RECT_MARGIN;
   const upperTextMargin = ANNOTATION_UPPER_TEXT_MARGIN;
 
   const durations: Dictionary<number> = {};
-  focusAnnotationData.forEach(d => {
+  focusAnnotationData.forEach((d) => {
     if (d.key !== undefined) {
       const duration = (d.end_timestamp || 0) - d.timestamp;
       durations[d.key] = duration;
@@ -139,10 +137,7 @@ export function renderAnnotations(
     .selectAll('g.mlAnnotation')
     .data(focusAnnotationData || [], (d: Annotation) => d._id || '');
 
-  annotations
-    .enter()
-    .append('g')
-    .classed('mlAnnotation', true);
+  annotations.enter().append('g').classed('mlAnnotation', true);
 
   const rects = annotations.selectAll('.mlAnnotationRect').data((d: Annotation) => [d]);
 
@@ -153,17 +148,17 @@ export function renderAnnotations(
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS)
     .classed('mlAnnotationRect', true)
     .attr('mask', `url(#${ANNOTATION_MASK_ID})`)
-    .on('mouseover', function(this: object, d: Annotation) {
+    .on('mouseover', function (this: object, d: Annotation) {
       showFocusChartTooltip(d, this);
     })
-    .on('mouseout', () => mlChartTooltipService.hide())
+    .on('mouseout', () => hideFocusChartTooltip())
     .on('click', (d: Annotation) => {
       // clear a possible existing annotation set up for editing before setting the new one.
       // this needs to be done explicitly here because a new annotation created using the brush tool
       // could still be present in the chart.
-      annotation$.next(null);
+      annotationUpdatesService.setValue(null);
       // set the actual annotation and trigger the flyout
-      annotation$.next(d);
+      annotationUpdatesService.setValue(d);
     });
 
   rects
@@ -191,8 +186,8 @@ export function renderAnnotations(
 
   rects.exit().remove();
 
-  const textRects = annotations.selectAll('.mlAnnotationTextRect').data(d => [d]);
-  const texts = annotations.selectAll('.mlAnnotationText').data(d => [d]);
+  const textRects = annotations.selectAll('.mlAnnotationTextRect').data((d) => [d]);
+  const texts = annotations.selectAll('.mlAnnotationText').data((d) => [d]);
 
   textRects
     .enter()
@@ -203,10 +198,7 @@ export function renderAnnotations(
     .attr('rx', ANNOTATION_RECT_BORDER_RADIUS)
     .attr('ry', ANNOTATION_RECT_BORDER_RADIUS);
 
-  texts
-    .enter()
-    .append('text')
-    .classed('mlAnnotationText', true);
+  texts.enter().append('text').classed('mlAnnotationText', true);
 
   function labelXOffset(ts: number) {
     const earliestMs = focusXScale.domain()[0];
@@ -273,7 +265,7 @@ export function getAnnotationWidth(
 export function highlightFocusChartAnnotation(annotation: Annotation) {
   const annotations = d3.selectAll('.mlAnnotation');
 
-  annotations.each(function(d) {
+  annotations.each(function (d) {
     // @ts-ignore
     const element = d3.select(this);
 
@@ -290,7 +282,7 @@ export function highlightFocusChartAnnotation(annotation: Annotation) {
 export function unhighlightFocusChartAnnotation() {
   const annotations = d3.selectAll('.mlAnnotation');
 
-  annotations.each(function() {
+  annotations.each(function () {
     // @ts-ignore
     const element = d3.select(this);
 

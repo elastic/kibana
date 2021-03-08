@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useEffect } from 'react';
@@ -9,13 +10,22 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+
+import {
+  SectionError,
+  Error,
+  WithPrivileges,
+  NotAuthorizedSection,
+} from '../../../../shared_imports';
+
 import { SlmPolicy } from '../../../../../common/types';
-import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
+import { useDecodedParams } from '../../../lib';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
-import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 import { useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
@@ -27,18 +37,16 @@ interface MatchParams {
 }
 
 export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { policyName },
-  },
   history,
 }) => {
+  const { policyName } = useDecodedParams<MatchParams>();
   const {
     error,
     isLoading,
     data: { policies } = {
       policies: undefined,
     },
-    sendRequest: reload,
+    resendRequest: reload,
   } = useLoadPolicies();
 
   const { uiMetricService } = useServices();
@@ -48,7 +56,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     isLoading: isLoadingRetentionSettings,
     error: retentionSettingsError,
     data: retentionSettings,
-    sendRequest: reloadRetentionSettings,
+    resendRequest: reloadRetentionSettings,
   } = useLoadRetentionSettings();
 
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
@@ -124,7 +132,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         }
         actions={
           <EuiButton
-            href={linkToAddPolicy()}
+            {...reactRouterNavigate(history, linkToAddPolicy())}
             fill
             iconType="plusInCircle"
             data-test-subj="createPolicyButton"
@@ -187,7 +195,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   }
 
   return (
-    <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
+    <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
           <section data-test-subj="policyList">

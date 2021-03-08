@@ -38,7 +38,14 @@
       },
       "type": "visualization",
       "updated_at": "2019-01-22T19:32:31.206Z"
-    }
+    },
+    "references" : [
+      {
+        "name" : "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type" : "index-pattern",
+        "id" : "logstash-*"
+      }
+    ]
   }
 }
 

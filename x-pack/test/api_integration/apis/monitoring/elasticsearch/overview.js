@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,7 +11,7 @@ import overviewFixtureGreenPlatinum from './fixtures/overview_green_platinum';
 import overviewFixtureRedPlatinum from './fixtures/overview_red_platinum';
 import overviewFixtureShardsRelocating from './fixtures/overview_shards_relocating';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

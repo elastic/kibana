@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import moment from 'moment-timezone';
 import { CoreSetup } from 'src/core/public';
-import { Action, IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
+import {
+  ISearchEmbeddable,
+  SEARCH_EMBEDDABLE_TYPE,
+} from '../../../../../src/plugins/discover/public';
+import { IEmbeddable, ViewMode } from '../../../../../src/plugins/embeddable/public';
+import {
+  IncompatibleActionError,
+  UiActionsActionDefinition as ActionDefinition,
+} from '../../../../../src/plugins/ui_actions/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
+import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
-
-import { ViewMode, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-
-// @TODO: These import paths will need to be updated once discovery moves to non-legacy dir
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
-import { ISearchEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/types';
-
-import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../constants';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -29,7 +33,7 @@ interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-export class GetCsvReportPanelAction implements Action<ActionContext> {
+export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> {
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
@@ -40,7 +44,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     this.isDownloading = false;
     this.core = core;
 
-    license$.subscribe(license => {
+    license$.subscribe((license) => {
       const results = license.check('reporting', 'basic');
       const { showLinks } = checkLicense(results);
       this.canDownloadCSV = showLinks;
@@ -57,7 +61,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     });
   }
 
-  public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
+  public getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
     const adapters = searchEmbeddable.getInspectorAdapters();
     if (!adapters) {
       return {};
@@ -101,10 +105,9 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
 
     const id = `search:${embeddable.getSavedSearch().id}`;
-    const filename = embeddable.getTitle();
     const timezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const fromTime = dateMath.parse(from);
-    const toTime = dateMath.parse(to);
+    const toTime = dateMath.parse(to, { roundUp: true });
 
     if (!fromTime || !toTime) {
       return this.onGenerationFail(
@@ -138,7 +141,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
       .then((rawResponse: string) => {
         this.isDownloading = false;
 
-        const download = `${filename}.csv`;
+        const download = `${embeddable.getSavedSearch().title}.csv`;
         const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
 
         // Hack for IE11 Support

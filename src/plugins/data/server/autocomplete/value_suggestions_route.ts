@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get, map } from 'lodash';
@@ -45,7 +34,7 @@ export function registerValueSuggestionsRoute(
           {
             field: schema.string(),
             query: schema.string(),
-            boolFilter: schema.maybe(schema.any()),
+            filters: schema.maybe(schema.any()),
           },
           { unknowns: 'allow' }
         ),
@@ -53,9 +42,9 @@ export function registerValueSuggestionsRoute(
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { field: fieldName, query, boolFilter } = request.body;
+      const { field: fieldName, query, filters } = request.body;
       const { index } = request.params;
-      const { dataClient } = context.core.elasticsearch;
+      const { client } = context.core.elasticsearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const autocompleteSearchOptions = {
@@ -66,34 +55,31 @@ export function registerValueSuggestionsRoute(
       const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
 
       const field = indexPattern && getFieldByName(fieldName, indexPattern);
-      const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
+      const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
 
-      try {
-        const result = await dataClient.callAsCurrentUser('search', { index, body }, { signal });
+      const result = await client.callAsCurrentUser('search', { index, body }, { signal });
 
-        const buckets: any[] =
-          get(result, 'aggregations.suggestions.buckets') ||
-          get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
+      const buckets: any[] =
+        get(result, 'aggregations.suggestions.buckets') ||
+        get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
 
-        return response.ok({ body: map(buckets || [], 'key') });
-      } catch (error) {
-        return response.internalError({ body: error });
-      }
+      return response.ok({ body: map(buckets || [], 'key') });
     }
   );
 }
 
 async function getBody(
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  boolFilter: Filter[] = []
+  filters: Filter[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   const getEscapedQuery = (q: string = '') =>
-    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, match => `\\${match}`);
+    q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
@@ -107,7 +93,7 @@ async function getBody(
     terminate_after,
     query: {
       bool: {
-        filter: boolFilter,
+        filter: filters,
       },
     },
     aggs: {

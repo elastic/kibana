@@ -1,0 +1,18 @@
+{
+  "list_id": "endpoint_trusted_apps",
+  "item_id": "endpoint_trusted_apps_item",
+  "tags": ["user added string for a tag", "malware"],
+  "type": "simple",
+  "description": "This is a sample agnostic endpoint trusted app entry",
+  "name": "Sample Endpoint Trusted App Entry",
+  "namespace_type": "agnostic",
+  "os_types": ["linux", "windows", "macos"],
+  "entries": [
+    {
+      "field": "actingProcess.file.signer",
+      "operator": "included",
+      "type": "match",
+      "value": "Elastic, N.V."
+    }
+  ]
+}

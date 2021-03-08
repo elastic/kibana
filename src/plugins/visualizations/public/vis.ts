@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -28,23 +17,25 @@
  */
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
+import { Assign } from '@kbn/utility-types';
+import { i18n } from '@kbn/i18n';
+
 import { PersistedState } from './persisted_state';
-// @ts-ignore
-import { updateVisualizationConfig } from './legacy/vis_update';
-import { getTypes, getAggs } from './services';
-import { VisType } from './vis_types';
+import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
 import {
   IAggConfigs,
   IndexPattern,
   ISearchSource,
   AggConfigOptions,
+  SearchSourceFields,
 } from '../../../plugins/data/public';
+import { BaseVisType } from './vis_types';
+import { VisParams } from '../common/types';
 
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigOptions[];
-  indexPattern?: string;
-  searchSource?: ISearchSource;
+  searchSource: SearchSourceFields;
   savedSearchId?: string;
 }
 
@@ -66,19 +57,25 @@ export interface VisData {
   savedSearchId?: string;
 }
 
-export interface VisParams {
-  [key: string]: any;
-}
+const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
+  const searchSource = inputSearchSource.createCopy();
+  if (savedSearchId) {
+    const savedSearch = await getSavedSearchLoader().get(savedSearchId);
 
-export class Vis {
-  public readonly type: VisType;
+    searchSource.setParent(savedSearch.searchSource);
+  }
+  searchSource.setField('size', 0);
+  return searchSource;
+};
+
+type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
+
+export class Vis<TVisParams = VisParams> {
+  public readonly type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
-  public params: VisParams = {};
-  // Session state is for storing information that is transitory, and will not be saved with the visualization.
-  // For instance, map bounds, which depends on the view port, browser window size, etc.
-  public sessionState: Record<string, any> = {};
+  public params: TVisParams;
   public data: VisData = {};
 
   public readonly uiState: PersistedState;
@@ -88,23 +85,27 @@ export class Vis {
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
-
-    this.setState(visState || {});
   }
 
   private getType(visType: string) {
-    const type = getTypes().get(visType);
+    const type = getTypes().get<TVisParams>(visType);
     if (!type) {
-      throw new Error(`Invalid type "${visType}"`);
+      const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+        defaultMessage: 'Invalid visualization type "{visType}"',
+        values: {
+          visType,
+        },
+      });
+      throw new Error(errorMessage);
     }
     return type;
   }
 
   private getParams(params: VisParams) {
-    return defaults({}, cloneDeep(params || {}), cloneDeep(this.type.visConfig.defaults || {}));
+    return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
-  setState(state: SerializedVis) {
+  async setState(state: PartialVisState) {
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
       // @ts-ignore
@@ -120,25 +121,32 @@ export class Vis {
     if (state.params || typeChanged) {
       this.params = this.getParams(state.params);
     }
-
-    // move to migration script
-    updateVisualizationConfig(state.params, this.params);
-
     if (state.data && state.data.searchSource) {
-      this.data.searchSource = state.data.searchSource!;
+      this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
       this.data.indexPattern = this.data.searchSource.getField('index');
     }
     if (state.data && state.data.savedSearchId) {
       this.data.savedSearchId = state.data.savedSearchId;
+      if (this.data.searchSource) {
+        this.data.searchSource = await getSearchSource(
+          this.data.searchSource,
+          this.data.savedSearchId
+        );
+        this.data.indexPattern = this.data.searchSource.getField('index');
+      }
     }
-    if (state.data && state.data.aggs) {
-      const configStates = this.initializeDefaultsFromSchemas(
-        cloneDeep(state.data.aggs),
-        this.type.schemas.all || []
-      );
+    if (state.data && (state.data.aggs || !this.data.aggs)) {
+      const aggs = state.data.aggs ? cloneDeep(state.data.aggs) : [];
+      const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
       if (!this.data.indexPattern) {
-        if (state.data.aggs.length) {
-          throw new Error('trying to initialize aggs without index pattern');
+        if (aggs.length) {
+          const errorMessage = i18n.translate(
+            'visualizations.initializeWithoutIndexPatternErrorMessage',
+            {
+              defaultMessage: 'Trying to initialize aggs without index pattern',
+            }
+          );
+          throw new Error(errorMessage);
         }
         return;
       }
@@ -147,29 +155,34 @@ export class Vis {
   }
 
   clone() {
-    return new Vis(this.type.name, this.serialize());
+    const { data, ...restOfSerialized } = this.serialize();
+    const vis = new Vis(this.type.name, restOfSerialized as any);
+    vis.setState({ ...restOfSerialized, data: {} });
+    const aggs = this.data.indexPattern
+      ? getAggs().createAggConfigs(this.data.indexPattern, data.aggs)
+      : undefined;
+    vis.data = {
+      ...this.data,
+      aggs,
+    };
+    return vis;
   }
 
   serialize(): SerializedVis {
-    const aggs = this.data.aggs ? this.data.aggs.aggs.map(agg => agg.toJSON()) : [];
-    const indexPattern = this.data.searchSource && this.data.searchSource.getField('index');
+    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.toJSON()) : [];
     return {
       id: this.id,
       title: this.title,
+      description: this.description,
       type: this.type.name,
       params: cloneDeep(this.params) as any,
       uiState: this.uiState.toJSON(),
       data: {
         aggs: aggs as any,
-        indexPattern: indexPattern ? indexPattern.id : undefined,
-        searchSource: this.data.searchSource!.createCopy(),
+        searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
         savedSearchId: this.data.savedSearchId,
       },
     };
-  }
-
-  toAST() {
-    return this.type.toAST(this.params);
   }
 
   // deprecated
@@ -190,7 +203,9 @@ export class Vis {
     const newConfigs = [...configStates];
     schemas
       .filter((schema: any) => Array.isArray(schema.defaults) && schema.defaults.length > 0)
-      .filter((schema: any) => !configStates.find(agg => agg.schema && agg.schema === schema.name))
+      .filter(
+        (schema: any) => !configStates.find((agg) => agg.schema && agg.schema === schema.name)
+      )
       .forEach((schema: any) => {
         const defaultSchemaConfig = schema.defaults.slice(0, schema.max);
         defaultSchemaConfig.forEach((d: any) => newConfigs.push(d));

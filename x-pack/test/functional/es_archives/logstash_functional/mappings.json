@@ -19,6 +19,12 @@
           }
         }
       ],
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
+        }
+      },
       "properties": {
         "@message": {
           "fields": {
@@ -384,6 +390,12 @@
           }
         }
       ],
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
+        }
+      },
       "properties": {
         "@message": {
           "fields": {
@@ -749,6 +761,12 @@
           }
         }
       ],
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
+        }
+      },
       "properties": {
         "@message": {
           "fields": {

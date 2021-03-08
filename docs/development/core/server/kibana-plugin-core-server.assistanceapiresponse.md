@@ -4,6 +4,9 @@
 
 ## AssistanceAPIResponse interface
 
+> Warning: This API is now obsolete.
+> 
+> 
 
 <b>Signature:</b>
 

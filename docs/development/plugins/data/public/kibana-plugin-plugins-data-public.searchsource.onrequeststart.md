@@ -9,14 +9,14 @@ Add a handler that will be notified whenever requests start
 <b>Signature:</b>
 
 ```typescript
-onRequestStart(handler: (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>): void;
+onRequestStart(handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  handler | <code>(searchSource: ISearchSource, options?: FetchOptions) =&gt; Promise&lt;unknown&gt;</code> |  |
+|  handler | <code>(searchSource: SearchSource, options?: ISearchOptions) =&gt; Promise&lt;unknown&gt;</code> |  |
 
 <b>Returns:</b>
 

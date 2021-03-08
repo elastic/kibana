@@ -1,56 +1,65 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
-import { calendarSchema } from './schemas/calendars_schema';
+import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
+import type { MlClient } from '../lib/ml_client';
 
-function getAllCalendars(context: RequestHandlerContext) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function getAllCalendars(mlClient: MlClient) {
+  const cal = new CalendarManager(mlClient);
   return cal.getAllCalendars();
 }
 
-function getCalendar(context: RequestHandlerContext, calendarId: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function getCalendar(mlClient: MlClient, calendarId: string) {
+  const cal = new CalendarManager(mlClient);
   return cal.getCalendar(calendarId);
 }
 
-function newCalendar(context: RequestHandlerContext, calendar: FormCalendar) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function newCalendar(mlClient: MlClient, calendar: FormCalendar) {
+  const cal = new CalendarManager(mlClient);
   return cal.newCalendar(calendar);
 }
 
-function updateCalendar(context: RequestHandlerContext, calendarId: string, calendar: Calendar) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function updateCalendar(mlClient: MlClient, calendarId: string, calendar: Calendar) {
+  const cal = new CalendarManager(mlClient);
   return cal.updateCalendar(calendarId, calendar);
 }
 
-function deleteCalendar(context: RequestHandlerContext, calendarId: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function deleteCalendar(mlClient: MlClient, calendarId: string) {
+  const cal = new CalendarManager(mlClient);
   return cal.deleteCalendar(calendarId);
 }
 
-function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+function getCalendarsByIds(mlClient: MlClient, calendarIds: string) {
+  const cal = new CalendarManager(mlClient);
   return cal.getCalendarsByIds(calendarIds);
 }
 
-export function calendars({ router, mlLicense }: RouteInitialization) {
-  // Gets calendars - size limit has been explicitly set to 1000
+export function calendars({ router, routeGuard }: RouteInitialization) {
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {get} /api/ml/calendars Gets calendars
+   * @apiName GetCalendars
+   * @apiDescription Gets calendars - size limit has been explicitly set to 1000
+   */
   router.get(
     {
       path: '/api/ml/calendars',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetCalendars'],
+      },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const resp = await getAllCalendars(context);
+        const resp = await getAllCalendars(mlClient);
 
         return response.ok({
           body: resp,
@@ -61,22 +70,34 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {get} /api/ml/calendars/:calendarIds Gets a calendar
+   * @apiName GetCalendarById
+   * @apiDescription Gets calendar by id
+   *
+   * @apiSchema (params) calendarIdsSchema
+   */
   router.get(
     {
       path: '/api/ml/calendars/{calendarIds}',
       validate: {
-        params: schema.object({ calendarIds: schema.string() }),
+        params: calendarIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetCalendars'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       let returnValue;
       try {
         const calendarIds = request.params.calendarIds.split(',');
 
         if (calendarIds.length === 1) {
-          returnValue = await getCalendar(context, calendarIds[0]);
+          returnValue = await getCalendar(mlClient, calendarIds[0]);
         } else {
-          returnValue = await getCalendarsByIds(context, calendarIds);
+          returnValue = await getCalendarsByIds(mlClient, calendarIds);
         }
 
         return response.ok({
@@ -88,17 +109,29 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {put} /api/ml/calendars Creates a calendar
+   * @apiName PutCalendars
+   * @apiDescription Creates a calendar
+   *
+   * @apiSchema (body) calendarSchema
+   */
   router.put(
     {
       path: '/api/ml/calendars',
       validate: {
-        body: schema.object({ ...calendarSchema }),
+        body: calendarSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const body = request.body;
-        const resp = await newCalendar(context, body);
+        const resp = await newCalendar(mlClient, body);
 
         return response.ok({
           body: resp,
@@ -109,19 +142,32 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {put} /api/ml/calendars/:calendarId Updates a calendar
+   * @apiName UpdateCalendarById
+   * @apiDescription Updates a calendar
+   *
+   * @apiSchema (params) calendarIdSchema
+   * @apiSchema (body) calendarSchema
+   */
   router.put(
     {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
-        params: schema.object({ calendarId: schema.string() }),
-        body: schema.object({ ...calendarSchema }),
+        params: calendarIdSchema,
+        body: calendarSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { calendarId } = request.params;
         const body = request.body;
-        const resp = await updateCalendar(context, calendarId, body);
+        const resp = await updateCalendar(mlClient, calendarId, body);
 
         return response.ok({
           body: resp,
@@ -132,17 +178,29 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {delete} /api/ml/calendars/:calendarId Deletes a calendar
+   * @apiName DeleteCalendarById
+   * @apiDescription Deletes a calendar
+   *
+   * @apiSchema (params) calendarIdSchema
+   */
   router.delete(
     {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
-        params: schema.object({ calendarId: schema.string() }),
+        params: calendarIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { calendarId } = request.params;
-        const resp = await deleteCalendar(context, calendarId);
+        const resp = await deleteCalendar(mlClient, calendarId);
 
         return response.ok({
           body: resp,

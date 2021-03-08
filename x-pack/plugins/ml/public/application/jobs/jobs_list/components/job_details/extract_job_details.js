@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
 import { detectorToString } from '../../../../util/string_utils';
 import { formatValues, filterObjects } from './format_values';
 import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
 
-export function extractJobDetails(job) {
+export function extractJobDetails(job, basePath) {
   if (Object.keys(job).length === 0) {
     return {};
   }
@@ -34,7 +35,7 @@ export function extractJobDetails(job) {
   };
   if (job.custom_settings && job.custom_settings.custom_urls) {
     customUrl.items.push(
-      ...job.custom_settings.custom_urls.map(cu => [cu.url_name, cu.url_value, cu.time_range])
+      ...job.custom_settings.custom_urls.map((cu) => [cu.url_name, cu.url_value, cu.time_range])
     );
   }
 
@@ -59,13 +60,15 @@ export function extractJobDetails(job) {
     items: [],
   };
   if (job.calendars) {
-    calendars.items = job.calendars.map(c => [
+    calendars.items = job.calendars.map((c) => [
       '',
-      <EuiLink href={`#/settings/calendars_list/edit_calendar/${c}?_g=()`}>{c}</EuiLink>,
+      <EuiLink href={basePath.prepend(`/app/ml/settings/calendars_list/edit_calendar/${c}?_g=()`)}>
+        {c}
+      </EuiLink>,
     ]);
     // remove the calendars list from the general section
     // so not to show it twice.
-    const i = general.items.findIndex(item => item[0] === 'calendars');
+    const i = general.items.findIndex((item) => item[0] === 'calendars');
     if (i >= 0) {
       general.items.splice(i, 1);
     }
@@ -81,7 +84,7 @@ export function extractJobDetails(job) {
   };
   if (job.analysis_config && job.analysis_config.detectors) {
     detectors.items.push(
-      ...job.analysis_config.detectors.map(d => {
+      ...job.analysis_config.detectors.map((d) => {
         const stringifiedDtr = detectorToString(d);
         return [
           stringifiedDtr,
@@ -97,7 +100,7 @@ export function extractJobDetails(job) {
       defaultMessage: 'Influencers',
     }),
     position: 'left',
-    items: job.analysis_config.influencers.map(i => ['', i]),
+    items: job.analysis_config.influencers.map((i) => ['', i]),
   };
 
   const analysisConfig = {
@@ -133,7 +136,7 @@ export function extractJobDetails(job) {
       defaultMessage: 'Datafeed',
     }),
     position: 'left',
-    items: filterObjects(job.datafeed_config, true, true),
+    items: filterObjects(job.datafeed_config || {}, true, true),
   };
   if (job.node) {
     datafeed.items.push(['node', JSON.stringify(job.node)]);
@@ -141,7 +144,7 @@ export function extractJobDetails(job) {
   if (job.datafeed_config && job.datafeed_config.timing_stats) {
     // remove the timing_stats list from the datafeed section
     // so not to show it twice.
-    const i = datafeed.items.findIndex(item => item[0] === 'timing_stats');
+    const i = datafeed.items.findIndex((item) => item[0] === 'timing_stats');
     if (i >= 0) {
       datafeed.items.splice(i, 1);
     }
@@ -165,6 +168,15 @@ export function extractJobDetails(job) {
     items: filterObjects(job.model_size_stats).map(formatValues),
   };
 
+  const jobTimingStats = {
+    id: 'jobTimingStats',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.jobTimingStatsTitle', {
+      defaultMessage: 'Job timing stats',
+    }),
+    position: 'left',
+    items: filterObjects(job.timing_stats).map(formatValues),
+  };
+
   const datafeedTimingStats = {
     id: 'datafeedTimingStats',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTimingStatsTitle', {
@@ -174,7 +186,7 @@ export function extractJobDetails(job) {
     items:
       job.datafeed_config && job.datafeed_config.timing_stats
         ? filterObjects(job.datafeed_config.timing_stats)
-            .filter(o => o[0] !== 'total_search_time_ms') // remove total_search_time_ms as average_search_time_per_bucket_ms is better
+            .filter((o) => o[0] !== 'total_search_time_ms') // remove total_search_time_ms as average_search_time_per_bucket_ms is better
             .map(formatValues)
         : [],
   };
@@ -192,6 +204,7 @@ export function extractJobDetails(job) {
     datafeed,
     counts,
     modelSizeStats,
+    jobTimingStats,
     datafeedTimingStats,
   };
 }

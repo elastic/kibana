@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
 import BroadcastChannel from 'broadcast-channel';
-import { SessionTimeout } from './session_timeout';
+
+import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
 import { createSessionExpiredMock } from './session_expired.mock';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { SessionTimeout } from './session_timeout';
 
 jest.useFakeTimers();
 
@@ -74,6 +77,7 @@ describe('Session Timeout', () => {
     now,
     idleTimeoutExpiration: now + 2 * 60 * 1000,
     lifespanExpiration: null,
+    provider: { type: 'basic', name: 'basic1' },
   };
   let notifications: ReturnType<typeof coreMock.createSetup>['notifications'];
   let http: ReturnType<typeof coreMock.createSetup>['http'];
@@ -108,6 +112,7 @@ describe('Session Timeout', () => {
 
   afterEach(async () => {
     jest.clearAllMocks();
+    sessionTimeout.stop();
   });
 
   afterAll(() => {
@@ -145,6 +150,27 @@ describe('Session Timeout', () => {
       sessionTimeout.stop();
       expect(close).toHaveBeenCalled();
       expect(cleanup).toHaveBeenCalled();
+    });
+
+    test(`stop works properly for large timeouts`, async () => {
+      http.fetch.mockResolvedValue({
+        ...defaultSessionInfo,
+        idleTimeoutExpiration: now + 5_000_000_000,
+      });
+      await sessionTimeout.start();
+
+      // Advance timers far enough to call intermediate `setTimeout` multiple times, but before any
+      // of the timers is supposed to be triggered.
+      jest.advanceTimersByTime(5_000_000_000 - (60 + 5 + 2) * 1000);
+
+      sessionTimeout.stop();
+
+      // Advance timer even further and make sure that timers were properly cleaned up.
+      jest.runAllTimers();
+
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(sessionExpired.logout).not.toHaveBeenCalled();
+      expectNoWarningToast(notifications);
     });
   });
 
@@ -187,17 +213,50 @@ describe('Session Timeout', () => {
       expectIdleTimeoutWarningToast(notifications);
     });
 
+    test(`shows idle timeout warning toast even for large timeouts`, async () => {
+      http.fetch.mockResolvedValue({
+        ...defaultSessionInfo,
+        idleTimeoutExpiration: now + 5_000_000_000,
+      });
+      await sessionTimeout.start();
+
+      // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
+      jest.advanceTimersByTime(5_000_000_000 - 66 * 1000);
+      expectNoWarningToast(notifications);
+
+      jest.advanceTimersByTime(1000);
+      expectIdleTimeoutWarningToast(notifications);
+    });
+
     test(`shows lifespan warning toast`, async () => {
       const sessionInfo = {
         now,
         idleTimeoutExpiration: null,
         lifespanExpiration: now + 2 * 60 * 1000,
+        provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
       await sessionTimeout.start();
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
+      expectLifespanWarningToast(notifications);
+    });
+
+    test(`shows lifespan warning toast even for large timeouts`, async () => {
+      const sessionInfo = {
+        ...defaultSessionInfo,
+        idleTimeoutExpiration: null,
+        lifespanExpiration: now + 5_000_000_000,
+      };
+      http.fetch.mockResolvedValue(sessionInfo);
+      await sessionTimeout.start();
+
+      // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
+      jest.advanceTimersByTime(5_000_000_000 - 66 * 1000);
+      expectNoWarningToast(notifications);
+
+      jest.advanceTimersByTime(1000);
       expectLifespanWarningToast(notifications);
     });
 
@@ -225,6 +284,7 @@ describe('Session Timeout', () => {
         now,
         idleTimeoutExpiration: null,
         lifespanExpiration: now + 2 * 60 * 1000,
+        provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
       await sessionTimeout.start();
@@ -251,6 +311,7 @@ describe('Session Timeout', () => {
         now: now + elapsed,
         idleTimeoutExpiration: now + elapsed + 2 * 60 * 1000,
         lifespanExpiration: null,
+        provider: { type: 'basic', name: 'basic1' },
       });
       await sessionTimeout.extend('/foo');
       expect(http.fetch).toHaveBeenCalledTimes(3);
@@ -303,6 +364,7 @@ describe('Session Timeout', () => {
         now,
         idleTimeoutExpiration: now + 64 * 1000,
         lifespanExpiration: null,
+        provider: { type: 'basic', name: 'basic1' },
       });
       await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalled();
@@ -323,6 +385,21 @@ describe('Session Timeout', () => {
       expect(sessionExpired.logout).toHaveBeenCalled();
     });
 
+    test(`expires the session 5 seconds before it really expires even for large timeouts`, async () => {
+      http.fetch.mockResolvedValue({
+        ...defaultSessionInfo,
+        idleTimeoutExpiration: now + 5_000_000_000,
+      });
+
+      await sessionTimeout.start();
+
+      jest.advanceTimersByTime(5_000_000_000 - 6000);
+      expect(sessionExpired.logout).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(1000);
+      expect(sessionExpired.logout).toHaveBeenCalled();
+    });
+
     test(`extend delays the expiration`, async () => {
       await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalledTimes(1);
@@ -336,6 +413,7 @@ describe('Session Timeout', () => {
         now: now + elapsed,
         idleTimeoutExpiration: now + elapsed + 2 * 60 * 1000,
         lifespanExpiration: null,
+        provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
       await sessionTimeout.extend('/foo');
@@ -358,6 +436,7 @@ describe('Session Timeout', () => {
         now,
         idleTimeoutExpiration: now + 4 * 1000,
         lifespanExpiration: null,
+        provider: { type: 'basic', name: 'basic1' },
       });
       await sessionTimeout.start();
 

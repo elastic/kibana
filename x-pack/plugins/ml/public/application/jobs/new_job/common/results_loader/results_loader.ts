@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -126,6 +127,10 @@ export class ResultsLoader {
     this._results$.next(this._results);
   }
 
+  public get results$() {
+    return this._results$;
+  }
+
   public subscribeToResults(func: ResultsSubscriber) {
     return this._results$.subscribe(func);
   }
@@ -157,7 +162,7 @@ export class ResultsLoader {
         [],
         this._lastModelTimeStamp,
         this._jobCreator.end,
-        `${this._chartInterval.getInterval().asMilliseconds()}ms`,
+        this._chartInterval.getInterval().asMilliseconds(),
         agg.mlModelPlotAgg
       )
       .toPromise();
@@ -207,7 +212,7 @@ export class ResultsLoader {
       [this._jobCreator.jobId],
       this._jobCreator.start,
       this._jobCreator.end,
-      `${this._chartInterval.getInterval().asMilliseconds()}ms`,
+      this._chartInterval.getInterval().asMilliseconds(),
       1
     );
 
@@ -229,14 +234,14 @@ export class ResultsLoader {
       this._jobCreator.jobId,
       this._jobCreator.start,
       this._jobCreator.end,
-      `${this._chartInterval.getInterval().asMilliseconds()}ms`,
+      this._chartInterval.getInterval().asMilliseconds(),
       this._detectorSplitFieldFilters
     );
 
     const anomalies: Record<number, Anomaly[]> = {};
     Object.entries(resp.results).forEach(([dtrIdx, results]) => {
       anomalies[+dtrIdx] = results.map(
-        r => ({ ...r, severity: getSeverityType(r.value as number) } as Anomaly)
+        (r) => ({ ...r, severity: getSeverityType(r.value as number) } as Anomaly)
       );
     });
     return anomalies;
@@ -250,7 +255,8 @@ export class ResultsLoader {
     if (isMultiMetricJobCreator(this._jobCreator)) {
       if (this._jobCreator.splitField !== null) {
         const fieldValues = await this._chartLoader.loadFieldExampleValues(
-          this._jobCreator.splitField
+          this._jobCreator.splitField,
+          this._jobCreator.runtimeMappings
         );
         if (fieldValues.length > 0) {
           this._detectorSplitFieldFilters = {

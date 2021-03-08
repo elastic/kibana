@@ -1,20 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-export { getFilterBar, GetFilterBarParams } from './get_filter_bar';
-export { getUptimeIndexPattern as getIndexPattern } from './get_index_pattern';
-export { getLatestMonitor, GetLatestMonitorParams } from './get_latest_monitor';
-export { getMonitorDurationChart, GetMonitorChartsParams } from './get_monitor_duration';
-export { getMonitorDetails, GetMonitorDetailsParams } from './get_monitor_details';
-export { getMonitorLocations, GetMonitorLocationsParams } from './get_monitor_locations';
-export { getMonitorStates, GetMonitorStatesParams } from './get_monitor_states';
-export { getMonitorStatus, GetMonitorStatusParams } from './get_monitor_status';
-export * from './get_monitor_status';
-export { getPings, GetPingsParams } from './get_pings';
-export { getPingHistogram, GetPingHistogramParams } from './get_ping_histogram';
-export { UptimeRequests } from './uptime_requests';
-export { getSnapshotCount, GetSnapshotCountParams } from './get_snapshot_counts';
-export { getIndexStatus } from './get_index_status';
+import { getCerts } from './get_certs';
+import { getFilterBar } from './get_filter_bar';
+import { getUptimeIndexPattern as getIndexPattern } from './get_index_pattern';
+import { getLatestMonitor } from './get_latest_monitor';
+import { getMonitorAvailability } from './get_monitor_availability';
+import { getMonitorDurationChart } from './get_monitor_duration';
+import { getMonitorDetails } from './get_monitor_details';
+import { getMonitorLocations } from './get_monitor_locations';
+import { getMonitorStates } from './get_monitor_states';
+import { getMonitorStatus } from './get_monitor_status';
+import { getPings } from './get_pings';
+import { getPingHistogram } from './get_ping_histogram';
+import { getSnapshotCount } from './get_snapshot_counts';
+import { getIndexStatus } from './get_index_status';
+import { getJourneySteps } from './get_journey_steps';
+import { getJourneyScreenshot } from './get_journey_screenshot';
+import { getJourneyDetails } from './get_journey_details';
+import { getNetworkEvents } from './get_network_events';
+import { getJourneyFailedSteps } from './get_journey_failed_steps';
+
+export const requests = {
+  getCerts,
+  getFilterBar,
+  getIndexPattern,
+  getLatestMonitor,
+  getMonitorAvailability,
+  getMonitorDurationChart,
+  getMonitorDetails,
+  getMonitorLocations,
+  getMonitorStates,
+  getMonitorStatus,
+  getPings,
+  getPingHistogram,
+  getSnapshotCount,
+  getIndexStatus,
+  getJourneySteps,
+  getJourneyFailedSteps,
+  getJourneyScreenshot,
+  getJourneyDetails,
+  getNetworkEvents,
+};
+
+export type UptimeRequests = typeof requests;

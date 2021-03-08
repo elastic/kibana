@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 import {
@@ -46,6 +36,16 @@ export const esFilters = {
   buildPhrasesFilter,
   buildRangeFilter,
   isFilterDisabled,
+};
+
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
 };
 
 /*
@@ -85,7 +85,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -96,17 +95,15 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-  serializeFieldFormat,
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -117,6 +114,7 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
@@ -136,15 +134,22 @@ export {
   IndexPatternsFetcher,
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
+  FieldDescriptor,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {
-  IIndexPattern,
   IFieldType,
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
+  IndexPattern,
+  IndexPatternLoadExpressionFunctionDefinition,
+  IndexPatternsService,
+  IndexPatternsService as IndexPatternsCommonService,
 } from '../common';
 
 /**
@@ -152,42 +157,115 @@ export {
  */
 
 import {
+  // aggs
+  CidrMask,
+  intervalOptions,
+  isNumberType,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
+  calcAutoIntervalLessThan,
 } from '../common';
 
-export { ParsedInterval } from '../common';
+export {
+  // aggs
+  AggGroupLabels,
+  AggGroupName,
+  AggGroupNames,
+  AggFunctionsMapping,
+  AggParam,
+  AggParamOption,
+  AggParamType,
+  AggConfigOptions,
+  BUCKET_TYPES,
+  EsaggsExpressionFunctionDefinition,
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  METRIC_TYPES,
+  OptionedParamType,
+  OptionedValueProp,
+  ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
+  // search
+  ISearchOptions,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  ES_SEARCH_STRATEGY,
+} from '../common';
 
 export {
-  ISearch,
-  ISearchCancel,
-  ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
-  ISearchContext,
-  TSearchStrategyProvider,
+  ISearchStrategy,
+  ISearchSetup,
+  ISearchStart,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
+  getShardTimeout,
   getTotalLoaded,
+  toKibanaSearchResponse,
+  shimHitsTotal,
+  usageProvider,
+  searchUsageObserver,
+  shimAbortSignal,
+  SearchUsage,
+  SearchSessionService,
+  ISearchSessionService,
+  SearchRequestHandlerContext,
+  DataRequestHandlerContext,
 } from './search';
 
 // Search namespace
 export const search = {
   aggs: {
+    CidrMask,
     dateHistogramInterval,
+    intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
+    Ipv4Address,
+    isNumberType,
+    isStringType,
+    isType,
     isValidEsInterval,
     isValidInterval,
+    parentPipelineType,
     parseEsInterval,
     parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
 };
 
 /**
@@ -200,6 +278,7 @@ export {
   castEsToKbnFieldTypeName,
   // query
   Filter,
+  getTime,
   Query,
   // timefilter
   RefreshInterval,
@@ -213,7 +292,7 @@ export {
  * @public
  */
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataServerPlugin(initializerContext);
 }
 
@@ -222,3 +301,13 @@ export {
   DataPluginSetup as PluginSetup,
   DataPluginStart as PluginStart,
 };
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    autocomplete: true,
+    search: true,
+  },
+  schema: configSchema,
+};
+
+export type { IndexPatternsServiceProvider } from './index_patterns';

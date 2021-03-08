@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+.truncated-content {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  white-space: nowrap;
+
+  &__tooltip {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: -3px;
+    margin-top: -1px;
+    background: $euiColorEmptyShade;
+    border-radius: 2px;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    padding: 0 2px;
+    display: none;
+    align-items: center;
+    box-shadow: 0 1px 3px $euiColorInk;
+    border: 1px solid $euiBorderColor;
+    width: auto;
+    white-space: nowrap;
+
+    .truncated-content:hover & {
+      display: flex;
+    }
+  }
+}

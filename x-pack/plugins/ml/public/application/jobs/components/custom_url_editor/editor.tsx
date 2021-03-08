@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent, FC } from 'react';
@@ -114,7 +115,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   };
 
   const onQueryEntitiesChange = (selectedOptions: EuiComboBoxOptionOption[]) => {
-    const selectedFieldNames = selectedOptions.map(option => option.label);
+    const selectedFieldNames = selectedOptions.map((option) => option.label);
 
     const kibanaSettings = customUrl.kibanaSettings;
     setEditCustomUrl({
@@ -159,22 +160,22 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
 
   const { label, type, timeRange, kibanaSettings, otherUrlSettings } = customUrl;
 
-  const dashboardOptions = dashboards.map(dashboard => {
+  const dashboardOptions = dashboards.map((dashboard) => {
     return { value: dashboard.id, text: dashboard.title };
   });
 
-  const indexPatternOptions = indexPatterns.map(indexPattern => {
+  const indexPatternOptions = indexPatterns.map((indexPattern) => {
     return { value: indexPattern.id, text: indexPattern.title };
   });
 
-  const entityOptions = queryEntityFieldNames.map(fieldName => ({ label: fieldName }));
+  const entityOptions = queryEntityFieldNames.map((fieldName) => ({ label: fieldName }));
   let selectedEntityOptions: EuiComboBoxOptionOption[] = [];
   if (kibanaSettings !== undefined && kibanaSettings.queryFieldNames !== undefined) {
     const queryFieldNames: string[] = kibanaSettings.queryFieldNames;
-    selectedEntityOptions = queryFieldNames.map(fieldName => ({ label: fieldName }));
+    selectedEntityOptions = queryFieldNames.map((fieldName) => ({ label: fieldName }));
   }
 
-  const timeRangeOptions = Object.values(TIME_RANGE_TYPE).map(timeRangeType => ({
+  const timeRangeOptions = Object.values(TIME_RANGE_TYPE).map((timeRangeType) => ({
     value: timeRangeType,
     text: timeRangeType,
   }));
@@ -216,7 +217,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           className="url-label"
           error={invalidLabelError}
           isInvalid={isInvalidLabel}
-          compressed
+          display="rowCompressed"
         >
           <EuiFieldText
             name="label"
@@ -231,7 +232,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           label={
             <FormattedMessage id="xpack.ml.customUrlsEditor.linkToLabel" defaultMessage="Link to" />
           }
-          compressed
+          display="rowCompressed"
         >
           <EuiRadioGroup
             options={getLinkToOptions()}
@@ -249,7 +250,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                 defaultMessage="Dashboard name"
               />
             }
-            compressed
+            display="rowCompressed"
           >
             <EuiSelect
               options={dashboardOptions}
@@ -268,7 +269,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                 defaultMessage="Index pattern"
               />
             }
-            compressed
+            display="rowCompressed"
           >
             <EuiSelect
               options={indexPatternOptions}
@@ -314,7 +315,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                     />
                   }
                   className="url-time-range"
-                  compressed
+                  display="rowCompressed"
                 >
                   <EuiSelect
                     options={timeRangeOptions}
@@ -336,7 +337,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                     className="url-time-range"
                     error={invalidIntervalError}
                     isInvalid={isInvalidTimeRange}
-                    compressed
+                    display="rowCompressed"
                   >
                     <EuiFieldText
                       value={timeRange.interval}
@@ -356,7 +357,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             label={
               <FormattedMessage id="xpack.ml.customUrlsEditor.urlLabel" defaultMessage="URL" />
             }
-            compressed
+            display="rowCompressed"
             fullWidth={true}
           >
             <EuiTextArea

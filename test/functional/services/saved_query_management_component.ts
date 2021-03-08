@@ -1,30 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SavedQueryManagementComponentProvider({ getService }: FtrProviderContext) {
+export function SavedQueryManagementComponentProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
   const config = getService('config');
+  const PageObjects = getPageObjects(['common']);
 
   class SavedQueryManagementComponent {
     public async getCurrentlyLoadedQueryID() {
@@ -105,7 +98,7 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
     public async deleteSavedQuery(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`~delete-saved-query-${title}-button`);
-      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.common.clickConfirmOnModal();
     }
 
     async clearCurrentlyLoadedQuery() {
@@ -151,6 +144,12 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       await testSubjects.existOrFail(`~load-saved-query-${title}-button`);
     }
 
+    async savedQueryTextExist(text: string) {
+      await this.openSavedQueryManagementComponent();
+      const queryString = await queryBar.getQueryString();
+      expect(queryString).to.eql(text);
+    }
+
     async savedQueryMissingOrFail(title: string) {
       await retry.try(async () => {
         await this.openSavedQueryManagementComponent();
@@ -163,8 +162,8 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (isOpenAlready) return;
 
-      await testSubjects.click('saved-query-management-popover-button');
       await retry.waitFor('saved query management popover to have any text', async () => {
+        await testSubjects.click('saved-query-management-popover-button');
         const queryText = await testSubjects.getVisibleText('saved-query-management-popover');
         return queryText.length > 0;
       });
@@ -174,7 +173,10 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (!isOpenAlready) return;
 
-      await testSubjects.click('saved-query-management-popover-button');
+      await retry.try(async () => {
+        await testSubjects.click('saved-query-management-popover-button');
+        await testSubjects.missingOrFail('saved-query-management-popover');
+      });
     }
 
     async openSaveCurrentQueryModal() {

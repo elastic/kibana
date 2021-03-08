@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsServiceStart } from 'src/core/server';
@@ -23,11 +24,9 @@ async function incrementUIReindexOptionCounter({
 }: IncrementUIReindexOptionDependencies) {
   const internalRepository = savedObjects.createInternalRepository();
 
-  await internalRepository.incrementCounter(
-    UPGRADE_ASSISTANT_TYPE,
-    UPGRADE_ASSISTANT_DOC_ID,
-    `ui_reindex.${uiReindexOptionCounter}`
-  );
+  await internalRepository.incrementCounter(UPGRADE_ASSISTANT_TYPE, UPGRADE_ASSISTANT_DOC_ID, [
+    `ui_reindex.${uiReindexOptionCounter}`,
+  ]);
 }
 
 type UpsertUIReindexOptionDepencies = UIReindex & { savedObjects: SavedObjectsServiceStart };

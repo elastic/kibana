@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -15,8 +16,8 @@ describe('get_high_level_stats', () => {
   const callWith = sinon.stub();
   const product = 'xyz';
   const cloudName = 'bare-metal';
-  const start = 0;
-  const end = 1;
+  const start = new Date().toISOString();
+  const end = new Date().toISOString();
   const response = {
     hits: {
       hits: [

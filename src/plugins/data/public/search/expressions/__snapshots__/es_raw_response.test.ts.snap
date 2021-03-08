@@ -1,0 +1,193 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`esRawResponse converts aggregations to table simple aggregation response 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "2.buckets.key",
+      "meta": Object {
+        "field": "2.buckets.key",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "2.buckets.key",
+    },
+    Object {
+      "id": "2.buckets.doc_count",
+      "meta": Object {
+        "field": "2.buckets.doc_count",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "2.buckets.doc_count",
+    },
+    Object {
+      "id": "2.doc_count_error_upper_bound",
+      "meta": Object {
+        "field": "2.doc_count_error_upper_bound",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "2.doc_count_error_upper_bound",
+    },
+    Object {
+      "id": "2.sum_other_doc_count",
+      "meta": Object {
+        "field": "2.sum_other_doc_count",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "2.sum_other_doc_count",
+    },
+  ],
+  "meta": Object {
+    "source": "*",
+    "type": "esdsl",
+  },
+  "rows": Array [
+    Object {
+      "2.buckets.doc_count": 1033,
+      "2.buckets.key": "FEMALE",
+      "2.doc_count_error_upper_bound": 0,
+      "2.sum_other_doc_count": 0,
+    },
+    Object {
+      "2.buckets.doc_count": 944,
+      "2.buckets.key": "MALE",
+      "2.doc_count_error_upper_bound": 0,
+      "2.sum_other_doc_count": 0,
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`esRawResponse converts raw docs to table simple docs response 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "order_date",
+      "meta": Object {
+        "field": "order_date",
+        "params": Object {},
+        "type": "object",
+      },
+      "name": "order_date",
+    },
+    Object {
+      "id": "products.created_on",
+      "meta": Object {
+        "field": "products.created_on",
+        "params": Object {},
+        "type": "object",
+      },
+      "name": "products.created_on",
+    },
+  ],
+  "meta": Object {
+    "source": "*",
+    "type": "esdsl",
+  },
+  "rows": Array [
+    Object {
+      "order_date": Array [
+        "2020-07-13T09:27:22.000Z",
+      ],
+      "products.created_on": Array [
+        "2016-12-12T09:27:22.000Z",
+        "2016-12-12T09:27:22.000Z",
+      ],
+    },
+    Object {
+      "order_date": Array [
+        "2020-07-15T08:12:29.000Z",
+      ],
+      "products.created_on": Array [
+        "2016-12-14T08:12:29.000Z",
+        "2016-12-14T08:12:29.000Z",
+      ],
+    },
+    Object {
+      "order_date": Array [
+        "2020-07-15T01:26:24.000Z",
+      ],
+      "products.created_on": Array [
+        "2016-12-14T01:26:24.000Z",
+        "2016-12-14T01:26:24.000Z",
+      ],
+    },
+    Object {
+      "order_date": Array [
+        "2020-07-10T19:55:12.000Z",
+      ],
+      "products.created_on": Array [
+        "2016-12-09T19:55:12.000Z",
+        "2016-12-09T19:55:12.000Z",
+      ],
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`esRawResponse returns aggs if both docs and aggs are present on response 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "2.buckets.key",
+      "meta": Object {
+        "field": "2.buckets.key",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "2.buckets.key",
+    },
+    Object {
+      "id": "2.buckets.doc_count",
+      "meta": Object {
+        "field": "2.buckets.doc_count",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "2.buckets.doc_count",
+    },
+    Object {
+      "id": "2.doc_count_error_upper_bound",
+      "meta": Object {
+        "field": "2.doc_count_error_upper_bound",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "2.doc_count_error_upper_bound",
+    },
+    Object {
+      "id": "2.sum_other_doc_count",
+      "meta": Object {
+        "field": "2.sum_other_doc_count",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "2.sum_other_doc_count",
+    },
+  ],
+  "meta": Object {
+    "source": "*",
+    "type": "esdsl",
+  },
+  "rows": Array [
+    Object {
+      "2.buckets.doc_count": 1033,
+      "2.buckets.key": "FEMALE",
+      "2.doc_count_error_upper_bound": 0,
+      "2.sum_other_doc_count": 0,
+    },
+    Object {
+      "2.buckets.doc_count": 944,
+      "2.buckets.key": "MALE",
+      "2.doc_count_error_upper_bound": 0,
+      "2.sum_other_doc_count": 0,
+    },
+  ],
+  "type": "datatable",
+}
+`;

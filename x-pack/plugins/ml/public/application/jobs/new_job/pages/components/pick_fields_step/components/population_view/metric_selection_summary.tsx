@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
@@ -15,7 +16,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { Field, AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 type DetectorFieldValues = Record<number, string[]>;
 
@@ -76,12 +77,13 @@ export const PopulationDetectorsSummary: FC = () => {
           jobCreator.end,
           aggFieldPairList,
           jobCreator.splitField,
-          cs.intervalMs
+          cs.intervalMs,
+          jobCreator.runtimeMappings
         );
 
         setLineChartsData(resp);
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        getToastNotificationService().displayErrorToast(error);
         setLineChartsData({});
       }
       setLoadingData(false);
@@ -96,7 +98,7 @@ export const PopulationDetectorsSummary: FC = () => {
           (async (index: number, field: Field) => {
             return {
               index,
-              fields: await chartLoader.loadFieldExampleValues(field),
+              fields: await chartLoader.loadFieldExampleValues(field, jobCreator.runtimeMappings),
             };
           })(i, af.by.field)
         );
@@ -125,7 +127,7 @@ export const PopulationDetectorsSummary: FC = () => {
 
   function allDataReady() {
     let ready = aggFieldPairList.length > 0;
-    aggFieldPairList.forEach(af => {
+    aggFieldPairList.forEach((af) => {
       if (af.by !== undefined && af.by.field !== null) {
         // if a by field is set, it's only ready when the value is loaded
         ready = ready && af.by.value !== null;

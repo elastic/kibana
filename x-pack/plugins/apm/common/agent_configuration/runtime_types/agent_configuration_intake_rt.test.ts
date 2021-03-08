@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { agentConfigurationIntakeRt } from './agent_configuration_intake_rt';
@@ -12,8 +13,8 @@ describe('agentConfigurationIntakeRt', () => {
     const config = {
       service: { name: 'my-service', environment: 'my-environment' },
       settings: {
-        transaction_sample_rate: '0.5'
-      }
+        transaction_sample_rate: '0.5',
+      },
     };
 
     expect(isConfigValid(config)).toBe(true);
@@ -23,8 +24,8 @@ describe('agentConfigurationIntakeRt', () => {
     const config = {
       service: {},
       settings: {
-        transaction_sample_rate: 0.5
-      }
+        transaction_sample_rate: 0.5,
+      },
     };
 
     expect(isConfigValid(config)).toBe(false);
@@ -34,8 +35,8 @@ describe('agentConfigurationIntakeRt', () => {
     const config = {
       service: { name: 'my-service', environment: 'my-environment' },
       settings: {
-        my_unknown_setting: '0.5'
-      }
+        my_unknown_setting: '0.5',
+      },
     };
 
     expect(isConfigValid(config)).toBe(true);
@@ -45,8 +46,8 @@ describe('agentConfigurationIntakeRt', () => {
     const config = {
       service: { name: 'my-service', environment: 'my-environment' },
       settings: {
-        my_unknown_setting: false
-      }
+        my_unknown_setting: false,
+      },
     };
 
     expect(isConfigValid(config)).toBe(false);

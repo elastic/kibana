@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// @ts-ignore
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import path from 'path';
+
+import { REPO_ROOT } from '@kbn/utils';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+
 import { services } from './services';
 
 interface CreateTestConfigOptions {
@@ -21,11 +23,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
-        api: await readConfigFile(resolveKibanaPath('test/api_integration/config.js')),
+        api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
         functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
       },
       xpack: {
-        api: await readConfigFile(require.resolve('../../api_integration/config.js')),
+        api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
       },
     };
 
@@ -54,11 +56,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...config.xpack.api.get('kbnTestServer'),
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
-          '--optimize.enabled=false',
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'namespace_agnostic_type_plugin')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'hidden_type_plugin')}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'saved_object_test_plugin')}`,
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

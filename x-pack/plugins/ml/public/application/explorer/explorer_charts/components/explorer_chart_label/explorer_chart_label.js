@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './_explorer_chart_label.scss';
@@ -36,7 +37,7 @@ export function ExplorerChartLabel({
       <React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>
     );
 
-  const entityFieldBadges = entityFields.map(entity => (
+  const entityFieldBadges = entityFields.map((entity) => (
     <ExplorerChartLabelBadge entity={entity} key={`${entity.fieldName} ${entity.fieldValue}`} />
   ));
 

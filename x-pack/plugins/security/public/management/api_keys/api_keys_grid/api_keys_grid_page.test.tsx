@@ -1,31 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import React from 'react';
-import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
 
+import { mountWithIntl } from '@kbn/test/jest';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { coreMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+
+import type { APIKeysAPIClient } from '../api_keys_api_client';
+import { apiKeysAPIClientMock } from '../index.mock';
+import { APIKeysGridPage } from './api_keys_grid_page';
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';
-import { APIKeysAPIClient } from '../api_keys_api_client';
-import { DocumentationLinksService } from '../documentation_links';
-import { APIKeysGridPage } from './api_keys_grid_page';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { apiKeysAPIClientMock } from '../index.mock';
-
-const mock403 = () => ({ body: { statusCode: 403 } });
 const mock500 = () => ({ body: { error: 'Internal Server Error', message: '', statusCode: 500 } });
 
 const waitForRender = async (
   wrapper: ReactWrapper<any>,
   condition: (wrapper: ReactWrapper<any>) => boolean
 ) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const interval = setInterval(async () => {
       await Promise.resolve();
       wrapper.update();
@@ -48,6 +49,7 @@ describe('APIKeysGridPage', () => {
     apiClientMock.checkPrivileges.mockResolvedValue({
       isAdmin: true,
       areApiKeysEnabled: true,
+      canManage: true,
     });
     apiClientMock.getApiKeys.mockResolvedValue({
       apiKeys: [
@@ -64,42 +66,43 @@ describe('APIKeysGridPage', () => {
     });
   });
 
-  const getViewProperties = () => {
-    const { docLinks, notifications } = coreMock.createStart();
-    return {
-      docLinks: new DocumentationLinksService(docLinks),
-      notifications,
-      apiKeysAPIClient: apiClientMock,
-    };
+  const coreStart = coreMock.createStart();
+  const renderView = () => {
+    return mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <APIKeysGridPage apiKeysAPIClient={apiClientMock} notifications={coreStart.notifications} />
+      </KibanaContextProvider>
+    );
   };
 
   it('renders a loading state when fetching API keys', async () => {
-    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
-
-    expect(wrapper.find('[data-test-subj="apiKeysSectionLoading"]')).toHaveLength(1);
+    expect(renderView().find('[data-test-subj="apiKeysSectionLoading"]')).toHaveLength(1);
   });
 
   it('renders a callout when API keys are not enabled', async () => {
     apiClientMock.checkPrivileges.mockResolvedValue({
       isAdmin: true,
+      canManage: true,
       areApiKeysEnabled: false,
     });
 
-    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
-
-    await waitForRender(wrapper, updatedWrapper => {
+    const wrapper = renderView();
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(NotEnabled).length > 0;
     });
 
-    expect(wrapper.find(NotEnabled)).toMatchSnapshot();
+    expect(wrapper.find(NotEnabled).find(EuiCallOut)).toMatchSnapshot();
   });
 
   it('renders permission denied if user does not have required permissions', async () => {
-    apiClientMock.checkPrivileges.mockRejectedValue(mock403());
+    apiClientMock.checkPrivileges.mockResolvedValue({
+      canManage: false,
+      isAdmin: false,
+      areApiKeysEnabled: true,
+    });
 
-    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
-
-    await waitForRender(wrapper, updatedWrapper => {
+    const wrapper = renderView();
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
 
@@ -109,9 +112,8 @@ describe('APIKeysGridPage', () => {
   it('renders error callout if error fetching API keys', async () => {
     apiClientMock.getApiKeys.mockRejectedValue(mock500());
 
-    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
-
-    await waitForRender(wrapper, updatedWrapper => {
+    const wrapper = renderView();
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiCallOut).length > 0;
     });
 
@@ -121,13 +123,13 @@ describe('APIKeysGridPage', () => {
   describe('Admin view', () => {
     let wrapper: ReactWrapper<any>;
     beforeEach(() => {
-      wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
+      wrapper = renderView();
     });
 
     it('renders a callout indicating the user is an administrator', async () => {
       const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(calloutEl).length > 0;
       });
 
@@ -137,7 +139,7 @@ describe('APIKeysGridPage', () => {
     it('renders the correct description text', async () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 
@@ -152,17 +154,18 @@ describe('APIKeysGridPage', () => {
     beforeEach(() => {
       apiClientMock.checkPrivileges.mockResolvedValue({
         isAdmin: false,
+        canManage: true,
         areApiKeysEnabled: true,
       });
 
-      wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
+      wrapper = renderView();
     });
 
     it('does NOT render a callout indicating the user is an administrator', async () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
       const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 
@@ -172,7 +175,7 @@ describe('APIKeysGridPage', () => {
     it('renders the correct description text', async () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 

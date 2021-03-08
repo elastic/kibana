@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
@@ -27,7 +28,7 @@ export const TopCategories: FC = () => {
   async function loadTopCats() {
     const results = await ml.jobs.topCategories(jobCreator.jobId, NUMBER_OF_CATEGORY_EXAMPLES);
     setTableRow(
-      results.categories.map(c => ({
+      results.categories.map((c) => ({
         count: c.count,
         example: c.category.examples?.length ? c.category.examples[0] : '',
       }))

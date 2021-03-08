@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import { chunk } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
@@ -12,15 +14,15 @@ import {
   CategorizationAnalyzer,
   CategoryFieldExample,
 } from '../../../../../common/types/categories';
-import { callWithRequestType } from '../../../../../common/types/kibana';
+import { RuntimeMappings } from '../../../../../common/types/fields';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
 
-export function categorizationExamplesProvider(
-  callWithRequest: callWithRequestType,
-  callWithInternalUser: callWithRequestType
-) {
+export function categorizationExamplesProvider({
+  asCurrentUser,
+  asInternalUser,
+}: IScopedClusterClient) {
   const validationResults = new ValidationResults();
 
   async function categorizationExamples(
@@ -31,7 +33,8 @@ export function categorizationExamplesProvider(
     timeField: string | undefined,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings: RuntimeMappings | undefined
   ): Promise<{ examples: CategoryFieldExample[]; error?: any }> {
     if (timeField !== undefined) {
       const range = {
@@ -56,18 +59,26 @@ export function categorizationExamplesProvider(
         }
       }
     }
-
-    const results: SearchResponse<{ [id: string]: string }> = await callWithRequest('search', {
+    const { body } = await asCurrentUser.search<SearchResponse<{ [id: string]: string }>>({
       index: indexPatternTitle,
       size,
       body: {
-        _source: categorizationFieldName,
+        fields: [categorizationFieldName],
+        _source: false,
         query,
         sort: ['_doc'],
+        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
       },
     });
 
-    const tempExamples = results.hits.hits.map(({ _source }) => _source[categorizationFieldName]);
+    // hit.fields can be undefined if value is originally null
+    const tempExamples = body.hits.hits.map(({ fields }) =>
+      fields &&
+      Array.isArray(fields[categorizationFieldName]) &&
+      fields[categorizationFieldName].length > 0
+        ? fields[categorizationFieldName][0]
+        : null
+    );
 
     validationResults.createNullValueResult(tempExamples);
 
@@ -81,7 +92,6 @@ export function categorizationExamplesProvider(
       const examplesWithTokens = await getTokens(CHUNK_SIZE, allExamples, analyzer);
       return { examples: examplesWithTokens };
     } catch (err) {
-      // console.log('dropping to 50 chunk size');
       // if an error is thrown when loading the tokens, lower the chunk size by half and try again
       // the error may have been caused by too many tokens being found.
       // the _analyze endpoint has a maximum of 10000 tokens.
@@ -92,7 +102,7 @@ export function categorizationExamplesProvider(
         return { examples: examplesWithTokens };
       } catch (error) {
         validationResults.createTooManyTokensResult(error, halfChunkSize);
-        return { examples: halfExamples.map(e => ({ text: e, tokens: [] })) };
+        return { examples: halfExamples.map((e) => ({ text: e, tokens: [] })) };
       }
     }
   }
@@ -112,17 +122,19 @@ export function categorizationExamplesProvider(
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const { tokens }: { tokens: Token[] } = await callWithInternalUser('indices.analyze', {
+    const {
+      body: { tokens },
+    } = await asInternalUser.indices.analyze<{ tokens: Token[] }>({
       body: {
         ...getAnalyzer(analyzer),
         text: examples,
       },
     });
 
-    const lengths = examples.map(e => e.length);
-    const sumLengths = lengths.map((s => (a: number) => (s += a))(0));
+    const lengths = examples.map((e) => e.length);
+    const sumLengths = lengths.map(((s) => (a: number) => (s += a))(0));
 
-    const tokensPerExample: Token[][] = examples.map(e => []);
+    const tokensPerExample: Token[][] = examples.map((e) => []);
 
     tokens.forEach((t, i) => {
       for (let g = 0; g < sumLengths.length; g++) {
@@ -156,7 +168,8 @@ export function categorizationExamplesProvider(
     timeField: string | undefined,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings: RuntimeMappings | undefined
   ) {
     const resp = await categorizationExamples(
       indexPatternTitle,
@@ -166,7 +179,8 @@ export function categorizationExamplesProvider(
       timeField,
       start,
       end,
-      analyzer
+      analyzer,
+      runtimeMappings
     );
 
     const { examples } = resp;
@@ -193,7 +207,7 @@ export function categorizationExamplesProvider(
     // sort back into original order and remove origIndex property
     const processedExamples = filteredExamples
       .sort((a, b) => a.origIndex - b.origIndex)
-      .map(e => ({ text: e.text, tokens: e.tokens }));
+      .map((e) => ({ text: e.text, tokens: e.tokens }));
 
     return {
       overallValidStatus: validationResults.overallResult,

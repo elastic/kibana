@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
 const commonPipelineParams = {
   on_failure: [],
   ignore_failure: {
@@ -50,6 +38,49 @@ const bytesProcessorDefinition = {
     },
     field: '',
     target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest-circle-processor.html
+const circleProcessorDefinition = {
+  circle: {
+    __template: {
+      field: '',
+      error_distance: '',
+      shape_type: '',
+    },
+    field: '',
+    target_field: '',
+    error_distance: '',
+    shape_type: {
+      __one_of: ['geo_shape', 'shape'],
+    },
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/csv-processor.html
+const csvProcessorDefinition = {
+  csv: {
+    __template: {
+      field: '',
+      target_fields: [''],
+    },
+    field: '',
+    target_fields: [''],
+    separator: '',
+    quote: '',
+    empty_value: '',
+    trim: {
+      __one_of: [true, false],
+    },
     ignore_missing: {
       __one_of: [false, true],
     },
@@ -174,6 +205,25 @@ const foreachProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/geoip-processor.html
+const geoipProcessorDefinition = {
+  geoip: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    database_file: '',
+    properties: [''],
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    first_only: {
+      __one_of: [false, true],
+    },
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html
 const grokProcessorDefinition = {
   grok: {
@@ -205,6 +255,37 @@ const gsubProcessorDefinition = {
     field: '',
     pattern: '',
     replacement: '',
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/htmlstrip-processor.html
+const htmlStripProcessorDefinition = {
+  html_strip: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/inference-processor.html
+const inferenceProcessorDefinition = {
+  inference: {
+    __template: {
+      model_id: '',
+      field_map: {},
+      inference_config: {},
+    },
+    model_id: '',
+    field_map: {},
+    inference_config: {},
+    target_field: '',
     ...commonPipelineParams,
   },
 };
@@ -338,6 +419,18 @@ const setProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest-node-set-security-user-processor.html
+const setSecurityUserProcessorDefinition = {
+  set_security_user: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    properties: [''],
+    ...commonPipelineParams,
+  },
+};
+
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/split-processor.html
 const splitProcessorDefinition = {
   split: {
@@ -394,10 +487,43 @@ const uppercaseProcessorDefinition = {
   },
 };
 
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/urldecode-processor.html
+const urlDecodeProcessorDefinition = {
+  urldecode: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+    ...commonPipelineParams,
+  },
+};
+
+// Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/user-agent-processor.html
+const userAgentProcessorDefinition = {
+  user_agent: {
+    __template: {
+      field: '',
+    },
+    field: '',
+    target_field: '',
+    regex_file: '',
+    properties: [''],
+    ignore_missing: {
+      __one_of: [false, true],
+    },
+  },
+};
+
 const processorDefinition = {
   __one_of: [
     appendProcessorDefinition,
     bytesProcessorDefinition,
+    csvProcessorDefinition,
+    circleProcessorDefinition,
     convertProcessorDefinition,
     dateProcessorDefinition,
     dateIndexNameProcessorDefinition,
@@ -406,8 +532,11 @@ const processorDefinition = {
     dropProcessorDefinition,
     failProcessorDefinition,
     foreachProcessorDefinition,
+    geoipProcessorDefinition,
     grokProcessorDefinition,
     gsubProcessorDefinition,
+    htmlStripProcessorDefinition,
+    inferenceProcessorDefinition,
     joinProcessorDefinition,
     jsonProcessorDefinition,
     kvProcessorDefinition,
@@ -417,10 +546,13 @@ const processorDefinition = {
     renameProcessorDefinition,
     scriptProcessorDefinition,
     setProcessorDefinition,
+    setSecurityUserProcessorDefinition,
     splitProcessorDefinition,
     sortProcessorDefinition,
     trimProcessorDefinition,
     uppercaseProcessorDefinition,
+    urlDecodeProcessorDefinition,
+    userAgentProcessorDefinition,
   ],
 };
 

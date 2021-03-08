@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { $Keys } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -59,7 +61,7 @@ const conjunctions: Record<string, JSX.Element> = {
   ),
 };
 
-export const setupGetConjunctionSuggestions: KqlQuerySuggestionProvider = core => {
+export const setupGetConjunctionSuggestions: KqlQuerySuggestionProvider = (core) => {
   return (querySuggestionsArgs, { text, end }) => {
     let suggestions: QuerySuggestion[] | [] = [];
 

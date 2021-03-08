@@ -26,4 +26,6 @@ export interface IKibanaSocket
 |  [getPeerCertificate(detailed)](./kibana-plugin-core-server.ikibanasocket.getpeercertificate.md) |  |
 |  [getPeerCertificate(detailed)](./kibana-plugin-core-server.ikibanasocket.getpeercertificate_1.md) |  |
 |  [getPeerCertificate(detailed)](./kibana-plugin-core-server.ikibanasocket.getpeercertificate_2.md) | Returns an object representing the peer's certificate. The returned object has some properties corresponding to the field of the certificate. If detailed argument is true the full chain with issuer property will be returned, if false only the top certificate without issuer property. If the peer does not provide a certificate, it returns null. |
+|  [getProtocol()](./kibana-plugin-core-server.ikibanasocket.getprotocol.md) | Returns a string containing the negotiated SSL/TLS protocol version of the current connection. The value 'unknown' will be returned for connected sockets that have not completed the handshaking process. The value null will be returned for server sockets or disconnected client sockets. See https://www.openssl.org/docs/man1.0.2/ssl/SSL\_get\_version.html for more information. |
+|  [renegotiate(options)](./kibana-plugin-core-server.ikibanasocket.renegotiate.md) | Renegotiates a connection to obtain the peer's certificate. This cannot be used when the protocol version is TLSv1.3. |
 

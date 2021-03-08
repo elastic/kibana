@@ -1,81 +1,75 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { merge } from 'lodash';
-import {
-  Plugin as PluginClass,
-  CoreSetup,
-  CoreStart,
-  PluginInitializerContext,
-  AppMountParameters,
-} from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
-import { registerStartSingleton } from './legacy_singletons';
+import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { createMetricThresholdAlertType } from './alerting/metric_threshold';
+import { createInventoryMetricAlertType } from './alerting/inventory';
+import { getAlertType as getLogsAlertType } from './alerting/log_threshold';
 import { registerFeatures } from './register_feature';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
+import {
+  InfraClientSetupDeps,
+  InfraClientStartDeps,
+  InfraClientCoreSetup,
+  InfraClientCoreStart,
+  InfraClientPluginClass,
+} from './types';
+import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
+import { createMetricsHasData, createMetricsFetchData } from './metrics_overview_fetchers';
+import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
+import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
-import { getAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
+export class Plugin implements InfraClientPluginClass {
+  constructor(_context: PluginInitializerContext) {}
 
-export type ClientSetup = void;
-export type ClientStart = void;
+  setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
+    if (pluginsSetup.home) {
+      registerFeatures(pluginsSetup.home);
+    }
 
-export interface ClientPluginsSetup {
-  home: HomePublicPluginSetup;
-  data: DataPublicPluginSetup;
-  usageCollection: UsageCollectionSetup;
-  dataEnhanced: DataEnhancedSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
-}
+    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
+    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType());
+    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
 
-export interface ClientPluginsStart {
-  data: DataPublicPluginStart;
-  dataEnhanced: DataEnhancedStart;
-}
+    if (pluginsSetup.observability) {
+      pluginsSetup.observability.dashboard.register({
+        appName: 'infra_logs',
+        hasData: getLogsHasDataFetcher(core.getStartServices),
+        fetchData: getLogsOverviewDataFetcher(core.getStartServices),
+      });
 
-export type InfraPlugins = ClientPluginsSetup & ClientPluginsStart;
+      pluginsSetup.observability.dashboard.register({
+        appName: 'infra_metrics',
+        hasData: createMetricsHasData(core.getStartServices),
+        fetchData: createMetricsFetchData(core.getStartServices),
+      });
+    }
 
-const getMergedPlugins = (setup: ClientPluginsSetup, start: ClientPluginsStart): InfraPlugins => {
-  return merge({}, setup, start);
-};
-
-export class Plugin
-  implements PluginClass<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
-  constructor(context: PluginInitializerContext) {}
-
-  setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
-    registerFeatures(pluginsSetup.home);
-
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    pluginsSetup.embeddable.registerEmbeddableFactory(
+      LOG_STREAM_EMBEDDABLE,
+      new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
+    );
 
     core.application.register({
       id: 'logs',
       title: i18n.translate('xpack.infra.logs.pluginTitle', {
         defaultMessage: 'Logs',
       }),
-      euiIconType: 'logsApp',
-      order: 8001,
+      euiIconType: 'logoObservability',
+      order: 8100,
       appRoute: '/app/logs',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
+        // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
-        const { startApp, composeLibs, LogsRouter } = await this.downloadAssets();
+        const { renderApp } = await import('./apps/logs_app');
 
-        return startApp(
-          composeLibs(coreStart),
-          coreStart,
-          plugins,
-          params,
-          LogsRouter,
-          pluginsSetup.triggers_actions_ui
-        );
+        return renderApp(coreStart, pluginsStart, params);
       },
     });
 
@@ -84,23 +78,16 @@ export class Plugin
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
         defaultMessage: 'Metrics',
       }),
-      euiIconType: 'metricsApp',
-      order: 8000,
+      euiIconType: 'logoObservability',
+      order: 8200,
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
+        // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
-        const { startApp, composeLibs, MetricsRouter } = await this.downloadAssets();
+        const { renderApp } = await import('./apps/metrics_app');
 
-        return startApp(
-          composeLibs(coreStart),
-          coreStart,
-          plugins,
-          params,
-          MetricsRouter,
-          pluginsSetup.triggers_actions_ui
-        );
+        return renderApp(coreStart, pluginsStart, params);
       },
     });
 
@@ -112,28 +99,14 @@ export class Plugin
       title: 'infra',
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
-        const { startLegacyApp } = await import('./apps/start_legacy_app');
-        return startLegacyApp(params);
+        const { renderApp } = await import('./apps/legacy_app');
+
+        return renderApp(params);
       },
     });
   }
 
-  start(core: CoreStart, plugins: ClientPluginsStart) {
-    registerStartSingleton(core);
-  }
+  start(_core: InfraClientCoreStart, _plugins: InfraClientStartDeps) {}
 
-  private async downloadAssets() {
-    const [{ startApp }, { composeLibs }, { LogsRouter, MetricsRouter }] = await Promise.all([
-      import('./apps/start_app'),
-      import('./compose_libs'),
-      import('./routers'),
-    ]);
-
-    return {
-      startApp,
-      composeLibs,
-      LogsRouter,
-      MetricsRouter,
-    };
-  }
+  stop() {}
 }

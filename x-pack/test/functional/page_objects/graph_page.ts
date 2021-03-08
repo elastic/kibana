@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
@@ -23,8 +24,9 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
+  const browser = getService('browser');
 
   class GraphPage {
     async selectIndexPattern(pattern: string) {
@@ -36,6 +38,9 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         'aria-disabled',
         'false'
       );
+      // Need document focus to not be on `graphDatasourceButton` so its tooltip does not
+      // obscure the next intended click area. Focus the adjaecnt input instead.
+      await testSubjects.click('queryInput');
     }
 
     async clickAddField() {
@@ -83,10 +88,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       return [this.getPositionAsString(x1, y1), this.getPositionAsString(x2, y2)];
     }
 
-    async isolateEdge(edge: Edge) {
-      const from = edge.sourceNode.label;
-      const to = edge.targetNode.label;
-
+    async isolateEdge(from: string, to: string) {
       // select all nodes
       await testSubjects.click('graphSelectAll');
 
@@ -109,13 +111,6 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       await testSubjects.click('graphRemoveSelection');
     }
 
-    async clickEdge(edge: Edge) {
-      await this.stopLayout();
-      await PageObjects.common.sleep(1000);
-      await edge.element.click();
-      await this.startLayout();
-    }
-
     async stopLayout() {
       if (await testSubjects.exists('graphPauseLayout')) {
         await testSubjects.click('graphPauseLayout');
@@ -130,9 +125,12 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
 
     async getGraphObjects() {
       await this.stopLayout();
-      const graphElements = await find.allByCssSelector(
-        '#graphSvg line, #graphSvg circle, #graphSvg text.gphNode__label'
-      );
+      // read node labels directly from DOM because getVisibleText is not reliable for the way the graph is rendered
+      const nodeNames: string[] = await browser.execute(`
+        const elements = document.querySelectorAll('#graphSvg text.gphNode__label');
+        return [...elements].map(element => element.innerHTML);
+      `);
+      const graphElements = await find.allByCssSelector('#graphSvg line, #graphSvg circle');
       const nodes: Node[] = [];
       const nodePositionMap: Record<string, number> = {};
       const edges: Edge[] = [];
@@ -142,14 +140,9 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         const tagName: string = await element.getTagName();
         // check the position of the circle element
         if (tagName === 'circle') {
-          nodes.push({ circle: element, label: '' });
+          nodes.push({ circle: element, label: nodeNames[nodes.length] });
           const position = await this.getCirclePosition(element);
           nodePositionMap[position] = nodes.length - 1;
-        }
-        // get the label for the node from the text element
-        if (tagName === 'text') {
-          const text = await element.getVisibleText();
-          nodes[nodes.length - 1].label = text;
         }
       }
 
@@ -203,11 +196,11 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       await testSubjects.click('confirmSaveSavedObjectButton');
 
       // Confirm that the Graph has been saved.
-      return await testSubjects.exists('saveGraphSuccess');
+      return await testSubjects.exists('saveGraphSuccess', { timeout: 10000 });
     }
 
     async getSearchFilter() {
-      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      const searchFilter = await find.allByCssSelector('main .euiFieldSearch');
       return searchFilter[0];
     }
 

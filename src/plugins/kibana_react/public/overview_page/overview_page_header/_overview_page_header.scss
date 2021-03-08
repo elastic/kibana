@@ -1,0 +1,14 @@
+.kbnOverviewPageHeader {
+  background-color: $euiPageBackgroundColor;
+  border-bottom: $euiBorderWidthThin solid $euiColorLightShade;
+}
+
+.kbnOverviewPageHeader__inner {
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: $euiSizeXL $euiSize;
+
+  .kbnOverviewPageHeader--hasOverlap & {
+    padding-bottom: $euiSizeXL + $euiSizeL;
+  }
+}

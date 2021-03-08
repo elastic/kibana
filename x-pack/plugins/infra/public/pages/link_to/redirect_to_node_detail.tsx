@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { replaceMetricTimeInQueryString } from '../metrics/containers/with_metrics_time';
+import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
 import { getFromFromLocation, getToFromLocation } from './query_params';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LinkDescriptor } from '../../hooks/use_link_props';

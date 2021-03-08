@@ -1,86 +1,62 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from 'src/core/server';
-import { coreMock, savedObjectsTypeRegistryMock } from '../../../../../../../src/core/server/mocks';
+import type { SavedObject, SavedObjectsUpdateResponse } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+import {
+  coreMock,
+  savedObjectsClientMock,
+  savedObjectsServiceMock,
+  savedObjectsTypeRegistryMock,
+} from 'src/core/server/mocks';
 
 export const createMockSavedObjectsService = (spaces: any[] = []) => {
-  const mockSavedObjectsClientContract = ({
-    get: jest.fn((type, id) => {
-      const result = spaces.filter(s => s.id === id);
-      if (!result.length) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      }
-      return result[0];
-    }),
-    find: jest.fn(() => {
-      return {
-        total: spaces.length,
-        saved_objects: spaces,
-      };
-    }),
-    create: jest.fn((type, attributes, { id }) => {
-      if (spaces.find(s => s.id === id)) {
-        throw SavedObjectsErrorHelpers.decorateConflictError(new Error(), 'space conflict');
-      }
-      return {};
-    }),
-    update: jest.fn((type, id) => {
-      if (!spaces.find(s => s.id === id)) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      }
-      return {};
-    }),
-    delete: jest.fn((type: string, id: string) => {
-      return {};
-    }),
-    deleteByNamespace: jest.fn(),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+  const typeRegistry = savedObjectsTypeRegistryMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
+  const savedObjectsExporter = savedObjectsServiceMock.createExporter();
+  const savedObjectsImporter = savedObjectsServiceMock.createImporter();
+
+  savedObjectsClient.get.mockImplementation((type, id) => {
+    const result = spaces.filter((s) => s.id === id);
+    if (!result.length) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    return Promise.resolve(result[0]);
+  });
+  savedObjectsClient.find.mockResolvedValue({
+    page: 1,
+    per_page: 20,
+    total: spaces.length,
+    saved_objects: spaces,
+  });
+  savedObjectsClient.create.mockImplementation((_type, _attributes, options) => {
+    if (spaces.find((s) => s.id === options?.id)) {
+      throw SavedObjectsErrorHelpers.decorateConflictError(new Error(), 'space conflict');
+    }
+    return Promise.resolve({} as SavedObject);
+  });
+  savedObjectsClient.update.mockImplementation((type, id, _attributes, _options) => {
+    if (!spaces.find((s) => s.id === id)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    return Promise.resolve({} as SavedObjectsUpdateResponse);
+  });
 
   const { savedObjects } = coreMock.createStart();
-
-  const typeRegistry = savedObjectsTypeRegistryMock.create();
-  typeRegistry.getAllTypes.mockReturnValue([
-    {
-      name: 'visualization',
-      namespaceAgnostic: false,
-      hidden: false,
-      mappings: { properties: {} },
-    },
-    {
-      name: 'dashboard',
-      namespaceAgnostic: false,
-      hidden: false,
-      mappings: { properties: {} },
-    },
-    {
-      name: 'index-pattern',
-      namespaceAgnostic: false,
-      hidden: false,
-      mappings: { properties: {} },
-    },
-    {
-      name: 'globalType',
-      namespaceAgnostic: true,
-      hidden: false,
-      mappings: { properties: {} },
-    },
-    {
-      name: 'space',
-      namespaceAgnostic: true,
-      hidden: true,
-      mappings: { properties: {} },
-    },
-  ]);
-  typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
-    typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceAgnostic)
-  );
   savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
+  savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
+  savedObjects.createExporter.mockReturnValue(savedObjectsExporter);
+  savedObjects.createImporter.mockReturnValue(savedObjectsImporter);
 
-  savedObjects.getScopedClient.mockReturnValue(mockSavedObjectsClientContract);
-
-  return savedObjects;
+  return {
+    savedObjects,
+    typeRegistry,
+    savedObjectsClient,
+    savedObjectsExporter,
+    savedObjectsImporter,
+  };
 };

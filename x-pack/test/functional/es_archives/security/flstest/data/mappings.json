@@ -3,6 +3,15 @@
   "value": {
     "index": "flstest",
     "mappings": {
+      "runtime": {
+        "runtime_customer_ssn": {
+          "type": "keyword",
+          "script": {
+            "lang": "painless",
+            "source": "if (doc['customer_ssn'].size() !== 0) { return emit(doc['customer_ssn'].value + ' calculated at runtime') }"
+          }
+        }
+      },
       "properties": {
         "customer_name": {
           "fields": {
@@ -29,7 +38,8 @@
               "type": "keyword"
             }
           },
-          "type": "text"
+          "type": "text",
+          "fielddata": true
         }
       }
     },

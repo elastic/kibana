@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { InfraSources } from './sources';
 
 describe('the InfraSources lib', () => {
@@ -29,7 +31,9 @@ describe('the InfraSources lib', () => {
         },
       });
 
-      expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
+      expect(
+        await sourcesLib.getSourceConfiguration(request.core.savedObjects.client, 'TEST_ID')
+      ).toMatchObject({
         id: 'TEST_ID',
         version: 'foo',
         updatedAt: 946684800000,
@@ -74,7 +78,9 @@ describe('the InfraSources lib', () => {
         },
       });
 
-      expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
+      expect(
+        await sourcesLib.getSourceConfiguration(request.core.savedObjects.client, 'TEST_ID')
+      ).toMatchObject({
         id: 'TEST_ID',
         version: 'foo',
         updatedAt: 946684800000,
@@ -104,7 +110,9 @@ describe('the InfraSources lib', () => {
         attributes: {},
       });
 
-      expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
+      expect(
+        await sourcesLib.getSourceConfiguration(request.core.savedObjects.client, 'TEST_ID')
+      ).toMatchObject({
         id: 'TEST_ID',
         version: 'foo',
         updatedAt: 946684800000,

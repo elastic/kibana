@@ -1,30 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { Adapters, InspectorSession } from '../../inspector/public';
-import { ExpressionRenderHandler } from './render';
+import { defaults } from 'lodash';
+import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
-import { getInspector, getExpressionsService } from './services';
 import { ExecutionContract } from '../common/execution/execution_contract';
+
+import { ExpressionRenderHandler } from './render';
+import { getExpressionsService } from './services';
 
 type Data = any;
 
@@ -55,25 +46,28 @@ export class ExpressionLoader {
     // as loading$ could emit straight away in the constructor
     // and we want to notify subscribers about it, but all subscriptions will happen later
     this.loading$ = this.loadingSubject.asObservable().pipe(
-      filter(_ => _ === true),
+      filter((_) => _ === true),
       map(() => void 0)
     );
 
     this.renderHandler = new ExpressionRenderHandler(element, {
       onRenderError: params && params.onRenderError,
+      renderMode: params?.renderMode,
+      syncColors: params?.syncColors,
+      hasCompatibleActions: params?.hasCompatibleActions,
     });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;
     this.events$ = this.renderHandler.events$;
 
-    this.update$.subscribe(value => {
+    this.update$.subscribe((value) => {
       if (value) {
         const { newExpression, newParams } = value;
         this.update(newExpression, newParams);
       }
     });
 
-    this.data$.subscribe(data => {
+    this.data$.subscribe((data) => {
       this.render(data);
     });
 
@@ -120,15 +114,6 @@ export class ExpressionLoader {
     return this.renderHandler.getElement();
   }
 
-  openInspector(title: string): InspectorSession | undefined {
-    const inspector = this.inspect();
-    if (inspector) {
-      return getInspector().open(inspector, {
-        title,
-      });
-    }
-  }
-
   inspect(): Adapters | undefined {
     return this.execution ? (this.execution.inspect() as Adapters) : undefined;
   }
@@ -153,11 +138,14 @@ export class ExpressionLoader {
     }
     this.setParams(params);
     this.execution = getExpressionsService().execute(expression, params.context, {
-      search: params.searchContext,
+      searchContext: params.searchContext,
       variables: params.variables || {},
       inspectorAdapters: params.inspectorAdapters,
+      searchSessionId: params.searchSessionId,
+      debug: params.debug,
+      syncColors: params.syncColors,
     });
-    if (!params.inspectorAdapters) params.inspectorAdapters = this.execution.inspect() as Adapters;
+
     const prevDataHandler = this.execution;
     const data = await prevDataHandler.getData();
     if (this.execution !== prevDataHandler) {
@@ -176,7 +164,7 @@ export class ExpressionLoader {
     }
 
     if (params.searchContext) {
-      this.params.searchContext = _.defaults(
+      this.params.searchContext = defaults(
         {},
         params.searchContext,
         this.params.searchContext || {}
@@ -188,6 +176,14 @@ export class ExpressionLoader {
     if (params.variables && this.params) {
       this.params.variables = params.variables;
     }
+    if (params.searchSessionId && this.params) {
+      this.params.searchSessionId = params.searchSessionId;
+    }
+    this.params.syncColors = params.syncColors;
+    this.params.debug = Boolean(params.debug);
+
+    this.params.inspectorAdapters = (params.inspectorAdapters ||
+      this.execution?.inspect()) as Adapters;
   }
 }
 

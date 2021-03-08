@@ -1,37 +1,29 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { get, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../es_query';
+type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
-  filter: string,
+  filter: string | KueryNode,
   indexMapping: IndexMapping
 ): KueryNode | undefined => {
-  if (filter && filter.length > 0 && indexMapping) {
-    const filterKueryNode = esKuery.fromKueryExpression(filter);
+  if (filter && indexMapping) {
+    const filterKueryNode =
+      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : filter;
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,
@@ -48,22 +40,22 @@ export const validateConvertFilterToKueryNode = (
       );
     }
 
-    if (validationFilterKuery.some(obj => obj.error != null)) {
+    if (validationFilterKuery.some((obj) => obj.error != null)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         validationFilterKuery
-          .filter(obj => obj.error != null)
-          .map(obj => obj.error)
+          .filter((obj) => obj.error != null)
+          .map((obj) => obj.error)
           .join('\n')
       );
     }
 
-    validationFilterKuery.forEach(item => {
+    validationFilterKuery.forEach((item) => {
       const path: string[] = item.astPath.length === 0 ? [] : item.astPath.split('.');
       const existingKueryNode: KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
-        const itemType = allowedTypes.filter(t => t === item.type);
+        const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
           set(
             filterKueryNode,
@@ -213,7 +205,35 @@ export const hasFilterKeyError = (
   return null;
 };
 
-const fieldDefined = (indexMappings: IndexMapping, key: string) => {
+export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
   const mappingKey = 'properties.' + key.split('.').join('.properties.');
-  return get(indexMappings, mappingKey) != null;
+  if (get(indexMappings, mappingKey) != null) {
+    return true;
+  }
+
+  // If the `mappingKey` does not match a valid path, before returning false,
+  // we want to check and see if the intended path was for a multi-field
+  // such as `x.attributes.field.text` where `field` is mapped to both text
+  // and keyword
+  const propertiesAttribute = 'properties';
+  const indexOfLastProperties = mappingKey.lastIndexOf(propertiesAttribute);
+  const fieldMapping = mappingKey.substr(0, indexOfLastProperties);
+  const fieldType = mappingKey.substr(
+    mappingKey.lastIndexOf(propertiesAttribute) + `${propertiesAttribute}.`.length
+  );
+  const mapping = `${fieldMapping}fields.${fieldType}`;
+  if (get(indexMappings, mapping) != null) {
+    return true;
+  }
+
+  // If the path is for a flattned type field, we'll assume the mappings are defined.
+  const keys = key.split('.');
+  for (let i = 0; i < keys.length; i++) {
+    const path = `properties.${keys.slice(0, i + 1).join('.properties.')}`;
+    if (get(indexMappings, path)?.type === 'flattened') {
+      return true;
+    }
+  }
+
+  return false;
 };

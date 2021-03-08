@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/pie default 1`] = `
+<div
+  style={
+    Object {
+      "height": "200px",
+      "width": "200px",
+    }
+  }
+>
+   
+</div>
+`;
+
+exports[`Storyshots renderers/pie with legend 1`] = `
+<div
+  style={
+    Object {
+      "height": "200px",
+      "width": "200px",
+    }
+  }
+>
+   
+</div>
+`;

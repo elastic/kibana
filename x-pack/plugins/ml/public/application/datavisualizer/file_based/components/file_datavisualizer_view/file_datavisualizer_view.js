@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -20,17 +21,15 @@ import { EditFlyout } from '../edit_flyout';
 import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
 import {
-  getMaxBytes,
+  DEFAULT_LINES_TO_SAMPLE,
   readFile,
   createUrlOverrides,
   processResults,
-  reduceData,
   hasImportPermission,
 } from '../utils';
+import { getFileUpload } from '../../../../util/dependency_cache';
 
 import { MODE } from './constants';
-
-const UPLOAD_SIZE_MB = 5;
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -40,6 +39,7 @@ export class FileDataVisualizerView extends Component {
       files: {},
       fileName: '',
       fileContents: '',
+      data: [],
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
@@ -57,8 +57,10 @@ export class FileDataVisualizerView extends Component {
 
     this.overrides = {};
     this.previousOverrides = {};
-    this.originalSettings = {};
-    this.maxFileUploadBytes = getMaxBytes();
+    this.originalSettings = {
+      linesToSample: DEFAULT_LINES_TO_SAMPLE,
+    };
+    this.maxFileUploadBytes = getFileUpload().getMaxBytes();
   }
 
   async componentDidMount() {
@@ -69,7 +71,7 @@ export class FileDataVisualizerView extends Component {
     this.setState({ hasPermissionToImport });
   }
 
-  onFilePickerChange = files => {
+  onFilePickerChange = (files) => {
     this.overrides = {};
 
     this.setState(
@@ -79,6 +81,7 @@ export class FileDataVisualizerView extends Component {
         loaded: false,
         fileName: '',
         fileContents: '',
+        data: [],
         fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
@@ -97,15 +100,15 @@ export class FileDataVisualizerView extends Component {
   async loadFile(file) {
     if (file.size <= this.maxFileUploadBytes) {
       try {
-        const fileContents = await readFile(file);
-        const data = fileContents.data;
+        const { data, fileContents } = await readFile(file);
         this.setState({
-          fileContents: data,
+          data,
+          fileContents,
           fileName: file.name,
           fileSize: file.size,
         });
 
-        await this.loadSettings(data);
+        await this.analyzeFile(fileContents);
       } catch (error) {
         this.setState({
           loaded: false,
@@ -124,18 +127,13 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  async loadSettings(data, overrides, isRetry = false) {
+  async analyzeFile(fileContents, overrides, isRetry = false) {
     try {
-      // reduce the amount of data being sent to the endpoint
-      // 5MB should be enough to contain 1000 lines
-      const lessData = reduceData(data, UPLOAD_SIZE_MB);
-      console.log('overrides', overrides);
-      const { analyzeFile } = ml.fileDatavisualizer;
-      const resp = await analyzeFile(lessData, overrides);
+      const resp = await ml.fileDatavisualizer.analyzeFile(fileContents, overrides);
       const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;
 
-      this.previousOverrides = this.overrides;
+      this.previousOverrides = overrides;
       this.overrides = {};
 
       if (serverSettings.format === 'xml') {
@@ -153,8 +151,8 @@ export class FileDataVisualizerView extends Component {
         // if no overrides were used, store all the settings returned from the endpoint
         this.originalSettings = serverSettings;
       } else {
-        Object.keys(serverOverrides).forEach(o => {
-          const camelCaseO = o.replace(/_\w/g, m => m[1].toUpperCase());
+        Object.keys(serverOverrides).forEach((o) => {
+          const camelCaseO = o.replace(/_\w/g, (m) => m[1].toUpperCase());
           this.overrides[camelCaseO] = serverOverrides[o];
         });
 
@@ -162,7 +160,7 @@ export class FileDataVisualizerView extends Component {
         // e.g. changing the name of the time field which is also the time field
         // will cause the timestamp_field setting to change.
         // if any have changed, update the originalSettings value
-        Object.keys(serverSettings).forEach(o => {
+        Object.keys(serverSettings).forEach((o) => {
           const value = serverSettings[o];
           if (
             this.overrides[o] === undefined &&
@@ -191,14 +189,13 @@ export class FileDataVisualizerView extends Component {
         serverError: error,
       });
 
-      // as long as the previous overrides are different to the current overrides,
       // reload the results with the previous overrides
-      if (overrides !== undefined && isEqual(this.previousOverrides, overrides) === false) {
+      if (isRetry === false) {
         this.setState({
           loading: true,
           loaded: false,
         });
-        this.loadSettings(data, this.previousOverrides, true);
+        this.analyzeFile(fileContents, this.previousOverrides, true);
       }
     }
   }
@@ -231,8 +228,7 @@ export class FileDataVisualizerView extends Component {
     this.setState({ bottomBarVisible: false });
   };
 
-  setOverrides = overrides => {
-    console.log('setOverrides', overrides);
+  setOverrides = (overrides) => {
     this.setState(
       {
         loading: true,
@@ -240,16 +236,21 @@ export class FileDataVisualizerView extends Component {
       },
       () => {
         const formattedOverrides = createUrlOverrides(overrides, this.originalSettings);
-        this.loadSettings(this.state.fileContents, formattedOverrides);
+        this.analyzeFile(this.state.fileContents, formattedOverrides);
       }
     );
   };
 
-  changeMode = mode => {
+  changeMode = (mode) => {
     this.setState({ mode });
   };
 
   onCancel = () => {
+    this.overrides = {};
+    this.previousOverrides = {};
+    this.originalSettings = {
+      linesToSample: DEFAULT_LINES_TO_SAMPLE,
+    };
     this.changeMode(MODE.READ);
     this.onFilePickerChange([]);
   };
@@ -261,6 +262,7 @@ export class FileDataVisualizerView extends Component {
       results,
       explanation,
       fileContents,
+      data,
       fileName,
       fileSize,
       fileTooLarge,
@@ -281,7 +283,7 @@ export class FileDataVisualizerView extends Component {
     return (
       <div>
         {mode === MODE.READ && (
-          <React.Fragment>
+          <>
             {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
 
             {loading && <LoadingPanel />}
@@ -291,10 +293,14 @@ export class FileDataVisualizerView extends Component {
             )}
 
             {fileCouldNotBeRead && loading === false && (
-              <React.Fragment>
-                <FileCouldNotBeRead error={serverError} loaded={loaded} />
+              <>
+                <FileCouldNotBeRead
+                  error={serverError}
+                  loaded={loaded}
+                  showEditFlyout={this.showEditFlyout}
+                />
                 <EuiSpacer size="l" />
-              </React.Fragment>
+              </>
             )}
 
             {loaded && (
@@ -303,8 +309,8 @@ export class FileDataVisualizerView extends Component {
                 explanation={explanation}
                 fileName={fileName}
                 data={fileContents}
-                showEditFlyout={() => this.showEditFlyout()}
-                showExplanationFlyout={() => this.showExplanationFlyout()}
+                showEditFlyout={this.showEditFlyout}
+                showExplanationFlyout={this.showExplanationFlyout}
                 disableButtons={isEditFlyoutVisible || isExplanationFlyoutVisible}
               />
             )}
@@ -322,23 +328,25 @@ export class FileDataVisualizerView extends Component {
             )}
 
             {bottomBarVisible && loaded && (
-              <BottomBar
-                mode={MODE.READ}
-                onChangeMode={this.changeMode}
-                onCancel={this.onCancel}
-                disableImport={hasPermissionToImport === false}
-              />
+              <>
+                <BottomBar
+                  mode={MODE.READ}
+                  onChangeMode={this.changeMode}
+                  onCancel={this.onCancel}
+                  disableImport={hasPermissionToImport === false}
+                />
+                <BottomPadding />
+              </>
             )}
-
-            <BottomPadding />
-          </React.Fragment>
+          </>
         )}
         {mode === MODE.IMPORT && (
-          <React.Fragment>
+          <>
             <ImportView
               results={results}
               fileName={fileName}
               fileContents={fileContents}
+              data={data}
               indexPatterns={this.props.indexPatterns}
               kibanaConfig={this.props.kibanaConfig}
               showBottomBar={this.showBottomBar}
@@ -346,15 +354,16 @@ export class FileDataVisualizerView extends Component {
             />
 
             {bottomBarVisible && (
-              <BottomBar
-                mode={MODE.IMPORT}
-                onChangeMode={this.changeMode}
-                onCancel={this.onCancel}
-              />
+              <>
+                <BottomBar
+                  mode={MODE.IMPORT}
+                  onChangeMode={this.changeMode}
+                  onCancel={this.onCancel}
+                />
+                <BottomPadding />
+              </>
             )}
-
-            <BottomPadding />
-          </React.Fragment>
+          </>
         )}
       </div>
     );
@@ -364,10 +373,10 @@ export class FileDataVisualizerView extends Component {
 function BottomPadding() {
   // padding for the BottomBar
   return (
-    <React.Fragment>
+    <>
       <EuiSpacer size="m" />
       <EuiSpacer size="l" />
       <EuiSpacer size="l" />
-    </React.Fragment>
+    </>
   );
 }

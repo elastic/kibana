@@ -15,25 +15,43 @@
 */
 def withDefaultPrComments(closure) {
   catchErrors {
+    // kibanaPipeline.notifyOnError() needs to know if comments are enabled, so lets track it with a global
+    // isPr() just ensures this functionality is skipped for non-PR builds
+    buildState.set('PR_COMMENTS_ENABLED', isPr())
     catchErrors {
       closure()
     }
+    sendComment(true)
+  }
+}
 
-    if (!params.ENABLE_GITHUB_PR_COMMENTS || !isPr()) {
-      return
-    }
+def sendComment(isFinal = false) {
+  if (!buildState.get('PR_COMMENTS_ENABLED')) {
+    return
+  }
 
-    def status = buildUtils.getBuildStatus()
-    if (status == "ABORTED") {
-      return;
-    }
+  def status = buildUtils.getBuildStatus()
+  if (status == "ABORTED") {
+    return
+  }
 
-    def lastComment = getLatestBuildComment()
-    def info = getLatestBuildInfo(lastComment) ?: [:]
-    info.builds = (info.builds ?: []).takeRight(5) // Rotate out old builds
+  def lastComment = getLatestBuildComment()
+  def info = getLatestBuildInfo(lastComment) ?: [:]
+  info.builds = (info.builds ?: []).takeRight(5) // Rotate out old builds
 
-    def message = getNextCommentMessage(info)
-    postComment(message)
+  // If two builds are running at the same time, the first one should not post a comment after the second one
+  if (info.number && info.number.toInteger() > env.BUILD_NUMBER.toInteger()) {
+    return
+  }
+
+  def shouldUpdateComment = !!info.builds.find { it.number == env.BUILD_NUMBER }
+
+  def message = getNextCommentMessage(info, isFinal)
+
+  if (shouldUpdateComment) {
+    updateComment(lastComment.id, message)
+  } else {
+    createComment(message)
 
     if (lastComment && lastComment.user.login == 'kibanamachine') {
       deleteComment(lastComment.id)
@@ -66,16 +84,7 @@ def getLatestBuildInfo() {
 }
 
 def getLatestBuildInfo(comment) {
-  return comment ? getBuildInfoFromComment(comment) : null
-}
-
-def createBuildInfo() {
-  return [
-    status: buildUtils.getBuildStatus(),
-    url: env.BUILD_URL,
-    number: env.BUILD_NUMBER,
-    commit: getCommitHash()
-  ]
+  return comment ? getBuildInfoFromComment(comment.body) : null
 }
 
 def getHistoryText(builds) {
@@ -137,24 +146,58 @@ def getTestFailuresMessage() {
   return messages.join("\n")
 }
 
-def getNextCommentMessage(previousCommentInfo = [:]) {
+def getBuildStatusIncludingMetrics() {
+  def status = buildUtils.getBuildStatus()
+
+  if (status == 'SUCCESS' && shouldCheckCiMetricSuccess() && !ciStats.getMetricsSuccess()) {
+    return 'FAILURE'
+  }
+
+  return status
+}
+
+def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   def info = previousCommentInfo ?: [:]
   info.builds = previousCommentInfo.builds ?: []
 
-  def messages = []
-  def status = buildUtils.getBuildStatus()
+  // When we update an in-progress comment, we need to remove the old version from the history
+  info.builds = info.builds.findAll { it.number != env.BUILD_NUMBER }
 
-  if (status == 'SUCCESS') {
+  def messages = []
+
+  def status = isFinal
+    ? getBuildStatusIncludingMetrics()
+    : buildUtils.getBuildStatus()
+
+  def storybooksUrl = buildState.get('storybooksUrl')
+  def storybooksMessage = storybooksUrl ? "* [Storybooks Preview](${storybooksUrl})" : "* Storybooks not built"
+
+  if (!isFinal) {
+    storybooksMessage = storybooksUrl ? storybooksMessage : "* Storybooks not built yet"
+
+    def failuresPart = status != 'SUCCESS' ? ', with failures' : ''
+    messages << """
+      ## :hourglass_flowing_sand: Build in-progress${failuresPart}
+      * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
+      * Commit: ${getCommitHash()}
+      ${storybooksMessage}
+      * This comment will update when the build is complete
+    """
+  } else if (status == 'SUCCESS') {
     messages << """
       ## :green_heart: Build Succeeded
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${storybooksMessage}
+      ${getDocsChangesLink()}
     """
   } else if(status == 'UNSTABLE') {
     def message = """
       ## :yellow_heart: Build succeeded, but was flaky
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${storybooksMessage}
+      ${getDocsChangesLink()}
     """.stripIndent()
 
     def failures = retryable.getFlakyFailures()
@@ -169,10 +212,14 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       ## :broken_heart: Build Failed
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${storybooksMessage}
       * [Pipeline Steps](${env.BUILD_URL}flowGraphTable) (look for red circles / failed steps)
       * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
+      ${getDocsChangesLink()}
     """
+  }
 
+  if (status != 'SUCCESS' && status != 'UNSTABLE') {
     try {
       def steps = getFailedSteps()
       if (steps?.size() > 0) {
@@ -187,13 +234,29 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
 
   messages << getTestFailuresMessage()
 
+  if (isFinal) {
+    messages << ciStats.getMetricsReport()
+  }
+
   if (info.builds && info.builds.size() > 0) {
     messages << getHistoryText(info.builds)
   }
 
   messages << "To update your PR or re-run it, just comment with:\n`@elasticmachine merge upstream`"
 
-  info.builds << createBuildInfo()
+  catchErrors {
+    def assignees = getAssignees()
+    if (assignees) {
+      messages << "cc " + assignees.collect { "@${it}"}.join(" ")
+    }
+  }
+
+  info.builds << [
+    status: status,
+    url: env.BUILD_URL,
+    number: env.BUILD_NUMBER,
+    commit: getCommitHash()
+  ]
 
   messages << """
     <!--PIPELINE
@@ -207,7 +270,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
     .join("\n\n")
 }
 
-def postComment(message) {
+def createComment(message) {
   if (!isPr()) {
     error "Trying to post a GitHub PR comment on a non-PR or non-elastic PR build"
   }
@@ -223,6 +286,20 @@ def getComments() {
   }
 }
 
+def updateComment(commentId, message) {
+  if (!isPr()) {
+    error "Trying to post a GitHub PR comment on a non-PR or non-elastic PR build"
+  }
+
+  withGithubCredentials {
+    def path = "repos/elastic/kibana/issues/comments/${commentId}"
+    def json = toJSON([ body: message ]).toString()
+
+    def resp = githubApi([ path: path ], [ method: "POST", data: json, headers: [ "X-HTTP-Method-Override": "PATCH" ] ])
+    return toJSON(resp)
+  }
+}
+
 def deleteComment(commentId) {
   withGithubCredentials {
     def path = "repos/elastic/kibana/issues/comments/${commentId}"
@@ -234,8 +311,53 @@ def getCommitHash() {
   return env.ghprbActualCommit
 }
 
+def getDocsChangesLink() {
+  def url = "https://kibana_${env.ghprbPullId}.docs-preview.app.elstc.co/diff"
+
+  try {
+    // httpRequest throws on status codes >400 and failures
+    def resp = httpRequest([ method: "GET", url: url ])
+
+    if (resp.contains("There aren't any differences!")) {
+      return ""
+    }
+
+    return "* [Documentation Changes](${url})"
+  } catch (ex) {
+    print "Failed to reach ${url}"
+    buildUtils.printStacktrace(ex)
+  }
+
+  return ""
+}
+
 def getFailedSteps() {
   return jenkinsApi.getFailedSteps()?.findAll { step ->
     step.displayName != 'Check out from version control'
   }
+}
+
+def shouldCheckCiMetricSuccess() {
+  // disable ciMetrics success check when a PR is targetting a non-tracked branch
+  if (buildState.has('checkoutInfo') && !buildState.get('checkoutInfo').targetsTrackedBranch) {
+    return false
+  }
+
+  return true
+}
+
+def getPR() {
+  withGithubCredentials {
+    def path = "repos/elastic/kibana/pulls/${env.ghprbPullId}"
+    return githubApi.get(path)
+  }
+}
+
+def getAssignees() {
+  def pr = getPR()
+  if (!pr) {
+    return []
+  }
+
+  return pr.assignees.collect { it.login }
 }

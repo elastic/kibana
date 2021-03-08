@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
-import {
-  LocationDurationLine,
-  MonitorDurationResult,
-} from '../../../../../legacy/plugins/uptime/common/types';
+import { LocationDurationLine, MonitorDurationResult } from '../../../common/types';
+import { QUERY, UNNAMED_LOCATION } from '../../../common/constants';
 
 export interface GetMonitorChartsParams {
   /** @member monitorId ID value for the selected monitor */
@@ -20,62 +18,38 @@ export interface GetMonitorChartsParams {
   dateEnd: string;
 }
 
-const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
-  let up = null;
-  let down = null;
-
-  buckets.forEach((bucket: any) => {
-    if (bucket.key === 'up') {
-      up = bucket.doc_count;
-    } else if (bucket.key === 'down') {
-      down = bucket.doc_count;
-    }
-  });
-
-  return {
-    x: time,
-    up,
-    down,
-    total: docCount,
-  };
-};
-
 /**
  * Fetches data used to populate monitor charts
  */
 export const getMonitorDurationChart: UMElasticsearchQueryFn<
   GetMonitorChartsParams,
   MonitorDurationResult
-> = async ({ callES, dynamicSettings, dateStart, dateEnd, monitorId }) => {
+> = async ({ uptimeEsClient, dateStart, dateEnd, monitorId }) => {
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
-            { term: { 'monitor.id': monitorId } },
-            { term: { 'monitor.status': 'up' } },
-          ],
-        },
+    query: {
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
+          { term: { 'monitor.id': monitorId } },
+          { range: { 'monitor.duration.us': { gt: 0 } } },
+        ],
       },
-      size: 0,
-      aggs: {
-        timeseries: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: QUERY.DEFAULT_BUCKET_COUNT,
-          },
-          aggs: {
-            location: {
-              terms: {
-                field: 'observer.geo.name',
-                missing: 'N/A',
-              },
-              aggs: {
-                status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
-                duration: { stats: { field: 'monitor.duration.us' } },
-              },
+    },
+    size: 0,
+    aggs: {
+      timeseries: {
+        auto_date_histogram: {
+          field: '@timestamp',
+          buckets: QUERY.DEFAULT_BUCKET_COUNT,
+        },
+        aggs: {
+          location: {
+            terms: {
+              field: 'observer.geo.name',
+              missing: UNNAMED_LOCATION,
+            },
+            aggs: {
+              duration: { stats: { field: 'monitor.duration.us' } },
             },
           },
         },
@@ -83,7 +57,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
     },
   };
 
-  const result = await callES('search', params);
+  const { body: result } = await uptimeEsClient.search({ body: params });
 
   const dateHistogramBuckets: any[] = result?.aggregations?.timeseries?.buckets ?? [];
 
@@ -94,15 +68,10 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
    *
    * The third list is for an area chart expressing a range, and it requires an (x,y,y0) structure,
    * where y0 is the min value for the point and y is the max.
-   *
-   * Additionally, we supply the maximum value for duration and status, so the corresponding charts know
-   * what the domain size should be.
    */
+
   const monitorChartsData: MonitorDurationResult = {
     locationDurationLines: [],
-    status: [],
-    durationMaxValue: 0,
-    statusMaxCount: 0,
   };
 
   /**
@@ -119,9 +88,9 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
   // a set of all the locations found for this result
   const resultLocations = new Set<string>();
   const linesByLocation: { [key: string]: LocationDurationLine } = {};
-  dateHistogramBuckets.forEach(dateHistogramBucket => {
+
+  dateHistogramBuckets.forEach((dateHistogramBucket) => {
     const x = dateHistogramBucket.key;
-    const docCount = dateHistogramBucket?.doc_count ?? 0;
     // a set of all the locations for the current bucket
     const bucketLocations = new Set<string>();
 
@@ -147,7 +116,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
     // if there are more lines in the result than are represented in the current bucket,
     // we must add null entries
     if (dateHistogramBucket.location.buckets.length < resultLocations.size) {
-      resultLocations.forEach(resultLocation => {
+      resultLocations.forEach((resultLocation) => {
         // the current bucket had no value for this location, insert a null value
         if (!bucketLocations.has(resultLocation)) {
           const locationLine = monitorChartsData.locationDurationLines.find(
@@ -161,10 +130,6 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
         }
       });
     }
-
-    monitorChartsData.status.push(
-      formatStatusBuckets(x, dateHistogramBucket?.status?.buckets ?? [], docCount)
-    );
   });
 
   return monitorChartsData;

@@ -1,49 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { IconType } from '@elastic/eui';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
-// @ts-ignore
 import { BaseVisType } from './base_vis_type';
-// @ts-ignore
-import { ReactVisType } from './react_vis_type';
-
-export interface VisType {
-  name: string;
-  title: string;
-  description?: string;
-  visualization: any;
-  isAccessible?: boolean;
-  requestHandler: string | unknown;
-  responseHandler: string | unknown;
-  icon?: IconType;
-  image?: string;
-  stage: 'experimental' | 'beta' | 'production';
-  requiresSearch: boolean;
-  hidden: boolean;
-
-  // Since we haven't typed everything here yet, we basically "any" the rest
-  // of that interface. This should be removed as soon as this type definition
-  // has been completed. But that way we at least have typing for a couple of
-  // properties on that type.
-  [key: string]: any;
-}
+import { VisTypeDefinition, VisGroups } from './types';
 
 /**
  * Vis Types Service
@@ -51,37 +16,29 @@ export interface VisType {
  * @internal
  */
 export class TypesService {
-  private types: Record<string, VisType> = {};
+  private types: Record<string, BaseVisType<any>> = {};
   private unregisteredHiddenTypes: string[] = [];
 
-  public setup() {
-    const registerVisualization = (registerFn: () => VisType) => {
-      const visDefinition = registerFn();
-      if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
-        visDefinition.hidden = true;
-      }
+  private registerVisualization<TVisParam>(visDefinition: BaseVisType<TVisParam>) {
+    if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
+      visDefinition.hidden = true;
+    }
 
-      if (this.types[visDefinition.name]) {
-        throw new Error('type already exists!');
-      }
-      this.types[visDefinition.name] = visDefinition;
-    };
+    if (this.types[visDefinition.name]) {
+      throw new Error('type already exists!');
+    }
+    this.types[visDefinition.name] = visDefinition;
+  }
+
+  public setup() {
     return {
       /**
        * registers a visualization type
-       * @param {VisType} config - visualization type definition
+       * @param config - visualization type definition
        */
-      createBaseVisualization: (config: any) => {
+      createBaseVisualization: <TVisParams>(config: VisTypeDefinition<TVisParams>): void => {
         const vis = new BaseVisType(config);
-        registerVisualization(() => vis);
-      },
-      /**
-       * registers a visualization which uses react for rendering
-       * @param {VisType} config - visualization type definition
-       */
-      createReactVisualization: (config: any) => {
-        const vis = new ReactVisType(config);
-        registerVisualization(() => vis);
+        this.registerVisualization(vis);
       },
       /**
        * registers a visualization alias
@@ -93,7 +50,7 @@ export class TypesService {
        * allows to hide specific visualization types from create visualization dialog
        * @param {string[]} typeNames - list of type ids to hide
        */
-      hideTypes: (typeNames: string[]) => {
+      hideTypes: (typeNames: string[]): void => {
         typeNames.forEach((name: string) => {
           if (this.types[name]) {
             this.types[name].hidden = true;
@@ -111,19 +68,34 @@ export class TypesService {
        * returns specific visualization or undefined if not found
        * @param {string} visualization - id of visualization to return
        */
-      get: (visualization: string) => {
+      get: <TVisParams>(visualization: string): BaseVisType<TVisParams> | undefined => {
         return this.types[visualization];
       },
       /**
        * returns all registered visualization types
        */
-      all: () => {
+      all: (): BaseVisType[] => {
         return [...Object.values(this.types)];
       },
       /**
        * returns all registered aliases
        */
       getAliases: visTypeAliasRegistry.get,
+      /**
+       * unregisters a visualization alias by its name
+       * alias is a visualization type without implementation, it just redirects somewhere in kibana
+       * @param {string} visTypeAliasName - visualization alias name
+       */
+      unRegisterAlias: visTypeAliasRegistry.remove,
+      /**
+       * returns all visualizations of specific group
+       * @param {VisGroups} group - group type (aggbased | other | tools)
+       */
+      getByGroup: (group: VisGroups) => {
+        return Object.values(this.types).filter((type) => {
+          return type.group === group;
+        });
+      },
     };
   }
 
@@ -138,6 +110,3 @@ export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
 export { VisTypeAlias };
-
-/** @public static code */
-// TODO once items are moved from ui/vis into this service

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { OverviewFilters } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { OverviewFilters } from '../../../common/runtime_types';
 import { generateFilterAggs } from './generate_filter_aggs';
 
 export interface GetFilterBarParams {
@@ -33,40 +34,20 @@ export const combineRangeWithFilters = (
       },
     },
   };
-  if (!filters) return range;
+  if (!filters?.bool) return range;
   const clientFiltersList = Array.isArray(filters?.bool?.filter ?? {})
     ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
       filters.bool.filter
     : // i.e. {"bool":{"filter":[ ...some listed filter objects ]}}
-      Object.keys(filters?.bool?.filter ?? {}).map(key => ({
+      Object.keys(filters?.bool?.filter ?? {}).map((key) => ({
         ...filters?.bool?.filter?.[key],
       }));
   filters.bool.filter = [...clientFiltersList, range];
   return filters;
 };
 
-type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
-
-export const extractFilterAggsResults = (
-  responseAggregations: Record<string, any>,
-  keys: SupportedFields[]
-): OverviewFilters => {
-  const values: OverviewFilters = {
-    locations: [],
-    ports: [],
-    schemes: [],
-    tags: [],
-  };
-  keys.forEach(key => {
-    const buckets = responseAggregations?.[key]?.term?.buckets ?? [];
-    values[key] = buckets.map((item: { key: string | number }) => item.key);
-  });
-  return values;
-};
-
 export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters> = async ({
-  callES,
-  dynamicSettings,
+  uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
   search,
@@ -82,17 +63,24 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
     filterOptions
   );
   const filters = combineRangeWithFilters(dateRangeStart, dateRangeEnd, search);
-  const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      size: 0,
-      query: {
-        ...filters,
-      },
-      aggs,
+  const searchBody = {
+    size: 0,
+    query: {
+      ...filters,
     },
+    aggs,
   };
 
-  const { aggregations } = await callES('search', params);
-  return extractFilterAggsResults(aggregations, ['tags', 'locations', 'ports', 'schemes']);
+  const {
+    body: { aggregations },
+  } = await uptimeEsClient.search({ body: searchBody });
+
+  const { tags, locations, ports, schemes } = aggregations ?? {};
+
+  return {
+    locations: locations?.term?.buckets.map((item) => item.key as string),
+    ports: ports?.term?.buckets.map((item) => item.key as number),
+    schemes: schemes?.term?.buckets.map((item) => item.key as string),
+    tags: tags?.term?.buckets.map((item) => item.key as string),
+  };
 };

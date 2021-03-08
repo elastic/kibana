@@ -1,46 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function hasHistoricalAgentData(setup: Setup) {
-  const { client, indices } = setup;
+  return withApmSpan('has_historical_agent_data', async () => {
+    const { apmEventClient } = setup;
 
-  const params = {
-    terminateAfter: 1,
-    index: [
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.metricsIndices'],
-      indices['apm_oss.sourcemapIndices'],
-      indices['apm_oss.transactionIndices']
-    ],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [PROCESSOR_EVENT]: [
-                  'error',
-                  'metric',
-                  'sourcemap',
-                  'transaction'
-                ]
-              }
-            }
-          ]
-        }
-      }
-    }
-  };
+    const params = {
+      terminateAfter: 1,
+      apm: {
+        events: [
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+          ProcessorEvent.transaction,
+        ],
+      },
+      body: {
+        size: 0,
+      },
+    };
 
-  const resp = await client.search(params);
-  const hasHistorialAgentData = resp.hits.total.value > 0;
-  return hasHistorialAgentData;
+    const resp = await apmEventClient.search(params);
+    return resp.hits.total.value > 0;
+  });
 }

@@ -1,29 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { withTimeout, isPromise } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginName, PluginOpaqueId } from './types';
+import { DiscoveredPlugin, PluginName } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { withTimeout } from '../../utils';
+import { PluginDependencies } from '.';
 
 const Sec = 1000;
 /** @internal */
@@ -41,23 +31,39 @@ export class PluginsSystem {
     this.plugins.set(plugin.name, plugin);
   }
 
+  public getPlugins() {
+    return [...this.plugins.values()];
+  }
+
   /**
    * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
    * @internal
    */
-  public getPluginDependencies(): ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]> {
-    // Return dependency map of opaque ids
-    return new Map(
+  public getPluginDependencies(): PluginDependencies {
+    const asNames = new Map(
+      [...this.plugins].map(([name, plugin]) => [
+        plugin.name,
+        [
+          ...new Set([
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
+          ]),
+        ].map((depId) => this.plugins.get(depId)!.name),
+      ])
+    );
+    const asOpaqueIds = new Map(
       [...this.plugins].map(([name, plugin]) => [
         plugin.opaqueId,
         [
           ...new Set([
             ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter(optPlugin => this.plugins.has(optPlugin)),
+            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
           ]),
-        ].map(depId => this.plugins.get(depId)!.opaqueId),
+        ].map((depId) => this.plugins.get(depId)!.opaqueId),
       ])
     );
+
+    return { asNames, asOpaqueIds };
   }
 
   public async setupPlugins(deps: PluginsServiceSetupDeps) {
@@ -66,15 +72,16 @@ export class PluginsSystem {
       return contracts;
     }
 
-    const sortedPlugins = this.getTopologicallySortedPluginNames();
-    this.log.info(`Setting up [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
+    const sortedPlugins = new Map(
+      [...this.getTopologicallySortedPluginNames()]
+        .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
+        .filter(([pluginName, plugin]) => plugin.includesServerPlugin)
+    );
+    this.log.info(
+      `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
+    );
 
-    for (const pluginName of sortedPlugins) {
-      const plugin = this.plugins.get(pluginName)!;
-      if (!plugin.includesServerPlugin) {
-        continue;
-      }
-
+    for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
       const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
@@ -87,14 +94,32 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      const contract = await withTimeout({
-        promise: plugin.setup(
-          createPluginSetupContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
+      let contract: unknown;
+      const contractOrPromise = plugin.setup(
+        createPluginSetupContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          this.log.warn(
+            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+        const contractMaybe = await withTimeout<any>({
+          promise: contractOrPromise,
+          timeoutMs: 10 * Sec,
+        });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
+      } else {
+        contract = contractOrPromise;
+      }
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -125,14 +150,32 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      const contract = await withTimeout({
-        promise: plugin.start(
-          createPluginStartContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
+      let contract: unknown;
+      const contractOrPromise = plugin.start(
+        createPluginStartContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          this.log.warn(
+            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+        const contractMaybe = await withTimeout({
+          promise: contractOrPromise,
+          timeoutMs: 10 * Sec,
+        });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
+      } else {
+        contract = contractOrPromise;
+      }
 
       contracts.set(pluginName, contract);
     }
@@ -152,7 +195,15 @@ export class PluginsSystem {
       const pluginName = this.satupPlugins.pop()!;
 
       this.log.debug(`Stopping plugin "${pluginName}"...`);
-      await this.plugins.get(pluginName)!.stop();
+
+      const resultMaybe = await withTimeout({
+        promise: this.plugins.get(pluginName)!.stop(),
+        timeoutMs: 30 * Sec,
+      });
+
+      if (resultMaybe?.timedout) {
+        this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+      }
     }
   }
 
@@ -161,18 +212,23 @@ export class PluginsSystem {
    */
   public uiPlugins() {
     const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
-      pluginName => this.plugins.get(pluginName)!.includesUiPlugin
+      (pluginName) => this.plugins.get(pluginName)!.includesUiPlugin
     );
     const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
-      uiPluginNames.map(pluginName => {
+      uiPluginNames.map((pluginName) => {
         const plugin = this.plugins.get(pluginName)!;
         return [
           pluginName,
           {
             id: pluginName,
             configPath: plugin.manifest.configPath,
-            requiredPlugins: plugin.manifest.requiredPlugins.filter(p => uiPluginNames.includes(p)),
-            optionalPlugins: plugin.manifest.optionalPlugins.filter(p => uiPluginNames.includes(p)),
+            requiredPlugins: plugin.manifest.requiredPlugins.filter((p) =>
+              uiPluginNames.includes(p)
+            ),
+            optionalPlugins: plugin.manifest.optionalPlugins.filter((p) =>
+              uiPluginNames.includes(p)
+            ),
+            requiredBundles: plugin.manifest.requiredBundles,
           },
         ];
       })
@@ -200,7 +256,7 @@ export class PluginsSystem {
           pluginName,
           new Set([
             ...plugin.requiredPlugins,
-            ...plugin.optionalPlugins.filter(dependency => this.plugins.has(dependency)),
+            ...plugin.optionalPlugins.filter((dependency) => this.plugins.has(dependency)),
           ]),
         ] as [PluginName, Set<PluginName>];
       })
@@ -209,7 +265,7 @@ export class PluginsSystem {
     // First, find a list of "start nodes" which have no outgoing edges. At least
     // one such node must exist in a non-empty acyclic graph.
     const pluginsWithAllDependenciesSorted = [...pluginsDependenciesGraph.keys()].filter(
-      pluginName => pluginsDependenciesGraph.get(pluginName)!.size === 0
+      (pluginName) => pluginsDependenciesGraph.get(pluginName)!.size === 0
     );
 
     const sortedPluginNames = new Set<PluginName>();

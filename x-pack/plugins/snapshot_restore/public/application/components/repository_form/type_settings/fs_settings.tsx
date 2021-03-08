@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -85,7 +86,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={location || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 location: e.target.value,
               });
@@ -129,7 +130,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!!compress}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 compress: e.target.checked,
               });
@@ -174,7 +175,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={chunkSize || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 chunkSize: e.target.value,
               });
@@ -219,7 +220,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={maxSnapshotBytesPerSec || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 maxSnapshotBytesPerSec: e.target.value,
               });
@@ -264,7 +265,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={maxRestoreBytesPerSec || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 maxRestoreBytesPerSec: e.target.value,
               });
@@ -308,7 +309,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!!readonly}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 readonly: e.target.checked,
               });

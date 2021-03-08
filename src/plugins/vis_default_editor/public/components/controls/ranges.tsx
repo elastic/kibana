@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment, useCallback, useState, useEffect } from 'react';
@@ -75,11 +64,13 @@ function RangesParamEditor({
   setValidity,
   validateRange,
 }: RangesParamEditorProps) {
-  const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
+  const [ranges, setRanges] = useState(() =>
+    value.map((range) => ({ ...range, id: generateId() }))
+  );
   const updateRanges = useCallback(
     (rangeValues: RangeValuesModel[]) => {
       // do not set internal id parameter into saved object
-      setValue(rangeValues.map(range => omit(range, 'id')));
+      setValue(rangeValues.map((range) => omit(range, 'id')));
       setRanges(rangeValues);
 
       if (setTouched) {
@@ -95,10 +86,10 @@ function RangesParamEditor({
         : updateRanges([...ranges, { id: generateId() }]),
     [addRangeValues, ranges, updateRanges]
   );
-  const onRemoveRange = (id: string) => updateRanges(ranges.filter(range => range.id !== id));
+  const onRemoveRange = (id: string) => updateRanges(ranges.filter((range) => range.id !== id));
   const onChangeRange = (id: string, key: string, newValue: string) =>
     updateRanges(
-      ranges.map(range =>
+      ranges.map((range) =>
         range.id === id
           ? {
               ...range,
@@ -121,7 +112,7 @@ function RangesParamEditor({
       value.length !== ranges.length ||
       value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
     ) {
-      setRanges(value.map(range => ({ ...range, id: generateId() })));
+      setRanges(value.map((range) => ({ ...range, id: generateId() })));
     }
   }, [ranges, value]);
 
@@ -140,7 +131,7 @@ function RangesParamEditor({
   }, [hasInvalidRange, setValidity]);
 
   return (
-    <EuiFormRow compressed fullWidth>
+    <EuiFormRow display="rowCompressed" fullWidth>
       <>
         {ranges.map(({ from, to, id }, index) => {
           const deleteBtnTitle = i18n.translate(
@@ -197,7 +188,7 @@ function RangesParamEditor({
                     data-test-subj={`${dataTestSubj}${index}__from`}
                     value={isEmpty(from) ? '' : from}
                     placeholder={hidePlaceholders ? undefined : FROM_PLACEHOLDER}
-                    onChange={ev => onChangeRange(id, 'from', ev.target.value)}
+                    onChange={(ev) => onChangeRange(id, 'from', ev.target.value)}
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isFromValid}
@@ -219,7 +210,7 @@ function RangesParamEditor({
                     data-test-subj={`${dataTestSubj}${index}__to`}
                     value={isEmpty(to) ? '' : to}
                     placeholder={hidePlaceholders ? undefined : TO_PLACEHOLDER}
-                    onChange={ev => onChangeRange(id, 'to', ev.target.value)}
+                    onChange={(ev) => onChangeRange(id, 'to', ev.target.value)}
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isToValid}

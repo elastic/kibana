@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any => {
-  const { reason, caused_by } = causedBy; // eslint-disable-line @typescript-eslint/camelcase
+  const { reason, caused_by } = causedBy; // eslint-disable-line @typescript-eslint/naming-convention
 
   if (reason) {
     accumulator.push(reason);
   }
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
   if (caused_by) {
     return extractCausedByChain(caused_by, accumulator);
   }
@@ -31,8 +31,8 @@ export const wrapEsError = (err: any, statusCodeToMessageMap: any = {}) => {
 
   const {
     error: {
-      root_cause = [], // eslint-disable-line @typescript-eslint/camelcase
-      caused_by = {}, // eslint-disable-line @typescript-eslint/camelcase
+      root_cause = [], // eslint-disable-line @typescript-eslint/naming-convention
+      caused_by = {}, // eslint-disable-line @typescript-eslint/naming-convention
     } = {},
   } = JSON.parse(response);
 

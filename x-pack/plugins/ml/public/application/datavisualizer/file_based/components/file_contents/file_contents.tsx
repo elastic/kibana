@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -60,8 +61,5 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
 };
 
 function limitByNumberOfLines(data: string, numberOfLines: number) {
-  return data
-    .split('\n')
-    .slice(0, numberOfLines)
-    .join('\n');
+  return data.split('\n').slice(0, numberOfLines).join('\n');
 }

@@ -1,0 +1,131 @@
+@import '../variables';
+@import '../mixins';
+
+.lnsDragDrop {
+  user-select: none;
+  transition: background-color $euiAnimSpeedFast ease-in-out, border-color $euiAnimSpeedFast ease-in-out;
+}
+
+.lnsDragDrop_ghost {
+  @include lnsDraggable;
+  border: $euiBorderWidthThin dashed $euiBorderColor;
+  position: absolute !important;  // sass-lint:disable-line no-important
+  margin: 0 !important;  // sass-lint:disable-line no-important
+  bottom: 100%;
+  width: 100%;
+  left: 0;
+  opacity: .9;
+  transform: translate(-12px, 8px);
+  z-index: $euiZLevel2;
+  pointer-events: none;
+  box-shadow: 0 0 0 $euiFocusRingSize $euiFocusRingColor;
+}
+
+// Draggable item
+.lnsDragDrop-isDraggable {
+  @include lnsDraggable;
+  @include lnsDragDropHover;
+
+  // Include a possible nested button like when using FieldButton
+  > .kbnFieldButton__button {
+    cursor: grab;
+  }
+
+  &:focus {
+    @include euiFocusRing;
+  }
+}
+
+// Drop area
+.lnsDragDrop-isDroppable {
+  @include lnsDroppable;
+}
+
+// Drop area when there's an item being dragged
+.lnsDragDrop-isDropTarget {
+  @include lnsDroppable;
+  @include lnsDroppableActive;
+  > * {
+    pointer-events: none;
+  }
+}
+
+.lnsDragDrop-isActiveGroup {
+  background-color: transparentize($euiColorVis0, .75);
+}
+
+// Drop area while hovering with item
+.lnsDragDrop-isActiveDropTarget {
+  @include lnsDroppableActiveHover;
+}
+
+// Drop area that is not allowed for current item
+.lnsDragDrop-isNotDroppable {
+  @include lnsDroppableNotAllowed;
+}
+
+// Drop area will be replacing existing content
+.lnsDragDrop-isReplacing {
+  &,
+  .lnsLayerPanel__triggerText {
+    text-decoration: line-through;
+  }
+}
+
+.lnsDragDrop-notCompatible {
+  background-color: $euiColorHighlight;
+  border: $euiBorderWidthThin dashed $euiBorderColor;
+  &.lnsDragDrop-isActiveDropTarget {
+    background-color: rgba(251, 208, 17, .25);
+    border-color: $euiColorVis5;
+  }
+}
+
+.lnsDragDrop__reorderableDrop {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  height: calc(100% + #{$lnsLayerPanelDimensionMargin});
+}
+
+.lnsDragDrop-translatableDrop {
+  transform: translateY(0);
+  transition: transform $euiAnimSpeedFast ease-in-out;
+  pointer-events: none;
+}
+
+.lnsDragDrop-translatableDrag {
+  transform: translateY(0);
+  transition: transform $euiAnimSpeedFast ease-in-out;
+  position: relative;
+  z-index: $euiZLevel1;
+}
+
+.lnsDragDrop__keyboardHandler {
+  top: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: $euiBorderRadius;
+
+  &:focus,
+  &:focus-within {
+    @include euiFocusRing;
+    pointer-events: none;
+  }
+}
+
+// Draggable item when it is moving
+.lnsDragDrop-isHidden {
+  opacity: 0;
+}
+
+.lnsDragDrop-isHidden-noFocus {
+  opacity: 0;
+  .lnsDragDrop__keyboardHandler {
+    &:focus,
+    &:focus-within {
+      animation: none;
+    }
+  }
+}

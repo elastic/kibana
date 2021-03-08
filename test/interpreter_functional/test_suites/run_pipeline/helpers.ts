@@ -1,25 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 import { ExpressionValue } from 'src/plugins/expressions';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+
+declare global {
+  interface Window {
+    runPipeline: (
+      expressions: string,
+      context?: ExpressionValue,
+      initialContext?: ExpressionValue
+    ) => any;
+    renderPipelineResponse: (context?: ExpressionValue) => Promise<any>;
+  }
+}
 
 export type ExpressionResult = any;
 
@@ -99,13 +99,13 @@ export function expectExpressionProvider({
         stepContext: ExpressionValue = context
       ): Promise<ExpressionResult> => {
         log.debug(`running expression ${step || expression}`);
-        return browser.executeAsync<ExpressionResult>(
-          (
-            _expression: string,
-            _currentContext: ExpressionValue & { type: string },
-            _initialContext: ExpressionValue,
-            done: (expressionResult: ExpressionResult) => void
-          ) => {
+        return browser.executeAsync<
+          ExpressionResult,
+          string,
+          ExpressionValue & { type: string },
+          ExpressionValue
+        >(
+          (_expression, _currentContext, _initialContext, done) => {
             if (!_currentContext) _currentContext = { type: 'null' };
             if (!_currentContext.type) _currentContext.type = 'null';
             return window
@@ -165,10 +165,16 @@ export function expectExpressionProvider({
         log.debug('starting to render');
         const result = await browser.executeAsync<any>(
           (_context: ExpressionResult, done: (renderResult: any) => void) =>
-            window.renderPipelineResponse(_context).then(renderResult => {
-              done(renderResult);
-              return renderResult;
-            }),
+            window
+              .renderPipelineResponse(_context)
+              .then((renderResult: any) => {
+                done(renderResult);
+                return renderResult;
+              })
+              .catch((e) => {
+                done(e);
+                return e;
+              }),
           pipelineResponse
         );
         log.debug('response of rendering: ', result);

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SampleDataRegistrySetup } from 'src/plugins/home/server';
 import { CANVAS as label } from '../../i18n';
-// @ts-ignore Untyped local
 import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from './index';
 
 export function loadSampleData(
@@ -16,10 +16,10 @@ export function loadSampleData(
   const now = new Date();
   const nowTimestamp = now.toISOString();
 
-  // @ts-ignore: Untyped local
+  // @ts-expect-error: untyped local
   function updateCanvasWorkpadTimestamps(savedObjects) {
-    // @ts-ignore: Untyped local
-    return savedObjects.map(savedObject => {
+    // @ts-expect-error: untyped local
+    return savedObjects.map((savedObject) => {
       if (savedObject.type === 'canvas-workpad') {
         savedObject.attributes['@timestamp'] = nowTimestamp;
         savedObject.attributes['@created'] = nowTimestamp;

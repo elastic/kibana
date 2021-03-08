@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
+import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
 import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -19,7 +21,6 @@ import {
   TaskManagerUtils,
 } from '../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
@@ -45,7 +46,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -70,7 +71,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      objectRemover.add(space.id, indexRecordActionId, 'action');
+      objectRemover.add(space.id, indexRecordActionId, 'action', 'actions');
       await objectRemover.removeAll();
     });
 
@@ -125,6 +126,7 @@ alertName: abc,
 spaceId: ${space.id},
 tags: tag-A,tag-B,
 alertInstanceId: 1,
+alertActionGroup: default,
 instanceContextValue: true,
 instanceStateValue: true
 `.trim(),
@@ -136,14 +138,138 @@ instanceStateValue: true
       await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
     });
 
-    it('should reschedule failing alerts using the alerting interval and not the Task Manager retry logic', async () => {
+    it('should fire actions when an alert instance is recovered', async () => {
+      const reference = alertUtils.generateReference();
+
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // pattern of when the alert should fire.
+      const pattern = {
+        instance: [true, true],
+      };
+
+      const createdAlert = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            schedule: { interval: '1s' },
+            throttle: null,
+            params: {
+              pattern,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                group: RecoveredActionGroup.id,
+                id: indexRecordActionId,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  message: 'Recovered message',
+                },
+              },
+            ],
+          })
+        );
+
+      expect(createdAlert.status).to.eql(200);
+      const alertId = createdAlert.body.id;
+      objectRemover.add(space.id, alertId, 'alert', 'alerts');
+
+      const actionTestRecord = (
+        await esTestIndexTool.waitForDocs('action:test.index-record', reference)
+      )[0];
+
+      expect(actionTestRecord._source.params.message).to.eql('Recovered message');
+    });
+
+    it('should not fire actions when an alert instance is recovered, but alert is muted', async () => {
+      const testStart = new Date();
+      const reference = alertUtils.generateReference();
+
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // pattern of when the alert should fire.
+      const pattern = {
+        instance: [true, true],
+      };
+      // created disabled alert
+      const createdAlert = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            schedule: { interval: '1s' },
+            enabled: false,
+            throttle: null,
+            params: {
+              pattern,
+              reference,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                group: RecoveredActionGroup.id,
+                id: indexRecordActionId,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  message: 'Recovered message',
+                },
+              },
+            ],
+          })
+        );
+      expect(createdAlert.status).to.eql(200);
+      const alertId = createdAlert.body.id;
+
+      await alertUtils.muteAll(alertId);
+
+      await alertUtils.enable(alertId);
+
+      await esTestIndexTool.search('alert:test.patternFiring', reference);
+
+      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+
+      const actionTestRecord = await esTestIndexTool.search('action:test.index-record', reference);
+      expect(actionTestRecord.hits.total.value).to.eql(0);
+      objectRemover.add(space.id, alertId, 'alert', 'alerts');
+    });
+
+    it('should reschedule failing alerts using the Task Manager retry logic with alert schedule interval', async () => {
       /*
-        Alerting does not use the Task Manager schedule and instead implements its own due to a current limitation
-        in TaskManager's ability to update an existing Task.
-        For this reason we need to handle the retry when Alert executors fail, as TaskManager doesn't understand that
-        alerting tasks are recurring tasks.
+        Alerts should set the Task Manager schedule interval with initial value.
       */
-      const alertIntervalInSeconds = 30;
+      const alertIntervalInSeconds = 10;
       const reference = alertUtils.generateReference();
       const response = await alertUtils.createAlwaysFailingAction({
         reference,
@@ -158,7 +284,8 @@ instanceStateValue: true
       await retry.try(async () => {
         const alertTask = (await getAlertingTaskById(response.body.scheduledTaskId)).docs[0];
         expect(alertTask.status).to.eql('idle');
-        // ensure the alert is rescheduled to a minute from now
+        expect(alertTask.schedule.interval).to.eql('10s');
+        // ensure the alert is rescheduled correctly
         ensureDatetimeIsWithinRange(
           Date.parse(alertTask.runAt),
           alertIntervalInSeconds * 1000,
@@ -174,7 +301,7 @@ instanceStateValue: true
       const retryDate = new Date(Date.now() + 60000);
 
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'Test rate limit',
@@ -182,11 +309,11 @@ instanceStateValue: true
           config: {},
         })
         .expect(200);
-      objectRemover.add(space.id, createdAction.id, 'action');
+      objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -211,7 +338,7 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const scheduledActionTask = await retry.try(async () => {
         const searchResult = await es.search({
           index: '.kibana_task_manager',
@@ -255,7 +382,7 @@ instanceStateValue: true
     it('should have proper callCluster and savedObjectsClient authorization for alert type executor', async () => {
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -271,12 +398,13 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const alertTestRecord = (
         await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
       )[0];
       expect(alertTestRecord._source.state).to.eql({
         callClusterSuccess: true,
+        callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
           ...alertTestRecord._source.state.savedObjectsClientError,
@@ -291,16 +419,16 @@ instanceStateValue: true
     it('should have proper callCluster and savedObjectsClient authorization for action type executor', async () => {
       const reference = alertUtils.generateReference();
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
           actionTypeId: 'test.authorization',
         })
         .expect(200);
-      objectRemover.add(space.id, createdAction.id, 'action');
+      objectRemover.add(space.id, createdAction.id, 'action', 'actions');
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/alert`)
+        .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
@@ -326,12 +454,13 @@ instanceStateValue: true
         );
 
       expect(response.statusCode).to.eql(200);
-      objectRemover.add(space.id, response.body.id, 'alert');
+      objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
       const actionTestRecord = (
         await esTestIndexTool.waitForDocs('action:test.authorization', reference)
       )[0];
       expect(actionTestRecord._source.state).to.eql({
         callClusterSuccess: true,
+        callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
           ...actionTestRecord._source.state.savedObjectsClientError,
@@ -341,6 +470,31 @@ instanceStateValue: true
           },
         },
       });
+    });
+
+    it('should notify feature usage when using a gold action type', async () => {
+      const testStart = new Date();
+      const reference = alertUtils.generateReference();
+      const response = await alertUtils.createAlwaysFiringAction({ reference });
+      expect(response.statusCode).to.eql(200);
+
+      // Wait for alert to run
+      await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+
+      const {
+        body: { features },
+      } = await supertestWithoutAuth.get(`${getUrlPrefix(space.id)}/api/licensing/feature_usage`);
+      expect(features).to.be.an(Array);
+      const indexRecordFeature = features.find(
+        (feature: { name: string }) => feature.name === 'Connector: Test: Index Record'
+      );
+      expect(indexRecordFeature).to.be.ok();
+      expect(indexRecordFeature.last_used).to.be.a('string');
+      expect(new Date(indexRecordFeature.last_used).getTime()).to.be.greaterThan(
+        testStart.getTime()
+      );
+
+      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
     });
   });
 }

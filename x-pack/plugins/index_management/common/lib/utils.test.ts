@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { TemplateV1Serialized, TemplateV2Serialized } from '../types';
-import { getTemplateVersion } from './utils';
+
+import { LegacyTemplateSerialized, TemplateSerialized } from '../types';
+import { isLegacyTemplate } from './utils';
 
 describe('utils', () => {
-  describe('getTemplateVersion', () => {
-    test('should detect v1 template', () => {
+  describe('isLegacyTemplate', () => {
+    test('should detect legacy template', () => {
       const template = {
         name: 'my_template',
         index_patterns: ['logs*'],
@@ -16,10 +18,10 @@ describe('utils', () => {
           properties: {},
         },
       };
-      expect(getTemplateVersion(template as TemplateV1Serialized)).toBe(1);
+      expect(isLegacyTemplate(template as LegacyTemplateSerialized)).toBe(true);
     });
 
-    test('should detect v2 template', () => {
+    test('should detect composable template', () => {
       const template = {
         name: 'my_template',
         index_patterns: ['logs*'],
@@ -29,7 +31,7 @@ describe('utils', () => {
           },
         },
       };
-      expect(getTemplateVersion(template as TemplateV2Serialized)).toBe(2);
+      expect(isLegacyTemplate(template as TemplateSerialized)).toBe(false);
     });
   });
 });

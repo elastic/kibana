@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -115,7 +104,7 @@ describe('Filter editor utils', () => {
 
     it('limits the fields to the filterable fields', () => {
       const fieldOptions = getFilterableFields(stubIndexPattern);
-      const nonFilterableFields = fieldOptions.filter(field => !field.filterable);
+      const nonFilterableFields = fieldOptions.filter((field) => !field.filterable);
       expect(nonFilterableFields.length).toBe(0);
     });
   });
@@ -124,14 +113,14 @@ describe('Filter editor utils', () => {
     it('returns range for number fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'number');
       const operatorOptions = getOperatorOptions(field);
-      const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
+      const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
       expect(rangeOperator).not.toBeUndefined();
     });
 
     it('does not return range for string fields', () => {
       const [field] = stubFields.filter(({ type }) => type === 'string');
       const operatorOptions = getOperatorOptions(field);
-      const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
+      const rangeOperator = operatorOptions.find((operator) => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
     });
   });
@@ -177,9 +166,25 @@ describe('Filter editor utils', () => {
     it('should return true for range filter with from/to', () => {
       const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
         from: 'foo',
-        too: 'goo',
+        to: 'goo',
       });
       expect(isValid).toBe(true);
+    });
+
+    it('should return false for date range filter with bad from', () => {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+        from: 'foo',
+        to: 'now',
+      });
+      expect(isValid).toBe(false);
+    });
+
+    it('should return false for date range filter with bad to', () => {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+        from: '2020-01-01',
+        to: 'mau',
+      });
+      expect(isValid).toBe(false);
     });
 
     it('should return true for exists filter without params', () => {

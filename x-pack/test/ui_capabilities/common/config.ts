@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -14,7 +15,6 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
 }
 
-// eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [] } = options;
 
@@ -43,7 +43,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackFunctionalTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'foo_plugin')}`,
         ],
       },

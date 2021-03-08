@@ -1,27 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep, get, omit, has, flow } from 'lodash';
+
+import { SavedObjectMigrationFn } from 'kibana/server';
+
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
-const migrateIndexPattern: SavedObjectMigrationFn = doc => {
+const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
@@ -64,8 +55,8 @@ const migrateIndexPattern: SavedObjectMigrationFn = doc => {
 };
 
 // [TSVB] Migrate percentile-rank aggregation (value -> values)
-const migratePercentileRankAggregation: SavedObjectMigrationFn = doc => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const migratePercentileRankAggregation: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
   if (visStateJSON) {
@@ -77,7 +68,7 @@ const migratePercentileRankAggregation: SavedObjectMigrationFn = doc => {
     if (visState && visState.type === 'metrics') {
       const series: any[] = get(visState, 'params.series') || [];
 
-      series.forEach(part => {
+      series.forEach((part) => {
         (part.metrics || []).forEach((metric: any) => {
           if (metric.type === 'percentile_rank' && has(metric, 'value')) {
             metric.values = [metric.value];
@@ -99,9 +90,48 @@ const migratePercentileRankAggregation: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
+// [TSVB] Replace string query with object
+const migrateFilterRatioQuery: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const series: any[] = get(visState, 'params.series') || [];
+
+      series.forEach((part) => {
+        (part.metrics || []).forEach((metric: any) => {
+          if (metric.type === 'filter_ratio') {
+            if (typeof metric.numerator === 'string') {
+              metric.numerator = { query: metric.numerator, language: 'lucene' };
+            }
+            if (typeof metric.denominator === 'string') {
+              metric.denominator = { query: metric.denominator, language: 'lucene' };
+            }
+          }
+        });
+      });
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 // [TSVB] Remove stale opperator key
-const migrateOperatorKeyTypo: SavedObjectMigrationFn = doc => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const migrateOperatorKeyTypo: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
   if (visStateJSON) {
@@ -113,7 +143,7 @@ const migrateOperatorKeyTypo: SavedObjectMigrationFn = doc => {
     if (visState && visState.type === 'metrics') {
       const gaugeColorRules: any[] = get(visState, 'params.gauge_color_rules') || [];
 
-      gaugeColorRules.forEach(colorRule => {
+      gaugeColorRules.forEach((colorRule) => {
         if (colorRule.opperator) {
           delete colorRule.opperator;
         }
@@ -131,9 +161,53 @@ const migrateOperatorKeyTypo: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
+/**
+ * Moving setting wether to do a row or column split to vis.params
+ *
+ * @see https://github.com/elastic/kibana/pull/58462/files#diff-ae69fe15b20a5099d038e9bbe2ed3849
+ **/
+const migrateSplitByChartRow: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState: any;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    if (visState && visState.aggs && visState.params) {
+      let row: boolean | undefined;
+
+      visState.aggs.forEach((agg: any) => {
+        if (agg.type === 'terms' && agg.schema === 'split' && 'row' in agg.params) {
+          row = agg.params.row;
+
+          delete agg.params.row;
+        }
+      });
+
+      if (row !== undefined) {
+        visState.params.row = row;
+      }
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+
+  return doc;
+};
+
 // Migrate date histogram aggregation (remove customInterval)
-const migrateDateHistogramAggregation: SavedObjectMigrationFn = doc => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const migrateDateHistogramAggregation: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
   if (visStateJSON) {
@@ -174,8 +248,8 @@ const migrateDateHistogramAggregation: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const removeDateHistogramTimeZones: SavedObjectMigrationFn = doc => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const removeDateHistogramTimeZones: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
     let visState;
     try {
@@ -206,8 +280,8 @@ const removeDateHistogramTimeZones: SavedObjectMigrationFn = doc => {
 
 // migrate gauge verticalSplit to alignment
 // https://github.com/elastic/kibana/issues/34636
-const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn = (doc, logger) => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn<any, any> = (doc, logger) => {
+  const visStateJSON = get(doc, 'attributes.visState');
 
   if (visStateJSON) {
     try {
@@ -241,11 +315,11 @@ const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn = (doc, logge
   Path to the series array is thus:
   attributes.visState.
 */
-const transformFilterStringToQueryObject: SavedObjectMigrationFn = (doc, logger) => {
+const transformFilterStringToQueryObject: SavedObjectMigrationFn<any, any> = (doc, logger) => {
   // Migrate filters
   // If any filters exist and they are a string, we assume it to be lucene and transform the filter into an object accordingly
   const newDoc = cloneDeep(doc);
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+  const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
     let visState;
     try {
@@ -254,7 +328,7 @@ const transformFilterStringToQueryObject: SavedObjectMigrationFn = (doc, logger)
       // let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
-      const visType = get<string>(visState, 'params.type');
+      const visType = get(visState, 'params.type');
       const tsvbTypes = ['metric', 'markdown', 'top_n', 'gauge', 'table', 'timeseries'];
       if (tsvbTypes.indexOf(visType) === -1) {
         // skip
@@ -272,7 +346,7 @@ const transformFilterStringToQueryObject: SavedObjectMigrationFn = (doc, logger)
 
       // migrate the annotations query string:
       const annotations: any[] = get(visState, 'params.annotations') || [];
-      annotations.forEach(item => {
+      annotations.forEach((item) => {
         if (!item.query_string) {
           // we don't need to transform anything if there isn't a filter at all
           return;
@@ -288,7 +362,7 @@ const transformFilterStringToQueryObject: SavedObjectMigrationFn = (doc, logger)
       // migrate the series filters
       const series: any[] = get(visState, 'params.series') || [];
 
-      series.forEach(item => {
+      series.forEach((item) => {
         if (!item.filter) {
           // we don't need to transform anything if there isn't a filter at all
           return;
@@ -304,7 +378,7 @@ const transformFilterStringToQueryObject: SavedObjectMigrationFn = (doc, logger)
         // series item split filters filter
         if (item.split_filters) {
           const splitFilters: any[] = get(item, 'split_filters') || [];
-          splitFilters.forEach(filter => {
+          splitFilters.forEach((filter) => {
             if (!filter.filter) {
               // we don't need to transform anything if there isn't a filter at all
               return;
@@ -325,11 +399,11 @@ const transformFilterStringToQueryObject: SavedObjectMigrationFn = (doc, logger)
   return newDoc;
 };
 
-const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn = doc => {
+const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn<any, any> = (doc) => {
   // Migrate split_filters in TSVB objects that weren't migrated in 7.3
   // If any filters exist and they are a string, we assume them to be lucene syntax and transform the filter into an object accordingly
   const newDoc = cloneDeep(doc);
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+  const visStateJSON = get(doc, 'attributes.visState');
   if (visStateJSON) {
     let visState;
     try {
@@ -338,7 +412,7 @@ const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn = doc => 
       // let it go, the data is invalid and we'll leave it as is
     }
     if (visState) {
-      const visType = get<string>(visState, 'params.type');
+      const visType = get(visState, 'params.type');
       const tsvbTypes = ['metric', 'markdown', 'top_n', 'gauge', 'table', 'timeseries'];
       if (tsvbTypes.indexOf(visType) === -1) {
         // skip
@@ -346,13 +420,13 @@ const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn = doc => 
       }
       // migrate the series split_filter filters
       const series: any[] = get(visState, 'params.series') || [];
-      series.forEach(item => {
+      series.forEach((item) => {
         // series item split filters filter
         if (item.split_filters) {
           const splitFilters: any[] = get(item, 'split_filters') || [];
           if (splitFilters.length > 0) {
             // only transform split_filter filters if we have filters
-            splitFilters.forEach(filter => {
+            splitFilters.forEach((filter) => {
               if (typeof filter.filter === 'string') {
                 const filterfilterObject = {
                   query: filter.filter,
@@ -370,8 +444,8 @@ const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn = doc => 
   return newDoc;
 };
 
-const migrateFiltersAggQuery: SavedObjectMigrationFn = doc => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const migrateFiltersAggQuery: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
 
   if (visStateJSON) {
     try {
@@ -402,8 +476,8 @@ const migrateFiltersAggQuery: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const replaceMovAvgToMovFn: SavedObjectMigrationFn = (doc, logger) => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const replaceMovAvgToMovFn: SavedObjectMigrationFn<any, any> = (doc, logger) => {
+  const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
   if (visStateJSON) {
@@ -413,7 +487,7 @@ const replaceMovAvgToMovFn: SavedObjectMigrationFn = (doc, logger) => {
       if (visState && visState.type === 'metrics') {
         const series: any[] = get(visState, 'params.series', []);
 
-        series.forEach(part => {
+        series.forEach((part) => {
           if (part.metrics && Array.isArray(part.metrics)) {
             part.metrics.forEach((metric: any) => {
               if (metric.type === 'moving_average') {
@@ -450,8 +524,8 @@ const replaceMovAvgToMovFn: SavedObjectMigrationFn = (doc, logger) => {
   return doc;
 };
 
-const migrateFiltersAggQueryStringQueries: SavedObjectMigrationFn = (doc, logger) => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const migrateFiltersAggQueryStringQueries: SavedObjectMigrationFn<any, any> = (doc, logger) => {
+  const visStateJSON = get(doc, 'attributes.visState');
 
   if (visStateJSON) {
     try {
@@ -483,13 +557,13 @@ const migrateFiltersAggQueryStringQueries: SavedObjectMigrationFn = (doc, logger
   return doc;
 };
 
-const addDocReferences: SavedObjectMigrationFn = doc => ({
+const addDocReferences: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,
   references: doc.references || [],
 });
 
-const migrateSavedSearch: SavedObjectMigrationFn = doc => {
-  const savedSearchId = get<string>(doc, 'attributes.savedSearchId');
+const migrateSavedSearch: SavedObjectMigrationFn<any, any> = (doc) => {
+  const savedSearchId = get(doc, 'attributes.savedSearchId');
 
   if (savedSearchId && doc.references) {
     doc.references.push({
@@ -505,8 +579,8 @@ const migrateSavedSearch: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const migrateControls: SavedObjectMigrationFn = doc => {
-  const visStateJSON = get<string>(doc, 'attributes.visState');
+const migrateControls: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
 
   if (visStateJSON) {
     let visState;
@@ -536,7 +610,7 @@ const migrateControls: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const migrateTableSplits: SavedObjectMigrationFn = doc => {
+const migrateTableSplits: SavedObjectMigrationFn<any, any> = (doc) => {
   try {
     const visState = JSON.parse(doc.attributes.visState);
     if (get(visState, 'type') !== 'table') {
@@ -572,8 +646,14 @@ const migrateTableSplits: SavedObjectMigrationFn = doc => {
   }
 };
 
-const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
-  const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+/**
+ * This migration script is related to:
+ *   @link https://github.com/elastic/kibana/pull/62194
+ *   @link https://github.com/elastic/kibana/pull/14644
+ * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
+ */
+const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
 
   if (searchSourceJSON) {
     let searchSource: any;
@@ -582,6 +662,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
       searchSource = JSON.parse(searchSourceJSON);
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
+      return doc;
     }
 
     if (searchSource.query?.match_all) {
@@ -602,7 +683,169 @@ const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
       };
     }
   }
+  return doc;
+};
 
+// [TSVB] Default color palette is changing, keep the default for older viz
+const migrateTsvbDefaultColorPalettes: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const series: any[] = get(visState, 'params.series') || [];
+
+      series.forEach((part) => {
+        // The default value was not saved before
+        if (!part.split_color_mode) {
+          part.split_color_mode = 'gradient';
+        }
+      });
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+// [TSVB] Remove serialized search source as it's not used in TSVB visualizations
+const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics' && searchSourceJSON !== '{}') {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          kibanaSavedObjectMeta: {
+            ...get(doc, 'attributes.kibanaSavedObjectMeta'),
+            searchSourceJSON: '{}',
+          },
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+// [Data table visualization] Enable toolbar by default
+const enableDataTableVisToolbar: SavedObjectMigrationFn<any, any> = (doc) => {
+  let visState;
+
+  try {
+    visState = JSON.parse(doc.attributes.visState);
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+
+  if (visState?.type === 'table') {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify({
+          ...visState,
+          params: {
+            ...visState.params,
+            showToolbar: true,
+          },
+        }),
+      },
+    };
+  }
+
+  return doc;
+};
+
+/**
+ * Decorate axes with default label filter value
+ */
+const decorateAxes = <T extends { labels: { filter?: boolean } }>(
+  axes: T[],
+  fallback: boolean
+): T[] =>
+  axes.map((axis) => ({
+    ...axis,
+    labels: {
+      ...axis.labels,
+      filter: axis.labels.filter ?? fallback,
+    },
+  }));
+
+// Inlined from vis_type_xy
+const CHART_TYPE_AREA = 'area';
+const CHART_TYPE_LINE = 'line';
+const CHART_TYPE_HISTOGRAM = 'histogram';
+
+/**
+ * Migrate vislib bar, line and area charts to use new vis_type_xy plugin
+ */
+const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (
+      visState &&
+      [CHART_TYPE_AREA, CHART_TYPE_LINE, CHART_TYPE_HISTOGRAM].includes(visState?.params?.type)
+    ) {
+      const isHorizontalBar = visState.type === 'horizontal_bar';
+      const isLineOrArea =
+        visState?.params?.type === CHART_TYPE_AREA || visState?.params?.type === CHART_TYPE_LINE;
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...visState.params,
+              palette: {
+                type: 'palette',
+                name: 'kibana_palette',
+              },
+              categoryAxes:
+                visState.params.categoryAxes &&
+                decorateAxes(visState.params.categoryAxes, !isHorizontalBar),
+              valueAxes:
+                visState.params.valueAxes &&
+                decorateAxes(visState.params.valueAxes, isHorizontalBar),
+              isVislibVis: true,
+              detailedTooltip: true,
+              ...(isLineOrArea && {
+                fittingFunction: 'zero',
+              }),
+            },
+          }),
+        },
+      };
+    }
+  }
   return doc;
 };
 
@@ -617,26 +860,28 @@ export const visualizationSavedObjectTypeMigrations = {
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
-  '6.7.2': flow<SavedObjectMigrationFn>(migrateMatchAllQuery, removeDateHistogramTimeZones),
-  '7.0.0': flow<SavedObjectMigrationFn>(
+  '6.7.2': flow(migrateMatchAllQuery, removeDateHistogramTimeZones),
+  '7.0.0': flow(
     addDocReferences,
     migrateIndexPattern,
     migrateSavedSearch,
     migrateControls,
     migrateTableSplits
   ),
-  '7.0.1': flow<SavedObjectMigrationFn>(removeDateHistogramTimeZones),
-  '7.2.0': flow<SavedObjectMigrationFn>(
-    migratePercentileRankAggregation,
-    migrateDateHistogramAggregation
-  ),
-  '7.3.0': flow<SavedObjectMigrationFn>(
+  '7.0.1': flow(removeDateHistogramTimeZones),
+  '7.2.0': flow(migratePercentileRankAggregation, migrateDateHistogramAggregation),
+  '7.3.0': flow(
     migrateGaugeVerticalSplitToAlignment,
     transformFilterStringToQueryObject,
     migrateFiltersAggQuery,
     replaceMovAvgToMovFn
   ),
-  '7.3.1': flow<SavedObjectMigrationFn>(migrateFiltersAggQueryStringQueries),
-  '7.4.2': flow<SavedObjectMigrationFn>(transformSplitFiltersStringToQueryObject),
-  '7.7.0': flow<SavedObjectMigrationFn>(migrateOperatorKeyTypo),
+  '7.3.1': flow(migrateFiltersAggQueryStringQueries),
+  '7.4.2': flow(transformSplitFiltersStringToQueryObject),
+  '7.7.0': flow(migrateOperatorKeyTypo, migrateSplitByChartRow),
+  '7.8.0': flow(migrateTsvbDefaultColorPalettes),
+  '7.9.3': flow(migrateMatchAllQuery),
+  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
+  '7.11.0': flow(enableDataTableVisToolbar),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes),
 };

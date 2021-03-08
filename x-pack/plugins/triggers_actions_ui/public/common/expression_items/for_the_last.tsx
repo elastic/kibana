@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -20,11 +21,12 @@ import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
-interface ForLastExpressionProps {
+export interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
@@ -40,11 +42,13 @@ interface ForLastExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const ForLastExpression = ({
   timeWindowSize,
   timeWindowUnit = 's',
+  display = 'inline',
   errors,
   onChangeWindowSize,
   onChangeWindowUnit,
@@ -62,6 +66,7 @@ export const ForLastExpression = ({
               defaultMessage: 'for the last',
             }
           )}
+          data-test-subj="forLastExpression"
           value={`${timeWindowSize} ${getTimeUnitLabel(
             timeWindowUnit as TIME_UNITS,
             (timeWindowSize ?? '').toString()
@@ -70,7 +75,8 @@ export const ForLastExpression = ({
           onClick={() => {
             setAlertDurationPopoverOpen(true);
           }}
-          color={timeWindowSize ? 'secondary' : 'danger'}
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={!timeWindowSize}
         />
       }
       isOpen={alertDurationPopoverOpen}
@@ -78,8 +84,9 @@ export const ForLastExpression = ({
         setAlertDurationPopoverOpen(false);
       }}
       ownFocus
-      withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAlertDurationPopoverOpen(false)}>
@@ -99,7 +106,7 @@ export const ForLastExpression = ({
                 isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
                 min={0}
                 value={timeWindowSize || ''}
-                onChange={e => {
+                onChange={(e) => {
                   const { value } = e.target;
                   const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : undefined;
                   onChangeWindowSize(timeWindowSizeVal);
@@ -111,7 +118,7 @@ export const ForLastExpression = ({
             <EuiSelect
               data-test-subj="timeWindowUnitSelect"
               value={timeWindowUnit}
-              onChange={e => {
+              onChange={(e) => {
                 onChangeWindowUnit(e.target.value);
               }}
               options={getTimeOptions(timeWindowSize ?? 1)}
@@ -122,3 +129,6 @@ export const ForLastExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ForLastExpression as default };

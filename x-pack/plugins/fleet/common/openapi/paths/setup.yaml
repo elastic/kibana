@@ -1,0 +1,25 @@
+post:
+  summary: Ingest Manager - Setup
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              isInitialized:
+                type: boolean
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+  operationId: post-setup
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml

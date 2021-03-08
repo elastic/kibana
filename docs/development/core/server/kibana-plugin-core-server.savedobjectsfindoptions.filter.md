@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-filter?: string;
+filter?: string | KueryNode;
 ```

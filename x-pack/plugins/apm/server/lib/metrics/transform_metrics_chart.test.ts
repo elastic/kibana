@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { ChartType, YUnit } from '../../../typings/timeseries';
 
@@ -20,25 +22,25 @@ test('transformDataToMetricsChart should transform an ES result into a chart obj
             b: { value: 10 },
             c: { value: 10 },
             key: 1,
-            doc_count: 0
+            doc_count: 0,
           },
           {
             a: { value: 20 },
             b: { value: 20 },
             c: { value: 20 },
             key: 2,
-            doc_count: 0
+            doc_count: 0,
           },
           {
             a: { value: 30 },
             b: { value: 30 },
             c: { value: 30 },
             key: 3,
-            doc_count: 0
-          }
-        ]
-      }
-    }
+            doc_count: 0,
+          },
+        ],
+      },
+    },
   } as any;
 
   const chartBase = {
@@ -49,8 +51,8 @@ test('transformDataToMetricsChart should transform an ES result into a chart obj
     series: {
       a: { title: 'Series A', color: 'red' },
       b: { title: 'Series B', color: 'blue' },
-      c: { title: 'Series C', color: 'green' }
-    }
+      c: { title: 'Series C', color: 'green' },
+    },
   };
 
   const chart = transformDataToMetricsChart(response, chartBase);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -35,16 +36,16 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
     it('should handle enable alert request appropriately', async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }))
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
 
       await alertUtils.enable(createdAlert.id);
 
       const { body: updatedAlert } = await supertestWithoutAuth
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
       expect(typeof updatedAlert.scheduledTaskId).to.eql('string');
@@ -67,11 +68,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
     it(`shouldn't enable alert from another space`, async () => {
       const { body: createdAlert } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.other.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }))
         .expect(200);
-      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert');
+      objectRemover.add(Spaces.other.id, createdAlert.id, 'alert', 'alerts');
 
       await alertUtils.getEnableRequest(createdAlert.id).expect(404, {
         statusCode: 404,

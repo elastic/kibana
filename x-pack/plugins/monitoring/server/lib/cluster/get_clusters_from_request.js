@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { notFound } from 'boom';
-import { set, findIndex } from 'lodash';
+import { notFound } from '@hapi/boom';
+import { set } from '@elastic/safer-lodash-set';
+import { findIndex } from 'lodash';
 import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
@@ -13,13 +15,10 @@ import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
-import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
-import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
+import { verifyMonitoringLicense } from '../../cluster_alerts/verify_monitoring_license';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
-import { fetchStatus } from '../alerts/fetch_status';
 import { getClustersSummary } from './get_clusters_summary';
 import {
-  CLUSTER_ALERTS_SEARCH_SIZE,
   STANDALONE_CLUSTER_CLUSTER_UUID,
   CODE_PATH_ML,
   CODE_PATH_ALERTS,
@@ -28,12 +27,11 @@ import {
   CODE_PATH_LOGSTASH,
   CODE_PATH_BEATS,
   CODE_PATH_APM,
-  KIBANA_ALERTING_ENABLED,
-  ALERT_TYPES,
 } from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
 import { checkCcrEnabled } from '../elasticsearch/ccr';
+import { fetchStatus } from '../alerts/fetch_status';
 import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
 import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
@@ -52,7 +50,6 @@ export async function getClustersFromRequest(
     lsIndexPattern,
     beatsIndexPattern,
     apmIndexPattern,
-    alertsIndex,
     filebeatIndexPattern,
   } = indexPatterns;
 
@@ -101,25 +98,6 @@ export async function getClustersFromRequest(
       cluster.ml = { jobs: mlJobs };
     }
 
-    if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
-      if (KIBANA_ALERTING_ENABLED) {
-        const alertsClient = req.getAlertsClient ? req.getAlertsClient() : null;
-        cluster.alerts = await fetchStatus(alertsClient, ALERT_TYPES, start, end, req.logger);
-      } else {
-        cluster.alerts = await alertsClusterSearch(
-          req,
-          alertsIndex,
-          cluster,
-          checkLicenseForAlerts,
-          {
-            start,
-            end,
-            size: CLUSTER_ALERTS_SEARCH_SIZE,
-          }
-        );
-      }
-    }
-
     cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])
       ? await getLogTypes(req, filebeatIndexPattern, {
           clusterUuid: cluster.cluster_uuid,
@@ -141,21 +119,101 @@ export async function getClustersFromRequest(
 
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
-      const clustersAlerts = await alertsClustersAggregation(
-        req,
-        alertsIndex,
-        clusters,
-        checkLicenseForAlerts
+      const alertsClient = req.getAlertsClient();
+      const alertStatus = await fetchStatus(
+        alertsClient,
+        req.server.plugins.monitoring.info,
+        undefined,
+        clusters.map((cluster) => cluster.cluster_uuid)
       );
-      clusters.forEach(cluster => {
+
+      for (const cluster of clusters) {
+        const verification = verifyMonitoringLicense(req.server);
+        if (!verification.enabled) {
+          // return metadata detailing that alerts is disabled because of the monitoring cluster license
+          cluster.alerts = {
+            alertsMeta: {
+              enabled: verification.enabled,
+              message: verification.message, // NOTE: this is only defined when the alert feature is disabled
+            },
+            list: {},
+          };
+          continue;
+        }
+
+        if (!alertsClient) {
+          cluster.alerts = {
+            list: {},
+            alertsMeta: {
+              enabled: false,
+            },
+          };
+          continue;
+        }
+
+        // check the license type of the production cluster for alerts feature support
+        const license = cluster.license || {};
+        const prodLicenseInfo = checkLicenseForAlerts(
+          license.type,
+          license.status === 'active',
+          'production'
+        );
+        if (prodLicenseInfo.clusterAlerts.enabled) {
+          try {
+            cluster.alerts = {
+              list: Object.keys(alertStatus).reduce((accum, alertName) => {
+                const value = alertStatus[alertName];
+                if (value.states && value.states.length) {
+                  accum[alertName] = {
+                    ...value,
+                    states: value.states.filter(
+                      (state) => state.state.cluster.clusterUuid === cluster.cluster_uuid
+                    ),
+                  };
+                } else {
+                  accum[alertName] = value;
+                }
+                return accum;
+              }, {}),
+              alertsMeta: {
+                enabled: true,
+              },
+            };
+          } catch (err) {
+            req.logger.warn(
+              `Unable to fetch alert status because '${err.message}'. Alerts may not properly show up in the UI.`
+            );
+            cluster.alerts = {
+              list: {},
+              alertsMeta: {
+                enabled: true,
+              },
+            };
+          }
+          continue;
+        }
+
         cluster.alerts = {
+          list: {},
           alertsMeta: {
-            enabled: clustersAlerts.alertsMeta.enabled,
-            message: clustersAlerts.alertsMeta.message, // NOTE: this is only defined when the alert feature is disabled
+            enabled: false,
           },
-          ...clustersAlerts[cluster.cluster_uuid],
+          clusterMeta: {
+            enabled: false,
+            message: i18n.translate(
+              'xpack.monitoring.clusterAlerts.unsupportedClusterAlertsDescription',
+              {
+                defaultMessage:
+                  'Cluster [{clusterName}] license type [{licenseType}] does not support Cluster Alerts',
+                values: {
+                  clusterName: cluster.cluster_name,
+                  licenseType: `${license.type}`,
+                },
+              }
+            ),
+          },
         };
-      });
+      }
     }
   }
 
@@ -165,7 +223,7 @@ export async function getClustersFromRequest(
       ? await getKibanasForClusters(req, kbnIndexPattern, clusters)
       : [];
   // add the kibana data to each cluster
-  kibanas.forEach(kibana => {
+  kibanas.forEach((kibana) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: kibana.clusterUuid });
     set(clusters[clusterIndex], 'kibana', kibana.stats);
   });
@@ -174,7 +232,7 @@ export async function getClustersFromRequest(
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
     const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
     const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, 1);
-    logstashes.forEach(logstash => {
+    logstashes.forEach((logstash) => {
       const clusterIndex = findIndex(clusters, { cluster_uuid: logstash.clusterUuid });
 
       // withhold LS overview stats until there is at least 1 pipeline
@@ -189,7 +247,7 @@ export async function getClustersFromRequest(
   const beatsByCluster = isInCodePath(codePaths, [CODE_PATH_BEATS])
     ? await getBeatsForClusters(req, beatsIndexPattern, clusters)
     : [];
-  beatsByCluster.forEach(beats => {
+  beatsByCluster.forEach((beats) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: beats.clusterUuid });
     set(clusters[clusterIndex], 'beats', beats.stats);
   });
@@ -198,9 +256,13 @@ export async function getClustersFromRequest(
   const apmsByCluster = isInCodePath(codePaths, [CODE_PATH_APM])
     ? await getApmsForClusters(req, apmIndexPattern, clusters)
     : [];
-  apmsByCluster.forEach(apm => {
+  apmsByCluster.forEach((apm) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: apm.clusterUuid });
-    set(clusters[clusterIndex], 'apm', apm.stats);
+    const { stats, config } = apm;
+    clusters[clusterIndex].apm = {
+      ...stats,
+      config,
+    };
   });
 
   // check ccr configuration

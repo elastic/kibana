@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Component } from 'react';
@@ -58,7 +59,7 @@ export class IndexSettings extends Component {
     }
   }
 
-  _setIndexName = async name => {
+  _setIndexName = async (name) => {
     const errorMessage = await this._isIndexNameAndPatternValid(name);
     return this.setState({
       indexName: name,
@@ -72,7 +73,7 @@ export class IndexSettings extends Component {
     this.props.setIndexName(name);
   };
 
-  _isIndexNameAndPatternValid = async name => {
+  _isIndexNameAndPatternValid = async (name) => {
     const { indexNameList, indexPatternList } = this.state;
     const nameAlreadyInUse = [...indexNameList, ...indexPatternList].includes(name);
     if (nameAlreadyInUse) {
@@ -113,10 +114,11 @@ export class IndexSettings extends Component {
           <EuiSelect
             data-test-subj="fileImportIndexSelect"
             disabled={indexDisabled}
-            options={indexTypes.map(indexType => ({
+            options={indexTypes.map((indexType) => ({
               text: indexType,
               value: indexType,
             }))}
+            value={this.props.selectedIndexType}
             onChange={({ target }) => setSelectedIndexType(target.value)}
           />
         </EuiFormRow>

@@ -1,34 +1,24 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { NotificationsStart, Toast } from 'src/core/public';
 import { DashboardPanelState } from '../embeddable';
 import {
-  IContainer,
-  IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
   EmbeddableStart,
-} from '../../embeddable_plugin';
+  IContainer,
+  IEmbeddable,
+  SavedObjectEmbeddableInput,
+} from '../../services/embeddable';
+import { dashboardReplacePanelAction } from '../../dashboard_strings';
 
 interface Props {
   container: IContainer;
@@ -56,40 +46,39 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     }
 
     this.lastToast = this.props.notifications.toasts.addSuccess({
-      title: i18n.translate('dashboard.addPanel.savedObjectAddedToContainerSuccessMessageTitle', {
-        defaultMessage: '{savedObjectName} was added',
-        values: {
-          savedObjectName: name,
-        },
-      }),
+      title: dashboardReplacePanelAction.getSuccessMessage(name),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
   };
 
-  public onReplacePanel = async (id: string, type: string, name: string) => {
-    const originalPanels = this.props.container.getInput().panels;
-    const filteredPanels = { ...originalPanels };
+  public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
+    const { panelToRemove, container } = this.props;
+    const { w, h, x, y } = (container.getInput().panels[
+      panelToRemove.id
+    ] as DashboardPanelState).gridData;
 
-    const nnw = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.w;
-    const nnh = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.h;
-    const nnx = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.x;
-    const nny = (filteredPanels[this.props.panelToRemove.id] as DashboardPanelState).gridData.y;
+    const { id } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, {
+      savedObjectId,
+    });
 
-    // add the new view
-    const newObj = await this.props.container.addSavedObjectEmbeddable(type, id);
+    const { [panelToRemove.id]: omit, ...panels } = container.getInput().panels;
 
-    const finalPanels = _.cloneDeep(this.props.container.getInput().panels);
-    (finalPanels[newObj.id] as DashboardPanelState).gridData.w = nnw;
-    (finalPanels[newObj.id] as DashboardPanelState).gridData.h = nnh;
-    (finalPanels[newObj.id] as DashboardPanelState).gridData.x = nnx;
-    (finalPanels[newObj.id] as DashboardPanelState).gridData.y = nny;
-
-    // delete the old view
-    delete finalPanels[this.props.panelToRemove.id];
-
-    // apply changes
-    this.props.container.updateInput({ panels: finalPanels });
-    this.props.container.reload();
+    container.updateInput({
+      panels: {
+        ...panels,
+        [id]: {
+          ...panels[id],
+          gridData: {
+            ...(panels[id] as DashboardPanelState).gridData,
+            w,
+            h,
+            x,
+            y,
+          },
+        } as DashboardPanelState,
+      },
+    });
+    container.reload();
 
     this.showToast(name);
     this.props.onClose();
@@ -99,12 +88,10 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     const SavedObjectFinder = this.props.savedObjectsFinder;
     const savedObjectsFinder = (
       <SavedObjectFinder
-        noItemsMessage={i18n.translate('dashboard.addPanel.noMatchingObjectsMessage', {
-          defaultMessage: 'No matching objects found.',
-        })}
+        noItemsMessage={dashboardReplacePanelAction.getNoMatchingObjectsMessage()}
         savedObjectMetaData={[...this.props.getEmbeddableFactories()]
           .filter(
-            embeddableFactory =>
+            (embeddableFactory) =>
               Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
           )
           .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}
@@ -116,7 +103,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     const panelToReplace = 'Replace panel ' + this.props.panelToRemove.getTitle() + ' with:';
 
     return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardReplacePanel">
+      <>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -125,7 +112,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
-      </EuiFlyout>
+      </>
     );
   }
 }

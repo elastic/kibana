@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { addBasePath } from '../helpers';
@@ -15,6 +16,7 @@ const defaultSnapshot = {
   versionId: undefined,
   version: undefined,
   indices: [],
+  dataStreams: [],
   includeGlobalState: undefined,
   state: undefined,
   startTime: undefined,
@@ -142,8 +144,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         jest.fn().mockRejectedValueOnce(new Error('Error getting repository')),
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -219,20 +220,24 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         mockSnapshotGetEsResponse,
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
   describe('deleteHandler()', () => {
-    const ids = ['fooRepository/snapshot-1', 'barRepository/snapshot-2'];
-
     const mockRequest: RequestMock = {
-      method: 'delete',
-      path: addBasePath('snapshots/{ids}'),
-      params: {
-        ids: ids.join(','),
-      },
+      method: 'post',
+      path: addBasePath('snapshots/bulk_delete'),
+      body: [
+        {
+          repository: 'fooRepository',
+          snapshot: 'snapshot-1',
+        },
+        {
+          repository: 'barRepository',
+          snapshot: 'snapshot-2',
+        },
+      ],
     };
 
     it('should return successful ES responses', async () => {

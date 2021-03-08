@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -21,7 +22,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
       const kibanaVersionAccessor = kibanaServer.version;
       kibanaVersion = await kibanaVersionAccessor.get();
       defaultAttributes =
-        (await getSavedObjectAttributes(supertest).catch(err => {
+        (await getSavedObjectAttributes(supertest).catch((err) => {
           if (err.message === 'expected 200 "OK", got 404 "Not Found"') {
             return null;
           }

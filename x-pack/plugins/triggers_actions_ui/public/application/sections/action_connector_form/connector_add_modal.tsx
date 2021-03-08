@@ -1,62 +1,85 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useCallback, useReducer, useState } from 'react';
+
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiFlexItem, EuiIcon, EuiFlexGroup, EuiBetaBadge } from '@elastic/eui';
 import {
   EuiModal,
   EuiButton,
+  EuiButtonEmpty,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
+  EuiTitle,
+  EuiFlexItem,
+  EuiIcon,
+  EuiFlexGroup,
 } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, ToastsApi } from 'kibana/public';
-import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { ActionType, ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
-import { connectorReducer } from './connector_reducer';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
+import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
-import { TypeRegistry } from '../../type_registry';
 import './connector_add_modal.scss';
-import { PLUGIN } from '../../constants/plugin';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import {
+  ActionType,
+  ActionConnector,
+  ActionTypeRegistryContract,
+  UserConfiguredActionConnector,
+} from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
-  addModalVisible: boolean;
-  setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
-  http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications?: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const ConnectorAddModal = ({
   actionType,
-  addModalVisible,
-  setAddModalVisibility,
+  onClose,
   postSaveEventHandler,
-  http,
-  toastNotifications,
+  consumer,
   actionTypeRegistry,
 }: ConnectorAddModalProps) => {
+  const {
+    http,
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
   let hasErrors = false;
-  const initialConnector = {
-    actionTypeId: actionType.id,
-    config: {},
-    secrets: {},
-  } as ActionConnector;
+  const initialConnector: InitialConnector<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = useMemo(
+    () => ({
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    }),
+    [actionType.id]
+  );
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const canSave = hasSaveActionsCapability(capabilities);
 
-  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
+  const reducer: ConnectorReducer<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
+  const [{ connector }, dispatch] = useReducer(reducer, {
+    connector: initialConnector as UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >,
+  });
   const setConnector = (value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
@@ -68,26 +91,25 @@ export const ConnectorAddModal = ({
   >(undefined);
 
   const closeModal = useCallback(() => {
-    setAddModalVisibility(false);
     setConnector(initialConnector);
     setServerError(undefined);
-  }, [initialConnector, setAddModalVisibility]);
+    onClose();
+  }, [initialConnector, onClose]);
 
-  if (!addModalVisible) {
-    return null;
-  }
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
-  const errors = {
-    ...actionTypeModel?.validateConnector(connector).errors,
-    ...validateBaseProperties(connector).errors,
-  } as IErrorObject;
-  hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const { configErrors, connectorBaseErrors, connectorErrors, secretsErrors } = getConnectorErrors(
+    connector,
+    actionTypeModel
+  );
+  hasErrors = !!Object.keys(connectorErrors).find(
+    (errorKey) => connectorErrors[errorKey].length >= 1
+  );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
-      .then(savedConnector => {
-        if (toastNotifications) {
-          toastNotifications.addSuccess(
+      .then((savedConnector) => {
+        if (toasts) {
+          toasts.addSuccess(
             i18n.translate(
               'xpack.triggersActionsUI.sections.addModalConnectorForm.updateSuccessNotificationText',
               {
@@ -101,84 +123,78 @@ export const ConnectorAddModal = ({
         }
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         setServerError(errorRes);
         return undefined;
       });
 
   return (
-    <EuiOverlayMask className="actConnectorModal">
-      <EuiModal onClose={closeModal}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <EuiFlexGroup gutterSize="m" alignItems="center">
-              {actionTypeModel && actionTypeModel.iconClass ? (
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={actionTypeModel.iconClass} size="xl" />
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h3 id="flyoutTitle">
-                    <FormattedMessage
-                      defaultMessage="{actionTypeName} connector"
-                      id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
-                      values={{
-                        actionTypeName: actionType.name,
-                      }}
-                    />
-                    &emsp;
-                    <EuiBetaBadge
-                      label="Beta"
-                      tooltipContent={i18n.translate(
-                        'xpack.triggersActionsUI.sections.addModalConnectorForm.betaBadgeTooltipContent',
-                        {
-                          defaultMessage:
-                            '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                          values: {
-                            pluginName: PLUGIN.getI18nName(i18n),
-                          },
-                        }
-                      )}
-                    />
-                  </h3>
-                </EuiTitle>
+    <EuiModal className="actConnectorModal" data-test-subj="connectorAddModal" onClose={closeModal}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            {actionTypeModel && actionTypeModel.iconClass ? (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={actionTypeModel.iconClass} size="xl" />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+            ) : null}
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3 id="flyoutTitle">
+                  <FormattedMessage
+                    defaultMessage="{actionTypeName} connector"
+                    id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
+                    values={{
+                      actionTypeName: actionType.name,
+                    }}
+                  />
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-        <EuiModalBody>
-          <ActionConnectorForm
-            connector={connector}
-            actionTypeName={actionType.name}
-            dispatch={dispatch}
-            serverError={serverError}
-            errors={errors}
-            actionTypeRegistry={actionTypeRegistry}
-            http={http}
-          />
-        </EuiModalBody>
-
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>
-            {i18n.translate(
-              'xpack.triggersActionsUI.sections.addModalConnectorForm.cancelButtonLabel',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-          </EuiButtonEmpty>
-
+      <EuiModalBody>
+        <ActionConnectorForm
+          connector={connector}
+          actionTypeName={actionType.name}
+          dispatch={dispatch}
+          serverError={serverError}
+          errors={connectorErrors}
+          actionTypeRegistry={actionTypeRegistry}
+          consumer={consumer}
+        />
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={closeModal}>
+          {i18n.translate(
+            'xpack.triggersActionsUI.sections.addModalConnectorForm.cancelButtonLabel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+        </EuiButtonEmpty>
+        {canSave ? (
           <EuiButton
             fill
             color="secondary"
             data-test-subj="saveActionButtonModal"
             type="submit"
             iconType="check"
-            isDisabled={hasErrors}
             isLoading={isSaving}
             onClick={async () => {
+              if (hasErrors) {
+                setConnector(
+                  getConnectorWithInvalidatedFields(
+                    connector,
+                    configErrors,
+                    secretsErrors,
+                    connectorBaseErrors
+                  )
+                );
+                return;
+              }
               setIsSaving(true);
               const savedAction = await onActionConnectorSave();
               setIsSaving(false);
@@ -195,8 +211,8 @@ export const ConnectorAddModal = ({
               defaultMessage="Save"
             />
           </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+        ) : null}
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

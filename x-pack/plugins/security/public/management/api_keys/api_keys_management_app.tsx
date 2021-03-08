@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from 'src/core/public';
-import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
-import { PluginStartDependencies } from '../../plugin';
-import { APIKeysGridPage } from './api_keys_grid';
-import { APIKeysAPIClient } from './api_keys_api_client';
-import { DocumentationLinksService } from './documentation_links';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
+
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import type { PluginStartDependencies } from '../../plugin';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -21,35 +22,43 @@ interface CreateParams {
 export const apiKeysManagementApp = Object.freeze({
   id: 'api_keys',
   create({ getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.apiKeysTitle', {
+      defaultMessage: 'API Keys',
+    });
     return {
       id: this.id,
       order: 30,
-      title: i18n.translate('xpack.security.management.apiKeysTitle', {
-        defaultMessage: 'API Keys',
-      }),
-      async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ docLinks, http, notifications, i18n: i18nStart }] = await getStartServices();
+      title,
+      async mount({ element, setBreadcrumbs }) {
         setBreadcrumbs([
           {
-            text: i18n.translate('xpack.security.apiKeys.breadcrumb', {
-              defaultMessage: 'API Keys',
-            }),
-            href: `#${basePath}`,
+            text: title,
+            href: `/`,
           },
         ]);
 
+        const [[core], { APIKeysGridPage }, { APIKeysAPIClient }] = await Promise.all([
+          getStartServices(),
+          import('./api_keys_grid'),
+          import('./api_keys_api_client'),
+        ]);
+
+        core.chrome.docTitle.change(title);
+
         render(
-          <i18nStart.Context>
-            <APIKeysGridPage
-              notifications={notifications}
-              docLinks={new DocumentationLinksService(docLinks)}
-              apiKeysAPIClient={new APIKeysAPIClient(http)}
-            />
-          </i18nStart.Context>,
+          <KibanaContextProvider services={core}>
+            <core.i18n.Context>
+              <APIKeysGridPage
+                notifications={core.notifications}
+                apiKeysAPIClient={new APIKeysAPIClient(core.http)}
+              />
+            </core.i18n.Context>
+          </KibanaContextProvider>,
           element
         );
 
         return () => {
+          core.chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

@@ -1,0 +1,27 @@
+@import '@elastic/eui/src/global_styling/variables/_size.scss';
+@import '@elastic/eui/src/global_styling/variables/_colors.scss';
+
+:global .kbnCanvas :local .root .bar {
+  position: absolute;
+}
+
+.bar {
+  composes: euiBottomBar from global;
+}
+
+:global .kbnCanvas :local .bar {
+  transition: bottom .25s;
+  padding: $euiSizeM;
+}
+
+:global .kbnCanvas :local .title {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1;
+}
+
+:global .kbnCanvas .euiIcon__fillNegative {
+  fill: $euiColorGhost !important;
+}

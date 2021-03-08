@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -25,57 +14,118 @@ const TEST_FILTER_COLUMN_NAMES = [
   ['geo.src', 'IN'],
 ];
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'settings',
+    'dashboard',
+    'context',
+    'header',
+  ]);
+  const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/53308
-  describe.skip('context link in discover', function contextSize() {
-    this.tags('smoke');
-    before(async function() {
+  describe('context link in discover', () => {
+    before(async () => {
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await Promise.all(
-        TEST_COLUMN_NAMES.map(columnName => PageObjects.discover.clickFieldListItemAdd(columnName))
-      );
+
+      for (const columnName of TEST_COLUMN_NAMES) {
+        await PageObjects.discover.clickFieldListItemAdd(columnName);
+      }
+
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
     });
+    after(async () => {
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+    });
 
-    it('should open the context view with the selected document as anchor', async function() {
-      // get the timestamp of the first row
-      const firstTimestamp = (await docTable.getFields())[0][0];
-
-      // navigate to the context view
-      await docTable.clickRowToggle({ rowIndex: 0 });
-      await (await docTable.getRowActions({ rowIndex: 0 }))[0].click();
-
+    it('should open the context view with the selected document as anchor', async () => {
       // check the anchor timestamp in the context view
-      await retry.try(async () => {
-        const anchorTimestamp = (await docTable.getFields({ isAnchorRow: true }))[0][0];
-        expect(anchorTimestamp).to.equal(firstTimestamp);
+      await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
+        // get the timestamp of the first row
+        const discoverFields = await docTable.getFields();
+        const firstTimestamp = discoverFields[0][0];
+
+        // navigate to the context view
+        await docTable.clickRowToggle({ rowIndex: 0 });
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        await rowActions[0].click();
+        const contextFields = await docTable.getFields({ isAnchorRow: true });
+        const anchorTimestamp = contextFields[0][0];
+        return anchorTimestamp === firstTimestamp;
       });
     });
 
-    it('should open the context view with the same columns', async function() {
+    it('should open the context view with the same columns', async () => {
       const columnNames = await docTable.getHeaderFields();
       expect(columnNames).to.eql(['Time', ...TEST_COLUMN_NAMES]);
     });
 
-    it('should open the context view with the filters disabled', async function() {
-      const hasDisabledFilters = (
-        await Promise.all(
-          TEST_FILTER_COLUMN_NAMES.map(([columnName, value]) =>
-            filterBar.hasFilter(columnName, value, false)
-          )
-        )
-      ).reduce((result, hasDisabledFilter) => result && hasDisabledFilter, true);
+    it('should open the context view with the filters disabled', async () => {
+      let disabledFilterCounter = 0;
+      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+        if (await filterBar.hasFilter(columnName, value, false)) {
+          disabledFilterCounter++;
+        }
+      }
+      expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
+    });
 
-      expect(hasDisabledFilters).to.be(true);
+    // bugfix: https://github.com/elastic/kibana/issues/92099
+    it('should navigate to the first document and then back to discover', async () => {
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      // navigate to the doc view
+      await docTable.clickRowToggle({ rowIndex: 0 });
+
+      // click the open action
+      await retry.try(async () => {
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        await rowActions[1].click();
+      });
+
+      const hasDocHit = await testSubjects.exists('doc-hit');
+      expect(hasDocHit).to.be(true);
+
+      await testSubjects.click('breadcrumb first');
+      await PageObjects.discover.waitForDiscoverAppOnScreen();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+    });
+
+    it('navigates to doc view from embeddable', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.addSavedSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+      await rowActions[1].click();
+      await PageObjects.common.sleep(250);
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      expect(await browser.getCurrentUrl()).to.contain('#/doc');
+      expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
     });
   });
 }

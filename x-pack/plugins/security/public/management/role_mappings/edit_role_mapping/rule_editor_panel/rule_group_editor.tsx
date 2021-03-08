@@ -1,23 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import './rule_group_editor.scss';
+
 import {
-  EuiPanel,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiButtonEmpty,
+  EuiPanel,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AddRuleButton } from './add_rule_button';
-import { RuleGroupTitle } from './rule_group_title';
-import { FieldRuleEditor } from './field_rule_editor';
-import { RuleGroup, Rule, FieldRule } from '../../model';
+
+import type { FieldRule, Rule, RuleGroup } from '../../model';
 import { isRuleGroup } from '../services/is_rule_group';
+import { AddRuleButton } from './add_rule_button';
+import { FieldRuleEditor } from './field_rule_editor';
+import { RuleGroupTitle } from './rule_group_title';
 
 interface Props {
   rule: RuleGroup;
@@ -88,7 +93,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
                 parentRule={this.props.rule}
                 allowAdd={this.props.allowAdd}
                 ruleDepth={this.props.ruleDepth + 1}
-                onChange={updatedSubRule => {
+                onChange={(updatedSubRule) => {
                   const updatedRule = this.props.rule.clone() as RuleGroup;
                   updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                   this.props.onChange(updatedRule);
@@ -110,7 +115,7 @@ export class RuleGroupEditor extends Component<Props, {}> {
           <EuiFlexItem>
             <FieldRuleEditor
               rule={subRule as FieldRule}
-              onChange={updatedSubRule => {
+              onChange={(updatedSubRule) => {
                 const updatedRule = this.props.rule.clone() as RuleGroup;
                 updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                 this.props.onChange(updatedRule);

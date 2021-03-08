@@ -1,19 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
+import getPort from 'get-port';
+import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions';
+import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
+  enableActionsProxy: boolean;
+  rejectUnauthorized?: boolean;
+  publicBaseUrl?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -23,6 +29,8 @@ const enabledActionTypes = [
   '.pagerduty',
   '.server-log',
   '.servicenow',
+  '.jira',
+  '.resilient',
   '.slack',
   '.webhook',
   'test.authorization',
@@ -30,15 +38,20 @@ const enabledActionTypes = [
   'test.index-record',
   'test.noop',
   'test.rate-limit',
+  'test.throw',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], ssl = false } = options;
+  const {
+    license = 'trial',
+    disabledPlugins = [],
+    ssl = false,
+    rejectUnauthorized = true,
+  } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
-      require.resolve('../../api_integration/config.js')
+      require.resolve('../../api_integration/config.ts')
     );
     const servers = {
       ...xPackApiIntegrationTestsConfig.get('servers'),
@@ -47,6 +60,20 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         protocol: ssl ? 'https' : 'http',
       },
     };
+    // Find all folders in ./plugins since we treat all them as plugin folder
+    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
+    const plugins = allFiles.filter((file) =>
+      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
+    );
+
+    const proxyPort =
+      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6300) }));
+    const actionsProxyUrl = options.enableActionsProxy
+      ? [
+          `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
+          '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
+        ]
+      : [];
 
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
@@ -62,32 +89,33 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ssl,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') &&
-            ['trial', 'basic'].includes(license)}`,
+          `xpack.security.enabled=${
+            !disabledPlugins.includes('security') && ['trial', 'basic'].includes(license)
+          }`,
         ],
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          `--xpack.actions.whitelistedHosts=${JSON.stringify([
-            'localhost',
-            'some.non.existent.com',
-          ])}`,
+          ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
+          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
+          '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
+          '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.alerting.enabled=true',
+          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
+          ...actionsProxyUrl,
+
           '--xpack.eventLog.logEntries=true',
-          `--xpack.actions.preconfigured=${JSON.stringify([
-            {
-              id: 'my-slack1',
+          `--xpack.actions.preconfigured=${JSON.stringify({
+            'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',
-              config: {
+              secrets: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
               },
             },
-            {
-              id: 'custom-system-abc-connector',
+            'custom-system-abc-connector': {
               actionTypeId: 'system-abc-action-type',
               name: 'SystemABC',
               config: {
@@ -100,13 +128,32 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 xyzSecret2: 'credential2',
               },
             },
-          ])}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
-          `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+            'preconfigured-es-index-action': {
+              actionTypeId: '.index',
+              name: 'preconfigured_es_index_action',
+              config: {
+                index: 'functional-test-actions-index-preconfigured',
+                refresh: true,
+                executionTimeField: 'timestamp',
+              },
+            },
+            'preconfigured.test.index-record': {
+              actionTypeId: 'test.index-record',
+              name: 'Test:_Preconfigured_Index_Record',
+              config: {
+                unencrypted: 'ignored-but-required',
+              },
+              secrets: {
+                encrypted: 'this-is-also-ignored-and-also-required',
+              },
+            },
+          })}`,
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...plugins.map(
+            (pluginDir) =>
+              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
+          ),
+          `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

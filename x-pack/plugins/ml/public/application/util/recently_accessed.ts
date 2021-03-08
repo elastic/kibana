@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // utility functions for managing which links get added to kibana's recently accessed list
@@ -37,7 +38,7 @@ export function addItemToRecentlyAccessed(page: string, itemId: string, url: str
       return;
   }
 
-  url = `ml#/${page}/${url}`;
+  url = url.startsWith('/') ? `/app/ml${url}` : `/app/ml/${page}/${url}`;
   const recentlyAccessed = getRecentlyAccessed();
   recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
 }

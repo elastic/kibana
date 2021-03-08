@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { combineReducers } from 'redux';
@@ -24,31 +25,31 @@ export const licenseManagement = combineReducers({
   permissions,
 });
 
-export const getPermission = state => {
+export const getPermission = (state) => {
   return state.permissions.hasPermission;
 };
 
-export const isPermissionsLoading = state => {
+export const isPermissionsLoading = (state) => {
   return state.permissions.loading;
 };
 
-export const getPermissionsError = state => {
+export const getPermissionsError = (state) => {
   return state.permissions.error;
 };
 
-export const getLicense = state => {
+export const getLicense = (state) => {
   return state.license;
 };
 
-export const getLicenseType = state => {
+export const getLicenseType = (state) => {
   return getLicense(state).type;
 };
 
-export const getExpirationMillis = state => {
+export const getExpirationMillis = (state) => {
   return getLicense(state).expiryDateInMillis;
 };
 
-export const getExpirationDate = state => {
+export const getExpirationDate = (state) => {
   //basic licenses do not expire
   if (getLicenseType(state) === 'basic') {
     return null;
@@ -61,16 +62,16 @@ export const getExpirationDate = state => {
   }
 };
 
-export const getExpirationDateFormatted = state => {
+export const getExpirationDateFormatted = (state) => {
   const expirationDate = getExpirationDate(state);
   return expirationDate ? expirationDate.format('LLL z') : null;
 };
 
-export const isExpired = state => {
+export const isExpired = (state) => {
   return new Date().getTime() > getExpirationMillis(state);
 };
 
-export const isImminentExpiration = state => {
+export const isImminentExpiration = (state) => {
   const now = new Date();
   const expirationDate = getExpirationDate(state);
   return (
@@ -80,32 +81,32 @@ export const isImminentExpiration = state => {
   );
 };
 
-export const shouldShowRevertToBasicLicense = state => {
+export const shouldShowRevertToBasicLicense = (state) => {
   const { type } = getLicense(state);
   return type === 'trial' || isImminentExpiration(state) || isExpired(state);
 };
 
-export const uploadNeedsAcknowledgement = state => {
+export const uploadNeedsAcknowledgement = (state) => {
   return !!state.uploadStatus.acknowledge;
 };
 
-export const isApplying = state => {
+export const isApplying = (state) => {
   return !!state.uploadStatus.applying;
 };
 
-export const uploadMessages = state => {
+export const uploadMessages = (state) => {
   return state.uploadStatus.messages;
 };
 
-export const isInvalid = state => {
+export const isInvalid = (state) => {
   return !!state.uploadStatus.invalid;
 };
 
-export const getUploadErrorMessage = state => {
+export const getUploadErrorMessage = (state) => {
   return state.uploadErrorMessage;
 };
 
-export const shouldShowStartTrial = state => {
+export const shouldShowStartTrial = (state) => {
   const licenseType = getLicenseType(state);
   return (
     state.trialStatus.canStartTrial &&
@@ -115,7 +116,7 @@ export const shouldShowStartTrial = state => {
   );
 };
 
-export const shouldShowRequestTrialExtension = state => {
+export const shouldShowRequestTrialExtension = (state) => {
   if (state.trialStatus.canStartTrial) {
     return false;
   }
@@ -123,14 +124,14 @@ export const shouldShowRequestTrialExtension = state => {
   return (type !== 'platinum' && type !== 'enterprise') || isExpired(state);
 };
 
-export const startTrialError = state => {
+export const startTrialError = (state) => {
   return state.trialStatus.startTrialError;
 };
 
-export const startBasicLicenseNeedsAcknowledgement = state => {
+export const startBasicLicenseNeedsAcknowledgement = (state) => {
   return !!state.startBasicStatus.acknowledge;
 };
 
-export const getStartBasicMessages = state => {
+export const getStartBasicMessages = (state) => {
   return state.startBasicStatus.messages;
 };

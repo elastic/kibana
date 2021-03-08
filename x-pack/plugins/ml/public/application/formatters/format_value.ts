@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -39,7 +40,7 @@ export function formatValue(
       // Currently only multi-value response is for lat_long detectors.
       // Return with array style formatting, with items formatted as numbers, rather than
       // the default String format which is set for geo_point and geo_shape fields.
-      const values = value.map(val => formatSingleValue(val, mlFunction, undefined, record));
+      const values = value.map((val) => formatSingleValue(val, mlFunction, undefined, record));
       return `[${values}]`;
     }
   } else {
@@ -53,9 +54,9 @@ export function formatValue(
 // For time_of_day or time_of_week functions the anomaly record
 // containing the timestamp of the anomaly should be supplied in
 // order to correctly format the day or week offset to the time of the anomaly.
-function formatSingleValue(
+export function formatSingleValue(
   value: number,
-  mlFunction: string,
+  mlFunction?: string,
   fieldFormat?: any,
   record?: AnomalyRecordDoc
 ) {
@@ -73,20 +74,14 @@ function formatSingleValue(
       record !== undefined && record.timestamp !== undefined
         ? new Date(record.timestamp)
         : new Date();
-    const utcMoment = moment
-      .utc(d)
-      .startOf('week')
-      .add(value, 's');
+    const utcMoment = moment.utc(d).startOf('week').add(value, 's');
     return moment(utcMoment.valueOf()).format('ddd HH:mm');
   } else if (mlFunction === 'time_of_day') {
     const d =
       record !== undefined && record.timestamp !== undefined
         ? new Date(record.timestamp)
         : new Date();
-    const utcMoment = moment
-      .utc(d)
-      .startOf('day')
-      .add(value, 's');
+    const utcMoment = moment.utc(d).startOf('day').add(value, 's');
     return moment(utcMoment.valueOf()).format('HH:mm');
   } else {
     if (fieldFormat !== undefined) {

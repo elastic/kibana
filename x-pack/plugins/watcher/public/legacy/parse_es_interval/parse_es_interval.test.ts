@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
@@ -32,7 +33,7 @@ describe('parseEsInterval', () => {
     const intervals = ['4w', '12M', '10y'];
     expect.assertions(intervals.length);
 
-    intervals.forEach(interval => {
+    intervals.forEach((interval) => {
       try {
         parseEsInterval(interval);
       } catch (error) {
@@ -45,7 +46,7 @@ describe('parseEsInterval', () => {
     const intervals = ['1', 'h', '0m', '0.5h'];
     expect.assertions(intervals.length);
 
-    intervals.forEach(interval => {
+    intervals.forEach((interval) => {
       try {
         parseEsInterval(interval);
       } catch (error) {

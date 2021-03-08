@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -28,9 +17,13 @@
  * service and the saved object api.
  */
 import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../types';
+import { ISavedObjectDecoratorRegistry } from './decorators';
 import { buildSavedObject } from './helpers/build_saved_object';
 
-export function createSavedObjectClass(services: SavedObjectKibanaServices) {
+export function createSavedObjectClass(
+  services: SavedObjectKibanaServices,
+  decoratorRegistry: ISavedObjectDecoratorRegistry
+) {
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
    * provides additional functionality besides loading/saving/deleting/etc.
@@ -44,7 +37,7 @@ export function createSavedObjectClass(services: SavedObjectKibanaServices) {
     constructor(config: SavedObjectConfig = {}) {
       // @ts-ignore
       const self: SavedObject = this;
-      buildSavedObject(self, config, services);
+      buildSavedObject(self, config, services, decoratorRegistry.getOrderedDecorators(services));
     }
   }
 

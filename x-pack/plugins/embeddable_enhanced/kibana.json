@@ -1,0 +1,7 @@
+{
+  "id": "embeddableEnhanced",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["embeddable", "kibanaReact", "uiActions", "uiActionsEnhanced"]
+}

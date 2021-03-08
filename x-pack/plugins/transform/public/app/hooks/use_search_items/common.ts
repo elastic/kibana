@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from 'src/core/public';
@@ -37,17 +38,17 @@ export function loadIndexPatterns(
       fields: ['id', 'title', 'type', 'fields'],
       perPage: 10000,
     })
-    .then(response => {
+    .then((response) => {
       indexPatternCache = response.savedObjects;
 
       if (refreshIndexPatterns === null) {
         refreshIndexPatterns = () => {
           return new Promise((resolve, reject) => {
             loadIndexPatterns(savedObjectsClient, indexPatterns)
-              .then(resp => {
+              .then((resp) => {
                 resolve(resp);
               })
-              .catch(error => {
+              .catch((error) => {
                 reject(error);
               });
           });
@@ -59,7 +60,7 @@ export function loadIndexPatterns(
 }
 
 export function getIndexPatternIdByTitle(indexPatternTitle: string): string | undefined {
-  return indexPatternCache.find(d => d?.attributes?.title === indexPatternTitle)?.id;
+  return indexPatternCache.find((d) => d?.attributes?.title === indexPatternTitle)?.id;
 }
 
 type CombinedQuery = Record<'bool', any> | object;

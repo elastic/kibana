@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -39,7 +40,7 @@ export class FilterListUsagePopover extends Component {
 
     const linkText = `${entityValues.length} ${entityType}${entityValues.length !== 1 ? 's' : ''}`;
 
-    const listItems = entityValues.map(value => <li key={value}>{value}</li>);
+    const listItems = entityValues.map((value) => <li key={value}>{value}</li>);
 
     const button = (
       <EuiButtonEmpty size="s" color="primary" onClick={this.onButtonClick}>

@@ -1,4 +1,4 @@
-# Conventions
+# Watcher
 
 This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
 

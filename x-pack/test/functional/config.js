@@ -1,10 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-/* eslint-disable import/no-default-export */
 
 import { resolve } from 'path';
 
@@ -13,7 +12,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function({ readConfigFile }) {
+export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -38,7 +37,7 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/machine_learning'),
+      resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
@@ -53,11 +52,14 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/ingest_pipelines'),
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
-      resolve(__dirname, './apps/endpoint'),
+      resolve(__dirname, './apps/reporting_management'),
+      resolve(__dirname, './apps/management'),
+
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -86,15 +88,15 @@ export default async function({ readConfigFile }) {
         '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
-        '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
-        '--xpack.endpoint.enabled=true',
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'visualization:visualize:legacyChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
@@ -113,8 +115,7 @@ export default async function({ readConfigFile }) {
         pathname: '/app/monitoring',
       },
       logstashPipelines: {
-        pathname: '/app/kibana',
-        hash: '/management/logstash/pipelines',
+        pathname: '/app/management/ingest/pipelines',
       },
       maps: {
         pathname: '/app/maps',
@@ -123,12 +124,16 @@ export default async function({ readConfigFile }) {
         pathname: '/app/graph',
       },
       grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
+        pathname: '/app/dev_tools',
+        hash: '/grokdebugger',
       },
       searchProfiler: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/searchprofiler',
+        pathname: '/app/dev_tools',
+        hash: '/searchprofiler',
+      },
+      painlessLab: {
+        pathname: '/app/dev_tools',
+        hash: '/painless_lab',
       },
       spaceSelector: {
         pathname: '/',
@@ -146,61 +151,50 @@ export default async function({ readConfigFile }) {
       uptime: {
         pathname: '/app/uptime',
       },
-      apm: {
-        pathname: '/app/apm',
-      },
       ml: {
         pathname: '/app/ml',
       },
       roleMappings: {
-        pathname: '/app/kibana',
-        hash: '/management/security/role_mappings',
+        pathname: '/app/management/security/role_mappings',
       },
       rollupJob: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/',
+        pathname: '/app/management/data/rollup_jobs',
       },
       apiKeys: {
-        pathname: '/app/kibana',
-        hash: '/management/security/api_keys/',
+        pathname: '/app/management/security/api_keys',
       },
       licenseManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/license_management',
+        pathname: '/app/management/stack/license_management',
       },
       indexManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_management',
+        pathname: '/app/management/data/index_management',
       },
       indexLifecycleManagement: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_lifecycle_management',
+        pathname: '/app/management/data/index_lifecycle_management',
+      },
+      ingestPipelines: {
+        pathname: '/app/management/ingest/ingest_pipelines',
       },
       snapshotRestore: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/snapshot_restore',
-      },
-      crossClusterReplication: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/cross_cluster_replication',
+        pathname: '/app/management/data/snapshot_restore',
       },
       remoteClusters: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/remote_clusters',
+        pathname: '/app/management/data/remote_clusters',
+      },
+      crossClusterReplication: {
+        pathname: '/app/management/data/cross_cluster_replication',
       },
       apm: {
         pathname: '/app/apm',
       },
       watcher: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/watcher/watches/',
+        pathname: '/app/management/insightsAndAlerting/watcher/watches',
       },
       transform: {
-        pathname: '/app/kibana/',
-        hash: '/management/elasticsearch/transform',
+        pathname: '/app/management/data/transform',
       },
-      endpoint: {
-        pathname: '/app/endpoint',
+      reporting: {
+        pathname: '/app/management/insightsAndAlerting/reporting',
       },
     },
 
@@ -234,6 +228,236 @@ export default async function({ readConfigFile }) {
           kibana: [],
         },
 
+        global_canvas_all: {
+          kibana: [
+            {
+              feature: {
+                canvas: ['all'],
+                visualize: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_discover_all: {
+          kibana: [
+            {
+              feature: {
+                discover: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_dashboard_read: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_discover_read: {
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_read: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_all: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_dashboard_all: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_maps_all: {
+          kibana: [
+            {
+              feature: {
+                maps: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_maps_read: {
+          kibana: [
+            {
+              feature: {
+                maps: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_points_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_points*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_shapes_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        meta_for_geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['meta_for_geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        geoconnections_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['connections*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        geoall_data_writer: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['create', 'read', 'view_index_metadata', 'monitor', 'create_index'],
+              },
+            ],
+          },
+        },
+
+        global_index_pattern_management_all: {
+          kibana: [
+            {
+              feature: {
+                indexPatterns: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_devtools_read: {
+          kibana: [
+            {
+              feature: {
+                dev_tools: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_upgrade_assistant_role: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        // using this role even for remote clusters
+        global_ccr_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        manage_rollups_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_rollup'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'delete', 'create_index', 'view_index_metadata'],
+              },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
@@ -247,6 +471,60 @@ export default async function({ readConfigFile }) {
               spaces: ['default'],
             },
           ],
+        },
+
+        manage_security: {
+          elasticsearch: {
+            cluster: ['manage_security'],
+          },
+        },
+
+        ccr_user: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+        },
+
+        manage_ilm: {
+          elasticsearch: {
+            cluster: ['manage_ilm'],
+          },
+        },
+
+        index_management_user: {
+          elasticsearch: {
+            cluster: ['monitor', 'manage_index_templates'],
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        ingest_pipelines_user: {
+          elasticsearch: {
+            cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+          },
+        },
+
+        license_management_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+        },
+
+        logstash_read_user: {
+          elasticsearch: {
+            cluster: ['manage_logstash_pipelines'],
+          },
+        },
+
+        remote_clusters_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
         },
       },
       defaultRoles: ['superuser'],

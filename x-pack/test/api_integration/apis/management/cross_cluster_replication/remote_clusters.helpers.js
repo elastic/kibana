@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { REMOTE_CLUSTER_NAME, REMOTE_CLUSTERS_API_BASE_PATH } from './constants';
 
 /**
@@ -10,7 +12,7 @@ import { REMOTE_CLUSTER_NAME, REMOTE_CLUSTERS_API_BASE_PATH } from './constants'
  * Remote clusters for the tests.
  * @param {Supertest} supertest The supertest instance
  */
-export const registerHelpers = supertest => {
+export const registerHelpers = (supertest) => {
   let remoteClustersCreated = [];
 
   const addCluster = (name = REMOTE_CLUSTER_NAME) => {
@@ -33,7 +35,7 @@ export const registerHelpers = supertest => {
   };
 
   const deleteCluster = (name = REMOTE_CLUSTER_NAME) => {
-    remoteClustersCreated = remoteClustersCreated.filter(c => c !== name);
+    remoteClustersCreated = remoteClustersCreated.filter((c) => c !== name);
 
     return supertest.delete(`${REMOTE_CLUSTERS_API_BASE_PATH}/${name}`).set('kbn-xsrf', 'xxx');
   };

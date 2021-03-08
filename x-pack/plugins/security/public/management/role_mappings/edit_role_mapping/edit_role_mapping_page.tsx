@@ -1,39 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
+  EuiLink,
   EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiLink,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart } from 'src/core/public';
-import { RoleMapping } from '../../../../common/model';
-import { RuleEditorPanel } from './rule_editor_panel';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DocLinksStart, NotificationsStart, ScopedHistory } from 'src/core/public';
+
+import type { RoleMapping } from '../../../../common/model';
+import type { RolesAPIClient } from '../../roles';
 import {
+  DeleteProvider,
   NoCompatibleRealms,
   PermissionDenied,
-  DeleteProvider,
   SectionLoading,
 } from '../components';
-import { RolesAPIClient } from '../../roles';
-import { ROLE_MAPPINGS_PATH } from '../../management_urls';
-import { validateRoleMappingForSave } from './services/role_mapping_validation';
+import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { MappingInfoPanel } from './mapping_info_panel';
-import { DocumentationLinksService } from '../documentation_links';
-import { RoleMappingsAPIClient } from '../role_mappings_api_client';
+import { RuleEditorPanel } from './rule_editor_panel';
+import { validateRoleMappingForSave } from './services/role_mapping_validation';
 
 interface State {
   loadState: 'loading' | 'permissionDenied' | 'ready' | 'saveInProgress';
@@ -54,7 +56,8 @@ interface Props {
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   notifications: NotificationsStart;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
+  history: ScopedHistory;
 }
 
 export class EditRoleMappingPage extends Component<Props, State> {
@@ -106,7 +109,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
           <EuiSpacer />
           <MappingInfoPanel
             roleMapping={this.state.roleMapping!}
-            onChange={roleMapping => this.setState({ roleMapping })}
+            onChange={(roleMapping) => this.setState({ roleMapping })}
             mode={this.editingExistingRoleMapping() ? 'edit' : 'create'}
             validateForm={this.state.validateForm}
             canUseInlineScripts={this.state.canUseInlineScripts}
@@ -119,7 +122,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
             rawRules={this.state.roleMapping!.rules}
             validateForm={this.state.validateForm}
             onValidityChange={this.onRuleValidityChange}
-            onChange={rules =>
+            onChange={(rules) =>
               this.setState({
                 roleMapping: {
                   ...this.state.roleMapping!,
@@ -162,7 +165,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href={this.props.docLinks.getRoleMappingDocUrl()}
+                    href={this.props.docLinks.links.security.mappingRoles}
                     external={true}
                     target="_blank"
                   >
@@ -179,7 +182,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         {!this.state.hasCompatibleRealms && (
           <>
             <EuiSpacer size="s" />
-            <NoCompatibleRealms docLinks={this.props.docLinks} />
+            <NoCompatibleRealms />
           </>
         )}
       </Fragment>
@@ -218,7 +221,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
               roleMappingsAPI={this.props.roleMappingsAPI}
               notifications={this.props.notifications}
             >
-              {deleteRoleMappingsPrompt => {
+              {(deleteRoleMappingsPrompt) => {
                 return (
                   <EuiButtonEmpty
                     onClick={() =>
@@ -279,7 +282,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         });
         this.backToRoleMappingsList();
       })
-      .catch(e => {
+      .catch((e) => {
         this.props.notifications.toasts.addError(e, {
           title: i18n.translate('xpack.security.management.editRoleMapping.saveError', {
             defaultMessage: `Error saving role mapping`,
@@ -342,7 +345,5 @@ export class EditRoleMappingPage extends Component<Props, State> {
     }
   }
 
-  private backToRoleMappingsList = () => {
-    window.location.hash = ROLE_MAPPINGS_PATH;
-  };
+  private backToRoleMappingsList = () => this.props.history.push('/');
 }

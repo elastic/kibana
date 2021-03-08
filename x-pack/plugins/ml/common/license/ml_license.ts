@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable, Subscription } from 'rxjs';
@@ -31,18 +32,18 @@ export class MlLicense {
     license$: Observable<ILicense>,
     postInitFunctions?: Array<(lic: MlLicense) => void>
   ) {
-    this._licenseSubscription = license$.subscribe(async license => {
+    this._licenseSubscription = license$.subscribe(async (license) => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
 
       this._license = license;
       this._isSecurityEnabled = securityIsEnabled;
       this._hasLicenseExpired = this._license.status === 'expired';
       this._isMlEnabled = this._license.getFeature(PLUGIN_ID).isEnabled;
-      this._isMinimumLicense = this._license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid';
-      this._isFullLicense = this._license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid';
+      this._isMinimumLicense = isMinimumLicense(this._license);
+      this._isFullLicense = isFullLicense(this._license);
 
       if (this._initialized === false && postInitFunctions !== undefined) {
-        postInitFunctions.forEach(f => f(this));
+        postInitFunctions.forEach((f) => f(this));
       }
       this._initialized = true;
     });
@@ -73,4 +74,16 @@ export class MlLicense {
   public isFullLicense() {
     return this._isFullLicense;
   }
+}
+
+export function isFullLicense(license: ILicense) {
+  return license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid';
+}
+
+export function isMinimumLicense(license: ILicense) {
+  return license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid';
+}
+
+export function isMlEnabled(license: ILicense) {
+  return license.getFeature(PLUGIN_ID).isEnabled;
 }

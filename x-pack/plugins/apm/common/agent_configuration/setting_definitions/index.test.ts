@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash';
@@ -13,7 +14,7 @@ describe('filterByAgent', () => {
   describe('when `excludeAgents` is dotnet and nodejs', () => {
     const setting = {
       key: 'my-setting',
-      excludeAgents: ['dotnet', 'nodejs']
+      excludeAgents: ['dotnet', 'nodejs'],
     } as SettingDefinition;
 
     it('should not include dotnet', () => {
@@ -28,7 +29,7 @@ describe('filterByAgent', () => {
   describe('when `includeAgents` is dotnet and nodejs', () => {
     const setting = {
       key: 'my-setting',
-      includeAgents: ['dotnet', 'nodejs']
+      includeAgents: ['dotnet', 'nodejs'],
     } as SettingDefinition;
 
     it('should not include go', () => {
@@ -45,11 +46,14 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent('go')).toEqual([
         'capture_body',
         'capture_headers',
+        'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
+        'transaction_ignore_urls',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -61,12 +65,14 @@ describe('filterByAgent', () => {
         'capture_headers',
         'circuit_breaker_enabled',
         'enable_log_correlation',
+        'log_level',
         'profiling_inferred_spans_enabled',
         'profiling_inferred_spans_excluded_classes',
         'profiling_inferred_spans_included_classes',
         'profiling_inferred_spans_min_duration',
         'profiling_inferred_spans_sampling_interval',
         'recording',
+        'sanitize_field_names',
         'server_timeout',
         'span_frames_min_duration',
         'stack_trace_limit',
@@ -75,30 +81,32 @@ describe('filterByAgent', () => {
         'stress_monitor_gc_stress_threshold',
         'stress_monitor_system_cpu_relief_threshold',
         'stress_monitor_system_cpu_stress_threshold',
+        'transaction_ignore_urls',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
     it('js-base', () => {
       expect(getSettingKeysForAgent('js-base')).toEqual([
-        'recording',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
     it('rum-js', () => {
       expect(getSettingKeysForAgent('rum-js')).toEqual([
-        'recording',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
     it('nodejs', () => {
       expect(getSettingKeysForAgent('nodejs')).toEqual([
         'capture_body',
+        'log_level',
+        'sanitize_field_names',
+        'transaction_ignore_urls',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -108,10 +116,13 @@ describe('filterByAgent', () => {
         'api_request_time',
         'capture_body',
         'capture_headers',
+        'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
+        'transaction_ignore_urls',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -121,10 +132,12 @@ describe('filterByAgent', () => {
         'capture_headers',
         'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
+        'transaction_ignore_urls',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -136,9 +149,11 @@ describe('filterByAgent', () => {
         'capture_headers',
         'log_level',
         'recording',
+        'sanitize_field_names',
         'span_frames_min_duration',
+        'transaction_ignore_urls',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -146,7 +161,7 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual([
         'capture_body',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
   });
@@ -155,7 +170,7 @@ describe('filterByAgent', () => {
 describe('settingDefinitions', () => {
   it('should have correct default values', () => {
     expect(
-      settingDefinitions.map(def => {
+      settingDefinitions.map((def) => {
         return {
           ...omit(def, [
             'category',
@@ -164,9 +179,9 @@ describe('settingDefinitions', () => {
             'excludeAgents',
             'includeAgents',
             'label',
-            'validation'
+            'validation',
           ]),
-          validationName: def.validation.name
+          validationName: def.validation.name,
         };
       })
     ).toMatchSnapshot();
@@ -175,5 +190,5 @@ describe('settingDefinitions', () => {
 
 function getSettingKeysForAgent(agentName: AgentName | undefined) {
   const definitions = settingDefinitions.filter(filterByAgent(agentName));
-  return definitions.map(def => def.key);
+  return definitions.map((def) => def.key);
 }

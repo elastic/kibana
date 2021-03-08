@@ -1,26 +1,59 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+
+const testMigrateMatchAllQuery = (migrate: Function) => {
+  it('should migrate obsolete match_all query', () => {
+    const migratedDoc = migrate({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            query: {
+              match_all: {},
+            },
+          }),
+        },
+      },
+    });
+
+    const migratedSearchSource = JSON.parse(
+      migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+    );
+
+    expect(migratedSearchSource).toEqual({
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  });
+
+  it('should return original doc if searchSourceJSON cannot be parsed', () => {
+    const migratedDoc = migrate({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+      },
+    });
+
+    expect(migratedDoc).toEqual({
+      type: 'area',
+      attributes: {
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+      },
+    });
+  });
+};
 
 describe('migration visualization', () => {
   describe('6.7.2', () => {
@@ -30,6 +63,10 @@ describe('migration visualization', () => {
         savedObjectMigrationContext
       );
     let doc: any;
+
+    describe('migrateMatchAllQuery', () => {
+      testMigrateMatchAllQuery(migrate);
+    });
 
     describe('date histogram time zone removal', () => {
       beforeEach(() => {
@@ -149,32 +186,6 @@ describe('migration visualization', () => {
         expect(aggs[0]).toHaveProperty('params.time_zone');
         expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
         expect(aggs[2]).not.toHaveProperty('params.time_zone');
-      });
-
-      it('should migrate obsolete match_all query', () => {
-        const migratedDoc = migrate({
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({
-                query: {
-                  match_all: {},
-                },
-              }),
-            },
-          },
-        });
-        const migratedSearchSource = JSON.parse(
-          migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
-        );
-
-        expect(migratedSearchSource).toEqual({
-          query: {
-            query: '',
-            language: 'kuery',
-          },
-        });
       });
     });
   });
@@ -623,12 +634,12 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
       ];
       const tableDoc = generateDoc('table', aggs);
@@ -656,7 +667,7 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
@@ -681,7 +692,7 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
       ];
       const tableDoc = generateDoc('table', aggs);
@@ -701,12 +712,12 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
         {
           id: '4',
@@ -731,15 +742,15 @@ describe('migration visualization', () => {
         {
           id: '2',
           schema: 'split',
-          params: { foo: 'bar', row: true },
+          params: { foo: 'bar' },
         },
         {
           id: '3',
           schema: 'split',
-          params: { hey: 'ya', row: false },
+          params: { hey: 'ya' },
         },
       ];
-      const expected = [{}, { foo: 'bar', row: true }, { hey: 'ya' }];
+      const expected = [{}, { foo: 'bar' }, { hey: 'ya' }];
       const migrated = migrate(generateDoc('table', aggs));
       const actual = JSON.parse(migrated.attributes.visState);
 
@@ -1386,11 +1397,11 @@ describe('migration visualization', () => {
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
-    const generateDoc = (params: any) => ({
+    const generateDoc = (visState: any) => ({
       attributes: {
         title: 'My Vis',
         description: 'This is my super cool vis.',
-        visState: JSON.stringify({ params }),
+        visState: JSON.stringify(visState),
         uiStateJSON: '{}',
         version: 1,
         kibanaSavedObjectMeta: {
@@ -1416,7 +1427,7 @@ describe('migration visualization', () => {
           },
         ],
       };
-      const timeSeriesDoc = generateDoc(params);
+      const timeSeriesDoc = generateDoc({ params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
 
@@ -1453,11 +1464,302 @@ describe('migration visualization', () => {
           },
         ],
       };
-      const timeSeriesDoc = generateDoc(params);
+      const timeSeriesDoc = generateDoc({ params });
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
 
       expect(migratedParams.gauge_color_rules[1]).toEqual(params.gauge_color_rules[1]);
+    });
+
+    it('should move "row" field on split chart by a row or column to vis.params', () => {
+      const visData = {
+        type: 'area',
+        aggs: [
+          {
+            id: '1',
+            schema: 'metric',
+            params: {},
+          },
+          {
+            id: '2',
+            type: 'terms',
+            schema: 'split',
+            params: { foo: 'bar', row: true },
+          },
+        ],
+        params: {},
+      };
+
+      const migrated = migrate(generateDoc(visData));
+      const actual = JSON.parse(migrated.attributes.visState);
+
+      expect(actual.aggs.filter((agg: any) => 'row' in agg.params)).toEqual([]);
+      expect(actual.params.row).toBeTruthy();
+    });
+  });
+
+  describe('7.9.3', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.9.3'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    describe('migrateMatchAllQuery', () => {
+      testMigrateMatchAllQuery(migrate);
+    });
+  });
+
+  describe('7.8.0 tsvb split_color_mode', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.8.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const generateDoc = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        type: 'visualization',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify(params),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+
+    it('should change a missing split_color_mode to gradient', () => {
+      const params = { type: 'metrics', params: { series: [{}] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('gradient');
+    });
+
+    it('should not change the color mode if it is set', () => {
+      const params = { type: 'metrics', params: { series: [{ split_color_mode: 'gradient' }] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('gradient');
+    });
+
+    it('should not change the color mode if it is non-default', () => {
+      const params = { type: 'metrics', params: { series: [{ split_color_mode: 'rainbow' }] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('rainbow');
+    });
+
+    it('should not migrate a visualization of unknown type', () => {
+      const params = { type: 'unknown', params: { series: [{}] } };
+      const doc = generateDoc(params);
+      const migratedDoc = migrate(doc);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toBeUndefined();
+    });
+  });
+
+  describe('7.10.0 tsvb filter_ratio migration', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.10.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const testDoc1 = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{"type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries",
+        "series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417",
+        "type":"filter_ratio","numerator":"Filter Bytes Test:>1000","denominator":"Filter Bytes Test:<1000"}]}]}}`,
+      },
+    };
+
+    it('should replace numerator string with a query object', () => {
+      const migratedTestDoc1 = migrate(testDoc1);
+      const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
+
+      expect(metric.numerator).toHaveProperty('query');
+      expect(metric.numerator).toHaveProperty('language');
+    });
+
+    it('should replace denominator string with a query object', () => {
+      const migratedTestDoc1 = migrate(testDoc1);
+      const metric = JSON.parse(migratedTestDoc1.attributes.visState).params.series[0].metrics[0];
+
+      expect(metric.denominator).toHaveProperty('query');
+      expect(metric.denominator).toHaveProperty('language');
+    });
+  });
+
+  describe('7.10.0 remove tsvb search source', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.10.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const generateDoc = (visState: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify(visState),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            filter: [],
+            query: {
+              query: {
+                query_string: {
+                  query: '*',
+                },
+              },
+              language: 'lucene',
+            },
+          }),
+        },
+      },
+    });
+
+    it('should remove the search source JSON', () => {
+      const timeSeriesDoc = generateDoc({ type: 'metrics' });
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
+      const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
+      const {
+        kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
+        ...oldAttributes
+      } = migratedtimeSeriesDoc.attributes;
+      expect(attributes).toEqual(oldAttributes);
+    });
+  });
+
+  describe('7.11.0 Data table vis - enable toolbar', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.11.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const testDoc = {
+      attributes: {
+        title: 'My data table vis',
+        description: 'Data table vis for test.',
+        visState: `{"type":"table","params": {"perPage": 10,"showPartialRows": false,"showTotal": false,"totalFunc": "sum"}}`,
+      },
+    };
+
+    it('should enable toolbar in visState.params', () => {
+      const migratedDataTableVisDoc = migrate(testDoc);
+      const visState = JSON.parse(migratedDataTableVisDoc.attributes.visState);
+      expect(visState.params.showToolbar).toEqual(true);
+    });
+  });
+
+  describe('7.12.0 update vislib visualization defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.12.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = (type = 'area', categoryAxes?: object[], valueAxes?: object[]) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type,
+          title: '[Flights] Delay Type',
+          params: {
+            type: type === 'horizontal_bar' ? 'histogram' : type,
+            categoryAxes: categoryAxes ?? [
+              {
+                labels: {},
+              },
+            ],
+            valueAxes: valueAxes ?? [
+              {
+                labels: {},
+              },
+            ],
+          },
+        }),
+      },
+    });
+
+    it('should return original doc if not area, line or histogram chart', () => {
+      const doc = getTestDoc('pie');
+      const migratedTestDoc = migrate(doc);
+      expect(migratedTestDoc).toEqual(doc);
+    });
+
+    it('should decorate existing docs with isVislibVis flag', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { isVislibVis } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(isVislibVis).toEqual(true);
+    });
+
+    it('should decorate existing docs with the kibana legacy palette', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+
+    describe('labels.filter', () => {
+      it('should keep existing categoryAxes labels.filter value', () => {
+        const migratedTestDoc = migrate(getTestDoc('area', [{ labels: { filter: false } }]));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should keep existing valueAxes labels.filter value', () => {
+        const migratedTestDoc = migrate(
+          getTestDoc('area', undefined, [{ labels: { filter: true } }])
+        );
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+
+      it('should set categoryAxes labels.filter to true for non horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc());
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
+
+      it('should set categoryAxes labels.filter to false for horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.categoryAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should set valueAxes labels.filter to false for non horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc());
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(false);
+      });
+
+      it('should set valueAxes labels.filter to true for horizontal_bar', () => {
+        const migratedTestDoc = migrate(getTestDoc('horizontal_bar'));
+        const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.valueAxes;
+
+        expect(result.labels.filter).toEqual(true);
+      });
     });
   });
 });

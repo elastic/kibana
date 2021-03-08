@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { FunctionComponent, createElement } from 'react';
@@ -74,36 +63,18 @@ export const Template: FunctionComponent<Props> = ({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>Elastic Kibana</title>
+        <title>Elastic</title>
         <Fonts url={uiPublicUrl} />
-        {/* Favicons (generated from http://realfavicongenerator.net/) */}
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href={`${uiPublicUrl}/favicons/apple-touch-icon.png`}
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href={`${uiPublicUrl}/favicons/favicon-32x32.png`}
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
-        />
-        <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
-        <link
-          rel="mask-icon"
-          color="#e8488b"
-          href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
-        />
-        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
+        {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
+        <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
+        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
         <meta name="theme-color" content="#ffffff" />
+        <meta name="color-scheme" content="light dark" />
         <Styles darkMode={darkMode} />
+
+        {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
+        <meta name="add-styles-here" />
+        <meta name="add-scripts-here" />
       </head>
       <body>
         {createElement('kbn-csp', {
@@ -122,10 +93,10 @@ export const Template: FunctionComponent<Props> = ({
               className="kbnWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
                 defaultMessage:
-                  'Elastic Kibana did not load properly. Check the server output for more information.',
+                  'Elastic did not load properly. Check the server output for more information.',
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic Kibana' })}
+              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
             </div>
             <div className="kbnProgress" />
           </div>
@@ -142,7 +113,7 @@ export const Template: FunctionComponent<Props> = ({
           <div className="kbnWelcomeText">
             {i18n('core.ui.legacyBrowserMessage', {
               defaultMessage:
-                'This Kibana installation has strict security requirements enabled that your current browser does not meet.',
+                'This Elastic installation has strict security requirements enabled that your current browser does not meet.',
             })}
           </div>
         </div>

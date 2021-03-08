@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../services';
 import { LicensingPluginSetup } from '../../../plugins/licensing/public';
@@ -10,7 +12,7 @@ import { createScenario } from '../scenario';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function(ftrContext: FtrProviderContext) {
+export default function (ftrContext: FtrProviderContext) {
   const { getService } = ftrContext;
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -27,15 +29,15 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
+        await browser.executeAsync(async (cb) => {
+          const { setup, testUtils } = window._coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
           await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
+          licensing.license$.subscribe((license) => cb(license.type));
         })
       ).to.be('basic');
 
@@ -43,15 +45,15 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
+        await browser.executeAsync(async (cb) => {
+          const { setup, testUtils } = window._coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
           await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
+          licensing.license$.subscribe((license) => cb(license.type));
         })
       ).to.be('basic');
 
@@ -59,15 +61,15 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
+        await browser.executeAsync(async (cb) => {
+          const { setup, testUtils } = window._coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
           await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
+          licensing.license$.subscribe((license) => cb(license.type));
         })
       ).to.be('trial');
 
@@ -75,15 +77,15 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
+        await browser.executeAsync(async (cb) => {
+          const { setup, testUtils } = window._coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
           await testUtils.delay(500);
 
           const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
+          licensing.license$.subscribe((license) => cb(license.type));
         })
       ).to.be('basic');
 

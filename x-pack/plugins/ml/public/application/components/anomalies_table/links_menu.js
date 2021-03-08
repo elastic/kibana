@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison from 'rison-node';
 import PropTypes from 'prop-types';
@@ -17,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-import { checkPermission } from '../../privilege/check_privilege';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
@@ -26,9 +27,10 @@ import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../common/constants/ml_url_generator';
 /*
  * Component for rendering the links menu inside a cell in the anomalies table.
  */
@@ -51,17 +53,19 @@ class LinksMenuUI extends Component {
     };
   }
 
-  openCustomUrl = customUrl => {
+  openCustomUrl = (customUrl) => {
     const { anomaly, interval, isAggregatedData } = this.props;
 
     console.log('Anomalies Table - open customUrl for record:', anomaly);
 
     // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
     // Create a copy of the record as we are adding properties into it.
-    const record = _.cloneDeep(anomaly.source);
+    const record = cloneDeep(anomaly.source);
     const timestamp = record.timestamp;
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval = parseInterval(customUrl.time_range);
+    const basePath = this.props.kibana.services.http.basePath.get();
+
     if (configuredUrlValue.includes('$earliest$')) {
       let earliestMoment = moment(timestamp);
       if (timeRangeInterval !== null) {
@@ -97,7 +101,7 @@ class LinksMenuUI extends Component {
     if (
       (configuredUrlValue.includes('$mlcategoryterms$') ||
         configuredUrlValue.includes('$mlcategoryregex$')) &&
-      _.has(record, 'mlcategory')
+      record.mlcategory !== undefined
     ) {
       const jobId = record.job_id;
 
@@ -107,19 +111,19 @@ class LinksMenuUI extends Component {
 
       ml.results
         .getCategoryDefinition(jobId, categoryId)
-        .then(resp => {
+        .then((resp) => {
           // Prefix each of the terms with '+' so that the Elasticsearch Query String query
           // run in a drilldown Kibana dashboard has to match on all terms.
-          const termsArray = resp.terms.split(' ').map(term => `+${term}`);
+          const termsArray = resp.terms.split(' ').map((term) => `+${term}`);
           record.mlcategoryterms = termsArray.join(' ');
           record.mlcategoryregex = resp.regex;
 
           // Replace any tokens in the configured url_value with values from the source record,
           // and then open link in a new tab/window.
           const urlPath = replaceStringTokens(customUrl.url_value, record, true);
-          openCustomUrlWindow(urlPath, customUrl);
+          openCustomUrlWindow(urlPath, customUrl, basePath);
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
           const { toasts } = this.props.kibana.services.notifications;
           toasts.addDanger(
@@ -136,11 +140,20 @@ class LinksMenuUI extends Component {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
       const urlPath = getUrlForRecord(customUrl, record);
-      openCustomUrlWindow(urlPath, customUrl);
+      openCustomUrlWindow(urlPath, customUrl, basePath);
     }
   };
 
-  viewSeries = () => {
+  viewSeries = async () => {
+    const {
+      services: {
+        share: {
+          urlGenerators: { getUrlGenerator },
+        },
+      },
+    } = this.props.kibana;
+    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+
     const record = this.props.anomaly.source;
     const bounds = this.props.bounds;
     const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
@@ -154,59 +167,49 @@ class LinksMenuUI extends Component {
     // Extract the by, over and partition fields for the record.
     const entityCondition = {};
 
-    if (_.has(record, 'partition_field_value')) {
+    if (record.partition_field_value !== undefined) {
       entityCondition[record.partition_field_name] = record.partition_field_value;
     }
 
-    if (_.has(record, 'over_field_value')) {
+    if (record.over_field_value !== undefined) {
       entityCondition[record.over_field_name] = record.over_field_value;
     }
 
-    if (_.has(record, 'by_field_value')) {
+    if (record.by_field_value !== undefined) {
       // Note that analyses with by and over fields, will have a top-level by_field_name,
       // but the by_field_value(s) will be in the nested causes array.
       // TODO - drilldown from cause in expanded row only?
       entityCondition[record.by_field_name] = record.by_field_value;
     }
 
-    // Use rison to build the URL .
-    const _g = rison.encode({
-      ml: {
+    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
+      excludeBasePath: false,
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
         jobIds: [record.job_id],
-      },
-      refreshInterval: {
-        display: 'Off',
-        pause: false,
-        value: 0,
-      },
-      time: {
-        from: from,
-        to: to,
-        mode: 'absolute',
-      },
-    });
-
-    const _a = rison.encode({
-      mlTimeSeriesExplorer: {
+        refreshInterval: {
+          display: 'Off',
+          pause: true,
+          value: 0,
+        },
+        timeRange: {
+          from: from,
+          to: to,
+          mode: 'absolute',
+        },
         zoom: {
           from: zoomFrom,
           to: zoomTo,
         },
         detectorIndex: record.detector_index,
         entities: entityCondition,
-      },
-      query: {
         query_string: {
           analyze_wildcard: true,
           query: '*',
         },
       },
     });
-
-    // Need to encode the _a parameter in case any entities contain unsafe characters such as '+'.
-    let path = '#/timeseriesexplorer';
-    path += `?_g=${_g}&_a=${encodeURIComponent(_a)}`;
-    window.open(path, '_blank');
+    window.open(singleMetricViewerLink, '_blank');
   };
 
   viewExamples = () => {
@@ -267,7 +270,7 @@ class LinksMenuUI extends Component {
       // categorization field is of mapping type text (preferred) or keyword.
       ml.results
         .getCategoryDefinition(record.job_id, categoryId)
-        .then(resp => {
+        .then((resp) => {
           let query = null;
           // Build query using categorization regex (if keyword type) or terms (if text type).
           // Check for terms or regex in case categoryId represents an anomaly from the absence of the
@@ -300,7 +303,7 @@ class LinksMenuUI extends Component {
           const _g = rison.encode({
             refreshInterval: {
               display: 'Off',
-              pause: false,
+              pause: true,
               value: 0,
             },
             time: {
@@ -322,12 +325,12 @@ class LinksMenuUI extends Component {
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
           const { basePath } = this.props.kibana.services.http;
           let path = basePath.get();
-          path += '/app/kibana#/discover';
+          path += '/app/discover#/';
           path += '?_g=' + _g;
           path += '&_a=' + encodeURIComponent(_a);
           window.open(path, '_blank');
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log('viewExamples(): error loading categoryDefinition:', resp);
           const { toasts } = this.props.kibana.services.notifications;
           toasts.addDanger(
@@ -344,7 +347,7 @@ class LinksMenuUI extends Component {
 
     function findFieldType(index) {
       getFieldTypeFromMapping(index, categorizationFieldName)
-        .then(resp => {
+        .then((resp) => {
           if (resp !== '') {
             createAndOpenUrl(index, resp);
           } else {
@@ -363,7 +366,7 @@ class LinksMenuUI extends Component {
   };
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -388,6 +391,7 @@ class LinksMenuUI extends Component {
           defaultMessage: 'Select action for anomaly at {time}',
           values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
         })}
+        data-test-subj="mlAnomaliesListRowActionsButton"
       />
     );
 
@@ -402,6 +406,7 @@ class LinksMenuUI extends Component {
               this.closePopover();
               this.openCustomUrl(customUrl);
             }}
+            data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
           >
             {customUrl.url_name}
           </EuiContextMenuItem>
@@ -413,11 +418,12 @@ class LinksMenuUI extends Component {
       items.push(
         <EuiContextMenuItem
           key="view_series"
-          icon="stats"
+          icon="visLine"
           onClick={() => {
             this.closePopover();
             this.viewSeries();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
@@ -436,6 +442,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.viewExamples();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
@@ -454,6 +461,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.props.showRuleEditorFlyout(anomaly);
           }}
+          data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
@@ -471,7 +479,7 @@ class LinksMenuUI extends Component {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
       </EuiPopover>
     );
   }

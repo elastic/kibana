@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
@@ -15,12 +17,26 @@ import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
+import { request } from './lib/axios_utils';
+import { renderMustacheString } from '../lib/mustache_renderer';
 
 // config definition
-enum WebhookMethods {
+export enum WebhookMethods {
   POST = 'post',
   PUT = 'put',
 }
+
+export type WebhookActionType = ActionType<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType,
+  unknown
+>;
+export type WebhookActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 const configSchemaProps = {
@@ -29,9 +45,10 @@ const configSchemaProps = {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
+  hasAuth: schema.boolean({ defaultValue: true }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
-type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
+export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
@@ -40,7 +57,7 @@ const secretSchemaProps = {
   password: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
-  validate: secrets => {
+  validate: (secrets) => {
     // user and password must be set together (or not at all)
     if (!secrets.password && !secrets.user) return;
     if (secrets.password && secrets.user) return;
@@ -51,11 +68,12 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 });
 
 // params definition
-type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
 
+export const ActionTypeId = '.webhook';
 // action type definition
 export function getActionType({
   logger,
@@ -63,9 +81,9 @@ export function getActionType({
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): ActionType {
+}): WebhookActionType {
   return {
-    id: '.webhook',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
@@ -77,7 +95,18 @@ export function getActionType({
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    renderParameterTemplates,
+    executor: curry(executor)({ logger, configurationUtilities }),
+  };
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  if (!params.body) return params;
+  return {
+    body: renderMustacheString(params.body, variables, 'json'),
   };
 }
 
@@ -85,13 +114,25 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
+  const configuredUrl = configObject.url;
   try {
-    configurationUtilities.ensureWhitelistedUri(configObject.url);
-  } catch (whitelistError) {
+    new URL(configuredUrl);
+  } catch (err) {
+    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
+      defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+      values: {
+        err,
+      },
+    });
+  }
+
+  try {
+    configurationUtilities.ensureUriAllowed(configuredUrl);
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }
@@ -99,26 +140,34 @@ function validateActionTypeConfig(
 
 // action executor
 export async function executor(
-  { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
+  execOptions: WebhookActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
-  const { body: data } = execOptions.params as ActionParamsType;
+  const { method, url, headers = {}, hasAuth } = execOptions.config;
+  const { body: data } = execOptions.params;
 
-  const secrets: ActionTypeSecretsType = execOptions.secrets as ActionTypeSecretsType;
+  const secrets: ActionTypeSecretsType = execOptions.secrets;
   const basicAuth =
-    isString(secrets.user) && isString(secrets.password)
+    hasAuth && isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
 
+  const axiosInstance = axios.create();
+
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
-    axios.request({
+    request({
+      axios: axiosInstance,
       method,
       url,
+      logger,
       ...basicAuth,
       headers,
       data,
+      configurationUtilities,
     })
   );
 
@@ -133,9 +182,15 @@ export async function executor(
     const { error } = result;
 
     if (error.response) {
-      const { status, statusText, headers: responseHeaders } = error.response;
-      const message = `[${status}] ${statusText}`;
-      logger.warn(`error on ${actionId} webhook event: ${message}`);
+      const {
+        status,
+        statusText,
+        headers: responseHeaders,
+        data: { message: responseMessage },
+      } = error.response;
+      const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
+      const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
+      logger.error(`error on ${actionId} webhook event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
@@ -147,24 +202,31 @@ export async function executor(
       if (status === 429) {
         return pipe(
           getRetryAfterIntervalFromHeaders(responseHeaders),
-          map(retry => retryResultSeconds(actionId, message, retry)),
+          map((retry) => retryResultSeconds(actionId, message, retry)),
           getOrElse(() => retryResult(actionId, message))
         );
       }
       return errorResultInvalid(actionId, message);
+    } else if (error.code) {
+      const message = `[${error.code}] ${error.message}`;
+      logger.error(`error on ${actionId} webhook event: ${message}`);
+      return errorResultRequestFailed(actionId, message);
     }
 
-    logger.warn(`error on ${actionId} webhook action: unexpected error`);
+    logger.error(`error on ${actionId} webhook action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
 }
 
 // Action Executor Result w/ internationalisation
-function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
 }
 
-function errorResultInvalid(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
+function errorResultInvalid(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
   });
@@ -176,7 +238,22 @@ function errorResultInvalid(actionId: string, serviceMessage: string): ActionTyp
   };
 }
 
-function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult {
+function errorResultRequestFailed(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<unknown> {
+  const errMessage = i18n.translate('xpack.actions.builtin.webhook.requestFailedErrorMessage', {
+    defaultMessage: 'error calling webhook, request failed',
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+    serviceMessage,
+  };
+}
+
+function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
     defaultMessage: 'error calling webhook, unexpected error',
   });
@@ -187,7 +264,7 @@ function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult 
   };
 }
 
-function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
+function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
     {
@@ -208,7 +285,7 @@ function retryResultSeconds(
   serviceMessage: string,
 
   retryAfter: number
-): ActionTypeExecutorResult {
+): ActionTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();

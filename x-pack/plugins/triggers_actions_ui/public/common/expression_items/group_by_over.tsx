@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, Fragment } from 'react';
@@ -19,10 +20,11 @@ import {
 import { builtInGroupByTypes } from '../constants';
 import { GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
-interface GroupByExpressionProps {
+export interface GroupByExpressionProps {
   groupBy: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
   onChangeSelectedTermField: (selectedTermField?: string) => void;
   onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
@@ -45,6 +47,7 @@ interface GroupByExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const GroupByExpression = ({
@@ -53,6 +56,7 @@ export const GroupByExpression = ({
   onChangeSelectedTermSize,
   onChangeSelectedTermField,
   onChangeSelectedGroupBy,
+  display = 'inline',
   fields,
   termSize,
   termField,
@@ -92,6 +96,7 @@ export const GroupByExpression = ({
                   }
                 )
           }`}
+          data-test-subj="groupByExpression"
           value={`${groupByTypes[groupBy].text} ${
             groupByTypes[groupBy].sizeRequired
               ? `${termSize} ${termField ? `'${termField}'` : ''}`
@@ -101,7 +106,8 @@ export const GroupByExpression = ({
           onClick={() => {
             setGroupByPopoverOpen(true);
           }}
-          color={groupBy === 'all' || (termSize && termField) ? 'secondary' : 'danger'}
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={!(groupBy === 'all' || (termSize && termField))}
         />
       }
       isOpen={groupByPopoverOpen}
@@ -109,8 +115,9 @@ export const GroupByExpression = ({
         setGroupByPopoverOpen(false);
       }}
       ownFocus
-      withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setGroupByPopoverOpen(false)}>
@@ -124,7 +131,7 @@ export const GroupByExpression = ({
             <EuiSelect
               data-test-subj="overExpressionSelect"
               value={groupBy}
-              onChange={e => {
+              onChange={(e) => {
                 if (groupByTypes[e.target.value].sizeRequired) {
                   onChangeSelectedTermSize(MIN_TERM_SIZE);
                   onChangeSelectedTermField('');
@@ -146,16 +153,13 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <Fragment>
               <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  isInvalid={errors.termSize.length > 0 && termSize !== undefined}
-                  error={errors.termSize}
-                >
+                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
-                    isInvalid={errors.termSize.length > 0 && termSize !== undefined}
-                    value={termSize}
-                    onChange={e => {
+                    isInvalid={errors.termSize.length > 0}
+                    value={termSize || ''}
+                    onChange={(e) => {
                       const { value } = e.target;
-                      const termSizeVal = value !== '' ? parseFloat(value) : MIN_TERM_SIZE;
+                      const termSizeVal = value !== '' ? parseFloat(value) : undefined;
                       onChangeSelectedTermSize(termSizeVal);
                     }}
                     min={MIN_TERM_SIZE}
@@ -172,7 +176,7 @@ export const GroupByExpression = ({
                     data-test-subj="fieldsExpressionSelect"
                     value={termField}
                     isInvalid={errors.termField.length > 0 && termField !== undefined}
-                    onChange={e => {
+                    onChange={(e) => {
                       onChangeSelectedTermField(e.target.value);
                     }}
                     options={fields.reduce(
@@ -204,3 +208,6 @@ export const GroupByExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { GroupByExpression as default };

@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingIndices should render normally 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  direction="column"
+  gutterSize="s"
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTitle
+      size="s"
+    >
+      <h3
+        className="eui-textCenter"
+      >
+        <FormattedMessage
+          defaultMessage="Looking for matching indices…"
+          id="indexPatternManagement.createIndexPattern.step.loadingHeader"
+          values={Object {}}
+        />
+      </h3>
+    </EuiTitle>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLoadingSpinner
+      size="l"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

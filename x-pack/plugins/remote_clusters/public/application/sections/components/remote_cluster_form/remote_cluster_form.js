@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -125,7 +126,7 @@ export class RemoteClusterForm extends Component {
     };
   }
 
-  onFieldsChange = changedFields => {
+  onFieldsChange = (changedFields) => {
     this.setState(({ fields: prevFields, seedInput }) => {
       const newFields = {
         ...prevFields,
@@ -191,7 +192,7 @@ export class RemoteClusterForm extends Component {
     save(cluster);
   };
 
-  onCreateSeed = newSeed => {
+  onCreateSeed = (newSeed) => {
     // If the user just hit enter without typing anything, treat it as a no-op.
     if (!newSeed) {
       return;
@@ -217,7 +218,7 @@ export class RemoteClusterForm extends Component {
     this.onFieldsChange({ seeds: newSeeds });
   };
 
-  onSeedsInputChange = seedInput => {
+  onSeedsInputChange = (seedInput) => {
     if (!seedInput) {
       // If empty seedInput ("") don't do anything. This happens
       // right after a seed is created.
@@ -250,16 +251,16 @@ export class RemoteClusterForm extends Component {
     });
   };
 
-  onSeedsChange = seeds => {
+  onSeedsChange = (seeds) => {
     this.onFieldsChange({ seeds: seeds.map(({ label }) => label) });
   };
 
-  onSkipUnavailableChange = e => {
+  onSkipUnavailableChange = (e) => {
     const skipUnavailable = e.target.checked;
     this.onFieldsChange({ skipUnavailable });
   };
 
-  resetToDefault = fieldName => {
+  resetToDefault = (fieldName) => {
     this.onFieldsChange({
       [fieldName]: defaultFields[fieldName],
     });
@@ -268,7 +269,7 @@ export class RemoteClusterForm extends Component {
   hasErrors = () => {
     const { fieldsErrors, localSeedErrors } = this.state;
     const errorValues = Object.values(fieldsErrors);
-    const hasErrors = errorValues.some(error => error != null) || localSeedErrors.length;
+    const hasErrors = errorValues.some((error) => error != null) || localSeedErrors.length;
     return hasErrors;
   };
 
@@ -285,7 +286,7 @@ export class RemoteClusterForm extends Component {
     const showErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
     const errors = areFormErrorsVisible ? localSeedErrors.concat(errorsSeeds) : localSeedErrors;
 
-    const formattedSeeds = seeds.map(seed => ({ label: seed }));
+    const formattedSeeds = seeds.map((seed) => ({ label: seed }));
 
     return (
       <>
@@ -353,7 +354,9 @@ export class RemoteClusterForm extends Component {
         >
           <EuiFieldNumber
             value={nodeConnections || ''}
-            onChange={e => this.onFieldsChange({ nodeConnections: Number(e.target.value) || null })}
+            onChange={(e) =>
+              this.onFieldsChange({ nodeConnections: Number(e.target.value) || null })
+            }
             fullWidth
           />
         </EuiFormRow>
@@ -398,7 +401,7 @@ export class RemoteClusterForm extends Component {
                 defaultMessage: 'host:port',
               }
             )}
-            onChange={e => this.onFieldsChange({ proxyAddress: e.target.value })}
+            onChange={(e) => this.onFieldsChange({ proxyAddress: e.target.value })}
             isInvalid={Boolean(areErrorsVisible && errorProxyAddress)}
             data-test-subj="remoteClusterFormProxyAddressInput"
             fullWidth
@@ -442,7 +445,7 @@ export class RemoteClusterForm extends Component {
         >
           <EuiFieldText
             value={serverName}
-            onChange={e => this.onFieldsChange({ serverName: e.target.value })}
+            onChange={(e) => this.onFieldsChange({ serverName: e.target.value })}
             isInvalid={Boolean(areErrorsVisible && errorServerName)}
             fullWidth
           />
@@ -466,7 +469,7 @@ export class RemoteClusterForm extends Component {
         >
           <EuiFieldNumber
             value={proxySocketConnections || ''}
-            onChange={e =>
+            onChange={(e) =>
               this.onFieldsChange({ proxySocketConnections: Number(e.target.value) || null })
             }
             fullWidth
@@ -511,7 +514,7 @@ export class RemoteClusterForm extends Component {
                 }
                 checked={mode === PROXY_MODE}
                 data-test-subj="remoteClusterFormConnectionModeToggle"
-                onChange={e =>
+                onChange={(e) =>
                   this.onFieldsChange({ mode: e.target.checked ? PROXY_MODE : SNIFF_MODE })
                 }
               />
@@ -525,7 +528,7 @@ export class RemoteClusterForm extends Component {
                   title={
                     <FormattedMessage
                       id="xpack.remoteClusters.cloudClusterInformationTitle"
-                      defaultMessage="Use proxy mode for Elasticsearch Cloud deployment"
+                      defaultMessage="Use proxy mode for Elastic Cloud deployment"
                     />
                   }
                 >
@@ -758,7 +761,7 @@ export class RemoteClusterForm extends Component {
         } else {
           errorBody = (
             <ul>
-              {cause.map(causeValue => (
+              {cause.map((causeValue) => (
                 <li key={causeValue}>{causeValue}</li>
               ))}
             </ul>
@@ -884,7 +887,7 @@ export class RemoteClusterForm extends Component {
       <Fragment>
         {this.renderSaveErrorFeedback()}
 
-        <EuiForm>
+        <EuiForm data-test-subj="remoteClusterForm">
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">
@@ -925,7 +928,7 @@ export class RemoteClusterForm extends Component {
               <EuiFieldText
                 isInvalid={Boolean(areErrorsVisible && errorClusterName)}
                 value={name}
-                onChange={e => this.onFieldsChange({ name: e.target.value })}
+                onChange={(e) => this.onFieldsChange({ name: e.target.value })}
                 fullWidth
                 disabled={disabledName}
                 data-test-subj="remoteClusterFormNameInput"

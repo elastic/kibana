@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -29,9 +30,14 @@ const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 interface ToastNotificationTextProps {
   overlays: CoreStart['overlays'];
   text: any;
+  previewTextLength?: number;
 }
 
-export const ToastNotificationText: FC<ToastNotificationTextProps> = ({ overlays, text }) => {
+export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
+  overlays,
+  text,
+  previewTextLength,
+}) => {
   if (typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;
   }
@@ -46,8 +52,9 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({ overlays
 
   const unformattedText = text.message ? text.message : text;
   const formattedText = typeof unformattedText === 'object' ? JSON.stringify(text, null, 2) : text;
-  const previewText = `${formattedText.substring(0, 140)}${
-    formattedText.length > 140 ? ' ...' : ''
+  const textLength = previewTextLength ?? 140;
+  const previewText = `${formattedText.substring(0, textLength)}${
+    formattedText.length > textLength ? ' ...' : ''
   }`;
 
   const openModal = () => {

@@ -4,6 +4,8 @@
 
 ## SearchSource.setField() method
 
+sets value to a single search source field
+
 <b>Signature:</b>
 
 ```typescript

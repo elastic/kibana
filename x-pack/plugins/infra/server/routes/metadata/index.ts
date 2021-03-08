@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { get } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -18,7 +19,6 @@ import {
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getMetricMetadata } from './lib/get_metric_metadata';
 import { pickFeatureName } from './lib/pick_feature_name';
-import { hasAPMData } from './lib/has_apm_data';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
 import { throwErrors } from '../../../common/runtime_types';
@@ -37,54 +37,57 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const { nodeId, nodeType, sourceId } = pipe(
-          InfraMetadataRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const { nodeId, nodeType, sourceId, timeRange } = pipe(
+        InfraMetadataRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const { configuration } = await libs.sources.getSourceConfiguration(
-          requestContext,
-          sourceId
-        );
-        const metricsMetadata = await getMetricMetadata(
-          framework,
-          requestContext,
-          configuration,
-          nodeId,
-          nodeType
-        );
-        const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(
-          nameToFeature('metrics')
-        );
+      const { configuration } = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
+      const metricsMetadata = await getMetricMetadata(
+        framework,
+        requestContext,
+        configuration,
+        nodeId,
+        nodeType,
+        timeRange
+      );
+      const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(nameToFeature('metrics'));
 
-        const info = await getNodeInfo(framework, requestContext, configuration, nodeId, nodeType);
-        const cloudInstanceId = get<string>(info, 'cloud.instance.id');
+      const info = await getNodeInfo(
+        framework,
+        requestContext,
+        configuration,
+        nodeId,
+        nodeType,
+        timeRange
+      );
+      const cloudInstanceId = get(info, 'cloud.instance.id');
 
-        const cloudMetricsMetadata = cloudInstanceId
-          ? await getCloudMetricsMetadata(framework, requestContext, configuration, cloudInstanceId)
-          : { buckets: [] };
-        const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
-          nameToFeature('metrics')
-        );
-        const hasAPM = await hasAPMData(framework, requestContext, configuration, nodeId, nodeType);
-        const apmMetricFeatures = hasAPM ? [{ name: 'apm.transaction', source: 'apm' }] : [];
-
-        const id = metricsMetadata.id;
-        const name = metricsMetadata.name || id;
-        return response.ok({
-          body: InfraMetadataRT.encode({
-            id,
-            name,
-            features: [...metricFeatures, ...cloudMetricsFeatures, ...apmMetricFeatures],
-            info,
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      const cloudMetricsMetadata = cloudInstanceId
+        ? await getCloudMetricsMetadata(
+            framework,
+            requestContext,
+            configuration,
+            cloudInstanceId,
+            timeRange
+          )
+        : { buckets: [] };
+      const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
+        nameToFeature('metrics')
+      );
+      const id = metricsMetadata.id;
+      const name = metricsMetadata.name || id;
+      return response.ok({
+        body: InfraMetadataRT.encode({
+          id,
+          name,
+          features: [...metricFeatures, ...cloudMetricsFeatures],
+          info,
+        }),
+      });
     }
   );
 };

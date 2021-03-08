@@ -1,0 +1,37 @@
+{
+  "name": "@elastic/safer-lodash-set",
+  "version": "0.0.0",
+  "description": "A safer version of the lodash set and setWith functions",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "lint": "../../node_modules/.bin/dependency-check --missing ../../package.json ./packages/elastic-safer-lodash-set/set.js ./packages/elastic-safer-lodash-set/setWith.js ./packages/elastic-safer-lodash-set/fp/*.js",
+    "test": "npm run lint && ../../node_modules/.bin/tape test/*.js && npm run test:types",
+    "test:types": "../../node_modules/.bin/tsc --noEmit",
+    "update": "./scripts/update.sh",
+    "save_state": "./scripts/save_state.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elastic/kibana.git"
+  },
+  "keywords": [
+    "lodash",
+    "security",
+    "set",
+    "setWith",
+    "prototype",
+    "pollution"
+  ],
+  "author": "Thomas Watson <w@tson.dk> (https://twitter.com/wa7son)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elastic/kibana/issues"
+  },
+  "homepage": "https://github.com/elastic/kibana/tree/master/packages/safer-lodash-set#readme",
+  "standard": {
+    "ignore": [
+      "/lodash/"
+    ]
+  }
+}

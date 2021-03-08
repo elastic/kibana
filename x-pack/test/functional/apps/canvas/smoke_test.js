@@ -1,31 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { parse } from 'url';
 
 export default function canvasSmokeTest({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
+  const esArchiver = getService('esArchiver');
 
-  describe('smoke test', function() {
-    this.tags('smoke');
+  describe('smoke test', function () {
+    this.tags('includeFirefox');
     const workpadListSelector = 'canvasWorkpadLoaderTable > canvasWorkpadLoaderWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      // init data
-      await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('canvas/default');
-
-      // load canvas
-      // see also navigateToUrl(app, hash)
       await PageObjects.common.navigateToApp('canvas');
     });
 

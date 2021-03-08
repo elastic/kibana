@@ -1,30 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { GraphQLSchema } from 'graphql';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  IRouter,
-  CallAPIOptions,
+import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
+  IScopedClusterClient,
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
-
-export type APICaller = (
-  endpoint: string,
-  clientParams: Record<string, any>,
-  options?: CallAPIOptions
-) => Promise<any>;
+import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
+import { UptimeESClient } from '../../lib';
+import type { UptimeRouter } from '../../../types';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: APICaller; dynamicSettings: DynamicSettings } & P
-) => Promise<R> | R;
+  params: {
+    uptimeEsClient: UptimeESClient;
+    esClient?: IScopedClusterClient;
+  } & P
+) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
   client: SavedObjectsClientContract | ISavedObjectsRepository,
@@ -32,7 +30,7 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
-  route: IRouter;
+  router: UptimeRouter;
 }
 
 export interface UptimeCorePlugins {
@@ -40,9 +38,9 @@ export interface UptimeCorePlugins {
   alerting: any;
   elasticsearch: any;
   usageCollection: UsageCollectionSetup;
+  ml: MlSetup;
 }
 
 export interface UMBackendFrameworkAdapter {
   registerRoute(route: UMKibanaRoute): void;
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
 }

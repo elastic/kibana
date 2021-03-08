@@ -1,34 +1,28 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
-import { filter, first, catchError } from 'rxjs/operators';
+import * as Rx from 'rxjs';
+import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
 
 import { ToolingLog } from '../tooling_log';
 import { createCliError } from './errors';
 import { Proc, ProcOptions, startProc } from './proc';
 
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+
 const noop = () => {};
 
 interface RunOptions extends ProcOptions {
   wait: true | RegExp;
+  waitTimeout?: number | false;
 }
 
 /**
@@ -45,7 +39,7 @@ export class ProcRunner {
 
   constructor(private log: ToolingLog) {
     this.signalUnsubscribe = exitHook(() => {
-      this.teardown().catch(error => {
+      this.teardown().catch((error) => {
         log.error(`ProcRunner teardown error: ${error.stack}`);
       });
     });
@@ -71,6 +65,7 @@ export class ProcRunner {
       cwd = process.cwd(),
       stdin = undefined,
       wait = false,
+      waitTimeout = 15 * MINUTE,
       env = process.env,
     } = options;
 
@@ -97,19 +92,29 @@ export class ProcRunner {
     try {
       if (wait instanceof RegExp) {
         // wait for process to log matching line
-        await proc.lines$
-          .pipe(
-            filter(line => wait.test(line)),
+        await Rx.race(
+          proc.lines$.pipe(
+            filter((line) => wait.test(line)),
             first(),
-            catchError(err => {
+            catchError((err) => {
               if (err.name !== 'EmptyError') {
                 throw createCliError(`[${name}] exited without matching pattern: ${wait}`);
               } else {
                 throw err;
               }
             })
-          )
-          .toPromise();
+          ),
+          waitTimeout === false
+            ? Rx.NEVER
+            : Rx.timer(waitTimeout).pipe(
+                map(() => {
+                  const sec = waitTimeout / SECOND;
+                  throw createCliError(
+                    `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
+                  );
+                })
+              )
+        ).toPromise();
       }
 
       if (wait === true) {
@@ -143,7 +148,7 @@ export class ProcRunner {
    *  @return {Promise<undefined>}
    */
   async waitForAllToStop() {
-    await Promise.all(this.procs.map(proc => proc.outcomePromise));
+    await Promise.all(this.procs.map((proc) => proc.outcomePromise));
   }
 
   /**
@@ -165,19 +170,19 @@ export class ProcRunner {
       this.log.warning(
         '%d processes left running, stop them with procs.stop(name):',
         this.procs.length,
-        this.procs.map(proc => proc.name)
+        this.procs.map((proc) => proc.name)
       );
     }
 
     await Promise.all(
-      this.procs.map(async proc => {
+      this.procs.map(async (proc) => {
         await proc.stop(signal === 'exit' ? 'SIGKILL' : signal);
       })
     );
   }
 
   private getProc(name: string) {
-    return this.procs.find(proc => {
+    return this.procs.find((proc) => {
       return proc.name === name;
     });
   }
@@ -193,14 +198,14 @@ export class ProcRunner {
 
     // tie into proc outcome$, remove from _procs on compete
     proc.outcome$.subscribe({
-      next: code => {
+      next: (code) => {
         const duration = moment.duration(Date.now() - startMs);
         this.log.info('[%s] exited with %s after %s', name, code, duration.humanize());
       },
       complete: () => {
         remove();
       },
-      error: error => {
+      error: (error) => {
         if (this.closing) {
           this.log.error(error);
         }

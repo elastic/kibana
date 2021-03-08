@@ -1,329 +1,369 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRight } from 'fp-ts/lib/Either';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions } from '../../../../alerting/server';
-import { ACTION_GROUP_DEFINITIONS } from '../../../../../legacy/plugins/uptime/common/constants';
+import Mustache from 'mustache';
+import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { UptimeAlertTypeFactory } from './types';
-import { GetMonitorStatusResult } from '../requests';
+import { esKuery } from '../../../../../../src/plugins/data/server';
+import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
 import {
-  StatusCheckExecutorParamsType,
-  StatusCheckAlertStateType,
-  StatusCheckAlertState,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import { savedObjectsAdapter } from '../saved_objects';
+  StatusCheckFilters,
+  Ping,
+  GetMonitorAvailabilityParams,
+} from '../../../common/runtime_types';
+import { MONITOR_STATUS } from '../../../common/constants/alerts';
+import { updateState } from './common';
+import { commonMonitorStateI18, commonStateTranslations, DOWN_LABEL } from './translations';
+import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
+import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
+import { GetMonitorStatusResult } from '../requests/get_monitor_status';
+import { UNNAMED_LOCATION } from '../../../common/constants';
+import { uptimeAlertWrapper } from './uptime_alert_wrapper';
+import { MonitorStatusTranslations } from '../../../common/translations';
+import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
+import { UMServerLibs, UptimeESClient } from '../lib';
 
-const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
+export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 
-/**
- * Reduce a composite-key array of status results to a set of unique IDs.
- * @param items to reduce
- */
-export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce((acc, { monitor_id }) => {
-    acc.add(monitor_id);
-    return acc;
-  }, new Set<string>());
-
-/**
- * Generates a message to include in contexts of alerts.
- * @param monitors the list of monitors to include in the message
- * @param max
- */
-export const contextMessage = (monitorIds: string[], max: number): string => {
-  const MIN = 2;
-  if (max < MIN) throw new Error(`Maximum value must be greater than ${MIN}, received ${max}.`);
-
-  // generate the message
-  let message;
-  if (monitorIds.length === 1) {
-    message = i18n.translate('xpack.uptime.alerts.message.singularTitle', {
-      defaultMessage: 'Down monitor: ',
-    });
-  } else if (monitorIds.length) {
-    message = i18n.translate('xpack.uptime.alerts.message.multipleTitle', {
-      defaultMessage: 'Down monitors: ',
-    });
-  }
-  // this shouldn't happen because the function should only be called
-  // when > 0 monitors are down
-  else {
-    message = i18n.translate('xpack.uptime.alerts.message.emptyTitle', {
-      defaultMessage: 'No down monitor IDs received',
-    });
-  }
-
-  for (let i = 0; i < monitorIds.length; i++) {
-    const id = monitorIds[i];
-    if (i === max) {
-      return (
-        message +
-        i18n.translate('xpack.uptime.alerts.message.overflowBody', {
-          defaultMessage: `... and {overflowCount} other monitors`,
-          values: {
-            overflowCount: monitorIds.length - i,
-          },
-        })
-      );
-    } else if (i === 0) {
-      message = message + id;
-    } else {
-      message = message + `, ${id}`;
-    }
-  }
-
-  return message;
+const getMonIdByLoc = (monitorId: string, location: string) => {
+  return monitorId + '-' + location;
 };
 
-/**
- * Creates an exhaustive list of all the down monitors.
- * @param list all the monitors that are down
- * @param sizeLimit the max monitors, we shouldn't allow an arbitrarily long string
- */
-export const fullListByIdAndLocation = (
-  list: GetMonitorStatusResult[],
-  sizeLimit: number = 1000
+const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
+
+const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
+
+export const getUniqueIdsByLoc = (
+  downMonitorsByLocation: GetMonitorStatusResult[],
+  availabilityResults: GetMonitorAvailabilityResult[]
 ) => {
-  return (
-    list
-      // sort by id, then location
-      .sort((a, b) => {
-        if (a.monitor_id > b.monitor_id) {
-          return 1;
-        } else if (a.monitor_id < b.monitor_id) {
-          return -1;
-        } else if (a.location > b.location) {
-          return 1;
-        }
-        return -1;
-      })
-      .slice(0, sizeLimit)
-      .reduce(
-        (cur, { monitor_id: id, location }) =>
-          cur + `${id} from ${location ?? 'Unnamed location'}; `,
-        ''
-      ) +
-    (sizeLimit < list.length
-      ? i18n.translate('xpack.uptime.alerts.message.fullListOverflow', {
-          defaultMessage: '...and {overflowCount} other {pluralizedMonitor}',
-          values: {
-            pluralizedMonitor:
-              list.length - sizeLimit === 1 ? 'monitor/location' : 'monitors/locations',
-            overflowCount: list.length - sizeLimit,
-          },
-        })
-      : '')
+  const uniqueDownsIdsByLoc = uniqueDownMonitorIds(downMonitorsByLocation);
+  const uniqueAvailIdsByLoc = uniqueAvailMonitorIds(availabilityResults);
+
+  return new Set([...uniqueDownsIdsByLoc, ...uniqueAvailIdsByLoc]);
+};
+
+export const hasFilters = (filters?: StatusCheckFilters) => {
+  if (!filters) return false;
+  for (const list of Object.values(filters)) {
+    if (list.length > 0) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const generateFilterDSL = async (
+  getIndexPattern: () => Promise<IndexPatternTitleAndFields | undefined>,
+  filters: StatusCheckFilters,
+  search: string
+): Promise<JsonObject | undefined> => {
+  const filtersExist = hasFilters(filters);
+  if (!filtersExist && !search) return undefined;
+
+  let filterString = '';
+  if (filtersExist) {
+    filterString = stringifyKueries(new Map(Object.entries(filters ?? {})));
+  }
+
+  const combinedString = combineFiltersAndUserSearch(filterString, search);
+
+  return esKuery.toElasticsearchQuery(
+    esKuery.fromKueryExpression(combinedString ?? ''),
+    await getIndexPattern()
   );
 };
 
-export const updateState = (
-  state: Record<string, any>,
-  isTriggeredNow: boolean
-): StatusCheckAlertState => {
-  const now = new Date().toISOString();
-  const decoded = StatusCheckAlertStateType.decode(state);
-  if (!isRight(decoded)) {
-    const triggerVal = isTriggeredNow ? now : undefined;
-    return {
-      currentTriggerStarted: triggerVal,
-      firstCheckedAt: now,
-      firstTriggeredAt: triggerVal,
-      isTriggered: isTriggeredNow,
-      lastTriggeredAt: triggerVal,
-      lastCheckedAt: now,
-      lastResolvedAt: undefined,
-    };
-  }
-  const {
-    currentTriggerStarted,
-    firstCheckedAt,
-    firstTriggeredAt,
-    lastTriggeredAt,
-    // this is the stale trigger status, we're naming it `wasTriggered`
-    // to differentiate it from the `isTriggeredNow` param
-    isTriggered: wasTriggered,
-    lastResolvedAt,
-  } = decoded.right;
+export const formatFilterString = async (
+  uptimeEsClient: UptimeESClient,
+  filters: StatusCheckFilters,
+  search: string,
+  libs?: UMServerLibs
+) =>
+  await generateFilterDSL(
+    () =>
+      libs?.requests?.getIndexPattern
+        ? libs?.requests?.getIndexPattern({ uptimeEsClient })
+        : getUptimeIndexPattern({
+            uptimeEsClient,
+          }),
+    filters,
+    search
+  );
 
-  let cts: string | undefined;
-  if (isTriggeredNow && !currentTriggerStarted) {
-    cts = now;
-  } else if (isTriggeredNow) {
-    cts = currentTriggerStarted;
-  }
-
+export const getMonitorSummary = (monitorInfo: Ping) => {
   return {
-    currentTriggerStarted: cts,
-    firstCheckedAt: firstCheckedAt ?? now,
-    firstTriggeredAt: isTriggeredNow && !firstTriggeredAt ? now : firstTriggeredAt,
-    lastCheckedAt: now,
-    lastTriggeredAt: isTriggeredNow ? now : lastTriggeredAt,
-    lastResolvedAt: !isTriggeredNow && wasTriggered ? now : lastResolvedAt,
-    isTriggered: isTriggeredNow,
+    monitorUrl: monitorInfo.url?.full,
+    monitorId: monitorInfo.monitor?.id,
+    monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
+    monitorType: monitorInfo.monitor?.type,
+    latestErrorMessage: monitorInfo.error?.message,
+    observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
+    observerHostname: monitorInfo.agent?.name,
   };
 };
 
-// Right now the maximum number of monitors shown in the message is hardcoded here.
-// we might want to make this a parameter in the future
-const DEFAULT_MAX_MESSAGE_ROWS = 3;
+const generateMessageForOlderVersions = (fields: Record<string, any>) => {
+  const messageTemplate = MonitorStatusTranslations.defaultActionMessage;
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
-  id: 'xpack.uptime.alerts.monitorStatus',
-  name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
-    defaultMessage: 'Uptime monitor status',
-  }),
-  validate: {
-    params: schema.object({
-      filters: schema.maybe(schema.string()),
-      numTimes: schema.number(),
-      timerange: schema.object({
-        from: schema.string(),
-        to: schema.string(),
-      }),
-      locations: schema.arrayOf(schema.string()),
-    }),
-  },
-  defaultActionGroupId: MONITOR_STATUS.id,
-  actionGroups: [
-    {
-      id: MONITOR_STATUS.id,
-      name: MONITOR_STATUS.name,
-    },
-  ],
-  actionVariables: {
-    context: [
-      {
-        name: 'message',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
-          {
-            defaultMessage: 'A generated message summarizing the currently down monitors',
-          }
-        ),
-      },
-      {
-        name: 'downMonitorsWithGeo',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
-          {
-            defaultMessage:
-              'A generated summary that shows some or all of the monitors detected as "down" by the alert',
-          }
-        ),
-      },
-    ],
-    state: [
-      {
-        name: 'firstCheckedAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.firstCheckedAt',
-          {
-            defaultMessage: 'Timestamp indicating when this alert first checked',
-          }
-        ),
-      },
-      {
-        name: 'firstTriggeredAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.firstTriggeredAt',
-          {
-            defaultMessage: 'Timestamp indicating when the alert first triggered',
-          }
-        ),
-      },
-      {
-        name: 'currentTriggerStarted',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.currentTriggerStarted',
-          {
-            defaultMessage:
-              'Timestamp indicating when the current trigger state began, if alert is triggered',
-          }
-        ),
-      },
-      {
-        name: 'isTriggered',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.isTriggered',
-          {
-            defaultMessage: `Flag indicating if the alert is currently triggering`,
-          }
-        ),
-      },
-      {
-        name: 'lastCheckedAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastCheckedAt',
-          {
-            defaultMessage: `Timestamp indicating the alert's most recent check time`,
-          }
-        ),
-      },
-      {
-        name: 'lastResolvedAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastResolvedAt',
-          {
-            defaultMessage: `Timestamp indicating the most recent resolution time for this alert`,
-          }
-        ),
-      },
-      {
-        name: 'lastTriggeredAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastTriggeredAt',
-          {
-            defaultMessage: `Timestamp indicating the alert's most recent trigger time`,
-          }
-        ),
-      },
-    ],
-  },
-  async executor(options: AlertExecutorOptions) {
-    const { params: rawParams } = options;
-    const decoded = StatusCheckExecutorParamsType.decode(rawParams);
-    if (!isRight(decoded)) {
-      ThrowReporter.report(decoded);
-      return {
-        error: 'Alert param types do not conform to required shape.',
-      };
-    }
+  // Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from
+  // {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}
 
-    const params = decoded.right;
-    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-      options.services.savedObjectsClient
+  return Mustache.render(messageTemplate, { state: { ...fields } });
+};
+
+export const getStatusMessage = (
+  downMonInfo?: Ping,
+  availMonInfo?: GetMonitorAvailabilityResult,
+  availability?: GetMonitorAvailabilityParams
+) => {
+  let statusMessage = '';
+  if (downMonInfo) {
+    statusMessage = DOWN_LABEL;
+  }
+  let availabilityMessage = '';
+
+  if (availMonInfo) {
+    availabilityMessage = i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage',
+      {
+        defaultMessage:
+          'below threshold with {availabilityRatio}% availability expected is {expectedAvailability}%',
+        values: {
+          availabilityRatio: (availMonInfo.availabilityRatio! * 100).toFixed(2),
+          expectedAvailability: availability?.threshold,
+        },
+      }
     );
-    /* This is called `monitorsByLocation` but it's really
-     * monitors by location by status. The query we run to generate this
-     * filters on the status field, so effectively there should be one and only one
-     * status represented in the result set. */
-    const monitorsByLocation = await libs.requests.getMonitorStatus({
-      callES: options.services.callCluster,
+  }
+  if (availMonInfo && downMonInfo) {
+    return i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage',
+      {
+        defaultMessage: '{statusMessage} and also {availabilityMessage}',
+        values: {
+          statusMessage,
+          availabilityMessage,
+        },
+      }
+    );
+  }
+  return statusMessage + availabilityMessage;
+};
+
+const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+  const normalizeText = (txt: string) => {
+    // replace url and name special characters with -
+    return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+  };
+  const urlText = normalizeText(monitorInfo.url?.full || '');
+
+  const monName = normalizeText(monitorInfo.monitor.name || '');
+
+  if (monName) {
+    return `${monName}_${urlText}_${monIdByLoc}`;
+  }
+  return `${urlText}_${monIdByLoc}`;
+};
+
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
+  uptimeAlertWrapper<ActionGroupIds>({
+    id: 'xpack.uptime.alerts.monitorStatus',
+    name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
+      defaultMessage: 'Uptime monitor status',
+    }),
+    validate: {
+      params: schema.object({
+        availability: schema.maybe(
+          schema.object({
+            range: schema.number(),
+            rangeUnit: schema.string(),
+            threshold: schema.string(),
+          })
+        ),
+        filters: schema.maybe(
+          schema.oneOf([
+            // deprecated
+            schema.object({
+              'monitor.type': schema.maybe(schema.arrayOf(schema.string())),
+              'observer.geo.name': schema.maybe(schema.arrayOf(schema.string())),
+              tags: schema.maybe(schema.arrayOf(schema.string())),
+              'url.port': schema.maybe(schema.arrayOf(schema.string())),
+            }),
+            schema.string(),
+          ])
+        ),
+        // deprecated
+        locations: schema.maybe(schema.arrayOf(schema.string())),
+        numTimes: schema.number(),
+        search: schema.maybe(schema.string()),
+        shouldCheckStatus: schema.boolean(),
+        shouldCheckAvailability: schema.boolean(),
+        timerangeCount: schema.maybe(schema.number()),
+        timerangeUnit: schema.maybe(schema.string()),
+        // deprecated
+        timerange: schema.maybe(
+          schema.object({
+            from: schema.string(),
+            to: schema.string(),
+          })
+        ),
+        version: schema.maybe(schema.number()),
+        isAutoGenerated: schema.maybe(schema.boolean()),
+      }),
+    },
+    defaultActionGroupId: MONITOR_STATUS.id,
+    actionGroups: [
+      {
+        id: MONITOR_STATUS.id,
+        name: MONITOR_STATUS.name,
+      },
+    ],
+    actionVariables: {
+      context: [
+        {
+          name: 'message',
+          description: i18n.translate(
+            'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
+            {
+              defaultMessage: 'A generated message summarizing the currently down monitors',
+            }
+          ),
+        },
+        {
+          name: 'downMonitorsWithGeo',
+          description: i18n.translate(
+            'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
+            {
+              defaultMessage:
+                'A generated summary that shows some or all of the monitors detected as "down" by the alert',
+            }
+          ),
+        },
+      ],
+      state: [...commonMonitorStateI18, ...commonStateTranslations],
+    },
+    minimumLicenseRequired: 'basic',
+    async executor({
+      options: {
+        params: rawParams,
+        state,
+        services: { alertInstanceFactory },
+      },
       dynamicSettings,
-      ...params,
-    });
+      uptimeEsClient,
+    }) {
+      const {
+        filters,
+        search,
+        numTimes,
+        timerangeCount,
+        timerangeUnit,
+        availability,
+        shouldCheckAvailability,
+        shouldCheckStatus,
+        isAutoGenerated,
+        timerange: oldVersionTimeRange,
+      } = rawParams;
 
-    // if no monitors are down for our query, we don't need to trigger an alert
-    if (monitorsByLocation.length) {
-      const uniqueIds = uniqueMonitorIds(monitorsByLocation);
-      const alertInstance = options.services.alertInstanceFactory(MONITOR_STATUS.id);
-      alertInstance.replaceState({
-        ...options.state,
-        monitors: monitorsByLocation,
-        ...updateState(options.state, true),
-      });
-      alertInstance.scheduleActions(MONITOR_STATUS.id, {
-        message: contextMessage(Array.from(uniqueIds.keys()), DEFAULT_MAX_MESSAGE_ROWS),
-        downMonitorsWithGeo: fullListByIdAndLocation(monitorsByLocation),
-      });
-    }
+      const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
 
-    return updateState(options.state, monitorsByLocation.length > 0);
-  },
-});
+      const timerange = oldVersionTimeRange || {
+        from: isAutoGenerated
+          ? state.lastCheckedAt
+          : `now-${String(timerangeCount) + timerangeUnit}`,
+        to: 'now',
+      };
+
+      let downMonitorsByLocation: GetMonitorStatusResult[] = [];
+
+      // if oldVersionTimeRange present means it's 7.7 format and
+      // after that shouldCheckStatus should be explicitly false
+      if (!(!oldVersionTimeRange && shouldCheckStatus === false)) {
+        downMonitorsByLocation = await libs.requests.getMonitorStatus({
+          uptimeEsClient,
+          timerange,
+          numTimes,
+          locations: [],
+          filters: filterString,
+        });
+      }
+
+      if (isAutoGenerated) {
+        for (const monitorLoc of downMonitorsByLocation) {
+          const monitorInfo = monitorLoc.monitorInfo;
+
+          const alertInstance = alertInstanceFactory(
+            getInstanceId(monitorInfo, monitorLoc.location)
+          );
+
+          const monitorSummary = getMonitorSummary(monitorInfo);
+          const statusMessage = getStatusMessage(monitorInfo);
+
+          alertInstance.replaceState({
+            ...state,
+            ...monitorSummary,
+            statusMessage,
+            ...updateState(state, true),
+          });
+
+          alertInstance.scheduleActions(MONITOR_STATUS.id);
+        }
+        return updateState(state, downMonitorsByLocation.length > 0);
+      }
+
+      let availabilityResults: GetMonitorAvailabilityResult[] = [];
+      if (shouldCheckAvailability) {
+        availabilityResults = await libs.requests.getMonitorAvailability({
+          uptimeEsClient,
+          ...availability,
+          filters: JSON.stringify(filterString) || undefined,
+        });
+      }
+
+      const mergedIdsByLoc = getUniqueIdsByLoc(downMonitorsByLocation, availabilityResults);
+
+      mergedIdsByLoc.forEach((monIdByLoc) => {
+        const availMonInfo = availabilityResults.find(
+          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
+        );
+
+        const downMonInfo = downMonitorsByLocation.find(
+          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
+        )?.monitorInfo;
+
+        const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;
+
+        const monitorSummary = getMonitorSummary(monitorInfo);
+        const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
+
+        const alertInstance = alertInstanceFactory(getInstanceId(monitorInfo, monIdByLoc));
+
+        alertInstance.replaceState({
+          ...updateState(state, true),
+          ...monitorSummary,
+          statusMessage,
+        });
+
+        alertInstance.scheduleActions(MONITOR_STATUS.id, {
+          message: generateMessageForOlderVersions({ ...monitorSummary, statusMessage }),
+        });
+      });
+
+      return updateState(state, downMonitorsByLocation.length > 0);
+    },
+  });

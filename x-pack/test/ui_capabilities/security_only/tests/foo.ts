@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -13,7 +14,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('foo', () => {
-    UserScenarios.forEach(scenario => {
+    UserScenarios.forEach((scenario) => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
           credentials: {

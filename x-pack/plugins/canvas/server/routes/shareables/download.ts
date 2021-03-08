@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { readFileSync } from 'fs';
-import { SHAREABLE_RUNTIME_FILE } from '../../../../../legacy/plugins/canvas/shareable_runtime/constants';
+import { SHAREABLE_RUNTIME_FILE } from '../../../shareable_runtime/constants';
 import { RouteInitializerDeps } from '../';
-import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../common/lib/constants';
 
 export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
@@ -21,7 +22,6 @@ export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDe
       //
       // The option setting is not for typical use.  We're using it here to avoid
       // problems in Cloud environments.  See elastic/kibana#47405.
-      // @ts-ignore No type for inert Hapi handler
       // const file = handler.file(SHAREABLE_RUNTIME_FILE, { confine: false });
       const file = readFileSync(SHAREABLE_RUNTIME_FILE);
       return response.ok({

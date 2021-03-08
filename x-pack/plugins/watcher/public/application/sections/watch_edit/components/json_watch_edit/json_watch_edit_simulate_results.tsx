@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useContext } from 'react';
@@ -46,8 +47,8 @@ export const JsonWatchEditSimulateResults = ({
     if (executeResults && actions) {
       const actionStatuses =
         executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
-      return Object.keys(actions).map(actionKey => {
-        const actionStatus = actionStatuses.find(status => status.id === actionKey);
+      return Object.keys(actions).map((actionKey) => {
+        const actionStatus = actionStatuses.find((status) => status.id === actionKey);
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),

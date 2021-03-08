@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
@@ -31,6 +32,29 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
         }
       });
       return await testSubjects.find('waffleMap');
+    },
+
+    async openInvenotrySwitcher() {
+      await testSubjects.click('openInventorySwitcher');
+      return await testSubjects.find('goToHost');
+    },
+
+    async goToHost() {
+      await testSubjects.click('openInventorySwitcher');
+      await testSubjects.find('goToHost');
+      return await testSubjects.click('goToHost');
+    },
+
+    async goToPods() {
+      await testSubjects.click('openInventorySwitcher');
+      await testSubjects.find('goToHost');
+      return await testSubjects.click('goToPods');
+    },
+
+    async goToDocker() {
+      await testSubjects.click('openInventorySwitcher');
+      await testSubjects.find('goToHost');
+      return await testSubjects.click('goToDocker');
     },
 
     async goToMetricExplorer() {
@@ -73,6 +97,10 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
     async openSourceConfigurationFlyout() {
       await testSubjects.click('configureSourceButton');
       await testSubjects.exists('sourceConfigurationFlyout');
+    },
+
+    async waitForLoading() {
+      await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
     },
   };
 }
