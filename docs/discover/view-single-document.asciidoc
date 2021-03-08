@@ -7,14 +7,13 @@ Once you've found a document of interest in *Discover*, there's a simple way to 
 . Click **View single document**.
 +
 This allows you to view the document in two ways. **Table** displays the document's fields row by row.
-**JSON** (JavaScript Object Notation) allows you to take a look at how the document is returned from Elasticsearch.
+**JSON** (JavaScript Object Notation) shows you how the document is returned from {es}.
 +
 [role="screenshot"]
 image::images/discover-view-single-document.png[Discover single document view]
 
 The link is valid for the time the document is available in Elasticsearch. If you need another way to view single 
 documents, you can extend **Table** and **JSON** by creating <<external-plugin-development, your own plugin>>.
-
 
 
 
