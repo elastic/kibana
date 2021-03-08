@@ -12,7 +12,7 @@ import { Storage } from './index';
 const MAX_NUMBER_OF_HISTORY_ITEMS = 100;
 
 export const errors = {
-  isQuoteExceeded: (e: Error) => e.name === 'QuotaExceededError',
+  isQuotaExceeded: (e: Error) => e.name === 'QuotaExceededError',
 };
 
 export class History {
