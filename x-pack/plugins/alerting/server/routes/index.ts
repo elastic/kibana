@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-export { aggregateAlertRoute } from './aggregate';
-export { createAlertRoute } from './create';
-export { deleteAlertRoute } from './delete';
-export { findAlertRoute } from './find';
-export { getAlertRoute } from './get';
-export { getAlertStateRoute } from './get_alert_state';
-export { getAlertInstanceSummaryRoute } from './get_alert_instance_summary';
-export { listAlertTypesRoute } from './list_alert_types';
-export { updateAlertRoute } from './update';
-export { enableAlertRoute } from './enable';
-export { disableAlertRoute } from './disable';
-export { updateApiKeyRoute } from './update_api_key';
-export { muteAlertInstanceRoute } from './mute_instance';
-export { unmuteAlertInstanceRoute } from './unmute_instance';
-export { muteAllAlertRoute } from './mute_all';
-export { unmuteAllAlertRoute } from './unmute_all';
-export { healthRoute } from './health';
+import { IRouter } from 'kibana/server';
+import { ILicenseState } from '../lib';
+import { defineLegacyRoutes } from './legacy';
+import { AlertingRequestHandlerContext } from '../types';
+import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+
+export function defineRoutes(
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState,
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+) {
+  defineLegacyRoutes(router, licenseState, encryptedSavedObjects);
+}
