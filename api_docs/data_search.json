@@ -10717,6 +10717,58 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-common.queryToAst",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Object",
+            "label": "query",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/query_to_ast.ts",
+              "lineNumber": 14
+            }
+          }
+        ],
+        "signature": [
+          "(query: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          ") => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpressionBuilder",
+            "text": "ExpressionAstExpressionBuilder"
+          }
+        ],
+        "description": [],
+        "label": "queryToAst",
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/query_to_ast.ts",
+          "lineNumber": 14
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.splitStringInterval",
         "type": "Function",
         "children": [
@@ -11094,6 +11146,67 @@
           "path": "src/plugins/data/common/search/tabify/get_columns.ts",
           "lineNumber": 34
         },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.timerangeToAst",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Object",
+            "label": "timerange",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/timerange_to_ast.ts",
+              "lineNumber": 13
+            }
+          }
+        ],
+        "signature": [
+          "(timerange: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ") => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstFunctionBuilder",
+            "text": "ExpressionAstFunctionBuilder"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ExpressionFunctionKibanaTimerange",
+            "text": "ExpressionFunctionKibanaTimerange"
+          },
+          ">"
+        ],
+        "description": [],
+        "label": "timerangeToAst",
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/timerange_to_ast.ts",
+          "lineNumber": 13
+        },
+        "tags": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -17777,7 +17890,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 23
+          "lineNumber": 25
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -17797,6 +17910,135 @@
             "text": "ExpressionValueBoxed"
           },
           "<\"kibana_context\", ExecutionContextSearch>>, ExecutionContext<Adapters, ExecutionContextSearch>>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ExpressionFunctionKibanaTimerange",
+        "type": "Type",
+        "label": "ExpressionFunctionKibanaTimerange",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/timerange.ts",
+          "lineNumber": 15
+        },
+        "signature": [
+          "ExpressionFunctionDefinition<\"timerange\", null, TimeRange, ExpressionValueBoxed<\"timerange\", TimeRange>, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState",
+          ">>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ExpressionFunctionKql",
+        "type": "Type",
+        "label": "ExpressionFunctionKql",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/kql.ts",
+          "lineNumber": 17
+        },
+        "signature": [
+          "ExpressionFunctionDefinition<\"kql\", null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_query\", ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ExpressionFunctionLucene",
+        "type": "Type",
+        "label": "ExpressionFunctionLucene",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/lucene.ts",
+          "lineNumber": 17
+        },
+        "signature": [
+          "ExpressionFunctionDefinition<\"lucene\", null, Arguments, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"kibana_query\", ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState"
         ],
         "initialIsOpen": false
       },
@@ -18179,7 +18421,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 26
+          "lineNumber": 28
         },
         "signature": [
           "\"kibana_context\""
@@ -18194,10 +18436,40 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 27
+          "lineNumber": 29
         },
         "signature": [
           "{ type: \"kibana_context\"; } & ExecutionContextSearch"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.KibanaQueryOutput",
+        "type": "Type",
+        "label": "KibanaQueryOutput",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
+          "lineNumber": 25
+        },
+        "signature": [
+          "{ type: \"kibana_query\"; } & Query"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.KibanaTimerangeOutput",
+        "type": "Type",
+        "label": "KibanaTimerangeOutput",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/timerange.ts",
+          "lineNumber": 13
+        },
+        "signature": [
+          "{ type: \"timerange\"; } & TimeRange"
         ],
         "initialIsOpen": false
       },
@@ -18544,7 +18816,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-              "lineNumber": 30
+              "lineNumber": 32
             }
           },
           {
@@ -18563,7 +18835,7 @@
                 "label": "null",
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-                  "lineNumber": 32
+                  "lineNumber": 34
                 },
                 "tags": [],
                 "returnComment": []
@@ -18573,7 +18845,7 @@
             "label": "from",
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-              "lineNumber": 31
+              "lineNumber": 33
             }
           },
           {
@@ -18592,7 +18864,7 @@
                 "label": "null",
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-                  "lineNumber": 39
+                  "lineNumber": 41
                 },
                 "tags": [],
                 "returnComment": []
@@ -18602,7 +18874,7 @@
             "label": "to",
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-              "lineNumber": 38
+              "lineNumber": 40
             }
           }
         ],
@@ -18610,7 +18882,7 @@
         "label": "kibanaContext",
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 29
+          "lineNumber": 31
         },
         "initialIsOpen": false
       },
@@ -18627,7 +18899,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "signature": [
               "\"kibana_context\""
@@ -18641,7 +18913,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 42
+              "lineNumber": 44
             },
             "signature": [
               "\"kibana_context\""
@@ -18655,7 +18927,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 43
+              "lineNumber": 45
             },
             "signature": [
               "(\"kibana_context\" | \"null\")[]"
@@ -18669,7 +18941,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 44
+              "lineNumber": 46
             }
           },
           {
@@ -18690,10 +18962,10 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 49
+                      "lineNumber": 51
                     },
                     "signature": [
-                      "(\"string\" | \"null\")[]"
+                      "(\"null\" | \"kibana_query\")[]"
                     ]
                   },
                   {
@@ -18704,7 +18976,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 50
+                      "lineNumber": 52
                     },
                     "signature": [
                       "string[]"
@@ -18718,7 +18990,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 51
+                      "lineNumber": 53
                     },
                     "signature": [
                       "null"
@@ -18732,7 +19004,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 52
+                      "lineNumber": 54
                     }
                   }
                 ],
@@ -18740,7 +19012,7 @@
                 "label": "q",
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 48
+                  "lineNumber": 50
                 }
               },
               {
@@ -18756,7 +19028,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 57
+                      "lineNumber": 59
                     },
                     "signature": [
                       "(\"string\" | \"null\")[]"
@@ -18770,7 +19042,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 58
+                      "lineNumber": 60
                     }
                   },
                   {
@@ -18781,7 +19053,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 59
+                      "lineNumber": 61
                     }
                   }
                 ],
@@ -18789,7 +19061,7 @@
                 "label": "filters",
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 56
+                  "lineNumber": 58
                 }
               },
               {
@@ -18805,10 +19077,10 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 64
+                      "lineNumber": 66
                     },
                     "signature": [
-                      "(\"string\" | \"null\")[]"
+                      "(\"null\" | \"timerange\")[]"
                     ]
                   },
                   {
@@ -18819,7 +19091,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 65
+                      "lineNumber": 67
                     },
                     "signature": [
                       "null"
@@ -18833,7 +19105,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 66
+                      "lineNumber": 68
                     }
                   }
                 ],
@@ -18841,7 +19113,7 @@
                 "label": "timeRange",
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 63
+                  "lineNumber": 65
                 }
               },
               {
@@ -18857,7 +19129,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 71
+                      "lineNumber": 73
                     },
                     "signature": [
                       "(\"string\" | \"null\")[]"
@@ -18871,7 +19143,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 72
+                      "lineNumber": 74
                     },
                     "signature": [
                       "null"
@@ -18885,7 +19157,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 73
+                      "lineNumber": 75
                     }
                   }
                 ],
@@ -18893,7 +19165,7 @@
                 "label": "savedSearchId",
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 70
+                  "lineNumber": 72
                 }
               }
             ],
@@ -18901,7 +19173,7 @@
             "label": "args",
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 47
+              "lineNumber": 49
             }
           },
           {
@@ -18962,7 +19234,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 79
+                  "lineNumber": 81
                 }
               },
               {
@@ -18975,7 +19247,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 79
+                  "lineNumber": 81
                 }
               },
               {
@@ -19011,7 +19283,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 79
+                  "lineNumber": 81
                 }
               }
             ],
@@ -19019,7 +19291,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 79
+              "lineNumber": 81
             }
           }
         ],
@@ -19027,7 +19299,664 @@
         "label": "kibanaContextFunction",
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 40
+          "lineNumber": 42
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.kibanaTimerangeFunction",
+        "type": "Object",
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.kibanaTimerangeFunction.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/timerange.ts",
+              "lineNumber": 23
+            },
+            "signature": [
+              "\"timerange\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.kibanaTimerangeFunction.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/timerange.ts",
+              "lineNumber": 24
+            },
+            "signature": [
+              "\"timerange\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.kibanaTimerangeFunction.inputTypes",
+            "type": "Array",
+            "label": "inputTypes",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/timerange.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              "\"null\"[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.kibanaTimerangeFunction.help",
+            "type": "string",
+            "label": "help",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/timerange.ts",
+              "lineNumber": 26
+            }
+          },
+          {
+            "id": "def-common.kibanaTimerangeFunction.args",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "id": "def-common.kibanaTimerangeFunction.args.from",
+                "type": "Object",
+                "tags": [],
+                "children": [
+                  {
+                    "tags": [],
+                    "id": "def-common.kibanaTimerangeFunction.args.from.types",
+                    "type": "Array",
+                    "label": "types",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                      "lineNumber": 31
+                    },
+                    "signature": [
+                      "\"string\"[]"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.kibanaTimerangeFunction.args.from.required",
+                    "type": "boolean",
+                    "label": "required",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                      "lineNumber": 32
+                    },
+                    "signature": [
+                      "true"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.kibanaTimerangeFunction.args.from.help",
+                    "type": "string",
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                      "lineNumber": 33
+                    }
+                  }
+                ],
+                "description": [],
+                "label": "from",
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                  "lineNumber": 30
+                }
+              },
+              {
+                "id": "def-common.kibanaTimerangeFunction.args.to",
+                "type": "Object",
+                "tags": [],
+                "children": [
+                  {
+                    "tags": [],
+                    "id": "def-common.kibanaTimerangeFunction.args.to.types",
+                    "type": "Array",
+                    "label": "types",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                      "lineNumber": 38
+                    },
+                    "signature": [
+                      "\"string\"[]"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.kibanaTimerangeFunction.args.to.required",
+                    "type": "boolean",
+                    "label": "required",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                      "lineNumber": 39
+                    },
+                    "signature": [
+                      "true"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.kibanaTimerangeFunction.args.to.help",
+                    "type": "string",
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                      "lineNumber": 40
+                    }
+                  }
+                ],
+                "description": [],
+                "label": "to",
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                  "lineNumber": 37
+                }
+              },
+              {
+                "id": "def-common.kibanaTimerangeFunction.args.mode",
+                "type": "Object",
+                "tags": [],
+                "children": [
+                  {
+                    "tags": [],
+                    "id": "def-common.kibanaTimerangeFunction.args.mode.types",
+                    "type": "Array",
+                    "label": "types",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                      "lineNumber": 45
+                    },
+                    "signature": [
+                      "\"string\"[]"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.kibanaTimerangeFunction.args.mode.help",
+                    "type": "string",
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                      "lineNumber": 46
+                    }
+                  }
+                ],
+                "description": [],
+                "label": "mode",
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                  "lineNumber": 44
+                }
+              }
+            ],
+            "description": [],
+            "label": "args",
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/timerange.ts",
+              "lineNumber": 29
+            }
+          },
+          {
+            "id": "def-common.kibanaTimerangeFunction.fn",
+            "type": "Function",
+            "label": "fn",
+            "signature": [
+              "(input: null, args: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              ") => { type: \"timerange\"; from: string; to: string; mode: \"absolute\" | \"relative\" | undefined; }"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Uncategorized",
+                "label": "input",
+                "isRequired": true,
+                "signature": [
+                  "null"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                  "lineNumber": 52
+                }
+              },
+              {
+                "type": "Object",
+                "label": "args",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/timerange.ts",
+                  "lineNumber": 52
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/timerange.ts",
+              "lineNumber": 52
+            }
+          }
+        ],
+        "description": [],
+        "label": "kibanaTimerangeFunction",
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/timerange.ts",
+          "lineNumber": 22
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.kqlFunction",
+        "type": "Object",
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.kqlFunction.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/kql.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              "\"kql\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.kqlFunction.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/kql.ts",
+              "lineNumber": 26
+            },
+            "signature": [
+              "\"kibana_query\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.kqlFunction.inputTypes",
+            "type": "Array",
+            "label": "inputTypes",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/kql.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "\"null\"[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.kqlFunction.help",
+            "type": "string",
+            "label": "help",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/kql.ts",
+              "lineNumber": 28
+            }
+          },
+          {
+            "id": "def-common.kqlFunction.args",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "id": "def-common.kqlFunction.args.q",
+                "type": "Object",
+                "tags": [],
+                "children": [
+                  {
+                    "tags": [],
+                    "id": "def-common.kqlFunction.args.q.types",
+                    "type": "Array",
+                    "label": "types",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/kql.ts",
+                      "lineNumber": 33
+                    },
+                    "signature": [
+                      "\"string\"[]"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.kqlFunction.args.q.required",
+                    "type": "boolean",
+                    "label": "required",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/kql.ts",
+                      "lineNumber": 34
+                    },
+                    "signature": [
+                      "true"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.kqlFunction.args.q.aliases",
+                    "type": "Array",
+                    "label": "aliases",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/kql.ts",
+                      "lineNumber": 35
+                    },
+                    "signature": [
+                      "string[]"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.kqlFunction.args.q.help",
+                    "type": "string",
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/kql.ts",
+                      "lineNumber": 36
+                    }
+                  }
+                ],
+                "description": [],
+                "label": "q",
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/kql.ts",
+                  "lineNumber": 32
+                }
+              }
+            ],
+            "description": [],
+            "label": "args",
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/kql.ts",
+              "lineNumber": 31
+            }
+          },
+          {
+            "id": "def-common.kqlFunction.fn",
+            "type": "Function",
+            "label": "fn",
+            "signature": [
+              "(input: null, args: Arguments) => { type: \"kibana_query\"; language: string; query: string; }"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Uncategorized",
+                "label": "input",
+                "isRequired": true,
+                "signature": [
+                  "null"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/kql.ts",
+                  "lineNumber": 42
+                }
+              },
+              {
+                "type": "Object",
+                "label": "args",
+                "isRequired": true,
+                "signature": [
+                  "Arguments"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/kql.ts",
+                  "lineNumber": 42
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/kql.ts",
+              "lineNumber": 42
+            }
+          }
+        ],
+        "description": [],
+        "label": "kqlFunction",
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/kql.ts",
+          "lineNumber": 24
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.luceneFunction",
+        "type": "Object",
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.luceneFunction.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/lucene.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              "\"lucene\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.luceneFunction.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/lucene.ts",
+              "lineNumber": 26
+            },
+            "signature": [
+              "\"kibana_query\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.luceneFunction.inputTypes",
+            "type": "Array",
+            "label": "inputTypes",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/lucene.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "\"null\"[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.luceneFunction.help",
+            "type": "string",
+            "label": "help",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/lucene.ts",
+              "lineNumber": 28
+            }
+          },
+          {
+            "id": "def-common.luceneFunction.args",
+            "type": "Object",
+            "tags": [],
+            "children": [
+              {
+                "id": "def-common.luceneFunction.args.q",
+                "type": "Object",
+                "tags": [],
+                "children": [
+                  {
+                    "tags": [],
+                    "id": "def-common.luceneFunction.args.q.types",
+                    "type": "Array",
+                    "label": "types",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/lucene.ts",
+                      "lineNumber": 33
+                    },
+                    "signature": [
+                      "\"string\"[]"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.luceneFunction.args.q.required",
+                    "type": "boolean",
+                    "label": "required",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/lucene.ts",
+                      "lineNumber": 34
+                    },
+                    "signature": [
+                      "true"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.luceneFunction.args.q.aliases",
+                    "type": "Array",
+                    "label": "aliases",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/lucene.ts",
+                      "lineNumber": 35
+                    },
+                    "signature": [
+                      "string[]"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-common.luceneFunction.args.q.help",
+                    "type": "string",
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/data/common/search/expressions/lucene.ts",
+                      "lineNumber": 36
+                    }
+                  }
+                ],
+                "description": [],
+                "label": "q",
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/lucene.ts",
+                  "lineNumber": 32
+                }
+              }
+            ],
+            "description": [],
+            "label": "args",
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/lucene.ts",
+              "lineNumber": 31
+            }
+          },
+          {
+            "id": "def-common.luceneFunction.fn",
+            "type": "Function",
+            "label": "fn",
+            "signature": [
+              "(input: null, args: Arguments) => { type: \"kibana_query\"; language: string; query: string; }"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Uncategorized",
+                "label": "input",
+                "isRequired": true,
+                "signature": [
+                  "null"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/lucene.ts",
+                  "lineNumber": 42
+                }
+              },
+              {
+                "type": "Object",
+                "label": "args",
+                "isRequired": true,
+                "signature": [
+                  "Arguments"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/expressions/lucene.ts",
+                  "lineNumber": 42
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/lucene.ts",
+              "lineNumber": 42
+            }
+          }
+        ],
+        "description": [],
+        "label": "luceneFunction",
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/lucene.ts",
+          "lineNumber": 24
         },
         "initialIsOpen": false
       },

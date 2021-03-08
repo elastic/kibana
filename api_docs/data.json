@@ -11594,7 +11594,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 23
+          "lineNumber": 25
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -11946,7 +11946,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 27
+          "lineNumber": 29
         },
         "signature": [
           "{ type: \"kibana_context\"; } & ExecutionContextSearch"
@@ -20477,7 +20477,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 23
+          "lineNumber": 25
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -20700,7 +20700,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 27
+          "lineNumber": 29
         },
         "signature": [
           "{ type: \"kibana_context\"; } & ExecutionContextSearch"
