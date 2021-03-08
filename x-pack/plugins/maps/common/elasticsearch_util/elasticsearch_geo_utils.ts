@@ -138,7 +138,7 @@ export function hitsToGeoJson(
     // There is a bug in Elasticsearch API where epoch_millis are returned as a string instead of a number
     // https://github.com/elastic/elasticsearch/issues/50622
     // Convert these field values to integers.
-    for (let k = 0; i < epochMillisFields.length; k++) {
+    for (let k = 0; k < epochMillisFields.length; k++) {
       const fieldName = epochMillisFields[k];
       if (typeof properties[fieldName] === 'string') {
         properties[fieldName] = parseInt(properties[fieldName], 10);
