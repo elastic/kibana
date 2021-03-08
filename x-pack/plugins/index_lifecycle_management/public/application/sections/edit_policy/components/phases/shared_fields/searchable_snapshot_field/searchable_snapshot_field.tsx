@@ -268,7 +268,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             'xpack.indexLifecycleMgmt.editPolicy.cold.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Rollup is not allowed when searchable snapshots are enabled in this phase.',
+                // TODO: Copy required
+                '[Rollup is not allowed when searchable snapshots are enabled in this phase.]',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"
