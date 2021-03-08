@@ -212,21 +212,4 @@ If an alert requires certain privileges to run such as index privileges, keep in
 
 For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and allowlist the hostnames that {kib} can connect with. 
 
-[float]
-[[alerting-limitations]]
-=== Limitations
-
-Users who create alerts will need the `manage_api_key` cluster privilege.
-
-[IMPORTANT]
-==============================================
-Note that the `manage_own_api_key` cluster privilege is not enough - it can be used to create API keys, but cannot be used invalidate them. Alerting must be able to both create and invalidate API keys. 
-==============================================
-
-When an alert is created by a user with the `manage_own_api_key` but not the `manage_api_key` cluster privilege, you will see the following error message in the {kib} logs:
-
-```bash
-[error][alerting][plugins] Failed to invalidate API Key: [security_exception] action [cluster:admin/xpack/security/api_key/invalidate] is unauthorized for user [user-name-here]
-```
-
 --
