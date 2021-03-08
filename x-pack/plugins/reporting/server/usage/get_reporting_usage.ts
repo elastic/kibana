@@ -6,8 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import { ElasticsearchClient, SearchResponse } from 'kibana/server';
 import { ReportingConfig } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { GetLicense } from './';

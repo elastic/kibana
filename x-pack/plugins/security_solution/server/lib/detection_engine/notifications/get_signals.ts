@@ -38,7 +38,7 @@ export const getSignals = async ({
     size,
   });
 
-  const { body: result } = await esClient.search(query);
+  const { body: result } = await esClient.search<SignalSearchResponse>(query);
 
-  return result as SignalSearchResponse;
+  return result;
 };
