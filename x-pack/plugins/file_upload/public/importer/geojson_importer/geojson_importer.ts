@@ -163,7 +163,7 @@ export class GeoJsonImporter extends Importer {
   private async _importBlock(
     id: string,
     index: string,
-    pipelineId: string,
+    pipelineId: string | undefined,
     chunks: ImportDoc[][],
     blockSizeInBytes: number,
     setImportProgress: (progress: number) => void
