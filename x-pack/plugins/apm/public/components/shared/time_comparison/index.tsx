@@ -84,12 +84,14 @@ function getSelectOptions({
     }),
   };
 
-  const dateDiff = getDateDifference({
-    start: momentStart,
-    end: momentEnd,
-    unitOfTime: 'days',
-    precise: true,
-  });
+  const dateDiff = Math.round(
+    getDateDifference({
+      start: momentStart,
+      end: momentEnd,
+      unitOfTime: 'days',
+      precise: true,
+    })
+  );
 
   const isRangeToNow = rangeTo === 'now';
 
