@@ -43,6 +43,7 @@ const agentIcons: { [key: string]: string } = {
 };
 
 const darkAgentIcons: { [key: string]: string } = {
+  ...agentIcons,
   php: darkPhpIcon,
   rum: darkRumJsIcon,
   rust: darkRustIcon,
