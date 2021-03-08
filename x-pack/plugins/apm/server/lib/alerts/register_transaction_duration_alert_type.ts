@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { AlertingPlugin } from '../../../../alerting/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -20,13 +20,13 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDurationFormatter } from '../../../common/utils/formatters';
-import { environmentQuery } from '../../../common/utils/queries';
+import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
-  alerts: AlertingPlugin['setup'];
+  alerting: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -47,10 +47,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
-  alerts,
+  alerting,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType({
+  alerting.registerType({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,

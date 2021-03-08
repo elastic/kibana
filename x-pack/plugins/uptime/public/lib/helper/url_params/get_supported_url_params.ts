@@ -22,6 +22,7 @@ export interface UptimeUrlParams {
   search: string;
   statusFilter: string;
   focusConnectorField?: boolean;
+  query?: string;
 }
 
 const {
@@ -75,9 +76,11 @@ export const getSupportedUrlParams = (params: {
     statusFilter,
     pagination,
     focusConnectorField,
+    query,
   } = filteredParams;
 
   return {
+    query,
     pagination,
     absoluteDateRangeStart: parseAbsoluteDate(
       dateRangeStart || DATE_RANGE_START,

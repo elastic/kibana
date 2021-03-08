@@ -59,14 +59,16 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
 import {
-  changeToThreeHundredRowsPerPage,
+  changeRowsPerPageTo300,
+  duplicateFirstRule,
+  duplicateRuleFromMenu,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
-  waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { cleanKibana } from '../../tasks/common';
+import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
+import { cleanKibana, reload } from '../../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -93,8 +95,10 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
+import { waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { DETECTIONS_URL, RULE_CREATION } from '../../urls/navigation';
 
@@ -375,7 +379,7 @@ describe('indicator match', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
-        waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+        waitForRulesTableToBeLoaded();
         goToCreateNewRule();
         selectIndicatorMatchType();
       });
@@ -388,8 +392,7 @@ describe('indicator match', () => {
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-        changeToThreeHundredRowsPerPage();
-        waitForRulesToBeLoaded();
+        changeRowsPerPageTo300();
 
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
@@ -465,6 +468,31 @@ describe('indicator match', () => {
           .first()
           .should('have.text', newThreatIndicatorRule.severity.toLowerCase());
         cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThreatIndicatorRule.riskScore);
+      });
+    });
+
+    describe('Duplicates the indicator rule', () => {
+      beforeEach(() => {
+        cleanKibana();
+        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        goToManageAlertsDetectionRules();
+        createCustomIndicatorRule(newThreatIndicatorRule);
+        reload();
+      });
+
+      it('Allows the rule to be duplicated from the table', () => {
+        waitForKibana();
+        duplicateFirstRule();
+        cy.contains(RULE_NAME, `${newThreatIndicatorRule.name} [Duplicate]`);
+      });
+
+      it('Allows the rule to be duplicated from the edit screen', () => {
+        waitForKibana();
+        goToRuleDetails();
+        duplicateRuleFromMenu();
+        goBackToAllRulesTable();
+        reload();
+        cy.contains(RULE_NAME, `${newThreatIndicatorRule.name} [Duplicate]`);
       });
     });
   });

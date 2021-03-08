@@ -20,13 +20,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   // url parameters
   const start = encodeURIComponent(metadata.start);
   const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
 
   registry.when('Top traces when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const response = await supertest.get(
-        `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
-      );
+      const response = await supertest.get(`/api/apm/traces?start=${start}&end=${end}`);
 
       expect(response.status).to.be(200);
       expect(response.body.items.length).to.be(0);
@@ -40,9 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: any;
       before(async () => {
-        response = await supertest.get(
-          `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
+        response = await supertest.get(`/api/apm/traces?start=${start}&end=${end}`);
       });
 
       it('returns the correct status code', async () => {

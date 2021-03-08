@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNodes } from '../lib/service_nodes';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { rangeRt, kueryRt } from './default_api_types';
 
 export const serviceNodesRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
@@ -17,15 +17,17 @@ export const serviceNodesRoute = createRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([rangeRt, uiFiltersRt]),
+    query: t.intersection([kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
     const { serviceName } = params.path;
+    const { kuery } = params.query;
 
     return getServiceNodes({
+      kuery,
       setup,
       serviceName,
     });

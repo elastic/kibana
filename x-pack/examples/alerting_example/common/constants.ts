@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../plugins/alerts/common';
+import { AlertTypeParams } from '../../../plugins/alerting/common';
 
 export const ALERTING_EXAMPLE_APP_ID = 'AlertingExample';
 

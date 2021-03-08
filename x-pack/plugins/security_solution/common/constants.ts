@@ -28,8 +28,8 @@ export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
-export const DEFAULT_FROM = 'now-24h';
-export const DEFAULT_TO = 'now';
+export const DEFAULT_FROM = 'now/d';
+export const DEFAULT_TO = 'now/d';
 export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
@@ -45,10 +45,10 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
 
-// Document path where threat indicator fields are expected. Used as
-// both the source of enrichment fields and the destination for enrichment in
-// the generated detection alert
-export const DEFAULT_INDICATOR_PATH = 'threat.indicator';
+// Document path where threat indicator fields are expected. Fields are used
+// to enrich signals, and are copied to threat.indicator.
+export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
+export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
 export enum SecurityPageName {
   detections = 'detections',

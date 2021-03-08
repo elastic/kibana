@@ -8,7 +8,7 @@
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { toArray, map } from 'rxjs/operators';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { AlertingPlugin } from '../../../../alerting/server';
 import { APMConfig } from '../..';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
 
@@ -28,14 +28,14 @@ const mockedConfig$ = (Rx.of('apm_oss.errorIndices').pipe(
 describe('Transaction error rate alert', () => {
   it("doesn't send an alert when rate is less than threshold", async () => {
     let alertExecutor: any;
-    const alerts = {
+    const alerting = {
       registerType: ({ executor }) => {
         alertExecutor = executor;
       },
     } as AlertingPlugin['setup'];
 
     registerTransactionErrorRateAlertType({
-      alerts,
+      alerting,
       config$: mockedConfig$,
     });
     expect(alertExecutor).toBeDefined();
@@ -58,14 +58,14 @@ describe('Transaction error rate alert', () => {
 
   it('sends alerts with service name, transaction type and environment', async () => {
     let alertExecutor: any;
-    const alerts = {
+    const alerting = {
       registerType: ({ executor }) => {
         alertExecutor = executor;
       },
     } as AlertingPlugin['setup'];
 
     registerTransactionErrorRateAlertType({
-      alerts,
+      alerting,
       config$: mockedConfig$,
     });
     expect(alertExecutor).toBeDefined();
@@ -163,14 +163,14 @@ describe('Transaction error rate alert', () => {
   });
   it('sends alerts with service name and transaction type', async () => {
     let alertExecutor: any;
-    const alerts = {
+    const alerting = {
       registerType: ({ executor }) => {
         alertExecutor = executor;
       },
     } as AlertingPlugin['setup'];
 
     registerTransactionErrorRateAlertType({
-      alerts,
+      alerting,
       config$: mockedConfig$,
     });
     expect(alertExecutor).toBeDefined();
@@ -237,14 +237,14 @@ describe('Transaction error rate alert', () => {
 
   it('sends alerts with service name', async () => {
     let alertExecutor: any;
-    const alerts = {
+    const alerting = {
       registerType: ({ executor }) => {
         alertExecutor = executor;
       },
     } as AlertingPlugin['setup'];
 
     registerTransactionErrorRateAlertType({
-      alerts,
+      alerting,
       config$: mockedConfig$,
     });
     expect(alertExecutor).toBeDefined();

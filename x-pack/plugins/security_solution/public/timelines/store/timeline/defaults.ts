@@ -25,7 +25,7 @@ export const timelineDefaults: SubsetTimelineModel &
   description: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
-    tiebreakerField: 'event.sequence',
+    tiebreakerField: '',
     timestampField: '@timestamp',
     query: '',
     size: 100,

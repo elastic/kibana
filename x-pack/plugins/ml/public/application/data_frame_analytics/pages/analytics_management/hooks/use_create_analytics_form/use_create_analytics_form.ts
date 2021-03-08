@@ -42,7 +42,7 @@ export interface CreateAnalyticsFormProps {
 }
 
 export interface CreateAnalyticsStepProps extends CreateAnalyticsFormProps {
-  setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
+  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
   step?: ANALYTICS_STEPS;
   stepActivated?: boolean;
 }
@@ -108,6 +108,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         createKibanaIndexPattern();
       }
       refresh();
+      return true;
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
@@ -118,6 +119,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
+      return false;
     }
   };
 
