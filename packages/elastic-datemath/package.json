@@ -5,10 +5,6 @@
   "license": "Apache-2.0",
   "main": "index.js",
   "typings": "index.d.ts",
-  "scripts": {
-    "build": "bazel build //packages/elastic-datemath:build",
-    "watch": "../../node_modules/.bin/ibazel build //packages/elastic-datemath:build --config=debug"
-  },
   "peerDependencies": {
     "moment": "^2.24.0"
   }
