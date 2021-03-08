@@ -64,7 +64,6 @@ export function Discover({
   rows,
   searchSource,
   state,
-  timeRange,
   unmappedFieldsConfig,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
@@ -81,6 +80,7 @@ export function Discover({
   const hideChart = useMemo(() => state.hideChart, [state]);
   const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
   const { trackUiMetric, capabilities, indexPatterns } = services;
+
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
@@ -293,8 +293,8 @@ export function Discover({
                         {!hideChart && (
                           <EuiFlexItem className="dscResultCount__actions">
                             <TimechartHeader
+                              data={opts.data}
                               dateFormat={opts.config.get('dateFormat')}
-                              timeRange={timeRange}
                               options={search.aggs.intervalOptions}
                               onChangeInterval={onChangeInterval}
                               stateInterval={state.interval || ''}
