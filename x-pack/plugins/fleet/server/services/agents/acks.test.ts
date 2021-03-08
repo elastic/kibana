@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectsBulkResponse } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+
 import type {
   Agent,
   AgentActionSOAttributes,
@@ -15,6 +16,7 @@ import type {
   AgentEvent,
 } from '../../../common/types/models';
 import { AGENT_TYPE_PERMANENT, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
+
 import { acknowledgeAgentActions } from './acks';
 
 describe('test agent acks services', () => {
@@ -106,16 +108,21 @@ describe('test agent acks services', () => {
       ]
     );
     expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
-    expect(mockSavedObjectsClient.update).toBeCalled();
-    expect(mockSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockElasticsearchClient.update).toBeCalled();
+    expect(mockElasticsearchClient.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "fleet-agents",
-        "id",
         Object {
-          "packages": Array [
-            "system",
-          ],
-          "policy_revision": 4,
+          "body": Object {
+            "doc": Object {
+              "packages": Array [
+                "system",
+              ],
+              "policy_revision_idx": 4,
+            },
+          },
+          "id": "id",
+          "index": ".fleet-agents",
+          "refresh": "wait_for",
         },
       ]
     `);
@@ -168,16 +175,21 @@ describe('test agent acks services', () => {
       ]
     );
     expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
-    expect(mockSavedObjectsClient.update).toBeCalled();
-    expect(mockSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockElasticsearchClient.update).toBeCalled();
+    expect(mockElasticsearchClient.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "fleet-agents",
-        "id",
         Object {
-          "packages": Array [
-            "system",
-          ],
-          "policy_revision": 4,
+          "body": Object {
+            "doc": Object {
+              "packages": Array [
+                "system",
+              ],
+              "policy_revision_idx": 4,
+            },
+          },
+          "id": "id",
+          "index": ".fleet-agents",
+          "refresh": "wait_for",
         },
       ]
     `);

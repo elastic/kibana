@@ -14,6 +14,7 @@ import {
   createCollectorFetchContextMock,
 } from '../../../usage_collection/server/mocks';
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { StatsCollectionConfig } from '../../../telemetry_collection_manager/server';
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -69,13 +70,16 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   return esClient;
 }
 
-function mockStatsCollectionConfig(clusterInfo: any, clusterStats: any, kibana: {}) {
+function mockStatsCollectionConfig(
+  clusterInfo: any,
+  clusterStats: any,
+  kibana: {}
+): StatsCollectionConfig {
   return {
     ...createCollectorFetchContextMock(),
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
     kibanaRequest: httpServerMock.createKibanaRequest(),
-    timestamp: Date.now(),
   };
 }
 
@@ -227,7 +231,7 @@ describe('get_local_stats', () => {
       const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
       const response = await getLocalStats(
         [{ clusterUuid: 'abc123' }],
-        { ...statsCollectionConfig },
+        statsCollectionConfig,
         context
       );
       const result = response[0];
@@ -243,7 +247,7 @@ describe('get_local_stats', () => {
 
     it('returns an empty array when no cluster uuid is provided', async () => {
       const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
-      const response = await getLocalStats([], { ...statsCollectionConfig }, context);
+      const response = await getLocalStats([], statsCollectionConfig, context);
       expect(response).toBeDefined();
       expect(response.length).toEqual(0);
     });

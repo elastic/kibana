@@ -83,6 +83,7 @@ export class HeadlessChromiumDriverFactory {
         } as puppeteer.LaunchOptions);
 
         page = await browser.newPage();
+        await page.emulateTimezone(browserTimezone ?? null);
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them

@@ -13,7 +13,6 @@ export interface FleetConfigType {
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
-    fleetServerEnabled: boolean;
     enabled: boolean;
     tlsCheckDisabled: boolean;
     pollingRequestTimeout: number;
