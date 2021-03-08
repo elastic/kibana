@@ -12,50 +12,6 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-server.asSavedObjectExecutionSource",
-        "type": "Function",
-        "label": "asSavedObjectExecutionSource",
-        "signature": [
-          "(source: Pick<",
-          "SavedObjectReference",
-          ", \"type\" | \"id\">) => ",
-          "SavedObjectExecutionSource"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Object",
-            "label": "source",
-            "isRequired": true,
-            "signature": [
-              "Pick<",
-              {
-                "pluginId": "core",
-                "scope": "common",
-                "docId": "kibCorePluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
-              ", \"type\" | \"id\">"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/lib/action_execution_source.ts#L30"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/lib/action_execution_source.ts#L29"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.asHttpRequestExecutionSource",
         "type": "Function",
         "label": "asHttpRequestExecutionSource",
@@ -90,8 +46,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/lib/action_execution_source.ts#L22"
+              "lineNumber": 22
             }
           }
         ],
@@ -99,70 +54,54 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/lib/action_execution_source.ts#L22"
+          "lineNumber": 22
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.asSavedObjectExecutionSource",
+        "type": "Function",
+        "label": "asSavedObjectExecutionSource",
+        "signature": [
+          "(source: Pick<",
+          "SavedObjectReference",
+          ", \"type\" | \"id\">) => ",
+          "SavedObjectExecutionSource"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Object",
+            "label": "source",
+            "isRequired": true,
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "core",
+                "scope": "common",
+                "docId": "kibCorePluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              ", \"type\" | \"id\">"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+              "lineNumber": 30
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+          "lineNumber": 29
         },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-server.ActionsPlugin",
-        "type": "Interface",
-        "label": "ActionsPlugin",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ActionsPlugin.setup",
-            "type": "Object",
-            "label": "setup",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 56,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L56"
-            },
-            "signature": [
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.PluginSetupContract",
-                "text": "PluginSetupContract"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ActionsPlugin.start",
-            "type": "Object",
-            "label": "start",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 57,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L57"
-            },
-            "signature": [
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.PluginStartContract",
-                "text": "PluginStartContract"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/actions/server/types.ts",
-          "lineNumber": 55,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L55"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-server.ActionResult",
         "type": "Interface",
@@ -188,8 +127,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 70,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L70"
+              "lineNumber": 70
             }
           },
           {
@@ -200,8 +138,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L71"
+              "lineNumber": 71
             }
           },
           {
@@ -212,8 +149,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 72,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L72"
+              "lineNumber": 72
             }
           },
           {
@@ -224,8 +160,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 73,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L73"
+              "lineNumber": 73
             },
             "signature": [
               "Config | undefined"
@@ -239,118 +174,124 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 74,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L74"
+              "lineNumber": 74
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/types.ts",
-          "lineNumber": 69,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L69"
+          "lineNumber": 69
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionTypeExecutorOptions",
+        "id": "def-server.ActionsApiRequestHandlerContext",
         "type": "Interface",
-        "label": "ActionTypeExecutorOptions",
-        "signature": [
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionTypeExecutorOptions",
-            "text": "ActionTypeExecutorOptions"
-          },
-          "<Config, Secrets, Params>"
-        ],
+        "label": "ActionsApiRequestHandlerContext",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-server.ActionTypeExecutorOptions.actionId",
-            "type": "string",
-            "label": "actionId",
+            "id": "def-server.ActionsApiRequestHandlerContext.getActionsClient",
+            "type": "Function",
+            "label": "getActionsClient",
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 62,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L62"
-            }
+              "lineNumber": 47
+            },
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ActionsClient",
+                "text": "ActionsClient"
+              }
+            ]
           },
           {
             "tags": [],
-            "id": "def-server.ActionTypeExecutorOptions.services",
-            "type": "Object",
-            "label": "services",
+            "id": "def-server.ActionsApiRequestHandlerContext.listTypes",
+            "type": "Function",
+            "label": "listTypes",
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L63"
+              "lineNumber": 48
+            },
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.ActionType",
+                "text": "ActionType"
+              },
+              "[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/actions/server/types.ts",
+          "lineNumber": 46
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionsPlugin",
+        "type": "Interface",
+        "label": "ActionsPlugin",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.ActionsPlugin.setup",
+            "type": "Object",
+            "label": "setup",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/server/types.ts",
+              "lineNumber": 56
             },
             "signature": [
               {
                 "pluginId": "actions",
                 "scope": "server",
                 "docId": "kibActionsPluginApi",
-                "section": "def-server.Services",
-                "text": "Services"
+                "section": "def-server.PluginSetupContract",
+                "text": "PluginSetupContract"
               }
             ]
           },
           {
             "tags": [],
-            "id": "def-server.ActionTypeExecutorOptions.config",
-            "type": "Uncategorized",
-            "label": "config",
+            "id": "def-server.ActionsPlugin.start",
+            "type": "Object",
+            "label": "start",
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L64"
+              "lineNumber": 57
             },
             "signature": [
-              "Config"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ActionTypeExecutorOptions.secrets",
-            "type": "Uncategorized",
-            "label": "secrets",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L65"
-            },
-            "signature": [
-              "Secrets"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ActionTypeExecutorOptions.params",
-            "type": "Uncategorized",
-            "label": "params",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 66,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L66"
-            },
-            "signature": [
-              "Params"
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.PluginStartContract",
+                "text": "PluginStartContract"
+              }
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/types.ts",
-          "lineNumber": 61,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L61"
+          "lineNumber": 55
         },
         "initialIsOpen": false
       },
@@ -379,8 +320,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L108"
+              "lineNumber": 108
             }
           },
           {
@@ -391,8 +331,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 109,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L109"
+              "lineNumber": 109
             }
           },
           {
@@ -403,8 +342,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 110,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L110"
+              "lineNumber": 110
             },
             "signature": [
               "number | undefined"
@@ -418,8 +356,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 111,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L111"
+              "lineNumber": 111
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -433,8 +370,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 112,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L112"
+              "lineNumber": 112
             },
             "signature": [
               "{ params?: ValidatorType<Params> | undefined; config?: ValidatorType<Config> | undefined; secrets?: ValidatorType<Secrets> | undefined; } | undefined"
@@ -459,8 +395,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/actions/server/types.ts",
-                  "lineNumber": 117,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L117"
+                  "lineNumber": 117
                 }
               },
               {
@@ -473,8 +408,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/actions/server/types.ts",
-                  "lineNumber": 117,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L117"
+                  "lineNumber": 117
                 }
               }
             ],
@@ -482,8 +416,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 117,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L117"
+              "lineNumber": 117
             }
           },
           {
@@ -494,8 +427,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 118,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L118"
+              "lineNumber": 118
             },
             "signature": [
               {
@@ -511,8 +443,104 @@
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/types.ts",
-          "lineNumber": 102,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L102"
+          "lineNumber": 102
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionTypeExecutorOptions",
+        "type": "Interface",
+        "label": "ActionTypeExecutorOptions",
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ActionTypeExecutorOptions",
+            "text": "ActionTypeExecutorOptions"
+          },
+          "<Config, Secrets, Params>"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.ActionTypeExecutorOptions.actionId",
+            "type": "string",
+            "label": "actionId",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/server/types.ts",
+              "lineNumber": 62
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.ActionTypeExecutorOptions.services",
+            "type": "Object",
+            "label": "services",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/server/types.ts",
+              "lineNumber": 63
+            },
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.Services",
+                "text": "Services"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ActionTypeExecutorOptions.config",
+            "type": "Uncategorized",
+            "label": "config",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/server/types.ts",
+              "lineNumber": 64
+            },
+            "signature": [
+              "Config"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ActionTypeExecutorOptions.secrets",
+            "type": "Uncategorized",
+            "label": "secrets",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/server/types.ts",
+              "lineNumber": 65
+            },
+            "signature": [
+              "Secrets"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ActionTypeExecutorOptions.params",
+            "type": "Uncategorized",
+            "label": "params",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/server/types.ts",
+              "lineNumber": 66
+            },
+            "signature": [
+              "Params"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/actions/server/types.ts",
+          "lineNumber": 61
         },
         "initialIsOpen": false
       },
@@ -549,8 +577,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L81"
+              "lineNumber": 81
             },
             "signature": [
               "Secrets"
@@ -559,74 +586,178 @@
         ],
         "source": {
           "path": "x-pack/plugins/actions/server/types.ts",
-          "lineNumber": 77,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L77"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ActionsApiRequestHandlerContext",
-        "type": "Interface",
-        "label": "ActionsApiRequestHandlerContext",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ActionsApiRequestHandlerContext.getActionsClient",
-            "type": "Function",
-            "label": "getActionsClient",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L47"
-            },
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.ActionsClient",
-                "text": "ActionsClient"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ActionsApiRequestHandlerContext.listTypes",
-            "type": "Function",
-            "label": "listTypes",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/server/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L48"
-            },
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "actions",
-                "scope": "common",
-                "docId": "kibActionsPluginApi",
-                "section": "def-common.ActionType",
-                "text": "ActionType"
-              },
-              "[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/actions/server/types.ts",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/types.ts#L46"
+          "lineNumber": 77
         },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
+          "lineNumber": 99
+        },
+        "signature": [
+          "{ readonly to: string[]; readonly message: string; readonly cc: string[]; readonly bcc: string[]; readonly subject: string; readonly kibanaFooterLink: Readonly<{} & { text: string; path: string; }>; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
+          "lineNumber": 34
+        },
+        "signature": [
+          "{ readonly documents: Record<string, any>[]; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
+          "lineNumber": 50
+        },
+        "signature": [
+          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"warning\" | \"info\" | \"error\" | \"critical\" | undefined; readonly timestamp?: string | undefined; readonly component?: string | undefined; readonly group?: string | undefined; readonly class?: string | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/server_log.ts",
+          "lineNumber": 25
+        },
+        "signature": [
+          "{ readonly message: string; readonly level: \"info\" | \"error\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
+          "lineNumber": 46
+        },
+        "signature": [
+          "{ readonly message: string; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
+          "lineNumber": 71
+        },
+        "signature": [
+          "{ readonly body?: string | undefined; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts",
+          "lineNumber": 35
+        },
+        "signature": [
+          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; category: string | null; severity: string | null; externalId: string | null; urgency: string | null; impact: string | null; short_description: string; subcategory: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"getChoices\"; subActionParams: Readonly<{} & { fields: string[]; }>; }> | Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; category: string | null; externalId: string | null; short_description: string; subcategory: string | null; dest_ip: string | null; malware_hash: string | null; malware_url: string | null; source_ip: string | null; priority: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"getChoices\"; subActionParams: Readonly<{} & { fields: string[]; }>; }>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/jira/index.ts",
+          "lineNumber": 36
+        },
+        "signature": [
+          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; parent: string | null; summary: string; externalId: string | null; priority: string | null; issueType: string | null; labels: string[] | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"issueTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"fieldsByIssueType\"; subActionParams: Readonly<{} & { id: string; }>; }> | Readonly<{} & { subAction: \"issues\"; subActionParams: Readonly<{} & { title: string; }>; }> | Readonly<{} & { subAction: \"issue\"; subActionParams: Readonly<{} & { id: string; }>; }>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
+          "lineNumber": 34
+        },
+        "signature": [
+          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; name: string; externalId: string | null; incidentTypes: number[] | null; severityCode: number | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"incidentTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"severity\"; subActionParams: Readonly<{} & {}>; }>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionParamsType",
+        "type": "Type",
+        "label": "ActionParamsType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
+          "lineNumber": 40
+        },
+        "signature": [
+          "{ readonly message: string; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.ActionsAuthorization",
+        "type": "Type",
+        "label": "ActionsAuthorization",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/index.ts",
+          "lineNumber": 16
+        },
+        "signature": [
+          "{ ensureAuthorized: (operation: string, actionTypeId?: string | undefined) => Promise<void>; }"
+        ],
+        "initialIsOpen": false
+      },
       {
         "id": "def-server.ActionsClient",
         "type": "Type",
@@ -635,8 +766,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/index.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/index.ts#L15"
+          "lineNumber": 15
         },
         "signature": [
           "{ get: ({ id }: { id: string; }) => Promise<",
@@ -671,22 +801,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionsAuthorization",
-        "type": "Type",
-        "label": "ActionsAuthorization",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/index.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/index.ts#L16"
-        },
-        "signature": [
-          "{ ensureAuthorized: (operation: string, actionTypeId?: string | undefined) => Promise<void>; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
@@ -694,8 +808,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
-          "lineNumber": 143,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/email.ts#L143"
+          "lineNumber": 143
         },
         "signature": [
           "\".email\""
@@ -703,22 +816,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
-          "lineNumber": 99,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/email.ts#L99"
-        },
-        "signature": [
-          "{ readonly to: string[]; readonly message: string; readonly cc: string[]; readonly bcc: string[]; readonly subject: string; readonly kibanaFooterLink: Readonly<{} & { text: string; path: string; }>; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
@@ -726,8 +823,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/es_index.ts#L43"
+          "lineNumber": 43
         },
         "signature": [
           "\".index\""
@@ -735,22 +831,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/es_index.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/es_index.ts#L34"
-        },
-        "signature": [
-          "{ readonly documents: Record<string, any>[]; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
@@ -758,8 +838,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
-          "lineNumber": 121,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/pagerduty.ts#L121"
+          "lineNumber": 121
         },
         "signature": [
           "\".pagerduty\""
@@ -767,22 +846,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
-          "lineNumber": 50,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/pagerduty.ts#L50"
-        },
-        "signature": [
-          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"warning\" | \"info\" | \"error\" | \"critical\" | undefined; readonly timestamp?: string | undefined; readonly component?: string | undefined; readonly group?: string | undefined; readonly class?: string | undefined; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
@@ -790,8 +853,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/server_log.ts",
-          "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/server_log.ts#L42"
+          "lineNumber": 42
         },
         "signature": [
           "\".server-log\""
@@ -799,22 +861,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/server_log.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/server_log.ts#L25"
-        },
-        "signature": [
-          "{ readonly message: string; readonly level: \"info\" | \"error\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; }"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "tags": [],
         "id": "def-server.ActionTypeId",
         "type": "string",
@@ -822,8 +868,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
-          "lineNumber": 54,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/slack.ts#L54"
+          "lineNumber": 54
         },
         "signature": [
           "\".slack\""
@@ -831,18 +876,17 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
         "tags": [],
+        "id": "def-server.ActionTypeId",
+        "type": "string",
+        "label": "ActionTypeId",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/slack.ts",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/slack.ts#L46"
+          "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
+          "lineNumber": 76
         },
         "signature": [
-          "{ readonly message: string; }"
+          "\".webhook\""
         ],
         "initialIsOpen": false
       },
@@ -853,28 +897,41 @@
         "label": "ActionTypeId",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
-          "lineNumber": 76,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/webhook.ts#L76"
+          "path": "x-pack/plugins/actions/server/builtin_action_types/jira/index.ts",
+          "lineNumber": 52
         },
         "signature": [
-          "\".webhook\""
+          "\".jira\""
         ],
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
         "tags": [],
+        "id": "def-server.ActionTypeId",
+        "type": "string",
+        "label": "ActionTypeId",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/webhook.ts",
-          "lineNumber": 71,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/webhook.ts#L71"
+          "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
+          "lineNumber": 43
         },
         "signature": [
-          "{ readonly body?: string | undefined; }"
+          "\".resilient\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-server.ActionTypeId",
+        "type": "string",
+        "label": "ActionTypeId",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
+          "lineNumber": 46
+        },
+        "signature": [
+          "\".teams\""
         ],
         "initialIsOpen": false
       },
@@ -886,8 +943,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts",
-          "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts#L47"
+          "lineNumber": 47
         },
         "signature": [
           "\".servicenow\""
@@ -902,123 +958,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts",
-          "lineNumber": 48,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts#L48"
+          "lineNumber": 48
         },
         "signature": [
           "\".servicenow-sir\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/servicenow/index.ts#L35"
-        },
-        "signature": [
-          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; category: string | null; severity: string | null; externalId: string | null; urgency: string | null; impact: string | null; short_description: string; subcategory: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"getChoices\"; subActionParams: Readonly<{} & { fields: string[]; }>; }> | Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; category: string | null; externalId: string | null; short_description: string; subcategory: string | null; dest_ip: string | null; malware_hash: string | null; malware_url: string | null; source_ip: string | null; priority: string | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"getChoices\"; subActionParams: Readonly<{} & { fields: string[]; }>; }>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-server.ActionTypeId",
-        "type": "string",
-        "label": "ActionTypeId",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/jira/index.ts",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/jira/index.ts#L52"
-        },
-        "signature": [
-          "\".jira\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/jira/index.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/jira/index.ts#L36"
-        },
-        "signature": [
-          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; parent: string | null; summary: string; externalId: string | null; priority: string | null; issueType: string | null; labels: string[] | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"issueTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"fieldsByIssueType\"; subActionParams: Readonly<{} & { id: string; }>; }> | Readonly<{} & { subAction: \"issues\"; subActionParams: Readonly<{} & { title: string; }>; }> | Readonly<{} & { subAction: \"issue\"; subActionParams: Readonly<{} & { id: string; }>; }>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-server.ActionTypeId",
-        "type": "string",
-        "label": "ActionTypeId",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/resilient/index.ts#L43"
-        },
-        "signature": [
-          "\".resilient\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/resilient/index.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/resilient/index.ts#L34"
-        },
-        "signature": [
-          "Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { incident: Readonly<{} & { description: string | null; name: string; externalId: string | null; incidentTypes: number[] | null; severityCode: number | null; }>; comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; }>; }> | Readonly<{} & { subAction: \"incidentTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"severity\"; subActionParams: Readonly<{} & {}>; }>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-server.ActionTypeId",
-        "type": "string",
-        "label": "ActionTypeId",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/teams.ts#L46"
-        },
-        "signature": [
-          "\".teams\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.ActionParamsType",
-        "type": "Type",
-        "label": "ActionParamsType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/actions/server/builtin_action_types/teams.ts",
-          "lineNumber": 40,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/builtin_action_types/teams.ts#L40"
-        },
-        "signature": [
-          "{ readonly message: string; }"
         ],
         "initialIsOpen": false
       }
@@ -1065,8 +1008,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 86,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L86"
+                "lineNumber": 86
               }
             }
           ],
@@ -1074,15 +1016,13 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 80,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L80"
+            "lineNumber": 80
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 79,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L79"
+        "lineNumber": 79
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1113,8 +1053,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 91,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L91"
+                "lineNumber": 91
               }
             },
             {
@@ -1132,15 +1071,13 @@
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 91,
-                    "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L91"
+                    "lineNumber": 91
                   }
                 }
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 91,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L91"
+                "lineNumber": 91
               }
             }
           ],
@@ -1148,8 +1085,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 91,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L91"
+            "lineNumber": 91
           }
         },
         {
@@ -1171,8 +1107,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 93,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L93"
+                "lineNumber": 93
               }
             },
             {
@@ -1185,8 +1120,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 94,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L94"
+                "lineNumber": 94
               }
             },
             {
@@ -1204,15 +1138,13 @@
                   "description": [],
                   "source": {
                     "path": "x-pack/plugins/actions/server/plugin.ts",
-                    "lineNumber": 95,
-                    "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L95"
+                    "lineNumber": 95
                   }
                 }
               ],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 95,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L95"
+                "lineNumber": 95
               }
             }
           ],
@@ -1220,8 +1152,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 92,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L92"
+            "lineNumber": 92
           }
         },
         {
@@ -1266,8 +1197,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 97,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L97"
+                "lineNumber": 97
               }
             }
           ],
@@ -1275,8 +1205,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 97,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L97"
+            "lineNumber": 97
           }
         },
         {
@@ -1321,8 +1250,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 98,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L98"
+                "lineNumber": 98
               }
             }
           ],
@@ -1330,8 +1258,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 98,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L98"
+            "lineNumber": 98
           }
         },
         {
@@ -1342,8 +1269,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 99,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L99"
+            "lineNumber": 99
           },
           "signature": [
             {
@@ -1375,8 +1301,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 101,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L101"
+                "lineNumber": 101
               }
             },
             {
@@ -1389,8 +1314,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 102,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L102"
+                "lineNumber": 102
               }
             },
             {
@@ -1403,8 +1327,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/actions/server/plugin.ts",
-                "lineNumber": 103,
-                "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L103"
+                "lineNumber": 103
               }
             }
           ],
@@ -1412,15 +1335,13 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/actions/server/plugin.ts",
-            "lineNumber": 100,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L100"
+            "lineNumber": 100
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/actions/server/plugin.ts",
-        "lineNumber": 90,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/server/plugin.ts#L90"
+        "lineNumber": 90
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1448,8 +1369,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L43"
+              "lineNumber": 43
             }
           }
         ],
@@ -1457,103 +1377,12 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/actions/common/types.ts",
-          "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L42"
+          "lineNumber": 42
         },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-common.ActionType",
-        "type": "Interface",
-        "label": "ActionType",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.ActionType.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L11"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ActionType.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L12"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ActionType.enabled",
-            "type": "boolean",
-            "label": "enabled",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L13"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ActionType.enabledInConfig",
-            "type": "boolean",
-            "label": "enabledInConfig",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L14"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ActionType.enabledInLicense",
-            "type": "boolean",
-            "label": "enabledInLicense",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L15"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ActionType.minimumLicenseRequired",
-            "type": "CompoundType",
-            "label": "minimumLicenseRequired",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L16"
-            },
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/actions/common/types.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L10"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-common.ActionResult",
         "type": "Interface",
@@ -1569,8 +1398,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L20"
+              "lineNumber": 20
             }
           },
           {
@@ -1581,8 +1409,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L21"
+              "lineNumber": 21
             }
           },
           {
@@ -1593,8 +1420,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L22"
+              "lineNumber": 22
             }
           },
           {
@@ -1605,8 +1431,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L25"
+              "lineNumber": 25
             },
             "signature": [
               "Record<string, any>"
@@ -1620,15 +1445,96 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L26"
+              "lineNumber": 26
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/actions/common/types.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L19"
+          "lineNumber": 19
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ActionType",
+        "type": "Interface",
+        "label": "ActionType",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.ActionType.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 11
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionType.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 12
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionType.enabled",
+            "type": "boolean",
+            "label": "enabled",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionType.enabledInConfig",
+            "type": "boolean",
+            "label": "enabledInConfig",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 14
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionType.enabledInLicense",
+            "type": "boolean",
+            "label": "enabledInLicense",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 15
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionType.minimumLicenseRequired",
+            "type": "CompoundType",
+            "label": "minimumLicenseRequired",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/actions/common/types.ts",
+              "lineNumber": 16
+            },
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/actions/common/types.ts",
+          "lineNumber": 10
         },
         "initialIsOpen": false
       },
@@ -1657,8 +1563,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L34"
+              "lineNumber": 34
             }
           },
           {
@@ -1669,8 +1574,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L35"
+              "lineNumber": 35
             },
             "signature": [
               "\"error\" | \"ok\""
@@ -1684,8 +1588,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L36"
+              "lineNumber": 36
             },
             "signature": [
               "string | undefined"
@@ -1699,8 +1602,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L37"
+              "lineNumber": 37
             },
             "signature": [
               "string | undefined"
@@ -1714,8 +1616,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L38"
+              "lineNumber": 38
             },
             "signature": [
               "Data | undefined"
@@ -1729,8 +1630,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/actions/common/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L39"
+              "lineNumber": 39
             },
             "signature": [
               "boolean | Date | null | undefined"
@@ -1739,8 +1639,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/actions/common/types.ts",
-          "lineNumber": 33,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/types.ts#L33"
+          "lineNumber": 33
         },
         "initialIsOpen": false
       }
@@ -1755,8 +1654,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/actions/common/index.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/actions/common/index.ts#L10"
+          "lineNumber": 10
         },
         "signature": [
           "\"/api/actions\""
