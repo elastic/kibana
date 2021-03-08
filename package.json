@@ -283,7 +283,7 @@
     "react-resizable": "^1.7.5",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "react-use": "^15.3.4",
+    "react-use": "^15.3.8",
     "recompose": "^0.26.0",
     "redux": "^4.0.5",
     "redux-actions": "^2.6.5",

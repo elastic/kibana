@@ -46,7 +46,7 @@ export async function agentCheckin(
   }
   // Update agent only if something changed
   if (Object.keys(updateData).length > 0) {
-    await updateAgent(soClient, esClient, agent.id, updateData);
+    await updateAgent(esClient, agent.id, updateData);
   }
   // Check if some actions are not acknowledged
   let actions = await getAgentActionsForCheckin(soClient, agent.id);
