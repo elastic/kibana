@@ -15,13 +15,10 @@ import type {
   CombinedJobWithStats,
   Job,
   Datafeed,
+  IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../common/types/audit_message';
-import type {
-  AggFieldNamePair,
-  RuntimeMappings,
-  IndicesOptions,
-} from '../../../../common/types/fields';
+import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type {
   CategorizationAnalyzer,

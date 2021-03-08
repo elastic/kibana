@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesOptions } from '../../../../../../common/types/fields';
+import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 
 export function resultsServiceProvider(

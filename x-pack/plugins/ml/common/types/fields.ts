@@ -121,4 +121,3 @@ export interface RuntimeField {
 }
 
 export type RuntimeMappings = Record<string, RuntimeField>;
-export type IndicesOptions = Record<string, any>;

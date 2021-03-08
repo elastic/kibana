@@ -11,8 +11,8 @@ import {
   AggFieldNamePair,
   EVENT_RATE_FIELD_ID,
   RuntimeMappings,
-  IndicesOptions,
 } from '../../../../common/types/fields';
+import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;

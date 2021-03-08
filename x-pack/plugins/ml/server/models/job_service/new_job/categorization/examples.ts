@@ -14,7 +14,8 @@ import {
   CategorizationAnalyzer,
   CategoryFieldExample,
 } from '../../../../../common/types/categories';
-import { RuntimeMappings, IndicesOptions } from '../../../../../common/types/fields';
+import { RuntimeMappings } from '../../../../../common/types/fields';
+import { IndicesOptions } from '../../../../../common/types/anomaly_detection_jobs';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;

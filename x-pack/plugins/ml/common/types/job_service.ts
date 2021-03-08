@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Job, JobStats } from './anomaly_detection_jobs';
-import { RuntimeMappings, IndicesOptions } from './fields';
+import { Job, JobStats, IndicesOptions } from './anomaly_detection_jobs';
+import { RuntimeMappings } from './fields';
 import { ES_AGGREGATION } from '../constants/aggregation_types';
 
 export interface MlJobsResponse {

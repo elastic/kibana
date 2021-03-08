@@ -8,12 +8,12 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 import {
   Field,
   SplitField,
   AggFieldPair,
   RuntimeMappings,
-  IndicesOptions,
 } from '../../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';

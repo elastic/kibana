@@ -13,8 +13,7 @@ import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { AggCardinality } from '../../../common/types/fields';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import { IndicesOptions } from '../../../common/types/fields';
+import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Service for carrying out queries to obtain data
