@@ -30,17 +30,12 @@ export function getLatencyChartSelector({
   latencyChart?: LatencyChartsResponse;
   theme: EuiTheme;
   latencyAggregationType?: string;
-}): LatencyChartData {
+}): Partial<LatencyChartData> {
   if (
     !latencyChart?.currentPeriod.latencyTimeseries ||
     !latencyAggregationType
   ) {
-    return {
-      currentPeriod: undefined,
-      previousPeriod: undefined,
-      mlJobId: undefined,
-      anomalyTimeseries: undefined,
-    };
+    return {};
   }
   return {
     currentPeriod: getLatencyTimeseries({
@@ -73,9 +68,7 @@ function getPreviousPeriodTimeseries({
     color: theme.eui.euiColorLightestShade,
     title: i18n.translate(
       'xpack.apm.serviceOverview.latencyChartTitle.previousPeriodLabel',
-      {
-        defaultMessage: 'Previous period',
-      }
+      { defaultMessage: 'Previous period' }
     ),
   };
 }
