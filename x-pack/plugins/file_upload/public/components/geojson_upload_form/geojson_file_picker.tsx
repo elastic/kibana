@@ -8,23 +8,22 @@
 import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MB } from '../../common';
-import { getMaxBytesFormatted } from '../get_max_bytes';
-import { validateFile } from '../importer';
-import { GeoJsonImporter, GeoJsonPreview, GEOJSON_FILE_TYPES } from '../importer/geojson_importer';
+import { MB } from '../../../common';
+import { getMaxBytesFormatted } from '../../get_max_bytes';
+import { validateFile } from '../../importer';
+import {
+  GeoJsonImporter,
+  GeoJsonPreview,
+  GEOJSON_FILE_TYPES,
+} from '../../importer/geojson_importer';
+
+export type OnFileSelectParameters = GeoJsonPreview & {
+  indexName: string;
+  importer: GeoJsonImporter;
+};
 
 interface Props {
-  onSelect: ({
-    features,
-    hasPoints,
-    hasShapes,
-    importer,
-    indexName,
-    previewCoverage,
-  }: GeoJsonPreview & {
-    indexName: string;
-    importer: GeoJsonImporter;
-  }) => void;
+  onSelect: (onFileSelectParameters: OnFileSelectParameters) => void;
   onClear: () => void;
 }
 
