@@ -13,7 +13,7 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
   ActionGroupIdsOf,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import {
   createMetricThresholdExecutor,

@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
-  const retry = getService('retry');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
@@ -181,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const longLabel =
         'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
       await PageObjects.lens.editDimensionLabel(longLabel);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -224,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(2);
@@ -236,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.toggleToolbarPopover('lnsValuesButton');
       await testSubjects.click('lnsXY_valueLabels_inside');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       // check for value labels
       let data = await PageObjects.lens.getCurrentChartDebugState();
@@ -244,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // switch to stacked bar chart
       await PageObjects.lens.switchToVisualization('bar_stacked');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       // check for value labels
       data = await PageObjects.lens.getCurrentChartDebugState();
@@ -257,14 +256,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
@@ -599,43 +598,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
       expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
-    });
-
-    it('should able to sort a table by a column', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
-      // Sort by number
-      await PageObjects.lens.changeTableSortingBy(2, 'ascending');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
-      // Now sort by IP
-      await PageObjects.lens.changeTableSortingBy(0, 'ascending');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('78.83.247.30');
-      // Change the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'descending');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
-      // Remove the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'none');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
-    });
-
-    it('should able to use filters cell actions in table', async () => {
-      const firstCellContent = await PageObjects.lens.getDatatableCellText(0, 0);
-      await retry.try(async () => {
-        await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          await find.existsByCssSelector(
-            `[data-test-subj*="filter-value-${firstCellContent}"][data-test-subj*="filter-negated"]`
-          )
-        ).to.eql(true);
-      });
     });
   });
 }
