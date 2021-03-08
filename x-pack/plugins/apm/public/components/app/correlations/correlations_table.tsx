@@ -156,7 +156,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
       ],
       name: i18n.translate(
         'xpack.apm.correlations.correlationsTable.actionsLabel',
-        { defaultMessage: 'Actions' }
+        { defaultMessage: 'Filter' }
       ),
       render: (_: any, term: T) => {
         return (
