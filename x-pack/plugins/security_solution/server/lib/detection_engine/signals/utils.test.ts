@@ -69,7 +69,7 @@ const ruleStatusServiceMock = {
   find: jest.fn(),
   goingToRun: jest.fn(),
   error: jest.fn(),
-  warning: jest.fn(),
+  partialFailure: jest.fn(),
 };
 
 describe('utils', () => {
@@ -662,8 +662,8 @@ describe('utils', () => {
           return;
         }
         expect(moment(item.to).diff(moment(item.from), 's')).toEqual(13);
-        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(-10);
-        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(-10);
+        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(10);
+        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
     });
