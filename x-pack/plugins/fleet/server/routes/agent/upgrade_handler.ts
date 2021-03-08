@@ -36,7 +36,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  const agent = await getAgent(soClient, esClient, request.params.agentId);
+  const agent = await getAgent(esClient, request.params.agentId);
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({
       statusCode: 400,
