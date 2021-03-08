@@ -81,6 +81,131 @@ logging:
 See https://github.com/elastic/kibana/pull/87939 for more details.
 
 [float]
+==== Logging destination is specified by the appender
+*Details:* Previously log destination would be `stdout` and could be changed to `file` using `logging.dest`. 
+
+*Impact:* To restore the previous behavior, in kibana.yml use the `console` appender to send logs to `stdout`.
+[source,yaml]
+-------------------
+logging:
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [console]
+-------------------
+
+To send logs to `file` with a given file path, you should define a custom appender with `type:file`:
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: /var/log/kibana.log
+      layout:
+        type: pattern
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [file]
+-------------------
+
+[float]
+==== Specify log event output with root
+*Details:* Previously logging output would be specified by `logging.silent` (none), 'logging.quiet' (error messages only) and `logging.verbose` (all).
+
+*Impact:* To restore the previous behavior, in kibana.yml specify `logging.root.level` as one of `off`, `error`, `all`:
+[source,yaml]
+-------------------
+# suppress all logs
+logging:
+  root:
+    appenders: [default]
+    level: off
+-------------------
+
+[source,yaml]
+-------------------
+# only log error messages
+logging:
+  root:
+    appenders: [default]
+    level: error
+-------------------
+
+[source,yaml]
+-------------------
+# log all events
+logging:
+  root:
+    appenders: [default]
+    level: all
+-------------------
+
+[float]
+==== Suppress all log output with root
+*Details:* Previously all logging output would be suppressed if `logging.silent` was true.
+
+*Impact:* To restore the previous behavior, in kibana.yml turn `logging.root.level` to 'off'.
+[source,yaml]
+-------------------
+logging:
+  root:
+    appenders: [default]
+    level: off
+-------------------
+
+[float]
+==== Suppress log output with root
+*Details:* Previously all logging output other than error messages would be suppressed if `logging.quiet` was true.
+
+*Impact:* To restore the previous behavior, in kibana.yml turn `logging.root.level` to 'error'.
+[source,yaml]
+-------------------
+logging:
+  root:
+    appenders: [default]
+    level: error
+-------------------
+
+[float]
+==== Log all output with root
+*Details:* Previously all events would be logged if `logging.verbose` was true.
+
+*Impact:* To restore the previous behavior, in kibana.yml turn `logging.root.level` to 'all'.
+[source,yaml]
+-------------------
+logging:
+  root:
+    appenders: [default]
+    level: all
+-------------------
+
+[float]
+==== Declare log message format for each custom appender
+*Details:* Previously all events would be logged in `json` format when `logging.json` was true.
+
+*Impact:* To restore the previous behavior, in kibana.yml configure the logging format for each custom appender with the `appender.layout` property. There is no default for custom appenders and each one must be configured expilictly.
+
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    custom_console:
+      type: console
+      layout:
+        type: pattern
+  appenders:
+    custom_json:
+      type: console
+      layout:
+        type: json
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [custom_console]
+    - name: plugins.myOtherPlugin
+      appenders: [custom_json]
+-------------------
+
+[float]
 ==== `xpack.security.authProviders` is no longer valid
 *Details:* The deprecated `xpack.security.authProviders` setting in the `kibana.yml` file has been removed.
 

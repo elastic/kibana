@@ -244,7 +244,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.ops\\" has been deprecated and will be removed in 8.0. To access ops data moving forward, please enable debug logs for the \\"metrics.ops\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+          "\\"logging.events.ops\\" has been deprecated and will be removed in 8.0. To access ops data moving forward, please enable debug logs for the \\"metrics.ops\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
@@ -264,7 +264,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
@@ -275,7 +275,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
@@ -286,7 +286,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
@@ -306,7 +306,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.timezone\\" has been deprecated and will be removed in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+          "\\"logging.timezone\\" has been deprecated and will be removed in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
@@ -317,5 +317,75 @@ describe('core deprecations', () => {
       });
       expect(messages).toEqual([]);
     });
+  });
+
+  describe('logging.dest', () => {
+    it('warns when dest is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { dest: 'stdout' },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+        ]
+      `);
+    });
+    it.todo('does not warn when ...');
+  });
+
+  describe('logging.quiet', () => {
+    it('warns when quiet is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { quiet: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.quiet\\" has been deprecated and will be removed in 8.0. To suppress logging output other than error messages moving forward, you can use \\"logging.root.level: error\\" in your logging configuration. For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+        ]
+      `);
+    });
+    it.todo('does not warn when .....');
+  });
+
+  describe('logging.silent', () => {
+    it('warns when silent is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { silent: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.silent\\" has been deprecated and will be removed in 8.0. To suppress all logging output moving forward, you can use \\"logging.root.level: off\\" in your logging configuration. For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+        ]
+      `);
+    });
+    it.todo('does not warn when .....');
+  });
+
+  describe('logging.verbose', () => {
+    it('warns when verbose is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { verbose: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.verbose\\" has been deprecated and will be removed in 8.0. To log all events moving forward, you can use \\"logging.root.level: all\\" in your logging configuration. For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+        ]
+      `);
+    });
+    it.todo('does not warn when .....');
+  });
+
+  describe('logging.json', () => {
+    it('warns when json is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { json: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.json\\" has been deprecated and will be removed in 8.0. To specify log message format moving forward, you must configure the \\"appender.layout\\" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly. For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+        ]
+      `);
+    });
+    it.todo('does not warn when .....');
   });
 });
