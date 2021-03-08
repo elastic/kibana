@@ -22657,7 +22657,7 @@
     "xpack.triggersActionsUI.sections.alertsList.alertErrorReasonRunning": "アラートの実行中にエラーが発生しました。",
     "xpack.triggersActionsUI.sections.alertsList.alertErrorReasonUnknown": "不明な理由でエラーが発生しました。",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex": "アクション",
-    "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText": "アクション",
+    "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsCount": "アクション",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle": "型",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.intervalTitle": "次の間隔で実行",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle": "名前",
