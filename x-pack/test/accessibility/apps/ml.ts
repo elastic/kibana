@@ -276,6 +276,11 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
+        it('data frame analytics create job validation step for outlier job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+          await a11y.testAppSnapshot();
+        });
+
         it('data frame analytics create job create step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
           await a11y.testAppSnapshot();
