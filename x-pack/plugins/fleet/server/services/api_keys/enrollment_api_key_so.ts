@@ -12,8 +12,6 @@ import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { appContextService } from '../app_context';
 import { normalizeKuery } from '../saved_object';
 
-const uuidRegex = /^\([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}\)$/;
-
 export async function listEnrollmentApiKeys(
   soClient: SavedObjectsClientContract,
   options: {
