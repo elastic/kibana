@@ -23,6 +23,11 @@ export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
 
+  reportTiming: {
+    group: 'bootstrap',
+    id: 'overall time',
+  },
+
   async run(projects, projectGraph, { options, kbn, rootPath }) {
     const nonBazelProjectsOnly = await getNonBazelProjectsOnly(projects);
     const batchedNonBazelProjects = topologicallyBatchProjects(nonBazelProjectsOnly, projectGraph);

@@ -116,7 +116,7 @@ export class CiStatsReporter {
           throw error;
         }
 
-        if (error?.response && error.response.status !== 502) {
+        if (error?.response && error.response.status < 502) {
           // error response from service was received so warn the user and move on
           this.log.warning(
             `error recording metric [status=${error.response.status}] [resp=${inspect(

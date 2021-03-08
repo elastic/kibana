@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { CiStatsTimings } from '@kbn/dev-utils/ci_stats_timings';
+
 import { ICommand, ICommandConfig } from './commands';
 import { CliError } from './utils/errors';
 import { log } from './utils/log';
@@ -14,10 +16,13 @@ import { renderProjectsTree } from './utils/projects_tree';
 import { Kibana } from './utils/kibana';
 
 export async function runCommand(command: ICommand, config: Omit<ICommandConfig, 'kbn'>) {
+  const runStartTime = Date.now();
+  let kbn;
+
   try {
     log.debug(`Running [${command.name}] command from [${config.rootPath}]`);
 
-    const kbn = await Kibana.loadFrom(config.rootPath);
+    kbn = await Kibana.loadFrom(config.rootPath);
     const projects = kbn.getFilteredProjects({
       skipKibanaPlugins: Boolean(config.options['skip-kibana-plugins']),
       ossOnly: Boolean(config.options.oss),
@@ -41,7 +46,42 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
       ...config,
       kbn,
     });
+
+    if (command.reportTiming) {
+      const reporter = CiStatsTimings.fromEnv(log, {
+        upstreamBranch: kbn.kibanaProject.json.branch,
+      });
+      await reporter.timings([
+        {
+          group: command.reportTiming.group,
+          id: command.reportTiming.id,
+          ms: Date.now() - runStartTime,
+          meta: {
+            success: true,
+          },
+        },
+      ]);
+    }
   } catch (error) {
+    if (command.reportTiming) {
+      // if we don't have a kbn object then things are too broken to report on
+      if (kbn) {
+        const reporter = CiStatsTimings.fromEnv(log, {
+          upstreamBranch: kbn.kibanaProject.json.branch,
+        });
+        await reporter.timings([
+          {
+            group: command.reportTiming.group,
+            id: command.reportTiming.id,
+            ms: Date.now() - runStartTime,
+            meta: {
+              outcome: 'failure',
+            },
+          },
+        ]);
+      }
+    }
+
     log.error(`[${command.name}] failed:`);
 
     if (error instanceof CliError) {
