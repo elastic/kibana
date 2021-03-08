@@ -203,7 +203,7 @@ so you can tailor it to your specific needs without impacting others.
 image::images/select-your-space.png[Space selector view]
 
 Most of {kib}’s entities are space-aware, including dashboards, visualizations, index patterns,
-Canvas workpads, Timelion visualizations, graphs, tags, and machine learning jobs.
+*Canvas* workpads, graphs, tags, and machine learning jobs.
 
 In addition:
 
@@ -245,7 +245,7 @@ see <<security-settings-kb,Security settings in {kib}>>.
 
 [float]
 ==== Log in
-Kibana supports several <<kibana-authentication,authentication providers>>,
+{kib} supports several <<kibana-authentication,authentication providers>>,
 allowing you to login using {es}’s built-in realms, or by your own single sign-on provider.
 
 [role="screenshot"]

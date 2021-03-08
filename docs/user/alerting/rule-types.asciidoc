@@ -27,7 +27,7 @@ For domain-specific rules, refer to the documentation for that app.
 * {observability-guide}/create-alerts.html[Observability rules]
 * {security-guide}/prebuilt-rules.html[Security rules]
 * <<geo-alerting, Maps rules>>
-* {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules]
+* {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] beta:[]
 
 [NOTE]
 ==============================================
