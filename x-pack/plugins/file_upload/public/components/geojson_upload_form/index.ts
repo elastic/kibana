@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { JsonUploadAndParse } from '../../components/json_upload_and_parse';
-export { importerFactory } from '../../importer';
+export { GeoJsonUploadForm } from './geojson_upload_form';
+export { OnFileSelectParameters } from './geojson_file_picker';
