@@ -120,7 +120,7 @@ number of bars.
 
 [[histogram-maxbars]]`histogram:maxBars`::
 Date histograms are not generated with more bars than the value of this property,
-scaling values when necessary.  This setting affects *Lens* and *Visualize.*
+scaling values when necessary.  This setting affects *Lens*.
 
 [[history-limit]]`history:limit`::
 In fields that have history, such as query inputs, show this many recent values.
