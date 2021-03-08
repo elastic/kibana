@@ -55,7 +55,7 @@ import {
   AlertExecutionStatusValues,
   ALERTS_FEATURE_ID,
   AlertExecutionStatusErrorReasons,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
