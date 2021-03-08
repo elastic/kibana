@@ -611,7 +611,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
-              "lineNumber": 23
+              "lineNumber": 24
             },
             "signature": [
               "\"percentile\""
@@ -625,7 +625,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "signature": [
               "{ percentile: number; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
@@ -634,7 +634,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/percentile.tsx",
-          "lineNumber": 22
+          "lineNumber": 23
         },
         "initialIsOpen": false
       },
@@ -1318,7 +1318,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 128
+          "lineNumber": 125
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"avg\"; }"
@@ -1333,7 +1333,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/counter_rate.tsx",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "signature": [
           "BaseIndexPatternColumn",
@@ -1365,7 +1365,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/cumulative_sum.tsx",
-          "lineNumber": 32
+          "lineNumber": 33
         },
         "signature": [
           "BaseIndexPatternColumn",
@@ -1381,7 +1381,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/derivative.tsx",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "signature": [
           "BaseIndexPatternColumn",
@@ -1475,7 +1475,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 130
+          "lineNumber": 127
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"max\"; }"
@@ -1490,7 +1490,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 131
+          "lineNumber": 128
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"median\"; }"
@@ -1505,7 +1505,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 129
+          "lineNumber": 126
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"min\"; }"
@@ -1598,7 +1598,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 127
+          "lineNumber": 124
         },
         "signature": [
           "BaseIndexPatternColumn & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & FieldBasedIndexPatternColumn & { operationType: \"sum\"; }"
