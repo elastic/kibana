@@ -9,6 +9,7 @@ import { http } from '../http_service';
 
 import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
 import {
   DataFrameAnalyticsConfig,
   UpdateDataFrameAnalyticsConfig,
@@ -164,6 +165,14 @@ export const dataFrameAnalytics = {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
+    });
+  },
+  validateDataFrameAnalytics(analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>) {
+    const body = JSON.stringify(analyticsConfig);
+    return http<ValidateAnalyticsJobResponse>({
+      path: `${basePath()}/data_frame/analytics/validate`,
+      method: 'POST',
+      body,
     });
   },
 };

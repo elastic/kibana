@@ -37,7 +37,7 @@ import { Error, Loading } from '../../../../components';
 import { useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
-import { useSetPackageInstallStatus } from '../../hooks';
+import { useGetPackageInstallStatus, useSetPackageInstallStatus } from '../../hooks';
 
 import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
 import { OverviewPage } from './overview';
@@ -77,6 +77,15 @@ export function Detail() {
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
+  const getPackageInstallStatus = useGetPackageInstallStatus();
+
+  const packageInstallStatus = useMemo(() => {
+    if (packageInfo === null || !packageInfo.name) {
+      return undefined;
+    }
+    return getPackageInstallStatus(packageInfo.name).status;
+  }, [packageInfo, getPackageInstallStatus]);
+
   const updateAvailable =
     packageInfo &&
     'savedObject' in packageInfo &&
@@ -88,7 +97,6 @@ export function Detail() {
     pkgkey
   );
 
-  const packageInstallStatus = packageInfoData?.response.status;
   const showCustomTab =
     useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
 
@@ -143,11 +151,11 @@ export function Detail() {
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m" className="eui-textTruncate">
+              <EuiFlexGroup alignItems="center" gutterSize="m">
                 <FlexItemWithMinWidth grow={false}>
                   <EuiText>
                     {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1 className="eui-textTruncate">{packageInfo?.title || '\u00A0'}</h1>
+                    <h1>{packageInfo?.title || '\u00A0'}</h1>
                   </EuiText>
                 </FlexItemWithMinWidth>
                 {packageInfo?.release && packageInfo.release !== 'ga' ? (
