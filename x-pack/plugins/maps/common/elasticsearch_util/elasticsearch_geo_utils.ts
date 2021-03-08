@@ -68,9 +68,9 @@ export interface PreIndexedShape {
   path: string;
 }
 
-function ensureGeoField(type: ES_GEO_FIELD_TYPE) {
+function ensureGeoField(type: string) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
-  if (!expectedTypes.includes(type)) {
+  if (!expectedTypes.includes(type as ES_GEO_FIELD_TYPE)) {
     const errorMessage = i18n.translate(
       'xpack.maps.es_geo_utils.unsupportedFieldTypeErrorMessage',
       {
@@ -493,9 +493,9 @@ export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }: MapE
   const bottomRight = [right, bottom] as Position;
   const topRight = [right, top] as Position;
   return {
-    type: GEO_JSON_TYPE.POLYGON as 'Polygon',
+    type: GEO_JSON_TYPE.POLYGON,
     coordinates: [[topLeft, bottomLeft, bottomRight, topRight, topLeft]],
-  };
+  } as Polygon;
 }
 
 export function clampToLatBounds(lat: number): number {
