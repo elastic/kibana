@@ -33,7 +33,7 @@ import moment from 'moment';
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { MULTI_BUCKET_IMPACT } from '@kbn/ml-utils/src/constants/multi_bucket_impact';
+import { MULTI_BUCKET_IMPACT } from '@kbn/ml-utils/target/constants/multi_bucket_impact';
 
 import {
   chartLimits,

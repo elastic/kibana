@@ -6,8 +6,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { getSeverityType } from '@kbn/ml-utils/src/anomaly_utils/get_severity_type';
-import { ANOMALY_SEVERITY } from '@kbn/ml-utils/src/constants/anomalies';
+import { getSeverityType } from '@kbn/ml-utils/target/anomaly_utils/get_severity_type';
+import { ANOMALY_SEVERITY } from '@kbn/ml-utils/target/constants/anomalies';
 import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { TimeBuckets } from '../../../../util/time_buckets';

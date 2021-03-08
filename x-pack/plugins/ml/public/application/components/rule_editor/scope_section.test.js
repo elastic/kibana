@@ -20,7 +20,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ScopeSection } from './scope_section';
-import { FILTER_TYPE } from '@kbn/ml-utils/src/constants/detector_rule';
+import { FILTER_TYPE } from '@kbn/ml-utils/target/constants/detector_rule';
 
 describe('ScopeSection', () => {
   const testFilterListIds = ['web_domains', 'safe_domains', 'uk_domains'];

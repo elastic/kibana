@@ -9,7 +9,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ActionsSection } from './actions_section';
-import { ACTION } from '@kbn/ml-utils/src/constants/detector_rule';
+import { ACTION } from '@kbn/ml-utils/target/constants/detector_rule';
 
 describe('ActionsSection', () => {
   const onSkipResultChange = jest.fn(() => {});

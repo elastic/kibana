@@ -6,7 +6,7 @@
  */
 
 import d3 from 'd3';
-import { MULTI_BUCKET_IMPACT } from '@kbn/ml-utils/src/constants/multi_bucket_impact';
+import { MULTI_BUCKET_IMPACT } from '@kbn/ml-utils/target/constants/multi_bucket_impact';
 import { calculateTextWidth } from './string_utils';
 import moment from 'moment';
 import { getTimefilter } from './dependency_cache';

@@ -15,7 +15,7 @@ import React, { Component } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 
-import { APPLIES_TO } from '@kbn/ml-utils/src/constants/detector_rule';
+import { APPLIES_TO } from '@kbn/ml-utils/target/constants/detector_rule';
 import { formatValue } from '../../../formatters/format_value';
 import { getAppliesToValueFromAnomaly } from '../utils';
 import { i18n } from '@kbn/i18n';

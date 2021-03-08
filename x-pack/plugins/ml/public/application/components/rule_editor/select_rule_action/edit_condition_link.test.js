@@ -11,7 +11,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { EditConditionLink } from './edit_condition_link';
-import { APPLIES_TO } from '@kbn/ml-utils/src/constants/detector_rule';
+import { APPLIES_TO } from '@kbn/ml-utils/target/constants/detector_rule';
 
 function prepareTest(updateConditionValueFn, appliesTo) {
   const anomaly = {

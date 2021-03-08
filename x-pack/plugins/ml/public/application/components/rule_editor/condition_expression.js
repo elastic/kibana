@@ -23,7 +23,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import { APPLIES_TO, OPERATOR } from '@kbn/ml-utils/src/constants/detector_rule';
+import { APPLIES_TO, OPERATOR } from '@kbn/ml-utils/target/constants/detector_rule';
 import { appliesToText, operatorToText } from './utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

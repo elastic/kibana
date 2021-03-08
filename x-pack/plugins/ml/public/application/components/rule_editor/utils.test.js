@@ -11,7 +11,7 @@ import {
   APPLIES_TO,
   OPERATOR,
   FILTER_TYPE,
-} from '@kbn/ml-utils/src/constants/detector_rule';
+} from '@kbn/ml-utils/target/constants/detector_rule';
 
 describe('ML - rule editor utils', () => {
   const ruleWithCondition = {

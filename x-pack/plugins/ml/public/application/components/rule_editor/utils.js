@@ -10,7 +10,7 @@ import {
   APPLIES_TO,
   FILTER_TYPE,
   OPERATOR,
-} from '@kbn/ml-utils/src/constants/detector_rule';
+} from '@kbn/ml-utils/target/constants/detector_rule';
 
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';

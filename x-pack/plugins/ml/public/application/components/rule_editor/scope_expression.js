@@ -22,7 +22,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { FILTER_TYPE } from '@kbn/ml-utils/src/constants/detector_rule';
+import { FILTER_TYPE } from '@kbn/ml-utils/target/constants/detector_rule';
 import { filterTypeToText } from './utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 

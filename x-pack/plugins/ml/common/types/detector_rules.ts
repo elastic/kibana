@@ -10,7 +10,7 @@ import {
   FILTER_TYPE,
   APPLIES_TO,
   OPERATOR,
-} from '@kbn/ml-utils/src/constants/detector_rule';
+} from '@kbn/ml-utils/target/constants/detector_rule';
 
 export interface DetectorRuleScope {
   [id: string]: {
