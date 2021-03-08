@@ -29,35 +29,6 @@ function isValueWithinTolerance(actualValue: number, expectedValue: number, tole
   return lower <= actualValue && upper >= actualValue;
 }
 
-/**
- * Returns if a given color is within the tolerated range of an expected color
- *
- * @param actualColor
- * @param expectedColor
- * @param toleranceRange
- * @returns if actualColor is within the tolerance of expectedColor
- */
-function isColorWithinTolerance(actualColor: string, expectedColor: string, toleranceRange = 10) {
-  const actualRGB = rgb(actualColor);
-  const expectedRGB = rgb(expectedColor);
-
-  const lowerR = expectedRGB.r - toleranceRange / 2;
-  const upperR = expectedRGB.r + toleranceRange / 2;
-  const lowerG = expectedRGB.g - toleranceRange / 2;
-  const upperG = expectedRGB.g + toleranceRange / 2;
-  const lowerB = expectedRGB.b - toleranceRange / 2;
-  const upperB = expectedRGB.b + toleranceRange / 2;
-
-  return (
-    lowerR <= actualRGB.r &&
-    upperR >= actualRGB.r &&
-    lowerG <= actualRGB.g &&
-    upperG >= actualRGB.g &&
-    lowerB <= actualRGB.b &&
-    upperB >= actualRGB.b
-  );
-}
-
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export async function CanvasElementProvider({ getService }: FtrProviderContext) {
@@ -160,11 +131,44 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
               ? {
                   withinTolerance:
                     isValueWithinTolerance(value, expectedColorStats[i]?.value, valueTolerance) &&
-                    isColorWithinTolerance(s.key, expectedColorStats[i]?.key, channelTolerance),
+                    this.isColorWithinTolerance(
+                      s.key,
+                      expectedColorStats[i]?.key,
+                      channelTolerance
+                    ),
                 }
               : {}),
           };
         });
+    }
+
+    /**
+     * Returns if a given color is within the tolerated range of an expected color
+     *
+     * @param actualColor
+     * @param expectedColor
+     * @param toleranceRange
+     * @returns if actualColor is within the tolerance of expectedColor
+     */
+    public isColorWithinTolerance(actualColor: string, expectedColor: string, toleranceRange = 10) {
+      const actualRGB = rgb(actualColor);
+      const expectedRGB = rgb(expectedColor);
+
+      const lowerR = expectedRGB.r - toleranceRange / 2;
+      const upperR = expectedRGB.r + toleranceRange / 2;
+      const lowerG = expectedRGB.g - toleranceRange / 2;
+      const upperG = expectedRGB.g + toleranceRange / 2;
+      const lowerB = expectedRGB.b - toleranceRange / 2;
+      const upperB = expectedRGB.b + toleranceRange / 2;
+
+      return (
+        lowerR <= actualRGB.r &&
+        upperR >= actualRGB.r &&
+        lowerG <= actualRGB.g &&
+        upperG >= actualRGB.g &&
+        lowerB <= actualRGB.b &&
+        upperB >= actualRGB.b
+      );
     }
   })();
 }

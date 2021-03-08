@@ -277,12 +277,13 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
           undefined,
           1
         );
-        const actualColors = actualColorStats.map((d) => d.key);
-        const colorInCanvasElement = actualColors.includes(expectedColor);
+        const colorWithinTolerance = actualColorStats.some((d) =>
+          canvasElement.isColorWithinTolerance(d.key, expectedColor)
+        );
 
-        expect(colorInCanvasElement).to.eql(
+        expect(colorWithinTolerance).to.eql(
           true,
-          `Expected color '${expectedColor}' to be present in canvas element '${dataTestSubj}'. Expected: 'true' (got 'false')`
+          `Expected color '${expectedColor}' to be present within tolerance in canvas element '${dataTestSubj}'. Expected: 'true' (got 'false')`
         );
       });
     },
