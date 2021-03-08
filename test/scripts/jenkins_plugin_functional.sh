@@ -11,5 +11,4 @@ cd -;
 pwd
 
 ./test/scripts/test/plugin_functional.sh
-./test/scripts/test/example_functional.sh
 ./test/scripts/test/interpreter_functional.sh
