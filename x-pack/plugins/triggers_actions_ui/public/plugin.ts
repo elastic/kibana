@@ -22,7 +22,7 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerts/public';
+import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -68,7 +68,7 @@ interface PluginsSetup {
 interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  alerts?: AlertingStart;
+  alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
@@ -143,7 +143,7 @@ export class Plugin
           ...coreStart,
           data: pluginsStart.data,
           charts: pluginsStart.charts,
-          alerts: pluginsStart.alerts,
+          alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,
           element: params.element,
           storage: new Storage(window.localStorage),
