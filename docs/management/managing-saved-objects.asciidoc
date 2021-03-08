@@ -48,7 +48,7 @@ of objects to update and want to batch the process.
 
 With each release, {kib} introduces changes to the way saved objects are stored. When importing a saved object, {kib} will run the necessary migrations to ensure that the imported saved objects are compatible with the current version.
 
-However, saved objects can only be imported into a newer minor on the same or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
+However, saved objects can only be imported into the same version, a newer minor on the same major or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
 
 |=======
 | Exporting version | Importing version | Compatible?
