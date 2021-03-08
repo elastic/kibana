@@ -28,10 +28,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { useAppContext } from '../../../app_context';
 import {
   convertCloudUrlToProxyConnection,
   validateCloudUrl,
 } from '../../../services/cloud_deployment_url';
+
+import { cloudRemoteClustersUrl } from '../../../services/documentation';
 
 // @ts-ignore
 import Screenshot from './cloud_deployment_screenshot.png';
@@ -45,6 +48,8 @@ interface Props {
 export const CloudDeploymentForm: FunctionComponent<Props> = ({ onClose, onClusterConfigure }) => {
   const [cloudDeploymentUrl, setCloudDeploymentUrl] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const { cloudDeploymentUrl: accountLink } = useAppContext();
+
   const configureCluster = () => {
     const urlError: string | null = validateCloudUrl(cloudDeploymentUrl);
     if (urlError) {
@@ -134,9 +139,19 @@ export const CloudDeploymentForm: FunctionComponent<Props> = ({ onClose, onClust
                 defaultMessage="If you configured a deployment alias in Elastic Cloud,
               in your own load balancer or reverse proxy, you will need to copy the deployment
               proxy address and server name from the Remote cluster parameters section in
-              the Security page and paste them in the form directly. "
+              the {securityPageLink} and paste them in the form directly. "
+                values={{
+                  securityPageLink: (
+                    <EuiLink href={`${accountLink}${'/security'}`} target="_blank" external={true}>
+                      <FormattedMessage
+                        id="xpack.remoteClusters.cloudDeploymentForm.cloudDeploymentLink"
+                        defaultMessage="Security page"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
-              <EuiLink href="test.com" target="_blank" external={true}>
+              <EuiLink href={cloudRemoteClustersUrl} target="_blank" external={true}>
                 <FormattedMessage
                   id="xpack.remoteClusters.cloudDeploymentForm.aliasDocsLink"
                   defaultMessage="Learn more"

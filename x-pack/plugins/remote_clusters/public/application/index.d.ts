@@ -13,6 +13,7 @@ export declare const renderApp: (
   I18nContext: I18nStart['Context'],
   appDependencies: {
     isCloudEnabled?: boolean;
+    cloudDeploymentUrl: string;
   },
   history: ScopedHistory
 ) => ReturnType<RegisterManagementAppArgs['mount']>;

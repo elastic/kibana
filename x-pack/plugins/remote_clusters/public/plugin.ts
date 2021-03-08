@@ -61,12 +61,13 @@ export class RemoteClustersUIPlugin
           initHttp(http);
 
           const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+          const cloudDeploymentUrl = cloud?.cloudDeploymentUrl || '';
 
           const { renderApp } = await import('./application');
           const unmountAppCallback = await renderApp(
             element,
             i18nContext,
-            { isCloudEnabled },
+            { isCloudEnabled, cloudDeploymentUrl },
             history
           );
 
