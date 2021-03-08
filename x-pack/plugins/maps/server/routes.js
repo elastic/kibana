@@ -35,7 +35,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
-import { importDataProvider } from './import_data';
+import { indexDataProvider } from './index_data';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -591,29 +591,26 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
     }
   );
 
-  async function importData(core, id, index, mappings, data) {
+  async function indexData(core, index, mappings, data) {
     const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
       core.savedObjects.client,
       core.elasticsearch.client.asCurrentUser
     );
-    const { importData: importDataFunc } = importDataProvider(
+    const { indexData: _indexData } = indexDataProvider(
       core.elasticsearch.client,
       indexPatternsService,
       logger
     );
-    return importDataFunc(id, index, mappings, data);
+    return _indexData(index, mappings, data);
   }
 
   router.post(
     {
       path: `/${CREATE_INDEX_API_PATH}`,
       validate: {
-        query: schema.object({
-          id: schema.maybe(schema.string()),
-        }),
         body: schema.object({
           index: schema.string(),
-          data: schema.arrayOf(schema.any()),
+          data: schema.arrayOf(schema.any(), { minSize: 1 }),
           mappings: schema.any(),
         }),
       },
@@ -626,12 +623,15 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
     },
     async (context, request, response) => {
       try {
-        const { id } = request.query;
         const { index, data, mappings } = request.body;
-        const result = await importData(context.core, id, index, mappings, data);
+        const result = await indexData(context.core, index, mappings, data);
         return response.ok({ body: result });
       } catch (error) {
-        logger.error(`Error creating geo point/shape index: ${error.message}.`);
+        logger.error(error.message);
+        return response.custom({
+          body: error.message,
+          statusCode: 500,
+        });
       }
     }
   );

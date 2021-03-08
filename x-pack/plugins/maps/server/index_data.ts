@@ -28,53 +28,53 @@ const DEFAULT_MAPPINGS = {
   },
 };
 
-export function importDataProvider(
+export function indexDataProvider(
   { asCurrentUser }: IScopedClusterClient,
   indexPatternsService: IndexPatternsService,
   logger: Logger
 ) {
-  async function importData(
-    id: string | undefined,
+  async function indexData(
     index: string,
     mappings: Mappings,
     data: InputData
   ): Promise<ImportResponse> {
     const docCount = data.length;
+    enum IndexStep {
+      CREATING_INDEX = 'creating index',
+      CREATING_INDEX_PATTERN = 'creating index pattern',
+      INDEXING_DATA = 'indexing data',
+    }
+    let currentStep: IndexStep = IndexStep.CREATING_INDEX;
 
     try {
-      if (id === undefined) {
-        // first chunk of data, create the index and id to return
-        id = generateId();
-        await createIndex(index, mappings);
-        await createIndexPattern(index);
-      }
+      await createIndex(index, mappings);
+      currentStep = IndexStep.CREATING_INDEX_PATTERN;
+      await createIndexPattern(index);
 
       let failures: ImportFailure[] = [];
-      if (data.length) {
-        const resp = await indexData(index, data);
-        if (resp.success === false) {
-          if (resp.ingestError) {
-            throw resp;
-          } else {
-            logger.warn(`Error: some documents failed to index. ${resp.failures}`);
-            failures = resp.failures || [];
-          }
+      currentStep = IndexStep.INDEXING_DATA;
+      const resp = await writeDataToIndex(index, data);
+      if (resp.success === false) {
+        if (resp.ingestError) {
+          throw resp;
+        } else {
+          logger.warn(`Error: some documents failed to index. ${resp.failures}`);
+          failures = resp.failures || [];
         }
       }
 
       return {
         success: true,
-        id,
         index,
         docCount,
         failures,
       };
     } catch (error) {
+      logger.error(`Failure detected while ${currentStep}`);
       return {
         success: false,
-        id: id!,
         index,
-        error: error.body !== undefined ? error.body : error,
+        error: error.body ? error.body : error,
         docCount,
         ingestError: error.ingestError,
         failures: error.failures || [],
@@ -82,7 +82,7 @@ export function importDataProvider(
     }
   }
 
-  async function createIndex(index: string, mappings: Mappings) {
+  async function createIndex(indexName: string, mappings: Mappings) {
     const body: { mappings: Mappings; settings: BodySettings } = {
       mappings: {
         ...DEFAULT_MAPPINGS,
@@ -91,7 +91,7 @@ export function importDataProvider(
       settings: DEFAULT_SETTINGS,
     };
 
-    await asCurrentUser.indices.create({ index, body });
+    await asCurrentUser.indices.create({ index: indexName, body });
   }
 
   async function createIndexPattern(indexPatternName: string) {
@@ -108,7 +108,7 @@ export function importDataProvider(
     }
   }
 
-  async function indexData(index: string, data: InputData) {
+  async function writeDataToIndex(index: string, data: InputData) {
     try {
       const body = [];
       for (let i = 0; i < data.length; i++) {
@@ -131,8 +131,6 @@ export function importDataProvider(
       let failures: ImportFailure[] = [];
       let ingestError = false;
       if (error.errors !== undefined && Array.isArray(error.items)) {
-        // an expected error where some or all of the bulk request
-        // docs have failed to be ingested.
         failures = getFailures(error.items, data);
       } else {
         // some other error has happened.
@@ -165,10 +163,6 @@ export function importDataProvider(
   }
 
   return {
-    importData,
+    indexData,
   };
-}
-
-function generateId() {
-  return Math.random().toString(36).substr(2, 9);
 }

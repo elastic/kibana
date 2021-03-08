@@ -7,7 +7,6 @@
 
 export interface ImportResponse {
   success: boolean;
-  id: string;
   index?: string;
   pipelineId?: string;
   docCount: number;
