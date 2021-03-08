@@ -243,7 +243,7 @@ The `BUILD.bazel` files will look similar to that of packages, there will be a t
 
 Plugins are built in a sandbox, so they will no longer be able to use relative imports from one another. For Typescript, relative imports will be replaced with a path reference to the `bazel/bin`.
 
-Static imports across plugins are a concern that would affect the developer experience due to cascading re-builds. For example, if every plugin has static imports from `src/core`, any changes to `src/core` would cause all those plugins to re-build. There are a few options to address this; the first would be to minimize or eliminate these imports. Most plugins are importing types, so we can also ensure that only type-level changes actually trigger a re-build. Additionally, these types of dependencies could be further broken out into another package to reduce the times further this is necessary. 
+Static imports across plugins are a concern that would affect the developer experience due to cascading re-builds. For example, if every plugin has static imports from `src/core`, any changes to `src/core` would cause all those plugins to re-build. There are a few options to address this; the first would be to minimize or eliminate these imports. Most plugins are importing types, so we can also ensure that only type-level changes actually trigger a re-build. Additionally, these types of dependencies could be further broken down into smaller packages to reduce the times further this is necessary. 
 
 ```
 "compilerOptions": {
