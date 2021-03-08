@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -159,13 +159,18 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     () => {
       if (!configurationValidationError?.length) {
         try {
-          return buildExpression({
+          const ast = buildExpression({
             visualization: activeVisualization,
             visualizationState,
             datasourceMap,
             datasourceStates,
             datasourceLayers: framePublicAPI.datasourceLayers,
           });
+          if (ast) {
+            return toExpression(ast);
+          } else {
+            return null;
+          }
         } catch (e) {
           const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
           const defaultMessage = {
