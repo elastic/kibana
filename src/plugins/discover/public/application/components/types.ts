@@ -155,10 +155,6 @@ export interface DiscoverProps {
    */
   state: AppState;
   /**
-   * Currently selected time range
-   */
-  timeRange?: { from: string; to: string };
-  /**
    * An object containing properties for unmapped fields behavior
    */
   unmappedFieldsConfig?: {

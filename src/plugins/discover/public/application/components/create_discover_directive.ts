@@ -26,7 +26,6 @@ export function createDiscoverDirective(reactDirective: any) {
     ['searchSource', { watchDepth: 'reference' }],
     ['showSaveQuery', { watchDepth: 'reference' }],
     ['state', { watchDepth: 'reference' }],
-    ['timeRange', { watchDepth: 'reference' }],
     ['topNavMenu', { watchDepth: 'reference' }],
     ['updateQuery', { watchDepth: 'reference' }],
     ['updateSavedQueryId', { watchDepth: 'reference' }],
