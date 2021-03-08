@@ -20,7 +20,6 @@ import {
   defaultUser,
   postCaseReq,
   postCaseResp,
-  postCollectionReq,
   postCommentAlertReq,
   postCommentUserReq,
   removeServerGeneratedPropertiesFromCase,
@@ -134,29 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(404);
     });
 
-    it('should 400 and not allow converting a collection back to an individual case', async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCollectionReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              type: CaseType.individual,
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    it('should allow converting an individual case to a collection when it does not have alerts', async () => {
+    it('should not allow converting an individual case to a collection when it does not have alerts', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -181,7 +158,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         })
-        .expect(200);
+        .expect(400);
     });
 
     it('should 400 when attempting to update an individual case to a collection when it has alerts attached to it', async () => {
@@ -206,28 +183,6 @@ export default ({ getService }: FtrProviderContext): void => {
               id: patchedCase.id,
               version: patchedCase.version,
               type: CaseType.collection,
-            },
-          ],
-        })
-        .expect(400);
-    });
-
-    it("should 400 when attempting to update a collection case's status", async () => {
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCollectionReq)
-        .expect(200);
-
-      await supertest
-        .patch(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              status: 'closed',
             },
           ],
         })

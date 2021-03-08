@@ -77,6 +77,18 @@ function throwIfUpdateStatusOfCollection(
 }
 
 /**
+ * Throws an error if any of the requests attempt to update the case type field.
+ */
+function throwIfUpdateCaseType(requests: ESCasePatchRequest[]) {
+  const requestsUpdatingCaseType = requests.filter((req) => req.type !== undefined);
+
+  if (requestsUpdatingCaseType.length > 0) {
+    const ids = requestsUpdatingCaseType.map((req) => req.id);
+    throw Boom.badRequest(`Updating the type of a case is not allowed ids: [${ids.join(', ')}]`);
+  }
+}
+
+/**
  * Throws an error if any of the requests attempt to update a collection style case to an individual one.
  */
 function throwIfUpdateTypeCollectionToIndividual(
@@ -396,6 +408,7 @@ export const update = async ({
       return acc;
     }, new Map<string, SavedObject<ESCaseAttributes>>());
 
+    throwIfUpdateCaseType(updateFilterCases);
     throwIfUpdateStatusOfCollection(updateFilterCases, casesMap);
     throwIfUpdateTypeCollectionToIndividual(updateFilterCases, casesMap);
     await throwIfInvalidUpdateOfTypeWithAlerts({
