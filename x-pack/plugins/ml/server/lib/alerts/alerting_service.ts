@@ -28,6 +28,17 @@ import {
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
 import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
+import { isDefined } from '../../../common/types/guards';
+
+type AggResultsResponse = { key?: number } & {
+  [key in PreviewResultsKeys]: {
+    doc_count: number;
+  } & {
+    [hitsKey in TopHitsResultsKeys]: {
+      hits: { hits: any[] };
+    };
+  };
+};
 
 /**
  * Alerting related server-side methods
@@ -253,6 +264,51 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
     return source.job_id;
   };
 
+  const getResultsFormatter = (resultType: AnomalyResultType) => {
+    const resultsLabel = getAggResultsLabel(resultType);
+    return (v: AggResultsResponse): AlertExecutionResult | undefined => {
+      const aggTypeResults = v[resultsLabel.aggGroupLabel];
+      if (aggTypeResults.doc_count === 0) {
+        return;
+      }
+
+      const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
+
+      const topAnomaly = requestedAnomalies[0];
+      const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
+
+      return {
+        count: aggTypeResults.doc_count,
+        key: v.key,
+        alertInstanceKey,
+        jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
+        isInterim: requestedAnomalies.some((h) => h._source.is_interim),
+        timestamp: topAnomaly._source.timestamp,
+        timestampIso8601: topAnomaly.fields.timestamp_iso8601[0],
+        timestampEpoch: topAnomaly.fields.timestamp_epoch[0],
+        score: topAnomaly.fields.score[0],
+        bucketRange: {
+          start: topAnomaly.fields.start[0],
+          end: topAnomaly.fields.end[0],
+        },
+        topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
+          return {
+            ...h._source,
+            score: h.fields.score[0],
+            unique_key: h.fields.unique_key[0],
+          };
+        }) as RecordAnomalyAlertDoc[],
+        topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
+          return {
+            ...h._source,
+            score: h.fields.score[0],
+            unique_key: h.fields.unique_key[0],
+          };
+        }) as InfluencerAnomalyAlertDoc[],
+      };
+    };
+  };
+
   /**
    * Builds a request body
    * @param params - Alert params
@@ -325,17 +381,22 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
           ],
         },
       },
-      aggs: {
-        alerts_over_time: {
-          date_histogram: {
-            field: 'timestamp',
-            fixed_interval: lookBackTimeInterval,
-            // Ignore empty buckets
-            min_doc_count: 1,
-          },
-          aggs: getResultTypeAggRequest(params.resultType as AnomalyResultType, params.severity),
-        },
-      },
+      aggs: previewTimeInterval
+        ? {
+            alerts_over_time: {
+              date_histogram: {
+                field: 'timestamp',
+                fixed_interval: lookBackTimeInterval,
+                // Ignore empty buckets
+                min_doc_count: 1,
+              },
+              aggs: getResultTypeAggRequest(
+                params.resultType as AnomalyResultType,
+                params.severity
+              ),
+            },
+          }
+        : getResultTypeAggRequest(params.resultType as AnomalyResultType, params.severity),
     };
 
     const response = await mlClient.anomalySearch(
@@ -345,67 +406,30 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       jobIds
     );
 
-    const result = response.body.aggregations as {
-      alerts_over_time: {
-        buckets: Array<
-          {
-            doc_count: number;
-            key: number;
-            key_as_string: string;
-          } & {
-            [key in PreviewResultsKeys]: {
-              doc_count: number;
-            } & {
-              [hitsKey in TopHitsResultsKeys]: {
-                hits: { hits: any[] };
-              };
-            };
-          }
-        >;
-      };
-    };
+    const result = response.body.aggregations;
 
     const resultsLabel = getAggResultsLabel(params.resultType as AnomalyResultType);
 
-    return (
-      result.alerts_over_time.buckets
-        // Filter out empty buckets
-        .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
-        // Map response
-        .map((v) => {
-          const aggTypeResults = v[resultsLabel.aggGroupLabel];
-          const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
+    const formatter = getResultsFormatter(params.resultType as AnomalyResultType);
 
-          const topAnomaly = requestedAnomalies[0];
-          const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
-
-          return {
-            count: aggTypeResults.doc_count,
-            key: v.key,
-            alertInstanceKey,
-            jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
-            isInterim: requestedAnomalies.some((h) => h._source.is_interim),
-            timestamp: topAnomaly._source.timestamp,
-            timestampIso8601: topAnomaly.fields.timestamp_iso8601[0],
-            timestampEpoch: topAnomaly.fields.timestamp_epoch[0],
-            score: topAnomaly.fields.score[0],
-            bucketRange: {
-              start: topAnomaly.fields.start[0],
-              end: topAnomaly.fields.end[0],
-            },
-            topRecords: v.record_results.top_record_hits.hits.hits.map((h) => ({
-              ...h._source,
-              score: h.fields.score[0],
-              unique_key: h.fields.unique_key[0],
-            })) as RecordAnomalyAlertDoc[],
-            topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => ({
-              ...h._source,
-              score: h.fields.score[0],
-              unique_key: h.fields.unique_key[0],
-            })) as InfluencerAnomalyAlertDoc[],
+    return (previewTimeInterval
+      ? (result as {
+          alerts_over_time: {
+            buckets: Array<
+              {
+                doc_count: number;
+                key: number;
+                key_as_string: string;
+              } & AggResultsResponse
+            >;
           };
-        })
-    );
+        }).alerts_over_time.buckets
+          // Filter out empty buckets
+          .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
+          // Map response
+          .map(formatter)
+      : [formatter(result as AggResultsResponse)]
+    ).filter(isDefined);
   };
 
   /**
