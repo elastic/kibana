@@ -390,13 +390,10 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
                 // Ignore empty buckets
                 min_doc_count: 1,
               },
-              aggs: getResultTypeAggRequest(
-                params.resultType as AnomalyResultType,
-                params.severity
-              ),
+              aggs: getResultTypeAggRequest(params.resultType, params.severity),
             },
           }
-        : getResultTypeAggRequest(params.resultType as AnomalyResultType, params.severity),
+        : getResultTypeAggRequest(params.resultType, params.severity),
     };
 
     const response = await mlClient.anomalySearch(
@@ -408,9 +405,9 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
 
     const result = response.body.aggregations;
 
-    const resultsLabel = getAggResultsLabel(params.resultType as AnomalyResultType);
+    const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const formatter = getResultsFormatter(params.resultType as AnomalyResultType);
+    const formatter = getResultsFormatter(params.resultType);
 
     return (previewTimeInterval
       ? (result as {
@@ -534,7 +531,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       const result = res[0];
       if (!result) return;
 
-      const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType as AnomalyResultType);
+      const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType);
 
       const executionResult = {
         ...result,
