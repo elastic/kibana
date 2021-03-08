@@ -8,6 +8,9 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse } from 'wellknown';
+import turfCircle from '@turf/circle';
+import { FeatureCollection, GeoJsonProperties, Geometry, Polygon, Position } from 'geojson';
+import { BBox } from '@turf/helpers';
 import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
@@ -18,12 +21,38 @@ import {
   LAT_INDEX,
 } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { FILTERS } from '../../../../../src/plugins/data/common';
-import turfCircle from '@turf/circle';
+import { Filter, FILTERS } from '../../../../../src/plugins/data/common';
+import { MapExtent } from '../descriptor_types';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
 
-function ensureGeoField(type) {
+export interface ESBBox {
+  top_left: number[];
+  bottom_right: number[];
+}
+
+export interface ESGeoBoundingBoxFilter {
+  geo_bounding_box: {
+    [geoFieldName: string]: ESBBox;
+  };
+}
+
+export interface ESPolygonFilter {
+  geo_shape: {
+    [geoFieldName: string]: {
+      shape: Polygon;
+      relation: ES_SPATIAL_RELATIONS.INTERSECTS;
+    };
+  };
+}
+
+export interface PreIndexedShape {
+  index: string;
+  id: string | number;
+  path: string;
+}
+
+function ensureGeoField(type: ES_GEO_FIELD_TYPE) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
   if (!expectedTypes.includes(type)) {
     const errorMessage = i18n.translate(
@@ -41,7 +70,7 @@ function ensureGeoField(type) {
   }
 }
 
-function ensureGeometryType(type, expectedTypes) {
+function ensureGeometryType(type: GEO_JSON_TYPE, expectedTypes: GEO_JSON_TYPE[]) {
   if (!expectedTypes.includes(type)) {
     const errorMessage = i18n.translate(
       'xpack.maps.es_geo_utils.unsupportedGeometryTypeErrorMessage',
@@ -68,14 +97,20 @@ function ensureGeometryType(type, expectedTypes) {
  * @param {string} geoFieldType Geometry field type ["geo_point", "geo_shape"]
  * @returns {number}
  */
-export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epochMillisFields) {
-  const features = [];
-  const tmpGeometriesAccumulator = [];
+export function hitsToGeoJson(
+  hits: Array<Record<string, unknown>>,
+  flattenHit: (elasticSearchHit: Record<string, unknown>) => GeoJsonProperties,
+  geoFieldName: string,
+  geoFieldType: ES_GEO_FIELD_TYPE,
+  epochMillisFields: string[]
+): FeatureCollection {
+  const features: Feature[] = [];
+  const tmpGeometriesAccumulator: Geometry[] = [];
 
   for (let i = 0; i < hits.length; i++) {
     const properties = flattenHit(hits[i]);
 
-    tmpGeometriesAccumulator.length = 0; //truncate accumulator
+    tmpGeometriesAccumulator.length = 0; // truncate accumulator
 
     ensureGeoField(geoFieldType);
     if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
@@ -87,17 +122,17 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epoc
     // There is a bug in Elasticsearch API where epoch_millis are returned as a string instead of a number
     // https://github.com/elastic/elasticsearch/issues/50622
     // Convert these field values to integers.
-    for (let i = 0; i < epochMillisFields.length; i++) {
-      const fieldName = epochMillisFields[i];
+    for (let k = 0; i < epochMillisFields.length; k++) {
+      const fieldName = epochMillisFields[k];
       if (typeof properties[fieldName] === 'string') {
-        properties[fieldName] = parseInt(properties[fieldName]);
+        properties[fieldName] = parseInt(properties[fieldName], 10);
       }
     }
 
     // don't include geometry field value in properties
     delete properties[geoFieldName];
 
-    //create new geojson Feature for every individual geojson geometry.
+    // create new geojson Feature for every individual geojson geometry.
     for (let j = 0; j < tmpGeometriesAccumulator.length; j++) {
       features.push({
         type: 'Feature',
@@ -112,7 +147,7 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epoc
 
   return {
     type: 'FeatureCollection',
-    features: features,
+    features,
   };
 }
 
@@ -120,7 +155,10 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epoc
 // Either
 // 1) Array of latLon strings
 // 2) latLon string
-export function geoPointToGeometry(value, accumulator) {
+export function geoPointToGeometry(
+  value: string[] | string | undefined,
+  accumulator: Geometry[]
+): void {
   if (!value) {
     return;
   }
@@ -141,7 +179,7 @@ export function geoPointToGeometry(value, accumulator) {
   });
 }
 
-export function convertESShapeToGeojsonGeometry(value) {
+export function convertESShapeToGeojsonGeometry(value: Geometry): Geometry {
   const geoJson = {
     type: value.type,
     coordinates: value.coordinates,
@@ -208,7 +246,7 @@ export function convertESShapeToGeojsonGeometry(value) {
   return geoJson;
 }
 
-function convertWKTStringToGeojson(value) {
+function convertWKTStringToGeojson(value: string): Feature {
   try {
     return parse(value);
   } catch (e) {
@@ -222,7 +260,10 @@ function convertWKTStringToGeojson(value) {
   }
 }
 
-export function geoShapeToGeometry(value, accumulator) {
+export function geoShapeToGeometry(
+  value: string | Geometry | string[] | Geometry[] | undefined,
+  accumulator: Geometry[]
+): void {
   if (!value) {
     return;
   }
@@ -252,7 +293,7 @@ export function geoShapeToGeometry(value, accumulator) {
   }
 }
 
-export function makeESBbox({ maxLat, maxLon, minLat, minLon }) {
+export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): ESBBox {
   const bottom = clampToLatBounds(minLat);
   const top = clampToLatBounds(maxLat);
   let esBbox;
@@ -280,7 +321,10 @@ export function makeESBbox({ maxLat, maxLon, minLat, minLon }) {
   return esBbox;
 }
 
-export function createExtentFilter(mapExtent, geoFieldName) {
+export function createExtentFilter(
+  mapExtent: MapExtent,
+  geoFieldName: string
+): ESPolygonFilter | ESGeoBoundingBoxFilter {
   const boundingBox = makeESBbox(mapExtent);
   return {
     geo_bounding_box: {
@@ -297,6 +341,14 @@ export function createSpatialFilterWithGeometry({
   geoFieldName,
   geoFieldType,
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
+}: {
+  preIndexedShape?: PreIndexedShape;
+  geometry: Geometry;
+  geometryLabel: string;
+  indexPatternId: string;
+  geoFieldName: string;
+  geoFieldType: ES_GEO_FIELD_TYPE;
+  relation: ES_SPATIAL_RELATIONS;
 }) {
   ensureGeoField(geoFieldType);
 
@@ -341,6 +393,12 @@ export function createDistanceFilterWithMeta({
   geoFieldName,
   indexPatternId,
   point,
+}: {
+  alias: string;
+  distanceKm: number;
+  geoFieldName: string;
+  indexPatternId: string;
+  point: Position;
 }) {
   const meta = {
     type: SPATIAL_FILTER_TYPE,
@@ -368,7 +426,8 @@ export function createDistanceFilterWithMeta({
   };
 }
 
-export function roundCoordinates(coordinates) {
+type Coordinates = Position | Position[] | Position[][] | Position[][][];
+export function roundCoordinates(coordinates: Coordinates): Coordinates {
   for (let i = 0; i < coordinates.length; i++) {
     const value = coordinates[i];
     if (Array.isArray(value)) {
@@ -382,7 +441,7 @@ export function roundCoordinates(coordinates) {
 /*
  * returns Polygon geometry where coordinates define a bounding box that contains the input geometry
  */
-export function getBoundingBoxGeometry(geometry) {
+export function getBoundingBoxGeometry(geometry: Feature): Feature {
   ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON]);
 
   const exterior = geometry.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
@@ -402,7 +461,7 @@ export function getBoundingBoxGeometry(geometry) {
   return formatEnvelopeAsPolygon(extent);
 }
 
-export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
+export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }: MapExtent): Feature {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline
   const lonDelta = maxLon - minLon;
@@ -420,15 +479,15 @@ export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   };
 }
 
-export function clampToLatBounds(lat) {
+export function clampToLatBounds(lat: number): number {
   return clamp(lat, -89, 89);
 }
 
-export function clampToLonBounds(lon) {
+export function clampToLonBounds(lon: number): number {
   return clamp(lon, -180, 180);
 }
 
-export function clamp(val, min, max) {
+export function clamp(val: number, min: number, max: number): number {
   if (val > max) {
     return max;
   } else if (val < min) {
@@ -438,8 +497,8 @@ export function clamp(val, min, max) {
   }
 }
 
-export function extractFeaturesFromFilters(filters) {
-  const features = [];
+export function extractFeaturesFromFilters(filters: Filter[]): Feature[] {
+  const features: Feature = [];
   filters
     .filter((filter) => {
       return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
@@ -475,7 +534,7 @@ export function extractFeaturesFromFilters(filters) {
   return features;
 }
 
-export function scaleBounds(bounds, scaleFactor) {
+export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent {
   const width = bounds.maxLon - bounds.minLon;
   const height = bounds.maxLat - bounds.minLat;
   return {
@@ -486,7 +545,7 @@ export function scaleBounds(bounds, scaleFactor) {
   };
 }
 
-export function turfBboxToBounds(turfBbox) {
+export function turfBboxToBounds(turfBbox: BBox): MapExtent {
   return {
     minLon: turfBbox[0],
     minLat: turfBbox[1],
