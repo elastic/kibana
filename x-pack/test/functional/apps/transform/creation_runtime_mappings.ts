@@ -50,8 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'rt_airline_lower',
         legend: '19 categories',
         colorStats: [
-          { key: '#000000', value: 50 },
-          { key: '#54B399', value: 50 },
+          { key: '#000000', value: 48 },
+          { key: '#54B399', value: 41 },
         ],
       },
       {
