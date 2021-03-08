@@ -13,9 +13,10 @@ import { getPathParts } from '../../archive';
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
+import { appContextService } from '../../../app_context';
+
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
-import { appContextService } from '../../../app_context';
 
 interface TransformInstallation {
   installationName: string;

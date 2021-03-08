@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type {
   EsAssetReference,
@@ -13,9 +14,10 @@ import type {
   RegistryDataStream,
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
-import { deleteIlmRefs, deleteIlms } from './remove';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getAsset } from '../transform/common';
+
+import { deleteIlmRefs, deleteIlms } from './remove';
 
 interface IlmInstallation {
   installationName: string;

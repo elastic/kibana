@@ -7,6 +7,7 @@
 
 import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
+
 import type { DataStream } from '../../types';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../common';
 import type { GetDataStreamsResponse } from '../../../common';

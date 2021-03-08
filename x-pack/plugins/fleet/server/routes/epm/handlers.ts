@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
-import path from 'path';
 import type { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
+
 import type {
   GetInfoResponse,
   InstallPackageResponse,
