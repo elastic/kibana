@@ -162,11 +162,13 @@ function onResults(resp: any, chartAggConfigs: any, timeRange: any, timeFilter: 
 
 export function DiscoverHistogramData(props: any) {
   const [chartData, setChartData] = useState<undefined | any>(undefined);
-  const [abortController, setAbortController] = useState<undefined | AbortController>(undefined);
   useEffect(() => {
-    if (abortController) abortController.abort();
-    const newAbortController = new AbortController();
-    const searchSource = props.searchSource.clone();
+    const abortController = new AbortController();
+    const searchSource = props.savedSearch.searchSource;
+    searchSource
+      .setField('index', props.indexPattern)
+      .setField('query', props.data.query.queryString.getQuery() || null)
+      .setField('filter', props.data.query.filterManager.getFilters());
 
     const { chartAggConfigs } = setupVisualization({
       data: props.data,
@@ -179,22 +181,24 @@ export function DiscoverHistogramData(props: any) {
 
     fetch(
       searchSource,
-      // @ts-ignore
-      newAbortController,
+      abortController,
       chartAggConfigs,
-      // @ts-ignore
-      timeRange,
-      props.timeFilter
-    ).then((result: any) => setChartData(result));
-    setAbortController(newAbortController);
+      props.timeRange,
+      props.data.query.timefilter.timefilter
+    ).then((result: any) => {
+      setChartData(result);
+    });
+    return () => {
+      abortController.abort();
+    };
   }, [
+    props.savedSearch,
     props.data,
     props.interval,
     props.timeField,
     props.timeRange,
     props.timeFilter,
     props.indexPattern,
-    abortController,
     props.searchSource,
   ]);
 

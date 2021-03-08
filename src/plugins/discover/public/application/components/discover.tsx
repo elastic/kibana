@@ -26,7 +26,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
-import { DiscoverHistogram, DiscoverUninitialized } from '../angular/directives';
+import { DiscoverUninitialized } from '../angular/directives';
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
@@ -42,6 +42,7 @@ import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { DiscoverHistogramData } from '../angular/directives/histogram';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -64,9 +65,11 @@ export function Discover({
   rows,
   searchSource,
   state,
-  timeRange,
   unmappedFieldsConfig,
 }: DiscoverProps) {
+  const { timefilter } = opts.data.query.timefilter;
+  const timeRange = useMemo(() => timefilter.getTime(), [timefilter]);
+
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -156,13 +159,13 @@ export function Discover({
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
-      data.query.timefilter.timefilter.setTime({
+      timefilter.setTime({
         from: moment(ranges.from).toISOString(),
         to: moment(ranges.to).toISOString(),
         mode: 'absolute',
       });
     },
-    [data]
+    [timefilter]
   );
 
   const onBackToTop = useCallback(() => {
@@ -325,7 +328,7 @@ export function Discover({
                       </EuiFlexGroup>
                       {isLegacy && <SkipBottomButton onClick={onSkipBottomButtonClick} />}
                     </EuiFlexItem>
-                    {!hideChart && opts.timefield && (
+                    {!hideChart && opts.timefield && timeRange && (
                       <EuiFlexItem grow={false}>
                         <section
                           aria-label={i18n.translate(
@@ -336,17 +339,19 @@ export function Discover({
                           )}
                           className="dscTimechart"
                         >
-                          {opts.chartAggConfigs && histogramData && rows.length !== 0 && (
-                            <div
-                              className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
-                              data-test-subj="discoverChart"
-                            >
-                              <DiscoverHistogram
-                                chartData={histogramData}
-                                timefilterUpdateHandler={timefilterUpdateHandler}
-                              />
-                            </div>
-                          )}
+                          <div
+                            className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
+                            data-test-subj="discoverChart"
+                          >
+                            <DiscoverHistogramData
+                              chartData={histogramData}
+                              timefilterUpdateHandler={timefilterUpdateHandler}
+                              savedSearch={savedSearch}
+                              data={data}
+                              indexPattern={indexPattern}
+                              timeRange={timeRange}
+                            />
+                          </div>
                         </section>
                         <EuiSpacer size="s" />
                       </EuiFlexItem>

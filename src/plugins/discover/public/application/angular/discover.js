@@ -229,6 +229,21 @@ function discoverController($route, $scope, Promise) {
       query: true,
     }
   );
+  const showUnmappedFields = $scope.useNewFieldsApi;
+  const updateSearchSourceHelper = () => {
+    const { indexPattern, useNewFieldsApi } = $scope;
+    const { columns, sort } = $scope.state;
+    updateSearchSource({
+      persistentSearchSource,
+      volatileSearchSource: $scope.volatileSearchSource,
+      indexPattern,
+      services,
+      sort,
+      columns,
+      useNewFieldsApi,
+      showUnmappedFields,
+    });
+  };
 
   const appStateUnsubscribe = appStateContainer.subscribe(async (newState) => {
     const { state: newStatePartial } = splitState(newState);
@@ -298,7 +313,7 @@ function discoverController($route, $scope, Promise) {
       {
         next: () => {
           $scope.state.filters = filterManager.getAppFilters();
-          $scope.updateDataSource();
+          updateSearchSourceHelper();
         },
       },
       (error) => addFatalError(core.fatalErrors, error)
@@ -435,91 +450,79 @@ function discoverController($route, $scope, Promise) {
     );
   };
 
-  const init = _.once(() => {
-    $scope.updateDataSource().then(async () => {
-      const fetch$ = merge(
-        refetch$,
-        filterManager.getFetches$(),
-        timefilter.getFetch$(),
-        timefilter.getAutoRefreshFetch$(),
-        data.query.queryString.getUpdates$(),
-        searchSessionManager.newSearchSessionIdFromURL$
-      ).pipe(debounceTime(100));
+  const updateResultState = (() => {
+    let prev = {};
+    const status = {
+      UNINITIALIZED: 'uninitialized',
+      LOADING: 'loading', // initial data load
+      READY: 'ready', // results came back
+      NO_RESULTS: 'none', // no results came back
+    };
 
-      subscriptions.add(
-        subscribeWithScope(
-          $scope,
-          fetch$,
-          {
-            next: $scope.fetch,
-          },
-          (error) => addFatalError(core.fatalErrors, error)
-        )
-      );
-      subscriptions.add(
-        subscribeWithScope(
-          $scope,
-          timefilter.getTimeUpdate$(),
-          {
-            next: () => {
-              $scope.updateTime();
-            },
-          },
-          (error) => addFatalError(core.fatalErrors, error)
-        )
-      );
-
-      $scope.$watchMulti(
-        ['rows', 'fetchStatus'],
-        (function updateResultState() {
-          let prev = {};
-          const status = {
-            UNINITIALIZED: 'uninitialized',
-            LOADING: 'loading', // initial data load
-            READY: 'ready', // results came back
-            NO_RESULTS: 'none', // no results came back
-          };
-
-          function pick(rows, oldRows, fetchStatus) {
-            // initial state, pretend we're already loading if we're about to execute a search so
-            // that the uninitilized message doesn't flash on screen
-            if (!$scope.fetchError && rows == null && oldRows == null && shouldSearchOnPageLoad()) {
-              return status.LOADING;
-            }
-
-            if (fetchStatus === fetchStatuses.UNINITIALIZED) {
-              return status.UNINITIALIZED;
-            }
-
-            const rowsEmpty = _.isEmpty(rows);
-            if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
-            else if (!rowsEmpty) return status.READY;
-            else return status.NO_RESULTS;
-          }
-
-          return function () {
-            const current = {
-              rows: $scope.rows,
-              fetchStatus: $scope.fetchStatus,
-            };
-
-            $scope.resultState = pick(
-              current.rows,
-              prev.rows,
-              current.fetchStatus,
-              prev.fetchStatus
-            );
-
-            prev = current;
-          };
-        })()
-      );
-
-      init.complete = true;
-      if (shouldSearchOnPageLoad()) {
-        refetch$.next();
+    function pick(rows, oldRows, fetchStatus) {
+      // initial state, pretend we're already loading if we're about to execute a search so
+      // that the uninitilized message doesn't flash on screen
+      if (!$scope.fetchError && rows == null && oldRows == null && shouldSearchOnPageLoad()) {
+        return status.LOADING;
       }
-    });
+
+      if (fetchStatus === fetchStatuses.UNINITIALIZED) {
+        return status.UNINITIALIZED;
+      }
+
+      const rowsEmpty = _.isEmpty(rows);
+      if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
+      else if (!rowsEmpty) return status.READY;
+      else return status.NO_RESULTS;
+    }
+
+    return function () {
+      const current = {
+        rows: $scope.rows,
+        fetchStatus: $scope.fetchStatus,
+      };
+      $scope.resultState = pick(current.rows, prev.rows, current.fetchStatus, prev.fetchStatus);
+
+      prev = current;
+    };
+  })();
+
+  const init = _.once(() => {
+    updateSearchSourceHelper();
+
+    const fetch$ = merge(
+      refetch$,
+      filterManager.getFetches$(),
+      timefilter.getFetch$(),
+      timefilter.getAutoRefreshFetch$(),
+      data.query.queryString.getUpdates$(),
+      searchSessionManager.newSearchSessionIdFromURL$
+    ).pipe(debounceTime(100));
+
+    subscriptions.add(
+      subscribeWithScope(
+        $scope,
+        fetch$,
+        {
+          next: $scope.fetch,
+        },
+        (error) => addFatalError(core.fatalErrors, error)
+      )
+    );
+    subscriptions.add(
+      subscribeWithScope(
+        $scope,
+        timefilter.getTimeUpdate$(),
+        {
+          next: () => {
+            $scope.updateTime();
+          },
+        },
+        (error) => addFatalError(core.fatalErrors, error)
+      )
+    );
+
+    init.complete = true;
   });
 
   $scope.opts.fetch = $scope.fetch = function () {
@@ -538,16 +541,15 @@ function discoverController($route, $scope, Promise) {
     abortController = new AbortController();
 
     const searchSessionId = searchSessionManager.getNextSearchSessionId();
+    updateSearchSourceHelper();
 
-    $scope
-      .updateDataSource()
-      .then(function () {
-        $scope.fetchStatus = fetchStatuses.LOADING;
-        logInspectorRequest({ searchSessionId });
-        return $scope.volatileSearchSource.fetch({
-          abortSignal: abortController.signal,
-          sessionId: searchSessionId,
-        });
+    $scope.fetchStatus = fetchStatuses.LOADING;
+    updateResultState();
+    logInspectorRequest({ searchSessionId });
+    return $scope.volatileSearchSource
+      .fetch({
+        abortSignal: abortController.signal,
+        sessionId: searchSessionId,
       })
       .then(onResults)
       .catch((error) => {
@@ -558,6 +560,10 @@ function discoverController($route, $scope, Promise) {
         $scope.fetchError = error;
 
         data.search.showError(error);
+      })
+      .finally(() => {
+        updateResultState();
+        $scope.$apply();
       });
   };
 
@@ -628,31 +634,18 @@ function discoverController($route, $scope, Promise) {
     history.push('/');
   };
 
-  const showUnmappedFields = $scope.useNewFieldsApi;
-
   $scope.unmappedFieldsConfig = {
     showUnmappedFields,
-  };
-
-  $scope.updateDataSource = () => {
-    const { indexPattern, useNewFieldsApi } = $scope;
-    const { columns, sort } = $scope.state;
-    updateSearchSource({
-      persistentSearchSource,
-      volatileSearchSource: $scope.volatileSearchSource,
-      indexPattern,
-      services,
-      sort,
-      columns,
-      useNewFieldsApi,
-      showUnmappedFields,
-    });
-    return Promise.resolve();
   };
 
   addHelpMenuToAppChrome(chrome);
 
   init();
   // Propagate current app state to url, then start syncing
-  replaceUrlAppState().then(() => startStateSync());
+  replaceUrlAppState().then(() => {
+    startStateSync();
+    if (shouldSearchOnPageLoad()) {
+      refetch$.next();
+    }
+  });
 }
