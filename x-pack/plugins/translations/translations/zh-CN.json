@@ -862,7 +862,7 @@
     "data.filter.filterBar.excludeFilterButtonLabel": "排除结果",
     "data.filter.filterBar.fieldNotFound": "索引模式 {indexPattern} 中未找到字段 {key}",
     "data.filter.filterBar.filterItemBadgeAriaLabel": "筛选操作",
-    "data.filter.filterBar.filterItemBadgeIconAriaLabel": "删除",
+    "data.filter.filterBar.filterItemBadgeIconAriaLabel": "删除 {filter}",
     "data.filter.filterBar.includeFilterButtonLabel": "包括结果",
     "data.filter.filterBar.indexPatternSelectPlaceholder": "选择索引模式",
     "data.filter.filterBar.labelErrorInfo": "找不到索引模式 {indexPattern}",
