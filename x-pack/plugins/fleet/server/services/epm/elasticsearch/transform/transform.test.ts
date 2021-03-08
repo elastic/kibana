@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/order
 import { createAppContextStartContractMock } from '../../../../mocks';
 
 jest.mock('../../packages/get', () => {
@@ -17,30 +18,28 @@ jest.mock('./common', () => {
   };
 });
 
-import { errors as LegacyESErrors } from 'elasticsearch';
-import { installTransform } from './install';
-import type {
-  ILegacyScopedClusterClient,
-  SavedObject,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
+import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+
 import { ElasticsearchAssetType } from '../../../../types';
 import type { Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
-import { getAsset } from './common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
 import { appContextService } from '../../../app_context';
 
+import { getAsset } from './common';
+import { installTransform } from './install';
+
 describe('test transform install', () => {
-  let legacyScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
+  let esClient: DeeplyMockedKeys<ElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    legacyScopedClusterClient = {
-      callAsInternalUser: jest.fn(),
-      callAsCurrentUser: jest.fn(),
-    };
+    esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
     (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -102,8 +101,8 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
-    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce(
-      Promise.resolve({
+    esClient.transform.getTransform.mockReturnValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         count: 1,
         transforms: [
           {
@@ -112,15 +111,9 @@ describe('test transform install', () => {
             },
           },
         ],
-      } as {
-        count: number;
-        transforms: Array<{
-          dest: {
-            index: string;
-          };
-        }>;
       })
     );
+
     await installTransform(
       ({
         name: 'endpoint',
@@ -161,78 +154,75 @@ describe('test transform install', () => {
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
       ],
-      legacyScopedClusterClient.callAsCurrentUser,
+      esClient,
       savedObjectsClient
     );
 
-    expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+    expect(esClient.transform.getTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'GET',
-          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
-          ignore: [404],
+          transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
         },
+        { ignore: [404] },
       ],
+    ]);
+    expect(esClient.transform.stopTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0/_stop',
-          query: 'force=true',
-          ignore: [404],
+          transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
+          force: true,
         },
+        { ignore: [404] },
       ],
+    ]);
+    expect(esClient.transform.deleteTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'DELETE',
-          query: 'force=true',
-          path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
-          ignore: [404],
+          transform_id: 'endpoint.metadata_current-default-0.15.0-dev.0',
+          force: true,
         },
+        { ignore: [404] },
       ],
+    ]);
+
+    expect(esClient.transport.request.mock.calls).toEqual([
       [
-        'transport.request',
         {
           method: 'DELETE',
           path: '/index',
-          ignore: [404],
         },
+        { ignore: [404] },
       ],
+    ]);
+
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'PUT',
-          path: '/_transform/endpoint.metadata-default-0.16.0-dev.0',
-          query: 'defer_validation=true',
+          transform_id: 'endpoint.metadata-default-0.16.0-dev.0',
+          defer_validation: true,
           body: '{"content": "data"}',
         },
       ],
       [
-        'transport.request',
         {
-          method: 'PUT',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
-          query: 'defer_validation=true',
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
+          defer_validation: true,
           body: '{"content": "data"}',
         },
       ],
+    ]);
+    expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata-default-0.16.0-dev.0/_start',
-          ignore: [409],
+          transform_id: 'endpoint.metadata-default-0.16.0-dev.0',
         },
+        { ignore: [409] },
       ],
       [
-        'transport.request',
         {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
-          ignore: [409],
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
         },
+        { ignore: [409] },
       ],
     ]);
 
@@ -311,7 +301,7 @@ describe('test transform install', () => {
         attributes: { installed_es: [] },
       } as unknown) as SavedObject<Installation>)
     );
-    legacyScopedClusterClient.callAsCurrentUser = jest.fn();
+
     await installTransform(
       ({
         name: 'endpoint',
@@ -334,29 +324,28 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
-      legacyScopedClusterClient.callAsCurrentUser,
+      esClient,
       savedObjectsClient
     );
 
-    expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'PUT',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
-          query: 'defer_validation=true',
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
+          defer_validation: true,
           body: '{"content": "data"}',
         },
       ],
+    ]);
+    expect(esClient.transform.startTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
-          ignore: [409],
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
         },
+        { ignore: [409] },
       ],
     ]);
+
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',
@@ -396,8 +385,8 @@ describe('test transform install', () => {
       } as unknown) as SavedObject<Installation>)
     );
 
-    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce(
-      Promise.resolve({
+    esClient.transform.getTransform.mockReturnValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         count: 1,
         transforms: [
           {
@@ -406,15 +395,9 @@ describe('test transform install', () => {
             },
           },
         ],
-      } as {
-        count: number;
-        transforms: Array<{
-          dest: {
-            index: string;
-          };
-        }>;
       })
     );
+
     await installTransform(
       ({
         name: 'endpoint',
@@ -451,46 +434,49 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       [],
-      legacyScopedClusterClient.callAsCurrentUser,
+      esClient,
       savedObjectsClient
     );
 
-    expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+    expect(esClient.transform.getTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'GET',
-          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
-          ignore: [404],
+          transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
         },
+        { ignore: [404] },
       ],
+    ]);
+
+    expect(esClient.transform.stopTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0/_stop',
-          query: 'force=true',
-          ignore: [404],
+          transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
+          force: true,
         },
+        { ignore: [404] },
       ],
+    ]);
+
+    expect(esClient.transform.deleteTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'DELETE',
-          query: 'force=true',
-          path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
-          ignore: [404],
+          transform_id: 'endpoint.metadata-current-default-0.15.0-dev.0',
+          force: true,
         },
+        { ignore: [404] },
       ],
+    ]);
+
+    expect(esClient.transport.request.mock.calls).toEqual([
       [
-        'transport.request',
         {
           method: 'DELETE',
           path: '/index',
-          ignore: [404],
         },
+        { ignore: [404] },
       ],
     ]);
+
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',
@@ -529,23 +515,18 @@ describe('test transform install', () => {
         attributes: { installed_es: [] },
       } as unknown) as SavedObject<Installation>)
     );
-    legacyScopedClusterClient.callAsCurrentUser = jest.fn();
 
-    legacyScopedClusterClient.callAsCurrentUser.mockImplementation(
-      async (endpoint, clientParams, options) => {
-        if (
-          endpoint === 'transport.request' &&
-          clientParams?.method === 'PUT' &&
-          clientParams?.path === '/_transform/endpoint.metadata_current-default-0.16.0-dev.0'
-        ) {
-          const err: LegacyESErrors._Abstract & { body?: any } = new LegacyESErrors.BadRequest();
-          err.body = {
-            error: { type: 'resource_already_exists_exception' },
-          };
-          throw err;
-        }
-      }
+    esClient.transport.request.mockImplementationOnce(() =>
+      elasticsearchClientMock.createErrorTransportRequestPromise(
+        new ResponseError(
+          elasticsearchClientMock.createApiResponse({
+            statusCode: 400,
+            body: { error: { type: 'resource_already_exists_exception' } },
+          })
+        )
+      )
     );
+
     await installTransform(
       ({
         name: 'endpoint',
@@ -568,29 +549,23 @@ describe('test transform install', () => {
         ],
       } as unknown) as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
-      legacyScopedClusterClient.callAsCurrentUser,
+      esClient,
       savedObjectsClient
     );
 
-    expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+    expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
-        'transport.request',
         {
-          method: 'PUT',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0',
-          query: 'defer_validation=true',
+          transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
+          defer_validation: true,
           body: '{"content": "data"}',
         },
       ],
-      [
-        'transport.request',
-        {
-          method: 'POST',
-          path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
-          ignore: [409],
-        },
-      ],
     ]);
+    expect(esClient.transform.startTransform.mock.calls).toEqual([
+      [{ transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0' }, { ignore: [409] }],
+    ]);
+
     expect(savedObjectsClient.update.mock.calls).toEqual([
       [
         'epm-packages',

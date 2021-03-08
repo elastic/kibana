@@ -182,7 +182,8 @@ export const getTrainingPercent = (
   analysis: AnalysisConfig
 ):
   | RegressionAnalysis['regression']['training_percent']
-  | ClassificationAnalysis['classification']['training_percent'] => {
+  | ClassificationAnalysis['classification']['training_percent']
+  | undefined => {
   let trainingPercent;
 
   if (isRegressionAnalysis(analysis)) {

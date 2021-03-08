@@ -76,6 +76,7 @@ import { UrlGeneratorState } from '../../share/public';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { replaceUrlHashQuery } from '../../kibana_utils/public';
+import { SpacesOssPluginStart } from './services/spaces';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -113,6 +114,7 @@ export interface DashboardStartDependencies {
   savedObjects: SavedObjectsStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  spacesOss?: SpacesOssPluginStart;
 }
 
 export type DashboardSetup = void;

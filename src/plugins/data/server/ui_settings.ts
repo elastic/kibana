@@ -355,6 +355,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
+  "histogram": { "id": "histogram", "params": {} },
   "_source": { "id": "_source", "params": {} },
   "_default_": { "id": "string", "params": {} }
 }`,
@@ -386,6 +387,10 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           params: schema.object({}),
         }),
         boolean: schema.object({
+          id: schema.string(),
+          params: schema.object({}),
+        }),
+        histogram: schema.object({
           id: schema.string(),
           params: schema.object({}),
         }),

@@ -24,6 +24,7 @@ import {
   EuiCodeBlock,
   EuiLink,
 } from '@elastic/eui';
+
 import { useStartServices, sendPostFleetSetup } from '../../../hooks';
 import { WithoutHeaderLayout } from '../../../layouts';
 import { GetFleetStatusResponse } from '../../../types';

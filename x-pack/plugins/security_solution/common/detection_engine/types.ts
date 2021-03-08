@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertAction } from '../../../alerts/common';
+import { AlertAction } from '../../../alerting/common';
 
 export type RuleAlertAction = Omit<AlertAction, 'actionTypeId'> & {
   action_type_id: string;

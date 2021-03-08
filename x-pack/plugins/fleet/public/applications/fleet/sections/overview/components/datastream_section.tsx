@@ -14,10 +14,12 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { OverviewPanel } from './overview_panel';
-import { OverviewStats } from './overview_stats';
+
 import { useLink, useGetDataStreams, useStartServices } from '../../../hooks';
 import { Loading } from '../../agents/components';
+
+import { OverviewPanel } from './overview_panel';
+import { OverviewStats } from './overview_stats';
 
 export const OverviewDatastreamSection: React.FC = () => {
   const { getHref } = useLink();
