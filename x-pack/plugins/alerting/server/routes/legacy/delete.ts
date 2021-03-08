@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { BASE_ALERT_API_PATH } from '../../../common';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -18,7 +18,7 @@ const paramSchema = schema.object({
 export const deleteAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.delete(
     {
-      path: `${BASE_ALERT_API_PATH}/alert/{id}`,
+      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
       validate: {
         params: paramSchema,
       },

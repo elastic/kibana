@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
+import type { AlertingRouter } from '../types';
 
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { renameKeys } from './../lib/rename_keys';
-import { FindOptions } from '../../alerts_client';
+import { ILicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../common';
+import { renameKeys } from './lib/rename_keys';
+import { FindOptions } from '../alerts_client';
 
 // config definition
 const querySchema = schema.object({

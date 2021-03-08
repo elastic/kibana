@@ -6,29 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
+import { ILicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../common';
+import type { AlertingRouter } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const querySchema = schema.object({
-  dateStart: schema.maybe(schema.string()),
-});
-
-export const getAlertInstanceSummaryRoute = (
-  router: AlertingRouter,
-  licenseState: ILicenseState
-) => {
+export const getAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_instance_summary`,
+      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
       validate: {
         params: paramSchema,
-        query: querySchema,
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -38,9 +30,9 @@ export const getAlertInstanceSummaryRoute = (
       }
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
-      const { dateStart } = req.query;
-      const summary = await alertsClient.getAlertInstanceSummary({ id, dateStart });
-      return res.ok({ body: summary });
+      return res.ok({
+        body: await alertsClient.get({ id }),
+      });
     })
   );
 };

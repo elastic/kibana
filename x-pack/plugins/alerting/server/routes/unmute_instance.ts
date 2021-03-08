@@ -6,20 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import type { AlertingRouter } from '../types';
+import { ILicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../common';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  alertId: schema.string(),
+  alertInstanceId: schema.string(),
 });
 
-export const unmuteAllAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const unmuteAlertInstanceRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.post(
     {
-      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_unmute_all`,
+      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`,
       validate: {
         params: paramSchema,
       },
@@ -30,9 +31,9 @@ export const unmuteAllAlertRoute = (router: AlertingRouter, licenseState: ILicen
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       const alertsClient = context.alerting.getAlertsClient();
-      const { id } = req.params;
+      const { alertId, alertInstanceId } = req.params;
       try {
-        await alertsClient.unmuteAll({ id });
+        await alertsClient.unmuteInstance({ alertId, alertInstanceId });
         return res.noContent();
       } catch (e) {
         if (e instanceof AlertTypeDisabledError) {

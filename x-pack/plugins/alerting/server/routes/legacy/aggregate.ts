@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { BASE_ALERT_API_PATH } from '../../../common';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from './../lib/rename_keys';
 import { FindOptions } from '../../alerts_client';
 
@@ -36,7 +36,7 @@ const querySchema = schema.object({
 export const aggregateAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `${BASE_ALERT_API_PATH}/_aggregate`,
+      path: `${LEGACY_BASE_ALERT_API_PATH}/_aggregate`,
       validate: {
         query: querySchema,
       },

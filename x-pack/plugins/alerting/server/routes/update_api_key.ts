@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import type { AlertingRouter } from '../types';
+import { ILicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../common';
+import { handleDisabledApiKeysError } from './lib/error_handler';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
   id: schema.string(),

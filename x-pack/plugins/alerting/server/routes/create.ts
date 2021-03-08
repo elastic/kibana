@@ -6,19 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
+import type { AlertingRouter } from '../types';
+import { ILicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { validateDurationSchema } from '../lib';
+import { handleDisabledApiKeysError } from './lib/error_handler';
 import {
   Alert,
   AlertNotifyWhenType,
   AlertTypeParams,
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
-} from '../../types';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+} from '../types';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 export const bodySchema = schema.object({
   name: schema.string(),

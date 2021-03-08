@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { BASE_ALERT_API_PATH } from '../../../common';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
@@ -19,7 +19,7 @@ const paramSchema = schema.object({
 export const muteAllAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.post(
     {
-      path: `${BASE_ALERT_API_PATH}/alert/{id}/_mute_all`,
+      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_mute_all`,
       validate: {
         params: paramSchema,
       },

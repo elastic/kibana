@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { BASE_ALERT_API_PATH } from '../../../common';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import type { AlertingRouter } from '../../types';
 
 const paramSchema = schema.object({
@@ -18,7 +18,7 @@ const paramSchema = schema.object({
 export const getAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `${BASE_ALERT_API_PATH}/alert/{id}`,
+      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
       validate: {
         params: paramSchema,
       },

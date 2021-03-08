@@ -6,21 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import type { AlertingRouter } from '../types';
+import { ILicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../common';
+import { handleDisabledApiKeysError } from './lib/error_handler';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const updateApiKeyRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const enableAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.post(
     {
-      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_update_api_key`,
+      path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_enable`,
       validate: {
         params: paramSchema,
       },
@@ -34,7 +34,7 @@ export const updateApiKeyRoute = (router: AlertingRouter, licenseState: ILicense
         const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
         try {
-          await alertsClient.updateApiKey({ id });
+          await alertsClient.enable({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {
