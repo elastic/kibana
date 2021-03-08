@@ -8,8 +8,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function FieldEditorProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+export function FieldEditorProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
