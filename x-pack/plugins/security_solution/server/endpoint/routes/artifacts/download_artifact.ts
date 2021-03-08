@@ -10,19 +10,16 @@ import {
   SavedObjectsClientContract,
   HttpResponseOptions,
   IKibanaResponse,
-  SavedObject,
 } from 'src/core/server';
 import LRU from 'lru-cache';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { authenticateAgentWithAccessToken } from '../../../../../fleet/server/services/agents/authenticate';
 import { LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG } from '../../../../common/endpoint/constants';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { ArtifactConstants } from '../../lib/artifacts';
 import {
   DownloadArtifactRequestParamsSchema,
   downloadArtifactRequestParamsSchema,
   downloadArtifactResponseSchema,
-  InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
 import { EndpointAppContext } from '../../types';
 
@@ -92,20 +89,19 @@ export function registerDownloadArtifactRoute(
         return buildAndValidateResponse(req.params.identifier, cacheResp);
       } else {
         logger.debug(`Cache MISS artifact ${id}`);
-        return scopedSOClient
-          .get<InternalArtifactCompleteSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
-          .then((artifact: SavedObject<InternalArtifactCompleteSchema>) => {
-            const body = Buffer.from(artifact.attributes.body, 'base64');
-            cache.set(id, body);
-            return buildAndValidateResponse(artifact.attributes.identifier, body);
-          })
-          .catch((err) => {
-            if (err?.output?.statusCode === 404) {
-              return res.notFound({ body: `No artifact found for ${id}` });
-            } else {
-              throw err;
-            }
-          });
+
+        const artifact = await endpointContext.service
+          .getManifestManager()
+          ?.getArtifactsClient()
+          .getArtifact(id);
+
+        if (!artifact) {
+          return res.notFound({ body: `No artifact found for ${id}` });
+        }
+
+        const bodyBuffer = Buffer.from(artifact.attributes.body, 'base64');
+        cache.set(id, bodyBuffer);
+        return buildAndValidateResponse(artifact.attributes.identifier, bodyBuffer);
       }
     }
   );

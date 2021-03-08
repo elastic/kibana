@@ -439,4 +439,8 @@ export class ManifestManager {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
   }
+
+  public getArtifactsClient(): ArtifactClient {
+    return this.artifactClient;
+  }
 }
