@@ -7,6 +7,7 @@
 
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
+
 import type { Agent } from '../types';
 
 export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {

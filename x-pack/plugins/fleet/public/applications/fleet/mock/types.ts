@@ -6,6 +6,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
+
 import type {
   FleetSetupDeps,
   FleetStart,
