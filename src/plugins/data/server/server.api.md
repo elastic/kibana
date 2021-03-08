@@ -329,9 +329,15 @@ export enum ES_FIELD_TYPES {
     // (undocumented)
     DATE_NANOS = "date_nanos",
     // (undocumented)
+    DATE_RANGE = "date_range",
+    // (undocumented)
     DOUBLE = "double",
     // (undocumented)
+    DOUBLE_RANGE = "double_range",
+    // (undocumented)
     FLOAT = "float",
+    // (undocumented)
+    FLOAT_RANGE = "float_range",
     // (undocumented)
     GEO_POINT = "geo_point",
     // (undocumented)
@@ -347,11 +353,17 @@ export enum ES_FIELD_TYPES {
     // (undocumented)
     INTEGER = "integer",
     // (undocumented)
+    INTEGER_RANGE = "integer_range",
+    // (undocumented)
     IP = "ip",
+    // (undocumented)
+    IP_RANGE = "ip_range",
     // (undocumented)
     KEYWORD = "keyword",
     // (undocumented)
     LONG = "long",
+    // (undocumented)
+    LONG_RANGE = "long_range",
     // (undocumented)
     MURMUR3 = "murmur3",
     // (undocumented)
@@ -1038,6 +1050,8 @@ export enum KBN_FIELD_TYPES {
     // (undocumented)
     DATE = "date",
     // (undocumented)
+    DATE_RANGE = "date_range",
+    // (undocumented)
     GEO_POINT = "geo_point",
     // (undocumented)
     GEO_SHAPE = "geo_shape",
@@ -1046,11 +1060,15 @@ export enum KBN_FIELD_TYPES {
     // (undocumented)
     IP = "ip",
     // (undocumented)
+    IP_RANGE = "ip_range",
+    // (undocumented)
     MURMUR3 = "murmur3",
     // (undocumented)
     NESTED = "nested",
     // (undocumented)
     NUMBER = "number",
+    // (undocumented)
+    NUMBER_RANGE = "number_range",
     // (undocumented)
     OBJECT = "object",
     // (undocumented)

@@ -13,6 +13,16 @@
       "readFromDocValues": true
     },
     {
+      "name": "bytes_range",
+      "type": "number_range",
+      "esTypes": ["long_range"],
+      "count": 10,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
       "name": "ssl",
       "type": "boolean",
       "esTypes": ["boolean"],
@@ -37,6 +47,16 @@
       "type": "date",
       "esTypes": ["date"],
       "count": 30,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "time_range",
+      "type": "date_range",
+      "esTypes": ["date_range"],
+      "count": 10,
       "scripted": false,
       "searchable": true,
       "aggregatable": true,
@@ -76,6 +96,16 @@
       "name": "ip",
       "type": "ip",
       "esTypes": ["ip"],
+      "count": 0,
+      "scripted": false,
+      "searchable": true,
+      "aggregatable": true,
+      "readFromDocValues": true
+    },
+    {
+      "name": "ip_range",
+      "type": "ip_range",
+      "esTypes": ["ip_range"],
       "count": 0,
       "scripted": false,
       "searchable": true,
