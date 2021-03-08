@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { ActionsTable } from '../../../actions/actions_table';
-import { WithHeaderLayout } from '../../../shared_imports';
+import { WithHeaderLayout } from '../../../components/layouts';
 
 const LiveQueriesPageComponent = () => {
   const newQueryLinkProps = useRouterNavigate('live_query/new');
