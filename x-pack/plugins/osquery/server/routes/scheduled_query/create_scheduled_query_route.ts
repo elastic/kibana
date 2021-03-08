@@ -20,12 +20,10 @@ export const createScheduledQueryRoute = (router: IRouter, osqueryContext: Osque
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
-      const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const integration = await packagePolicyService?.create(
         savedObjectsClient,
         esClient,
-        callCluster,
         // @ts-expect-error update types
         request.body
       );
