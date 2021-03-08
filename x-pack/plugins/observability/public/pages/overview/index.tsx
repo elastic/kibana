@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { useTrackPageview } from '../..';
-import { Alert } from '../../../../alerts/common';
+import { Alert } from '../../../../alerting/common';
 import { EmptySections } from '../../components/app/empty_sections';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { NewsFeed } from '../../components/app/news_feed';
