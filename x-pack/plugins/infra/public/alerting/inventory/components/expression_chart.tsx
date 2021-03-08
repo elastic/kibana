@@ -4,24 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useMemo, useCallback } from 'react';
 import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
 import { first, last } from 'lodash';
+import moment from 'moment';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSource } from '../../../../common/http_api/source_api';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricExpression } from '../types';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
-import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
+import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
+
 import {
   ChartContainer,
   LoadingState,
@@ -31,40 +32,65 @@ import {
   getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
+import { useWaffleOptionsContext } from '../../../pages/metrics/inventory_view/hooks/use_waffle_options';
 
 interface Props {
-  expression: MetricExpression;
-  derivedIndexPattern: IIndexPattern;
-  source: InfraSource | null;
+  expression: InventoryMetricConditions;
   filterQuery?: string;
-  groupBy?: string | string[];
+  nodeType: InventoryItemType;
+  sourceId: string;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
-  derivedIndexPattern,
-  source,
   filterQuery,
-  groupBy,
+  nodeType,
+  sourceId,
 }) => {
-  const { loading, data } = useMetricsExplorerChartData(
-    expression,
-    derivedIndexPattern,
-    source,
+  const timerange = useMemo(
+    () => ({
+      interval: `${expression.timeSize || 1}${expression.timeUnit}`,
+      from: moment()
+        .subtract((expression.timeSize || 1) * 20, expression.timeUnit)
+        .valueOf(),
+      to: moment().valueOf(),
+      forceInterval: true,
+      ignoreLookback: true,
+    }),
+    [expression.timeSize, expression.timeUnit]
+  );
+
+  const buildCustomMetric = (metric: any) => ({
+    ...metric,
+    type: 'custom' as SnapshotMetricType,
+  });
+
+  const options = useWaffleOptionsContext();
+  const { loading, nodes } = useSnapshot(
     filterQuery,
-    groupBy
+    expression.metric === 'custom'
+      ? [buildCustomMetric(expression.customMetric)]
+      : [{ type: expression.metric }],
+    [],
+    nodeType,
+    sourceId,
+    0,
+    options.accountId,
+    options.region,
+    true,
+    timerange
   );
 
   const { uiSettings } = useKibanaContextForPlugin().services;
 
   const metric = {
     field: expression.metric,
-    aggregation: expression.aggType as MetricsExplorerAggregation,
+    aggregation: 'avg' as MetricsExplorerAggregation,
     color: Color.color0,
   };
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
-    const firstSeries = first(data?.series);
+    const firstSeries = nodes[0]?.metrics[0]?.timeseries;
     const firstTimestamp = first(firstSeries?.rows)?.timestamp;
     const lastTimestamp = last(firstSeries?.rows)?.timestamp;
 
@@ -73,28 +99,40 @@ export const ExpressionChart: React.FC<Props> = ({
     }
 
     return niceTimeFormatter([firstTimestamp, lastTimestamp]);
-  }, [data?.series]);
+  }, [nodes]);
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);
+  const yAxisFormater = useCallback(
+    createInventoryMetricFormatter(
+      expression.metric === 'custom'
+        ? buildCustomMetric(expression.customMetric)
+        : { type: expression.metric }
+    ),
+    [expression.metric]
+  );
 
-  if (loading || !data) {
+  if (loading || !nodes) {
     return <LoadingState />;
   }
 
-  const criticalThresholds = expression.threshold.slice().sort();
-  const warningThresholds = expression.warningThreshold?.slice().sort() ?? [];
+  const convertThreshold = (threshold: number) => convertMetricValue(expression.metric, threshold);
+  const convertedThresholds = expression.threshold.map(convertThreshold);
+  const convertedWarningThresholds = expression.warningThreshold?.map(convertThreshold) ?? [];
+
+  const criticalThresholds = convertedThresholds.slice().sort();
+  const warningThresholds = convertedWarningThresholds.slice().sort();
   const thresholds = [...criticalThresholds, ...warningThresholds].sort();
 
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domian
-  const firstSeries = first(data.series);
+  const firstSeries = nodes[0]?.metrics[0]?.timeseries;
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return <NoDataState />;
   }
 
   const series = {
     ...firstSeries,
+    id: nodes[0]?.name,
     rows: firstSeries.rows.map((row) => {
       const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
@@ -109,10 +147,10 @@ export const ExpressionChart: React.FC<Props> = ({
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
     max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
-    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min) * 0.9, // add 10% floor,
+    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min) * 0.9, // add 10% floor
   };
 
-  if (domain.min === first(expression.threshold)) {
+  if (domain.min === first(convertedThresholds)) {
     domain.min = domain.min * 0.9;
   }
 
@@ -132,7 +170,7 @@ export const ExpressionChart: React.FC<Props> = ({
           />
           <ThresholdAnnotations
             comparator={expression.comparator}
-            threshold={expression.threshold}
+            threshold={convertedThresholds}
             sortedThresholds={criticalThresholds}
             color={Color.color1}
             id="critical"
@@ -143,7 +181,7 @@ export const ExpressionChart: React.FC<Props> = ({
           {expression.warningComparator && expression.warningThreshold && (
             <ThresholdAnnotations
               comparator={expression.warningComparator}
-              threshold={expression.warningThreshold}
+              threshold={convertedWarningThresholds}
               sortedThresholds={warningThresholds}
               color={Color.color5}
               id="warning"
@@ -168,7 +206,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
               defaultMessage="Last {lookback} {timeLabel} of data for {id}"
-              values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
+              values={{ id: series.id, timeLabel, lookback: timeSize * 20 }}
             />
           </EuiText>
         ) : (
@@ -176,11 +214,23 @@ export const ExpressionChart: React.FC<Props> = ({
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
               defaultMessage="Last {lookback} {timeLabel}"
-              values={{ timeLabel, lookback: timeSize! * 20 }}
+              values={{ timeLabel, lookback: timeSize * 20 }}
             />
           </EuiText>
         )}
       </div>
     </>
   );
+};
+
+const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
+  if (converters[metric]) {
+    return converters[metric](value);
+  } else {
+    return value;
+  }
+};
+const converters: Record<string, (n: number) => number> = {
+  cpu: (n) => Number(n) / 100,
+  memory: (n) => Number(n) / 100,
 };
