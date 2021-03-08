@@ -104,18 +104,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
       {
-        field: 'packagePolicy.description',
-        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.description', {
-          defaultMessage: 'Description',
+        field: 'packagePolicy.package.version',
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.version', {
+          defaultMessage: 'Version',
         }),
-        truncateText: true,
-        render(description) {
-          return (
-            <span className="eui-textTruncate" title={description}>
-              {description}
-            </span>
-          );
-        },
       },
       {
         field: 'packagePolicy.policy_id',
