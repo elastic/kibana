@@ -18,24 +18,34 @@ export interface ConfigurationIssues {
    * the form such as hot phase (forcemerge, shrink) and cold phase (searchable snapshot).
    */
   isUsingRollover: boolean;
+
   /**
-   * If this value is true, phases after hot cannot set shrink, forcemerge, freeze, or
-   * searchable_snapshot actions.
+   * If this value is true, phases after hot cannot set subsequent shrink, forcemerge, freeze or rollup actions.
    *
    * See https://github.com/elastic/elasticsearch/blob/master/docs/reference/ilm/actions/ilm-searchable-snapshot.asciidoc.
    */
   isUsingSearchableSnapshotInHotPhase: boolean;
+
+  /**
+   * If this value is true, phases after hot cannot set subsequent shrink, forcemerge, freeze or rollup actions.
+   *
+   * See https://github.com/elastic/elasticsearch/blob/master/docs/reference/ilm/actions/ilm-searchable-snapshot.asciidoc.
+   */
+  isUsingSearchableSnapshotInColdPhase: boolean;
 }
 
 const ConfigurationIssuesContext = createContext<ConfigurationIssues>(null as any);
 
-const pathToHotPhaseSearchableSnapshot =
-  'phases.hot.actions.searchable_snapshot.snapshot_repository';
+const fieldPaths = {
+  hotPhaseSearchableSnapshot: 'phases.hot.actions.searchable_snapshot.snapshot_repository',
+  coldPhaseSearchableSnapshot: 'phases.cold.actions.searchable_snapshot.snapshot_repository',
+};
 
 export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData({
     watch: [
-      pathToHotPhaseSearchableSnapshot,
+      fieldPaths.hotPhaseSearchableSnapshot,
+      fieldPaths.coldPhaseSearchableSnapshot,
       isUsingCustomRolloverPath,
       isUsingDefaultRolloverPath,
     ],
@@ -49,7 +59,9 @@ export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => 
       value={{
         isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
         isUsingSearchableSnapshotInHotPhase:
-          get(formData, pathToHotPhaseSearchableSnapshot) != null,
+          get(formData, fieldPaths.hotPhaseSearchableSnapshot) != null,
+        isUsingSearchableSnapshotInColdPhase:
+          get(formData, fieldPaths.coldPhaseSearchableSnapshot) != null,
       }}
     >
       {children}

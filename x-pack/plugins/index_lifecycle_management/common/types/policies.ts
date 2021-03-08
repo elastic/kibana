@@ -76,11 +76,11 @@ export interface SerializedHotPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
+    rollup?: RollupAction;
     /**
      * Only available on enterprise license
      */
     searchable_snapshot?: SearchableSnapshotAction;
-    rollup?: RollupAction;
   };
 }
 
@@ -105,11 +105,11 @@ export interface SerializedColdPhase extends SerializedPhase {
       priority: number | null;
     };
     migrate?: MigrateAction;
+    rollup?: RollupAction;
     /**
      * Only available on enterprise license
      */
     searchable_snapshot?: SearchableSnapshotAction;
-    rollup?: RollupAction;
   };
 }
 

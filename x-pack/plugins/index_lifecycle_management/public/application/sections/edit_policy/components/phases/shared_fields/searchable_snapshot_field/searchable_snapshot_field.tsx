@@ -52,7 +52,10 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const {
+    isUsingSearchableSnapshotInHotPhase,
+    isUsingSearchableSnapshotInColdPhase,
+  } = useConfigurationIssues();
 
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
@@ -251,7 +254,21 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Force merge, shrink and freeze actions are not allowed when searchable snapshots are enabled in this phase.',
+                'Force merge, freeze, shrink and rollup actions are not allowed when searchable snapshots are enabled in this phase.',
+            }
+          )}
+          data-test-subj="searchableSnapshotFieldsDisabledCallout"
+        />
+      );
+    } else if (phase === 'cold' && isUsingSearchableSnapshotInColdPhase) {
+      infoCallout = (
+        <EuiCallOut
+          size="s"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.cold.searchableSnapshotCalloutBody',
+            {
+              defaultMessage:
+                'Rollup is not allowed when searchable snapshots are enabled in this phase.',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"

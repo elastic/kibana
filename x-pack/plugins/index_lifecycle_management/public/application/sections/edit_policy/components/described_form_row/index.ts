@@ -7,7 +7,8 @@
 
 export { ToggleFieldWithDescribedFormRow } from './toggle_field_with_described_form_row';
 
-import { Props, SwitchProps } from './described_form_row';
-
-export { Props as DescribedFormRowProps, SwitchProps as DescribedFormRowSwitchProps };
-export { DescribedFormRow } from './described_form_row';
+export {
+  Props as DescribedFormRowProps,
+  SwitchProps as DescribedFormRowSwitchProps,
+  DescribedFormRow,
+} from './described_form_row';
