@@ -24,6 +24,10 @@ export default function (providerContext: FtrProviderContext) {
     let managedAgentPolicyId: string;
     let packagePolicyId: string;
     let packagePolicyId2: string;
+    before(async () => {
+      await getService('esArchiver').load('empty_kibana');
+      await getService('esArchiver').load('fleet/empty_fleet_server');
+    });
 
     before(async function () {
       if (!server.enabled) {
@@ -104,6 +108,11 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId });
+    });
+
+    after(async () => {
+      await getService('esArchiver').unload('fleet/empty_fleet_server');
+      await getService('esArchiver').unload('empty_kibana');
     });
 
     it('should fail on managed agent policies', async function () {
