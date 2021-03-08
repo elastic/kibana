@@ -12,7 +12,6 @@ import {
   getCreateRequest,
   getFindResultStatus,
   getNonEmptyIndex,
-  getEmptyIndex,
   getFindResultWithSingleHit,
   createMlRuleRequest,
 } from '../__mocks__/request_responses';
@@ -108,7 +107,6 @@ describe('create_rules', () => {
 
   describe('unhappy paths', () => {
     test('it returns a 400 if the index does not exist', async () => {
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })

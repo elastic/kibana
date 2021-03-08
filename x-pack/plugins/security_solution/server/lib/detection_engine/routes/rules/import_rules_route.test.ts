@@ -11,7 +11,6 @@ import {
   getImportRulesRequestOverwriteTrue,
   getEmptyFindResult,
   getResult,
-  getEmptyIndex,
   getFindResultWithSingleHit,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';

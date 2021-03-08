@@ -9,7 +9,6 @@ import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
-  getEmptyIndex,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } from '../__mocks__';
@@ -131,7 +130,6 @@ describe('add_prepackaged_rules_route', () => {
     });
 
     test('it returns a 400 if the index does not exist', async () => {
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const request = addPrepackagedRulesRequest();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(

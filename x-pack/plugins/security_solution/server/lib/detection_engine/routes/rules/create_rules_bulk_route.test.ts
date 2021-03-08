@@ -10,7 +10,6 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getReadBulkRequest,
-  getEmptyIndex,
   getNonEmptyIndex,
   getFindResultWithSingleHit,
   getEmptyFindResult,
