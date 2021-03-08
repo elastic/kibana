@@ -311,7 +311,7 @@ const fleetEnrollAgentForHost = async (
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
       method: 'GET',
       query: {
-        kuery: `fleet-enrollment-api-keys.policy_id:"${agentPolicyId}"`,
+        kuery: `policy_id:"${agentPolicyId}"`,
       },
     })
     .then((apiKeysResponse) => {
