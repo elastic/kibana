@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   HttpInterceptor,
   HttpInterceptorResponseError,
   HttpResponse,
   IAnonymousPaths,
 } from 'src/core/public';
 
-import { ISessionTimeout } from './session_timeout';
+import type { ISessionTimeout } from './session_timeout';
 
 export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
   constructor(private sessionTimeout: ISessionTimeout, private anonymousPaths: IAnonymousPaths) {}

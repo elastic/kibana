@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import { EnrollmentAPIKey } from '../../types';
-import { appContextService } from '../app_context';
-import * as enrollmentApiKeyServiceSO from './enrollment_api_key_so';
-import * as enrollmentApiKeyServiceFleetServer from './enrollment_api_key_fleet_server';
+import uuid from 'uuid';
+import Boom from '@hapi/boom';
+import { GetResponse } from 'elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
+import { ESSearchResponse as SearchResponse } from '../../../../../typings/elasticsearch';
+import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
+import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
+import { agentPolicyService } from '../agent_policy';
+import { escapeSearchQueryPhrase } from '../saved_object';
+
+import { createAPIKey, invalidateAPIKeys } from './security';
 
 export async function listEnrollmentApiKeys(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: {
     page?: number;
@@ -21,22 +28,44 @@ export async function listEnrollmentApiKeys(
     showInactive?: boolean;
   }
 ): Promise<{ items: EnrollmentAPIKey[]; total: any; page: any; perPage: any }> {
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled === true) {
-    return enrollmentApiKeyServiceFleetServer.listEnrollmentApiKeys(esClient, options);
-  } else {
-    return enrollmentApiKeyServiceSO.listEnrollmentApiKeys(soClient, options);
-  }
+  const { page = 1, perPage = 20, kuery } = options;
+
+  const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
+    index: ENROLLMENT_API_KEYS_INDEX,
+    from: (page - 1) * perPage,
+    size: perPage,
+    sort: 'created_at:desc',
+    track_total_hits: true,
+    q: kuery,
+  });
+
+  const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+
+  return {
+    items,
+    total: res.body.hits.total.value,
+    page,
+    perPage,
+  };
 }
 
 export async function getEnrollmentAPIKey(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   id: string
-) {
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled === true) {
-    return enrollmentApiKeyServiceFleetServer.getEnrollmentAPIKey(esClient, id);
-  } else {
-    return enrollmentApiKeyServiceSO.getEnrollmentAPIKey(soClient, id);
+): Promise<EnrollmentAPIKey> {
+  try {
+    const res = await esClient.get<GetResponse<FleetServerEnrollmentAPIKey>>({
+      index: ENROLLMENT_API_KEYS_INDEX,
+      id,
+    });
+
+    return esDocToEnrollmentApiKey(res.body);
+  } catch (e) {
+    if (e instanceof ResponseError && e.statusCode === 404) {
+      throw Boom.notFound(`Enrollment api key ${id} not found`);
+    }
+
+    throw e;
   }
 }
 
@@ -50,18 +79,44 @@ export async function deleteEnrollmentApiKey(
   esClient: ElasticsearchClient,
   id: string
 ) {
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled === true) {
-    return enrollmentApiKeyServiceFleetServer.deleteEnrollmentApiKey(soClient, esClient, id);
-  } else {
-    return enrollmentApiKeyServiceSO.deleteEnrollmentApiKey(soClient, id);
-  }
+  const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
+
+  await invalidateAPIKeys(soClient, [enrollmentApiKey.api_key_id]);
+
+  await esClient.update({
+    index: ENROLLMENT_API_KEYS_INDEX,
+    id,
+    body: {
+      doc: {
+        active: false,
+      },
+    },
+    refresh: 'wait_for',
+  });
 }
 
 export async function deleteEnrollmentApiKeyForAgentPolicyId(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentPolicyId: string
 ) {
-  return enrollmentApiKeyServiceSO.deleteEnrollmentApiKeyForAgentPolicyId(soClient, agentPolicyId);
+  let hasMore = true;
+  let page = 1;
+  while (hasMore) {
+    const { items } = await listEnrollmentApiKeys(esClient, {
+      page: page++,
+      perPage: 100,
+      kuery: `policy_id:${agentPolicyId}`,
+    });
+
+    if (items.length === 0) {
+      hasMore = false;
+    }
+
+    for (const apiKey of items) {
+      await deleteEnrollmentApiKey(soClient, esClient, apiKey.id);
+    }
+  }
 }
 
 export async function generateEnrollmentAPIKey(
@@ -72,22 +127,91 @@ export async function generateEnrollmentAPIKey(
     expiration?: string;
     agentPolicyId?: string;
   }
-) {
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled === true) {
-    return enrollmentApiKeyServiceFleetServer.generateEnrollmentAPIKey(soClient, esClient, data);
-  } else {
-    return enrollmentApiKeyServiceSO.generateEnrollmentAPIKey(soClient, data);
+): Promise<EnrollmentAPIKey> {
+  const id = uuid.v4();
+  const { name: providedKeyName } = data;
+  if (data.agentPolicyId) {
+    await validateAgentPolicyId(soClient, data.agentPolicyId);
+  }
+  const agentPolicyId =
+    data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
+  const name = providedKeyName ? `${providedKeyName} (${id})` : id;
+  const key = await createAPIKey(soClient, name, {
+    // Useless role to avoid to have the privilege of the user that created the key
+    'fleet-apikey-enroll': {
+      cluster: [],
+      applications: [
+        {
+          application: '.fleet',
+          privileges: ['no-privileges'],
+          resources: ['*'],
+        },
+      ],
+    },
+  });
+
+  if (!key) {
+    throw new Error('Unable to create an enrollment api key');
+  }
+
+  const apiKey = Buffer.from(`${key.id}:${key.api_key}`).toString('base64');
+
+  const body = {
+    active: true,
+    api_key_id: key.id,
+    api_key: apiKey,
+    name,
+    policy_id: agentPolicyId,
+    created_at: new Date().toISOString(),
+  };
+
+  const res = await esClient.create({
+    index: ENROLLMENT_API_KEYS_INDEX,
+    body,
+    id,
+    refresh: 'wait_for',
+  });
+
+  return {
+    id: res.body._id,
+    ...body,
+  };
+}
+
+export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, apiKeyId: string) {
+  const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
+    index: ENROLLMENT_API_KEYS_INDEX,
+    q: `api_key_id:${escapeSearchQueryPhrase(apiKeyId)}`,
+  });
+
+  const [enrollmentAPIKey] = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+
+  if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
+    throw new Error('find enrollmentKeyById returned an incorrect key');
+  }
+
+  return enrollmentAPIKey;
+}
+
+async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agentPolicyId: string) {
+  try {
+    await agentPolicyService.get(soClient, agentPolicyId);
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      throw Boom.badRequest(`Agent policy ${agentPolicyId} does not exist`);
+    }
+    throw e;
   }
 }
 
-export async function getEnrollmentAPIKeyById(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  apiKeyId: string
-) {
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled === true) {
-    return enrollmentApiKeyServiceFleetServer.getEnrollmentAPIKeyById(esClient, apiKeyId);
-  } else {
-    return enrollmentApiKeyServiceSO.getEnrollmentAPIKeyById(soClient, apiKeyId);
-  }
+function esDocToEnrollmentApiKey(doc: {
+  _id: string;
+  _source: FleetServerEnrollmentAPIKey;
+}): EnrollmentAPIKey {
+  return {
+    id: doc._id,
+    ...doc._source,
+    created_at: doc._source.created_at as string,
+    active: doc._source.active || false,
+  };
 }

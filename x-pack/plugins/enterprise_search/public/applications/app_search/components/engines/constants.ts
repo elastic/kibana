@@ -33,3 +33,25 @@ export const DELETE_ENGINE_MESSAGE = (engineName: string) =>
       },
     }
   );
+
+export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.createAMetaEngineButton.ButtonLabel',
+  {
+    defaultMessage: 'Create a meta engine',
+  }
+);
+
+export const META_ENGINE_EMPTY_PROMPT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPrompTitle',
+  {
+    defaultMessage: 'No meta engines yet',
+  }
+);
+
+export const META_ENGINE_EMPTY_PROMPT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPromptDescription',
+  {
+    defaultMessage:
+      'Meta engines allow you to combine multiple engines into one searchable engine.',
+  }
+);
