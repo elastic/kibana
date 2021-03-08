@@ -71,7 +71,9 @@ export function transformActionParams({
       alertId: alertInstanceId,
       alertActionGroup,
       alertActionGroupName,
-      alertActionSubGroup: alertActionSubgroup,
+      alertActionSubgroup,
+      spaceId,
+      tags,
     },
   };
   return actionsPlugin.renderActionParameterTemplates(actionTypeId, actionParams, variables);

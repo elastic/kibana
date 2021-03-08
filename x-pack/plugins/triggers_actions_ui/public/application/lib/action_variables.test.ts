@@ -26,11 +26,11 @@ describe('transformActionVariables', () => {
         },
         Object {
           "description": "The space ID of the rule.",
-          "name": "spaceId",
+          "name": "rule.spaceId",
         },
         Object {
           "description": "The tags of the rule.",
-          "name": "tags",
+          "name": "rule.tags",
         },
         Object {
           "description": "The date the rule scheduled the action.",
@@ -46,7 +46,7 @@ describe('transformActionVariables', () => {
         },
         Object {
           "description": "The action subgroup of the alert that scheduled actions for the rule.",
-          "name": "rule.alertActionSubGroup",
+          "name": "rule.alertActionSubgroup",
         },
         Object {
           "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
@@ -83,8 +83,18 @@ describe('transformActionVariables', () => {
         },
         Object {
           "deprecated": true,
-          "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
-          "name": "alertActionSubGroup",
+          "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+          "name": "alertActionSubgroup",
+        },
+        Object {
+          "deprecated": true,
+          "description": "This has been deprecated in favor of rule.spaceId.",
+          "name": "spaceId",
+        },
+        Object {
+          "deprecated": true,
+          "description": "This has been deprecated in favor of rule.tags.",
+          "name": "tags",
         },
       ]
     `);
@@ -111,11 +121,11 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The space ID of the rule.",
-            "name": "spaceId",
+            "name": "rule.spaceId",
           },
           Object {
             "description": "The tags of the rule.",
-            "name": "tags",
+            "name": "rule.tags",
           },
           Object {
             "description": "The date the rule scheduled the action.",
@@ -131,7 +141,7 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The action subgroup of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionSubGroup",
+            "name": "rule.alertActionSubgroup",
           },
           Object {
             "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
@@ -168,8 +178,18 @@ describe('transformActionVariables', () => {
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
-            "name": "alertActionSubGroup",
+            "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+            "name": "alertActionSubgroup",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.spaceId.",
+            "name": "spaceId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.tags.",
+            "name": "tags",
           },
           Object {
             "description": "foo-description",
@@ -204,11 +224,11 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The space ID of the rule.",
-            "name": "spaceId",
+            "name": "rule.spaceId",
           },
           Object {
             "description": "The tags of the rule.",
-            "name": "tags",
+            "name": "rule.tags",
           },
           Object {
             "description": "The date the rule scheduled the action.",
@@ -224,7 +244,7 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The action subgroup of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionSubGroup",
+            "name": "rule.alertActionSubgroup",
           },
           Object {
             "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
@@ -261,8 +281,18 @@ describe('transformActionVariables', () => {
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
-            "name": "alertActionSubGroup",
+            "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+            "name": "alertActionSubgroup",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.spaceId.",
+            "name": "spaceId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.tags.",
+            "name": "tags",
           },
           Object {
             "description": "foo-description",
@@ -300,11 +330,11 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The space ID of the rule.",
-            "name": "spaceId",
+            "name": "rule.spaceId",
           },
           Object {
             "description": "The tags of the rule.",
-            "name": "tags",
+            "name": "rule.tags",
           },
           Object {
             "description": "The date the rule scheduled the action.",
@@ -320,7 +350,7 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The action subgroup of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionSubGroup",
+            "name": "rule.alertActionSubgroup",
           },
           Object {
             "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
@@ -357,8 +387,18 @@ describe('transformActionVariables', () => {
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
-            "name": "alertActionSubGroup",
+            "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+            "name": "alertActionSubgroup",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.spaceId.",
+            "name": "spaceId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.tags.",
+            "name": "tags",
           },
           Object {
             "description": "fooC-description",
@@ -414,11 +454,11 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The space ID of the rule.",
-            "name": "spaceId",
+            "name": "rule.spaceId",
           },
           Object {
             "description": "The tags of the rule.",
-            "name": "tags",
+            "name": "rule.tags",
           },
           Object {
             "description": "The date the rule scheduled the action.",
@@ -434,7 +474,7 @@ describe('transformActionVariables', () => {
           },
           Object {
             "description": "The action subgroup of the alert that scheduled actions for the rule.",
-            "name": "rule.alertActionSubGroup",
+            "name": "rule.alertActionSubgroup",
           },
           Object {
             "description": "The human readable name of the action group of the alert that scheduled actions for the rule.",
@@ -471,8 +511,18 @@ describe('transformActionVariables', () => {
           },
           Object {
             "deprecated": true,
-            "description": "This has been deprecated in favor of rule.alertActionSubGroup.",
-            "name": "alertActionSubGroup",
+            "description": "This has been deprecated in favor of rule.alertActionSubgroup.",
+            "name": "alertActionSubgroup",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.spaceId.",
+            "name": "spaceId",
+          },
+          Object {
+            "deprecated": true,
+            "description": "This has been deprecated in favor of rule.tags.",
+            "name": "tags",
           },
           Object {
             "description": "fooC-description",

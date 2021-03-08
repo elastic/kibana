@@ -27,9 +27,9 @@ export enum AlertProvidedActionVariables {
   ruleAlertId = 'rule.alertId',
   ruleAlertActionGroup = 'rule.alertActionGroup',
   ruleAlertActionGroupName = 'rule.alertActionGroupName',
-  ruleAlertSubActionGroup = 'rule.alertActionSubGroup',
-  spaceId = 'spaceId',
-  tags = 'tags',
+  ruleAlertActionSubgroup = 'rule.alertActionSubgroup',
+  ruleSpaceId = 'rule.spaceId',
+  ruleTags = 'rule.tags',
   date = 'date',
 }
 
@@ -39,7 +39,9 @@ export enum LegacyAlertProvidedActionVariables {
   alertInstanceId = 'alertInstanceId',
   alertActionGroup = 'alertActionGroup',
   alertActionGroupName = 'alertActionGroupName',
-  alertActionSubGroup = 'alertActionSubGroup',
+  alertActionSubgroup = 'alertActionSubgroup',
+  tags = 'tags',
+  spaceId = 'spaceId',
 }
 
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
@@ -68,15 +70,15 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
-    name: AlertProvidedActionVariables.spaceId,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.spaceIdLabel', {
+    name: AlertProvidedActionVariables.ruleSpaceId,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleSpaceIdLabel', {
       defaultMessage: 'The space ID of the rule.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.tags,
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.tagsLabel', {
+    name: AlertProvidedActionVariables.ruleTags,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleTagsLabel', {
       defaultMessage: 'The tags of the rule.',
     }),
   });
@@ -106,9 +108,9 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
-    name: AlertProvidedActionVariables.ruleAlertSubActionGroup,
+    name: AlertProvidedActionVariables.ruleAlertActionSubgroup,
     description: i18n.translate(
-      'xpack.triggersActionsUI.actionVariables.ruleAlertSubActionGroupLabel',
+      'xpack.triggersActionsUI.actionVariables.ruleAlertActionSubgroupLabel',
       {
         defaultMessage: 'The action subgroup of the alert that scheduled actions for the rule.',
       }
@@ -199,17 +201,39 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
-    name: LegacyAlertProvidedActionVariables.alertActionSubGroup,
+    name: LegacyAlertProvidedActionVariables.alertActionSubgroup,
     deprecated: true,
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.legacyAlertActionSubGroupLabel',
       {
         defaultMessage: 'This has been deprecated in favor of {variable}.',
         values: {
-          variable: AlertProvidedActionVariables.ruleAlertSubActionGroup,
+          variable: AlertProvidedActionVariables.ruleAlertActionSubgroup,
         },
       }
     ),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.spaceId,
+    deprecated: true,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacySpaceIdLabel', {
+      defaultMessage: 'This has been deprecated in favor of {variable}.',
+      values: {
+        variable: AlertProvidedActionVariables.ruleSpaceId,
+      },
+    }),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.tags,
+    deprecated: true,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyTagsLabel', {
+      defaultMessage: 'This has been deprecated in favor of {variable}.',
+      values: {
+        variable: AlertProvidedActionVariables.ruleTags,
+      },
+    }),
   });
 
   return result;

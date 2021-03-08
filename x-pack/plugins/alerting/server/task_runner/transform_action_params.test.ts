@@ -371,7 +371,7 @@ test('alertActionGroupName is passed to templates', () => {
 
 test('rule variables are passed to templates', () => {
   const actionParams = {
-    message: 'Value "{{rule.id}}" and "{{rule.name}}" exist',
+    message: 'Value "{{rule.id}}", "{{rule.name}}", "{{rule.spaceId}}" and "{{rule.tags}}" exist',
   };
   const result = transformActionParams({
     actionsPlugin,
@@ -386,11 +386,12 @@ test('rule variables are passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertActionGroupName: 'Action Group',
+    alertActionSubgroup: 'subgroup',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "message": "Value \\"1\\" and \\"alert-name\\" exist",
+      "message": "Value \\"1\\", \\"alert-name\\", \\"spaceId-A\\" and \\"tag-A,tag-B\\" exist",
     }
   `);
 });
@@ -398,7 +399,7 @@ test('rule variables are passed to templates', () => {
 test('rule alert variables are passed to templates', () => {
   const actionParams = {
     message:
-      'Value "{{rule.alertActionGroup}}" and "{{rule.alertActionGroupName}}" and "{{rule.alertActionSubGroup}}" exist',
+      'Value "{{rule.alertActionGroup}}" and "{{rule.alertActionGroupName}}" and "{{rule.alertActionSubgroup}}" exist',
   };
   const result = transformActionParams({
     actionsPlugin,
