@@ -239,7 +239,7 @@ describe('CoreUsageDataService', () => {
               },
               "savedObjects": Object {
                 "customIndex": false,
-                "maxImportExportSizeBytes": 10000,
+                "maxImportExportSize": 10000,
                 "maxImportPayloadBytes": 26214400,
               },
             },

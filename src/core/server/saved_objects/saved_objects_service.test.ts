@@ -42,7 +42,7 @@ describe('SavedObjectsService', () => {
       }
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
-        maxImportExportSize: new ByteSizeValue(0),
+        maxImportExportSize: 10000,
       });
     });
     return mockCoreContext.create({ configService, env });
