@@ -120,6 +120,7 @@ export function CustomFields({
                   ),
                   docsLink: (
                     <ElasticDocsLink
+                      target="_blank"
                       section="/kibana"
                       path="/advanced-queries.html"
                     >
