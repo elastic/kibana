@@ -124,10 +124,7 @@ export const TimeSeries = ({
           ? 'custom'
           : seriesById[0].palette.name;
 
-      const gradientFinalColor = computeGradientFinalColor(
-        seriesById[0].baseColor,
-        seriesById.length
-      );
+      const gradientFinalColor = computeGradientFinalColor(seriesById[0].baseColor);
       const paletteParams =
         seriesById[0].palette.name === PALETTES.GRADIENT
           ? {

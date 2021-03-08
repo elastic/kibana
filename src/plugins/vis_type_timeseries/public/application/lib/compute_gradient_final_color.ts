@@ -7,12 +7,10 @@
  */
 import Color from 'color';
 
-export const computeGradientFinalColor = (color: string, size: number): string => {
-  const inputColor = new Color(color);
-  let workingColor = Color.hsl(inputColor.hsl().object());
-  const rotateBy = inputColor.luminosity() / (size - 1);
-  const hsl = workingColor.hsl().object();
-  hsl.l -= rotateBy * 100 * (size - 1);
-  workingColor = Color.hsl(hsl);
-  return workingColor.rgb().toString();
+export const computeGradientFinalColor = (color: string): string => {
+  let inputColor = new Color(color);
+  const hsl = inputColor.hsl().object();
+  hsl.l -= inputColor.luminosity() * 100;
+  inputColor = Color.hsl(hsl);
+  return inputColor.rgb().toString();
 };

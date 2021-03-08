@@ -119,28 +119,8 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
     );
   }
 
-  const handleColorChange = (val) => {
-    props.onChange(val);
-    // if (model.palette.name === 'gradient') {
-    //   props.onChange({
-    //     palette: {
-    //       ...model.palette,
-    //       params: {
-    //         colors: [val.color, 'black'],
-    //         gradient: true,
-    //       },
-    //     },
-    //   });
-    // }
-  };
-
   const colorPicker = (
-    <ColorPicker
-      disableTrash={true}
-      onChange={handleColorChange}
-      name="color"
-      value={model.color}
-    />
+    <ColorPicker disableTrash={true} onChange={props.onChange} name="color" value={model.color} />
   );
 
   return (

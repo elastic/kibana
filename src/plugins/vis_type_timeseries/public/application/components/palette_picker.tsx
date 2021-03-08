@@ -22,7 +22,7 @@ export interface PalettePickerProps {
 }
 
 export function PalettePicker({ activePalette, palettes, setPalette, color }: PalettePickerProps) {
-  const finalGradientColor = computeGradientFinalColor(color, 10);
+  const finalGradientColor = computeGradientFinalColor(color);
 
   return (
     <EuiColorPalettePicker
