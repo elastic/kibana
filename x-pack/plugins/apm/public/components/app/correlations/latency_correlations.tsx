@@ -61,6 +61,8 @@ export function LatencyCorrelations({ onClose }: Props) {
     `apm.correlations.latency.fields:${serviceName}`,
     defaultFieldNames
   );
+  const hasFieldsNames = fieldNames.length > 0;
+
   const [
     durationPercentile,
     setDurationPercentile,
@@ -71,7 +73,7 @@ export function LatencyCorrelations({ onClose }: Props) {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && hasFieldsNames) {
         return callApmApi({
           endpoint: 'GET /api/apm/correlations/slow_transactions',
           params: {
@@ -100,6 +102,7 @@ export function LatencyCorrelations({ onClose }: Props) {
       transactionType,
       durationPercentile,
       fieldNames,
+      hasFieldsNames,
     ]
   );
 
@@ -131,7 +134,7 @@ export function LatencyCorrelations({ onClose }: Props) {
                 </h4>
               </EuiTitle>
               <LatencyDistributionChart
-                data={data}
+                data={hasFieldsNames ? data : undefined}
                 status={status}
                 selectedSignificantTerm={selectedSignificantTerm}
               />
@@ -144,7 +147,7 @@ export function LatencyCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latency.percentageColumnName',
               { defaultMessage: '% of slow transactions' }
             )}
-            significantTerms={data?.significantTerms}
+            significantTerms={hasFieldsNames ? data?.significantTerms : []}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             onFilter={onClose}
