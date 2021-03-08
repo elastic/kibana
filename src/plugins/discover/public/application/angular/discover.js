@@ -510,18 +510,6 @@ function discoverController($route, $scope) {
         (error) => addFatalError(core.fatalErrors, error)
       )
     );
-    subscriptions.add(
-      subscribeWithScope(
-        $scope,
-        timefilter.getTimeUpdate$(),
-        {
-          next: () => {
-            $scope.updateTime();
-          },
-        },
-        (error) => addFatalError(core.fatalErrors, error)
-      )
-    );
   };
 
   $scope.opts.fetch = $scope.fetch = function () {
