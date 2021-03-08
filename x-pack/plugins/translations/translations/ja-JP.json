@@ -822,7 +822,7 @@
     "data.filter.filterBar.excludeFilterButtonLabel": "結果を除外",
     "data.filter.filterBar.fieldNotFound": "インデックスパターン {indexPattern} にフィールド {key} がありません",
     "data.filter.filterBar.filterItemBadgeAriaLabel": "フィルターアクション",
-    "data.filter.filterBar.filterItemBadgeIconAriaLabel": "削除",
+    "data.filter.filterBar.filterItemBadgeIconAriaLabel": "削除 {filter}",
     "data.filter.filterBar.includeFilterButtonLabel": "結果を含める",
     "data.filter.filterBar.indexPatternSelectPlaceholder": "インデックスパターンの選択",
     "data.filter.filterBar.labelErrorInfo": "インデックスパターン{indexPattern}が見つかりません",
