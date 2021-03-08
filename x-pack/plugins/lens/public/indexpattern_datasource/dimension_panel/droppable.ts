@@ -23,6 +23,7 @@ import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, DraggedField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { DragContextState } from '../../drag_drop/providers';
 
 type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPrivateState> & {
   droppedItem: T;
@@ -31,9 +32,12 @@ type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPriva
 const operationLabels = getOperationDisplay();
 
 export function getDropProps(
-  props: DatasourceDimensionDropProps<IndexPatternPrivateState> & { groupId: string }
+  props: DatasourceDimensionDropProps<IndexPatternPrivateState> & {
+    dragging: DragContextState['dragging'];
+    groupId: string;
+  }
 ): { dropType: DropType; nextLabel?: string } | undefined {
-  const { dragging } = props.dragDropContext;
+  const { dragging } = props;
   if (!dragging) {
     return;
   }

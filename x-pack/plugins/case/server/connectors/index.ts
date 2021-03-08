@@ -22,6 +22,12 @@ import { CommentRequest, CommentType } from '../../common/api';
 export * from './types';
 export { transformConnectorComment } from './case';
 
+/**
+ * Separator used for creating a json parsable array from the mustache syntax that the alerting framework
+ * sends.
+ */
+export const separator = '__SEPARATOR__';
+
 export const registerConnectors = ({
   actionsRegisterType,
   logger,
@@ -65,3 +71,22 @@ export const isCommentAlert = (
 ): comment is ContextTypeAlertSchemaType => {
   return comment.type === CommentType.alert;
 };
+
+interface AlertIDIndex {
+  _id: string;
+  _index: string;
+  ruleId: string;
+  ruleName: string;
+}
+
+/**
+ * Creates the format that the connector's parser is expecting, it should result in something like this:
+ * [{"_id":"1","_index":"index1"}__SEPARATOR__{"_id":"id2","_index":"index2"}__SEPARATOR__]
+ *
+ * This should only be used for testing purposes.
+ */
+export function createAlertsString(alerts: AlertIDIndex[]) {
+  return `[${alerts.reduce((acc, alert) => {
+    return `${acc}${JSON.stringify(alert)}${separator}`;
+  }, '')}]`;
+}

@@ -113,24 +113,13 @@ export interface DiscoverSidebarResponsiveProps {
   useNewFieldsApi?: boolean;
 
   /**
-   * an object containing properties for proper handling of unmapped fields in the UI
+   * an object containing properties for proper handling of unmapped fields
    */
   unmappedFieldsConfig?: {
     /**
-     * callback function to change the value of `showUnmappedFields` flag
-     * @param value new value to set
-     */
-    onChangeUnmappedFields: (value: boolean) => void;
-    /**
      * determines whether to display unmapped fields
-     * configurable through the switch in the UI
      */
     showUnmappedFields: boolean;
-    /**
-     * determines if we should display an option to toggle showUnmappedFields value in the first place
-     * this value is not configurable through the UI
-     */
-    showUnmappedFieldsDefaultValue: boolean;
   };
 }
 
@@ -171,7 +160,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               indexPatterns={props.indexPatterns}
               state={props.state}
               setAppState={props.setAppState}
-              useNewFieldsApi={props.useNewFieldsApi}
             />
           </section>
           <EuiSpacer size="s" />

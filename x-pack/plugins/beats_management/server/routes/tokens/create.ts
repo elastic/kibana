@@ -50,11 +50,7 @@ export const registerCreateTokenRoute = (router: BeatsManagementRouter) => {
           });
         } catch (err) {
           beatsManagement.framework.log(err.message);
-          return response.internalError({
-            body: {
-              message: 'An error occurred, please check your Kibana logs',
-            },
-          });
+          throw new Error('An error occurred, please check your Kibana logs');
         }
       }
     )

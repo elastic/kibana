@@ -69,6 +69,16 @@ describe('AnalyticsTable', () => {
     expect(tableContent).toContain('0');
   });
 
+  it('renders tag counts instead of tag names if isSmall is passed', () => {
+    const wrapper = mountWithIntl(<AnalyticsTable items={items} isSmall />);
+    const tableContent = wrapper.find(EuiBasicTable).text();
+
+    expect(tableContent).toContain('Analytics tags');
+    expect(tableContent).toContain('1 tag');
+    expect(tableContent).toContain('2 tags');
+    expect(wrapper.find(EuiBadge)).toHaveLength(3);
+  });
+
   describe('renders an action column', () => {
     const wrapper = mountWithIntl(<AnalyticsTable items={items} />);
     runActionColumnTests(wrapper);

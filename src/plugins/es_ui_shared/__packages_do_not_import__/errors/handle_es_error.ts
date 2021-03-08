@@ -9,6 +9,7 @@
 import { ApiError } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
+import { getEsCause } from './es_error_parser';
 
 interface EsErrorHandlerParams {
   error: ApiError;
@@ -34,9 +35,17 @@ export const handleEsError = ({
     const { statusCode, body } = error as ResponseError;
     return response.customError({
       statusCode,
-      body: { message: body.error?.reason },
+      body: {
+        message: body.error?.reason,
+        attributes: {
+          // The full original ES error object
+          error: body.error,
+          // We assume that this is an ES error object with a nested caused by chain if we can see the "caused_by" field at the top-level
+          causes: body.error?.caused_by ? getEsCause(body.error) : undefined,
+        },
+      },
     });
   }
   // Case: default
-  return response.internalError({ body: error });
+  throw error;
 };

@@ -17,7 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes } from '../../../../../case/common/api';
+import { CaseStatuses, CaseAttributes, CaseType } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -42,8 +42,6 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -55,6 +53,7 @@ import * as i18n from './translations';
 
 interface Props {
   caseId: string;
+  subCaseId?: string;
   userCanCrud: boolean;
 }
 
@@ -87,32 +86,8 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
-interface Signal {
-  rule: {
-    id: string;
-    name: string;
-    to: string;
-    from: string;
-  };
-}
-
-interface SignalHit {
-  _id: string;
-  _index: string;
-  _source: {
-    '@timestamp': string;
-    signal: Signal;
-  };
-}
-
-export type Alert = {
-  _id: string;
-  _index: string;
-  '@timestamp': string;
-} & Signal;
-
 export const CaseComponent = React.memo<CaseProps>(
-  ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
+  ({ caseId, caseData, fetchCase, subCaseId, updateCase, userCanCrud }) => {
     const dispatch = useDispatch();
     const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
     const allCasesLink = getCaseUrl(search);
@@ -127,45 +102,18 @@ export const CaseComponent = React.memo<CaseProps>(
       hasDataToPush,
       isLoading: isLoadingUserActions,
       participants,
-    } = useGetCaseUserActions(caseId, caseData.connector.id);
+    } = useGetCaseUserActions(caseId, caseData.connector.id, subCaseId);
 
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
+      subCaseId,
     });
-
-    const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
-      caseData.comments,
-    ]);
 
     /**
      * For the future developer: useSourcererScope is security solution dependent.
      * You can use useSignalIndex as an alternative.
      */
-    const { browserFields, docValueFields, selectedPatterns } = useSourcererScope(
-      SourcererScopeName.detections
-    );
-
-    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
-      alertsQuery,
-      selectedPatterns[0]
-    );
-
-    const alerts = useMemo(
-      () =>
-        alertsData?.hits.hits.reduce<Record<string, Alert>>(
-          (acc, { _id, _index, _source }) => ({
-            ...acc,
-            [_id]: {
-              _id,
-              _index,
-              '@timestamp': _source['@timestamp'],
-              ..._source.signal,
-            },
-          }),
-          {}
-        ) ?? {},
-      [alertsData?.hits.hits]
-    );
+    const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -265,9 +213,9 @@ export const CaseComponent = React.memo<CaseProps>(
     const handleUpdateCase = useCallback(
       (newCase: Case) => {
         updateCase(newCase);
-        fetchCaseUserActions(newCase.id);
+        fetchCaseUserActions(caseId, subCaseId);
       },
-      [updateCase, fetchCaseUserActions]
+      [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
@@ -288,7 +236,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const { pushButton, pushCallouts } = usePushToService({
       connector: {
         ...caseData.connector,
-        name: isEmpty(caseData.connector.name) ? connectorName : caseData.connector.name,
+        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
       },
       caseServices,
       caseId: caseData.id,
@@ -335,9 +283,9 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const handleRefresh = useCallback(() => {
-      fetchCaseUserActions(caseData.id);
+      fetchCaseUserActions(caseId, subCaseId);
       fetchCase();
-    }, [caseData.id, fetchCase, fetchCaseUserActions]);
+    }, [caseId, fetchCase, fetchCaseUserActions, subCaseId]);
 
     const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
@@ -350,10 +298,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions && !isLoadingAlerts) {
+      if (initLoadingData && !isLoadingUserActions) {
         setInitLoadingData(false);
       }
-    }, [initLoadingData, isLoadingAlerts, isLoadingUserActions]);
+    }, [initLoadingData, isLoadingUserActions]);
 
     const backOptions = useMemo(
       () => ({
@@ -397,6 +345,7 @@ export const CaseComponent = React.memo<CaseProps>(
         );
       }
     }, [dispatch]);
+
     return (
       <>
         <HeaderWrapper>
@@ -435,35 +384,43 @@ export const CaseComponent = React.memo<CaseProps>(
                 {!initLoadingData && (
                   <>
                     <UserActionTree
+                      caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
-                      fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
-                      caseServices={caseServices}
+                      fetchUserActions={fetchCaseUserActions.bind(null, caseId, subCaseId)}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
+                      onShowAlertDetails={showAlert}
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
-                      alerts={alerts}
-                      onShowAlertDetails={showAlert}
                     />
-                    <MyEuiHorizontalRule margin="s" />
-                    <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <StatusActionButton
-                          status={caseData.status}
-                          onStatusChanged={changeStatus}
-                          disabled={!userCanCrud}
-                          isLoading={isLoading && updateKey === 'status'}
+                    {(caseData.type !== CaseType.collection || hasDataToPush) && (
+                      <>
+                        <MyEuiHorizontalRule
+                          margin="s"
+                          data-test-subj="case-view-bottom-actions-horizontal-rule"
                         />
-                      </EuiFlexItem>
-                      {hasDataToPush && (
-                        <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                          {pushButton}
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
+                        <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+                          {caseData.type !== CaseType.collection && (
+                            <EuiFlexItem grow={false}>
+                              <StatusActionButton
+                                status={caseData.status}
+                                onStatusChanged={changeStatus}
+                                disabled={!userCanCrud}
+                                isLoading={isLoading && updateKey === 'status'}
+                              />
+                            </EuiFlexItem>
+                          )}
+                          {hasDataToPush && (
+                            <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
+                              {pushButton}
+                            </EuiFlexItem>
+                          )}
+                        </EuiFlexGroup>
+                      </>
+                    )}
                   </>
                 )}
               </EuiFlexItem>
@@ -492,6 +449,9 @@ export const CaseComponent = React.memo<CaseProps>(
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
                   disabled={!userCanCrud}
+                  hideConnectorServiceNowSir={
+                    subCaseId != null || caseData.type === CaseType.collection
+                  }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}
@@ -513,11 +473,12 @@ export const CaseComponent = React.memo<CaseProps>(
   }
 );
 
-export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
-  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId);
+export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
+  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
   if (isError) {
     return null;
   }
+
   if (isLoading) {
     return (
       <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
@@ -529,13 +490,16 @@ export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
   }
 
   return (
-    <CaseComponent
-      caseId={caseId}
-      fetchCase={fetchCase}
-      caseData={data}
-      updateCase={updateCase}
-      userCanCrud={userCanCrud}
-    />
+    data && (
+      <CaseComponent
+        caseId={caseId}
+        subCaseId={subCaseId}
+        fetchCase={fetchCase}
+        caseData={data}
+        updateCase={updateCase}
+        userCanCrud={userCanCrud}
+      />
+    )
   );
 });
 

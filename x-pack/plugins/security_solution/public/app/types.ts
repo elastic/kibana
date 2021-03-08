@@ -17,7 +17,7 @@ import {
   CombinedState,
 } from 'redux';
 
-import { AppMountParameters } from '../../../../../src/core/public';
+import { AppMountParameters, AppSearchDeepLink } from '../../../../../src/core/public';
 import { StartServices } from '../types';
 import { AppFrontendLibs } from '../common/lib/lib';
 
@@ -34,6 +34,7 @@ import { State, SubPluginsInitReducer } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
 import { AppAction } from '../common/store/actions';
 import { TimelineState } from '../timelines/store/timeline/types';
+import { SecurityPageName } from '../../common/constants';
 export { SecurityPageName } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
@@ -54,6 +55,15 @@ export type SecuritySubPluginKeyStore =
   | 'hostList'
   | 'alertList'
   | 'management';
+
+export type SecuritySubPluginNames = keyof typeof SecurityPageName;
+
+interface SecurityDeepLink {
+  base: AppSearchDeepLink[];
+  premium?: AppSearchDeepLink[];
+}
+
+export type SecurityDeepLinks = { [key in SecuritySubPluginNames]: SecurityDeepLink };
 
 /**
  * Returned by the various 'SecuritySubPlugin' classes from the `start` method.

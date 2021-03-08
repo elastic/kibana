@@ -6,16 +6,13 @@
  */
 /* eslint-disable no-console */
 import yargs from 'yargs';
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
-import {
-  CaseResponse,
-  CaseType,
-  CollectionWithSubCaseResponse,
-  ConnectorTypes,
-} from '../../../common/api';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
+import { CaseResponse, CaseType, ConnectorTypes } from '../../../common/api';
 import { CommentType } from '../../../common/api/cases/comment';
 import { CASES_URL } from '../../../common/constants';
 import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
+import { ContextTypeGeneratedAlertType, createAlertsString } from '../../connectors';
 
 main();
 
@@ -105,9 +102,19 @@ async function handleGenGroupAlerts(argv: any) {
     }
 
     console.log('Case id: ', caseID);
-    const executeResp = await client.request<
-      ActionTypeExecutorResult<CollectionWithSubCaseResponse>
-    >({
+    const comment: ContextTypeGeneratedAlertType = {
+      type: CommentType.generatedAlert,
+      alerts: createAlertsString(
+        argv.ids.map((id: string) => ({
+          _id: id,
+          _index: argv.signalsIndex,
+          ruleId: argv.ruleID,
+          ruleName: argv.ruleName,
+        }))
+      ),
+    };
+
+    const executeResp = await client.request<ActionTypeExecutorResult<CaseResponse>>({
       path: `/api/actions/action/${createdAction.data.id}/_execute`,
       method: 'POST',
       body: {
@@ -115,11 +122,7 @@ async function handleGenGroupAlerts(argv: any) {
           subAction: 'addComment',
           subActionParams: {
             caseId: caseID,
-            comment: {
-              type: CommentType.generatedAlert,
-              alerts: argv.ids.map((id: string) => ({ _id: id })),
-              index: argv.signalsIndex,
-            },
+            comment,
           },
         },
       },
@@ -174,6 +177,18 @@ async function main() {
               describe: 'siem signals index',
               type: 'string',
               default: '.siem-signals-default',
+            },
+            ruleID: {
+              alias: 'ri',
+              describe: 'siem signals rule id',
+              type: 'string',
+              default: 'rule-id',
+            },
+            ruleName: {
+              alias: 'rn',
+              describe: 'siem signals rule name',
+              type: 'string',
+              default: 'rule-name',
             },
           })
           .demandOption(['ids']);

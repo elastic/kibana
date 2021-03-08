@@ -164,24 +164,25 @@ export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
+  subCaseId?: string;
   title?: string;
-}> = ({ children, detailName, title }) => {
+}> = ({ children, detailName, subCaseId, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCaseDetails = useCallback(
     (ev) => {
       ev.preventDefault();
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCaseDetailsUrl({ id: detailName, search }),
+        path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
     },
-    [detailName, navigateToApp, search]
+    [detailName, navigateToApp, search, subCaseId]
   );
 
   return (
     <LinkAnchor
       onClick={goToCaseDetails}
-      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }))}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >

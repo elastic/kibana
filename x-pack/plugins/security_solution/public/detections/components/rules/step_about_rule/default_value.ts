@@ -29,7 +29,6 @@ export const stepAboutDefaultValue: AboutStepRule = {
   license: '',
   ruleNameOverride: '',
   tags: [],
-  threatIndicatorPath: '',
   timestampOverride: '',
   threat: threatDefault,
   note: '',

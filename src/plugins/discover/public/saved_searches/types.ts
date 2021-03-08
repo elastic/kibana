@@ -23,7 +23,6 @@ export interface SavedSearch {
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   lastSavedTitle?: string;
   copyOnSave?: boolean;
-  pre712?: boolean;
   hideChart?: boolean;
 }
 export interface SavedSearchLoader {

@@ -36,19 +36,20 @@ No matter your data, {kib} can help you uncover patterns and relationships and v
 [[kibana-home-page]]
 === Where to start
 
-Start with the home page, where you’re guided toward the most common use cases.
-For a quick reference of {kib} use cases, refer to <<whats-the-right-app,What’s the right app for you?>>
+Start with the home page, where you’re presented options for adding your data.
+You can collect data from an app or service or upload a file that contains your data.
+If you’re not ready to use your own data, you can add a sample data set.
+
+The home page provides access to the *Enterprise Search*, *Observability*, and *Security* solutions,
+and everything you need to visualize and analyze your data.
 
 [role="screenshot"]
 image::images/home-page.png[Kibana home page]
 
-The main menu gets you to where you need to go. Like the home page,
-the menu is organized by use case. Want to work with your logs, metrics, APM, or
-Uptime data? The apps you need are under *Observability*. The main menu also includes
-*Recently viewed*, so you can easily access your previously opened apps.
-
-Hidden by default, you open the main menu by clicking the
-hamburger icon. To keep the main menu visible at all times, click the *Dock navigation* item.
+To access all of {kib} features, use the main menu.
+Open this menu by clicking the
+menu icon. To keep the main menu visible at all times, click *Dock navigation*.
+For a quick reference of all {kib} features, refer to <<whats-the-right-app,What’s the right app for you?>>
 
 [role="screenshot"]
 image::images/kibana-main-menu.png[Kibana main menu]
@@ -91,8 +92,7 @@ image::images/visualization-journey.png[User data analysis journey]
 
 | *1*
 | *Add data.* The best way to add {es} data to {kib} is to use one of our guided processes,
-available from the <<kibana-home-page,home page>>. You can collect data from an app or service, upload a
-file, or add a sample data set.
+available from the <<kibana-home-page,home page>>.
 
 | *2*
 | *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
@@ -203,7 +203,7 @@ so you can tailor it to your specific needs without impacting others.
 image::images/select-your-space.png[Space selector view]
 
 Most of {kib}’s entities are space-aware, including dashboards, visualizations, index patterns,
-Canvas workpads, Timelion visualizations, graphs, tags, and machine learning jobs.
+*Canvas* workpads, graphs, tags, and machine learning jobs.
 
 In addition:
 
@@ -245,7 +245,7 @@ see <<security-settings-kb,Security settings in {kib}>>.
 
 [float]
 ==== Log in
-Kibana supports several <<kibana-authentication,authentication providers>>,
+{kib} supports several <<kibana-authentication,authentication providers>>,
 allowing you to login using {es}’s built-in realms, or by your own single sign-on provider.
 
 [role="screenshot"]

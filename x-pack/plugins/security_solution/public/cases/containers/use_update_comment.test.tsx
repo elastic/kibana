@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useUpdateComment, UseUpdateComment } from './use_update_comment';
-import { basicCase, basicCaseCommentPatch } from './mock';
+import { basicCase, basicCaseCommentPatch, basicSubCaseId } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
@@ -43,7 +43,7 @@ describe('useUpdateComment', () => {
     });
   });
 
-  it('calls patchComment with correct arguments', async () => {
+  it('calls patchComment with correct arguments - case', async () => {
     const spyOnPatchComment = jest.spyOn(api, 'patchComment');
 
     await act(async () => {
@@ -59,7 +59,30 @@ describe('useUpdateComment', () => {
         basicCase.comments[0].id,
         'updated comment',
         basicCase.comments[0].version,
-        abortCtrl.signal
+        abortCtrl.signal,
+        undefined
+      );
+    });
+  });
+
+  it('calls patchComment with correct arguments - sub case', async () => {
+    const spyOnPatchComment = jest.spyOn(api, 'patchComment');
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseUpdateComment>(() =>
+        useUpdateComment()
+      );
+      await waitForNextUpdate();
+
+      result.current.patchComment({ ...sampleUpdate, subCaseId: basicSubCaseId });
+      await waitForNextUpdate();
+      expect(spyOnPatchComment).toBeCalledWith(
+        basicCase.id,
+        basicCase.comments[0].id,
+        'updated comment',
+        basicCase.comments[0].version,
+        abortCtrl.signal,
+        basicSubCaseId
       );
     });
   });

@@ -249,7 +249,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
       await find.clickByCssSelector(
         `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
-          td:last-child button`
+          td:nth-last-child(2) button`
       );
     }
 
@@ -334,8 +334,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         await retry.try(async () => {
           await this.setIndexPatternField(indexPatternName);
         });
-        await PageObjects.common.sleep(2000);
-        await (await this.getCreateIndexPatternGoToStep2Button()).click();
+
+        const btn = await this.getCreateIndexPatternGoToStep2Button();
+        await retry.waitFor(`index pattern Go To Step 2 button to be enabled`, async () => {
+          return await btn.isEnabled();
+        });
+        await btn.click();
+
         await PageObjects.common.sleep(2000);
         if (timefield) {
           await this.selectTimeFieldOption(timefield);

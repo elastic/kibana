@@ -68,12 +68,18 @@ describe('timeline flyout button', () => {
   it('sets the data providers background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers area', () => {
     dragFirstHostToTimeline();
 
-    cy.get(TIMELINE_DATA_PROVIDERS)
-      .filter(':visible')
-      .should(
-        'have.css',
-        'background',
-        'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
-      );
+    if (Cypress.browser.name === 'firefox') {
+      cy.get(TIMELINE_DATA_PROVIDERS)
+        .filter(':visible')
+        .should('have.css', 'background-color', 'rgba(1, 125, 115, 0.1)');
+    } else {
+      cy.get(TIMELINE_DATA_PROVIDERS)
+        .filter(':visible')
+        .should(
+          'have.css',
+          'background',
+          'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
+        );
+    }
   });
 });

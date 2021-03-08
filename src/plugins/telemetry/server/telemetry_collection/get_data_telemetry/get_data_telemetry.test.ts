@@ -265,7 +265,7 @@ function mockEsClient(
   indexStats: any = {}
 ) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  // @ts-ignore
+  // @ts-expect-error
   esClient.indices.getMapping.mockImplementationOnce(async () => {
     const body = Object.fromEntries(
       indicesMappings.map((index) => [
@@ -294,7 +294,7 @@ function mockEsClient(
     );
     return { body };
   });
-  // @ts-ignore
+  // @ts-expect-error
   esClient.indices.stats.mockImplementationOnce(async () => {
     return { body: indexStats };
   });

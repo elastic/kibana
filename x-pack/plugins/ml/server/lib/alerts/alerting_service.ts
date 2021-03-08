@@ -16,7 +16,7 @@ import {
   MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
 import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
-import { AnomalyResultType } from '../../../common/types/anomalies';
+import { AnomalyRecordDoc, AnomalyResultType } from '../../../common/types/anomalies';
 import {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
@@ -25,30 +25,20 @@ import {
   RecordAnomalyAlertDoc,
   TopHitsResultsKeys,
 } from '../../../common/types/alerts';
-import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { MlJobsResponse } from '../../../common/types/job_service';
-import { ANOMALY_SCORE_MATCH_GROUP_ID } from '../../../common/constants/alerts';
-import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
+import { resolveBucketSpanInSeconds } from '../../../common/util/job_utils';
+import { isDefined } from '../../../common/types/guards';
 
-function isDefined<T>(argument: T | undefined | null): argument is T {
-  return argument !== undefined && argument !== null;
-}
-
-/**
- * Resolves the longest bucket span from the list and multiply it by 2.
- * @param bucketSpans Collection of bucket spans
- */
-export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
-  return (
-    Math.max(
-      ...bucketSpans
-        .map((b) => parseInterval(b))
-        .filter(isDefined)
-        .map((v) => v.asSeconds())
-    ) * 2
-  );
-}
+type AggResultsResponse = { key?: number } & {
+  [key in PreviewResultsKeys]: {
+    doc_count: number;
+  } & {
+    [hitsKey in TopHitsResultsKeys]: {
+      hits: { hits: any[] };
+    };
+  };
+};
 
 /**
  * Alerting related server-side methods
@@ -268,18 +258,55 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
   };
 
   /**
-   * Provides unique key for the anomaly result.
+   * Provides a key for alert instance.
    */
-  const getAlertInstanceKey = (source: any): string => {
-    let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
-    if (source.result_type === ANOMALY_RESULT_TYPE.INFLUENCER) {
-      alertInstanceKey += `_${source.influencer_field_name}_${source.influencer_field_value}`;
-    } else if (source.result_type === ANOMALY_RESULT_TYPE.RECORD) {
-      const fieldName = getEntityFieldName(source);
-      const fieldValue = getEntityFieldValue(source);
-      alertInstanceKey += `_${source.detector_index}_${source.function}_${fieldName}_${fieldValue}`;
-    }
-    return alertInstanceKey;
+  const getAlertInstanceKey = (source: AnomalyRecordDoc): string => {
+    return source.job_id;
+  };
+
+  const getResultsFormatter = (resultType: AnomalyResultType) => {
+    const resultsLabel = getAggResultsLabel(resultType);
+    return (v: AggResultsResponse): AlertExecutionResult | undefined => {
+      const aggTypeResults = v[resultsLabel.aggGroupLabel];
+      if (aggTypeResults.doc_count === 0) {
+        return;
+      }
+
+      const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
+
+      const topAnomaly = requestedAnomalies[0];
+      const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
+
+      return {
+        count: aggTypeResults.doc_count,
+        key: v.key,
+        alertInstanceKey,
+        jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
+        isInterim: requestedAnomalies.some((h) => h._source.is_interim),
+        timestamp: topAnomaly._source.timestamp,
+        timestampIso8601: topAnomaly.fields.timestamp_iso8601[0],
+        timestampEpoch: topAnomaly.fields.timestamp_epoch[0],
+        score: topAnomaly.fields.score[0],
+        bucketRange: {
+          start: topAnomaly.fields.start[0],
+          end: topAnomaly.fields.end[0],
+        },
+        topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
+          return {
+            ...h._source,
+            score: h.fields.score[0],
+            unique_key: h.fields.unique_key[0],
+          };
+        }) as RecordAnomalyAlertDoc[],
+        topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
+          return {
+            ...h._source,
+            score: h.fields.score[0],
+            unique_key: h.fields.unique_key[0],
+          };
+        }) as InfluencerAnomalyAlertDoc[],
+      };
+    };
   };
 
   /**
@@ -313,8 +340,11 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      * We need to check the biggest time range to make sure anomalies are not missed.
      */
     const lookBackTimeInterval = `${Math.max(
-      resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)),
-      checkIntervalGap ? checkIntervalGap.asSeconds() : 0
+      // Double the max bucket span
+      Math.round(
+        resolveBucketSpanInSeconds(jobsResponse.map((v) => v.analysis_config.bucket_span)) * 2
+      ),
+      checkIntervalGap ? Math.round(checkIntervalGap.asSeconds()) : 0
     )}s`;
 
     const jobIds = jobsResponse.map((v) => v.job_id);
@@ -351,17 +381,19 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
           ],
         },
       },
-      aggs: {
-        alerts_over_time: {
-          date_histogram: {
-            field: 'timestamp',
-            fixed_interval: lookBackTimeInterval,
-            // Ignore empty buckets
-            min_doc_count: 1,
-          },
-          aggs: getResultTypeAggRequest(params.resultType as AnomalyResultType, params.severity),
-        },
-      },
+      aggs: previewTimeInterval
+        ? {
+            alerts_over_time: {
+              date_histogram: {
+                field: 'timestamp',
+                fixed_interval: lookBackTimeInterval,
+                // Ignore empty buckets
+                min_doc_count: 1,
+              },
+              aggs: getResultTypeAggRequest(params.resultType, params.severity),
+            },
+          }
+        : getResultTypeAggRequest(params.resultType, params.severity),
     };
 
     const response = await mlClient.anomalySearch(
@@ -371,67 +403,30 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       jobIds
     );
 
-    const result = response.body.aggregations as {
-      alerts_over_time: {
-        buckets: Array<
-          {
-            doc_count: number;
-            key: number;
-            key_as_string: string;
-          } & {
-            [key in PreviewResultsKeys]: {
-              doc_count: number;
-            } & {
-              [hitsKey in TopHitsResultsKeys]: {
-                hits: { hits: any[] };
-              };
-            };
-          }
-        >;
-      };
-    };
+    const result = response.body.aggregations;
 
-    const resultsLabel = getAggResultsLabel(params.resultType as AnomalyResultType);
+    const resultsLabel = getAggResultsLabel(params.resultType);
 
-    return (
-      result.alerts_over_time.buckets
-        // Filter out empty buckets
-        .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
-        // Map response
-        .map((v) => {
-          const aggTypeResults = v[resultsLabel.aggGroupLabel];
-          const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
+    const formatter = getResultsFormatter(params.resultType);
 
-          const topAnomaly = requestedAnomalies[0];
-          const alertInstanceKey = getAlertInstanceKey(topAnomaly._source);
-
-          return {
-            count: aggTypeResults.doc_count,
-            key: v.key,
-            alertInstanceKey,
-            jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
-            isInterim: requestedAnomalies.some((h) => h._source.is_interim),
-            timestamp: topAnomaly._source.timestamp,
-            timestampIso8601: topAnomaly.fields.timestamp_iso8601[0],
-            timestampEpoch: topAnomaly.fields.timestamp_epoch[0],
-            score: topAnomaly.fields.score[0],
-            bucketRange: {
-              start: topAnomaly.fields.start[0],
-              end: topAnomaly.fields.end[0],
-            },
-            topRecords: v.record_results.top_record_hits.hits.hits.map((h) => ({
-              ...h._source,
-              score: h.fields.score[0],
-              unique_key: h.fields.unique_key[0],
-            })) as RecordAnomalyAlertDoc[],
-            topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => ({
-              ...h._source,
-              score: h.fields.score[0],
-              unique_key: h.fields.unique_key[0],
-            })) as InfluencerAnomalyAlertDoc[],
+    return (previewTimeInterval
+      ? (result as {
+          alerts_over_time: {
+            buckets: Array<
+              {
+                doc_count: number;
+                key: number;
+                key_as_string: string;
+              } & AggResultsResponse
+            >;
           };
-        })
-    );
+        }).alerts_over_time.buckets
+          // Filter out empty buckets
+          .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
+          // Map response
+          .map(formatter)
+      : [formatter(result as AggResultsResponse)]
+    ).filter(isDefined);
   };
 
   /**
@@ -515,15 +510,11 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
      * Return the result of an alert condition execution.
      *
      * @param params - Alert params
-     * @param publicBaseUrl
-     * @param alertId - Alert ID
      * @param startedAt
      * @param previousStartedAt
      */
     execute: async (
       params: MlAnomalyDetectionAlertParams,
-      publicBaseUrl: string | undefined,
-      alertId: string,
       startedAt: Date,
       previousStartedAt: Date | null
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
@@ -540,65 +531,13 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
       const result = res[0];
       if (!result) return;
 
-      const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType as AnomalyResultType);
+      const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType);
 
       const executionResult = {
         ...result,
         name: result.alertInstanceKey,
         anomalyExplorerUrl,
-        kibanaBaseUrl: publicBaseUrl!,
       };
-
-      let kibanaEventLogCount = 0;
-      try {
-        // Check kibana-event-logs for presence of this alert instance
-        const kibanaLogResults = await esClient.count({
-          index: '.kibana-event-log-*',
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'kibana.alerting.action_group_id': {
-                        value: ANOMALY_SCORE_MATCH_GROUP_ID,
-                      },
-                    },
-                  },
-                  {
-                    term: {
-                      'kibana.alerting.instance_id': {
-                        value: executionResult.name,
-                      },
-                    },
-                  },
-                  {
-                    nested: {
-                      path: 'kibana.saved_objects',
-                      query: {
-                        term: {
-                          'kibana.saved_objects.id': {
-                            value: alertId,
-                          },
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-
-        kibanaEventLogCount = kibanaLogResults.body.count;
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Unable to check kibana event logs', e);
-      }
-
-      if (kibanaEventLogCount > 0) {
-        return;
-      }
 
       return executionResult;
     },

@@ -8,36 +8,37 @@
 jest.mock('./authenticator');
 
 import Boom from '@hapi/boom';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import {
-  loggingSystemMock,
-  coreMock,
-  httpServerMock,
-  httpServiceMock,
-  elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { licenseMock } from '../../common/licensing/index.mock';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
-import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
-import { sessionMock } from '../session_management/session.mock';
-
 import type {
   AuthenticationHandler,
   AuthToolkit,
+  HttpServiceSetup,
+  HttpServiceStart,
   KibanaRequest,
   Logger,
   LoggerFactory,
-  HttpServiceSetup,
-  HttpServiceStart,
-} from '../../../../../src/core/server';
-import type { AuthenticatedUser } from '../../common/model';
+} from 'src/core/server';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
 import type { SecurityLicense } from '../../common/licensing';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { AuthenticatedUser } from '../../common/model';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import type { ConfigType } from '../config';
+import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import type { Session } from '../session_management';
-import { ConfigSchema, ConfigType, createConfig } from '../config';
+import { sessionMock } from '../session_management/session.mock';
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';
 
@@ -149,7 +150,6 @@ describe('AuthenticationService', () => {
         expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
         expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith();
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-        expect(mockResponse.internalError).not.toHaveBeenCalled();
 
         expect(authenticate).not.toHaveBeenCalled();
       });
@@ -172,7 +172,6 @@ describe('AuthenticationService', () => {
           requestHeaders: mockAuthHeaders,
         });
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-        expect(mockResponse.internalError).not.toHaveBeenCalled();
 
         expect(authenticate).toHaveBeenCalledTimes(1);
         expect(authenticate).toHaveBeenCalledWith(mockRequest);
@@ -201,7 +200,6 @@ describe('AuthenticationService', () => {
           responseHeaders: mockAuthResponseHeaders,
         });
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-        expect(mockResponse.internalError).not.toHaveBeenCalled();
 
         expect(authenticate).toHaveBeenCalledTimes(1);
         expect(authenticate).toHaveBeenCalledWith(mockRequest);
@@ -223,7 +221,6 @@ describe('AuthenticationService', () => {
           'WWW-Authenticate': 'Negotiate',
         });
         expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-        expect(mockResponse.internalError).not.toHaveBeenCalled();
       });
 
       it('rejects with `Internal Server Error` and log error when `authenticate` throws unhandled exception', async () => {
@@ -231,15 +228,12 @@ describe('AuthenticationService', () => {
         const failureReason = new Error('something went wrong');
         authenticate.mockRejectedValue(failureReason);
 
-        await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
-
-        expect(mockResponse.internalError).toHaveBeenCalledTimes(1);
-        const [[error]] = mockResponse.internalError.mock.calls;
-        expect(error).toBeUndefined();
+        await expect(
+          authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit)
+        ).rejects.toThrow(failureReason);
 
         expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
-        expect(logger.error).toHaveBeenCalledWith(failureReason);
       });
 
       it('rejects with original `badRequest` error when `authenticate` fails to authenticate user', async () => {

@@ -51,10 +51,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<
         id="routingKey"
         fullWidth
         helpText={
-          <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.alerting.pagerDutyAction} target="_blank">
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
               defaultMessage="Configure a PagerDuty account"

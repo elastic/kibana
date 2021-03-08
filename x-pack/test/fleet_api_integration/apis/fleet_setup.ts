@@ -13,9 +13,19 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('fleet_setup', () => {
     skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await esArchiver.load('empty_kibana');
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
+
+    after(async () => {
+      await esArchiver.unload('empty_kibana');
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
     beforeEach(async () => {
       try {
         await es.security.deleteUser({
@@ -104,6 +114,20 @@ export default function (providerContext: FtrProviderContext) {
         metadata: {},
         transient_metadata: { enabled: true },
       });
+    });
+
+    it('should install default packages', async () => {
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/epm/packages?experimental=true`)
+        .expect(200);
+      const installedPackages = apiResponse.response
+        .filter((p: any) => p.status === 'installed')
+        .map((p: any) => p.name)
+        .sort();
+
+      expect(installedPackages).to.eql(['elastic_agent', 'endpoint', 'fleet_server', 'system']);
     });
   });
 }

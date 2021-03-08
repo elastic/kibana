@@ -10,12 +10,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import {
-  decodeCommentRequest,
-  getAlertIds,
-  isCommentRequestTypeGenAlert,
-} from '../../routes/api/utils';
+import { SavedObject, SavedObjectsClientContract, Logger } from 'src/core/server';
+import { decodeCommentRequest, isCommentRequestTypeGenAlert } from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -25,7 +21,7 @@ import {
   CaseType,
   SubCaseAttributes,
   CommentRequest,
-  CollectionWithSubCaseResponse,
+  CaseResponse,
   User,
   CommentRequestAlertType,
   AlertCommentRequestRt,
@@ -36,8 +32,11 @@ import {
 } from '../../services/user_actions/helpers';
 
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
-import { CommentableCase } from '../../common';
+import { CommentableCase, createAlertUpdateRequest } from '../../common';
 import { CaseClientHandler } from '..';
+import { createCaseError } from '../../common/error';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
+import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
 
 async function getSubCase({
   caseService,
@@ -56,7 +55,20 @@ async function getSubCase({
 }): Promise<SavedObject<SubCaseAttributes>> {
   const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
   if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
-    return mostRecentSubCase;
+    const subCaseAlertsAttachement = await caseService.getAllSubCaseComments({
+      client: savedObjectsClient,
+      id: mostRecentSubCase.id,
+      options: {
+        fields: [],
+        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+        page: 1,
+        perPage: 1,
+      },
+    });
+
+    if (subCaseAlertsAttachement.total <= MAX_GENERATED_ALERTS_PER_SUB_CASE) {
+      return mostRecentSubCase;
+    }
   }
 
   const newSubCase = await caseService.createSubCase({
@@ -89,6 +101,7 @@ interface AddCommentFromRuleArgs {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
+  logger: Logger;
 }
 
 const addGeneratedAlerts = async ({
@@ -98,7 +111,8 @@ const addGeneratedAlerts = async ({
   caseClient,
   caseId,
   comment,
-}: AddCommentFromRuleArgs): Promise<CollectionWithSubCaseResponse> => {
+  logger,
+}: AddCommentFromRuleArgs): Promise<CaseResponse> => {
   const query = pipe(
     AlertCommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
@@ -110,84 +124,101 @@ const addGeneratedAlerts = async ({
   if (comment.type !== CommentType.generatedAlert) {
     throw Boom.internal('Attempting to add a non generated alert in the wrong context');
   }
-  const createdDate = new Date().toISOString();
 
-  const caseInfo = await caseService.getCase({
-    client: savedObjectsClient,
-    id: caseId,
-  });
+  try {
+    const createdDate = new Date().toISOString();
 
-  if (
-    query.type === CommentType.generatedAlert &&
-    caseInfo.attributes.type !== CaseType.collection
-  ) {
-    throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
-  }
+    const caseInfo = await caseService.getCase({
+      client: savedObjectsClient,
+      id: caseId,
+    });
 
-  const userDetails: User = {
-    username: caseInfo.attributes.created_by?.username,
-    full_name: caseInfo.attributes.created_by?.full_name,
-    email: caseInfo.attributes.created_by?.email,
-  };
+    if (
+      query.type === CommentType.generatedAlert &&
+      caseInfo.attributes.type !== CaseType.collection
+    ) {
+      throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
+    }
 
-  const subCase = await getSubCase({
-    caseService,
-    savedObjectsClient,
-    caseId,
-    createdAt: createdDate,
-    userActionService,
-    user: userDetails,
-  });
+    const userDetails: User = {
+      username: caseInfo.attributes.created_by?.username,
+      full_name: caseInfo.attributes.created_by?.full_name,
+      email: caseInfo.attributes.created_by?.email,
+    };
 
-  const commentableCase = new CommentableCase({
-    collection: caseInfo,
-    subCase,
-    soClient: savedObjectsClient,
-    service: caseService,
-  });
+    const subCase = await getSubCase({
+      caseService,
+      savedObjectsClient,
+      caseId,
+      createdAt: createdDate,
+      userActionService,
+      user: userDetails,
+    });
 
-  const {
-    comment: newComment,
-    commentableCase: updatedCase,
-  } = await commentableCase.createComment({ createdDate, user: userDetails, commentReq: query });
+    const commentableCase = new CommentableCase({
+      logger,
+      collection: caseInfo,
+      subCase,
+      soClient: savedObjectsClient,
+      service: caseService,
+    });
 
-  if (
-    (newComment.attributes.type === CommentType.alert ||
-      newComment.attributes.type === CommentType.generatedAlert) &&
-    caseInfo.attributes.settings.syncAlerts
-  ) {
-    const ids = getAlertIds(query);
-    await caseClient.updateAlertsStatus({
-      ids,
-      status: subCase.attributes.status,
-      indices: new Set([newComment.attributes.index]),
+    const {
+      comment: newComment,
+      commentableCase: updatedCase,
+    } = await commentableCase.createComment({ createdDate, user: userDetails, commentReq: query });
+
+    if (
+      (newComment.attributes.type === CommentType.alert ||
+        newComment.attributes.type === CommentType.generatedAlert) &&
+      caseInfo.attributes.settings.syncAlerts
+    ) {
+      const alertsToUpdate = createAlertUpdateRequest({
+        comment: query,
+        status: subCase.attributes.status,
+      });
+      await caseClient.updateAlertsStatus({
+        alerts: alertsToUpdate,
+      });
+    }
+
+    await userActionService.postUserActions({
+      client: savedObjectsClient,
+      actions: [
+        buildCommentUserActionItem({
+          action: 'create',
+          actionAt: createdDate,
+          actionBy: { ...userDetails },
+          caseId: updatedCase.caseId,
+          subCaseId: updatedCase.subCaseId,
+          commentId: newComment.id,
+          fields: ['comment'],
+          newValue: JSON.stringify(query),
+        }),
+      ],
+    });
+
+    return updatedCase.encode();
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed while adding a generated alert to case id: ${caseId} error: ${error}`,
+      error,
+      logger,
     });
   }
-
-  await userActionService.postUserActions({
-    client: savedObjectsClient,
-    actions: [
-      buildCommentUserActionItem({
-        action: 'create',
-        actionAt: createdDate,
-        actionBy: { ...userDetails },
-        caseId: updatedCase.caseId,
-        subCaseId: updatedCase.subCaseId,
-        commentId: newComment.id,
-        fields: ['comment'],
-        newValue: JSON.stringify(query),
-      }),
-    ],
-  });
-
-  return updatedCase.encode();
 };
 
-async function getCombinedCase(
-  service: CaseServiceSetup,
-  client: SavedObjectsClientContract,
-  id: string
-): Promise<CommentableCase> {
+async function getCombinedCase({
+  service,
+  client,
+  id,
+  logger,
+}: {
+  service: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+  id: string;
+  logger: Logger;
+}): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     service.getCase({
       client,
@@ -206,6 +237,7 @@ async function getCombinedCase(
         id: subCasePromise.value.references[0].id,
       });
       return new CommentableCase({
+        logger,
         collection: caseValue,
         subCase: subCasePromise.value,
         service,
@@ -219,7 +251,12 @@ async function getCombinedCase(
   if (casePromise.status === 'rejected') {
     throw casePromise.reason;
   } else {
-    return new CommentableCase({ collection: casePromise.value, service, soClient: client });
+    return new CommentableCase({
+      logger,
+      collection: casePromise.value,
+      service,
+      soClient: client,
+    });
   }
 }
 
@@ -231,6 +268,7 @@ interface AddCommentArgs {
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
   user: User;
+  logger: Logger;
 }
 
 export const addComment = async ({
@@ -241,7 +279,8 @@ export const addComment = async ({
   caseId,
   comment,
   user,
-}: AddCommentArgs): Promise<CollectionWithSubCaseResponse> => {
+  logger,
+}: AddCommentArgs): Promise<CaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
@@ -255,52 +294,68 @@ export const addComment = async ({
       savedObjectsClient,
       userActionService,
       caseService,
+      logger,
     });
   }
 
   decodeCommentRequest(comment);
-  const createdDate = new Date().toISOString();
+  try {
+    const createdDate = new Date().toISOString();
 
-  const combinedCase = await getCombinedCase(caseService, savedObjectsClient, caseId);
+    const combinedCase = await getCombinedCase({
+      service: caseService,
+      client: savedObjectsClient,
+      id: caseId,
+      logger,
+    });
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = user;
-  const userInfo: User = {
-    username,
-    full_name,
-    email,
-  };
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { username, full_name, email } = user;
+    const userInfo: User = {
+      username,
+      full_name,
+      email,
+    };
 
-  const { comment: newComment, commentableCase: updatedCase } = await combinedCase.createComment({
-    createdDate,
-    user: userInfo,
-    commentReq: query,
-  });
+    const { comment: newComment, commentableCase: updatedCase } = await combinedCase.createComment({
+      createdDate,
+      user: userInfo,
+      commentReq: query,
+    });
 
-  if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
-    const ids = getAlertIds(query);
-    await caseClient.updateAlertsStatus({
-      ids,
-      status: updatedCase.status,
-      indices: new Set([newComment.attributes.index]),
+    if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
+      const alertsToUpdate = createAlertUpdateRequest({
+        comment: query,
+        status: updatedCase.status,
+      });
+
+      await caseClient.updateAlertsStatus({
+        alerts: alertsToUpdate,
+      });
+    }
+
+    await userActionService.postUserActions({
+      client: savedObjectsClient,
+      actions: [
+        buildCommentUserActionItem({
+          action: 'create',
+          actionAt: createdDate,
+          actionBy: { username, full_name, email },
+          caseId: updatedCase.caseId,
+          subCaseId: updatedCase.subCaseId,
+          commentId: newComment.id,
+          fields: ['comment'],
+          newValue: JSON.stringify(query),
+        }),
+      ],
+    });
+
+    return updatedCase.encode();
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,
+      error,
+      logger,
     });
   }
-
-  await userActionService.postUserActions({
-    client: savedObjectsClient,
-    actions: [
-      buildCommentUserActionItem({
-        action: 'create',
-        actionAt: createdDate,
-        actionBy: { username, full_name, email },
-        caseId: updatedCase.caseId,
-        subCaseId: updatedCase.subCaseId,
-        commentId: newComment.id,
-        fields: ['comment'],
-        newValue: JSON.stringify(query),
-      }),
-    ],
-  });
-
-  return updatedCase.encode();
 };

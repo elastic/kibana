@@ -18,7 +18,6 @@ import {
   AssociationType,
   CaseResponse,
   CasesResponse,
-  CollectionWithSubCaseResponse,
 } from '../../../common/api';
 import {
   connectorMappingsServiceMock,
@@ -717,6 +716,10 @@ describe('case connector', () => {
               type: CommentType.alert,
               alertId: 'test-id',
               index: 'test-index',
+              rule: {
+                id: null,
+                name: null,
+              },
             },
           },
         };
@@ -1014,9 +1017,10 @@ describe('case connector', () => {
 
     describe('addComment', () => {
       it('executes correctly', async () => {
-        const commentReturn: CollectionWithSubCaseResponse = {
+        const commentReturn: CaseResponse = {
           id: 'mock-it',
           totalComment: 0,
+          totalAlerts: 0,
           version: 'WzksMV0=',
 
           closed_at: null,

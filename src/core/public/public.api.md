@@ -116,7 +116,7 @@ export interface AppLeaveDefaultAction {
 
 // Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
 //
-// @public
+// @public @deprecated
 export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 
 // @public (undocumented)
@@ -153,6 +153,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     appBasePath: string;
     element: HTMLElement;
     history: ScopedHistory<HistoryLocationState>;
+    // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
@@ -523,6 +524,8 @@ export interface DocLinksStart {
             readonly base: string;
         };
         readonly aggs: {
+            readonly composite: string;
+            readonly composite_missing_bucket: string;
             readonly date_histogram: string;
             readonly date_range: string;
             readonly date_format_pattern: string;
@@ -585,6 +588,7 @@ export interface DocLinksStart {
         };
         readonly date: {
             readonly dateMath: string;
+            readonly dateMathIndexNames: string;
         };
         readonly management: Record<string, string>;
         readonly ml: Record<string, string>;
@@ -598,6 +602,7 @@ export interface DocLinksStart {
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
+            cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
             openIndex: string;
@@ -605,6 +610,7 @@ export interface DocLinksStart {
             painlessExecute: string;
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
+            putSnapshotLifecyclePolicy: string;
             putWatch: string;
             updateTransform: string;
         }>;
@@ -626,6 +632,8 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
+        readonly plugins: Record<string, string>;
+        readonly snapshotRestore: Record<string, string>;
     };
 }
 

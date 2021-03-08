@@ -55,7 +55,6 @@ export function registerDownloadArtifactRoute(
       try {
         scopedSOClient = endpointContext.service.getScopedSavedObjectsClient(req);
         await authenticateAgentWithAccessToken(
-          scopedSOClient,
           context.core.elasticsearch.client.asInternalUser,
           req
         );
@@ -78,7 +77,7 @@ export function registerDownloadArtifactRoute(
         };
 
         if (validateDownload && !downloadArtifactResponseSchema.is(artifact)) {
-          return res.internalError({ body: 'Artifact failed to validate.' });
+          throw new Error('Artifact failed to validate.');
         } else {
           return res.ok(artifact);
         }
@@ -103,7 +102,7 @@ export function registerDownloadArtifactRoute(
             if (err?.output?.statusCode === 404) {
               return res.notFound({ body: `No artifact found for ${id}` });
             } else {
-              return res.internalError({ body: err });
+              throw err;
             }
           });
       }

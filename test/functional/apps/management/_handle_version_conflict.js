@@ -18,6 +18,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const es = getService('legacyEs');
@@ -65,6 +66,11 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('controls are open');
+      await (
+        await (await testSubjects.find('formatRow')).findAllByCssSelector(
+          '[data-test-subj="toggle"]'
+        )
+      )[0].click();
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update({
         index: '.kibana',

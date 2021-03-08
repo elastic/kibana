@@ -23,6 +23,8 @@ const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
   [ProcessorEvent.span]: 'apm_oss.spanIndices',
   [ProcessorEvent.metric]: 'apm_oss.metricsIndices',
   [ProcessorEvent.error]: 'apm_oss.errorIndices',
+  // TODO: should have its own config setting
+  [ProcessorEvent.profile]: 'apm_oss.transactionIndices',
 };
 
 export function unpackProcessorEvents(

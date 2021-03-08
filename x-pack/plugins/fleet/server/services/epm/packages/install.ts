@@ -8,58 +8,62 @@
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
-import { UnwrapPromise } from '@kbn/utility-types';
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type { UnwrapPromise } from '@kbn/utility-types';
+import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import { isRequiredPackage } from './index';
-import {
-  BulkInstallPackageInfo,
-  InstallablePackage,
-  InstallSource,
-  defaultPackages,
-} from '../../../../common';
-import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import {
-  AssetReference,
-  Installation,
-  CallESAsCurrentUser,
-  AssetType,
-  EsAssetReference,
-  InstallType,
-  KibanaAssetType,
-} from '../../../types';
-import * as Registry from '../registry';
-import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
-import {
-  getInstallation,
-  getInstallationObject,
-  bulkInstallPackages,
-  isBulkInstallError,
-} from './index';
-import { toAssetReference, ArchiveAsset } from '../kibana/assets/install';
-import { removeInstallation } from './remove';
+
+import { defaultPackages } from '../../../../common';
+import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
   PackageOutdatedError,
 } from '../../../errors';
-import { getPackageSavedObjects } from './get';
+import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
+import { KibanaAssetType } from '../../../types';
+import type {
+  AssetReference,
+  Installation,
+  AssetType,
+  EsAssetReference,
+  InstallType,
+} from '../../../types';
 import { appContextService } from '../../app_context';
+import * as Registry from '../registry';
+import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
+import { toAssetReference } from '../kibana/assets/install';
+import type { ArchiveAsset } from '../kibana/assets/install';
+
+import {
+  isRequiredPackage,
+  getInstallation,
+  getInstallationObject,
+  bulkInstallPackages,
+  isBulkInstallError,
+} from './index';
+import { removeInstallation } from './remove';
+import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, callCluster } = options;
+  const { savedObjectsClient, pkgName, esClient } = options;
   try {
     const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPackage.name,
       version: latestPackage.version,
     });
-    return installPackage({ installSource: 'registry', savedObjectsClient, pkgkey, callCluster });
+    return installPackage({
+      installSource: 'registry',
+      savedObjectsClient,
+      pkgkey,
+      esClient,
+    });
   } catch (err) {
     throw err;
   }
@@ -67,13 +71,13 @@ export async function installLatestPackage(options: {
 
 export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ): Promise<Installation[]> {
   const installations = [];
   const bulkResponse = await bulkInstallPackages({
     savedObjectsClient,
     packagesToUpgrade: Object.values(defaultPackages),
-    callCluster,
+    esClient,
   });
 
   for (const resp of bulkResponse) {
@@ -96,9 +100,9 @@ export async function ensureInstalledDefaultPackages(
 export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, callCluster } = options;
+  const { savedObjectsClient, pkgName, esClient } = options;
   const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
   if (installedPackage) {
     return installedPackage;
@@ -107,7 +111,7 @@ export async function ensureInstalledPackage(options: {
   await installLatestPackage({
     savedObjectsClient,
     pkgName,
-    callCluster,
+    esClient,
   });
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new Error(`could not get installation ${pkgName}`);
@@ -120,14 +124,14 @@ export async function handleInstallPackageFailure({
   pkgName,
   pkgVersion,
   installedPkg,
-  callCluster,
+  esClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: IngestManagerError | Boom.Boom | Error;
   pkgName: string;
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
 }) {
   if (error instanceof IngestManagerError) {
     return;
@@ -143,7 +147,7 @@ export async function handleInstallPackageFailure({
     const installType = getInstallType({ pkgVersion, installedPkg });
     if (installType === 'install' || installType === 'reinstall') {
       logger.error(`uninstalling ${pkgkey} after error installing`);
-      await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+      await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     }
 
     if (installType === 'update') {
@@ -159,7 +163,7 @@ export async function handleInstallPackageFailure({
         installSource: 'registry',
         savedObjectsClient,
         pkgkey: prevVersion,
-        callCluster,
+        esClient,
       });
     }
   } catch (e) {
@@ -175,14 +179,14 @@ export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageEr
 
 interface UpgradePackageParams {
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   installedPkg: UnwrapPromise<ReturnType<typeof getInstallationObject>>;
   latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
   pkgToUpgrade: string;
 }
 export async function upgradePackage({
   savedObjectsClient,
-  callCluster,
+  esClient,
   installedPkg,
   latestPkg,
   pkgToUpgrade,
@@ -198,7 +202,7 @@ export async function upgradePackage({
         installSource: 'registry',
         savedObjectsClient,
         pkgkey,
-        callCluster,
+        esClient,
       });
       return {
         name: pkgToUpgrade,
@@ -213,7 +217,7 @@ export async function upgradePackage({
         pkgName: latestPkg.name,
         pkgVersion: latestPkg.version,
         installedPkg,
-        callCluster,
+        esClient,
       });
       return { name: pkgToUpgrade, error: installFailed };
     }
@@ -234,14 +238,14 @@ export async function upgradePackage({
 interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   force?: boolean;
 }
 
 async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
-  callCluster,
+  esClient,
   force = false,
 }: InstallRegistryPackageParams): Promise<AssetReference[]> {
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -262,7 +266,7 @@ async function installPackageFromRegistry({
 
   return _installPackage({
     savedObjectsClient,
-    callCluster,
+    esClient,
     installedPkg,
     paths,
     packageInfo,
@@ -273,7 +277,7 @@ async function installPackageFromRegistry({
 
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   archiveBuffer: Buffer;
   contentType: string;
 }
@@ -284,7 +288,7 @@ export type InstallPackageParams =
 
 async function installPackageByUpload({
   savedObjectsClient,
-  callCluster,
+  esClient,
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<AssetReference[]> {
@@ -319,7 +323,7 @@ async function installPackageByUpload({
 
   return _installPackage({
     savedObjectsClient,
-    callCluster,
+    esClient,
     installedPkg,
     paths,
     packageInfo,
@@ -334,20 +338,20 @@ export async function installPackage(args: InstallPackageParams) {
   }
 
   if (args.installSource === 'registry') {
-    const { savedObjectsClient, pkgkey, callCluster, force } = args;
+    const { savedObjectsClient, pkgkey, esClient, force } = args;
 
     return installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
-      callCluster,
+      esClient,
       force,
     });
   } else if (args.installSource === 'upload') {
-    const { savedObjectsClient, callCluster, archiveBuffer, contentType } = args;
+    const { savedObjectsClient, esClient, archiveBuffer, contentType } = args;
 
     return installPackageByUpload({
       savedObjectsClient,
-      callCluster,
+      esClient,
       archiveBuffer,
       contentType,
     });
@@ -441,7 +445,7 @@ export const removeAssetsFromInstalledEsByType = async (
 
 export async function ensurePackagesCompletedInstall(
   savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ) {
   const installingPackages = await getPackageSavedObjects(savedObjectsClient, {
     searchFields: ['install_status'],
@@ -457,7 +461,12 @@ export async function ensurePackagesCompletedInstall(
     // reinstall package
     if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
       acc.push(
-        installPackage({ installSource: 'registry', savedObjectsClient, pkgkey, callCluster })
+        installPackage({
+          installSource: 'registry',
+          savedObjectsClient,
+          pkgkey,
+          esClient,
+        })
       );
     }
     return acc;
