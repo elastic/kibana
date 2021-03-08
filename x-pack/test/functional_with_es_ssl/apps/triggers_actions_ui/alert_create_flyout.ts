@@ -129,9 +129,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-rule.alertActionGroup');
+      await testSubjects.click('variableMenuButton-alert.actionGroup');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{rule.alertActionGroup}}'
+        'test message {{alert.actionGroup}}'
       );
       await messageTextArea.type(' some additional text ');
 
