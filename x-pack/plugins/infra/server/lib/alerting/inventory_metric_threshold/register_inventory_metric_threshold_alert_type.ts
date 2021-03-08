@@ -12,7 +12,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   ActionGroupIdsOf,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,

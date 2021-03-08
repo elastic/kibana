@@ -9,8 +9,8 @@
 import { startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import {
-  parseTimelionExpression,
+import { parseTimelionExpressionAsync } from '../../common/parser_async';
+import type {
   ParsedExpression,
   TimelionExpressionArgument,
   ExpressionLocation,
@@ -128,7 +128,7 @@ export async function suggest(
   argValueSuggestions: ArgValueSuggestions
 ) {
   try {
-    const result = parseTimelionExpression(expression);
+    const result = await parseTimelionExpressionAsync(expression);
 
     return await extractSuggestionsFromParsedResult(
       result,
