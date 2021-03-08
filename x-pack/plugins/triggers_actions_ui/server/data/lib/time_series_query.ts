@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { Logger, ElasticsearchClient } from 'kibana/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
@@ -127,29 +128,29 @@ export async function timeSeriesQuery(
 
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
   logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
-
+  let esResult: SearchResponse<unknown>;
   // note there are some commented out console.log()'s below, which are left
   // in, as they are VERY useful when debugging these queries; debug logging
   // isn't as nice since it's a single long JSON line.
 
   // console.log('time_series_query.ts request\n', JSON.stringify(esQuery, null, 4));
   try {
-    const { body: esResult } = await esClient.search(esQuery);
-    // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));
-    logger.debug(`${logPrefix} result: ${JSON.stringify(esResult)}`);
-    return getResultFromEs(isCountAgg, isGroupAgg, esResult);
+    esResult = (await esClient.search<SearchResponse<unknown>>(esQuery)).body;
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
     logger.warn(`${logPrefix} error: ${err.message}`);
     return { results: [] };
   }
+
+  // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));
+  logger.debug(`${logPrefix} result: ${JSON.stringify(esResult)}`);
+  return getResultFromEs(isCountAgg, isGroupAgg, esResult);
 }
 
 function getResultFromEs(
   isCountAgg: boolean,
   isGroupAgg: boolean,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  esResult: Record<string, any>
+  esResult: SearchResponse<unknown>
 ): TimeSeriesResult {
   const aggregations = esResult?.aggregations || {};
 
