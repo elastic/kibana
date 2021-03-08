@@ -120,8 +120,8 @@ export function useExplorerInputResolver(
             swimlaneType: swimlaneTypeInput,
             // perPage: perPageInput,
             timeRange,
-            // filters,
-            // query,
+            filters,
+            query,
             // viewMode,
           } = input;
 
@@ -142,9 +142,15 @@ export function useExplorerInputResolver(
             };
           });
 
-          // @TODO: change this to viewBySwimlaneFieldName !== undefined
           if (viewBySwimlaneFieldName !== undefined) {
-            const influencersFilterQuery = undefined;
+            let influencersFilterQuery: any;
+            try {
+              influencersFilterQuery = processFilters(filters, query);
+            } catch (e) {
+              // handle query syntax errors
+              setError(e);
+              return of(undefined);
+            }
 
             const selectionInfluencers = getSelectionInfluencers(
               selections,
