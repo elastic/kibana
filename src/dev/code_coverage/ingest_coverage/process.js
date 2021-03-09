@@ -7,7 +7,7 @@
  */
 
 import { fromEventPattern, fromEvent } from 'rxjs';
-import { map, mergeMap, takeUntil, bufferCount } from 'rxjs/operators';
+import { map, takeUntil, bufferCount } from 'rxjs/operators';
 import jsonStream from './json_stream';
 import { pipe, noop } from './utils';
 import { ingestList } from './ingest';
@@ -58,10 +58,10 @@ const transform = (jsonSummaryPath) => (log) => (vcsInfo) => (teamAssignmentsPat
           ciRunUrl,
           addJsonSummaryPath(jsonSummaryPath),
           testRunner,
-          staticSite(staticSiteUrlBase)
+          staticSite(staticSiteUrlBase),
+          assignTeams
         )
       ),
-      mergeMap(assignTeams),
       bufferCount(BUFFER_SIZE)
     )
     .subscribe(ingestList(log));
