@@ -6,3 +6,4 @@
  */
 
 export { CurationLogic } from './curation_logic';
+export { Curation } from './curation';
