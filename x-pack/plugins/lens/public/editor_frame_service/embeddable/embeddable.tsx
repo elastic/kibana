@@ -375,6 +375,9 @@ export class Embeddable
   };
 
   async reload() {
+    if (!this.savedVis || !this.isInitialized) {
+      return;
+    }
     this.handleContainerStateChanged(this.input);
     if (this.domNode) {
       this.render(this.domNode);
