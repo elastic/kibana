@@ -52,6 +52,7 @@ interface ExpandableEventTitleProps {
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   flex: 0 1 auto;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeS};`}
 `;
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
@@ -67,7 +68,7 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
   ({ isAlert, loading, handleOnEventClosed }) => (
-    <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+    <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
