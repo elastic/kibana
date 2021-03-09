@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import Joi from 'joi';
 import { errors } from '@elastic/elasticsearch';
 import { has, snakeCase } from 'lodash/fp';
-import { SanitizedAlert } from '../../../../../alerts/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 
 import {
   RouteValidationFunction,
@@ -17,7 +17,7 @@ import {
   CustomHttpResponseOptions,
   SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
-import { AlertsClient } from '../../../../../alerts/server';
+import { AlertsClient } from '../../../../../alerting/server';
 import { BadRequestError } from '../errors/bad_request_error';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
