@@ -36,7 +36,7 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
         averageDuration: null,
       };
     }
-    const { successCount, errorCount, totalDuration } = esResponse.hits.hits[0]._source[
+    const { successCount, errorCount, totalDuration } = esResponse.hits.hits[0]._source![
       'search-telemetry'
     ];
     const averageDuration = totalDuration / successCount;
