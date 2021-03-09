@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started by a System Process",
   "query": "event.category:process and event.type:(start or process_started) and process.name:MSBuild.exe and process.parent.name:(explorer.exe or wmiprvse.exe)",
   "risk_score": 47,
