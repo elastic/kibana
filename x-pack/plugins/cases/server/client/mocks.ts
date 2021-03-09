@@ -15,12 +15,12 @@ import {
   CaseUserActionServiceSetup,
   ConnectorMappingsService,
 } from '../services';
-import { CaseClient } from './types';
+import { CasesClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
-import { createExternalCaseClient } from '.';
+import { createExternalCasesClient } from '.';
 
-export type CaseClientPluginContractMock = jest.Mocked<CaseClient>;
-export const createExternalCaseClientMock = (): CaseClientPluginContractMock => ({
+export type CasesClientPluginContractMock = jest.Mocked<CasesClient>;
+export const createExternalCasesClientMock = (): CasesClientPluginContractMock => ({
   addComment: jest.fn(),
   create: jest.fn(),
   get: jest.fn(),
@@ -33,7 +33,7 @@ export const createExternalCaseClientMock = (): CaseClientPluginContractMock => 
   updateAlertsStatus: jest.fn(),
 });
 
-export const createCaseClientWithMockSavedObjectsClient = async ({
+export const createCasesClientWithMockSavedObjectsClient = async ({
   savedObjectsClient,
   badAuth = false,
   omitFromContext = [],
@@ -42,7 +42,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
   badAuth?: boolean;
   omitFromContext?: string[];
 }): Promise<{
-  client: CaseClient;
+  client: CasesClient;
   services: {
     userActionService: jest.Mocked<CaseUserActionServiceSetup>;
     alertsService: jest.Mocked<AlertServiceContract>;
@@ -71,7 +71,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     getAlerts: jest.fn(),
   };
 
-  const caseClient = createExternalCaseClient({
+  const casesClient = createExternalCasesClient({
     savedObjectsClient,
     user: auth.getCurrentUser(),
     caseService,
@@ -83,7 +83,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     logger: log,
   });
   return {
-    client: caseClient,
+    client: casesClient,
     services: { userActionService, alertsService },
     esClient,
   };

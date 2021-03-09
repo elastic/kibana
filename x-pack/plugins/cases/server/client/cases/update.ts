@@ -51,7 +51,7 @@ import {
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
 } from '../../saved_object_types';
-import { CaseClientHandler } from '..';
+import { CasesClientHandler } from '..';
 import { createAlertUpdateRequest } from '../../common';
 import { UpdateAlertRequest } from '../types';
 import { createCaseError } from '../../common/error';
@@ -254,14 +254,14 @@ async function updateAlerts({
   casesMap,
   caseService,
   client,
-  caseClient,
+  casesClient,
 }: {
   casesWithSyncSettingChangedToOn: ESCasePatchRequest[];
   casesWithStatusChangedAndSynced: ESCasePatchRequest[];
   casesMap: Map<string, SavedObject<ESCaseAttributes>>;
   caseService: CaseServiceSetup;
   client: SavedObjectsClientContract;
-  caseClient: CaseClientHandler;
+  casesClient: CasesClientHandler;
 }) {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -309,7 +309,7 @@ async function updateAlerts({
     []
   );
 
-  await caseClient.updateAlertsStatus({ alerts: alertsToUpdate });
+  await casesClient.updateAlertsStatus({ alerts: alertsToUpdate });
 }
 
 interface UpdateArgs {
@@ -317,7 +317,7 @@ interface UpdateArgs {
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
   user: User;
-  caseClient: CaseClientHandler;
+  casesClient: CasesClientHandler;
   cases: CasesPatchRequest;
   logger: Logger;
 }
@@ -327,7 +327,7 @@ export const update = async ({
   caseService,
   userActionService,
   user,
-  caseClient,
+  casesClient,
   cases,
   logger,
 }: UpdateArgs): Promise<CasesResponse> => {
@@ -470,7 +470,7 @@ export const update = async ({
       casesWithSyncSettingChangedToOn,
       caseService,
       client: savedObjectsClient,
-      caseClient,
+      casesClient,
       casesMap,
     });
 

@@ -126,12 +126,12 @@ describe('Push case', () => {
       })
     );
 
-    const caseClient = context.case.getCaseClient();
-    caseClient.getAlerts = jest.fn().mockResolvedValue([]);
+    const casesClient = context.cases.getCasesClient();
+    casesClient.getAlerts = jest.fn().mockResolvedValue([]);
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(caseClient.getAlerts).toHaveBeenCalledWith({
+    expect(casesClient.getAlerts).toHaveBeenCalledWith({
       alertsInfo: [{ id: 'test-id', index: 'test-index' }],
     });
   });

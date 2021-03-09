@@ -7,16 +7,16 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
 import {
-  CaseClientFactoryArguments,
-  CaseClient,
+  CasesClientFactoryArguments,
+  CasesClient,
   ConfigureFields,
   MappingsClient,
-  CaseClientUpdateAlertsStatus,
-  CaseClientAddComment,
-  CaseClientGet,
-  CaseClientGetUserActions,
-  CaseClientGetAlerts,
-  CaseClientPush,
+  CasesClientUpdateAlertsStatus,
+  CasesClientAddComment,
+  CasesClientGet,
+  CasesClientGetUserActions,
+  CasesClientGetAlerts,
+  CasesClientPush,
 } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
@@ -41,7 +41,7 @@ import { createCaseError } from '../common/error';
 /**
  * This class is a pass through for common case functionality (like creating, get a case).
  */
-export class CaseClientHandler implements CaseClient {
+export class CasesClientHandler implements CasesClient {
   private readonly _scopedClusterClient: ElasticsearchClient;
   private readonly _caseConfigureService: CaseConfigureServiceSetup;
   private readonly _caseService: CaseServiceSetup;
@@ -52,7 +52,7 @@ export class CaseClientHandler implements CaseClient {
   private readonly _alertsService: AlertServiceContract;
   private readonly logger: Logger;
 
-  constructor(clientArgs: CaseClientFactoryArguments) {
+  constructor(clientArgs: CasesClientFactoryArguments) {
     this._scopedClusterClient = clientArgs.scopedClusterClient;
     this._caseConfigureService = clientArgs.caseConfigureService;
     this._caseService = clientArgs.caseService;
@@ -92,7 +92,7 @@ export class CaseClientHandler implements CaseClient {
         userActionService: this._userActionService,
         user: this.user,
         cases,
-        caseClient: this,
+        casesClient: this,
         logger: this.logger,
       });
     } catch (error) {
@@ -108,13 +108,13 @@ export class CaseClientHandler implements CaseClient {
     }
   }
 
-  public async addComment({ caseId, comment }: CaseClientAddComment) {
+  public async addComment({ caseId, comment }: CasesClientAddComment) {
     try {
       return addComment({
         savedObjectsClient: this._savedObjectsClient,
         caseService: this._caseService,
         userActionService: this._userActionService,
-        caseClient: this,
+        casesClient: this,
         caseId,
         comment,
         user: this.user,
@@ -147,7 +147,7 @@ export class CaseClientHandler implements CaseClient {
         ...args,
         savedObjectsClient: this._savedObjectsClient,
         connectorMappingsService: this._connectorMappingsService,
-        caseClient: this,
+        casesClient: this,
         logger: this.logger,
       });
     } catch (error) {
@@ -159,7 +159,7 @@ export class CaseClientHandler implements CaseClient {
     }
   }
 
-  public async updateAlertsStatus(args: CaseClientUpdateAlertsStatus) {
+  public async updateAlertsStatus(args: CasesClientUpdateAlertsStatus) {
     try {
       return updateAlertsStatus({
         ...args,
@@ -178,7 +178,7 @@ export class CaseClientHandler implements CaseClient {
     }
   }
 
-  public async get(args: CaseClientGet) {
+  public async get(args: CasesClientGet) {
     try {
       return get({
         ...args,
@@ -192,7 +192,7 @@ export class CaseClientHandler implements CaseClient {
     }
   }
 
-  public async getUserActions(args: CaseClientGetUserActions) {
+  public async getUserActions(args: CasesClientGetUserActions) {
     try {
       return getUserActions({
         ...args,
@@ -208,7 +208,7 @@ export class CaseClientHandler implements CaseClient {
     }
   }
 
-  public async getAlerts(args: CaseClientGetAlerts) {
+  public async getAlerts(args: CasesClientGetAlerts) {
     try {
       return getAlerts({
         ...args,
@@ -227,7 +227,7 @@ export class CaseClientHandler implements CaseClient {
     }
   }
 
-  public async push(args: CaseClientPush) {
+  public async push(args: CasesClientPush) {
     try {
       return push({
         ...args,
@@ -235,7 +235,7 @@ export class CaseClientHandler implements CaseClient {
         caseService: this._caseService,
         userActionService: this._userActionService,
         user: this.user,
-        caseClient: this,
+        casesClient: this,
         caseConfigureService: this._caseConfigureService,
         logger: this.logger,
       });

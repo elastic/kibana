@@ -34,7 +34,7 @@ import {
   excess,
   throwErrors,
   CaseStatuses,
-  CaseClientPostRequest,
+  CasesClientPostRequest,
   AssociationType,
   SubCaseAttributes,
   SubCaseResponse,
@@ -79,7 +79,7 @@ export const transformNewCase = ({
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
-  newCase: CaseClientPostRequest;
+  newCase: CasesClientPostRequest;
   username?: string | null;
 }): ESCaseAttributes => ({
   ...newCase,

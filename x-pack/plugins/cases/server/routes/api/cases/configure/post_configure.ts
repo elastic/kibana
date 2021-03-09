@@ -40,10 +40,10 @@ export function initPostCaseConfigure({
     async (context, request, response) => {
       try {
         let error = null;
-        if (!context.case) {
+        if (!context.cases) {
           throw Boom.badRequest('RouteHandlerContext is not registered for cases');
         }
-        const caseClient = context.cases.getCaseClient();
+        const casesClient = context.cases.getCasesClient();
         const actionsClient = context.actions?.getActionsClient();
         if (actionsClient == null) {
           throw Boom.notFound('Action client not found');
@@ -68,7 +68,7 @@ export function initPostCaseConfigure({
         const creationDate = new Date().toISOString();
         let mappings: ConnectorMappingsAttributes[] = [];
         try {
-          mappings = await caseClient.getMappings({
+          mappings = await casesClient.getMappings({
             actionsClient,
             connectorId: query.connector.id,
             connectorType: query.connector.type,

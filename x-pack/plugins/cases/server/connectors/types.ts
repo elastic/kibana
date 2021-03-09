@@ -14,7 +14,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../actions/server/types';
 import { CaseResponse, ConnectorTypes } from '../../common/api';
-import { CaseClientGetAlertsResponse } from '../client/alerts/types';
+import { CasesClientGetAlertsResponse } from '../client/alerts/types';
 import {
   CaseServiceSetup,
   CaseConfigureServiceSetup,
@@ -52,7 +52,7 @@ export interface RegisterConnectorsArgs extends GetActionTypeParams {
 export type FormatterConnectorTypes = Exclude<ConnectorTypes, ConnectorTypes.none>;
 
 export interface ExternalServiceFormatter<TExternalServiceParams = {}> {
-  format: (theCase: CaseResponse, alerts: CaseClientGetAlertsResponse) => TExternalServiceParams;
+  format: (theCase: CaseResponse, alerts: CasesClientGetAlertsResponse) => TExternalServiceParams;
 }
 
 export type ExternalServiceFormatterMapper = {

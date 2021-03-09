@@ -13,7 +13,7 @@ import {
   mockCaseComments,
   mockCases,
 } from '../../routes/api/__fixtures__';
-import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
+import { createCasesClientWithMockSavedObjectsClient } from '../mocks';
 
 type AlertComment = CommentType.alert | CommentType.generatedAlert;
 
@@ -33,8 +33,8 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.addComment({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.addComment({
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -71,8 +71,8 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.addComment({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.addComment({
         caseId: 'mock-id-1',
         comment: {
           type: CommentType.alert,
@@ -119,8 +119,8 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.addComment({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.addComment({
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -142,8 +142,8 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      await caseClient.client.addComment({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      await casesClient.client.addComment({
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -152,7 +152,7 @@ describe('addComment', () => {
       });
 
       expect(
-        caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
+        casesClient.services.userActionService.postUserActions.mock.calls[0][0].actions
       ).toEqual([
         {
           attributes: {
@@ -189,11 +189,11 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({
         savedObjectsClient,
         badAuth: true,
       });
-      const res = await caseClient.client.addComment({
+      const res = await casesClient.client.addComment({
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -229,14 +229,14 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({
         savedObjectsClient,
         badAuth: true,
       });
 
-      caseClient.client.updateAlertsStatus = jest.fn();
+      casesClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.addComment({
+      await casesClient.client.addComment({
         caseId: 'mock-id-1',
         comment: {
           type: CommentType.alert,
@@ -249,7 +249,7 @@ describe('addComment', () => {
         },
       });
 
-      expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
+      expect(casesClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         alerts: [{ id: 'test-alert', index: 'test-index', status: 'open' }],
       });
     });
@@ -265,14 +265,14 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({
         savedObjectsClient,
         badAuth: true,
       });
 
-      caseClient.client.updateAlertsStatus = jest.fn();
+      casesClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.addComment({
+      await casesClient.client.addComment({
         caseId: 'mock-id-1',
         comment: {
           type: CommentType.alert,
@@ -285,7 +285,7 @@ describe('addComment', () => {
         },
       });
 
-      expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
+      expect(casesClient.client.updateAlertsStatus).not.toHaveBeenCalled();
     });
   });
 
@@ -297,8 +297,8 @@ describe('addComment', () => {
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      return caseClient.client
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return casesClient.client
         .addComment({
           caseId: 'mock-id-1',
           // @ts-expect-error
@@ -319,7 +319,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       const allRequestAttributes = {
         type: CommentType.user,
         comment: 'a comment',
@@ -327,7 +327,7 @@ describe('addComment', () => {
 
       ['comment'].forEach((attribute) => {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        return caseClient.client
+        return casesClient.client
           .addComment({
             caseId: 'mock-id-1',
             // @ts-expect-error
@@ -351,10 +351,10 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       ['alertId', 'index'].forEach((attribute) => {
-        return caseClient.client
+        return casesClient.client
           .addComment({
             caseId: 'mock-id-1',
             comment: {
@@ -379,7 +379,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       const allRequestAttributes = {
         type: CommentType.alert,
         index: 'test-index',
@@ -388,7 +388,7 @@ describe('addComment', () => {
 
       ['alertId', 'index'].forEach((attribute) => {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        return caseClient.client
+        return casesClient.client
           .addComment({
             caseId: 'mock-id-1',
             // @ts-expect-error
@@ -412,10 +412,10 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       ['comment'].forEach((attribute) => {
-        return caseClient.client
+        return casesClient.client
           .addComment({
             caseId: 'mock-id-1',
             comment: {
@@ -444,8 +444,8 @@ describe('addComment', () => {
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      return caseClient.client
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return casesClient.client
         .addComment({
           caseId: 'not-exists',
           comment: {
@@ -469,8 +469,8 @@ describe('addComment', () => {
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      return caseClient.client
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return casesClient.client
         .addComment({
           caseId: 'mock-id-1',
           comment: {
@@ -495,8 +495,8 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      return caseClient.client
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return casesClient.client
         .addComment({
           caseId: 'mock-id-4',
           comment: {
@@ -534,11 +534,11 @@ describe('addComment', () => {
             caseCommentSavedObject: mockCaseComments,
           });
 
-          const caseClient = await createCaseClientWithMockSavedObjectsClient({
+          const casesClient = await createCasesClientWithMockSavedObjectsClient({
             savedObjectsClient,
           });
           await expect(
-            caseClient.client.addComment({
+            casesClient.client.addComment({
               caseId: 'mock-id-4',
               comment: {
                 // casting because type must be either alert or generatedAlert but type is CommentType
@@ -568,11 +568,11 @@ describe('addComment', () => {
             caseCommentSavedObject: mockCaseComments,
           });
 
-          const caseClient = await createCaseClientWithMockSavedObjectsClient({
+          const casesClient = await createCasesClientWithMockSavedObjectsClient({
             savedObjectsClient,
           });
           await expect(
-            caseClient.client.addComment({
+            casesClient.client.addComment({
               caseId: 'mock-id-1',
               comment: {
                 // casting because type must be either alert or generatedAlert but type is CommentType

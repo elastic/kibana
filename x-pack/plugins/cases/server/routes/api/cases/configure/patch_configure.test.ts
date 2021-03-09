@@ -19,7 +19,7 @@ import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPatchCaseConfigure } from './patch_configure';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 import { ConnectorTypes } from '../../../../../common/api/connectors';
-import { CaseClient } from '../../../../client';
+import { CasesClient } from '../../../../client';
 
 describe('PATCH configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -161,15 +161,15 @@ describe('PATCH configuration', () => {
     );
     const mockThrowContext = {
       ...context,
-      case: {
-        ...context.case,
-        getCaseClient: () =>
+      cases: {
+        ...context.cases,
+        getCasesClient: () =>
           ({
-            ...context?.case?.getCaseClient(),
+            ...context?.cases?.getCasesClient(),
             getMappings: () => {
               throw new Error();
             },
-          } as CaseClient),
+          } as CasesClient),
       },
     };
 

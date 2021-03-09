@@ -67,16 +67,16 @@ export function initPatchCaseConfigure({
 
         let mappings: ConnectorMappingsAttributes[] = [];
         if (connector != null) {
-          if (!context.case) {
+          if (!context.cases) {
             throw Boom.badRequest('RouteHandlerContext is not registered for cases');
           }
-          const caseClient = context.cases.getCaseClient();
+          const casesClient = context.cases.getCasesClient();
           const actionsClient = context.actions?.getActionsClient();
           if (actionsClient == null) {
             throw Boom.notFound('Action client have not been found');
           }
           try {
-            mappings = await caseClient.getMappings({
+            mappings = await casesClient.getMappings({
               actionsClient,
               connectorId: connector.id,
               connectorType: connector.type,

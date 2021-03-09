@@ -105,7 +105,7 @@ export const constructQueryOptions = ({
   status?: CaseStatuses;
   sortByField?: string;
   caseType?: CaseType;
-}): { case: SavedObjectFindOptions; subCase?: SavedObjectFindOptions } => {
+}): { cases: SavedObjectFindOptions; subCase?: SavedObjectFindOptions } => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'OR' });
   const reportersFilter = buildFilter({
     filters: reporters,

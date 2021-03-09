@@ -14,7 +14,7 @@ import {
   CommentRequest,
   CommentType,
 } from '../../../common/api';
-import { createExternalCaseClient } from '../../client';
+import { createExternalCasesClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
   CaseExecutorResponse,
@@ -75,7 +75,7 @@ async function executor(
   let data: CaseExecutorResponse | null = null;
 
   const { savedObjectsClient, scopedClusterClient } = services;
-  const caseClient = createExternalCaseClient({
+  const casesClient = createExternalCasesClient({
     savedObjectsClient,
     scopedClusterClient,
     // we might want the user information to be passed as part of the action request
@@ -96,7 +96,7 @@ async function executor(
 
   if (subAction === 'create') {
     try {
-      data = await caseClient.create({
+      data = await casesClient.create({
         ...(subActionParams as CasePostRequest),
       });
     } catch (error) {
@@ -118,7 +118,7 @@ async function executor(
     );
 
     try {
-      data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+      data = await casesClient.update({ cases: [updateParamsWithoutNullValues] });
     } catch (error) {
       throw createCaseError({
         message: `Failed to update case using connector id: ${updateParamsWithoutNullValues?.id} version: ${updateParamsWithoutNullValues?.version}: ${error}`,
@@ -132,7 +132,7 @@ async function executor(
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
     try {
       const formattedComment = transformConnectorComment(comment, logger);
-      data = await caseClient.addComment({ caseId, comment: formattedComment });
+      data = await casesClient.addComment({ caseId, comment: formattedComment });
     } catch (error) {
       throw createCaseError({
         message: `Failed to create comment using connector case id: ${caseId}: ${error}`,

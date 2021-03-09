@@ -20,8 +20,8 @@ import {
 } from '../services/mocks';
 
 jest.mock('./client');
-import { CaseClientHandler } from './client';
-import { createExternalCaseClient } from './index';
+import { CasesClientHandler } from './client';
+import { createExternalCasesClient } from './index';
 
 const logger = loggingSystemMock.create().get('case');
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -32,9 +32,9 @@ const connectorMappingsService = connectorMappingsServiceMock();
 const savedObjectsClient = savedObjectsClientMock.create();
 const userActionService = createUserActionServiceMock();
 
-describe('createExternalCaseClient()', () => {
+describe('createExternalCasesClient()', () => {
   test('it creates the client correctly', async () => {
-    createExternalCaseClient({
+    createExternalCasesClient({
       scopedClusterClient: esClient,
       alertsService,
       caseConfigureService,
@@ -45,6 +45,6 @@ describe('createExternalCaseClient()', () => {
       userActionService,
       logger,
     });
-    expect(CaseClientHandler).toHaveBeenCalledTimes(1);
+    expect(CasesClientHandler).toHaveBeenCalledTimes(1);
   });
 });

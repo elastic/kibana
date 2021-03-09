@@ -8,7 +8,7 @@
 import { ConnectorTypes } from '../../../common/api';
 
 import { createMockSavedObjectsRepository, mockCaseMappings } from '../../routes/api/__fixtures__';
-import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
+import { createCasesClientWithMockSavedObjectsClient } from '../mocks';
 import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
 import { mappings, mockGetFieldsResponse } from './mock';
 
@@ -28,8 +28,8 @@ describe('get_mappings', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: mockCaseMappings,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.getMappings({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.getMappings({
         actionsClient: actionsMock,
         connectorType: ConnectorTypes.jira,
         connectorId: '123',
@@ -41,8 +41,8 @@ describe('get_mappings', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: [],
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.getMappings({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.getMappings({
         actionsClient: actionsMock,
         connectorType: ConnectorTypes.jira,
         connectorId: '123',

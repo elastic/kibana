@@ -20,7 +20,7 @@ import { initPostCaseConfigure } from './post_configure';
 import { newConfiguration } from '../../__mocks__/request_responses';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 import { ConnectorTypes } from '../../../../../common/api/connectors';
-import { CaseClient } from '../../../../client';
+import { CasesClient } from '../../../../client';
 
 describe('POST configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -81,15 +81,15 @@ describe('POST configuration', () => {
     );
     const mockThrowContext = {
       ...context,
-      case: {
-        ...context.case,
-        getCaseClient: () =>
+      cases: {
+        ...context.cases,
+        getCasesClient: () =>
           ({
-            ...context?.case?.getCaseClient(),
+            ...context?.cases?.getCasesClient(),
             getMappings: () => {
               throw new Error();
             },
-          } as CaseClient),
+          } as CasesClient),
       },
     };
 

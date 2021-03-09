@@ -38,7 +38,7 @@ import {
   CaseServiceSetup,
   CaseUserActionServiceSetup,
 } from '../../services';
-import { CaseClientHandler } from '../client';
+import { CasesClientHandler } from '../client';
 import { createCaseError } from '../../common/error';
 
 /**
@@ -65,7 +65,7 @@ interface PushParams {
   user: User;
   caseId: string;
   connectorId: string;
-  caseClient: CaseClientHandler;
+  casesClient: CasesClientHandler;
   actionsClient: ActionsClient;
   logger: Logger;
 }
@@ -75,7 +75,7 @@ export const push = async ({
   caseService,
   caseConfigureService,
   userActionService,
-  caseClient,
+  casesClient,
   actionsClient,
   connectorId,
   caseId,
@@ -92,9 +92,9 @@ export const push = async ({
 
   try {
     [theCase, connector, userActions] = await Promise.all([
-      caseClient.get({ id: caseId, includeComments: true, includeSubCaseComments: true }),
+      casesClient.get({ id: caseId, includeComments: true, includeSubCaseComments: true }),
       actionsClient.get({ id: connectorId }),
-      caseClient.getUserActions({ caseId }),
+      casesClient.getUserActions({ caseId }),
     ]);
   } catch (e) {
     const message = `Error getting case and/or connector and/or user actions: ${e.message}`;
@@ -111,7 +111,7 @@ export const push = async ({
   const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
   try {
-    alerts = await caseClient.getAlerts({
+    alerts = await casesClient.getAlerts({
       alertsInfo,
     });
   } catch (e) {
@@ -123,7 +123,7 @@ export const push = async ({
   }
 
   try {
-    connectorMappings = await caseClient.getMappings({
+    connectorMappings = await casesClient.getMappings({
       actionsClient,
       connectorId: connector.id,
       connectorType: connector.actionTypeId,

@@ -33,7 +33,7 @@ import {
 
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CommentableCase, createAlertUpdateRequest } from '../../common';
-import { CaseClientHandler } from '..';
+import { CasesClientHandler } from '..';
 import { createCaseError } from '../../common/error';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
 import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
@@ -95,7 +95,7 @@ async function getSubCase({
 }
 
 interface AddCommentFromRuleArgs {
-  caseClient: CaseClientHandler;
+  casesClient: CasesClientHandler;
   caseId: string;
   comment: CommentRequestAlertType;
   savedObjectsClient: SavedObjectsClientContract;
@@ -108,7 +108,7 @@ const addGeneratedAlerts = async ({
   savedObjectsClient,
   caseService,
   userActionService,
-  caseClient,
+  casesClient,
   caseId,
   comment,
   logger,
@@ -177,7 +177,7 @@ const addGeneratedAlerts = async ({
         comment: query,
         status: subCase.attributes.status,
       });
-      await caseClient.updateAlertsStatus({
+      await casesClient.updateAlertsStatus({
         alerts: alertsToUpdate,
       });
     }
@@ -261,7 +261,7 @@ async function getCombinedCase({
 }
 
 interface AddCommentArgs {
-  caseClient: CaseClientHandler;
+  casesClient: CasesClientHandler;
   caseId: string;
   comment: CommentRequest;
   savedObjectsClient: SavedObjectsClientContract;
@@ -275,7 +275,7 @@ export const addComment = async ({
   savedObjectsClient,
   caseService,
   userActionService,
-  caseClient,
+  casesClient,
   caseId,
   comment,
   user,
@@ -290,7 +290,7 @@ export const addComment = async ({
     return addGeneratedAlerts({
       caseId,
       comment,
-      caseClient,
+      casesClient,
       savedObjectsClient,
       userActionService,
       caseService,
@@ -329,7 +329,7 @@ export const addComment = async ({
         status: updatedCase.status,
       });
 
-      await caseClient.updateAlertsStatus({
+      await casesClient.updateAlertsStatus({
         alerts: alertsToUpdate,
       });
     }

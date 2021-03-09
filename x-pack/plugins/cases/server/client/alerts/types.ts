@@ -16,4 +16,4 @@ interface Alert {
   };
 }
 
-export type CaseClientGetAlertsResponse = Alert[];
+export type CasesClientGetAlertsResponse = Alert[];

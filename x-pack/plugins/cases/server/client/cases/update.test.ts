@@ -13,7 +13,7 @@ import {
   mockCases,
   mockCaseComments,
 } from '../../routes/api/__fixtures__';
-import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
+import { createCasesClientWithMockSavedObjectsClient } from '../mocks';
 
 describe('update', () => {
   beforeEach(async () => {
@@ -40,8 +40,8 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update(patchCases);
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.update(patchCases);
 
       expect(res).toMatchInlineSnapshot(`
         Array [
@@ -93,7 +93,7 @@ describe('update', () => {
       `);
 
       expect(
-        caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
+        casesClient.services.userActionService.postUserActions.mock.calls[0][0].actions
       ).toEqual([
         {
           attributes: {
@@ -140,8 +140,8 @@ describe('update', () => {
         ],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update(patchCases);
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.update(patchCases);
 
       expect(res).toMatchInlineSnapshot(`
         Array [
@@ -204,8 +204,8 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update(patchCases);
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.update(patchCases);
 
       expect(res).toMatchInlineSnapshot(`
         Array [
@@ -272,8 +272,8 @@ describe('update', () => {
         caseSavedObject: [mockCaseNoConnectorId],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update(patchCases);
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.update(patchCases);
 
       expect(res).toMatchInlineSnapshot(`
         Array [
@@ -344,8 +344,8 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.update(patchCases);
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.update(patchCases);
 
       expect(res).toMatchInlineSnapshot(`
         Array [
@@ -424,12 +424,12 @@ describe('update', () => {
         ],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.updateAlertsStatus = jest.fn();
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      casesClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update(patchCases);
+      await casesClient.client.update(patchCases);
 
-      expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
+      expect(casesClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         alerts: [
           {
             id: 'test-id',
@@ -461,11 +461,11 @@ describe('update', () => {
         caseCommentSavedObject: [{ ...mockCaseComments[3] }],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
 
-      await caseClient.client.update(patchCases);
+      await casesClient.client.update(patchCases);
 
-      expect(caseClient.esClient.bulk).not.toHaveBeenCalled();
+      expect(casesClient.esClient.bulk).not.toHaveBeenCalled();
     });
 
     test('it updates alert status when syncAlerts is turned on', async () => {
@@ -489,12 +489,12 @@ describe('update', () => {
         caseCommentSavedObject: [{ ...mockCaseComments[3] }],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.updateAlertsStatus = jest.fn();
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      casesClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update(patchCases);
+      await casesClient.client.update(patchCases);
 
-      expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
+      expect(casesClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         alerts: [{ id: 'test-id', index: 'test-index', status: 'open' }],
       });
     });
@@ -515,11 +515,11 @@ describe('update', () => {
         caseCommentSavedObject: [{ ...mockCaseComments[3] }],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
 
-      await caseClient.client.update(patchCases);
+      await casesClient.client.update(patchCases);
 
-      expect(caseClient.esClient.bulk).not.toHaveBeenCalled();
+      expect(casesClient.esClient.bulk).not.toHaveBeenCalled();
     });
 
     test('it updates alert status for multiple cases', async () => {
@@ -572,12 +572,12 @@ describe('update', () => {
         ],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.updateAlertsStatus = jest.fn();
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      casesClient.client.updateAlertsStatus = jest.fn();
 
-      await caseClient.client.update(patchCases);
+      await casesClient.client.update(patchCases);
 
-      expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
+      expect(casesClient.client.updateAlertsStatus).toHaveBeenCalledWith({
         alerts: [
           { id: 'test-id', index: 'test-index', status: 'open' },
           { id: 'test-id-2', index: 'test-index-2', status: 'closed' },
@@ -600,11 +600,11 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
 
-      await caseClient.client.update(patchCases);
+      await casesClient.client.update(patchCases);
 
-      expect(caseClient.esClient.bulk).not.toHaveBeenCalled();
+      expect(casesClient.esClient.bulk).not.toHaveBeenCalled();
     });
   });
 
@@ -629,9 +629,9 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       return (
-        caseClient.client
+        casesClient.client
           // @ts-expect-error
           .update({ cases: patchCases })
           .catch((e) => {
@@ -662,9 +662,9 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       return (
-        caseClient.client
+        casesClient.client
           // @ts-expect-error
           .update({ cases: patchCases })
           .catch((e) => {
@@ -691,8 +691,8 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      return caseClient.client.update(patchCases).catch((e) => {
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return casesClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
         expect(isCaseError(e)).toBeTruthy();
         const boomErr = e.boomify();
@@ -723,8 +723,8 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      return caseClient.client.update(patchCases).catch((e) => {
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return casesClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
         expect(isCaseError(e)).toBeTruthy();
         const boomErr = e.boomify();
@@ -752,8 +752,8 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      return caseClient.client.update(patchCases).catch((e) => {
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return casesClient.client.update(patchCases).catch((e) => {
         expect(e).not.toBeNull();
         expect(isCaseError(e)).toBeTruthy();
         const boomErr = e.boomify();

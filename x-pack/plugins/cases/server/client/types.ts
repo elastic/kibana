@@ -27,34 +27,34 @@ import {
   AlertServiceContract,
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
-import { CaseClientGetAlertsResponse } from './alerts/types';
+import { CasesClientGetAlertsResponse } from './alerts/types';
 
-export interface CaseClientGet {
+export interface CasesClientGet {
   id: string;
   includeComments?: boolean;
   includeSubCaseComments?: boolean;
 }
 
-export interface CaseClientPush {
+export interface CasesClientPush {
   actionsClient: ActionsClient;
   caseId: string;
   connectorId: string;
 }
 
-export interface CaseClientAddComment {
+export interface CasesClientAddComment {
   caseId: string;
   comment: CommentRequest;
 }
 
-export interface CaseClientUpdateAlertsStatus {
+export interface CasesClientUpdateAlertsStatus {
   alerts: UpdateAlertRequest[];
 }
 
-export interface CaseClientGetAlerts {
+export interface CasesClientGetAlerts {
   alertsInfo: AlertInfo[];
 }
 
-export interface CaseClientGetUserActions {
+export interface CasesClientGetUserActions {
   caseId: string;
   subCaseId?: string;
 }
@@ -65,7 +65,7 @@ export interface MappingsClient {
   connectorType: string;
 }
 
-export interface CaseClientFactoryArguments {
+export interface CasesClientFactoryArguments {
   scopedClusterClient: ElasticsearchClient;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
@@ -95,17 +95,17 @@ export interface UpdateAlertRequest {
 /**
  * This represents the interface that other plugins can access.
  */
-export interface CaseClient {
-  addComment(args: CaseClientAddComment): Promise<CaseResponse>;
+export interface CasesClient {
+  addComment(args: CasesClientAddComment): Promise<CaseResponse>;
   create(theCase: CasePostRequest): Promise<CaseResponse>;
-  get(args: CaseClientGet): Promise<CaseResponse>;
-  getAlerts(args: CaseClientGetAlerts): Promise<CaseClientGetAlertsResponse>;
+  get(args: CasesClientGet): Promise<CaseResponse>;
+  getAlerts(args: CasesClientGetAlerts): Promise<CasesClientGetAlertsResponse>;
   getFields(args: ConfigureFields): Promise<GetFieldsResponse>;
   getMappings(args: MappingsClient): Promise<ConnectorMappingsAttributes[]>;
-  getUserActions(args: CaseClientGetUserActions): Promise<CaseUserActionsResponse>;
-  push(args: CaseClientPush): Promise<CaseResponse>;
+  getUserActions(args: CasesClientGetUserActions): Promise<CaseUserActionsResponse>;
+  push(args: CasesClientPush): Promise<CaseResponse>;
   update(args: CasesPatchRequest): Promise<CasesResponse>;
-  updateAlertsStatus(args: CaseClientUpdateAlertsStatus): Promise<void>;
+  updateAlertsStatus(args: CasesClientUpdateAlertsStatus): Promise<void>;
 }
 
 export interface MappingsClient {

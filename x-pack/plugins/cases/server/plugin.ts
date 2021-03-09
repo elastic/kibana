@@ -34,7 +34,7 @@ import {
   AlertService,
   AlertServiceContract,
 } from './services';
-import { CaseClientHandler, createExternalCaseClient } from './client';
+import { CasesClientHandler, createExternalCasesClient } from './client';
 import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
 
@@ -88,7 +88,7 @@ export class CasePlugin {
     this.userActionService = await new CaseUserActionService(this.log).setup();
     this.alertsService = new AlertService();
 
-    core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'case'>(
+    core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
       this.createRouteHandlerContext({
         core,
@@ -125,12 +125,12 @@ export class CasePlugin {
   public start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
 
-    const getCaseClientWithRequestAndContext = async (
+    const getCasesClientWithRequestAndContext = async (
       context: CasesRequestHandlerContext,
       request: KibanaRequest
     ) => {
       const user = await this.caseService!.getUser({ request });
-      return createExternalCaseClient({
+      return createExternalCasesClient({
         scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         user,
@@ -144,7 +144,7 @@ export class CasePlugin {
     };
 
     return {
-      getCaseClientWithRequestAndContext,
+      getCasesClientWithRequestAndContext,
     };
   }
 
@@ -168,13 +168,13 @@ export class CasePlugin {
     userActionService: CaseUserActionServiceSetup;
     alertsService: AlertServiceContract;
     logger: Logger;
-  }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
+  }): IContextProvider<CasesRequestHandlerContext, 'cases'> => {
     return async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();
       const user = await caseService.getUser({ request });
       return {
-        getCaseClient: () => {
-          return new CaseClientHandler({
+        getCasesClient: () => {
+          return new CasesClientHandler({
             scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,

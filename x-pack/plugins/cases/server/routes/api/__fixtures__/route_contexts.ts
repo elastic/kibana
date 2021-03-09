@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { createExternalCaseClient } from '../../../client';
+import { createExternalCasesClient } from '../../../client';
 import {
   AlertService,
   CaseService,
@@ -42,13 +42,13 @@ export const createRouteContext = async (client: any, badAuth = false) => {
       },
     },
     actions: { getActionsClient: () => actionsMock },
-    case: {
-      getCaseClient: () => caseClient,
+    cases: {
+      getCasesClient: () => casesClient,
     },
   } as unknown) as CasesRequestHandlerContext;
 
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
-  const caseClient = createExternalCaseClient({
+  const casesClient = createExternalCasesClient({
     savedObjectsClient: client,
     user: authc.getCurrentUser(),
     caseService,

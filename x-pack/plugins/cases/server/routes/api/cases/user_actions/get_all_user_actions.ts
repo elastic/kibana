@@ -23,15 +23,15 @@ export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        if (!context.case) {
+        if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
-        const caseClient = context.cases.getCaseClient();
+        const casesClient = context.cases.getCasesClient();
         const caseId = request.params.case_id;
 
         return response.ok({
-          body: await caseClient.getUserActions({ caseId }),
+          body: await casesClient.getUserActions({ caseId }),
         });
       } catch (error) {
         logger.error(
@@ -56,16 +56,16 @@ export function initGetAllSubCaseUserActionsApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        if (!context.case) {
+        if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
-        const caseClient = context.cases.getCaseClient();
+        const casesClient = context.cases.getCasesClient();
         const caseId = request.params.case_id;
         const subCaseId = request.params.sub_case_id;
 
         return response.ok({
-          body: await caseClient.getUserActions({ caseId, subCaseId }),
+          body: await casesClient.getUserActions({ caseId, subCaseId }),
         });
       } catch (error) {
         logger.error(

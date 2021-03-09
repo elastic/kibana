@@ -18,7 +18,7 @@ import {
   excess,
   CaseResponseRt,
   CaseResponse,
-  CaseClientPostRequestRt,
+  CasesClientPostRequestRt,
   CasePostRequest,
   CaseType,
   User,
@@ -62,7 +62,7 @@ export const create = async ({
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
   const query = pipe(
     // decode with the defaulted type field
-    excess(CaseClientPostRequestRt).decode({ type, ...nonTypeCaseFields }),
+    excess(CasesClientPostRequestRt).decode({ type, ...nonTypeCaseFields }),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

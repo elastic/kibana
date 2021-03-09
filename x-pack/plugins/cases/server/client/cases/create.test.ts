@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ConnectorTypes, CaseStatuses, CaseType, CaseClientPostRequest } from '../../../common/api';
+import {
+  ConnectorTypes,
+  CaseStatuses,
+  CaseType,
+  CasesClientPostRequest,
+} from '../../../common/api';
 import { isCaseError } from '../../common/error';
 
 import {
@@ -13,7 +18,7 @@ import {
   mockCaseConfigure,
   mockCases,
 } from '../../routes/api/__fixtures__';
-import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
+import { createCasesClientWithMockSavedObjectsClient } from '../mocks';
 
 describe('create', () => {
   beforeEach(async () => {
@@ -26,7 +31,7 @@ describe('create', () => {
 
   describe('happy path', () => {
     test('it creates the case correctly', async () => {
-      const postCase: CaseClientPostRequest = {
+      const postCase: CasesClientPostRequest = {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
         tags: ['defacement'],
@@ -46,8 +51,8 @@ describe('create', () => {
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.create(postCase);
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.create(postCase);
 
       expect(res).toMatchInlineSnapshot(`
         Object {
@@ -93,7 +98,7 @@ describe('create', () => {
       `);
 
       expect(
-        caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
+        casesClient.services.userActionService.postUserActions.mock.calls[0][0].actions
         // using a snapshot here so we don't have to update the text field manually each time it changes
       ).toMatchInlineSnapshot(`
         Array [
@@ -130,7 +135,7 @@ describe('create', () => {
     });
 
     test('it creates the case without connector in the configuration', async () => {
-      const postCase: CaseClientPostRequest = {
+      const postCase: CasesClientPostRequest = {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
         tags: ['defacement'],
@@ -149,8 +154,8 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.create(postCase);
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const res = await casesClient.client.create(postCase);
 
       expect(res).toMatchInlineSnapshot(`
         Object {
@@ -193,7 +198,7 @@ describe('create', () => {
     });
 
     test('Allow user to create case without authentication', async () => {
-      const postCase: CaseClientPostRequest = {
+      const postCase: CasesClientPostRequest = {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
         tags: ['defacement'],
@@ -212,11 +217,11 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({
         savedObjectsClient,
         badAuth: true,
       });
-      const res = await caseClient.client.create(postCase);
+      const res = await casesClient.client.create(postCase);
 
       expect(res).toMatchInlineSnapshot(`
         Object {
@@ -276,9 +281,9 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       return (
-        caseClient.client
+        casesClient.client
           // @ts-expect-error
           .create({ theCase: postCase })
           .catch((e) => {
@@ -305,9 +310,9 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       return (
-        caseClient.client
+        casesClient.client
           // @ts-expect-error
           .create({ theCase: postCase })
           .catch((e) => {
@@ -334,9 +339,9 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       return (
-        caseClient.client
+        casesClient.client
           // @ts-expect-error
           .create({ theCase: postCase })
           .catch((e) => {
@@ -358,9 +363,9 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       return (
-        caseClient.client
+        casesClient.client
           // @ts-expect-error
           .create({ theCase: postCase })
           .catch((e) => {
@@ -388,9 +393,9 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       return (
-        caseClient.client
+        casesClient.client
           // @ts-expect-error
           .create({ theCase: postCase })
           .catch((e) => {
@@ -423,8 +428,8 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      return caseClient.client.create(postCase).catch((e) => {
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return casesClient.client.create(postCase).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(400);
@@ -432,7 +437,7 @@ describe('create', () => {
     });
 
     it(`Returns an error if postNewCase throws`, async () => {
-      const postCase: CaseClientPostRequest = {
+      const postCase: CasesClientPostRequest = {
         description: 'Throw an error',
         title: 'Super Bad Security Issue',
         tags: ['error'],
@@ -450,9 +455,9 @@ describe('create', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
 
-      return caseClient.client.create(postCase).catch((e) => {
+      return casesClient.client.create(postCase).catch((e) => {
         expect(e).not.toBeNull();
         expect(isCaseError(e)).toBeTruthy();
         const boomErr = e.boomify();

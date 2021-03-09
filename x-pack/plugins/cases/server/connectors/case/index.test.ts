@@ -28,12 +28,12 @@ import {
 } from '../../services/mocks';
 import { CaseActionType, CaseActionTypeExecutorOptions, CaseExecutorParams } from './types';
 import { getActionType } from '.';
-import { createExternalCaseClientMock } from '../../client/mocks';
+import { createExternalCasesClientMock } from '../../client/mocks';
 
-const mockCaseClient = createExternalCaseClientMock();
+const mockCasesClient = createExternalCasesClientMock();
 
 jest.mock('../../client', () => ({
-  createExternalCaseClient: () => mockCaseClient,
+  createExternalCasesClient: () => mockCasesClient,
 }));
 
 const services = actionsMock.createServices();
@@ -877,7 +877,7 @@ describe('case connector', () => {
           },
         };
 
-        mockCaseClient.create.mockReturnValue(Promise.resolve(createReturn));
+        mockCasesClient.create.mockReturnValue(Promise.resolve(createReturn));
 
         const actionId = 'some-id';
         const params: CaseExecutorParams = {
@@ -913,7 +913,7 @@ describe('case connector', () => {
         const result = await caseActionType.executor(executorOptions);
 
         expect(result).toEqual({ actionId, status: 'ok', data: createReturn });
-        expect(mockCaseClient.create).toHaveBeenCalledWith({
+        expect(mockCasesClient.create).toHaveBeenCalledWith({
           ...params.subActionParams,
           connector: {
             id: 'jira',
@@ -974,7 +974,7 @@ describe('case connector', () => {
           },
         ];
 
-        mockCaseClient.update.mockReturnValue(Promise.resolve(updateReturn));
+        mockCasesClient.update.mockReturnValue(Promise.resolve(updateReturn));
 
         const actionId = 'some-id';
         const params: CaseExecutorParams = {
@@ -1002,7 +1002,7 @@ describe('case connector', () => {
         const result = await caseActionType.executor(executorOptions);
 
         expect(result).toEqual({ actionId, status: 'ok', data: updateReturn });
-        expect(mockCaseClient.update).toHaveBeenCalledWith({
+        expect(mockCasesClient.update).toHaveBeenCalledWith({
           // Null values have been striped out.
           cases: [
             {
@@ -1064,7 +1064,7 @@ describe('case connector', () => {
           },
         };
 
-        mockCaseClient.addComment.mockReturnValue(Promise.resolve(commentReturn));
+        mockCasesClient.addComment.mockReturnValue(Promise.resolve(commentReturn));
 
         const actionId = 'some-id';
         const params: CaseExecutorParams = {
@@ -1089,7 +1089,7 @@ describe('case connector', () => {
         const result = await caseActionType.executor(executorOptions);
 
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
-        expect(mockCaseClient.addComment).toHaveBeenCalledWith({
+        expect(mockCasesClient.addComment).toHaveBeenCalledWith({
           caseId: 'case-id',
           comment: {
             comment: 'a comment',

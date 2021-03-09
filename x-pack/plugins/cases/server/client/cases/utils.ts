@@ -23,7 +23,7 @@ import {
 } from '../../../common/api';
 import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
-import { CaseClientGetAlertsResponse } from '../../client/alerts/types';
+import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
 import {
   BasicParams,
   EntityInformation,
@@ -46,7 +46,7 @@ interface CreateIncidentArgs {
   userActions: CaseUserActionsResponse;
   connector: ActionConnector;
   mappings: ConnectorMappingsAttributes[];
-  alerts: CaseClientGetAlertsResponse;
+  alerts: CasesClientGetAlertsResponse;
 }
 
 export const getLatestPushInfo = (

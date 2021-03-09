@@ -27,11 +27,11 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const caseClient = context.cases.getCaseClient();
+        const casesClient = context.cases.getCasesClient();
         const id = request.params.case_id;
 
         return response.ok({
-          body: await caseClient.get({
+          body: await casesClient.get({
             id,
             includeComments: request.query.includeComments,
             includeSubCaseComments: request.query.includeSubCaseComments,

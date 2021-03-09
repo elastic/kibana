@@ -20,7 +20,7 @@ import { initGetCaseConfigure } from './get_configure';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 import { mappings } from '../../../../client/configure/mock';
 import { ConnectorTypes } from '../../../../../common/api/connectors';
-import { CaseClient } from '../../../../client';
+import { CasesClient } from '../../../../client';
 
 describe('GET configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -141,15 +141,15 @@ describe('GET configuration', () => {
     );
     const mockThrowContext = {
       ...context,
-      case: {
-        ...context.case,
-        getCaseClient: () =>
+      cases: {
+        ...context.cases,
+        getCasesClient: () =>
           ({
-            ...context?.case?.getCaseClient(),
+            ...context?.cases?.getCasesClient(),
             getMappings: () => {
               throw new Error();
             },
-          } as CaseClient),
+          } as CasesClient),
       },
     };
 

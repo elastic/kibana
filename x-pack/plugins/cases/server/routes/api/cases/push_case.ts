@@ -27,11 +27,11 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        if (!context.case) {
+        if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
-        const caseClient = context.cases.getCaseClient();
+        const casesClient = context.cases.getCasesClient();
         const actionsClient = context.actions?.getActionsClient();
 
         if (actionsClient == null) {
@@ -44,7 +44,7 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
         );
 
         return response.ok({
-          body: await caseClient.push({
+          body: await casesClient.push({
             actionsClient,
             caseId: params.case_id,
             connectorId: params.connector_id,

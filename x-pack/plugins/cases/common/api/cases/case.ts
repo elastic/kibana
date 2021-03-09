@@ -83,7 +83,7 @@ const CasePostRequestNoTypeRt = rt.type({
 /**
  * This type is used for validating a create case request. It requires that the type field be defined.
  */
-export const CaseClientPostRequestRt = rt.type({
+export const CasesClientPostRequestRt = rt.type({
   ...CasePostRequestNoTypeRt.props,
   [caseTypeField]: CaseTypeRt,
 });
@@ -92,7 +92,7 @@ export const CaseClientPostRequestRt = rt.type({
  * This type is not used for validation when decoding a request because intersection does not have props defined which
  * required for the excess function. Instead we use this as the type used by the UI. This allows the type field to be
  * optional and the server will handle setting it to a default value before validating that the request
- * has all the necessary fields. CaseClientPostRequestRt is used for validation.
+ * has all the necessary fields. CasesClientPostRequestRt is used for validation.
  */
 export const CasePostRequestRt = rt.intersection([
   rt.partial({ type: CaseTypeRt }),
@@ -178,7 +178,7 @@ export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
  * that the type field be defined. The CasePostRequest should be used in most places (the UI etc). This type is really
  * only necessary for validation.
  */
-export type CaseClientPostRequest = rt.TypeOf<typeof CaseClientPostRequestRt>;
+export type CasesClientPostRequest = rt.TypeOf<typeof CasesClientPostRequestRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;

@@ -17,7 +17,7 @@ import {
   Logger,
 } from 'kibana/server';
 
-import { CaseClient } from '../../../../client';
+import { CasesClient } from '../../../../client';
 import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../../../services';
 import {
@@ -55,7 +55,7 @@ interface UpdateArgs {
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
   request: KibanaRequest;
-  caseClient: CaseClient;
+  casesClient: CasesClient;
   subCases: SubCasesPatchRequest;
   logger: Logger;
 }
@@ -218,13 +218,13 @@ async function updateAlerts({
   subCasesToSync,
   caseService,
   client,
-  caseClient,
+  casesClient,
   logger,
 }: {
   subCasesToSync: SubCasePatchRequest[];
   caseService: CaseServiceSetup;
   client: SavedObjectsClientContract;
-  caseClient: CaseClient;
+  casesClient: CasesClient;
   logger: Logger;
 }) {
   try {
@@ -251,7 +251,7 @@ async function updateAlerts({
       []
     );
 
-    await caseClient.updateAlertsStatus({ alerts: alertsToUpdate });
+    await casesClient.updateAlertsStatus({ alerts: alertsToUpdate });
   } catch (error) {
     throw createCaseError({
       message: `Failed to update alert status while updating sub cases: ${JSON.stringify(
@@ -268,7 +268,7 @@ async function update({
   caseService,
   userActionService,
   request,
-  caseClient,
+  casesClient,
   subCases,
   logger,
 }: UpdateArgs): Promise<SubCasesResponse> {
@@ -360,7 +360,7 @@ async function update({
     await updateAlerts({
       caseService,
       client,
-      caseClient,
+      casesClient,
       subCasesToSync: subCasesToSyncAlertsFor,
       logger,
     });
@@ -425,14 +425,14 @@ export function initPatchSubCasesApi({
     },
     async (context, request, response) => {
       try {
-        const caseClient = context.cases.getCaseClient();
+        const casesClient = context.cases.getCasesClient();
         const subCases = request.body as SubCasesPatchRequest;
 
         return response.ok({
           body: await update({
             request,
             subCases,
-            caseClient,
+            casesClient,
             client: context.core.savedObjects.client,
             caseService,
             userActionService,

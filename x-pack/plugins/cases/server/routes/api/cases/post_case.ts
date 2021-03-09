@@ -21,14 +21,14 @@ export function initPostCaseApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        if (!context.case) {
+        if (!context.cases) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
-        const caseClient = context.cases.getCaseClient();
+        const casesClient = context.cases.getCasesClient();
         const theCase = request.body as CasePostRequest;
 
         return response.ok({
-          body: await caseClient.create({ ...theCase }),
+          body: await casesClient.create({ ...theCase }),
         });
       } catch (error) {
         logger.error(`Failed to post case in route: ${error}`);

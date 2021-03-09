@@ -28,17 +28,17 @@ export function initPostCommentApi({ router, logger }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      if (!context.case) {
+      if (!context.cases) {
         return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
       }
 
-      const caseClient = context.cases.getCaseClient();
+      const casesClient = context.cases.getCasesClient();
       const caseId = request.query?.subCaseId ?? request.params.case_id;
       const comment = request.body as CommentRequest;
 
       try {
         return response.ok({
-          body: await caseClient.addComment({ caseId, comment }),
+          body: await casesClient.addComment({ caseId, comment }),
         });
       } catch (error) {
         logger.error(
