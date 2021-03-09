@@ -491,6 +491,58 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await this.clickSaveScriptedField();
     }
 
+    async addRuntimeField(name: string, type: string, script: string) {
+      await this.clickAddField();
+      await this.setFieldName(name);
+      await this.setFieldType(type);
+      if (script) {
+        await this.setFieldScript(script);
+      }
+      await this.clickSaveField();
+      await this.closeIndexPatternFieldEditor();
+    }
+
+    async closeIndexPatternFieldEditor() {
+      await retry.waitFor('field editor flyout to close', async () => {
+        return !(await testSubjects.exists('euiFlyoutCloseButton'));
+      });
+    }
+
+    async clickAddField() {
+      log.debug('click Add Field');
+      await testSubjects.click('addField');
+    }
+
+    async clickSaveField() {
+      log.debug('click Save');
+      await testSubjects.click('fieldSaveButton');
+    }
+
+    async setFieldName(name: string) {
+      log.debug('set field name = ' + name);
+      await testSubjects.setValue('nameField', name);
+    }
+
+    async setFieldType(type: string) {
+      log.debug('set type = ' + type);
+      await testSubjects.setValue('typeField', type);
+    }
+
+    async setFieldScript(script: string) {
+      log.debug('set script = ' + script);
+      const formatRow = await testSubjects.find('valueRow');
+      const formatRowToggle = (
+        await formatRow.findAllByCssSelector('[data-test-subj="toggle"]')
+      )[0];
+
+      await formatRowToggle.click();
+      const getMonacoTextArea = async () => (await formatRow.findAllByCssSelector('textarea'))[0];
+      retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
+      const monacoTextArea = await getMonacoTextArea();
+      await monacoTextArea.focus();
+      browser.pressKeys(script);
+    }
+
     async clickAddScriptedField() {
       log.debug('click Add Scripted Field');
       await testSubjects.click('addScriptedFieldLink');

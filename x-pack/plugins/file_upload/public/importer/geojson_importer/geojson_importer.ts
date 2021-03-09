@@ -77,7 +77,7 @@ export class GeoJsonImporter extends Importer {
   public async import(
     id: string,
     index: string,
-    pipelineId: string,
+    pipelineId: string | undefined,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults> {
     if (!id || !index) {
@@ -163,7 +163,7 @@ export class GeoJsonImporter extends Importer {
   private async _importBlock(
     id: string,
     index: string,
-    pipelineId: string,
+    pipelineId: string | undefined,
     chunks: ImportDoc[][],
     blockSizeInBytes: number,
     setImportProgress: (progress: number) => void
