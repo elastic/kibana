@@ -283,7 +283,9 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
 
         expect(colorWithinTolerance).to.eql(
           true,
-          `Expected color '${expectedColor}' to be present within tolerance in canvas element '${dataTestSubj}'. Expected: 'true' (got 'false')`
+          `Expected color '${expectedColor}' to be present within tolerance of colors (${JSON.stringify(
+            actualColorStats
+          )})in canvas element '${dataTestSubj}'. Expected: 'true' (got 'false')`
         );
       });
     },
