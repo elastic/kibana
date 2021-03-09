@@ -78,11 +78,80 @@ similar-ish environment locally (which wasn't done during the initial investigat
 
 # Implementation proposal
 
+## enabling clustering mode
+
+Enabling clustering mode will be done using the `clustering.enabled` configuration property.
+
+The whole `clustering` configuration would look like:
+
+```ts
+export const config = {
+  path: 'clustering',
+  schema: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    workers: schema.number({ defaultValue: 2 }),
+  }),
+};
+```
+
+Notes:
+- What should be the default value for `clustering.workers`? We could go with `Max(1, os.cpus().length - 1)`, but do we really want to use all cpus by default,
+  knowing that every worker is going to have its own memory usage.
+
+## The clustering service
+
+We will be adding a new clustering service to core, that will add the necessary cluster APIs, and would be accessible via core's setup and start contracts (`coreSetup.clustering` and `coreStart.clustering`).
+
+At the moment, no need to extend Core's request handler context with clustering related APIs has been identified.
+
+The contract interface would look like (more APIs could be added depending on the discussions on this RFC)
+
+```ts
+type ClusterMessagePayload = Serializable;
+
+interface BroadcastOptions {
+  /**
+   * If true, will also send the message to the worker that sent it.
+   * Defaults to false.
+   */
+  sendToSelf?: boolean;
+  /**
+   * If true, the message will also be sent to subscribers subscribing after the message was effectively sent.
+   * Defaults to false.
+   */
+  persist?: boolean;
+}
+
+export interface ClusteringServiceSetup {
+  /**
+   * Return true if clustering mode is enabled, false otherwise
+   */
+  isEnabled: () => boolean;
+  /**
+   * Return the current worker's id. In non-clustered mode, will return `1`
+   */
+  getWorkerId: () => number;
+  /**
+   * Broadcast a message to other workers.
+   * In non-clustered mode, this is a no-op
+   */
+  broadcast: (type: string, payload?: ClusterMessagePayload, options?: BroadcastOptions) => void;
+  /**
+   * Registered a handler for given `type` of IPC messages
+   * In non-clustered mode, this is a no-op that returns a no-op unsubscription callback.
+   */
+  addMessageHandler: (type: string, handler: MessageHandler) => MessageHandlerUnsubscribeFn;
+  /**
+   * Returns true if the current worker has been elected as the main one. In non-clustered mode, will return true
+   */
+  isMainWorker: () => boolean;
+}
+```
+
 ## Cross-worker communication
 
-We will be adding a new clustering service to core, that will add the necessary cluster APIs
-
-For some of our changes (such as the /status API, see below), we will need some kind of cross-worker communication. Such communication will need to pass through the coordinator, which will also serve as an 'event bus'.
+For some of our changes (such as the /status API, see below), we will need some kind of cross-worker communication. Such communication 
+will need to pass through the coordinator, which will also serve as an 'event bus', or IPC forwarder.
 
 The base API for such communication will be exposed from the clustering service.
 
@@ -95,15 +164,20 @@ export interface ClusteringServiceSetup {
 ```
 
 Notes:
--  to reduce cluster/non-cluster mode divergence, in non-clustering mode, these APIs would just be no-ops. 
+-  to reduce clustered and non-clustered mode divergence, in non-clustered mode, these APIs would just be no-ops. 
    It will avoid to force (most) code to check in which mode Kibana is running before calling them.
 -  We could eventually use an Observable pattern instead of a handler pattern to subscribe to messages.
 
 ## Executing code on a single worker
 
-In some scenario, we would like to have some part of the code executed from a single process. The SO migration would be a good example: we don't need to have each worker try to perform the migration, and we'd prefer to have one performing/trying the migration, and the other wait for it. Due to the architecture, we can't have the coordinator perform such single-process jobs, as it doesn't actually run a Kibana's Server.
+In some scenario, we would like to have some part of the code executed from a single process. The SO migration would be a good example: 
+we don't need to have each worker try to perform the migration, and we'd prefer to have one performing/trying the migration, 
+and the other wait for it. Due to the architecture, we can't have the coordinator perform such single-process jobs, 
+as it doesn't actually run a Kibana's Server.
 
-There are various ways to address such use-case. What seems to be the best compromise right now would be the concept of 'main worker'. The coordinator would arbitrary elect a worker as the 'main' one. The clustering service would then expose an API to let workers identify themselves as main or not.
+There are various ways to address such use-case. What seems to be the best compromise right now would be the concept of 
+'main worker'. The coordinator would arbitrary elect a worker as the 'main' one. The clustering service would then expose 
+an API to let workers identify themselves as main or not.
 
 ```ts
 export interface ClusteringServiceSetup {
@@ -138,9 +212,16 @@ runMigration() {
 }
 ```
 
+Notes:
+  - to be sure that we do not encounter a race condition with the event subscribing / sending (workers subscribing after 
+    the main worker actually send the `migration-complete` event and then waiting indefinitely), we are using the `persist` option of the `broadcast` API.
+    I'm honestly not sure this is the best pattern, but I couldn't come with anything better (maybe shared state instead?). 
+    This is probably something else we should discuss.
+
+
 ## Sharing state between workers
 
-This is not identified as necessary at the moment, and IPC broadcast should be sufficient. 
+This is not identified as necessary at the moment, and IPC broadcast should be sufficient, hopefully. 
 
 If we do need shared state, we will probably have to use syscall libraries to share buffers such as [mmap-io](https://www.npmjs.com/package/mmap-io), 
 and expose a higher level API for that from the `clustering` service.
