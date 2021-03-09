@@ -6,10 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { extractIndexPatterns } from './index_patterns_utils';
+import {
+  extractIndexPatterns,
+  isStringTypeIndexPattern,
+  convertIndexPatternObjectToStringRepresentation,
+} from './index_patterns_utils';
 import { PanelSchema } from './types';
 
-describe('extractIndexPatterns(vis)', () => {
+describe('isStringTypeIndexPattern', () => {
+  test('should returns true on string-based index', () => {
+    expect(isStringTypeIndexPattern('index')).toBeTruthy();
+  });
+  test('should returns false on object-based index', () => {
+    expect(isStringTypeIndexPattern({ title: 'title', id: 'id' })).toBeFalsy();
+  });
+});
+
+describe('convertIndexPatternObjectToStringRepresentation', () => {
+  test('should return the correct title on getting string-based index', () => {
+    expect(convertIndexPatternObjectToStringRepresentation('index')).toBe('index');
+  });
+  test('should return the correct title on getting object-based index', () => {
+    expect(convertIndexPatternObjectToStringRepresentation({ title: 'title', id: 'id' })).toBe(
+      'title'
+    );
+  });
+});
+
+describe('extractIndexPatterns', () => {
   let panel: PanelSchema;
 
   beforeEach(() => {

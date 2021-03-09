@@ -32,11 +32,9 @@ export async function getIndexPatternObject(
         indexPatternString = indexPattern;
       }
     } else if (indexPattern.id) {
-      indexPatternObject = await indexPatternsService.get(indexPattern.id);
-
-      if (!indexPatternObject && indexPattern.title) {
-        indexPatternString = indexPattern.title;
-      }
+      indexPatternObject =
+        (await indexPatternsService.get(indexPattern.id)) ??
+        (await indexPatternsService.getDefault());
     }
   }
 
