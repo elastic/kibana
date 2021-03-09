@@ -84,7 +84,6 @@ export const getStats = async (
       for (const indexPatternTitle of indexes) {
         const indexPattern = await soClient.find<IndexPatternSavedObjectAttrs>({
           type: 'index-pattern',
-          perPage: 10000,
           fields: ['title', 'fields'],
           searchFields: ['title'],
           search: indexPatternTitle,
