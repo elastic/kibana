@@ -123,7 +123,7 @@ interface IndexType {
   [key: string]: unknown;
 }
 
-interface AggregateResult {
+export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
 }
 
