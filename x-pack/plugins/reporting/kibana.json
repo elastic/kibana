@@ -14,6 +14,7 @@
     "management",
     "licensing",
     "uiActions",
+    "taskManager",
     "embeddable",
     "share",
     "features"

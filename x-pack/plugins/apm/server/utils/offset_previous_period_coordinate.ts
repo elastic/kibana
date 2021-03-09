@@ -21,12 +21,10 @@ export function offsetPreviousPeriodCoordinates({
     return [];
   }
 
-  const dateOffset = moment(currentPeriodStart).diff(
-    moment(previousPeriodStart)
-  );
+  const dateDiff = currentPeriodStart - previousPeriodStart;
 
   return previousPeriodTimeseries.map(({ x, y }) => {
-    const offsetX = moment(x).add(dateOffset).valueOf();
+    const offsetX = moment(x).add(dateDiff).valueOf();
     return {
       x: offsetX,
       y,
