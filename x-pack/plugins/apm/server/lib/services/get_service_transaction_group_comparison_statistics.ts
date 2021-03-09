@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { head, keyBy } from 'lodash';
+import { keyBy } from 'lodash';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
