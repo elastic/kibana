@@ -488,7 +488,7 @@ See
 
 [[glossary-wms]] Web Map Service (WMS) ::
 // tag::wms-def[]
-A layer type in the *Maps* application. WMS stands for Web Map Service.
+A layer type in the *Maps* application. 
 Add a WMS source to provide authoritative geographic context to your map.
 See the https://www.ogc.org/standards/wms[OpenGIS Web Map Service].
 // end::wms-def[]
