@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Exporting Exchange Mailbox via PowerShell",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name: (\"powershell.exe\", \"pwsh.exe\") and process.args : \"New-MailboxExportRequest*\"\n",
   "references": [
