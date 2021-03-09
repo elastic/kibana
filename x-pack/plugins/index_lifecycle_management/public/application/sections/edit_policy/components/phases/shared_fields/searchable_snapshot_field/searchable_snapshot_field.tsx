@@ -5,59 +5,40 @@
  * 2.0.
  */
 
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import React, { FunctionComponent, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiComboBoxOptionOption,
-  EuiTextColor,
-  EuiSpacer,
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 
-import {
-  ComboBoxField,
-  useKibana,
-  fieldValidators,
-  useFormData,
-} from '../../../../../../../shared_imports';
-
+import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { useConfigurationIssues, UseField } from '../../../../form';
-
-import { i18nTexts } from '../../../../i18n_texts';
-
+import { useConfiguration, UseField } from '../../../../form';
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
-
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
+import { RepositoryComboBoxField } from './repository_combobox_field';
 
 import './_searchable_snapshot_field.scss';
-
-const { emptyField } = fieldValidators;
 
 export interface Props {
   phase: 'hot' | 'cold';
 }
-
-/**
- * This repository is provisioned by Elastic Cloud and will always
- * exist as a "managed" repository.
- */
-const CLOUD_DEFAULT_REPO = 'found-snapshots';
 
 export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => {
   const {
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
-  const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const searchableSnapshotRepoGlobalPath = `_meta.searchableSnapshot.repository`;
 
-  const [formData] = useFormData({ watch: searchableSnapshotPath });
-  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
+  const [formData] = useFormData({
+    watch: [searchableSnapshotRepoGlobalPath],
+  });
+
+  const searchableSnapshotGlobalRepo = get(formData, searchableSnapshotRepoGlobalPath);
 
   const isColdPhase = phase === 'cold';
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
@@ -141,7 +122,10 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                 />
               </EuiCallOut>
             );
-          } else if (searchableSnapshotRepo && !repos.includes(searchableSnapshotRepo)) {
+          } else if (
+            searchableSnapshotGlobalRepo &&
+            !repos.includes(searchableSnapshotGlobalRepo)
+          ) {
             calloutContent = (
               <EuiCallOut
                 title={i18n.translate(
@@ -178,56 +162,17 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
 
         return (
           <div className="ilmSearchableSnapshotField">
-            <UseField<string>
-              config={{
-                label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
-                defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
-                validations: [
-                  {
-                    validator: emptyField(
-                      i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired
-                    ),
-                  },
-                ],
+            <UseField
+              path={searchableSnapshotRepoPath}
+              defaultValue={[searchableSnapshotGlobalRepo]}
+              component={RepositoryComboBoxField}
+              componentProps={{
+                globalRepository: searchableSnapshotGlobalRepo,
+                isLoading,
+                repos,
+                noSuggestions: !!(error || repos.length === 0),
               }}
-              path={searchableSnapshotPath}
-            >
-              {(field) => {
-                const singleSelectionArray: [selectedSnapshot?: string] = field.value
-                  ? [field.value]
-                  : [];
-
-                return (
-                  <ComboBoxField
-                    field={
-                      {
-                        ...field,
-                        value: singleSelectionArray,
-                      } as any
-                    }
-                    label={field.label}
-                    fullWidth={false}
-                    euiFieldProps={{
-                      'data-test-subj': 'searchableSnapshotCombobox',
-                      options: repos.map((repo) => ({ label: repo, value: repo })),
-                      singleSelection: { asPlainText: true },
-                      isLoading,
-                      noSuggestions: !!(error || repos.length === 0),
-                      onCreateOption: (newOption: string) => {
-                        field.setValue(newOption);
-                      },
-                      onChange: (options: EuiComboBoxOptionOption[]) => {
-                        if (options.length > 0) {
-                          field.setValue(options[0].label);
-                        } else {
-                          field.setValue('');
-                        }
-                      },
-                    }}
-                  />
-                );
-              }}
-            </UseField>
+            />
             {calloutContent && (
               <>
                 <EuiSpacer size="s" />
