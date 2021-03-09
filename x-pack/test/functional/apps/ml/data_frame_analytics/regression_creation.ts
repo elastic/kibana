@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.jobId}`;
         },
         dependentVariable: 'stab',
-        trainingPercent: '20',
+        trainingPercent: 20,
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsScatterplot.assertScatterplotMatrix(
+          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
             testData.expected.scatterplotMatrixColorStats
           );
@@ -140,6 +140,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
             testData.createIndexPattern
           );
+
+          await ml.testExecution.logTestStep('continues to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('checks validation callouts exist');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
@@ -224,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsScatterplot.assertScatterplotMatrix(
+          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlDFExpandableSection-splom',
             testData.expected.scatterplotMatrixColorStats
           );

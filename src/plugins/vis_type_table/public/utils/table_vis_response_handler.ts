@@ -20,12 +20,12 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
   let table: TableContext | undefined;
   let direction: TableVisData['direction'];
 
-  const split = visConfig.dimensions.splitColumn || visConfig.dimensions.splitRow;
+  const split = visConfig.splitColumn || visConfig.splitRow;
 
   if (split) {
-    direction = visConfig.dimensions.splitRow ? 'row' : 'column';
-    const splitColumnIndex = split[0].accessor;
-    const splitColumnFormatter = getFormatService().deserialize(split[0].format);
+    direction = visConfig.splitRow ? 'row' : 'column';
+    const splitColumnIndex = split.accessor as number;
+    const splitColumnFormatter = getFormatService().deserialize(split.format);
     const splitColumn = input.columns[splitColumnIndex];
     const splitMap: { [key: string]: number } = {};
     let splitIndex = 0;

@@ -15,6 +15,7 @@ import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
 import uuid from 'uuid';
+import { TaskRunningStage } from './task_running';
 
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
@@ -370,6 +371,7 @@ describe('TaskPool', () => {
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
+      stage: TaskRunningStage.PENDING,
       toString: () => `TaskType "shooooo"`,
       get expiration() {
         return new Date();

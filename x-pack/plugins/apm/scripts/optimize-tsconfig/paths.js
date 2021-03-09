@@ -16,6 +16,7 @@ const filesToIgnore = [
   path.resolve(xpackRoot, 'tsconfig.json'),
   path.resolve(kibanaRoot, 'tsconfig.json'),
   path.resolve(kibanaRoot, 'tsconfig.base.json'),
+  path.resolve(kibanaRoot, 'x-pack/plugins/apm', 'tsconfig.json'),
 ];
 
 module.exports = {

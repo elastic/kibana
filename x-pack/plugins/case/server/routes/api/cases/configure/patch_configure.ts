@@ -24,7 +24,12 @@ import {
   transformESConnectorToCaseConnector,
 } from '../helpers';
 
-export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
+export function initPatchCaseConfigure({
+  caseConfigureService,
+  caseService,
+  router,
+  logger,
+}: RouteDeps) {
   router.patch(
     {
       path: CASE_CONFIGURE_URL,
@@ -56,7 +61,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         }
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request });
 
         const updateDate = new Date().toISOString();
 
@@ -66,14 +71,13 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
             throw Boom.badRequest('RouteHandlerContext is not registered for cases');
           }
           const caseClient = context.case.getCaseClient();
-          const actionsClient = await context.actions?.getActionsClient();
+          const actionsClient = context.actions?.getActionsClient();
           if (actionsClient == null) {
             throw Boom.notFound('Action client have not been found');
           }
           try {
             mappings = await caseClient.getMappings({
               actionsClient,
-              caseClient,
               connectorId: connector.id,
               connectorType: connector.type,
             });
@@ -108,6 +112,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           }),
         });
       } catch (error) {
+        logger.error(`Failed to get patch configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

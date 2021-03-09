@@ -6,6 +6,7 @@
  */
 
 import { History } from 'history';
+
 import { HttpSetup } from 'src/core/public';
 
 /**

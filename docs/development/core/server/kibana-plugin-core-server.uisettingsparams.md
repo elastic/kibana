@@ -23,6 +23,7 @@ export interface UiSettingsParams<T = unknown>
 |  [name](./kibana-plugin-core-server.uisettingsparams.name.md) | <code>string</code> | title in the UI |
 |  [optionLabels](./kibana-plugin-core-server.uisettingsparams.optionlabels.md) | <code>Record&lt;string, string&gt;</code> | text labels for 'select' type UI element |
 |  [options](./kibana-plugin-core-server.uisettingsparams.options.md) | <code>string[]</code> | array of permitted values for this setting |
+|  [order](./kibana-plugin-core-server.uisettingsparams.order.md) | <code>number</code> | index of the settings within its category (ascending order, smallest will be displayed first). Used for ordering in the UI. settings without order defined will be displayed last and ordered by name |
 |  [readonly](./kibana-plugin-core-server.uisettingsparams.readonly.md) | <code>boolean</code> | a flag indicating that value cannot be changed |
 |  [requiresPageReload](./kibana-plugin-core-server.uisettingsparams.requirespagereload.md) | <code>boolean</code> | a flag indicating whether new value applying requires page reloading |
 |  [schema](./kibana-plugin-core-server.uisettingsparams.schema.md) | <code>Type&lt;T&gt;</code> |  |

@@ -24,6 +24,7 @@ export function createReporter(config: AnalyicsReporterConfig): Reporter {
     async http(report) {
       const response = await fetch.post('/api/ui_counters/_report', {
         body: JSON.stringify({ report }),
+        asSystemRequest: true,
       });
 
       if (response.status !== 'ok') {

@@ -9,6 +9,7 @@ jest.mock('puppeteer', () => ({
   launch: () => ({
     // Fixme needs event emitters
     newPage: () => ({
+      emulateTimezone: jest.fn(),
       setDefaultTimeout: jest.fn(),
     }),
     process: jest.fn(),

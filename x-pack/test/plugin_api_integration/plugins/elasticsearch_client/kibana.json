@@ -1,5 +1,5 @@
 {
-  "id": "elasticsearch_client_xpack",
+  "id": "elasticsearchClientXpack",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "server": true,

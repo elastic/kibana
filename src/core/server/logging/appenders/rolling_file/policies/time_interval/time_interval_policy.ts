@@ -15,7 +15,7 @@ import { getNextRollingTime } from './get_next_rolling_time';
 import { isValidRolloverInterval } from './utils';
 
 export interface TimeIntervalTriggeringPolicyConfig {
-  kind: 'time-interval';
+  type: 'time-interval';
 
   /**
    * How often a rollover should occur.
@@ -38,7 +38,7 @@ export interface TimeIntervalTriggeringPolicyConfig {
 }
 
 export const timeIntervalTriggeringPolicyConfigSchema = schema.object({
-  kind: schema.literal('time-interval'),
+  type: schema.literal('time-interval'),
   interval: schema.duration({
     defaultValue: '24h',
     validate: (interval) => {

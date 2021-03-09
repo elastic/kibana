@@ -119,6 +119,8 @@ function getServiceNowActionParams(): ServiceNowActionParams {
         impact: '2',
         severity: '2',
         urgency: '2',
+        category: null,
+        subcategory: null,
         externalId: null,
       },
       comments: [],

@@ -97,6 +97,7 @@ export const buildEventsHistogramQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: true,
     body: {
       aggregations: getHistogramAggregation(),
       query: {
@@ -105,7 +106,6 @@ export const buildEventsHistogramQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
     },
   };
 

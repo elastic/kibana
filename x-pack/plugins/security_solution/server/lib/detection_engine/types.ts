@@ -47,12 +47,13 @@ import {
   ThreatLanguageOrUndefined,
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
+  ThreatIndicatorPathOrUndefined,
 } from '../../../common/detection_engine/schemas/types/threat_mapping';
 
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
 import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
-import { AlertTypeParams } from '../../../../alerts/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -88,6 +89,7 @@ export interface RuleTypeParams extends AlertTypeParams {
   threshold: ThresholdOrUndefined;
   threatFilters: PartialFilter[] | undefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;

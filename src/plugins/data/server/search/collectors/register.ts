@@ -10,7 +10,13 @@ import { PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { fetchProvider } from './fetch';
 
-export interface Usage {
+export interface CollectedUsage {
+  successCount: number;
+  errorCount: number;
+  totalDuration: number;
+}
+
+export interface ReportedUsage {
   successCount: number;
   errorCount: number;
   averageDuration: number | null;
@@ -21,7 +27,7 @@ export async function registerUsageCollector(
   context: PluginInitializerContext
 ) {
   try {
-    const collector = usageCollection.makeUsageCollector<Usage>({
+    const collector = usageCollection.makeUsageCollector<ReportedUsage>({
       type: 'search',
       isReady: () => true,
       fetch: fetchProvider(context.config.legacy.globalConfig$),

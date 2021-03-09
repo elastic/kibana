@@ -9,8 +9,6 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,18 +21,15 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
-
-import { Group } from '../../../types';
+import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 import { CANCEL_BUTTON } from '../../../constants';
 import { SOURCES_PATH } from '../../../routes';
-
-import noSharedSourcesIcon from '../../../assets/share_circle.svg';
-
+import { Group } from '../../../types';
 import { GroupLogic } from '../group_logic';
 import { GroupsLogic } from '../groups_logic';
 
@@ -165,14 +160,12 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiModal
-        onClose={handleClose}
-        initialFocus=".euiFieldSearch"
-        data-test-subj="GroupManagerModal"
-      >
-        {showEmptyState ? emptyState : modalContent}
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal
+      onClose={handleClose}
+      initialFocus=".euiFieldSearch"
+      data-test-subj="GroupManagerModal"
+    >
+      {showEmptyState ? emptyState : modalContent}
+    </EuiModal>
   );
 };

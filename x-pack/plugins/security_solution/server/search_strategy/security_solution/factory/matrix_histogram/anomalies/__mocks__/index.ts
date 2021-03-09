@@ -36,6 +36,7 @@ export const expectedDsl = {
   ],
   allowNoIndices: true,
   ignoreUnavailable: true,
+  track_total_hits: true,
   body: {
     aggs: {
       anomalyActionGroup: {
@@ -83,6 +84,5 @@ export const expectedDsl = {
       },
     },
     size: 0,
-    track_total_hits: true,
   },
 };

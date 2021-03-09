@@ -70,7 +70,9 @@ export const formatFields = (theData: unknown, theType: string): ConnectorField[
       return normalizeJiraFields(theData as JiraGetFieldsResponse);
     case ConnectorTypes.resilient:
       return normalizeResilientFields(theData as ResilientGetFieldsResponse);
-    case ConnectorTypes.servicenow:
+    case ConnectorTypes.serviceNowITSM:
+      return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
+    case ConnectorTypes.serviceNowSIR:
       return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
     default:
       return [];
@@ -91,17 +93,26 @@ const findTextAreaField = (fields: ConnectorField[]): string =>
 const getPreferredFields = (theType: string) => {
   let title: string = '';
   let description: string = '';
+  let comments: string = '';
+
   if (theType === ConnectorTypes.jira) {
     title = 'summary';
     description = 'description';
+    comments = 'comments';
   } else if (theType === ConnectorTypes.resilient) {
     title = 'name';
     description = 'description';
-  } else if (theType === ConnectorTypes.servicenow) {
+    comments = 'comments';
+  } else if (
+    theType === ConnectorTypes.serviceNowITSM ||
+    theType === ConnectorTypes.serviceNowSIR
+  ) {
     title = 'short_description';
     description = 'description';
+    comments = 'work_notes';
   }
-  return { title, description };
+
+  return { title, description, comments };
 };
 
 const getRemainingFields = (fields: ConnectorField[], titleTarget: string) =>
@@ -137,9 +148,16 @@ export const createDefaultMapping = (
   theType: string
 ): ConnectorMappingsAttributes[] => {
   const { description: dynamicDescription, title: dynamicTitle } = getDynamicFields(fields);
-  const { description: preferredDescription, title: preferredTitle } = getPreferredFields(theType);
+
+  const {
+    description: preferredDescription,
+    title: preferredTitle,
+    comments: preferredComments,
+  } = getPreferredFields(theType);
+
   let titleTarget = dynamicTitle;
   let descriptionTarget = dynamicDescription;
+
   if (preferredTitle.length > 0 && preferredDescription.length > 0) {
     if (shouldTargetBePreferred(fields, dynamicTitle, preferredTitle)) {
       const { description: dynamicDescriptionOverwrite } = getDynamicFields(fields, preferredTitle);
@@ -163,7 +181,7 @@ export const createDefaultMapping = (
     },
     {
       source: 'comments',
-      target: 'comments',
+      target: preferredComments,
       action_type: 'append',
     },
   ];

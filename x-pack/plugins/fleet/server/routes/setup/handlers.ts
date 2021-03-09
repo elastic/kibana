@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+
 import { outputService, appContextService } from '../../services';
-import { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
+import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 import { PostFleetSetupRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -24,7 +25,7 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
     const isTLSCheckDisabled = appContextService.getConfig()?.agents?.tlsCheckDisabled ?? false;
-    const isUsingEphemeralEncryptionKey = !appContextService.getEncryptedSavedObjectsSetup();
+    const canEncrypt = appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt === true;
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isAdminUserSetup) {
@@ -37,7 +38,7 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
       missingRequirements.push('tls_required');
     }
 
-    if (isUsingEphemeralEncryptionKey) {
+    if (!canEncrypt) {
       missingRequirements.push('encrypted_saved_object_encryption_key_required');
     }
 
@@ -62,9 +63,8 @@ export const createFleetSetupHandler: RequestHandler<
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    await setupIngestManager(soClient, esClient, callCluster);
-    await setupFleet(soClient, esClient, callCluster, {
+    await setupIngestManager(soClient, esClient);
+    await setupFleet(soClient, esClient, {
       forceRecreate: request.body?.forceRecreate ?? false,
     });
 
@@ -79,11 +79,10 @@ export const createFleetSetupHandler: RequestHandler<
 export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
 
   try {
     const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, esClient, callCluster);
+    await setupIngestManager(soClient, esClient);
     return response.ok({
       body,
     });

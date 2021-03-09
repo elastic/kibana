@@ -24,12 +24,12 @@ import {
   ElementClickListener,
   TooltipValue,
   HeatmapSpec,
+  TooltipSettings,
+  HeatmapBrushEvent,
 } from '@elastic/charts';
 import moment from 'moment';
-import { HeatmapBrushEvent } from '@elastic/charts/dist/chart_types/heatmap/layout/types/config_types';
 
 import { i18n } from '@kbn/i18n';
-import { TooltipSettings } from '@elastic/charts/dist/specs/settings';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';

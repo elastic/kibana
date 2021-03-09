@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export type CallOutType = 'primary' | 'success' | 'warning' | 'danger';
+import { EuiCallOutProps } from '@elastic/eui';
+
+export type CallOutType = NonNullable<EuiCallOutProps['color']>;
 
 export interface CallOutMessage {
   type: CallOutType;

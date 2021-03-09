@@ -115,7 +115,7 @@ export const createRequest = ({ type, id }: TestCase) => ({ type, id });
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 const isNamespaceAgnostic = (type: string) => type === 'globaltype';
-const isMultiNamespace = (type: string) => type === 'sharedtype';
+const isMultiNamespace = (type: string) => type === 'sharedtype' || type === 'sharecapabletype';
 export const expectResponses = {
   forbiddenTypes: (action: string) => (
     typeOrTypes: string | string[]

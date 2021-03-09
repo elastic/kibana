@@ -63,6 +63,13 @@ const fieldsOne = [
     aggregatable: true,
     searchable: true,
   },
+  {
+    name: 'bytes_range',
+    displayName: 'bytes_range',
+    type: 'number_range',
+    aggregatable: true,
+    searchable: true,
+  },
   documentField,
 ];
 
@@ -319,7 +326,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       sourceField: 'timestamp',
                     }),
                     id2: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'bytes',
                     }),
                   },
@@ -400,7 +407,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columnOrder: ['id1'],
                   columns: {
                     id1: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'bytes',
                     }),
                   },
@@ -542,7 +549,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       sourceField: 'timestamp',
                     }),
                     id1: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'bytes',
                     }),
                   },
@@ -624,7 +631,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columnOrder: ['id1'],
                   columns: {
                     id1: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'bytes',
                     }),
                   },
@@ -914,7 +921,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columns: {
                     cola: initialState.layers.currentLayer.columns.cola,
                     colb: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'memory',
                     }),
                   },
@@ -934,7 +941,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     cola: initialState.layers.currentLayer.columns.cola,
                     colb: initialState.layers.currentLayer.columns.colb,
                     newid: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'memory',
                     }),
                   },
@@ -979,7 +986,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columns: {
                     ...modifiedState.layers.currentLayer.columns,
                     newid: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'memory',
                     }),
                   },
@@ -2039,7 +2046,7 @@ describe('IndexPattern Data Source suggestions', () => {
           table: expect.objectContaining({
             columns: [
               expect.objectContaining({
-                operation: expect.objectContaining({ label: 'Sum of field1' }),
+                operation: expect.objectContaining({ label: 'Median of field1' }),
               }),
             ],
           }),

@@ -9,8 +9,8 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 import { EuiIconTip } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
@@ -27,25 +27,25 @@ import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
 
-const GroupIdLink = styled(ErrorDetailLink)`
+const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
 `;
 
-const MessageAndCulpritCell = styled.div`
+const MessageAndCulpritCell = euiStyled.div`
   ${truncate('100%')};
 `;
 
-const ErrorLink = styled(ErrorOverviewLink)`
+const ErrorLink = euiStyled(ErrorOverviewLink)`
   ${truncate('100%')};
 `;
 
-const MessageLink = styled(ErrorDetailLink)`
+const MessageLink = euiStyled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
 
-const Culprit = styled.div`
+const Culprit = euiStyled.div`
   font-family: ${fontFamilyCode};
 `;
 

@@ -6,6 +6,7 @@
  */
 
 import { ALLOWED_DATA_UNITS } from '../constants/validation';
+import { parseInterval } from './parse_interval';
 
 /**
  * Provides a validator function for maximum allowed input length.
@@ -61,17 +62,17 @@ export function composeValidators(
 }
 
 export function requiredValidator() {
-  return (value: any) => {
+  return <T extends string>(value: T) => {
     return value === '' || value === undefined || value === null ? { required: true } : null;
   };
 }
 
-export type ValidationResult = object | null;
+export type ValidationResult = Record<string, any> | null;
 
 export type MemoryInputValidatorResult = { invalidUnits: { allowedUnits: string } } | null;
 
 export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
-  return (value: any) => {
+  return <T>(value: T) => {
     if (typeof value !== 'string' || value === '') {
       return null;
     }
@@ -79,5 +80,18 @@ export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
     return regexp.test(value.trim())
       ? null
       : { invalidUnits: { allowedUnits: allowedUnits.join(', ') } };
+  };
+}
+
+export function timeIntervalInputValidator() {
+  return (value: string) => {
+    const r = parseInterval(value);
+    if (r === null) {
+      return {
+        invalidTimeInterval: true,
+      };
+    }
+
+    return null;
   };
 }

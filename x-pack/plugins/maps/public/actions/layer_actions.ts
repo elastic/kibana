@@ -42,7 +42,7 @@ import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_r
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
-import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../classes/layers/vector_layer';
 import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
@@ -537,5 +537,14 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
         dispatch(setLayerVisibility(layer.id, !hiddenLayerIds.includes(layer.id)))
       );
     }
+  };
+}
+
+export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id: layerId,
+    propName: '__areTilesLoaded',
+    newValue: areTilesLoaded,
   };
 }

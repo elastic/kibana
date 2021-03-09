@@ -147,6 +147,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         onClose={this.props.onClose}
         title={this.props.title}
         showCopyOnSave={this.props.showCopyOnSave}
+        initialCopyOnSave={this.props.showCopyOnSave}
         objectType="dashboard"
         options={this.renderDashboardSaveOptions()}
         showDescription={false}

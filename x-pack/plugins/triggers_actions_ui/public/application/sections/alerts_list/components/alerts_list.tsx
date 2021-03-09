@@ -26,6 +26,7 @@ import {
   EuiHealth,
   EuiText,
   EuiToolTip,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -53,14 +54,15 @@ import {
   AlertExecutionStatus,
   AlertExecutionStatusValues,
   ALERTS_FEATURE_ID,
-} from '../../../../../../alerts/common';
+  AlertExecutionStatusErrorReasons,
+} from '../../../../../../alerting/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
-import { alertsStatusesTranslationsMapping } from '../translations';
+import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './alerts_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { ManageLicenseModal } from './manage_license_modal';
 
 const ENTER_KEY = 13;
 
@@ -97,7 +99,15 @@ export const AlertsList: React.FunctionComponent = () => {
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
-  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
+  const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
+  const [sort, setSort] = useState<EuiTableSortingType<AlertTableItem>['sort']>({
+    field: 'name',
+    direction: 'asc',
+  });
+  const [manageLicenseModalOpts, setManageLicenseModalOpts] = useState<{
+    licenseType: string;
+    alertTypeId: string;
+  } | null>(null);
   const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>(
     AlertExecutionStatusValues.reduce(
       (prev: Record<string, number>, status: string) =>
@@ -189,6 +199,7 @@ export const AlertsList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           alertStatusesFilter,
+          sort,
         });
         await loadAlertAggs();
         setAlertsState({
@@ -238,39 +249,76 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
+  const renderAlertExecutionStatus = (
+    executionStatus: AlertExecutionStatus,
+    item: AlertTableItem
+  ) => {
+    const healthColor = getHealthColor(executionStatus.status);
+    const tooltipMessage =
+      executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
+    const isLicenseError =
+      executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+    const statusMessage = isLicenseError
+      ? ALERT_STATUS_LICENSE_ERROR
+      : alertsStatusesTranslationsMapping[executionStatus.status];
+
+    const health = (
+      <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
+        {statusMessage}
+      </EuiHealth>
+    );
+
+    const healthWithTooltip = tooltipMessage ? (
+      <EuiToolTip
+        data-test-subj="alertStatus-error-tooltip"
+        position="top"
+        content={tooltipMessage}
+      >
+        {health}
+      </EuiToolTip>
+    ) : (
+      health
+    );
+
+    return (
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>{healthWithTooltip}</EuiFlexItem>
+        {isLicenseError && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj="alertStatus-error-license-fix"
+              onClick={() =>
+                setManageLicenseModalOpts({
+                  licenseType: alertTypesState.data.get(item.alertTypeId)?.minimumLicenseRequired!,
+                  alertTypeId: item.alertTypeId,
+                })
+              }
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.fixLicenseLink"
+                defaultMessage="Fix"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  };
+
   const alertsTableColumns = [
-    {
-      field: 'executionStatus',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
-        { defaultMessage: 'Status' }
-      ),
-      sortable: false,
-      truncateText: false,
-      'data-test-subj': 'alertsTableCell-status',
-      render: (executionStatus: AlertExecutionStatus) => {
-        const healthColor = getHealthColor(executionStatus.status);
-        return (
-          <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
-            {alertsStatusesTranslationsMapping[executionStatus.status]}
-          </EuiHealth>
-        );
-      },
-    },
     {
       field: 'name',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle',
         { defaultMessage: 'Name' }
       ),
-      sortable: false,
+      sortable: true,
       truncateText: true,
+      width: '35%',
       'data-test-subj': 'alertsTableCell-name',
       render: (name: string, alert: AlertTableItem) => {
-        const checkEnabledResult = checkAlertTypeEnabled(
-          alertTypesState.data.get(alert.alertTypeId)
-        );
-        const link = (
+        return (
           <EuiLink
             title={name}
             onClick={() => {
@@ -280,17 +328,20 @@ export const AlertsList: React.FunctionComponent = () => {
             {name}
           </EuiLink>
         );
-        return checkEnabledResult.isEnabled ? (
-          link
-        ) : (
-          <EuiToolTip
-            position="top"
-            data-test-subj={`${alert.id}-disabledTooltip`}
-            content={checkEnabledResult.message}
-          >
-            {link}
-          </EuiToolTip>
-        );
+      },
+    },
+    {
+      field: 'executionStatus.status',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
+        { defaultMessage: 'Status' }
+      ),
+      sortable: true,
+      truncateText: false,
+      width: '150px',
+      'data-test-subj': 'alertsTableCell-status',
+      render: (executionStatus: AlertExecutionStatus, item: AlertTableItem) => {
+        return renderAlertExecutionStatus(item.executionStatus, item);
       },
     },
     {
@@ -303,9 +354,9 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-tagsText',
     },
     {
-      field: 'actionsText',
+      field: 'actionsCount',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsCount',
         { defaultMessage: 'Actions' }
       ),
       render: (count: number, item: AlertTableItem) => {
@@ -316,7 +367,7 @@ export const AlertsList: React.FunctionComponent = () => {
         );
       },
       sortable: false,
-      'data-test-subj': 'alertsTableCell-actionsText',
+      'data-test-subj': 'alertsTableCell-actionsCount',
     },
     {
       field: 'alertType',
@@ -492,7 +543,7 @@ export const AlertsList: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!dissmissAlertErrors && alertsStatusesTotal.error > 0 ? (
+      {!dismissAlertErrors && alertsStatusesTotal.error > 0 ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiCallOut
@@ -521,7 +572,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   defaultMessage="View"
                 />
               </EuiButton>
-              <EuiButtonEmpty color="danger" onClick={() => setDissmissAlertErrors(true)}>
+              <EuiButtonEmpty color="danger" onClick={() => setDismissAlertErrors(true)}>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.dismissBunnerButtonLabel"
                   defaultMessage="Dismiss"
@@ -610,6 +661,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         itemId="id"
         columns={alertsTableColumns}
+        sorting={{ sort }}
         rowProps={(item: AlertTableItem) => ({
           'data-test-subj': 'alert-row',
           className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
@@ -635,10 +687,32 @@ export const AlertsList: React.FunctionComponent = () => {
             setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
           },
         }}
-        onChange={({ page: changedPage }: { page: Pagination }) => {
-          setPage(changedPage);
+        onChange={({
+          page: changedPage,
+          sort: changedSort,
+        }: {
+          page?: Pagination;
+          sort?: EuiTableSortingType<AlertTableItem>['sort'];
+        }) => {
+          if (changedPage) {
+            setPage(changedPage);
+          }
+          if (changedSort) {
+            setSort(changedSort);
+          }
         }}
       />
+      {manageLicenseModalOpts && (
+        <ManageLicenseModal
+          licenseType={manageLicenseModalOpts.licenseType}
+          alertTypeId={manageLicenseModalOpts.alertTypeId}
+          onConfirm={() => {
+            window.open(`${http.basePath.get()}/app/management/stack/license_management`, '_blank');
+            setManageLicenseModalOpts(null);
+          }}
+          onCancel={() => setManageLicenseModalOpts(null)}
+        />
+      )}
     </Fragment>
   );
 
@@ -701,7 +775,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }}
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}
-          reloadAlerts={loadAlertsData}
+          onSave={loadAlertsData}
         />
       )}
     </section>
@@ -741,7 +815,7 @@ function convertAlertsToTableItems(
 ) {
   return alerts.map((alert) => ({
     ...alert,
-    actionsText: alert.actions.length,
+    actionsCount: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
     isEditable:

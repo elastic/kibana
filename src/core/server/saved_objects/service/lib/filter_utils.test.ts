@@ -9,7 +9,12 @@
 // @ts-expect-error no ts
 import { esKuery } from '../../es_query';
 
-import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './filter_utils';
+import {
+  validateFilterKueryNode,
+  validateConvertFilterToKueryNode,
+  fieldDefined,
+  hasFilterKeyError,
+} from './filter_utils';
 
 const mockMappings = {
   properties: {
@@ -39,6 +44,18 @@ const mockMappings = {
         },
       },
     },
+    bean: {
+      properties: {
+        canned: {
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
+          type: 'keyword',
+        },
+      },
+    },
     alert: {
       properties: {
         actions: {
@@ -58,6 +75,9 @@ const mockMappings = {
               type: 'object',
             },
           },
+        },
+        params: {
+          type: 'flattened',
         },
       },
     },
@@ -89,6 +109,15 @@ describe('Filter Utils', () => {
       expect(
         validateConvertFilterToKueryNode(['foo'], 'foo.attributes.title: "best"', mockMappings)
       ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
+    });
+    test('Validate a multi-field KQL expression filter', () => {
+      expect(
+        validateConvertFilterToKueryNode(
+          ['bean'],
+          'bean.attributes.canned.text: "best"',
+          mockMappings
+        )
+      ).toEqual(esKuery.fromKueryExpression('bean.canned.text: "best"'));
     });
     test('Assemble filter kuery node saved object attributes with one saved object type', () => {
       expect(
@@ -142,6 +171,12 @@ describe('Filter Utils', () => {
       ).toEqual(esKuery.fromKueryExpression('alert.actions:{ actionTypeId: ".server-log" }'));
     });
 
+    test('Assemble filter for flattened fields', () => {
+      expect(
+        validateConvertFilterToKueryNode(['alert'], 'alert.attributes.params.foo:bar', mockMappings)
+      ).toEqual(esKuery.fromKueryExpression('alert.params.foo:bar'));
+    });
+
     test('Lets make sure that we are throwing an exception if we get an error', () => {
       expect(() => {
         validateConvertFilterToKueryNode(
@@ -180,35 +215,35 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
@@ -255,35 +290,35 @@ describe('Filter Utils', () => {
           type: null,
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
@@ -310,14 +345,14 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error:
             "This key 'foo.bytes' does NOT match the filter proposition SavedObjectType.attributes.key",
           isSavedObjectAttr: false,
@@ -325,21 +360,21 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error:
             "This key 'foo.description' does NOT match the filter proposition SavedObjectType.attributes.key",
           isSavedObjectAttr: false,
@@ -367,35 +402,35 @@ describe('Filter Utils', () => {
           type: 'bar',
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
@@ -422,21 +457,21 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.0',
+          astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.2',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.3',
           error:
             "This key 'foo.attributes.header' does NOT exist in foo saved object index patterns",
           isSavedObjectAttr: false,
@@ -444,14 +479,14 @@ describe('Filter Utils', () => {
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.0',
+          astPath: 'arguments.4.arguments.0',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
-          astPath: 'arguments.1.arguments.1.arguments.1.arguments.1.arguments.1',
+          astPath: 'arguments.4.arguments.1',
           error: null,
           isSavedObjectAttr: false,
           key: 'foo.attributes.description',
@@ -483,6 +518,102 @@ describe('Filter Utils', () => {
           type: null,
         },
       ]);
+    });
+  });
+
+  describe('#hasFilterKeyError', () => {
+    test('Return no error if filter key is valid', () => {
+      const hasError = hasFilterKeyError('bean.attributes.canned.text', ['bean'], mockMappings);
+
+      expect(hasError).toBeNull();
+    });
+
+    test('Return error if key is not defined', () => {
+      const hasError = hasFilterKeyError(undefined, ['bean'], mockMappings);
+
+      expect(hasError).toEqual(
+        'The key is empty and needs to be wrapped by a saved object type like bean'
+      );
+    });
+
+    test('Return error if key is null', () => {
+      const hasError = hasFilterKeyError(null, ['bean'], mockMappings);
+
+      expect(hasError).toEqual(
+        'The key is empty and needs to be wrapped by a saved object type like bean'
+      );
+    });
+
+    test('Return error if key does not identify an SO wrapper', () => {
+      const hasError = hasFilterKeyError('beanattributescannedtext', ['bean'], mockMappings);
+
+      expect(hasError).toEqual(
+        "This key 'beanattributescannedtext' need to be wrapped by a saved object type like bean"
+      );
+    });
+
+    test('Return error if key does not match an SO type', () => {
+      const hasError = hasFilterKeyError('canned.attributes.bean.text', ['bean'], mockMappings);
+
+      expect(hasError).toEqual('This type canned is not allowed');
+    });
+
+    test('Return error if key does not match SO attribute structure', () => {
+      const hasError = hasFilterKeyError('bean.canned.text', ['bean'], mockMappings);
+
+      expect(hasError).toEqual(
+        "This key 'bean.canned.text' does NOT match the filter proposition SavedObjectType.attributes.key"
+      );
+    });
+
+    test('Return error if key matches SO attribute parent, not attribute itself', () => {
+      const hasError = hasFilterKeyError('alert.actions', ['alert'], mockMappings);
+
+      expect(hasError).toEqual(
+        "This key 'alert.actions' does NOT match the filter proposition SavedObjectType.attributes.key"
+      );
+    });
+
+    test('Return error if key refers to a non-existent attribute parent', () => {
+      const hasError = hasFilterKeyError('alert.not_a_key', ['alert'], mockMappings);
+
+      expect(hasError).toEqual(
+        "This key 'alert.not_a_key' does NOT exist in alert saved object index patterns"
+      );
+    });
+
+    test('Return error if key refers to a non-existent attribute', () => {
+      const hasError = hasFilterKeyError('bean.attributes.red', ['bean'], mockMappings);
+
+      expect(hasError).toEqual(
+        "This key 'bean.attributes.red' does NOT exist in bean saved object index patterns"
+      );
+    });
+  });
+
+  describe('#fieldDefined', () => {
+    test('Return false if filter is using an non-existing key', () => {
+      const isFieldDefined = fieldDefined(mockMappings, 'foo.not_a_key');
+
+      expect(isFieldDefined).toBeFalsy();
+    });
+
+    test('Return true if filter is using an existing key', () => {
+      const isFieldDefined = fieldDefined(mockMappings, 'foo.title');
+
+      expect(isFieldDefined).toBeTruthy();
+    });
+
+    test('Return true if filter is using a default for a multi-field property', () => {
+      const isFieldDefined = fieldDefined(mockMappings, 'bean.canned');
+
+      expect(isFieldDefined).toBeTruthy();
+    });
+
+    test('Return true if filter is using a non-default for a multi-field property', () => {
+      const isFieldDefined = fieldDefined(mockMappings, 'bean.canned.text');
+
+      expect(isFieldDefined).toBeTruthy();
     });
   });
 });

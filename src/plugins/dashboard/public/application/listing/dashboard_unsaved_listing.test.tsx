@@ -17,8 +17,8 @@ import { KibanaContextProvider } from '../../services/kibana_react';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardPanelStorage } from '../lib';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
-import { DashboardAppServices, DashboardRedirect } from '../types';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { DashboardAppServices } from '../types';
+import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 
 const mockedDashboards: { [key: string]: DashboardSavedObject } = {
   dashboardUnsavedOne: {
@@ -39,16 +39,11 @@ function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
   core.overlays.openConfirm = jest.fn().mockResolvedValue(true);
   const savedDashboards = {} as SavedObjectLoader;
-  savedDashboards.get = jest.fn().mockImplementation((id: string) => mockedDashboards[id]);
+  savedDashboards.get = jest
+    .fn()
+    .mockImplementation((id: string) => Promise.resolve(mockedDashboards[id]));
   const dashboardPanelStorage = {} as DashboardPanelStorage;
   dashboardPanelStorage.clearPanels = jest.fn();
-  dashboardPanelStorage.getDashboardIdsWithUnsavedChanges = jest
-    .fn()
-    .mockImplementation(() => [
-      'dashboardUnsavedOne',
-      'dashboardUnsavedTwo',
-      'dashboardUnsavedThree',
-    ]);
   return ({
     dashboardPanelStorage,
     savedDashboards,
@@ -56,14 +51,18 @@ function makeDefaultServices(): DashboardAppServices {
   } as unknown) as DashboardAppServices;
 }
 
-const makeDefaultProps = () => ({ redirectTo: jest.fn() });
+const makeDefaultProps = (): DashboardUnsavedListingProps => ({
+  redirectTo: jest.fn(),
+  unsavedDashboardIds: ['dashboardUnsavedOne', 'dashboardUnsavedTwo', 'dashboardUnsavedThree'],
+  refreshUnsavedDashboards: jest.fn(),
+});
 
 function mountWith({
   services: incomingServices,
   props: incomingProps,
 }: {
   services?: DashboardAppServices;
-  props?: { redirectTo: DashboardRedirect };
+  props?: DashboardUnsavedListingProps;
 }) {
   const services = incomingServices ?? makeDefaultServices();
   const props = incomingProps ?? makeDefaultProps();
@@ -89,11 +88,9 @@ describe('Unsaved listing', () => {
   });
 
   it('Does not attempt to get unsaved dashboard id', async () => {
-    const services = makeDefaultServices();
-    services.dashboardPanelStorage.getDashboardIdsWithUnsavedChanges = jest
-      .fn()
-      .mockImplementation(() => ['dashboardUnsavedOne', DASHBOARD_PANELS_UNSAVED_ID]);
-    mountWith({ services });
+    const props = makeDefaultProps();
+    props.unsavedDashboardIds = ['dashboardUnsavedOne', DASHBOARD_PANELS_UNSAVED_ID];
+    const { services } = mountWith({ props });
     await waitFor(() => {
       expect(services.savedDashboards.get).toHaveBeenCalledTimes(1);
     });
@@ -115,11 +112,9 @@ describe('Unsaved listing', () => {
   });
 
   it('Redirects to new dashboard when continue editing clicked', async () => {
-    const services = makeDefaultServices();
-    services.dashboardPanelStorage.getDashboardIdsWithUnsavedChanges = jest
-      .fn()
-      .mockImplementation(() => [DASHBOARD_PANELS_UNSAVED_ID]);
-    const { props, component } = mountWith({ services });
+    const props = makeDefaultProps();
+    props.unsavedDashboardIds = [DASHBOARD_PANELS_UNSAVED_ID];
+    const { component } = mountWith({ props });
     const getEditButton = () => findTestSubject(component, `edit-unsaved-New-Dashboard`);
     await waitFor(() => {
       component.update();
@@ -148,6 +143,36 @@ describe('Unsaved listing', () => {
       expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith(
         'dashboardUnsavedOne'
       );
+    });
+  });
+
+  it('removes unsaved changes from any dashboard which errors on fetch', async () => {
+    const services = makeDefaultServices();
+    const props = makeDefaultProps();
+    services.savedDashboards.get = jest.fn().mockImplementation((id: string) => {
+      if (id === 'failCase1' || id === 'failCase2') {
+        return Promise.reject(new Error());
+      }
+      return Promise.resolve(mockedDashboards[id]);
+    });
+
+    props.unsavedDashboardIds = [
+      'dashboardUnsavedOne',
+      'dashboardUnsavedTwo',
+      'dashboardUnsavedThree',
+      'failCase1',
+      'failCase2',
+    ];
+    const { component } = mountWith({ services, props });
+    waitFor(() => {
+      component.update();
+      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith('failCase1');
+      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith('failCase2');
+
+      // clearing panels from dashboard with errors should cause getDashboardIdsWithUnsavedChanges to be called again.
+      expect(
+        services.dashboardPanelStorage.getDashboardIdsWithUnsavedChanges
+      ).toHaveBeenCalledTimes(2);
     });
   });
 });

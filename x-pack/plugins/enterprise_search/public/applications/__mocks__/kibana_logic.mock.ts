@@ -6,6 +6,7 @@
  */
 
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
+
 import { mockHistory } from './';
 
 export const mockKibanaValues = {

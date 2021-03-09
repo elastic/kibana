@@ -7,14 +7,14 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { px, unit } from '../../style/variables';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';
 import { TimeComparison } from './time_comparison';
 import { useBreakPoints } from '../../hooks/use_break_points';
 
-const SearchBarFlexGroup = styled(EuiFlexGroup)`
+const SearchBarFlexGroup = euiStyled(EuiFlexGroup)`
   margin: ${({ theme }) =>
     `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeS}`};
 `;
@@ -22,17 +22,23 @@ const SearchBarFlexGroup = styled(EuiFlexGroup)`
 interface Props {
   prepend?: React.ReactNode | string;
   showTimeComparison?: boolean;
+  showCorrelations?: boolean;
 }
 
 function getRowDirection(showColumn: boolean) {
   return showColumn ? 'column' : 'row';
 }
 
-export function SearchBar({ prepend, showTimeComparison = false }: Props) {
+export function SearchBar({
+  prepend,
+  showTimeComparison = false,
+  showCorrelations = false,
+}: Props) {
   const { isMedium, isLarge } = useBreakPoints();
   const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
+
   return (
-    <SearchBarFlexGroup gutterSize="s" direction={getRowDirection(isLarge)}>
+    <SearchBarFlexGroup gutterSize="m" direction={getRowDirection(isLarge)}>
       <EuiFlexItem>
         <KueryBar prepend={prepend} />
       </EuiFlexItem>

@@ -31,7 +31,7 @@ export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) 
     <>
       <EuiSpacer />
 
-      <EuiText grow={false}>
+      <EuiText data-test-subj="upgradeAssistantOverviewTabDetail" grow={false}>
         <p>
           <FormattedMessage
             id="xpack.upgradeAssistant.overviewTab.tabDetail"

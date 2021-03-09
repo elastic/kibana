@@ -595,4 +595,35 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.alerts.cloud_lookup',
+    first_supported_version: '7.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.cloud_lookup',
+      {
+        defaultMessage:
+          "A value of 'false' disables cloud lookup for Windows alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.cloud_lookup',
+    first_supported_version: '7.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.cloud_lookup',
+      {
+        defaultMessage: "A value of 'false' disables cloud lookup for Mac alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.ransomware.mbr',
+    first_supported_version: '7.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.mbr',
+      {
+        defaultMessage: "A value of 'false' disables Ransomware MBR protection. Default: true.",
+      }
+    ),
+  },
 ];

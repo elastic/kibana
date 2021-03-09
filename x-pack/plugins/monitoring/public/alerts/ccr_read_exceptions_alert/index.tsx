@@ -9,8 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Expression, Props } from '../components/param_details_form/expression';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
-import { ALERT_CCR_READ_EXCEPTIONS, ALERT_DETAILS } from '../../../common/constants';
-import { AlertTypeParams } from '../../../../alerts/common';
+import {
+  ALERT_CCR_READ_EXCEPTIONS,
+  ALERT_DETAILS,
+  ALERT_REQUIRES_APP_CONTEXT,
+} from '../../../common/constants';
+import { AlertTypeParams } from '../../../../alerting/common';
 
 interface ValidateOptions extends AlertTypeParams {
   duration: string;
@@ -45,6 +49,6 @@ export function createCCRReadExceptionsAlertType(): AlertTypeModel<ValidateOptio
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: true,
+    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
   };
 }

@@ -6,7 +6,7 @@
  */
 
 import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { extractErrorProperties } from '../../../../../../../common/util/errors';
 import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
 import {
   getJobConfigFromFormState,
@@ -23,6 +23,7 @@ export interface FetchExplainDataReturnType {
 export const fetchExplainData = async (formState: State['form']) => {
   const jobConfig = getJobConfigFromFormState(formState);
   let errorMessage = '';
+  let errorReason = '';
   let success = true;
   let expectedMemory = '';
   let fieldSelection: FieldSelectionItem[] = [];
@@ -36,8 +37,12 @@ export const fetchExplainData = async (formState: State['form']) => {
     expectedMemory = resp.memory_estimation?.expected_memory_without_disk;
     fieldSelection = resp.field_selection || [];
   } catch (error) {
+    const errObj = extractErrorProperties(error);
     success = false;
-    errorMessage = extractErrorMessage(error);
+    errorMessage = errObj.message;
+    if (errObj.causedBy) {
+      errorReason = errObj.causedBy;
+    }
   }
 
   return {
@@ -45,5 +50,6 @@ export const fetchExplainData = async (formState: State['form']) => {
     expectedMemory,
     fieldSelection,
     errorMessage,
+    errorReason,
   };
 };

@@ -10,7 +10,7 @@ import semver from 'semver';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../../plugins/fleet/common';
+import { AGENTS_INDEX } from '../../../../plugins/fleet/common';
 
 const makeSnapshotVersion = (version: string) => {
   return version.endsWith('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
@@ -19,26 +19,33 @@ const makeSnapshotVersion = (version: string) => {
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('fleet upgrade agent', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
-    beforeEach(async () => {
+    before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
     });
-    afterEach(async () => {
+    setupFleetAndAgents(providerContext);
+    beforeEach(async () => {
+      await esArchiver.load('fleet/agents');
+    });
+    after(async () => {
       await esArchiver.unload('fleet/agents');
     });
 
     it('should respond 200 to upgrade agent and update the agent SO', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
       await supertest
@@ -56,11 +63,14 @@ export default function (providerContext: FtrProviderContext) {
     it('should respond 400 if upgrading agent with version the same as snapshot version', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: kibanaVersion } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: kibanaVersion } } },
+          },
         },
       });
       await supertest
@@ -74,11 +84,14 @@ export default function (providerContext: FtrProviderContext) {
     it('should respond 200 if upgrading agent with version the same as snapshot version and force flag is passed', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: kibanaVersion } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: kibanaVersion } } },
+          },
         },
       });
       await supertest
@@ -94,11 +107,14 @@ export default function (providerContext: FtrProviderContext) {
       const kibanaVersion = await kibanaServer.version.get();
       const kibanaVersionSnapshot = makeSnapshotVersion(kibanaVersion);
 
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
       await supertest
@@ -111,11 +127,14 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should respond 200 to upgrade agent and update the agent SO without source_uri', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
       await supertest
@@ -156,10 +175,15 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should respond 400 if trying to upgrade an agent that is unenrolled', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: { unenrolled_at: new Date().toISOString() },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            unenrolled_at: new Date().toISOString(),
+          },
+        },
       });
       await supertest
         .post(`/api/fleet/agents/agent1/upgrade`)
@@ -184,19 +208,27 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should respond 200 to bulk upgrade upgradeable agents and update the agent SOs', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent2',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: {
-            elastic: { agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
+              },
+            },
           },
         },
       });
@@ -219,19 +251,27 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should allow to upgrade multiple upgradeable agents by kuery', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent2',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: {
-            elastic: { agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
+              },
+            },
           },
         },
       });
@@ -239,7 +279,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agents/bulk_upgrade`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          agents: 'fleet-agents.active: true',
+          agents: 'active:true',
           version: kibanaVersion,
         })
         .expect(200);
@@ -256,19 +296,23 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').send({
         force: true,
       });
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent2',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: {
-            elastic: { agent: { upgradeable: true, version: '0.0.0' } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         },
       });
@@ -288,20 +332,26 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should not upgrade an unenrolled agent during bulk_upgrade', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          unenrolled_at: new Date().toISOString(),
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            unenrolled_at: new Date().toISOString(),
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent2',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: {
-            elastic: { agent: { upgradeable: true, version: '0.0.0' } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: {
+              elastic: { agent: { upgradeable: true, version: '0.0.0' } },
+            },
           },
         },
       });
@@ -321,27 +371,38 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should not upgrade an non upgradeable agent during bulk_upgrade', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-        },
-      });
-      await kibanaServer.savedObjects.update({
-        id: 'agent2',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: {
-            elastic: { agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         },
       });
-      await kibanaServer.savedObjects.update({
+      await es.update({
+        id: 'agent2',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
+              },
+            },
+          },
+        },
+      });
+      await es.update({
         id: 'agent3',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
+          },
         },
       });
       await supertest
@@ -362,27 +423,38 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should upgrade a non upgradeable agent during bulk_upgrade with force flag', async () => {
       const kibanaVersion = await kibanaServer.version.get();
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-        },
-      });
-      await kibanaServer.savedObjects.update({
-        id: 'agent2',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: {
-            elastic: { agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         },
       });
-      await kibanaServer.savedObjects.update({
+      await es.update({
+        id: 'agent2',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
+              },
+            },
+          },
+        },
+      });
+      await es.update({
         id: 'agent3',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
+          },
         },
       });
       await supertest
@@ -403,18 +475,24 @@ export default function (providerContext: FtrProviderContext) {
       expect(typeof agent3data.body.item.upgrade_started_at).to.be('string');
     });
     it('should respond 400 if trying to bulk upgrade to a version that does not match installed kibana version', async () => {
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent1',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
-      await kibanaServer.savedObjects.update({
+      await es.update({
         id: 'agent2',
-        type: AGENT_SAVED_OBJECT_TYPE,
-        attributes: {
-          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        body: {
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+          },
         },
       });
       await supertest
@@ -426,6 +504,92 @@ export default function (providerContext: FtrProviderContext) {
           force: true,
         })
         .expect(400);
+    });
+
+    describe('fleet upgrade agent(s) in a managed policy', function () {
+      it('should respond 400 to bulk upgrade and not update the agent SOs', async () => {
+        // update enrolled policy to managed
+        await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
+          name: 'Test policy',
+          namespace: 'default',
+          is_managed: true,
+        });
+
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: {
+                elastic: {
+                  agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
+                },
+              },
+            },
+          },
+        });
+        // attempt to upgrade agent in managed policy
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: kibanaVersion,
+            agents: ['agent1', 'agent2'],
+          })
+          .expect(400);
+        expect(body.message).to.contain('Cannot upgrade agent in managed policy policy1');
+
+        const [agent1data, agent2data] = await Promise.all([
+          supertest.get(`/api/fleet/agents/agent1`),
+          supertest.get(`/api/fleet/agents/agent2`),
+        ]);
+
+        expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+        expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
+      });
+
+      it('should respond 400 to upgrade and not update the agent SOs', async () => {
+        // update enrolled policy to managed
+        await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
+          name: 'Test policy',
+          namespace: 'default',
+          is_managed: true,
+        });
+
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        // attempt to upgrade agent in managed policy
+        const { body } = await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ version: kibanaVersion })
+          .expect(400);
+        expect(body.message).to.contain('Cannot upgrade agent agent1 in managed policy policy1');
+
+        const agent1data = await supertest.get(`/api/fleet/agents/agent1`);
+        expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+      });
     });
   });
 }

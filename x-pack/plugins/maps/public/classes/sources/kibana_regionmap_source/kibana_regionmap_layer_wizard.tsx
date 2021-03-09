@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 // @ts-ignore
 import { KibanaRegionmapSource, sourceTitle } from './kibana_regionmap_source';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../meta';

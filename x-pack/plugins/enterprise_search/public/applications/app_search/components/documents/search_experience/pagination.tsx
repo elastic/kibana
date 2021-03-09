@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet
 import { Paging, ResultsPerPage } from '@elastic/react-search-ui';
+
 import { PagingView, ResultsPerPageView } from './views';
 
 export const Pagination: React.FC<{ 'aria-label': string }> = ({ 'aria-label': ariaLabel }) => (

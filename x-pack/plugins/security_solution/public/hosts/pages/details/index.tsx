@@ -151,6 +151,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                         docValueFields={docValueFields}
                         id={id}
                         inspect={inspect}
+                        isInDetailsSidePanel={false}
                         refetch={refetch}
                         setQuery={setQuery}
                         data={hostOverview as HostItem}

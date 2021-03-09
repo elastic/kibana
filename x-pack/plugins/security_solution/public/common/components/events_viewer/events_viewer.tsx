@@ -40,11 +40,7 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import {
-  TimelineExpandedEventType,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
 
@@ -113,11 +109,10 @@ interface Props {
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
-  expandedEvent: TimelineExpandedEventType;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
-  id: string;
+  id: TimelineId;
   indexNames: string[];
   indexPattern: IIndexPattern;
   isLive: boolean;
@@ -141,7 +136,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   docValueFields,
   end,
-  expandedEvent,
   filters,
   headerFilterGroup,
   id,
@@ -159,7 +153,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   graphEventId,
 }) => {
-  const { globalFullScreen } = useGlobalFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
@@ -182,11 +176,11 @@ const EventsViewerComponent: React.FC<Props> = ({
       <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
         <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ExitFullScreen />
+          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
         </EuiFlexItem>
       </TitleFlexGroup>
     ),
-    [justTitle]
+    [globalFullScreen, justTitle, setGlobalFullScreen]
   );
 
   const combinedQueries = combineQueries({

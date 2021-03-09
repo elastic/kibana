@@ -19,12 +19,19 @@ export class IngestManagerError extends Error {
     this.name = this.constructor.name; // for stack traces
   }
 }
+
 export class RegistryError extends IngestManagerError {}
 export class RegistryConnectionError extends RegistryError {}
-export class RegistryResponseError extends RegistryError {}
+export class RegistryResponseError extends RegistryError {
+  constructor(message?: string, public readonly status?: number) {
+    super(message);
+  }
+}
 export class PackageNotFoundError extends IngestManagerError {}
+export class PackageKeyInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
 export class AgentPolicyError extends IngestManagerError {}
+export class AgentNotFoundError extends IngestManagerError {}
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class PackageUnsupportedMediaTypeError extends IngestManagerError {}
 export class PackageInvalidArchiveError extends IngestManagerError {}
@@ -34,3 +41,4 @@ export class FleetAdminUserInvalidError extends IngestManagerError {}
 export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
 export class AgentUnenrollmentError extends IngestManagerError {}
+export class AgentPolicyDeletionError extends IngestManagerError {}

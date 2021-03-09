@@ -26,6 +26,7 @@ export const getMinMetricAgg = () => {
     name: METRIC_TYPES.MIN,
     expressionName: aggMinFnName,
     title: minTitle,
+    valueType: 'number',
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.minLabel', {
         defaultMessage: 'Min {field}',
@@ -36,7 +37,7 @@ export const getMinMetricAgg = () => {
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.HISTOGRAM],
       },
     ],
   });

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   esKuery,
   IIndexPattern,
@@ -24,7 +24,7 @@ import { getBoolFilter } from './get_bool_filter';
 import { Typeahead } from './Typeahead';
 import { useProcessorEvent } from './use_processor_event';
 
-const Container = styled.div`
+const Container = euiStyled.div`
   margin-bottom: 10px;
 `;
 
@@ -66,7 +66,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useDynamicIndexPatternFetcher(processorEvent);
+  const { indexPattern } = useDynamicIndexPatternFetcher();
 
   const placeholder = i18n.translate('xpack.apm.kueryBar.placeholder', {
     defaultMessage: `Search {event, select,

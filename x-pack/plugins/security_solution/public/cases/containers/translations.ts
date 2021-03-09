@@ -53,7 +53,20 @@ export const REOPENED_CASES = ({
 }) =>
   i18n.translate('xpack.securitySolution.containers.case.reopenedCases', {
     values: { caseTitle, totalCases },
-    defaultMessage: 'Reopened {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
+    defaultMessage: 'Opened {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
+  });
+
+export const MARK_IN_PROGRESS_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
+  i18n.translate('xpack.securitySolution.containers.case.markInProgressCases', {
+    values: { caseTitle, totalCases },
+    defaultMessage:
+      'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as in progress',
   });
 
 export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = (serviceName: string) =>
@@ -61,13 +74,6 @@ export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = (serviceName: string) =>
     values: { serviceName },
     defaultMessage: 'Successfully sent to { serviceName }',
   });
-
-export const ERROR_PUSH_TO_SERVICE = i18n.translate(
-  'xpack.securitySolution.case.configure.errorPushingToService',
-  {
-    defaultMessage: 'Error pushing to service',
-  }
-);
 
 export const ERROR_GET_FIELDS = i18n.translate(
   'xpack.securitySolution.case.configure.errorGetFields',

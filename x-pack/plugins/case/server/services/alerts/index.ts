@@ -5,54 +5,94 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { IClusterClient, KibanaRequest } from 'kibana/server';
-import { CaseStatuses } from '../../../common/api';
+import { ElasticsearchClient, Logger } from 'kibana/server';
+import { MAX_ALERTS_PER_SUB_CASE } from '../../../common/constants';
+import { UpdateAlertRequest } from '../../client/types';
+import { AlertInfo } from '../../common';
+import { createCaseError } from '../../common/error';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
-  request: KibanaRequest;
-  ids: string[];
-  status: CaseStatuses;
-  index: string;
+  alerts: UpdateAlertRequest[];
+  scopedClusterClient: ElasticsearchClient;
+  logger: Logger;
+}
+
+interface GetAlertsArgs {
+  alertsInfo: AlertInfo[];
+  scopedClusterClient: ElasticsearchClient;
+  logger: Logger;
+}
+
+interface Alert {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
+}
+
+interface AlertsResponse {
+  docs: Alert[];
+}
+
+function isEmptyAlert(alert: AlertInfo): boolean {
+  return isEmpty(alert.id) || isEmpty(alert.index);
 }
 
 export class AlertService {
-  private isInitialized = false;
-  private esClient?: IClusterClient;
-
   constructor() {}
 
-  public initialize(esClient: IClusterClient) {
-    if (this.isInitialized) {
-      throw new Error('AlertService already initialized');
-    }
+  public async updateAlertsStatus({ alerts, scopedClusterClient, logger }: UpdateAlertsStatusArgs) {
+    try {
+      const body = alerts
+        .filter((alert) => !isEmptyAlert(alert))
+        .flatMap((alert) => [
+          { update: { _id: alert.id, _index: alert.index } },
+          { doc: { signal: { status: alert.status } } },
+        ]);
 
-    this.isInitialized = true;
-    this.esClient = esClient;
+      if (body.length <= 0) {
+        return;
+      }
+
+      return scopedClusterClient.bulk({ body });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 
-  public async updateAlertsStatus({ request, ids, status, index }: UpdateAlertsStatusArgs) {
-    if (!this.isInitialized) {
-      throw new Error('AlertService not initialized');
+  public async getAlerts({
+    scopedClusterClient,
+    alertsInfo,
+    logger,
+  }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
+    try {
+      const docs = alertsInfo
+        .filter((alert) => !isEmptyAlert(alert))
+        .slice(0, MAX_ALERTS_PER_SUB_CASE)
+        .map((alert) => ({ _id: alert.id, _index: alert.index }));
+
+      if (docs.length <= 0) {
+        return;
+      }
+
+      const results = await scopedClusterClient.mget<AlertsResponse>({ body: { docs } });
+
+      return results.body;
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,
+        error,
+        logger,
+      });
     }
-
-    // The above check makes sure that esClient is defined.
-    const result = await this.esClient!.asScoped(request).asCurrentUser.updateByQuery({
-      index,
-      conflicts: 'abort',
-      body: {
-        script: {
-          source: `ctx._source.signal.status = '${status}'`,
-          lang: 'painless',
-        },
-        query: { ids: { values: ids } },
-      },
-      ignore_unavailable: true,
-    });
-
-    return result;
   }
 }

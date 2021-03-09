@@ -7,16 +7,17 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../../../routes';
-import { generateEnginePath } from '../../../engine';
 import { DOCUMENTS_TITLE } from '../../../documents';
+import { generateEnginePath } from '../../../engine';
 
 import { QueryClick } from '../../types';
-import { FIRST_COLUMN_PROPS, TAGS_COLUMN, COUNT_COLUMN_PROPS } from './shared_columns';
+
+import { FIRST_COLUMN_PROPS, TAGS_LIST_COLUMN, COUNT_COLUMN_PROPS } from './shared_columns';
 
 interface Props {
   items: QueryClick[];
@@ -54,7 +55,7 @@ export const QueryClicksTable: React.FC<Props> = ({ items }) => {
 
   return (
     <EuiBasicTable
-      columns={[DOCUMENT_COLUMN, TAGS_COLUMN, CLICKS_COLUMN] as Columns}
+      columns={[DOCUMENT_COLUMN, TAGS_LIST_COLUMN, CLICKS_COLUMN] as Columns}
       items={items}
       responsive
       noItemsMessage={

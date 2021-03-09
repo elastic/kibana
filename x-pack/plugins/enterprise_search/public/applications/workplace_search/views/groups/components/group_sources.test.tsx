@@ -8,14 +8,14 @@
 import { contentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { GroupSources } from './group_sources';
-import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
-
 import { SourceIcon } from '../../../components/shared/source_icon';
-
 import { ContentSourceDetails } from '../../../types';
+
+import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
+import { GroupSources } from './group_sources';
 
 describe('GroupSources', () => {
   it('renders', () => {

@@ -8,7 +8,9 @@
 import { mockKibanaValues } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { Chart, Settings, LineSeries, Axis } from '@elastic/charts';
 
 import { AnalyticsChart } from './';

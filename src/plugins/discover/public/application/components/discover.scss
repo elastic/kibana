@@ -1,10 +1,12 @@
+@import '../../../../../core/public/mixins';
+
 discover-app {
   flex-grow: 1;
 }
 
 .dscPage {
   @include euiBreakpoint('m', 'l', 'xl') {
-    height: calc(100vh - #{($euiHeaderHeightCompensation * 2)});
+    @include kibanaFullBodyHeight();
   }
 
   flex-direction: column;

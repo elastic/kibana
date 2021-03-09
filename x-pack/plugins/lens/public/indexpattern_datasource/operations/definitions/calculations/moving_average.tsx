@@ -19,7 +19,7 @@ import {
   hasDateField,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { isValidNumber, useDebounceWithOptions } from '../helpers';
+import { getFormatFromPreviousColumn, isValidNumber, useDebounceWithOptions } from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
@@ -89,13 +89,10 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format, window: 5 }
-          : { window: 5 },
+      params: {
+        window: 5,
+        ...getFormatFromPreviousColumn(previousColumn),
+      },
     };
   },
   paramEditor: MovingAverageParamEditor,
@@ -192,22 +189,21 @@ const MovingAveragePopup = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.basicExplanation"
-          defaultMessage="Moving average slides a window across the data and displays the average value in the window."
+          defaultMessage="Moving average slides a window across the data and displays the average value. Moving average is supported only by date histograms."
         />
       </p>
 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.longerExplanation"
-          defaultMessage="To calculate the moving average, Lens uses the mean of the window and applies a skip policy for gaps.
-            For missing values, the bucket is skipped and the calculation is performed on the next value."
+          defaultMessage="To calculate the moving average, Lens uses the mean of the window and applies a skip policy for gaps.  For missing values, the bucket is skipped, and the calculation is performed on the next value."
         />
       </p>
 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.tableExplanation"
-          defaultMessage="For example, given the data [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], we can calculate a simple moving average with a window size of 5 as follows:"
+          defaultMessage="For example, given the data [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], you can calculate a simple moving average with a window size of 5:"
         />
       </p>
 
@@ -227,7 +223,7 @@ const MovingAveragePopup = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.windowInitialPartial"
-          defaultMessage="For the initial part of the series the window is partial, until it reaches the requested number of items. For instance with a window size of 5:"
+          defaultMessage="The window is partial until it reaches the requested number of items.  For example, with a window size of 5:"
         />
       </p>
       <ul>
@@ -240,7 +236,7 @@ const MovingAveragePopup = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.limitations"
-          defaultMessage="Note the first moving average value start from the second item onward. The moving average is supported only for date histograms."
+          defaultMessage="The first moving average value starts at the second item."
         />
       </p>
     </HelpPopover>

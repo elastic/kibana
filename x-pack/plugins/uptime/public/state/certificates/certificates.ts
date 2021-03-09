@@ -19,7 +19,7 @@ export const getCertificatesAction = createAsyncAction<GetCertsParams, CertResul
   'GET_CERTIFICATES'
 );
 
-interface CertificatesState {
+export interface CertificatesState {
   certs: AsyncInitState<CertResult>;
 }
 

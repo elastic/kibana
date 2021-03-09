@@ -32,8 +32,10 @@ export default async function ({ readConfigFile }) {
 
     servers: commonConfig.get('servers'),
 
-    esTestCluster: commonConfig.get('esTestCluster'),
-
+    esTestCluster: {
+      ...commonConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [

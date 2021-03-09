@@ -21,3 +21,9 @@ export {
 } from './configuration_issues_context';
 
 export { FormErrorsProvider, useFormErrorsContext } from './form_errors_context';
+
+export {
+  PhaseTimingsProvider,
+  usePhaseTimings,
+  PhaseTimingConfiguration,
+} from './phase_timings_context';

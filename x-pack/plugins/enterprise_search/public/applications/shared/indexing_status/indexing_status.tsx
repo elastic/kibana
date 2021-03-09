@@ -11,11 +11,11 @@ import { useValues, useActions } from 'kea';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
+import { IIndexingStatus } from '../types';
+
 import { IndexingStatusContent } from './indexing_status_content';
 import { IndexingStatusErrors } from './indexing_status_errors';
 import { IndexingStatusLogic } from './indexing_status_logic';
-
-import { IIndexingStatus } from '../types';
 
 export interface IIndexingStatusProps {
   viewLinkPath: string;

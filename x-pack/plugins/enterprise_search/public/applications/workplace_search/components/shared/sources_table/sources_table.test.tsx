@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { contentSources } from '../../../__mocks__/content_sources.mock';
+
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiTable } from '@elastic/eui';
-import { TableHeader } from '../../../../shared/table_header/table_header';
-import { contentSources } from '../../../__mocks__/content_sources.mock';
 
+import { TableHeader } from '../../../../shared/table_header/table_header';
 import { SourceRow } from '../source_row';
 
 import { SourcesTable } from './';

@@ -13,7 +13,12 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { IKibanaSearchRequest, IKibanaSearchResponse, ISearchOptions } from '../../common';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+  ISearchOptionsSerializable,
+} from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
   SearchTimeoutError,
@@ -60,7 +65,7 @@ export class SearchInterceptor {
    */
   protected application!: CoreStart['application'];
   private batchedFetch!: BatchedFunc<
-    { request: IKibanaSearchRequest; options: ISearchOptions },
+    { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
   >;
 
@@ -109,7 +114,7 @@ export class SearchInterceptor {
       return e;
     } else if (isEsError(e)) {
       if (isPainlessError(e)) {
-        return new PainlessError(e);
+        return new PainlessError(e, options?.indexPattern);
       } else {
         return new EsError(e);
       }
@@ -126,15 +131,24 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
-    const { abortSignal, ...requestOptions } = options || {};
+    const { abortSignal, sessionId, ...requestOptions } = options || {};
+    const combined = {
+      ...requestOptions,
+      ...this.deps.session.getSearchOptions(sessionId),
+    };
+    const serializableOptions: ISearchOptionsSerializable = {};
+
+    if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
+    if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
+    if (combined.legacyHitsTotal !== undefined)
+      serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
+    if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
+    if (combined.isStored !== undefined) serializableOptions.isStored = combined.isStored;
 
     return this.batchedFetch(
       {
         request,
-        options: {
-          ...requestOptions,
-          ...(options?.sessionId && this.deps.session.getSearchOptions(options.sessionId)),
-        },
+        options: serializableOptions,
       },
       abortSignal
     );
@@ -155,13 +169,14 @@ export class SearchInterceptor {
     const { signal: timeoutSignal } = timeoutController;
     const timeout$ = timeout ? timer(timeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
+      this.deps.usageCollector?.trackQueryTimedOut();
       timeoutController.abort();
     });
 
     const selfAbortController = new AbortController();
 
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
-    // 1. The user manually aborts (via `cancelPending`)
+    // 1. The internal abort controller aborts
     // 2. The request times out
     // 3. abort() is called on `selfAbortController`. This is used by session service to abort all pending searches that it tracks
     //    in the current session
@@ -221,8 +236,8 @@ export class SearchInterceptor {
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
-   * either when `cancelPending` is called, when the request times out, or when the original
-   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
+   * either when the request times out, or when the original `AbortSignal` is aborted. Updates
+   * `pendingCount$` when the request is started/finalized.
    *
    * @param request
    * @options

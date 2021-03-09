@@ -25,6 +25,7 @@ export interface FieldSetting {
   isCustom: boolean;
   validation?: StringValidation | ImageValidation;
   readOnly?: boolean;
+  order?: number;
   deprecation?: {
     message: string;
     docLinksKey: string;

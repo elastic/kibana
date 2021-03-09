@@ -67,6 +67,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
   const {
     start,
     end,
+    filter,
     moduleSourceConfiguration: { spaceId, sourceId, indices, timestampField },
     partitionField,
   } = setUpModuleArgs;
@@ -107,10 +108,23 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
 
   const datafeedOverrides = jobIds.map((id) => {
     const { datafeed: defaultDatafeedConfig } = getDefaultJobConfigs(id);
+    const config = { ...defaultDatafeedConfig };
+
+    if (filter) {
+      const query = JSON.parse(filter);
+
+      config.query.bool = {
+        ...config.query.bool,
+        ...query.bool,
+      };
+    }
 
     if (!partitionField || id === 'hosts_memory_usage') {
       // Since the host memory usage doesn't have custom aggs, we don't need to do anything to add a partition field
-      return defaultDatafeedConfig;
+      return {
+        ...config,
+        job_id: id,
+      };
     }
 
     // If we have a partition field, we need to change the aggregation to do a terms agg at the top level
@@ -126,7 +140,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     };
 
     return {
-      ...defaultDatafeedConfig,
+      ...config,
       job_id: id,
       aggregations,
     };

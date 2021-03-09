@@ -36,7 +36,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/apply_influencer_filters_action';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
@@ -47,12 +47,17 @@ const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
 function getJobsObservable(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
-  anomalyDetectorService: AnomalyDetectorService
+  anomalyDetectorService: AnomalyDetectorService,
+  setErrorHandler: (e: Error) => void
 ) {
   return embeddableInput.pipe(
     pluck('jobIds'),
     distinctUntilChanged(isEqual),
-    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds))
+    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds)),
+    catchError((e) => {
+      setErrorHandler(e.body ?? e);
+      return of(undefined);
+    })
   );
 }
 
@@ -95,7 +100,7 @@ export function useSwimlaneInputResolver(
 
   useEffect(() => {
     const subscription = combineLatest([
-      getJobsObservable(embeddableInput, anomalyDetectorService),
+      getJobsObservable(embeddableInput, anomalyDetectorService, setError),
       embeddableInput,
       chartWidth$.pipe(skipWhile((v) => !v)),
       fromPage$,
@@ -112,6 +117,11 @@ export function useSwimlaneInputResolver(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         switchMap(([jobs, input, swimlaneContainerWidth, fromPageInput, perPageFromState]) => {
+          if (!jobs) {
+            // couldn't load the list of jobs
+            return of(undefined);
+          }
+
           const {
             viewBy,
             swimlaneType: swimlaneTypeInput,

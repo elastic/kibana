@@ -13,7 +13,7 @@
   ],
   "interval": "10m",
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "AWS Root Login Without MFA",
   "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.dataset:aws.cloudtrail and event.provider:signin.amazonaws.com and event.action:ConsoleLogin and aws.cloudtrail.user_identity.type:Root and aws.cloudtrail.console_login.additional_eventdata.mfa_used:false and event.outcome:success",
@@ -48,6 +48,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

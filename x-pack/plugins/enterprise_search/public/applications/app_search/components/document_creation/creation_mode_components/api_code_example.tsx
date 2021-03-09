@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import dedent from 'dedent';
 import React from 'react';
+
+import dedent from 'dedent';
+
 import { useValues, useActions } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyoutHeader,
   EuiTitle,
@@ -27,18 +27,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
+import { DOCS_PREFIX } from '../../../routes';
 import { EngineLogic } from '../../engine';
 import { EngineDetails } from '../../engine/types';
-
-import { DOCS_PREFIX } from '../../../routes';
 import {
   DOCUMENTS_API_JSON_EXAMPLE,
   FLYOUT_ARIA_LABEL_ID,
   FLYOUT_CANCEL_BUTTON,
 } from '../constants';
-import { DocumentCreationLogic } from '../';
+import { DocumentCreationLogic } from '../index';
 
 export const ApiCodeExample: React.FC = () => (
   <>

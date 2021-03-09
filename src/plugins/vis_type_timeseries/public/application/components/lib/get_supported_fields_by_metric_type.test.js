@@ -26,11 +26,11 @@ describe('getSupportedFieldsByMetricType', () => {
   shouldSupportAllFieldTypes('value_count');
   shouldHaveHistogramAndNumbers('avg');
   shouldHaveHistogramAndNumbers('sum');
+  shouldHaveHistogramAndNumbers('min');
+  shouldHaveHistogramAndNumbers('max');
 
   shouldHaveOnlyNumbers('positive_rate');
   shouldHaveOnlyNumbers('std_deviation');
-  shouldHaveOnlyNumbers('max');
-  shouldHaveOnlyNumbers('min');
 
   it(`should return everything but histogram for cardinality`, () => {
     expect(getSupportedFieldsByMetricType('cardinality')).not.toContain('histogram');

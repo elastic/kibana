@@ -30,13 +30,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/application_links'),
       require.resolve('./test_suites/data_plugin'),
       require.resolve('./test_suites/saved_objects_management'),
+      require.resolve('./test_suites/saved_objects_hidden_type'),
     ],
     services: {
       ...functionalConfig.get('services'),
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     apps: functionalConfig.get('apps'),
     esArchiver: {
       directory: path.resolve(__dirname, '../es_archives'),

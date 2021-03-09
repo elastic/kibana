@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-type Arg =
-  | string
-  | number
-  | {
-      name: string;
-      args: Arg[];
-    };
+import { TinymathAST } from '@kbn/tinymath';
 
-export function getFieldNames(names: string[], arg: Arg): string[] {
-  if (typeof arg === 'object' && arg.args !== undefined) {
-    return names.concat(arg.args.reduce(getFieldNames, []));
+export function getFieldNames(names: string[], ast: TinymathAST): string[] {
+  if (typeof ast === 'number') {
+    return names;
   }
 
-  if (typeof arg === 'string') {
-    return names.concat(arg);
+  if (ast.type === 'function') {
+    return names.concat(ast.args.reduce(getFieldNames, []));
+  }
+
+  if (ast.type === 'variable') {
+    return names.concat(ast.value);
   }
 
   return names;

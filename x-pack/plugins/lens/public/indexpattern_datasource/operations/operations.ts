@@ -58,13 +58,20 @@ export function getSortScoreByPriority(
  * Returns all `OperationType`s that can build a column using `buildColumn` based on the
  * passed in field.
  */
-export function getOperationTypesForField(field: IndexPatternField): OperationType[] {
+export function getOperationTypesForField(
+  field: IndexPatternField,
+  filterOperations?: (operation: OperationMetadata) => boolean
+): OperationType[] {
   return operationDefinitions
-    .filter(
-      (operationDefinition) =>
-        operationDefinition.input === 'field' &&
-        operationDefinition.getPossibleOperationForField(field)
-    )
+    .filter((operationDefinition) => {
+      if (operationDefinition.input !== 'field') {
+        return false;
+      }
+      const possibleOperation = operationDefinition.getPossibleOperationForField(field);
+      return filterOperations
+        ? possibleOperation && filterOperations(possibleOperation)
+        : possibleOperation;
+    })
     .sort(getSortScoreByPriority)
     .map(({ type }) => type);
 }

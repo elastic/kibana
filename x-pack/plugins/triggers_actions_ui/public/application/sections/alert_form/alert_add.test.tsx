@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import uuid from 'uuid';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import AlertAdd from './alert_add';
+import AlertAdd, { AlertAddProps } from './alert_add';
+import { createAlert } from '../../lib/alert_api';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   Alert,
+  AlertFlyoutCloseReason,
   ConnectorValidationResult,
   GenericValidationResult,
   ValidationResult,
 } from '../../../types';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
+
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
+  createAlert: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -41,7 +46,12 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-export const TestExpression: React.FunctionComponent<any> = () => {
+const delay = (wait: number = 1000) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, wait);
+  });
+
+export const TestExpression: FunctionComponent<any> = () => {
   return (
     <EuiFormLabel>
       <FormattedMessage
@@ -56,7 +66,10 @@ export const TestExpression: React.FunctionComponent<any> = () => {
 describe('alert_add', () => {
   let wrapper: ReactWrapper<any>;
 
-  async function setup(initialValues?: Partial<Alert>) {
+  async function setup(
+    initialValues?: Partial<Alert>,
+    onClose: AlertAddProps['onClose'] = jest.fn()
+  ) {
     const mocks = coreMock.createSetup();
     const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
     const alertTypes = [
@@ -141,9 +154,9 @@ describe('alert_add', () => {
     wrapper = mountWithIntl(
       <AlertAdd
         consumer={ALERTS_FEATURE_ID}
-        onClose={() => {}}
+        onClose={onClose}
         initialValues={initialValues}
-        reloadAlerts={() => {
+        onSave={() => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}
@@ -160,11 +173,9 @@ describe('alert_add', () => {
   }
 
   it('renders alert add flyout', async () => {
-    await setup();
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, 1000);
-    });
+    const onClose = jest.fn();
+    await setup({}, onClose);
+    await delay(1000);
 
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
@@ -176,20 +187,25 @@ describe('alert_add', () => {
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
 
     expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
+
+    wrapper.find('[data-test-subj="cancelSaveAlertButton"]').first().simulate('click');
+    expect(onClose).toHaveBeenCalledWith(AlertFlyoutCloseReason.CANCELED);
   });
 
   it('renders alert add flyout with initial values', async () => {
-    await setup({
-      name: 'Simple status alert',
-      tags: ['uptime', 'logs'],
-      schedule: {
-        interval: '1h',
+    const onClose = jest.fn();
+    await setup(
+      {
+        name: 'Simple status alert',
+        tags: ['uptime', 'logs'],
+        schedule: {
+          interval: '1h',
+        },
       },
-    });
+      onClose
+    );
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 1000);
-    });
+    await delay(1000);
 
     expect(wrapper.find('input#alertName').props().value).toBe('Simple status alert');
 
@@ -197,4 +213,61 @@ describe('alert_add', () => {
 
     expect(wrapper.find('.euiSelect').first().props().value).toBe('h');
   });
+
+  it('emit an onClose event when the alert is saved', async () => {
+    const onClose = jest.fn();
+    const alert = mockAlert();
+
+    (createAlert as jest.MockedFunction<typeof createAlert>).mockResolvedValue(alert);
+
+    await setup(
+      {
+        name: 'Simple status alert',
+        alertTypeId: 'my-alert-type',
+        tags: ['uptime', 'logs'],
+        schedule: {
+          interval: '1h',
+        },
+      },
+      onClose
+    );
+
+    wrapper.find('[data-test-subj="saveAlertButton"]').first().simulate('click');
+
+    // Wait for handlers to fire
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(onClose).toHaveBeenCalledWith(AlertFlyoutCloseReason.SAVED);
+  });
 });
+
+function mockAlert(overloads: Partial<Alert> = {}): Alert {
+  return {
+    id: uuid.v4(),
+    enabled: true,
+    name: `alert-${uuid.v4()}`,
+    tags: [],
+    alertTypeId: '.noop',
+    consumer: 'consumer',
+    schedule: { interval: '1m' },
+    actions: [],
+    params: {},
+    createdBy: null,
+    updatedBy: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    apiKeyOwner: null,
+    throttle: null,
+    notifyWhen: null,
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
+    ...overloads,
+  };
+}

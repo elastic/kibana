@@ -6,15 +6,16 @@
  */
 
 import { setMockValues } from '../../../../__mocks__';
-import { groups } from '../../../__mocks__/groups.mock';
 import { contentSources } from '../../../__mocks__/content_sources.mock';
+import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { GroupManagerModal } from './group_manager_modal';
+import { EuiModal, EuiEmptyPrompt } from '@elastic/eui';
 
-import { EuiOverlayMask, EuiModal, EuiEmptyPrompt } from '@elastic/eui';
+import { GroupManagerModal } from './group_manager_modal';
 
 const hideModal = jest.fn();
 const selectAll = jest.fn();
@@ -45,7 +46,6 @@ describe('GroupManagerModal', () => {
     const wrapper = shallow(<GroupManagerModal {...props} />);
 
     expect(wrapper.find(EuiModal)).toHaveLength(1);
-    expect(wrapper.find(EuiOverlayMask)).toHaveLength(1);
   });
 
   it('renders empty state', () => {

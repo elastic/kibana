@@ -2106,10 +2106,15 @@ export const mockTimelineModel: TimelineModel = {
   },
   deletedEventIds: [],
   description: 'This is a sample rule description',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: 'event.sequence',
+    timestampField: '@timestamp',
+  },
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
   filters: [
     {
       $state: {
@@ -2229,10 +2234,17 @@ export const defaultTimelineProps: CreateTimelineProps = {
     dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
+    eqlOptions: {
+      eventCategoryField: 'event.category',
+      query: '',
+      size: 100,
+      tiebreakerField: '',
+      timestampField: '@timestamp',
+    },
     eventIdToNoteIds: {},
     eventType: 'all',
     excludedRowRendererIds: [],
-    expandedEvent: {},
+    expandedDetail: {},
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -2275,11 +2287,13 @@ export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
     field: 'host.name',
     values: ['apache'],
     originalValue: 'apache',
+    isObjectArray: false,
   },
   {
     field: 'user.id',
     values: ['1'],
     originalValue: 1,
+    isObjectArray: false,
   },
 ];
 

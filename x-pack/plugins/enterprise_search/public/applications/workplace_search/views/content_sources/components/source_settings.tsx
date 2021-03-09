@@ -6,24 +6,26 @@
  */
 
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import { isEmpty } from 'lodash';
-import { Link } from 'react-router-dom';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AppLogic } from '../../../app_logic';
+import { ContentSection } from '../../../components/shared/content_section';
+import { SourceConfigFields } from '../../../components/shared/source_config_fields';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
   CANCEL_BUTTON,
   OK_BUTTON,
@@ -31,6 +33,8 @@ import {
   SAVE_CHANGES_BUTTON,
   REMOVE_BUTTON,
 } from '../../../constants';
+import { SourceDataItem } from '../../../types';
+import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
@@ -41,16 +45,7 @@ import {
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
 } from '../constants';
-
-import { ContentSection } from '../../../components/shared/content_section';
-import { SourceConfigFields } from '../../../components/shared/source_config_fields';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
-import { SourceDataItem } from '../../../types';
-import { AppLogic } from '../../../app_logic';
-import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import { staticSourceData } from '../source_data';
-
 import { SourceLogic } from '../source_logic';
 
 export const SourceSettings: React.FC = () => {
@@ -105,26 +100,24 @@ export const SourceSettings: React.FC = () => {
   };
 
   const confirmModal = (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={CONFIRM_MODAL_TITLE}
-        onConfirm={handleSourceRemoval}
-        onCancel={hideConfirm}
-        buttonColor="danger"
-        cancelButtonText={CANCEL_BUTTON}
-        confirmButtonText={OK_BUTTON}
-        defaultFocusedButton="confirm"
-      >
-        <FormattedMessage
-          id="xpack.enterpriseSearch.workplaceSearch.sources.settingsModal.text"
-          defaultMessage="Your source documents will be deleted from Workplace Search.{lineBreak}Are you sure you want to remove {name}?"
-          values={{
-            name,
-            lineBreak: <br />,
-          }}
-        />
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={CONFIRM_MODAL_TITLE}
+      onConfirm={handleSourceRemoval}
+      onCancel={hideConfirm}
+      buttonColor="danger"
+      cancelButtonText={CANCEL_BUTTON}
+      confirmButtonText={OK_BUTTON}
+      defaultFocusedButton="confirm"
+    >
+      <FormattedMessage
+        id="xpack.enterpriseSearch.workplaceSearch.sources.settingsModal.text"
+        defaultMessage="Your source documents will be deleted from Workplace Search.{lineBreak}Are you sure you want to remove {name}?"
+        values={{
+          name,
+          lineBreak: <br />,
+        }}
+      />
+    </EuiConfirmModal>
   );
 
   return (

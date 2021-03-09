@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
+
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiButtonTo } from '../react_router_helpers';
 import { KibanaLogic } from '../../shared/kibana';
+import { EuiButtonTo } from '../react_router_helpers';
 
 import './error_state_prompt.scss';
 

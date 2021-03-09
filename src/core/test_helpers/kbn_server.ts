@@ -185,7 +185,7 @@ export function createTestServers({
   adjustTimeout: (timeout: number) => void;
   settings?: {
     es?: {
-      license: 'oss' | 'basic' | 'gold' | 'trial';
+      license: 'basic' | 'gold' | 'trial';
       [key: string]: any;
     };
     kbn?: {
@@ -208,7 +208,7 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = get(settings, 'es.license', 'oss');
+  const license = get(settings, 'es.license', 'basic');
   const usersToBeAdded = get(settings, 'users', []);
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {

@@ -16,7 +16,7 @@ export const SERVICENOW_ITSM = i18n.translate('xpack.actions.builtin.serviceNowI
 });
 
 export const SERVICENOW_SIR = i18n.translate('xpack.actions.builtin.serviceNowSIRTitle', {
-  defaultMessage: 'ServiceNow SIR',
+  defaultMessage: 'ServiceNow SecOps',
 });
 
 export const ALLOWED_HOSTS_ERROR = (message: string) =>

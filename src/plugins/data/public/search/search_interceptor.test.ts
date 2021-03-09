@@ -95,21 +95,23 @@ describe('SearchInterceptor', () => {
     });
 
     describe('Search session', () => {
-      const setup = ({
-        isRestore = false,
-        isStored = false,
-        sessionId,
-      }: {
-        isRestore?: boolean;
-        isStored?: boolean;
-        sessionId: string;
-      }) => {
+      const setup = (
+        opts: {
+          isRestore?: boolean;
+          isStored?: boolean;
+          sessionId: string;
+        } | null
+      ) => {
         const sessionServiceMock = searchMock.session as jest.Mocked<ISessionService>;
-        sessionServiceMock.getSearchOptions.mockImplementation(() => ({
-          sessionId,
-          isRestore,
-          isStored,
-        }));
+        sessionServiceMock.getSearchOptions.mockImplementation(() =>
+          opts
+            ? {
+                sessionId: opts.sessionId,
+                isRestore: opts.isRestore ?? false,
+                isStored: opts.isStored ?? false,
+              }
+            : null
+        );
         fetchMock.mockResolvedValue({ result: 200 });
       };
 
@@ -135,6 +137,22 @@ describe('SearchInterceptor', () => {
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.objectContaining({
             options: { sessionId, isStored: true, isRestore: true },
+          })
+        );
+
+        expect(
+          (searchMock.session as jest.Mocked<ISessionService>).getSearchOptions
+        ).toHaveBeenCalledWith(sessionId);
+      });
+
+      test("doesn't forward sessionId if search options return null", async () => {
+        const sessionId = 'sid';
+        setup(null);
+
+        await searchInterceptor.search(mockRequest, { sessionId }).toPromise();
+        expect(fetchMock.mock.calls[0][0]).toEqual(
+          expect.not.objectContaining({
+            options: { sessionId },
           })
         );
 

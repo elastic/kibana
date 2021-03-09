@@ -12,7 +12,7 @@ import { EuiDataGrid } from '@elastic/eui';
 import { IAggType, IFieldFormat } from 'src/plugins/data/public';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
-import { DatatableComponent } from './table_basic';
+import { DataContext, DatatableComponent } from './table_basic';
 import { LensMultiTable } from '../../types';
 import { DatatableProps } from '../expression';
 
@@ -425,6 +425,39 @@ describe('DatatableComponent', () => {
     );
 
     expect(wrapper.find(EuiDataGrid).prop('columns')!.length).toEqual(2);
+  });
+
+  test('it adds alignment data to context', () => {
+    const { data, args } = sampleArgs();
+
+    const wrapper = shallow(
+      <DatatableComponent
+        data={data}
+        args={{
+          ...args,
+          columns: [
+            { columnId: 'a', alignment: 'center', type: 'lens_datatable_column' },
+            { columnId: 'b', type: 'lens_datatable_column' },
+            { columnId: 'c', type: 'lens_datatable_column' },
+          ],
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
+        }}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn()}
+        renderMode="display"
+      />
+    );
+
+    expect(wrapper.find(DataContext.Provider).prop('value').alignments).toEqual({
+      // set via args
+      a: 'center',
+      // default for date
+      b: 'left',
+      // default for number
+      c: 'right',
+    });
   });
 
   test('it should refresh the table header when the datatable data changes', () => {

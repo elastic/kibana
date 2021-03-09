@@ -20,20 +20,20 @@ import { LogLevel, LogRecord } from '@kbn/logging';
 import { RollingFileAppender, RollingFileAppenderConfig } from './rolling_file_appender';
 
 const config: RollingFileAppenderConfig = {
-  kind: 'rolling-file',
-  path: '/var/log/kibana.log',
+  type: 'rolling-file',
+  fileName: '/var/log/kibana.log',
   layout: {
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
     highlight: false,
   },
   policy: {
-    kind: 'time-interval',
+    type: 'time-interval',
     interval: moment.duration(4, 'hour'),
     modulate: true,
   },
   strategy: {
-    kind: 'numeric',
+    type: 'numeric',
     max: 5,
     pattern: '-%i',
   },
@@ -99,7 +99,7 @@ describe('RollingFileAppender', () => {
 
   it('constructs its delegates with the correct parameters', () => {
     expect(RollingFileContextMock).toHaveBeenCalledTimes(1);
-    expect(RollingFileContextMock).toHaveBeenCalledWith(config.path);
+    expect(RollingFileContextMock).toHaveBeenCalledWith(config.fileName);
 
     expect(RollingFileManagerMock).toHaveBeenCalledTimes(1);
     expect(RollingFileManagerMock).toHaveBeenCalledWith(context);

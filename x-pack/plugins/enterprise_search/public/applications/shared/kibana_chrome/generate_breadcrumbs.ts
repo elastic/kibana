@@ -6,10 +6,8 @@
  */
 
 import { useValues } from 'kea';
-import { EuiBreadcrumb } from '@elastic/eui';
 
-import { KibanaLogic } from '../kibana';
-import { HttpLogic } from '../http';
+import { EuiBreadcrumb } from '@elastic/eui';
 
 import {
   ENTERPRISE_SEARCH_PLUGIN,
@@ -18,6 +16,8 @@ import {
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
+import { HttpLogic } from '../http';
+import { KibanaLogic } from '../kibana';
 import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
 
 /**

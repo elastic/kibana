@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Windows Component Object Model (COM) is an inter-process communication (IPC) component of the native Windows application programming interface (API) that enables interaction between software objects or executable code. Xwizard can be used to run a COM object created in registry to evade defensive counter measures.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Execution of COM object via Xwizard",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n process.pe.original_file_name : \"xwizard.exe\" and\n (\n   (process.args : \"RunWizard\" and process.args : \"{*}\") or\n   (process.executable != null and\n     not process.executable : (\"C:\\\\Windows\\\\SysWOW64\\\\xwizard.exe\", \"C:\\\\Windows\\\\System32\\\\xwizard.exe\")\n   )\n )\n",
+  "references": [
+    "https://lolbas-project.github.io/lolbas/Binaries/Xwizard/",
+    "http://www.hexacorn.com/blog/2017/07/31/the-wizard-of-x-oppa-plugx-style/"
+  ],
+  "risk_score": 47,
+  "rule_id": "1a6075b0-7479-450e-8fe7-b8b8438ac570",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1559",
+          "name": "Inter-Process Communication",
+          "reference": "https://attack.mitre.org/techniques/T1559/",
+          "subtechnique": [
+            {
+              "id": "T1559.001",
+              "name": "Component Object Model",
+              "reference": "https://attack.mitre.org/techniques/T1559/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

@@ -1,5 +1,5 @@
 {
-  "id": "kbn_tp_run_pipeline",
+  "id": "kbnTpRunPipeline",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "requiredPlugins": [

@@ -57,5 +57,6 @@ exports.externals = {
    * runtime deps which don't need to be copied across all bundles
    */
   tslib: '__kbnSharedDeps__.TsLib',
+  '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');

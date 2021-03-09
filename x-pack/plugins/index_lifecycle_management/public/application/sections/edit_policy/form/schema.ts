@@ -70,7 +70,7 @@ export const schema: FormSchema<FormInternal> = {
         ),
       },
       minAgeUnit: {
-        defaultValue: 'ms',
+        defaultValue: 'd',
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
@@ -354,12 +354,24 @@ export const schema: FormSchema<FormInternal> = {
     },
     delete: {
       min_age: {
-        defaultValue: '0',
+        defaultValue: '365',
         validations: [
           {
             validator: minAgeValidator,
           },
         ],
+      },
+      actions: {
+        wait_for_snapshot: {
+          policy: {
+            label: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.waitForSnapshot.snapshotPolicyFieldLabel',
+              {
+                defaultMessage: 'Policy name (optional)',
+              }
+            ),
+          },
+        },
       },
     },
   },

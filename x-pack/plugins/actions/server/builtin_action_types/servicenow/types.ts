@@ -121,6 +121,7 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
   params: PushToServiceApiParams;
   secrets: Record<string, unknown>;
   logger: Logger;
+  commentFieldKey: string;
 }
 
 export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
@@ -169,4 +170,13 @@ export interface ExternalServiceCommentResponse {
   commentId: string;
   pushedDate: string;
   externalCommentId?: string;
+}
+
+type TypeNullOrUndefined<T> = T | null | undefined;
+export interface ResponseError {
+  error: TypeNullOrUndefined<{
+    message: TypeNullOrUndefined<string>;
+    detail: TypeNullOrUndefined<string>;
+  }>;
+  status: TypeNullOrUndefined<string>;
 }

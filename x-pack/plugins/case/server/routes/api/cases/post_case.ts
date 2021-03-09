@@ -11,7 +11,7 @@ import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
 import { CasePostRequest } from '../../../../common/api';
 
-export function initPostCaseApi({ router }: RouteDeps) {
+export function initPostCaseApi({ router, logger }: RouteDeps) {
   router.post(
     {
       path: CASES_URL,
@@ -20,17 +20,18 @@ export function initPostCaseApi({ router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
-      if (!context.case) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-      const caseClient = context.case.getCaseClient();
-      const theCase = request.body as CasePostRequest;
-
       try {
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+        const caseClient = context.case.getCaseClient();
+        const theCase = request.body as CasePostRequest;
+
         return response.ok({
-          body: await caseClient.create({ theCase }),
+          body: await caseClient.create({ ...theCase }),
         });
       } catch (error) {
+        logger.error(`Failed to post case in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

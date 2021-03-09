@@ -17,11 +17,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const SOURCE_API_URL = '/api/metrics/source/default';
   const patchRequest = async (
     body: InfraSavedSourceConfiguration
   ): Promise<SourceResponse | undefined> => {
     const response = await supertest
-      .patch('/api/metrics/source/default')
+      .patch(SOURCE_API_URL)
       .set('kbn-xsrf', 'xxx')
       .send(body)
       .expect(200);
@@ -73,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(configuration?.fields.timestamp).to.be('@timestamp');
         expect(configuration?.fields.container).to.be('container.id');
         expect(configuration?.logColumns).to.have.length(3);
+        expect(configuration?.anomalyThreshold).to.be(50);
         expect(status?.logIndicesExist).to.be(true);
         expect(status?.metricIndicesExist).to.be(true);
       });
@@ -172,6 +174,31 @@ export default function ({ getService }: FtrProviderContext) {
         const fieldColumn = (configuration?.logColumns[0] as any).fieldColumn;
         expect(fieldColumn).to.have.property('id', 'ADDED_COLUMN_ID');
         expect(fieldColumn).to.have.property('field', 'ADDED_COLUMN_FIELD');
+      });
+      it('validates anomalyThreshold is between range 1-100', async () => {
+        // create config with bad request
+        await supertest
+          .patch(SOURCE_API_URL)
+          .set('kbn-xsrf', 'xxx')
+          .send({ name: 'NAME', anomalyThreshold: -20 })
+          .expect(400);
+        // create config with good request
+        await supertest
+          .patch(SOURCE_API_URL)
+          .set('kbn-xsrf', 'xxx')
+          .send({ name: 'NAME', anomalyThreshold: 20 })
+          .expect(200);
+
+        await supertest
+          .patch(SOURCE_API_URL)
+          .set('kbn-xsrf', 'xxx')
+          .send({ anomalyThreshold: -2 })
+          .expect(400);
+        await supertest
+          .patch(SOURCE_API_URL)
+          .set('kbn-xsrf', 'xxx')
+          .send({ anomalyThreshold: 101 })
+          .expect(400);
       });
     });
   });

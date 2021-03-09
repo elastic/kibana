@@ -138,6 +138,7 @@ export const datatableColumn: ExpressionFunctionDefinition<
   inputTypes: ['null'],
   args: {
     columnId: { types: ['string'], help: '' },
+    alignment: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
   },

@@ -50,15 +50,7 @@ import {
 
 import { getActionsConfigurationUtilities } from './actions_config';
 
-import {
-  createActionRoute,
-  deleteActionRoute,
-  getAllActionRoute,
-  getActionRoute,
-  updateActionRoute,
-  listActionTypesRoute,
-  executeActionRoute,
-} from './routes';
+import { defineRoutes } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
@@ -144,7 +136,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private security?: SecurityPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
-  private isESOUsingEphemeralEncryptionKey?: boolean;
+  private isESOCanEncrypt?: boolean;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
@@ -162,12 +154,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
     this.licenseState = new LicenseState(plugins.licensing.license$);
-    this.isESOUsingEphemeralEncryptionKey =
-      plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
+    this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
-    if (this.isESOUsingEphemeralEncryptionKey) {
+    if (!this.isESOCanEncrypt) {
       this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
 
@@ -181,7 +172,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     });
 
     const actionExecutor = new ActionExecutor({
-      isESOUsingEphemeralEncryptionKey: this.isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt: this.isESOCanEncrypt,
     });
 
     // get executions count
@@ -238,14 +229,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     // Routes
-    const router = core.http.createRouter<ActionsRequestHandlerContext>();
-    createActionRoute(router, this.licenseState);
-    deleteActionRoute(router, this.licenseState);
-    getActionRoute(router, this.licenseState);
-    getAllActionRoute(router, this.licenseState);
-    updateActionRoute(router, this.licenseState);
-    listActionTypesRoute(router, this.licenseState);
-    executeActionRoute(router, this.licenseState);
+    defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
 
     return {
       registerType: <
@@ -270,7 +254,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionTypeRegistry,
       taskRunnerFactory,
       kibanaIndexConfig,
-      isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt,
       preconfiguredActions,
       instantiateAuthorization,
       getUnsecuredSavedObjectsClient,
@@ -286,9 +270,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       request: KibanaRequest,
       authorizationContext?: ActionExecutionSource<unknown>
     ) => {
-      if (isESOUsingEphemeralEncryptionKey === true) {
+      if (isESOCanEncrypt !== true) {
         throw new Error(
-          `Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
 
@@ -314,7 +298,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
-          isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
+          isESOCanEncrypt: isESOCanEncrypt!,
           preconfiguredActions,
         }),
         auditLogger: this.security?.audit.asScoped(request),
@@ -437,7 +421,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
-      isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt,
       preconfiguredActions,
       actionExecutor,
       instantiateAuthorization,
@@ -448,9 +432,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       const [{ savedObjects }, { taskManager }] = await core.getStartServices();
       return {
         getActionsClient: () => {
-          if (isESOUsingEphemeralEncryptionKey === true) {
+          if (isESOCanEncrypt !== true) {
             throw new Error(
-              `Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+              `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
             );
           }
           return new ActionsClient({
@@ -468,7 +452,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
-              isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
+              isESOCanEncrypt: isESOCanEncrypt!,
               preconfiguredActions,
             }),
             auditLogger: security?.audit.asScoped(request),

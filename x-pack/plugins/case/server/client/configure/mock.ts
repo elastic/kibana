@@ -70,7 +70,7 @@ export const mappings: TestMappings = {
       action_type: 'append',
     },
   ],
-  [ConnectorTypes.servicenow]: [
+  [ConnectorTypes.serviceNowITSM]: [
     {
       source: 'title',
       target: 'short_description',
@@ -83,7 +83,24 @@ export const mappings: TestMappings = {
     },
     {
       source: 'comments',
-      target: 'comments',
+      target: 'work_notes',
+      action_type: 'append',
+    },
+  ],
+  [ConnectorTypes.serviceNowSIR]: [
+    {
+      source: 'title',
+      target: 'short_description',
+      action_type: 'overwrite',
+    },
+    {
+      source: 'description',
+      target: 'description',
+      action_type: 'overwrite',
+    },
+    {
+      source: 'comments',
+      target: 'work_notes',
       action_type: 'append',
     },
   ],
@@ -611,7 +628,25 @@ export const formatFieldsTestData: FormatFieldsTestData[] = [
       { id: 'upon_reject', name: 'Upon reject', required: false, type: 'text' },
     ],
     fields: serviceNowFields,
-    type: ConnectorTypes.servicenow,
+    type: ConnectorTypes.serviceNowITSM,
+  },
+  {
+    expected: [
+      { id: 'approval', name: 'Approval', required: false, type: 'text' },
+      { id: 'close_notes', name: 'Close notes', required: false, type: 'textarea' },
+      { id: 'contact_type', name: 'Contact type', required: false, type: 'text' },
+      { id: 'correlation_display', name: 'Correlation display', required: false, type: 'text' },
+      { id: 'correlation_id', name: 'Correlation ID', required: false, type: 'text' },
+      { id: 'description', name: 'Description', required: false, type: 'textarea' },
+      { id: 'number', name: 'Number', required: false, type: 'text' },
+      { id: 'short_description', name: 'Short description', required: false, type: 'text' },
+      { id: 'sys_created_by', name: 'Created by', required: false, type: 'text' },
+      { id: 'sys_updated_by', name: 'Updated by', required: false, type: 'text' },
+      { id: 'upon_approval', name: 'Upon approval', required: false, type: 'text' },
+      { id: 'upon_reject', name: 'Upon reject', required: false, type: 'text' },
+    ],
+    fields: serviceNowFields,
+    type: ConnectorTypes.serviceNowSIR,
   },
 ];
 export const mockGetFieldsResponse = {

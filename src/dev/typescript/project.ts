@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { readFileSync } from 'fs';
 import { basename, dirname, relative, resolve } from 'path';
 
 import { IMinimatch, Minimatch } from 'minimatch';
-import { parseConfigFileTextToJson } from 'typescript';
-
 import { REPO_ROOT } from '@kbn/utils';
+
+import { parseTsConfig } from './ts_configfile';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
@@ -21,16 +20,6 @@ function makeMatchers(directory: string, patterns: string[]) {
         dot: true,
       })
   );
-}
-
-function parseTsConfig(path: string) {
-  const { error, config } = parseConfigFileTextToJson(path, readFileSync(path, 'utf8'));
-
-  if (error) {
-    throw error;
-  }
-
-  return config;
 }
 
 function testMatchers(matchers: IMinimatch[], path: string) {

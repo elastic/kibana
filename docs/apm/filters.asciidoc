@@ -52,8 +52,9 @@ See the documentation for each agent you're using to learn how to configure serv
 
 * *Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONMENT`]
 * *Java:* {apm-java-ref}/config-core.html#config-environment[`environment`]
-* *.NET* {apm-dotnet-ref}/config-core.html#config-environment[`Environment`]
+* *.NET:* {apm-dotnet-ref}/config-core.html#config-environment[`Environment`]
 * *Node.js:* {apm-node-ref}/configuration.html#environment[`environment`]
+* *PHP:* {apm-php-ref}/configuration-reference.html#config-environment[`environment`]
 * *Python:* {apm-py-ref}/configuration.html#config-environment[`environment`]
 * *Ruby:* {apm-ruby-ref}/configuration.html#config-environment[`environment`]
 * *Real User Monitoring:* {apm-rum-ref}/configuration.html#environment[`environment`]

@@ -61,6 +61,15 @@ export const connectorsMock: ActionConnector[] = [
     },
     isPreconfigured: false,
   },
+  {
+    id: 'servicenow-sir',
+    actionTypeId: '.servicenow-sir',
+    name: 'My Connector SIR',
+    config: {
+      apiUrl: 'https://instance1.service-now.com',
+    },
+    isPreconfigured: false,
+  },
 ];
 
 export const actionTypesMock: ActionTypeConnector[] = [

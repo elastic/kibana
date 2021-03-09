@@ -7,10 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 import { isEqual } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
 import {
   clearFlashMessages,
   flashAPIErrors,
@@ -18,9 +17,9 @@ import {
   setQueuedSuccessMessage,
   setQueuedErrorMessage,
 } from '../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { GROUPS_PATH } from '../../routes';
-
 import { ContentSourceDetails, GroupDetails, User, SourcePriority } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;

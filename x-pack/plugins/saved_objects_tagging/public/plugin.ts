@@ -39,11 +39,12 @@ export class SavedObjectTaggingPlugin
     { management, savedObjectsTaggingOss }: SetupDeps
   ) {
     const kibanaSection = management.sections.section.kibana;
+    const title = i18n.translate('xpack.savedObjectsTagging.management.sectionLabel', {
+      defaultMessage: 'Tags',
+    });
     kibanaSection.registerApp({
       id: tagManagementSectionId,
-      title: i18n.translate('xpack.savedObjectsTagging.management.sectionLabel', {
-        defaultMessage: 'Tags',
-      }),
+      title,
       order: 1.5,
       mount: async (mountParams) => {
         const { mountSection } = await import('./management');
@@ -53,6 +54,7 @@ export class SavedObjectTaggingPlugin
           assignmentService: this.assignmentService!,
           core,
           mountParams,
+          title,
         });
       },
     });
@@ -66,7 +68,7 @@ export class SavedObjectTaggingPlugin
 
   public start({ http, application, overlays }: CoreStart) {
     this.tagCache = new TagsCache({
-      refreshHandler: () => this.tagClient!.getAll(),
+      refreshHandler: () => this.tagClient!.getAll({ asSystemRequest: true }),
       refreshInterval: this.config.cacheRefreshInterval,
     });
     this.tagClient = new TagsClient({ http, changeListener: this.tagCache });

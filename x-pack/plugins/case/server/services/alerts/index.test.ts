@@ -6,20 +6,21 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { CaseStatuses } from '../../../common/api';
 import { AlertService, AlertServiceContract } from '.';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 describe('updateAlertsStatus', () => {
-  const esClientMock = elasticsearchServiceMock.createClusterClient();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggingSystemMock.create().get('case');
 
   describe('happy path', () => {
     let alertService: AlertServiceContract;
     const args = {
-      ids: ['alert-id-1'],
-      index: '.siem-signals',
+      alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
       request: {} as KibanaRequest,
-      status: CaseStatuses.closed,
+      scopedClusterClient: esClient,
+      logger,
     };
 
     beforeEach(async () => {
@@ -28,30 +29,31 @@ describe('updateAlertsStatus', () => {
     });
 
     test('it update the status of the alert correctly', async () => {
-      alertService.initialize(esClientMock);
       await alertService.updateAlertsStatus(args);
 
-      expect(esClientMock.asScoped().asCurrentUser.updateByQuery).toHaveBeenCalledWith({
-        body: {
-          query: { ids: { values: args.ids } },
-          script: { lang: 'painless', source: `ctx._source.signal.status = '${args.status}'` },
-        },
-        conflicts: 'abort',
-        ignore_unavailable: true,
-        index: args.index,
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'alert-id-1', _index: '.siem-signals' } },
+          {
+            doc: {
+              signal: {
+                status: CaseStatuses.closed,
+              },
+            },
+          },
+        ],
       });
     });
 
     describe('unhappy path', () => {
-      test('it throws when service is already initialized', async () => {
-        alertService.initialize(esClientMock);
-        expect(() => {
-          alertService.initialize(esClientMock);
-        }).toThrow();
-      });
-
-      test('it throws when service is not initialized and try to update the status', async () => {
-        await expect(alertService.updateAlertsStatus(args)).rejects.toThrow();
+      it('ignores empty indices', async () => {
+        expect(
+          await alertService.updateAlertsStatus({
+            alerts: [{ id: 'alert-id-1', index: '', status: CaseStatuses.closed }],
+            scopedClusterClient: esClient,
+            logger,
+          })
+        ).toBeUndefined();
       });
     });
   });

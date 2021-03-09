@@ -1,0 +1,26 @@
+
+{
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+      "composite": true,
+      "outDir": "./target/types",
+      "emitDeclarationOnly": true,
+      "declaration": true,
+      "declarationMap": true
+    },
+    "include": [
+      "common/**/*",
+      "public/**/*",
+      "server/**/*",
+    ],
+    "references": [
+      { "path": "../../../src/core/tsconfig.json" },
+      { "path": "../../../src/plugins/home/tsconfig.json"},
+      { "path": "../../../src/plugins/management/tsconfig.json"},
+
+      { "path": "../features/tsconfig.json" },
+      { "path": "../licensing/tsconfig.json"},
+      { "path": "../monitoring/tsconfig.json"},
+      { "path": "../security/tsconfig.json"},
+    ]
+  }

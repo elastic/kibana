@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiPanel } from '@elastic/eui';
 
-import { ResultField } from './result_field';
-import { ResultHeader } from './result_header';
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
 import { SchemaTypes } from '../../../shared/types';
 
 import { Result } from './result';
+import { ResultField } from './result_field';
+import { ResultHeader } from './result_header';
 
 describe('Result', () => {
   const props = {

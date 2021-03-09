@@ -15,11 +15,11 @@ import {
 } from './numeric';
 import { RollingFileContext } from '../rolling_file_context';
 
-export { RollingStrategy } from './strategy';
+export type { RollingStrategy } from './strategy';
 export type RollingStrategyConfig = NumericRollingStrategyConfig;
 
 const defaultStrategy: NumericRollingStrategyConfig = {
-  kind: 'numeric',
+  type: 'numeric',
   pattern: '-%i',
   max: 7,
 };

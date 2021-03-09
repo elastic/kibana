@@ -15,8 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing ES promotion, see https://github.com/elastic/kibana/issues/89980
-  describe.skip('jobs cloning supported by UI form', function () {
+  describe('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -198,6 +197,16 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
+
+          await ml.testExecution.logTestStep('should continue to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('Should have validation callouts');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(
+            testData?.job?.analysis?.outlier_detection !== undefined ? 1 : 3
+          );
 
           await ml.testExecution.logTestStep('should continue to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();

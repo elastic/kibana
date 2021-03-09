@@ -46,10 +46,11 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 
   const handleClick = useCallback(() => {
     dispatch(
-      timelineActions.toggleExpandedEvent({
+      timelineActions.toggleDetailPanel({
+        panelView: 'eventDetail',
         tabType: TimelineTabs.notes,
         timelineId,
-        event: {
+        params: {
           eventId,
           indexName: existingIndexNames.join(','),
         },

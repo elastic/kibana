@@ -40,7 +40,7 @@ export const loadFollowerIndices = (isUpdating = false) =>
     label: t.FOLLOWER_INDEX_LOAD,
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
-    handler: async () => await loadFollowerIndicesRequest(),
+    handler: async () => await loadFollowerIndicesRequest(isUpdating),
   });
 
 export const getFollowerIndex = (id) =>

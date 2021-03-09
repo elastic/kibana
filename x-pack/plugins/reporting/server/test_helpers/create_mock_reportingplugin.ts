@@ -8,10 +8,10 @@
 jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
-jest.mock('../lib/create_queue');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
+import { coreMock } from 'src/core/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import {
@@ -22,7 +22,6 @@ import {
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
-import { ReportingStartDeps } from '../types';
 import { createMockLevelLogger } from './create_mock_levellogger';
 
 (initializeBrowserDriverFactory as jest.Mock<
@@ -31,10 +30,7 @@ import { createMockLevelLogger } from './create_mock_levellogger';
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
-const createMockPluginSetup = (
-  mockReportingCore: ReportingCore,
-  setupMock?: any
-): ReportingInternalSetup => {
+export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
   return {
     features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
@@ -42,6 +38,8 @@ const createMockPluginSetup = (
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
+    taskManager: { registerTaskDefinitions: jest.fn() } as any,
+    ...setupMock,
   };
 };
 
@@ -54,10 +52,14 @@ const createMockPluginStart = (
   const store = new ReportingStore(mockReportingCore, logger);
   return {
     browserDriverFactory: startMock.browserDriverFactory,
-    esqueue: startMock.esqueue,
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
     store,
+    taskManager: {
+      schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
+      ensureScheduled: jest.fn(),
+    } as any,
+    ...startMock,
   };
 };
 
@@ -73,7 +75,7 @@ interface ReportingConfigTestType {
 
 export const createMockConfigSchema = (
   overrides: Partial<ReportingConfigTestType> = {}
-): ReportingConfigTestType => {
+): ReportingConfigType => {
   // deeply merge the defaults and the provided partial schema
   return {
     index: '.reporting',
@@ -93,13 +95,16 @@ export const createMockConfigSchema = (
       ...overrides.capture,
     },
     queue: {
+      indexInterval: 'week',
+      pollEnabled: true,
+      pollInterval: 3000,
       timeout: 120000,
       ...overrides.queue,
     },
     csv: {
       ...overrides.csv,
     },
-  };
+  } as any;
 };
 
 export const createMockConfig = (
@@ -114,35 +119,28 @@ export const createMockConfig = (
   };
 };
 
-export const createMockStartDeps = (startMock?: any): ReportingStartDeps => ({
-  data: startMock.data,
-});
-
 export const createMockReportingCore = async (
   config: ReportingConfig,
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  const mockReportingCore = {
-    getConfig: () => config,
-    getElasticsearchService: () => setupDepsMock?.elasticsearch,
-  } as ReportingCore;
+  config = config || {};
 
   if (!setupDepsMock) {
-    setupDepsMock = createMockPluginSetup(mockReportingCore, {});
-  }
-  if (!startDepsMock) {
-    startDepsMock = createMockPluginStart(mockReportingCore, {});
+    setupDepsMock = createMockPluginSetup({});
   }
 
-  config = config || {};
-  const core = new ReportingCore(logger);
+  const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
+  const core = new ReportingCore(logger, context);
+  core.setConfig(config);
 
   core.pluginSetup(setupDepsMock);
-  core.setConfig(config);
   await core.pluginSetsUp();
 
-  core.pluginStart(startDepsMock);
+  if (!startDepsMock) {
+    startDepsMock = createMockPluginStart(core, context);
+  }
+  await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();
 
   return core;

@@ -11,6 +11,7 @@ import { Form as LibForm, FormHook } from '../../../../../shared_imports';
 
 import { ConfigurationIssuesProvider } from '../configuration_issues_context';
 import { FormErrorsProvider } from '../form_errors_context';
+import { PhaseTimingsProvider } from '../phase_timings_context';
 
 interface Props {
   form: FormHook;
@@ -19,7 +20,9 @@ interface Props {
 export const Form: FunctionComponent<Props> = ({ form, children }) => (
   <LibForm form={form}>
     <ConfigurationIssuesProvider>
-      <FormErrorsProvider>{children}</FormErrorsProvider>
+      <FormErrorsProvider>
+        <PhaseTimingsProvider>{children}</PhaseTimingsProvider>
+      </FormErrorsProvider>
     </ConfigurationIssuesProvider>
   </LibForm>
 );

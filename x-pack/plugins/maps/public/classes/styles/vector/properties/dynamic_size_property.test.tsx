@@ -21,7 +21,7 @@ import { IField } from '../../../fields/field';
 import { Map as MbMap } from 'mapbox-gl';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 export class MockMbMap {
   _paintPropertyCalls: unknown[];

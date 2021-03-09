@@ -19,6 +19,14 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
 
 export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
-  return supertestAsPromised(elasticSearchServerUrl);
+  const esServerConfig = config.get('servers.elasticsearch');
+  const elasticSearchServerUrl = formatUrl(esServerConfig);
+
+  let agentOptions = {};
+  if ('certificateAuthorities' in esServerConfig) {
+    agentOptions = { ca: esServerConfig!.certificateAuthorities };
+  }
+
+  // @ts-ignore - supertestAsPromised doesn't like the agentOptions, but still passes it correctly to supertest
+  return supertestAsPromised.agent(elasticSearchServerUrl, agentOptions);
 }

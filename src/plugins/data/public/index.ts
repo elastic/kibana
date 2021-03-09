@@ -158,6 +158,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 import { DateNanosFormat, DateFormat } from './field_formats';
@@ -188,6 +189,7 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export {
@@ -308,6 +310,7 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
+  getNumberHistogramIntervalByDatatableColumn,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -381,6 +384,7 @@ export {
   TimeoutErrorMode,
   PainlessError,
   noSearchSessionStorageCapabilityMessage,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
 } from './search';
 
 export type {
@@ -388,6 +392,7 @@ export type {
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
+  SearchUsageCollector,
 } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
@@ -415,6 +420,7 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
+    getNumberHistogramIntervalByDatatableColumn,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

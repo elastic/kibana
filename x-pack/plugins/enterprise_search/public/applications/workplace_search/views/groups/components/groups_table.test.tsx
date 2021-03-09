@@ -8,18 +8,18 @@
 import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
-import { DEFAULT_META } from '../../../../shared/constants';
-
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
+import { EuiTable, EuiTableHeaderCell } from '@elastic/eui';
+
+import { DEFAULT_META } from '../../../../shared/constants';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 
-import { GroupsTable } from './groups_table';
-import { GroupRow } from './group_row';
 import { ClearFiltersLink } from './clear_filters_link';
-
-import { EuiTable, EuiTableHeaderCell } from '@elastic/eui';
+import { GroupRow } from './group_row';
+import { GroupsTable } from './groups_table';
 
 const setActivePage = jest.fn();
 

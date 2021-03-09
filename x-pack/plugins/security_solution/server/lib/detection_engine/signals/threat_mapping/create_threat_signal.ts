@@ -13,7 +13,9 @@ import { CreateThreatSignalOptions } from './types';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
+  tuples,
   threatMapping,
+  threatEnrichment,
   query,
   inputIndex,
   type,
@@ -22,8 +24,6 @@ export const createThreatSignal = async ({
   savedId,
   services,
   exceptionItems,
-  gap,
-  previousStartedAt,
   listClient,
   logger,
   eventsTelemetry,
@@ -77,9 +77,9 @@ export const createThreatSignal = async ({
         `${threatFilter.query.bool.should.length} indicator items are being checked for existence of matches`
       )
     );
+
     const result = await searchAfterAndBulkCreate({
-      gap,
-      previousStartedAt,
+      tuples,
       listClient,
       exceptionsList: exceptionItems,
       ruleParams: params,
@@ -103,6 +103,7 @@ export const createThreatSignal = async ({
       tags,
       throttle,
       buildRuleMessage,
+      enrichment: threatEnrichment,
     });
     logger.debug(
       buildRuleMessage(

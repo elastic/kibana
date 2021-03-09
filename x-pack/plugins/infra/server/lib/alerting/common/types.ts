@@ -29,6 +29,15 @@ export enum Aggregators {
 export enum AlertStates {
   OK,
   ALERT,
+  WARNING,
   NO_DATA,
   ERROR,
+}
+
+export interface PreviewResult {
+  fired: number;
+  warning: number;
+  noData: number;
+  error: number;
+  notifications: number;
 }

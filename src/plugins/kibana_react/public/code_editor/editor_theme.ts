@@ -41,7 +41,7 @@ export function createTheme(
       { token: 'annotation', foreground: euiTheme.euiColorMediumShade },
       { token: 'type', foreground: euiTheme.euiColorVis0 },
 
-      { token: 'delimiter', foreground: euiTheme.euiColorDarkestShade },
+      { token: 'delimiter', foreground: euiTheme.euiTextSubduedColor },
       { token: 'delimiter.html', foreground: euiTheme.euiColorDarkShade },
       { token: 'delimiter.xml', foreground: euiTheme.euiColorPrimary },
 
@@ -81,6 +81,9 @@ export function createTheme(
       { token: 'operator.sql', foreground: euiTheme.euiColorMediumShade },
       { token: 'operator.swift', foreground: euiTheme.euiColorMediumShade },
       { token: 'predefined.sql', foreground: euiTheme.euiColorMediumShade },
+
+      { token: 'text', foreground: euiTheme.euiTitleColor },
+      { token: 'label', foreground: euiTheme.euiColorVis9 },
     ],
     colors: {
       'editor.foreground': euiTheme.euiColorDarkestShade,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useReducer, useRef } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { Unit } from '@elastic/datemath';
 import styled from 'styled-components';
 import {
@@ -56,7 +56,16 @@ export const initialState: State = {
   showNonEqlHistogram: false,
 };
 
-export type Threshold = { field: string | undefined; value: number } | undefined;
+export type Threshold =
+  | {
+      field: string | string[] | undefined;
+      value: number;
+      cardinality?: {
+        field: string[];
+        value: number;
+      };
+    }
+  | undefined;
 
 interface PreviewQueryProps {
   dataTestSubj: string;
@@ -268,6 +277,16 @@ export const PreviewQuery = ({
     }
   }, [setWarnings, setShowHistogram, ruleType, handlePreviewEqlQuery, startNonEql, timeframe]);
 
+  const previewButtonDisabled = useMemo(() => {
+    return (
+      isMatrixHistogramLoading ||
+      eqlQueryLoading ||
+      isDisabled ||
+      query == null ||
+      (query != null && query.query.query === '' && query.filters.length === 0)
+    );
+  }, [eqlQueryLoading, isDisabled, isMatrixHistogramLoading, query]);
+
   return (
     <>
       <EuiFormRow
@@ -293,9 +312,7 @@ export const PreviewQuery = ({
           <EuiFlexItem grow={false}>
             <PreviewButton
               fill
-              isDisabled={
-                isMatrixHistogramLoading || eqlQueryLoading || isDisabled || query == null
-              }
+              isDisabled={previewButtonDisabled}
               onClick={handlePreviewClicked}
               data-test-subj="queryPreviewButton"
             >

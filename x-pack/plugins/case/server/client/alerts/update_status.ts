@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { CaseClientUpdateAlertsStatus, CaseClientFactoryArguments } from '../types';
+import { ElasticsearchClient, Logger } from 'src/core/server';
+import { AlertServiceContract } from '../../services';
+import { UpdateAlertRequest } from '../types';
 
-export const updateAlertsStatus = ({
+interface UpdateAlertsStatusArgs {
+  alertsService: AlertServiceContract;
+  alerts: UpdateAlertRequest[];
+  scopedClusterClient: ElasticsearchClient;
+  logger: Logger;
+}
+
+export const updateAlertsStatus = async ({
   alertsService,
-  request,
-  context,
-}: CaseClientFactoryArguments) => async ({
-  ids,
-  status,
-}: CaseClientUpdateAlertsStatus): Promise<void> => {
-  const securitySolutionClient = context?.securitySolution?.getAppClient();
-  if (securitySolutionClient == null) {
-    throw Boom.notFound('securitySolutionClient client have not been found');
-  }
-
-  const index = securitySolutionClient.getSignalsIndex();
-  await alertsService.updateAlertsStatus({ ids, status, index, request });
+  alerts,
+  scopedClusterClient,
+  logger,
+}: UpdateAlertsStatusArgs): Promise<void> => {
+  await alertsService.updateAlertsStatus({ alerts, scopedClusterClient, logger });
 };

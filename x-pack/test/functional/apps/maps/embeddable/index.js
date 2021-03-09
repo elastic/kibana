@@ -7,8 +7,10 @@
 
 export default function ({ loadTestFile }) {
   describe('embeddable', function () {
+    loadTestFile(require.resolve('./add_to_dashboard'));
     loadTestFile(require.resolve('./save_and_return'));
     loadTestFile(require.resolve('./dashboard'));
+    loadTestFile(require.resolve('./embeddable_library'));
     loadTestFile(require.resolve('./embeddable_state'));
     loadTestFile(require.resolve('./tooltip_filter_actions'));
   });

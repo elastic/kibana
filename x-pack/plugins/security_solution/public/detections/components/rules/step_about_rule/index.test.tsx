@@ -8,7 +8,6 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_light.json';
 import { act } from '@testing-library/react';
 
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
@@ -23,9 +22,15 @@ import {
   RuleStep,
 } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiColorLightestShade: '#ece',
+  },
+});
 
 jest.mock('../../../../common/containers/source');
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -37,6 +42,7 @@ jest.mock('@elastic/eui', () => {
     },
   };
 });
+
 describe('StepAboutRuleComponent', () => {
   let formHook: RuleStepsFormHooks[RuleStep.aboutRule] | null = null;
   const setFormHook = <K extends keyof RuleStepsFormHooks>(
@@ -72,7 +78,7 @@ describe('StepAboutRuleComponent', () => {
 
   it('is invalid if description is not present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <StepAboutRule
           addPadding={true}
           defaultValues={stepAboutDefaultValue}
@@ -100,7 +106,7 @@ describe('StepAboutRuleComponent', () => {
 
   it('is invalid if no "name" is present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <StepAboutRule
           addPadding={true}
           defaultValues={stepAboutDefaultValue}
@@ -128,7 +134,7 @@ describe('StepAboutRuleComponent', () => {
 
   it('is valid if both "name" and "description" are present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <StepAboutRule
           addPadding={true}
           defaultValues={stepAboutDefaultValue}
@@ -185,7 +191,7 @@ describe('StepAboutRuleComponent', () => {
 
   it('it allows user to set the risk score as a number (and not a string)', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <StepAboutRule
           addPadding={true}
           defaultValues={stepAboutDefaultValue}
@@ -248,7 +254,7 @@ describe('StepAboutRuleComponent', () => {
 
   it('does not modify the provided risk score until the user changes the severity', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={mockTheme}>
         <StepAboutRule
           addPadding={true}
           defaultValues={stepAboutDefaultValue}
