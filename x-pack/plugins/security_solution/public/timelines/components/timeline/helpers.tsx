@@ -100,14 +100,10 @@ const buildQueryMatch = (
   `${dataProvider.excluded ? 'NOT ' : ''}${
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
     dataProvider.type !== DataProviderType.template
-      ? checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
+      ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
+        ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
+        : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
-        : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-        ? convertNestedFieldToQuery(
-            dataProvider.queryMatch.field,
-            dataProvider.queryMatch.value,
-            browserFields
-          )
         : `${dataProvider.queryMatch.field} : ${
             isNumber(dataProvider.queryMatch.value)
               ? dataProvider.queryMatch.value
