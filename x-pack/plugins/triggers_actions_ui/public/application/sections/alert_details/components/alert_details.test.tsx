@@ -16,7 +16,7 @@ import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 
