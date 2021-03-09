@@ -25,7 +25,7 @@ const rowsSource: ElasticSearchHit[] = [
   },
 ];
 
-const rowsFields = [
+const rowsFields: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
@@ -34,12 +34,12 @@ const rowsFields = [
     _source: undefined,
     fields: { bytes: [100], extension: ['.gz'] },
     highlight: {
-      extension: '@kibana-highlighted-field.gz@/kibana-highlighted-field',
+      extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
     },
   },
 ];
 
-const rowsFieldsWithTopLevelObject = [
+const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
@@ -48,7 +48,7 @@ const rowsFieldsWithTopLevelObject = [
     _source: undefined,
     fields: { 'object.value': [100], extension: ['.gz'] },
     highlight: {
-      extension: '@kibana-highlighted-field.gz@/kibana-highlighted-field',
+      extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
     },
   },
 ];
@@ -151,7 +151,9 @@ describe('Discover grid cell rendering', function () {
           &quot;extension&quot;: &quot;.gz&quot;
         },
         &quot;highlight&quot;: {
-          &quot;extension&quot;: &quot;@kibana-highlighted-field.gz@/kibana-highlighted-field&quot;
+          &quot;extension&quot;: [
+            &quot;@kibana-highlighted-field.gz@/kibana-highlighted-field&quot;
+          ]
         }
       }</span>"
     `);
@@ -242,7 +244,9 @@ describe('Discover grid cell rendering', function () {
           ]
         },
         &quot;highlight&quot;: {
-          &quot;extension&quot;: &quot;@kibana-highlighted-field.gz@/kibana-highlighted-field&quot;
+          &quot;extension&quot;: [
+            &quot;@kibana-highlighted-field.gz@/kibana-highlighted-field&quot;
+          ]
         }
       }</span>"
     `);
