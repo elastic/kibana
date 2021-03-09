@@ -1,0 +1,230 @@
+# -----------------------------------------------------------------------------------------------------------
+# Queries
+
+# Whole execution log of the rule, events sorted from new to old
+GET /try-ecs-event-log/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "kibana.saved_objects.type": "alert" } },
+        { "term": { "kibana.saved_objects.namespace": "some-space" } },
+        { "term": { "kibana.saved_objects.id": "1234-56789-dfgdfhgfgh-122346567" } }
+      ]
+    }
+  },
+  "sort": [
+    { "@timestamp": { "order": "desc" } },
+    { "event.sequence": { "order": "desc" } }
+  ]
+}
+
+# Rule details page: execution log
+# Last 50 events of the rule which are actual events, not metrics
+GET /try-ecs-event-log/_search
+{
+  "size": 50,
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "kibana.saved_objects.type": "alert" } },
+        { "term": { "kibana.saved_objects.namespace": "some-space" } },
+        { "term": { "kibana.saved_objects.id": "1234-56789-dfgdfhgfgh-122346567" } },
+        {
+          "term": { "event.kind": "event" }
+        }
+      ]
+    }
+  },
+  "sort": [
+    { "@timestamp": { "order": "desc" } },
+    { "event.sequence": { "order": "desc" } }
+  ],
+  "_source": ["@timestamp", "message", "log.level", "event.severity", "event.action"]
+}
+
+# Rule details page: current execution status of the rule
+GET /try-ecs-event-log/_search
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "kibana.saved_objects.type": "alert" } },
+        { "term": { "kibana.saved_objects.namespace": "some-space" } },
+        { "term": { "kibana.saved_objects.id": "1234-56789-dfgdfhgfgh-122346567" } },
+        {
+          "term": { "event.action": "status-changed" }
+        }
+      ]
+    }
+  },
+  "sort": [
+    { "@timestamp": { "order": "desc" } },
+    { "event.sequence": { "order": "desc" } }
+  ]
+}
+
+# Rules management table: "Last run", "Last response" columns
+# N current statuses of N rules. N=2 for simplicity
+GET /try-ecs-event-log/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "kibana.saved_objects.type": "alert" } },
+        { "term": { "kibana.saved_objects.namespace": "some-space" } },
+        {
+          "terms": {
+            "kibana.saved_objects.id": [
+              "1234-56789-dfgdfhgfgh-122346567",
+              "1234-56789-dfgdfhgfgh-122346568"
+            ]
+          }
+        },
+        {
+          "term": { "event.action": "status-changed" }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "rules": {
+      "terms": {
+        "field": "kibana.saved_objects.id",
+        "size": 2
+      },
+      "aggs": {
+        "current_status": {
+          "top_hits": {
+            "size": 1,
+            "sort": [
+              { "@timestamp": { "order": "desc" } },
+              { "event.sequence": { "order": "desc" } }
+            ],
+            "_source": ["@timestamp", "kibana.detection_engine"]
+          }
+        }
+      }
+    }
+  }
+}
+
+# Rules monitoring table: "Last run", "Last response", "Last Gap (if any)", "Query Time (ms)", "Indexing Time (ms)" columns
+# N current statuses, last gaps, last max search durations, last max indexing durations. N=2 for simplicity
+GET /try-ecs-event-log/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "kibana.saved_objects.type": "alert" } },
+        { "term": { "kibana.saved_objects.namespace": "some-space" } },
+        {
+          "terms": {
+            "kibana.saved_objects.id": [
+              "1234-56789-dfgdfhgfgh-122346567",
+              "1234-56789-dfgdfhgfgh-122346568"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "rules": {
+      "terms": {
+        "field": "kibana.saved_objects.id",
+        "size": 2
+      },
+      "aggs": {
+        "events_status_changed": {
+          "filter": {
+            "term": { "event.action": "status-changed" }
+          },
+          "aggs": {
+            "last_item": {
+              "top_hits": {
+                "size": 1,
+                "sort": [
+                  { "@timestamp": { "order": "desc" } },
+                  { "event.sequence": { "order": "desc" } }
+                ],
+                "_source": ["@timestamp", "kibana.detection_engine"]
+              }
+            }
+          }
+        },
+        "metrics_execution_gap": {
+          "filter": {
+            "term": { "event.action": "metric-execution-gap" }
+          },
+          "aggs": {
+            "last_item": {
+              "top_hits": {
+                "size": 1,
+                "sort": [
+                  { "@timestamp": { "order": "desc" } },
+                  { "event.sequence": { "order": "desc" } }
+                ],
+                "_source": ["event.duration"]
+              }
+            }
+          }
+        },
+        "metrics_search_duration_max": {
+          "filter": {
+            "term": { "event.action": "metric-search-duration-max" }
+          },
+          "aggs": {
+            "last_item": {
+              "top_hits": {
+                "size": 1,
+                "sort": [
+                  { "@timestamp": { "order": "desc" } },
+                  { "event.sequence": { "order": "desc" } }
+                ],
+                "_source": ["event.duration"]
+              }
+            }
+          }
+        },
+        "metrics_indexing_duration_max": {
+          "filter": {
+            "term": { "event.action": "metric-indexing-duration-max" }
+          },
+          "aggs": {
+            "last_item": {
+              "top_hits": {
+                "size": 1,
+                "sort": [
+                  { "@timestamp": { "order": "desc" } },
+                  { "event.sequence": { "order": "desc" } }
+                ],
+                "_source": ["event.duration"]
+              }
+            }
+          }
+        },
+        "metrics_indexing_lookback": {
+          "filter": {
+            "term": { "event.action": "metric-indexing-lookback" }
+          },
+          "aggs": {
+            "last_item": {
+              "top_hits": {
+                "size": 1,
+                "sort": [
+                  { "@timestamp": { "order": "desc" } },
+                  { "event.sequence": { "order": "desc" } }
+                ],
+                "_source": ["event.end"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
