@@ -99,8 +99,8 @@ export function QueryLanguageSwitcher({
             <FormattedMessage
               id="data.query.queryBar.syntaxOptionsDescription"
               defaultMessage="The {docsLink} (KQL) offers a simplified query
-              syntax and support for scripted fields. KQL also provides autocomplete if you have
-              a Basic license or above. If you turn off KQL, {nonKqlModeHelpText}"
+              syntax and support for scripted fields. KQL also provides autocomplete.
+              If you turn off KQL, {nonKqlModeHelpText}"
               values={{
                 docsLink: (
                   <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
