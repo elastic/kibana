@@ -8,7 +8,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ActionGroupIdsOf } from '../../../../alerts/common';
+import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { updateState } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';

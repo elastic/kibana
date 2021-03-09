@@ -15,7 +15,7 @@ import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
-import { ActionGroupIdsOf } from '../../../../alerts/common';
+import { ActionGroupIdsOf } from '../../../../alerting/common';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
