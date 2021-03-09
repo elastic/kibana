@@ -1,5 +1,5 @@
 [[tutorial-secure-access-to-kibana]]
-== How to: Secure access to {kib}
+== Tutorial: Securing access to {kib}
 
 
 {kib} is home to an ever-growing suite of powerful features, which help you get the most out of your data. We believe that all data is important, and should be protected. We not only allow you to secure access to your data, but also to control how users are able to interact with your data inside of {kib}.
@@ -62,7 +62,7 @@ Let’s get started!
 
 . Navigate to {kib}’s **Stack Management** application, and select the **Roles** menu item under the **Security** section.
 . Click on **Create role** to start the role creation process.
-. Give this role a unique name. For example: `*marketing_dashboards_role*`
+. Give this role a unique name. For example: `marketing_dashboards_role`
 . Granting access to the underlying data is governed by **Index privileges**. For this example, we’ll say that all marketing data is stored in the `acme-marketing-*` set of indices. To grant this access, locate the **Index privileges** section and enter:
 .. `acme-marketing-*` in the **Index** field.
 .. `read` and `view_index_metadata` in the **Privileges** field.
@@ -77,7 +77,7 @@ TIP: You can add multiple patterns of indices, and grant different access levels
 If you’ve followed the example above, you should end up with a role that looks like this:
 
 [role="screenshot"]
-image::getting-started/images/tutorial-secure-access-example-1-role.png[Create role UI]
+image::user/security/images/tutorial-secure-access-example-1-role.png[Create role UI]
 
 
 [float]
@@ -92,7 +92,7 @@ Now that we have a role created, it’s time to create a user account for Dave.
 . Click *Create user* to finish
 
 [role="screenshot"]
-image::getting-started/images/tutorial-secure-access-example-1-user.png[Create user UI]
+image::user/security/images/tutorial-secure-access-example-1-user.png[Create user UI]
 
 [float]
 ==== Step 3: Verify
@@ -105,7 +105,7 @@ Now that we have a user and role created for Dave, it’s time to verify that ev
 Notice that you’re brought directly into the `Marketing` space, and the main navigation shows only the Dashboards application.
 
 [role="screenshot"]
-image::getting-started/images/tutorial-secure-access-example-1-test.png[Verifying access to dashboards]
+image::user/security/images/tutorial-secure-access-example-1-test.png[Verifying access to dashboards]
 
 You did it!
 
@@ -118,4 +118,4 @@ View our <<kibana-authentication, authentication guide>> to learn more about sin
 
 View our <<xpack-security-authorization, authorization guide>> to learn more about authorizing access to {kib}'s features.
 
-Still have questions? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or Elastic engineer will be glad to help you out.
+Still have questions? Ask away on our https://discuss.elastic.co/c/kibana[Kibana Discuss Forum] and a fellow community member or Elastic engineer will be glad to help you out.
