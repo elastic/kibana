@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-// @ts-ignore
 import { FormattedMessage } from '@kbn/i18n/react';
+// @ts-ignore
 import { ExplorerChartsContainer } from './explorer_charts/embeddable_explorer_charts_container';
 import {
   SelectSeverityUI,

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { FC, useCallback, useState, useMemo } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
 import { IAnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
 import { useExplorerInputResolver } from './explorer_input_resolver';
-import { useSwimlaneInputResolver } from '../anomaly_swimlane/swimlane_input_resolver';
 import {
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableOutput,
@@ -22,6 +21,8 @@ import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { ANOMALY_THRESHOLD } from '../../../common';
+import { TimeBuckets } from '../../application/util/time_buckets';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -42,14 +43,14 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
   services,
   refresh,
   onInputChange,
-  onOutputChange,
+  // @TODO
+  // onOutputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
-  const [fromPage] = useState<number>(1);
   const [severity, setSeverity] = useState(optionValueToThreshold(ANOMALY_THRESHOLD.MINOR));
 
   const [
-    {},
+    { uiSettings },
     {
       data: dataServices,
       share: {
@@ -61,32 +62,31 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
 
-  const [, swimlaneData, perPage, , timeBuckets, , error] = useSwimlaneInputResolver(
-    embeddableInput,
-    onInputChange,
-    refresh,
-    services,
-    chartWidth,
-    fromPage
-  );
-
-  const { chartsData, isLoading: isExplorerLoading } = useExplorerInputResolver(
-    embeddableInput,
-    onInputChange,
-    refresh,
-    services,
-    chartWidth,
-    severity.val,
-    id
-  );
-
-  useEffect(() => {
-    onOutputChange({
-      perPage,
-      fromPage,
-      interval: swimlaneData?.interval,
+  const timeBuckets = useMemo(() => {
+    return new TimeBuckets({
+      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+      dateFormat: uiSettings.get('dateFormat'),
+      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
-  }, [perPage, fromPage, swimlaneData]);
+  }, []);
+
+  const { chartsData, isLoading: isExplorerLoading, error } = useExplorerInputResolver(
+    embeddableInput,
+    onInputChange,
+    refresh,
+    services,
+    chartWidth,
+    severity.val
+  );
+
+  // useEffect(() => {
+  //   onOutputChange({
+  //     perPage,
+  //     fromPage,
+  //     interval: swimlaneData?.interval,
+  //   });
+  // }, [perPage, fromPage, swimlaneData]);
 
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
