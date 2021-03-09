@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  IRouter,
-  SavedObjectsClientContract,
-  HttpResponseOptions,
-  IKibanaResponse,
-} from 'src/core/server';
+import { IRouter, HttpResponseOptions, IKibanaResponse } from 'src/core/server';
 import LRU from 'lru-cache';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { authenticateAgentWithAccessToken } from '../../../../../fleet/server/services/agents/authenticate';
@@ -45,12 +40,10 @@ export function registerDownloadArtifactRoute(
       options: { tags: [LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG] },
     },
     async (context, req, res) => {
-      let scopedSOClient: SavedObjectsClientContract;
       const logger = endpointContext.logFactory.get('download_artifact');
 
       // The ApiKey must be associated with an enrolled Fleet agent
       try {
-        scopedSOClient = endpointContext.service.getScopedSavedObjectsClient(req);
         await authenticateAgentWithAccessToken(
           context.core.elasticsearch.client.asInternalUser,
           req
