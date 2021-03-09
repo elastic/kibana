@@ -44,16 +44,19 @@ const bodySchema = schema.object({
     }),
     { defaultValue: [] }
   ),
-  notify_when: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
+  notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
-const rewriteBodyReq: RewriteRequestCase<UpdateOptions<AlertTypeParams>['data']> = ({
-  notify_when: notifyWhen,
-  ...rest
-}) => ({
-  ...rest,
-  notifyWhen,
-});
+const rewriteBodyReq: RewriteRequestCase<UpdateOptions<AlertTypeParams>> = (result) => {
+  const { notify_when: notifyWhen, ...rest } = result.data;
+  return {
+    ...result,
+    data: {
+      ...rest,
+      notifyWhen,
+    },
+  };
+};
 const rewriteBodyRes: RewriteResponseCase<PartialAlert<AlertTypeParams>> = ({
   actions,
   alertTypeId,
@@ -111,13 +114,15 @@ export const updateRuleRoute = (
           const { id } = req.params;
           const rule = req.body;
           try {
-            const alertRes = await alertsClient.update({
-              id,
-              data: rewriteBodyReq({
-                ...rule,
-                notify_when: rule.notify_when as AlertNotifyWhenType,
-              }),
-            });
+            const alertRes = await alertsClient.update(
+              rewriteBodyReq({
+                id,
+                data: {
+                  ...rule,
+                  notify_when: rule.notify_when as AlertNotifyWhenType,
+                },
+              })
+            );
             return res.ok({
               body: rewriteBodyRes(alertRes),
             });
