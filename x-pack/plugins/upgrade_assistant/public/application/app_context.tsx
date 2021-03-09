@@ -20,6 +20,7 @@ export interface ContextValue {
   docLinks: DocLinksStart;
   kibanaVersionInfo: KibanaVersionContext;
   notifications: NotificationsStart;
+  isReadOnlyMode: boolean;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

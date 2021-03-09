@@ -21,8 +21,8 @@ import {
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
-const MAX_CHUNK_CHAR_COUNT = 1000000;
-const IMPORT_RETRIES = 5;
+export const MAX_CHUNK_CHAR_COUNT = 1000000;
+export const IMPORT_RETRIES = 5;
 const STRING_CHUNKS_MB = 100;
 
 export abstract class Importer implements IImporter {
@@ -232,7 +232,7 @@ function createDocumentChunks(docArray: ImportDoc[]) {
   return chunks;
 }
 
-function callImportRoute({
+export function callImportRoute({
   id,
   index,
   data,

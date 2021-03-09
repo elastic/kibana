@@ -5,29 +5,26 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
 import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
-import type {
-  AssetReference,
-  Installation,
-  CallESAsCurrentUser,
-  InstallType,
-} from '../../../types';
+import type { AssetReference, Installation, InstallType } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { installTemplates } from '../elasticsearch/template/install';
 import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
-import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
+
+import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
+import { deleteKibanaSavedObjectsAssets } from './remove';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -35,7 +32,7 @@ import { ConcurrentInstallOperationError } from '../../../errors';
 
 export async function _installPackage({
   savedObjectsClient,
-  callCluster,
+  esClient,
   installedPkg,
   paths,
   packageInfo,
@@ -43,7 +40,7 @@ export async function _installPackage({
   installSource,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   installedPkg?: SavedObject<Installation>;
   paths: string[];
   packageInfo: InstallablePackage;
@@ -129,12 +126,12 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    await installILMPolicy(paths, callCluster);
+    await installILMPolicy(paths, esClient);
 
     const installedDataStreamIlm = await installIlmForDataStream(
       packageInfo,
       paths,
-      callCluster,
+      esClient,
       savedObjectsClient
     );
 
@@ -142,31 +139,31 @@ export async function _installPackage({
     const installedPipelines = await installPipelines(
       packageInfo,
       paths,
-      callCluster,
+      esClient,
       savedObjectsClient
     );
     // install or update the templates referencing the newly installed pipelines
     const installedTemplates = await installTemplates(
       packageInfo,
-      callCluster,
+      esClient,
       paths,
       savedObjectsClient
     );
 
     // update current backing indices of each data stream
-    await updateCurrentWriteIndices(callCluster, installedTemplates);
+    await updateCurrentWriteIndices(esClient, installedTemplates);
 
     const installedTransforms = await installTransform(
       packageInfo,
       paths,
-      callCluster,
+      esClient,
       savedObjectsClient
     );
 
     // if this is an update or retrying an update, delete the previous version's pipelines
     if ((installType === 'update' || installType === 'reupdate') && installedPkg) {
       await deletePreviousPipelines(
-        callCluster,
+        esClient,
         savedObjectsClient,
         pkgName,
         installedPkg.attributes.version
@@ -175,7 +172,7 @@ export async function _installPackage({
     // pipelines from a different version may have installed during a failed update
     if (installType === 'rollback' && installedPkg) {
       await deletePreviousPipelines(
-        callCluster,
+        esClient,
         savedObjectsClient,
         pkgName,
         installedPkg.attributes.install_version

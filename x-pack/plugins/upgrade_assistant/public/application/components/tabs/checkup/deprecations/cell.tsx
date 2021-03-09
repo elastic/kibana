@@ -100,7 +100,7 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
 
       {deprecatedIndexSettings?.length && (
         <EuiFlexItem grow={false}>
-          <FixIndexSettingsButton settings={deprecatedIndexSettings} index={indexName!} />
+          <FixIndexSettingsButton settings={deprecatedIndexSettings} index={reindexIndexName!} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

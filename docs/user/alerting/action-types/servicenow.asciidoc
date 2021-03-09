@@ -1,6 +1,9 @@
 [role="xpack"]
 [[servicenow-action-type]]
 === ServiceNow action
+++++
+<titleabbrev>ServiceNow</titleabbrev>
+++++
 
 The ServiceNow action type uses the https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI[V2 Table API] to create ServiceNow incidents.
 
@@ -8,7 +11,7 @@ The ServiceNow action type uses the https://developer.servicenow.com/app.do#!/re
 [[servicenow-connector-configuration]]
 ==== Connector configuration
 
-ServiceNow connectors have the following configuration properties:
+ServiceNow connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
 URL::       ServiceNow instance URL.
@@ -31,34 +34,20 @@ Password::  Password for HTTP Basic authentication.
      password: passwordkeystorevalue
 --
 
-[[servicenow-connector-config-properties]]
-**`config`** defines the action type specific to the configuration and contains the following properties:
+Config defines information for the action type.
 
-[cols="2*<"]
-|===
+`apiUrl`:: An address that corresponds to *URL*.
 
-| `apiUrl`
-| An address that corresponds to *URL*.
+Secrets defines sensitive information for the action type.
 
-|===
+`username`:: A string that corresponds to *Username*.
+`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
 
-**`secrets`** defines sensitive information for the action type and contains the following properties:
-
-[cols="2*<"]
-|===
-
-| `username`
-| A string that corresponds to *Username*.
-
-| `password`
-| A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
-
-|===
-
+[float]
 [[servicenow-action-configuration]]
 ==== Action configuration
 
-ServiceNow actions have the following configuration properties:
+ServiceNow actions have the following configuration properties.
 
 Urgency::              The extent to which the incident resolution can delay.
 Severity::             The severity of the incident.
@@ -68,6 +57,6 @@ Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-servicenow]]
-==== Configuring and testing ServiceNow
+==== Configure ServiceNow
 
 ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

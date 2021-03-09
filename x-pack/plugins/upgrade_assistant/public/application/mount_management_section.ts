@@ -7,6 +7,7 @@
 
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
+import { UA_READONLY_MODE } from '../../common/constants';
 import { renderApp } from './render_app';
 import { KibanaVersionContext } from './app_context';
 
@@ -25,5 +26,6 @@ export async function mountManagementSection(
     docLinks,
     kibanaVersionInfo,
     notifications,
+    isReadOnlyMode: UA_READONLY_MODE,
   });
 }
