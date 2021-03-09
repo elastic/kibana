@@ -15,15 +15,9 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
-  EuiAccordion,
 } from '@elastic/eui';
 
-import {
-  ComboBoxField,
-  useKibana,
-  useFormData,
-  SelectField,
-} from '../../../../../../../shared_imports';
+import { ComboBoxField, useKibana, useFormData } from '../../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfigurationIssues, UseField, searchableSnapshotFields } from '../../../../form';
@@ -43,27 +37,6 @@ export interface Props {
  */
 const CLOUD_DEFAULT_REPO = 'found-snapshots';
 
-const storageOptions = [
-  {
-    value: 'full_copy',
-    text: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorage.fullCopyLabel',
-      {
-        defaultMessage: 'Full copy',
-      }
-    ),
-  },
-  {
-    value: 'shared_cache',
-    text: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorage.sharedCacheLabel',
-      {
-        defaultMessage: 'Shared cache',
-      }
-    ),
-  },
-];
-
 export const SearchableSnapshotField: FunctionComponent<Props> = ({
   phase,
   canBeDisabled = true,
@@ -75,12 +48,10 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
-  const searchableSnapshotStoragePath = `phases.${phase}.actions.searchable_snapshot.storage`;
 
   const [formData] = useFormData({ watch: searchableSnapshotRepoPath });
   const searchableSnapshotRepo = get(formData, searchableSnapshotRepoPath);
 
-  const isHotPhase = phase === 'hot';
   const isColdPhase = phase === 'cold';
   const isFrozenPhase = phase === 'frozen';
   const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;
@@ -93,16 +64,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
         policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
     )
   );
-
-  const [isMoreOptionsExpanded, setIsMoreOptionsExpanded] = useState(false);
-
-  const moreOptionsLabel = isMoreOptionsExpanded
-    ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.lessButtonLabel', {
-        defaultMessage: 'Fewer options',
-      })
-    : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.moreButtonLabel', {
-        defaultMessage: 'More options',
-      });
 
   useEffect(() => {
     if (isDisabledDueToLicense) {
@@ -261,33 +222,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
                 {calloutContent}
               </>
             )}
-
-            <EuiSpacer />
-            <EuiAccordion
-              id="searchableSnapshotAdvanced"
-              buttonContent={moreOptionsLabel}
-              onToggle={() => setIsMoreOptionsExpanded((prev) => !prev)}
-            >
-              <>
-                <EuiSpacer size="s" />
-                <UseField
-                  key={searchableSnapshotStoragePath}
-                  path={searchableSnapshotStoragePath}
-                  config={{
-                    ...searchableSnapshotFields.storage,
-                    defaultValue: isHotPhase || isColdPhase ? 'full_copy' : 'shared_cache',
-                  }}
-                  component={SelectField}
-                  componentProps={{
-                    'data-test-subj': `searchableSnapshotStorage`,
-                    euiFieldProps: {
-                      options: storageOptions,
-                      'aria-label': searchableSnapshotFields.storage.label,
-                    },
-                  }}
-                />
-              </>
-            </EuiAccordion>
           </div>
         );
       }}

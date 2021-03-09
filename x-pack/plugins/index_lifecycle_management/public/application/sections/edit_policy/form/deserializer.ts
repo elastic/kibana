@@ -99,20 +99,6 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
         }
       }
 
-      if (draft.phases.frozen) {
-        if (draft.phases.frozen.actions?.allocate?.require) {
-          Object.entries(draft.phases.frozen.actions.allocate.require).forEach((entry) => {
-            draft._meta.frozen.allocationNodeAttribute = entry.join(':');
-          });
-        }
-
-        if (draft.phases.frozen.min_age) {
-          const minAge = splitSizeAndUnits(draft.phases.frozen.min_age);
-          draft.phases.frozen.min_age = minAge.size;
-          draft._meta.frozen.minAgeUnit = minAge.units;
-        }
-      }
-
       if (draft.phases.delete) {
         if (draft.phases.delete.min_age) {
           const minAge = splitSizeAndUnits(draft.phases.delete.min_age);

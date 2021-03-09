@@ -115,20 +115,22 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
             <EuiSpacer size="m" />
           )}
 
-          <EuiAccordion
-            id={`${phase}-settingsSwitch`}
-            buttonContent={
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
-                defaultMessage="Advanced settings"
-              />
-            }
-            buttonClassName="ilmSettingsButton"
-            extraAction={<PhaseFooter phase={phase} />}
-          >
-            <EuiSpacer />
-            {children}
-          </EuiAccordion>
+          {children && (
+            <EuiAccordion
+              id={`${phase}-settingsSwitch`}
+              buttonContent={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
+                  defaultMessage="Advanced settings"
+                />
+              }
+              buttonClassName="ilmSettingsButton"
+              extraAction={<PhaseFooter phase={phase} />}
+            >
+              <EuiSpacer />
+              {children}
+            </EuiAccordion>
+          )}
         </>
       )}
     </EuiComment>
