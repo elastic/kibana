@@ -50,7 +50,7 @@ export interface Module {
   description: string;
   type: string;
   logoFile?: string;
-  logo?: { icon: string } | null;
+  logo?: Logo;
   defaultIndexPattern: string;
   query: any;
   jobs: ModuleJob[];
