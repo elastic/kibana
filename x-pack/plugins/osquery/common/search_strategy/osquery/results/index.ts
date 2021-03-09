@@ -20,6 +20,7 @@ export interface ResultsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface ResultsRequestOptions extends RequestOptionsPaginated<{}> {
+export interface ResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
+  agentId?: string;
 }

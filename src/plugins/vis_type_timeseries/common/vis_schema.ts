@@ -38,12 +38,12 @@ const numberOptionalOrEmptyString = schema.maybe(
 
 export const fieldObject = stringOptionalNullable;
 
-const annotationsItems = schema.object({
+export const annotationsItems = schema.object({
   color: stringOptionalNullable,
   fields: stringOptionalNullable,
   hidden: schema.maybe(schema.boolean()),
   icon: stringOptionalNullable,
-  id: stringOptionalNullable,
+  id: schema.string(),
   ignore_global_filters: numberIntegerOptional,
   ignore_panel_filters: numberIntegerOptional,
   index_pattern: stringOptionalNullable,

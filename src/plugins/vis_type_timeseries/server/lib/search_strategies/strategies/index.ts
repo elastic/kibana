@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { AbstractSearchStrategy, ReqFacade } from './abstract_search_strategy';
+export { AbstractSearchStrategy } from './abstract_search_strategy';
 export { DefaultSearchStrategy } from './default_search_strategy';
 export { RollupSearchStrategy } from './rollup_search_strategy';
