@@ -229,7 +229,7 @@ export async function getLatencyPeriods({
     previousPeriod: {
       ...previousPeriod,
       latencyTimeseries: offsetPreviousPeriodCoordinates({
-        currentPeriodStart: currentPeriod.latencyTimeseries[0]?.x,
+        currentPeriodTimeseries: currentPeriod.latencyTimeseries,
         previousPeriodTimeseries: previousPeriod.latencyTimeseries,
       }),
     },

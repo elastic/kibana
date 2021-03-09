@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { keyBy } from 'lodash';
+import { head, keyBy } from 'lodash';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -47,7 +47,6 @@ export async function getServiceTransactionGroupComparisonStatistics({
   latencyAggregationType,
   start,
   end,
-  getOffsetXCoordinate,
 }: {
   environment?: string;
   kuery?: string;
@@ -60,7 +59,6 @@ export async function getServiceTransactionGroupComparisonStatistics({
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
-  getOffsetXCoordinate?: (timeseries: Coordinate[]) => Coordinate[];
 }): Promise<
   Array<{
     transactionName: string;
@@ -175,15 +173,9 @@ export async function getServiceTransactionGroupComparisonStatistics({
           bucket.transaction_group_total_duration.value || 0;
         return {
           transactionName,
-          latency: getOffsetXCoordinate
-            ? getOffsetXCoordinate(latency)
-            : latency,
-          throughput: getOffsetXCoordinate
-            ? getOffsetXCoordinate(throughput)
-            : throughput,
-          errorRate: getOffsetXCoordinate
-            ? getOffsetXCoordinate(errorRate)
-            : errorRate,
+          latency,
+          throughput,
+          errorRate,
           impact: totalDuration
             ? (transactionGroupTotalDuration * 100) / totalDuration
             : 0,
@@ -244,11 +236,6 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
           ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,
-          getOffsetXCoordinate: (timeseries: Coordinate[]) =>
-            offsetPreviousPeriodCoordinates({
-              currentPeriodStart: start,
-              previousPeriodTimeseries: timeseries,
-            }),
         })
       : [];
 
@@ -257,8 +244,29 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
     previousPeriodPromise,
   ]);
 
+  const firtCurrentPeriod = currentPeriod.length ? currentPeriod[0] : undefined;
+
   return {
     currentPeriod: keyBy(currentPeriod, 'transactionName'),
-    previousPeriod: keyBy(previousPeriod, 'transactionName'),
+    previousPeriod: keyBy(
+      previousPeriod.map((data) => {
+        return {
+          ...data,
+          errorRate: offsetPreviousPeriodCoordinates({
+            currentPeriodTimeseries: firtCurrentPeriod?.errorRate,
+            previousPeriodTimeseries: data.errorRate,
+          }),
+          throughput: offsetPreviousPeriodCoordinates({
+            currentPeriodTimeseries: firtCurrentPeriod?.throughput,
+            previousPeriodTimeseries: data.throughput,
+          }),
+          latency: offsetPreviousPeriodCoordinates({
+            currentPeriodTimeseries: firtCurrentPeriod?.latency,
+            previousPeriodTimeseries: data.latency,
+          }),
+        };
+      }),
+      'transactionName'
+    ),
   };
 }

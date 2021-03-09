@@ -194,6 +194,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expectSnapshot(currentPeriodNonNullDataPoints).toMatch();
           expectSnapshot(previousPeriodNonNullDataPoints).toMatch();
         });
+
+        it('matches x-axis on current period and previous period', () => {
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.map(({ x }) => x)).to.be.eql(
+            latencyChartReturn.previousPeriod.latencyTimeseries.map(({ x }) => x)
+          );
+        });
       });
     }
   );

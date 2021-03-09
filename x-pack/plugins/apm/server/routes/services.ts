@@ -415,7 +415,7 @@ export const serviceThroughputRoute = createRoute({
     return {
       currentPeriod,
       previousPeriod: offsetPreviousPeriodCoordinates({
-        currentPeriodStart: currentPeriod[0]?.x,
+        currentPeriodTimeseries: currentPeriod,
         previousPeriodTimeseries: previousPeriod,
       }),
     };
