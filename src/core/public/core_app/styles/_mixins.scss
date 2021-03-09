@@ -144,7 +144,7 @@
     } @else {
       @warn 'The second parameter must be a valid mode (light, dark, or both) -- got #{$mode}';
     }
-  } else {
+  } @else {
     @warn 'Invalid $theme. Valid options are: #{$themes}. Got #{$theme} instead';
   }
 }
