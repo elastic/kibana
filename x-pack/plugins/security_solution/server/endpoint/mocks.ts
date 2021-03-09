@@ -9,7 +9,7 @@ import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/s
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
-import { alertsMock } from '../../../alerts/server/mocks';
+import { alertsMock } from '../../../alerting/server/mocks';
 import { xpackMocks } from '../../../../mocks';
 import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
 import {
@@ -76,7 +76,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     manifestManager: getManifestManagerMock(),
     appClientFactory: factory,
     security: securityMock.createSetup(),
-    alerts: alertsMock.createStart(),
+    alerting: alertsMock.createStart(),
     config,
     licenseService: new LicenseService(),
     registerIngestCallback: jest.fn<

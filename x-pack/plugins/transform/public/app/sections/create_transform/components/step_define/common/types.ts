@@ -24,6 +24,8 @@ import {
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 
+import { isPopulatedObject } from '../../../../../../../common/utils/object_utils';
+
 export interface ErrorMessage {
   query: string;
   message: string;
@@ -70,10 +72,30 @@ export interface StepDefineExposedState {
   isRuntimeMappingsEditorEnabled: boolean;
 }
 
+export function isRuntimeField(arg: any): arg is RuntimeField {
+  return (
+    isPopulatedObject(arg) &&
+    ((Object.keys(arg).length === 1 && arg.hasOwnProperty('type')) ||
+      (Object.keys(arg).length === 2 &&
+        arg.hasOwnProperty('type') &&
+        arg.hasOwnProperty('script') &&
+        (typeof arg.script === 'string' ||
+          (isPopulatedObject(arg.script) &&
+            Object.keys(arg.script).length === 1 &&
+            arg.script.hasOwnProperty('source') &&
+            typeof arg.script.source === 'string')))) &&
+    RUNTIME_FIELD_TYPES.includes(arg.type)
+  );
+}
+
+export function isRuntimeMappings(arg: any): arg is RuntimeMappings {
+  return isPopulatedObject(arg) && Object.values(arg).every((d) => isRuntimeField(d));
+}
+
 export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {
-  return typeof arg === 'object' && arg.hasOwnProperty('pivot');
+  return isPopulatedObject(arg) && arg.hasOwnProperty('pivot');
 }
 
 export function isLatestPartialRequest(arg: any): arg is { latest: LatestFunctionConfig } {
-  return typeof arg === 'object' && arg.hasOwnProperty('latest');
+  return isPopulatedObject(arg) && arg.hasOwnProperty('latest');
 }

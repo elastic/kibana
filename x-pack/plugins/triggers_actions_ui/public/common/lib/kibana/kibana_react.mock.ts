@@ -26,7 +26,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     } as AlertTypeRegistryContract,
     dataPlugin: jest.fn(),
     navigateToApp: jest.fn(),
-    alerts: {
+    alerting: {
       getNavigation: jest.fn(async (id) =>
         id === 'alert-with-nav' ? { path: '/alert' } : undefined
       ),

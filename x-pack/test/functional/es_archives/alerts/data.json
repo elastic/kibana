@@ -43,6 +43,147 @@
 {
   "type": "doc",
   "value": {
+    "id": "alert:99f3e6d7-b7bb-477d-ac28-92ee22726969",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [{
+          "actionRef": "action_0",
+          "actionTypeId": ".servicenow",
+          "group": "threshold met",
+          "params": {
+            "subAction": "pushToService",
+            "subActionParams": {
+                "severity":"2",
+                "impact":"2",
+                "urgency":"2",
+                "savedObjectId":"{{alertId}}",
+                "title":"SN short desc",
+                "description":"SN desc",
+                "comment":"sn comment"
+            }
+          }
+        },
+          {
+            "actionRef": "action_1",
+            "actionTypeId": ".jira",
+            "group": "threshold met",
+            "params": {
+              "subAction": "pushToService",
+              "subActionParams": {
+                "title":"Jira summary",
+                "issueType":"10001",
+                "comments":[
+                  {
+                    "commentId":"1",
+                    "comment":"jira comment"
+                  }
+                ],
+                "description":"Jira description",
+                "savedObjectId":"{{alertId}}",
+                "priority":"Highest",
+                "parent":"CASES-78",
+                "labels":[
+                  "test"
+                ]
+              }
+            }
+          },
+          {
+            "actionRef": "action_2",
+            "actionTypeId": ".resilient",
+            "group": "threshold met",
+            "params": {
+              "subAction": "pushToService",
+              "subActionParams": {
+                "savedObjectId":"{{alertId}}",
+                "incidentTypes":[
+                  "17",
+                  "21"
+                ],
+                "severityCode":"5",
+                "title":"IBM name",
+                "description":"IBM description",
+                "comments":[
+                  {
+                    "commentId":"alert-comment",
+                    "comment":"IBM comment"
+                  }
+                ]
+              }
+            }
+          }],
+        "alertTypeId": "test.noop",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-22T15:16:07.451Z",
+        "createdBy": null,
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "rbg",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.11.0"
+      },
+      "references": [{
+        "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+        "name": "action_0",
+        "type": "action"
+      },
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_1",
+          "type": "action"
+        },
+        {
+          "id": "66a8ab7a-35cf-445e-ade3-215a029c6969",
+          "name": "action_2",
+          "type": "action"
+        }],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:66a8ab7a-35cf-445e-ade3-215a029c6969",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".servicenow",
+        "config": {
+          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/servicenow"
+        },
+        "name": "A servicenow action",
+        "secrets": "kvjaTWYKGmCqptyv4giaN+nQGgsZrKXmlULcbAP8KK3JmR8Ei9ADqh5mB+uVC+x+Q7/vTQ5SKZCj3dHv3pmNzZ5WGyZYQFBaaa63Mkp3kIcnpE1OdSAv+3Z/Y+XihHAM19zUm3JRpojnIpYegoS5/vMx1sOzcf/+miYUuZw2lgo0lNE="
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-09-22T15:16:06.924Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "alert:74f3e6d7-b7bb-477d-ac28-fdf248d5f2a4",
     "index": ".kibana_1",
     "source": {

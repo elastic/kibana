@@ -105,9 +105,6 @@ describe('buildRule', () => {
       ],
       exceptions_list: getListArrayMock(),
       version: 1,
-      threat_filters: [],
-      threat_index: [],
-      threat_mapping: [],
     };
     expect(rule).toEqual(expected);
   });
@@ -166,9 +163,6 @@ describe('buildRule', () => {
       created_at: rule.created_at,
       throttle: 'no_actions',
       exceptions_list: getListArrayMock(),
-      threat_filters: [],
-      threat_index: [],
-      threat_mapping: [],
     };
     expect(rule).toEqual(expected);
   });
@@ -227,9 +221,6 @@ describe('buildRule', () => {
       created_at: rule.created_at,
       throttle: 'no_actions',
       exceptions_list: getListArrayMock(),
-      threat_filters: [],
-      threat_index: [],
-      threat_mapping: [],
     };
     expect(rule).toEqual(expected);
   });
@@ -292,9 +283,6 @@ describe('buildRule', () => {
       throttle: 'no_actions',
       exceptions_list: getListArrayMock(),
       version: 1,
-      threat_filters: [],
-      threat_index: [],
-      threat_mapping: [],
     };
     expect(rule).toEqual(expected);
   });

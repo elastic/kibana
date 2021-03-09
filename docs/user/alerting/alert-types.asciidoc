@@ -10,14 +10,13 @@ Kibana provides two types of alerts:
 [float]
 ==== Standard stack alerts
 
-Users require the `all` privilege to access to the *Stack Alerts* feature and create and edit alerts. .
-See <<kibana-feature-privileges, feature privileges>> for more information. 
-
 {kib} provides two stack alerts: 
 
 * <<alert-type-index-threshold>>
 * <<alert-type-es-query>>
 
+Users require the `all` privilege to access the *Stack Alerts* feature and create and edit alerts.
+See <<kibana-feature-privileges, feature privileges>> for more information.
 
 [float]
 ==== Domain-specific alerts
@@ -28,7 +27,7 @@ For domain-specific alerts, refer to the documentation for that app.
 * {observability-guide}/create-alerts.html[Observability alerts]
 * {security-guide}/prebuilt-rules.html[Security alerts]
 * <<geo-alerting, Maps alerts>>
-* <<xpack-ml, ML alerts>>
+* {ml-docs}/ml-configuring-alerts.html[{ml-cap} alerts] beta:[]
 
 [NOTE]
 ==============================================

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FleetConfigType } from '../../../plugin';
+import type { FleetConfigType } from '../../../plugin';
 
 export const createConfigurationMock = (): FleetConfigType => {
   return {
@@ -14,7 +14,6 @@ export const createConfigurationMock = (): FleetConfigType => {
     registryProxyUrl: '',
     agents: {
       enabled: true,
-      fleetServerEnabled: false,
       tlsCheckDisabled: true,
       pollingRequestTimeout: 1000,
       maxConcurrentConnections: 100,

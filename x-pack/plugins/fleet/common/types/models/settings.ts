@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from 'src/core/public';
+import type { SavedObjectAttributes } from 'src/core/public';
 
 export interface BaseSettings {
   agent_auto_upgrade: boolean;
