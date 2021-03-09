@@ -127,7 +127,7 @@ export const ColorPicker = ({
           </legend>
         </EuiScreenReaderOnly>
         {legendColors.map((color) => (
-          <label key={color} className="visColorPicker__radio">
+          <label key={color} className="visColorPicker__colorBtn">
             <input
               type="radio"
               onChange={(e) => onChange(color, e)}

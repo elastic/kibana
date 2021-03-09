@@ -233,7 +233,6 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           canFilter={this.state.filterableLabels.has(item.label)}
           onFilter={this.filter}
           onSelect={this.toggleDetails}
-          legendId={this.legendId}
           setColor={this.setColor}
           getColor={this.getColor}
           onHighlight={this.highlight}
