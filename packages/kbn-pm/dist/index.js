@@ -59470,8 +59470,8 @@ function waitUntilWatchIsReady(stream, opts = {}) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runCommand", function() { return runCommand; });
-/* harmony import */ var _kbn_dev_utils_ci_stats_timings__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(514);
-/* harmony import */ var _kbn_dev_utils_ci_stats_timings__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_ci_stats_timings__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(514);
+/* harmony import */ var _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _utils_errors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(249);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(246);
 /* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(248);
@@ -59523,33 +59523,35 @@ async function runCommand(command, config) {
     }));
 
     if (command.reportTiming) {
-      const reporter = _kbn_dev_utils_ci_stats_timings__WEBPACK_IMPORTED_MODULE_0__["CiStatsTimings"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"], {
-        upstreamBranch: kbn.kibanaProject.json.branch
+      const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"]);
+      await reporter.timings({
+        upstreamBranch: kbn.kibanaProject.json.branch,
+        timings: [{
+          group: command.reportTiming.group,
+          id: command.reportTiming.id,
+          ms: Date.now() - runStartTime,
+          meta: {
+            success: true
+          }
+        }]
       });
-      await reporter.timings([{
-        group: command.reportTiming.group,
-        id: command.reportTiming.id,
-        ms: Date.now() - runStartTime,
-        meta: {
-          success: true
-        }
-      }]);
     }
   } catch (error) {
     if (command.reportTiming) {
       // if we don't have a kbn object then things are too broken to report on
       if (kbn) {
-        const reporter = _kbn_dev_utils_ci_stats_timings__WEBPACK_IMPORTED_MODULE_0__["CiStatsTimings"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"], {
-          upstreamBranch: kbn.kibanaProject.json.branch
+        const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"]);
+        await reporter.timings({
+          upstreamBranch: kbn.kibanaProject.json.branch,
+          timings: [{
+            group: command.reportTiming.group,
+            id: command.reportTiming.id,
+            ms: Date.now() - runStartTime,
+            meta: {
+              success: false
+            }
+          }]
         });
-        await reporter.timings([{
-          group: command.reportTiming.group,
-          id: command.reportTiming.id,
-          ms: Date.now() - runStartTime,
-          meta: {
-            outcome: 'failure'
-          }
-        }]);
       }
     }
 
@@ -59595,62 +59597,120 @@ function toArray(value) {
  * Side Public License, v 1.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CiStatsTimings = void 0;
+exports.CiStatsReporter = void 0;
 const tslib_1 = __webpack_require__(7);
 const util_1 = __webpack_require__(112);
 const os_1 = tslib_1.__importDefault(__webpack_require__(121));
 const axios_1 = tslib_1.__importDefault(__webpack_require__(515));
 const ci_stats_config_1 = __webpack_require__(555);
-class CiStatsTimings {
-    constructor(log, upstreamBranch, defaultMetadata, config) {
-        this.log = log;
-        this.upstreamBranch = upstreamBranch;
-        this.defaultMetadata = defaultMetadata;
+const BASE_URL = 'https://ci-stats.kibana.dev';
+class CiStatsReporter {
+    constructor(config, log) {
         this.config = config;
+        this.log = log;
     }
-    static fromEnv(log, options) {
-        var _a, _b, _c, _d;
-        return new CiStatsTimings(log, (_a = options === null || options === void 0 ? void 0 : options.upstreamBranch) !== null && _a !== void 0 ? _a : CiStatsTimings.getUpstreamBranch(), {
-            ...options === null || options === void 0 ? void 0 : options.defaultMetadata,
+    static fromEnv(log) {
+        return new CiStatsReporter(ci_stats_config_1.parseConfig(log), log);
+    }
+    isEnabled() {
+        return process.env.CI_STATS_DISABLED !== 'true';
+    }
+    hasBuildConfig() {
+        var _a, _b;
+        return this.isEnabled() && !!((_a = this.config) === null || _a === void 0 ? void 0 : _a.apiToken) && !!((_b = this.config) === null || _b === void 0 ? void 0 : _b.buildId);
+    }
+    /**
+     * Report timings data to the ci-stats service. If running in CI then the reporter
+     * will include the buildId in the report with the access token, otherwise the timings
+     * data will be recorded as anonymous timing data.
+     */
+    async timings(options) {
+        var _a, _b, _c, _d, _e;
+        if (!this.isEnabled()) {
+            return;
+        }
+        const buildId = (_a = this.config) === null || _a === void 0 ? void 0 : _a.buildId;
+        const timings = options.timings;
+        const upstreamBranch = (_b = options.upstreamBranch) !== null && _b !== void 0 ? _b : this.getUpstreamBranch();
+        const defaultMetadata = {
             os_kernel: os_1.default.release(),
-            system_cpu_cores: (_b = os_1.default.cpus()) === null || _b === void 0 ? void 0 : _b.length,
-            system_cpu_name: (_c = os_1.default.cpus()[0]) === null || _c === void 0 ? void 0 : _c.model,
-            system_cpu_speed: (_d = os_1.default.cpus()[0]) === null || _d === void 0 ? void 0 : _d.speed,
-            host_architecture: os_1.default.arch(),
             host_platform: os_1.default.platform(),
-        }, ci_stats_config_1.parseConfig(log));
+            system_cpu_cores: (_c = os_1.default.cpus()) === null || _c === void 0 ? void 0 : _c.length,
+            system_cpu_name: (_d = os_1.default.cpus()[0]) === null || _d === void 0 ? void 0 : _d.model,
+            system_cpu_speed: (_e = os_1.default.cpus()[0]) === null || _e === void 0 ? void 0 : _e.speed,
+            host_architecture: os_1.default.arch(),
+        };
+        return await this.req({
+            auth: !!buildId,
+            path: '/v1/timings',
+            body: {
+                buildId,
+                upstreamBranch,
+                timings,
+                defaultMetadata,
+            },
+            bodyDesc: timings.length === 1 ? `${timings.length} timing` : `${timings.length} timings`,
+        });
     }
-    static getUpstreamBranch() {
-        // in order to allow this code to run before @kbn/utils is built, @kbn/pm will pass in the upstreamBranch
-        // when constructing the CiStatsTimings object. Outside of @kbn/pm we rely on @kbn/utils to find the package.json file
+    /**
+     * Report metrics data to the ci-stats service. If running outside of CI this method
+     * does nothing as metrics can only be reported when associated with a specific CI build.
+     */
+    async metrics(metrics) {
+        var _a;
+        if (!this.hasBuildConfig()) {
+            return;
+        }
+        const buildId = (_a = this.config) === null || _a === void 0 ? void 0 : _a.buildId;
+        if (!buildId) {
+            throw new Error(`CiStatsReporter can't be authorized without a buildId`);
+        }
+        return await this.req({
+            auth: true,
+            path: '/v1/metrics',
+            body: {
+                buildId,
+                metrics,
+            },
+            bodyDesc: `metrics: ${metrics
+                .map(({ group, id, value }) => `[${group}/${id}=${value}]`)
+                .join(' ')}`,
+        });
+    }
+    /**
+     * in order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
+     * in the upstreamBranch when constructing the CiStatsTimings object. Outside of @kbn/pm
+     * we rely on @kbn/utils to find the package.json file.
+     */
+    getUpstreamBranch() {
+        // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
         const hideFromWebpack = ['@', 'kbn/utils'];
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { kibanaPackageJson } = __webpack_require__(556)(hideFromWebpack.join(''));
         return kibanaPackageJson.branch;
     }
-    async timings(timings) {
-        var _a, _b, _c;
-        if (timings.length === 0) {
-            return true;
-        }
+    async req({ auth, body, bodyDesc, path }) {
+        var _a;
         let attempt = 0;
         const maxAttempts = 5;
+        let headers;
+        if (auth && this.config) {
+            headers = {
+                Authorization: `token ${this.config.apiToken}`,
+            };
+        }
+        else if (auth) {
+            throw new Error('this.req() shouldnt be called with auth=true if this.config is defined');
+        }
         while (true) {
-            attempt++;
+            attempt += 1;
             try {
                 await axios_1.default.request({
                     method: 'POST',
-                    url: 'https://ci-stats.kibana.dev/v1/timings',
-                    headers: ((_a = this.config) === null || _a === void 0 ? void 0 : _a.apiToken) ? {
-                        Authorization: `token ${this.config.apiToken}`,
-                    }
-                        : undefined,
-                    data: {
-                        buildId: (_b = this.config) === null || _b === void 0 ? void 0 : _b.buildId,
-                        timings,
-                        upstreamBranch: this.upstreamBranch,
-                        defaultMetadata: this.defaultMetadata,
-                    },
+                    url: path,
+                    baseURL: BASE_URL,
+                    headers,
+                    data: body,
                 });
                 return true;
             }
@@ -59659,26 +59719,25 @@ class CiStatsTimings {
                     // not an axios error, must be a usage error that we should notify user about
                     throw error;
                 }
-                if ((error === null || error === void 0 ? void 0 : error.response) && error.response.status < 500) {
-                    const status = error.response.status;
+                if ((error === null || error === void 0 ? void 0 : error.response) && error.response.status < 502) {
                     // error response from service was received so warn the user and move on
-                    this.log.warning(`error recording timings [status=${status}] [resp=${util_1.inspect(error.response.data)}] `);
+                    this.log.warning(`error reporting ${bodyDesc} [status=${error.response.status}] [resp=${util_1.inspect(error.response.data)}]`);
                     return;
                 }
                 if (attempt === maxAttempts) {
-                    this.log.warning(`failed to reach kibana-ci-stats service too many times, unable to record timings`);
+                    this.log.warning(`unable to report ${bodyDesc}, failed to reach ci-stats service too many times`);
                     return;
                 }
                 // we failed to reach the backend and we have remaining attempts, lets retry after a short delay
-                const reason = ((_c = error === null || error === void 0 ? void 0 : error.response) === null || _c === void 0 ? void 0 : _c.status) ? `${error.response.status} response`
+                const reason = ((_a = error === null || error === void 0 ? void 0 : error.response) === null || _a === void 0 ? void 0 : _a.status) ? `${error.response.status} response`
                     : 'no response';
-                this.log.warning(`failed to reach kibana-ci-stats service [reason=${reason}], retrying in ${attempt} seconds`);
+                this.log.warning(`failed to reach ci-stats service [reason=${reason}], retrying in ${attempt} seconds`);
                 await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
             }
         }
     }
 }
-exports.CiStatsTimings = CiStatsTimings;
+exports.CiStatsReporter = CiStatsReporter;
 
 
 /***/ }),
@@ -63107,11 +63166,6 @@ module.exports = function isAxiosError(payload) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseConfig = void 0;
 function validateConfig(log, config) {
-    const validApiUrl = typeof config.apiUrl === 'string' && config.apiUrl.length !== 0;
-    if (!validApiUrl) {
-        log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api url, stats will not be reported');
-        return;
-    }
     const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;
     if (!validApiToken) {
         log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api token, stats will not be reported');

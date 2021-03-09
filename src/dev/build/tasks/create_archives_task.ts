@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import { CiStatsMetrics } from '@kbn/dev-utils';
+import { CiStatsMetric } from '@kbn/dev-utils';
 
 import { mkdirp, compressTar, compressZip, Task } from '../lib';
 
@@ -72,7 +72,7 @@ export const CreateArchives: Task = {
       }
     }
 
-    const metrics: CiStatsMetrics = [];
+    const metrics: CiStatsMetric[] = [];
     for (const { format, path, fileCount } of archives) {
       metrics.push({
         group: `${build.isOss() ? 'oss ' : ''}distributable size`,

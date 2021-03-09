@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CiStatsTimings } from '@kbn/dev-utils/ci_stats_timings';
+import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
 
 import { ICommand, ICommandConfig } from './commands';
 import { CliError } from './utils/errors';
@@ -48,37 +48,39 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
     });
 
     if (command.reportTiming) {
-      const reporter = CiStatsTimings.fromEnv(log, {
+      const reporter = CiStatsReporter.fromEnv(log);
+      await reporter.timings({
         upstreamBranch: kbn.kibanaProject.json.branch,
-      });
-      await reporter.timings([
-        {
-          group: command.reportTiming.group,
-          id: command.reportTiming.id,
-          ms: Date.now() - runStartTime,
-          meta: {
-            success: true,
-          },
-        },
-      ]);
-    }
-  } catch (error) {
-    if (command.reportTiming) {
-      // if we don't have a kbn object then things are too broken to report on
-      if (kbn) {
-        const reporter = CiStatsTimings.fromEnv(log, {
-          upstreamBranch: kbn.kibanaProject.json.branch,
-        });
-        await reporter.timings([
+        timings: [
           {
             group: command.reportTiming.group,
             id: command.reportTiming.id,
             ms: Date.now() - runStartTime,
             meta: {
-              outcome: 'failure',
+              success: true,
             },
           },
-        ]);
+        ],
+      });
+    }
+  } catch (error) {
+    if (command.reportTiming) {
+      // if we don't have a kbn object then things are too broken to report on
+      if (kbn) {
+        const reporter = CiStatsReporter.fromEnv(log);
+        await reporter.timings({
+          upstreamBranch: kbn.kibanaProject.json.branch,
+          timings: [
+            {
+              group: command.reportTiming.group,
+              id: command.reportTiming.id,
+              ms: Date.now() - runStartTime,
+              meta: {
+                success: false,
+              },
+            },
+          ],
+        });
       }
     }
 

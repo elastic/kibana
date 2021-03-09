@@ -9,18 +9,11 @@
 import type { ToolingLog } from '../tooling_log';
 
 export interface Config {
-  apiUrl: string;
   apiToken: string;
   buildId: string;
 }
 
 function validateConfig(log: ToolingLog, config: { [k in keyof Config]: unknown }) {
-  const validApiUrl = typeof config.apiUrl === 'string' && config.apiUrl.length !== 0;
-  if (!validApiUrl) {
-    log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api url, stats will not be reported');
-    return;
-  }
-
   const validApiToken = typeof config.apiToken === 'string' && config.apiToken.length !== 0;
   if (!validApiToken) {
     log.warning('KIBANA_CI_STATS_CONFIG is missing a valid api token, stats will not be reported');
