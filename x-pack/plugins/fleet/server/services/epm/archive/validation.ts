@@ -222,7 +222,7 @@ export function parseAndVerifyDataStreams(
       Object.entries(restOfProps).reduce(
         (validatedDataStream, [key, value]) => {
           if (registryDataStreamProps.includes(key as RegistryDataStreamKeys)) {
-            // @ts-ignore-error
+            // @ts-expect-error
             validatedDataStream[key] = value;
           }
           return validatedDataStream;
@@ -236,7 +236,7 @@ export function parseAndVerifyDataStreams(
           ingest_pipeline: ingestPipeline || 'default',
           path: dataStreamPath,
           streams,
-        } as RegistryDataStream
+        }
       )
     );
   });
@@ -270,7 +270,7 @@ export function parseAndVerifyStreams(
         Object.entries(restOfProps).reduce(
           (validatedStream, [key, value]) => {
             if (registryStreamProps.includes(key as RegistryStreamKeys)) {
-              // @ts-ignore-error
+              // @ts-expect-error
               validatedStream[key] = value;
             }
             return validatedStream;
@@ -303,7 +303,7 @@ export function parseAndVerifyVars(manifestVars: any[], location: string): Regis
         Object.entries(restOfProps).reduce(
           (validatedVarEntry, [key, value]) => {
             if (registryVarsProps.includes(key as RegistryVarsEntryKeys)) {
-              // @ts-ignore-error
+              // @ts-expect-error
               validatedVarEntry[key] = value;
             }
             return validatedVarEntry;
@@ -349,7 +349,7 @@ export function parseAndVerifyPolicyTemplates(
         Object.entries(restOfProps).reduce(
           (validatedPolicyTemplate, [key, value]) => {
             if (registryPolicyTemplateProps.includes(key as RegistryPolicyTemplateKeys)) {
-              // @ts-ignore-error
+              // @ts-expect-error
               validatedPolicyTemplate[key] = value;
             }
             return validatedPolicyTemplate;
@@ -384,7 +384,7 @@ export function parseAndVerifyInputs(manifestInputs: any, location: string): Reg
         Object.entries(restOfProps).reduce(
           (validatedInput, [key, value]) => {
             if (registryInputProps.includes(key as RegistryInputKeys)) {
-              // @ts-ignore-error
+              // @ts-expect-error
               validatedInput[key] = value;
             }
             return validatedInput;
