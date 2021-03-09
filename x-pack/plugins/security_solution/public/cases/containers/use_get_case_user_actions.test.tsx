@@ -53,7 +53,7 @@ describe('useGetCaseUserActions', () => {
       );
       await waitForNextUpdate();
 
-      result.current.fetchCaseUserActions(basicCase.id);
+      result.current.fetchCaseUserActions(basicCase.id, basicCase.connector.id);
       await waitForNextUpdate();
       expect(spyOnPostCase).toBeCalledWith(basicCase.id, abortCtrl.signal);
     });
@@ -65,7 +65,7 @@ describe('useGetCaseUserActions', () => {
         useGetCaseUserActions(basicCase.id, basicCase.connector.id)
       );
       await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCase.id);
+      result.current.fetchCaseUserActions(basicCase.id, basicCase.connector.id);
       await waitForNextUpdate();
       expect(result.current).toEqual({
         ...initialData,
@@ -85,7 +85,7 @@ describe('useGetCaseUserActions', () => {
         useGetCaseUserActions(basicCase.id, basicCase.connector.id)
       );
       await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCase.id);
+      result.current.fetchCaseUserActions(basicCase.id, basicCase.connector.id);
 
       expect(result.current.isLoading).toBe(true);
     });
@@ -102,7 +102,7 @@ describe('useGetCaseUserActions', () => {
         useGetCaseUserActions(basicCase.id, basicCase.connector.id)
       );
       await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCase.id);
+      result.current.fetchCaseUserActions(basicCase.id, basicCase.connector.id);
 
       expect(result.current).toEqual({
         ...initialData,

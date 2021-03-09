@@ -227,6 +227,7 @@ export async function setupFleet(
       return generateEnrollmentAPIKey(soClient, esClient, {
         name: `Default`,
         agentPolicyId: agentPolicy.id,
+        forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
       });
     })
   );

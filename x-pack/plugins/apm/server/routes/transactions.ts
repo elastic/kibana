@@ -15,7 +15,7 @@ import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
-import { getServiceTransactionGroupComparisonStatistics } from '../lib/services/get_service_transaction_group_comparison_statistics';
+import { getServiceTransactionGroupComparisonStatisticsPeriods } from '../lib/services/get_service_transaction_group_comparison_statistics';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
@@ -123,6 +123,7 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       environmentRt,
       kueryRt,
       rangeRt,
+      comparisonRangeRt,
       t.type({
         transactionNames: jsonRt.pipe(t.array(t.string)),
         numBuckets: toNumberRt,
@@ -150,10 +151,12 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
         latencyAggregationType,
         numBuckets,
         transactionType,
+        comparisonStart,
+        comparisonEnd,
       },
     } = context.params;
 
-    return getServiceTransactionGroupComparisonStatistics({
+    return await getServiceTransactionGroupComparisonStatisticsPeriods({
       environment,
       kuery,
       setup,
@@ -163,6 +166,8 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       transactionType,
       numBuckets,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     });
   },
 });
