@@ -323,7 +323,6 @@ Object {
         "status": "metrics-apache.status-*",
       },
       "install_source": "upload",
-      "install_started_at": "2021-03-09T02:12:26.449Z",
       "install_status": "installed",
       "install_version": "0.1.4",
       "installed_es": Array [
