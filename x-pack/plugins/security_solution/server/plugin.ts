@@ -343,9 +343,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
       const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
-
-      // const artifactClient = new ArtifactClient(savedObjectsClient);
-
       const artifactClient = (new EndpointArtifactClient(
         plugins.fleet.createArtifactsClient('endpoint')
       ) as unknown) as ArtifactClient;
