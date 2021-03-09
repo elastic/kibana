@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { REPO_ROOT } from '@kbn/utils';
 import { resolve, relative } from 'path';
 
 // resolve() treats relative paths as relative to process.cwd(),
@@ -16,7 +17,7 @@ function resolveRelative(path) {
 
 export const KIBANA_EXEC = 'node';
 export const KIBANA_EXEC_PATH = resolveRelative('scripts/kibana');
-export const KIBANA_ROOT = resolve(__dirname, '../../../../../');
+export const KIBANA_ROOT = REPO_ROOT;
 export const KIBANA_FTR_SCRIPT = resolve(KIBANA_ROOT, 'scripts/functional_test_runner');
 export const PROJECT_ROOT = resolve(__dirname, '../../../../../../');
 export const FUNCTIONAL_CONFIG_PATH = resolve(KIBANA_ROOT, 'test/functional/config');
