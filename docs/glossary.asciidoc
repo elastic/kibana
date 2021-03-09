@@ -104,7 +104,7 @@ Specifies how many documents must contain a pair of terms before it is considere
 a useful connection in a graph.
 // end::certainty-def[]
 
-[[glossary-certainty]] clusters ::
+[[glossary-clusters]] clusters ::
 // tag::clusters-def[]
 A layer type and display option in the *Maps* application.
 Clusters display a cluster symbol across a grid on the map, one symbol per grid cluster.
