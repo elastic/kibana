@@ -1,7 +1,7 @@
 - Start Date: 2021-03-09
 - RFC PR: https://github.com/elastic/kibana/pull/94057
 - Kibana Issue: https://github.com/elastic/kibana/issues/68626
-- POC issue: https://github.com/elastic/kibana/pull/93380
+- POC PR: https://github.com/elastic/kibana/pull/93380
 
 # Summary
 
@@ -24,7 +24,7 @@ In 'classic' mode, the Kibana server is started in the main NodeJS process.
 ![image](../images/15_clustering/no-cluster-mode.png)
 
 In clustering mode, the main NodeJS process would only start the coordinator, which would then fork workers using 
-the cluster API. NodeJS underlying socket implementation allows multiple processes to listen to the same ports, 
+Node's `cluster` API. NodeJS underlying socket implementation allows multiple processes to listen to the same ports, 
 performing http traffic balancing between the workers for us.
 
 ![image](../images/15_clustering/cluster-mode.png)
@@ -150,10 +150,10 @@ export interface ClusteringServiceSetup {
 
 ## Cross-worker communication
 
-For some of our changes (such as the /status API, see below), we will need some kind of cross-worker communication. Such communication 
+For some of our changes (such as the /status API, see below), we will need some kind of cross-worker communication. This 
 will need to pass through the coordinator, which will also serve as an 'event bus', or IPC forwarder.
 
-The base API for such communication will be exposed from the clustering service.
+This IPC API will be exposed from the clustering service.
 
 ```ts
 export interface ClusteringServiceSetup {
@@ -170,13 +170,15 @@ Notes:
 
 ## Executing code on a single worker
 
-In some scenario, we would like to have some part of the code executed from a single process. The SO migration would be a good example: 
-we don't need to have each worker try to perform the migration, and we'd prefer to have one performing/trying the migration, 
-and the other wait for it. Due to the architecture, we can't have the coordinator perform such single-process jobs, 
-as it doesn't actually run a Kibana's Server.
+In some scenarios, we would like to have parts of the code executed only from a single process. 
 
-There are various ways to address such use-case. What seems to be the best compromise right now would be the concept of 
-'main worker'. The coordinator would arbitrary elect a worker as the 'main' one. The clustering service would then expose 
+The SO migration would be a good example: 
+we don't need to have each worker try to perform the migration, and we'd prefer to have one performing/trying the migration, 
+and the others wait for it. Due to the architecture, we can't have the coordinator perform such single-process jobs, 
+as it doesn't actually run a Kibana server.
+
+There are various ways to address such use-cases. What seems to be the best compromise right now would be the concept of 
+'main worker'. The coordinator would arbitrary elect a worker as the 'main' one at startup. The clustering service would then expose 
 an API to let workers identify themselves as main or not.
 
 ```ts
@@ -235,7 +237,7 @@ be required to support clustering mode.
 
 ### Handling multi-process logs
 
-This is an example of log output in a 2 workers cluster, coming from the POC
+This is an example of log output in a 2 workers cluster, coming from the POC:
 
 ```
 [2021-03-02T10:23:41.834+01:00][INFO ][plugins-service] Plugin initialization disabled.
@@ -244,19 +246,20 @@ This is an example of log output in a 2 workers cluster, coming from the POC
 [2021-03-02T10:23:41.903+01:00][WARN ][savedobjects-service] Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.
 ```
 
-The workers logs are interleaved, and, most importantly, there is no way to see which process the log is coming from. 
+The workers logs are interleaved, and, most importantly, there is no way to see which process each log entry is coming from. 
 We will need to address that.
 
-Our options are
+Our options are:
 
 - Have a distinct logging configuration for each worker
 
-We could do that by automatically adding a suffix depending on the process to the appropriate appenders configuration. 
+We could do that by automatically adding a suffix depending on the process to the appropriate file appenders configuration. 
 Note that this doesn’t solve the problem for the console appender, which is probably a no-go.
 
 - Add the process info to the log pattern and output it with the log message
 
-We could add the process name information to the log messages, and add a new conversion to be able to display it with the pattern layout, such as %process for example.
+We could add the process name information to the log messages, and add a new conversion to be able to display it with 
+the pattern layout, such as `%process` for example.
 
 the default pattern could evolve to (ideally, only when clustering is enabled)
 
@@ -271,30 +274,41 @@ The logging output would then look like
 [2021-03-02T10:23:41.840+01:00][INFO ][worker-2][plugins-service] Plugin initialization disabled.
 ```
 
-This will require some changes in the logging system implementation, as currently the BaseLogger has no logic to 
+This will require some non-trivial changes in the logging system implementation, as currently the BaseLogger has no logic to 
 enhance the log record with context information before forwarding it to its appenders, but this still
-seems to be the best solution.
+seems to be the best solution. (This may even be the first step to implement our MDC)
+
+Notes:
+- Even if we add the `%process` pattern, do we want to also allow users to specify per-worker log files? 
 
 ### The rolling-file appender
 
 The rolling process of the `rolling-file` appender is going to be problematic in clustered mode, as it will cause 
-concurrency issues during the rolling. We need to find a way to have this rolling process clustered-proof.
+concurrency issues during the rolling. We need to find a way to have this rolling stage clustered-proof.
 
 Identified options are:
 
 - have the rolling file appenders coordinate themselves when rolling
 
-By using a broadcast message based mutex mechanism, the appenders could acquire a ‘lock’ to roll a specific file, and release the lock once the rotation is done.
+By using a broadcast message based mutex mechanism, the appenders could acquire a ‘lock’ to roll a specific file, and
+notify other workers when the rolling is complete (quite similar to what we want to do with SO migration for example).
 
 - have the coordinator process perform the rolling
 
-Another option would be to have the coordinator perform the rotation instead. When a rolling is required, the appender would send a message to the coordinator, which would perform the rolling and notify the workers once the process is complete. Note that this option is even more complicated than the previous one, as it forces to move the rolling implementation outside of the appender, without any significant upsides.
+Another option would be to have the coordinator perform the rotation instead. When a rolling is required, the appender 
+would send a message to the coordinator, which would perform the rolling and notify the workers once the operation is complete. 
+
+Note that this option is even more complicated than the previous one, as it forces to move the rolling implementation 
+outside of the appender, without any significant upsides identified.
 
 - centralize the logging system in the coordinator (and have the workers send messages to the coordinator when using the logging system)
 
-We could go further, and change the way the logging system works in clustering mode by having the coordinator centralize the logging system. The worker’s logger implementation would just send messages to the coordinator. If this may be a correct design, the main downside is that the logging implementation would be totally different in cluster and non cluster mode, and is overall way more work that the other options.
+We could go further, and change the way the logging system works in clustering mode by having the coordinator centralize 
+the logging system. The worker’s logger implementation would just send messages to the coordinator. If this may be a 
+correct design, the main downside is that the logging implementation would be totally different in cluster and 
+non cluster mode, and seems to be way more work that the other options.
 
-Overall, if no option is trivial, I feel like option 1) is still the most pragmatic one. Option 3) is probably a better 
+Overall, if no option is trivial, I feel like option 1) is still the most pragmatic one. Option 3) may be a better 
 design, but represents more work. It would probably be fine if all our appenders were impacted, but as only the 
 rolling-file one is, I feel like going with 1) would be ok.
 
@@ -323,7 +337,7 @@ in the worker's environment service.
 
 In the current state, all workers are going to try to perform the migration. Ideally, we would have only one process 
 perform the migration, and the other ones just wait for a ready signal. We can’t easily have the coordinator do it, 
-so we would probably have to leverage the ‘main worker’ concept to do so.
+so we would probably have to leverage the ‘main worker’ concept here.
 
 The SO migration v2 is supposed to be resilient to concurrent attempts though, as we already support multi-instances 
 Kibana, so this can probably be considered an improvement.
@@ -331,14 +345,16 @@ Kibana, so this can probably be considered an improvement.
 ## Open questions and things to solve
 
 ### Memory consumption
-In cluster mode, node options such as `max-old-space-size` will be used by all processes. E.g using 
-`--max-old-space-size=1024` in a 2 workers cluster would have a maximum memory usage of 3gb (1 coordinator + 2 workers). 
+
+In clustered mode, node options such as `max-old-space-size` will be used by all processes. 
+
+E.g using `--max-old-space-size=1024` in a 2 workers cluster would have a maximum memory usage of 3gb (1 coordinator + 2 workers). 
 
 If this something we will need to document somewhere?
 
 ### Workers error handling
 
-When using `cluster`, the common best practice is to have the coordinator recreate workers when they terminate unexpectedly. 
+When using `cluster`, the common best practice is to have the coordinator recreate ('restart') workers when they terminate unexpectedly. 
 However, given Kibana's architecture, some failures are not recoverable (workers failing because of config validation, failed migration...). 
 
 For instance, if a worker (well, all workers) terminates because of an invalid configuration property, it doesn't make
@@ -356,7 +372,7 @@ are accessing files in write mode, which could result in concurrency issues betw
 
 If that was confirmed, we would have to create and use a distinct data folder for each worker.
 
-One pragmatic solution would be, when clustering is enabled, to create a sub folder under path.data for each worker. 
+One pragmatic solution could be, when clustering is enabled, to create a sub folder under path.data for each worker. 
 
 If we need to do so, should this be considered a breaking change, or do we assume the usage of the data folder is an 
 implementation detail and not part of our public 'API'?
@@ -369,7 +385,7 @@ We still need to identify with the teams if this is going to be a problem, in wh
 instance uuid per workers.
 
 Note that this could be a breaking change, as the single `server.uuid` configuration property would not be enough. 
-We may want to introduce a new `workerId` variable and create the associated API to expose this value to plugins?
+Could the new `clustering.getWorkerId()` API be used here somehow? We could have a unique worker id with `serverUUid-workerId`. 
 
 ### The Dev CLI
 
@@ -473,23 +489,24 @@ We may need to have each worker uses a distinct data folder. Should this be cons
 # Drawbacks
 
 - Implementation cost is going to be significant, both in core and in plugins. Also, this will have to be a collaborative
-  effort, as we can't enable the clustered mode in production until all the identified breaking changes has been addressed.
+  effort, as we can't enable the clustered mode in production until all the identified breaking changes have been addressed.
   
 - Even if easier to deploy, it doesn't really provide anything more than a multi-instances Kibana setup.
   
 - This will complexify the code, especially in Core were some part of the logic will drastically change between clustered and 
-non-clustered modes (e.g the status API).
+non-clustered modes (e.g the status API, rolling-file appender).
   
-- It could introduce subtle bugs in clustered mode, as we may overlook some breaking changes, or new features may omit to
-ensure clustered mode compatibility.
+- It could introduce subtle bugs in clustered mode, as we may overlook some breaking changes, or developers may omit to
+ensure clustered mode compatibility when adding new features.
   
-- Proper testing of all the edge case is going to be tedious, if not just realistically impossible. 
+- Proper testing of all the edge cases is going to be tedious, if not just realistically impossible. We can't really
+  automate the testing of the clustered mode.
 
 # Alternatives
 
 Regarding the whole proposal, an alternative would be to provide tooling to ease the deployment of multi-instance Kibana setups.
 
-Regarding the implementation proposal, the discussion is still ongoing.
+Regarding the implementation proposal, the discussions are still ongoing.
 
 # Adoption strategy
 
@@ -497,8 +514,8 @@ Phase 1: we perform the required changes in `Core`, and add the `clustering.enab
 That way, we allow developers to test their features against clustering mode and to adapt their code to use the new `clustering` API
 and service.
 
-Phase 2: when all the required changes have been performed, we enable the `clustering` configuration on production mode as a `beta` feature.
-We would ideally also add telemetry collection for the clustering usages (actual metrics TBD) to have a precise vision of the adoption of the feature.
+Phase 2: when all the required changes have been performed in plugins code, we enable the `clustering` configuration on production mode as a `beta` feature.
+We would ideally also add telemetry collection for the clustering usages (relevant metrics TBD) to have a precise vision of the adoption of the feature.
 
 # How we teach this
 
