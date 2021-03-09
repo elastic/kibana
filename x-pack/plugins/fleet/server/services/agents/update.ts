@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { listAgents } from './crud';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+
+import { listAgents } from './crud';
 import { unenrollAgent } from './unenroll';
 
 export async function unenrollForAgentPolicyId(
@@ -18,7 +20,7 @@ export async function unenrollForAgentPolicyId(
   let hasMore = true;
   let page = 1;
   while (hasMore) {
-    const { agents } = await listAgents(soClient, esClient, {
+    const { agents } = await listAgents(esClient, {
       kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${policyId}"`,
       page: page++,
       perPage: 1000,

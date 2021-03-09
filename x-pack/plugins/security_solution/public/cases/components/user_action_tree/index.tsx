@@ -122,7 +122,11 @@ export const UserActionTree = React.memo(
     userCanCrud,
     onShowAlertDetails,
   }: UserActionTreeProps) => {
-    const { commentId, subCaseId } = useParams<{ commentId?: string; subCaseId?: string }>();
+    const { detailName: caseId, commentId, subCaseId } = useParams<{
+      detailName: string;
+      commentId?: string;
+      subCaseId?: string;
+    }>();
     const handlerTimeoutId = useRef(0);
     const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
@@ -149,15 +153,16 @@ export const UserActionTree = React.memo(
     const handleSaveComment = useCallback(
       ({ id, version }: { id: string; version: string }, content: string) => {
         patchComment({
-          caseId: caseData.id,
+          caseId,
           commentId: id,
           commentUpdate: content,
           fetchUserActions,
           version,
           updateCase,
+          subCaseId,
         });
       },
-      [caseData.id, fetchUserActions, patchComment, updateCase]
+      [caseId, fetchUserActions, patchComment, subCaseId, updateCase]
     );
 
     const handleOutlineComment = useCallback(
@@ -223,7 +228,7 @@ export const UserActionTree = React.memo(
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
-          caseId={caseData.id}
+          caseId={caseId}
           disabled={!userCanCrud}
           ref={addCommentRef}
           onCommentPosted={handleUpdate}
@@ -232,7 +237,7 @@ export const UserActionTree = React.memo(
           subCaseId={subCaseId}
         />
       ),
-      [caseData.id, handleUpdate, userCanCrud, handleManageMarkdownEditId, subCaseId]
+      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, subCaseId]
     );
 
     useEffect(() => {
@@ -374,11 +379,10 @@ export const UserActionTree = React.memo(
                   return comments;
                 }
 
-                const ruleId = comment?.rule?.id ?? manualAlertsData[alertId]?.rule?.id?.[0] ?? '';
+                const ruleId =
+                  comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? null;
                 const ruleName =
-                  comment?.rule?.name ??
-                  manualAlertsData[alertId]?.rule?.name?.[0] ??
-                  i18n.UNKNOWN_RULE;
+                  comment?.rule?.name ?? manualAlertsData[alertId]?.signal?.rule?.name?.[0] ?? null;
 
                 return [
                   ...comments,

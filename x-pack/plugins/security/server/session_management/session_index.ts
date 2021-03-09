@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+
 import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';
 

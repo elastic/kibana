@@ -29,6 +29,7 @@ import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { CaseType } from '../../../../../case/common/api';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -201,6 +202,10 @@ describe('CaseView ', () => {
           .first()
           .text()
       ).toBe(data.description);
+
+      expect(
+        wrapper.find('button[data-test-subj="case-view-status-action-button"]').first().text()
+      ).toBe('Mark in progress');
     });
   });
 
@@ -464,7 +469,7 @@ describe('CaseView ', () => {
     );
     await waitFor(() => {
       wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
-      expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
+      expect(fetchCaseUserActions).toBeCalledWith('1234', 'resilient-2', undefined);
       expect(fetchCase).toBeCalled();
     });
   });
@@ -547,8 +552,7 @@ describe('CaseView ', () => {
     });
   });
 
-  // TO DO fix when the useEffects in edit_connector are cleaned up
-  it.skip('should update connector', async () => {
+  it('should update connector', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -719,6 +723,32 @@ describe('CaseView ', () => {
     });
   });
 
+  it('should show the correct connector name on the push button', async () => {
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetCaseUserActionsMock.mockImplementation(() => ({
+      ...defaultUseGetCaseUserActions,
+      hasDataToPush: true,
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper
+          .find('[data-test-subj="has-data-to-push-button"]')
+          .first()
+          .text()
+          .includes('My Connector 2')
+      ).toBe(true);
+    });
+  });
+
   describe('Callouts', () => {
     it('it shows the danger callout when a connector has been deleted', async () => {
       useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));
@@ -749,6 +779,76 @@ describe('CaseView ', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeFalsy();
+      });
+    });
+  });
+
+  describe('Collections', () => {
+    it('it does not allow the user to update the status', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent
+              {...caseProps}
+              caseData={{ ...caseProps.caseData, type: CaseType.collection }}
+            />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="case-action-bar-wrapper"]').exists()).toBe(true);
+        expect(wrapper.find('button[data-test-subj="case-view-status"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test-subj="user-actions"]').exists()).toBe(true);
+        expect(
+          wrapper.find('button[data-test-subj="case-view-status-action-button"]').exists()
+        ).toBe(false);
+      });
+    });
+
+    it('it shows the push button when has data to push', async () => {
+      useGetCaseUserActionsMock.mockImplementation(() => ({
+        ...defaultUseGetCaseUserActions,
+        hasDataToPush: true,
+      }));
+
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent
+              {...caseProps}
+              caseData={{ ...caseProps.caseData, type: CaseType.collection }}
+            />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="has-data-to-push-button"]').exists()).toBe(true);
+      });
+    });
+
+    it('it does not show the horizontal rule when does NOT has data to push', async () => {
+      useGetCaseUserActionsMock.mockImplementation(() => ({
+        ...defaultUseGetCaseUserActions,
+        hasDataToPush: false,
+      }));
+
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent
+              {...caseProps}
+              caseData={{ ...caseProps.caseData, type: CaseType.collection }}
+            />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="case-view-bottom-actions-horizontal-rule"]').exists()
+        ).toBe(false);
       });
     });
   });

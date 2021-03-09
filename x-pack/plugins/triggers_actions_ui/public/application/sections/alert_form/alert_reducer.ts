@@ -8,7 +8,7 @@
 import { SavedObjectAttribute } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
-import { AlertActionParam, IntervalSchedule } from '../../../../../alerts/common';
+import { AlertActionParam, IntervalSchedule } from '../../../../../alerting/common';
 import { Alert, AlertAction } from '../../../types';
 
 export type InitialAlert = Partial<Alert> &

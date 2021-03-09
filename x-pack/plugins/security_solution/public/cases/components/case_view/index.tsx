@@ -17,7 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes } from '../../../../../case/common/api';
+import { CaseStatuses, CaseAttributes, CaseType } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -213,9 +213,9 @@ export const CaseComponent = React.memo<CaseProps>(
     const handleUpdateCase = useCallback(
       (newCase: Case) => {
         updateCase(newCase);
-        fetchCaseUserActions(newCase.id);
+        fetchCaseUserActions(caseId, newCase.connector.id, subCaseId);
       },
-      [updateCase, fetchCaseUserActions]
+      [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
@@ -236,7 +236,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const { pushButton, pushCallouts } = usePushToService({
       connector: {
         ...caseData.connector,
-        name: isEmpty(caseData.connector.name) ? connectorName : caseData.connector.name,
+        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
       },
       caseServices,
       caseId: caseData.id,
@@ -283,9 +283,9 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const handleRefresh = useCallback(() => {
-      fetchCaseUserActions(caseData.id);
+      fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
       fetchCase();
-    }, [caseData.id, fetchCase, fetchCaseUserActions]);
+    }, [caseData.connector.id, caseId, fetchCase, fetchCaseUserActions, subCaseId]);
 
     const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
@@ -345,6 +345,7 @@ export const CaseComponent = React.memo<CaseProps>(
         );
       }
     }, [dispatch]);
+
     return (
       <>
         <HeaderWrapper>
@@ -387,7 +388,12 @@ export const CaseComponent = React.memo<CaseProps>(
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
-                      fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
+                      fetchUserActions={fetchCaseUserActions.bind(
+                        null,
+                        caseId,
+                        caseData.connector.id,
+                        subCaseId
+                      )}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
                       onShowAlertDetails={showAlert}
@@ -395,22 +401,31 @@ export const CaseComponent = React.memo<CaseProps>(
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
                     />
-                    <MyEuiHorizontalRule margin="s" />
-                    <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <StatusActionButton
-                          status={caseData.status}
-                          onStatusChanged={changeStatus}
-                          disabled={!userCanCrud}
-                          isLoading={isLoading && updateKey === 'status'}
+                    {(caseData.type !== CaseType.collection || hasDataToPush) && (
+                      <>
+                        <MyEuiHorizontalRule
+                          margin="s"
+                          data-test-subj="case-view-bottom-actions-horizontal-rule"
                         />
-                      </EuiFlexItem>
-                      {hasDataToPush && (
-                        <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                          {pushButton}
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
+                        <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+                          {caseData.type !== CaseType.collection && (
+                            <EuiFlexItem grow={false}>
+                              <StatusActionButton
+                                status={caseData.status}
+                                onStatusChanged={changeStatus}
+                                disabled={!userCanCrud}
+                                isLoading={isLoading && updateKey === 'status'}
+                              />
+                            </EuiFlexItem>
+                          )}
+                          {hasDataToPush && (
+                            <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
+                              {pushButton}
+                            </EuiFlexItem>
+                          )}
+                        </EuiFlexGroup>
+                      </>
+                    )}
                   </>
                 )}
               </EuiFlexItem>
@@ -439,6 +454,9 @@ export const CaseComponent = React.memo<CaseProps>(
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
                   disabled={!userCanCrud}
+                  hideConnectorServiceNowSir={
+                    subCaseId != null || caseData.type === CaseType.collection
+                  }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}
@@ -465,6 +483,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   if (isError) {
     return null;
   }
+
   if (isLoading) {
     return (
       <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
@@ -476,14 +495,16 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   }
 
   return (
-    <CaseComponent
-      caseId={caseId}
-      subCaseId={subCaseId}
-      fetchCase={fetchCase}
-      caseData={data}
-      updateCase={updateCase}
-      userCanCrud={userCanCrud}
-    />
+    data && (
+      <CaseComponent
+        caseId={caseId}
+        subCaseId={subCaseId}
+        fetchCase={fetchCase}
+        caseData={data}
+        updateCase={updateCase}
+        userCanCrud={userCanCrud}
+      />
+    )
   );
 });
 

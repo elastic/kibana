@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { UIExtensionsStorage } from '../types';
+import type { UIExtensionsStorage } from '../types';
 import { createExtensionRegistrationCallback } from '../services/ui_extensions';
-import { MockedFleetStart } from './types';
+
+import type { MockedFleetStart } from './types';
 
 export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): MockedFleetStart => {
   return {

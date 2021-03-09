@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 import { errors as legacyESErrors } from 'elasticsearch';
+
 import * as errors from './errors';
 import { securityMock } from './mocks';
 
