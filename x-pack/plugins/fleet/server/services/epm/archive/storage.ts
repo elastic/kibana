@@ -19,7 +19,13 @@ import {
   PackageAssetReference,
   RegistryDataStream,
 } from '../../../../common';
-import { ArchiveEntry, getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
+import {
+  ArchiveEntry,
+  getArchiveEntry,
+  setArchiveEntry,
+  setArchiveFilelist,
+  setPackageInfo,
+} from './index';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 import { pkgToPkgKey } from '../registry';
 
