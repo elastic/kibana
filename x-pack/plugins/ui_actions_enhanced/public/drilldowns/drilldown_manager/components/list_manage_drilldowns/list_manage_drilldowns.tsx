@@ -41,22 +41,20 @@ interface Trigger {
 
 export interface ListManageDrilldownsProps {
   items: DrilldownListItem[];
-  onCreate?: () => void;
-  onEdit?: (id: string) => void;
-  onDelete?: (ids: string[]) => void;
   showTriggerColumn?: boolean;
+  onCreate?: () => void;
+  onDelete?: (ids: string[]) => void;
+  onEdit?: (id: string) => void;
 }
-
-const noop = () => {};
 
 export const TEST_SUBJ_DRILLDOWN_ITEM = 'listManageDrilldownsItem';
 
 export function ListManageDrilldowns({
   items: drilldowns,
-  onCreate,
-  onEdit = noop,
-  onDelete = noop,
   showTriggerColumn = true,
+  onCreate,
+  onDelete,
+  onEdit,
 }: ListManageDrilldownsProps) {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 
@@ -116,11 +114,12 @@ export function ListManageDrilldowns({
     {
       align: 'right',
       width: '64px',
-      render: (drilldown: DrilldownListItem) => (
-        <EuiButtonEmpty size="xs" onClick={() => onEdit(drilldown.id)}>
-          {txtEditDrilldown}
-        </EuiButtonEmpty>
-      ),
+      render: (drilldown: DrilldownListItem) =>
+        !!onEdit ? (
+          <EuiButtonEmpty size="xs" onClick={() => onEdit(drilldown.id)}>
+            {txtEditDrilldown}
+          </EuiButtonEmpty>
+        ) : null,
     },
   ].filter(Boolean) as Array<EuiBasicTableColumn<DrilldownListItem>>;
 
@@ -149,7 +148,7 @@ export function ListManageDrilldowns({
           {txtCreateDrilldown}
         </EuiButton>
       )}
-      {selectedDrilldowns.length > 0 && (
+      {!!onDelete && selectedDrilldowns.length > 0 && (
         <EuiButton
           color="danger"
           fill
