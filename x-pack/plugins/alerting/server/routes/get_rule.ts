@@ -32,9 +32,9 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   mutedInstanceIds,
   executionStatus: { lastExecutionDate, ...executionStatus },
   actions,
-  ...res
+  ...rest
 }) => ({
-  ...res,
+  ...rest,
   rule_type_id: alertTypeId,
   created_by: createdBy,
   updated_by: updatedBy,

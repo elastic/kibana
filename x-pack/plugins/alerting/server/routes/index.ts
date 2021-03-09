@@ -17,6 +17,7 @@ import { deleteRuleRoute } from './delete_rule';
 import { aggregateRulesRoute } from './aggregate_rules';
 import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
+import { findRulesRoute } from './find_rules';
 
 export function defineRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
@@ -31,4 +32,5 @@ export function defineRoutes(
   aggregateRulesRoute(router, licenseState);
   disableRuleRoute(router, licenseState);
   enableRuleRoute(router, licenseState);
+  findRulesRoute(router, licenseState);
 }
