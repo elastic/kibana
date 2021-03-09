@@ -22,6 +22,7 @@ import type {
 import { KibanaAssetType } from '../../../types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
+import { appContextService } from '../../';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
@@ -181,10 +182,11 @@ export async function getPackageFromSource(options: {
   installedPkg?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<PackageResponse> {
+  const logger = appContextService.getLogger();
   const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
   let res: GetPackageResponse;
-  // if the package is installed
 
+  // If the package is installed
   if (installedPkg && installedPkg.version === pkgVersion) {
     const { install_source: pkgInstallSource } = installedPkg;
     // check cache
@@ -193,6 +195,10 @@ export async function getPackageFromSource(options: {
       version: pkgVersion,
     });
 
+    if (res) {
+      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from cache`);
+    }
+
     if (!res && installedPkg.package_assets) {
       res = await getEsPackage(
         pkgName,
@@ -200,11 +206,13 @@ export async function getPackageFromSource(options: {
         installedPkg.package_assets,
         savedObjectsClient
       );
+      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
     }
     // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {
       try {
         res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from registry`);
         // TODO: add to cache and storage here?
       } catch (error) {
         // treating this is a 404 as no status code returned
@@ -214,6 +222,7 @@ export async function getPackageFromSource(options: {
   } else {
     // else package is not installed or installed and missing from cache and storage and installed from registry
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+    logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
   }
   if (!res) {
     throw new IngestManagerError(`package info for ${pkgName}-${pkgVersion} does not exist`);
