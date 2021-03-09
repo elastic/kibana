@@ -23,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     before(async () => {
       const { body: createdAction } = await supertest
-        .post(`/api/actions/action`)
+        .post(`/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send(getTestActionData())
         .expect(200);

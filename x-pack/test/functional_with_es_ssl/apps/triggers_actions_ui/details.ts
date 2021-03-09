@@ -27,7 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createActionManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdAction } = await supertest
-      .post(`/api/actions/action`)
+      .post(`/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send(getTestActionData(overwrites))
       .expect(200);
