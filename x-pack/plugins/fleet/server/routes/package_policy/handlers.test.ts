@@ -27,7 +27,7 @@ jest.mock('../../services/package_policy', (): {
       compilePackagePolicyInputs: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
       buildPackagePolicyFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
-      create: jest.fn((soClient, esClient, callCluster, newData) =>
+      create: jest.fn((soClient, esClient, newData) =>
         Promise.resolve({
           ...newData,
           inputs: newData.inputs.map((input) => ({
@@ -204,7 +204,8 @@ describe('When calling package policy', () => {
         );
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(packagePolicyServiceMock.create.mock.calls[0][3]).toEqual({
+
+        expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
           policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,

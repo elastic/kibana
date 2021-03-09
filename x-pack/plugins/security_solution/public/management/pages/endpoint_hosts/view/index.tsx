@@ -618,12 +618,12 @@ export const EndpointList = () => {
                     <LinkToApp
                       appId="fleet"
                       appPath={`#${pagePathGetters.fleet_agent_list({
-                        kuery: 'fleet-agents.packages : "endpoint"',
+                        kuery: 'packages : "endpoint"',
                       })}`}
                       href={`${services?.application?.getUrlForApp(
                         'fleet'
                       )}#${pagePathGetters.fleet_agent_list({
-                        kuery: 'fleet-agents.packages : "endpoint"',
+                        kuery: 'packages : "endpoint"',
                       })}`}
                     >
                       <FormattedMessage

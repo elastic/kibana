@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-// @ts-expect-error
 export { JsonUploadAndParse } from '../../components/json_upload_and_parse';
 export { importerFactory } from '../../importer';
