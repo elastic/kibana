@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious WerFault Child Process",
   "query": "event.category:process and event.type:(start or process_started) and process.parent.name:WerFault.exe and not process.name:(cofire.exe or psr.exe or VsJITDebugger.exe or TTTracer.exe or rundll32.exe)",
   "references": [
