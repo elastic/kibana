@@ -194,9 +194,12 @@ export const Page: FC = () => {
     searchString: Query['query'];
     queryLanguage: SearchQueryLanguage;
   }) => {
-    if (currentSavedSearch !== null && searchParams.searchString === '') {
+    // When the user loads saved search and then clear or modify the query
+    // we should remove the saved search and replace it with the index pattern id
+    if (currentSavedSearch !== null) {
       setCurrentSavedSearch(null);
     }
+
     setDataVisualizerListState({
       ...dataVisualizerListState,
       searchQuery: searchParams.searchQuery,
