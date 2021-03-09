@@ -18,7 +18,7 @@ export const createRoute = async (
   const httpService = httpServiceMock.createSetupContract();
   const router = httpService.createRouter();
 
-  const log = loggingSystemMock.create().get('case');
+  const log = loggingSystemMock.create().get('cases');
   const auth = badAuth ? authenticationMock.createInvalid() : authenticationMock.create();
   const caseService = new CaseService(log, auth);
   const caseConfigureServicePlugin = new CaseConfigureService(log);

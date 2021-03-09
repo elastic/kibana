@@ -426,7 +426,7 @@ describe('Push case', () => {
 
     const betterContext = ({
       ...context,
-      case: null,
+      cases: null,
     } as unknown) as CasesRequestHandlerContext;
 
     const res = await routeHandler(betterContext, request, kibanaResponseFactory);
