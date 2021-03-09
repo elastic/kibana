@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Image Load (taskschd.dll) from MS Office",
   "query": "library where process.name : (\"WINWORD.EXE\", \"EXCEL.EXE\", \"POWERPNT.EXE\", \"MSPUB.EXE\", \"MSACCESS.EXE\") and\n  event.action : \"load\" and\n  event.category : \"library\" and\n  dll.name : \"taskschd.dll\"\n",
   "references": [
@@ -25,7 +25,7 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Execution"
+    "Persistence"
   ],
   "threat": [
     {

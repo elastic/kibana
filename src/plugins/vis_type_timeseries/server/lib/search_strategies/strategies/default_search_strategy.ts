@@ -6,23 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { AbstractSearchStrategy, ReqFacade } from './abstract_search_strategy';
+import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
-import { VisPayload } from '../../../../common/types';
+import { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRequest } from '../../../types';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
-  checkForViability(req: ReqFacade<VisPayload>) {
+  checkForViability(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesRequest
+  ) {
     return Promise.resolve({
       isViable: true,
       capabilities: new DefaultSearchCapabilities(req),
     });
   }
 
-  async getFieldsForWildcard<TPayload = unknown>(
-    req: ReqFacade<TPayload>,
+  async getFieldsForWildcard(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesRequest,
     indexPattern: string,
     capabilities?: unknown
   ) {
-    return super.getFieldsForWildcard(req, indexPattern, capabilities);
+    return super.getFieldsForWildcard(requestContext, req, indexPattern, capabilities);
   }
 }
