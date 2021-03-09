@@ -19,7 +19,9 @@ describe('find_list_item', () => {
   test('should find a simple single list item', async () => {
     const options = getFindListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.count.mockReturnValue(elasticsearchClientMock.createSuccessTransportRequestPromise(1));
+    esClient.count.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ count: 1 })
+    );
     esClient.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         _scroll_id: '123',
