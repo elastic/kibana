@@ -45,8 +45,12 @@ export default function (providerContext: FtrProviderContext) {
     path.dirname(__filename),
     '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
   );
+  const testPkgArchiveRobustValidation = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/system-0.10.7.zip'
+  );
 
-  const testPkgKey = 'apache-0.1.4';
+  const testPkgKeys = ['apache-0.1.4', 'system-0.10.7'];
   const server = dockerServers.get('registry');
 
   const deletePackage = async (pkgkey: string) => {
@@ -57,8 +61,8 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     afterEach(async () => {
       if (server) {
-        // remove the package just in case it being installed will affect other tests
-        await deletePackage(testPkgKey);
+        // remove the packages just in case it being installed will affect other tests
+        await Promise.all(testPkgKeys.map((key) => deletePackage(key)));
       }
     });
 
@@ -173,6 +177,22 @@ export default function (providerContext: FtrProviderContext) {
       expect(res.error.text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Name thisIsATypo and version 0.1.4 do not match top-level directory apache-0.1.4"}'
       );
+    });
+
+    it('should install a robust package and return the correct package information after validation', async function () {
+      const buf = fs.readFileSync(testPkgArchiveRobustValidation);
+      await supertest
+        .post(`/api/fleet/epm/packages`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(200);
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/system-0.10.7`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expectSnapshot(res.body).toMatch();
     });
   });
 }
