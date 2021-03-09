@@ -12,5 +12,5 @@ Along with the execution time of each execution we ship the following informatio
 * The `branch` property from the package.json file
 * https://nodejs.org/docs/latest/api/os.html#os_os_platform[Operating system platform]
 * https://nodejs.org/docs/latest/api/os.html#os_os_release[Operating system release]
-* https://nodejs.org/docs/latest/api/os.html#os_os_cpus[Number, model, and speed of the CPU]
+* https://nodejs.org/docs/latest/api/os.html#os_os_cpus[Count, model, and speed of the CPUs]
 * https://nodejs.org/docs/latest/api/os.html#os_os_arch[CPU Architecture]
