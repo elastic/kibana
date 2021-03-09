@@ -23229,7 +23229,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutTitle": "索引已关闭",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.openAndCloseDocumentation": "文档",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail": "映射类型在 8.x 中不再受支持。此索引映射不使用默认类型名称 {defaultType}，并将在重新索引时更新。确保没有应用程序代码或脚本依赖其他类型。",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle": "映射类型将更改为 {defaultType}",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail": "备份您的索引，然后通过接受每个重大更改来继续重新索引。",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle": "此索引需要无法撤消的破坏性更改",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel": "文档",

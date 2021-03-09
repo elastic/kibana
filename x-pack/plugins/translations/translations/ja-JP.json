@@ -22871,7 +22871,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.indexClosedCallout.calloutTitle": "インデックスが閉じました",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.openAndCloseDocumentation": "ドキュメンテーション",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail": "マッピングタイプは8.xではサポートされていません。このインデックスマッピングはデフォルトのタイプ名、{defaultType}を使用しておらず、再インデックス時に更新されます。アプリケーションコードまたはスクリプトが異なるタイプに依存していないことを確認してください。",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle": "マッピングタイプが{defaultType}に変更されます",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail": "インデックスをバックアップして、互換性を破るそれぞれの変更に同意することで再インデックスしてください。",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle": "このインデックスには元に戻すことのできない破壊的な変更が含まれています",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel": "ドキュメント",

@@ -160,6 +160,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
       const resp = await this.props.http.get('/api/upgrade_assistant/status');
       this.setState({
         loadingState: LoadingState.Success,
+        // resp.data is specifically to handle the CITs which uses axios to mock HTTP requests
         checkupData: resp.data ? resp.data : resp,
       });
     } catch (e) {
