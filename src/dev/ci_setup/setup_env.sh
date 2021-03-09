@@ -22,7 +22,7 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 ### can handle color fine, so this forces https://github.com/chalk/supports-color
 ### to enable color support in Chalk and other related modules.
 ###
-export FORCE_COLOR=true
+export FORCE_COLOR=1
 
 ### APM tracking
 ###
