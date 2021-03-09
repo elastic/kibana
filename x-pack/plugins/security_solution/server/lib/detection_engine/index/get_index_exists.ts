@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import { CallWithRequest } from '../types';
 
 export const getIndexExists = async (
   esClient: ElasticsearchClient,
@@ -20,7 +21,7 @@ export const getIndexExists = async (
     });
     return response._shards.total > 0;
   } catch (err) {
-    if (err.status === 404) {
+    if (err.body.status === 404) {
       return false;
     } else {
       throw err;
