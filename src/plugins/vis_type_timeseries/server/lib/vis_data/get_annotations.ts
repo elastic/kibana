@@ -6,11 +6,19 @@
  * Side Public License, v 1.
  */
 
+import {
+  AnnotationItemsSchema,
+  PanelSchema,
+  SeriesItemsSchema,
+} from 'src/plugins/vis_type_timeseries/common/types';
+// @ts-expect-error
 import { handleAnnotationResponse } from './response_processors/annotations';
-import { getAnnotationRequestParams } from './annotations/get_request_params';
+import { AnnotationServices, getAnnotationRequestParams } from './annotations/get_request_params';
+// @ts-expect-error
 import { getLastSeriesTimestamp } from './helpers/timestamp';
+import { VisTypeTimeseriesVisDataRequest } from '../../types';
 
-function validAnnotation(annotation) {
+function validAnnotation(annotation: AnnotationItemsSchema) {
   return (
     annotation.index_pattern &&
     annotation.time_field &&
@@ -21,37 +29,37 @@ function validAnnotation(annotation) {
   );
 }
 
-export async function getAnnotations({
-  req,
-  esQueryConfig,
-  searchStrategy,
-  panel,
-  capabilities,
-  series,
-}) {
-  const annotations = panel.annotations.filter(validAnnotation);
+interface GetAnnotationsParams {
+  req: VisTypeTimeseriesVisDataRequest;
+  panel: PanelSchema;
+  series: SeriesItemsSchema[];
+  services: AnnotationServices;
+}
+
+export async function getAnnotations({ req, panel, series, services }: GetAnnotationsParams) {
+  const annotations = panel.annotations!.filter(validAnnotation);
   const lastSeriesTimestamp = getLastSeriesTimestamp(series);
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
 
   const bodiesPromises = annotations.map((annotation) =>
-    getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities)
+    getAnnotationRequestParams(req, panel, annotation, services)
   );
 
   const searches = (await Promise.all(bodiesPromises)).reduce(
-    (acc, items) => acc.concat(items),
+    (acc, items) => acc.concat(items as any),
     []
   );
 
   if (!searches.length) return { responses: [] };
 
   try {
-    const data = await searchStrategy.search(req, searches);
+    const data = await services.searchStrategy.search(services.requestContext, req, searches);
 
     return annotations.reduce((acc, annotation, index) => {
       acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);
 
       return acc;
-    }, {});
+    }, {} as { [key: string]: any });
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;

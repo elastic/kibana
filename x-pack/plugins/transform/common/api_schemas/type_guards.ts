@@ -8,6 +8,7 @@
 import type { SearchResponse7 } from '../../../ml/common';
 
 import type { EsIndex } from '../types/es_index';
+import { isPopulatedObject } from '../utils/object_utils';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
 // the code of '@kbn/config-schema' but just its types, otherwise the client side code will
@@ -25,13 +26,9 @@ import type {
 import type { GetTransformsStatsResponseSchema } from './transforms_stats';
 import type { PostTransformsUpdateResponseSchema } from './update_transforms';
 
-const isBasicRecord = (arg: unknown): arg is Record<string, unknown> => {
-  return typeof arg === 'object' && arg !== null;
-};
-
-const isGenericResponseSchema = <T>(arg: unknown): arg is T => {
+const isGenericResponseSchema = <T>(arg: any): arg is T => {
   return (
-    isBasicRecord(arg) &&
+    isPopulatedObject(arg) &&
     {}.hasOwnProperty.call(arg, 'count') &&
     {}.hasOwnProperty.call(arg, 'transforms') &&
     Array.isArray(arg.transforms)
@@ -52,7 +49,7 @@ export const isDeleteTransformsResponseSchema = (
   arg: unknown
 ): arg is DeleteTransformsResponseSchema => {
   return (
-    isBasicRecord(arg) &&
+    isPopulatedObject(arg) &&
     Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'transformDeleted')))
   );
 };
@@ -62,7 +59,7 @@ export const isEsIndices = (arg: unknown): arg is EsIndex[] => {
 };
 
 export const isEsSearchResponse = (arg: unknown): arg is SearchResponse7 => {
-  return isBasicRecord(arg) && {}.hasOwnProperty.call(arg, 'hits');
+  return isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'hits');
 };
 
 export const isFieldHistogramsResponseSchema = (
@@ -81,7 +78,7 @@ export const isPostTransformsPreviewResponseSchema = (
   arg: unknown
 ): arg is PostTransformsPreviewResponseSchema => {
   return (
-    isBasicRecord(arg) &&
+    isPopulatedObject(arg) &&
     {}.hasOwnProperty.call(arg, 'generated_dest_index') &&
     {}.hasOwnProperty.call(arg, 'preview') &&
     typeof arg.generated_dest_index !== undefined &&
@@ -92,12 +89,12 @@ export const isPostTransformsPreviewResponseSchema = (
 export const isPostTransformsUpdateResponseSchema = (
   arg: unknown
 ): arg is PostTransformsUpdateResponseSchema => {
-  return isBasicRecord(arg) && {}.hasOwnProperty.call(arg, 'id') && typeof arg.id === 'string';
+  return isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'id') && typeof arg.id === 'string';
 };
 
 export const isPutTransformsResponseSchema = (arg: unknown): arg is PutTransformsResponseSchema => {
   return (
-    isBasicRecord(arg) &&
+    isPopulatedObject(arg) &&
     {}.hasOwnProperty.call(arg, 'transformsCreated') &&
     {}.hasOwnProperty.call(arg, 'errors') &&
     Array.isArray(arg.transformsCreated) &&
@@ -106,7 +103,7 @@ export const isPutTransformsResponseSchema = (arg: unknown): arg is PutTransform
 };
 
 const isGenericSuccessResponseSchema = (arg: unknown) =>
-  isBasicRecord(arg) && Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'success')));
+  isPopulatedObject(arg) && Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'success')));
 
 export const isStartTransformsResponseSchema = (
   arg: unknown

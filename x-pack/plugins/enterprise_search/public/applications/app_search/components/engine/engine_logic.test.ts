@@ -9,6 +9,8 @@ import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { EngineTypes } from './types';
+
 import { EngineLogic } from './';
 
 describe('EngineLogic', () => {
@@ -17,7 +19,7 @@ describe('EngineLogic', () => {
 
   const mockEngineData = {
     name: 'some-engine',
-    type: 'default',
+    type: EngineTypes.default,
     created_at: 'some date timestamp',
     language: null,
     document_count: 1,
@@ -213,7 +215,7 @@ describe('EngineLogic', () => {
 
     describe('isMetaEngine', () => {
       it('should be set based on engine.type', () => {
-        const mockMetaEngine = { ...mockEngineData, type: 'meta' };
+        const mockMetaEngine = { ...mockEngineData, type: EngineTypes.meta };
         mount({ engine: mockMetaEngine });
 
         expect(EngineLogic.values).toEqual({
