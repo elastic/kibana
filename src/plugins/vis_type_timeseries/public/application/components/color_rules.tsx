@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
-import { AddDeleteButtons } from './add_delete_buttons';
-import { collectionActions } from './lib/collection_actions';
-import { ColorPicker } from './color_picker';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -20,11 +16,38 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-class ColorRulesUI extends Component {
-  constructor(props) {
+import { AddDeleteButtons } from './add_delete_buttons';
+// @ts-expect-error not typed yet
+import { collectionActions } from './lib/collection_actions';
+import { ColorPicker, ColorPickerProps } from './color_picker';
+import { TimeseriesVisParams } from '../../types';
+
+interface ColorRulesProps {
+  name: keyof TimeseriesVisParams;
+  model: TimeseriesVisParams;
+  onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
+  primaryName?: string;
+  primaryVarName?: string;
+  secondaryName?: string;
+  secondaryVarName?: string;
+  hideSecondary?: boolean;
+}
+
+const defaultSecondaryName = i18n.translate(
+  'visTypeTimeseries.colorRules.defaultSecondaryNameLabel',
+  {
+    defaultMessage: 'text',
+  }
+);
+const defaultPrimaryName = i18n.translate('visTypeTimeseries.colorRules.defaultPrimaryNameLabel', {
+  defaultMessage: 'background',
+});
+
+export class ColorRules extends Component<ColorRulesProps> {
+  constructor(props: ColorRulesProps) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
@@ -45,38 +68,33 @@ class ColorRulesUI extends Component {
     const model = { ...defaults, ...row };
     const handleAdd = () => collectionActions.handleAdd(this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const { intl } = this.props;
     const operatorOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.colorRules.greaterThanLabel',
+        label: i18n.translate('visTypeTimeseries.colorRules.greaterThanLabel', {
           defaultMessage: '> greater than',
         }),
         value: 'gt',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.colorRules.greaterThanOrEqualLabel',
+        label: i18n.translate('visTypeTimeseries.colorRules.greaterThanOrEqualLabel', {
           defaultMessage: '>= greater than or equal',
         }),
         value: 'gte',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.colorRules.lessThanLabel',
+        label: i18n.translate('visTypeTimeseries.colorRules.lessThanLabel', {
           defaultMessage: '< less than',
         }),
         value: 'lt',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.colorRules.lessThanOrEqualLabel',
+        label: i18n.translate('visTypeTimeseries.colorRules.lessThanOrEqualLabel', {
           defaultMessage: '<= less than or equal',
         }),
         value: 'lte',
       },
     ];
-    const handleColorChange = (part) => {
+    const handleColorChange: ColorPickerProps['onChange'] = (part) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       handleChange(_.assign({}, model, part));
     };
@@ -96,7 +114,7 @@ class ColorRulesUI extends Component {
               <FormattedMessage
                 id="visTypeTimeseries.colorRules.setSecondaryColorLabel"
                 defaultMessage="and {secondaryName} to"
-                values={{ secondaryName: this.props.secondaryName }}
+                values={{ secondaryName: this.props.secondaryName ?? defaultSecondaryName }}
                 description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
                 metric is {greaterOrLessThan} {value}."
               />
@@ -105,8 +123,8 @@ class ColorRulesUI extends Component {
           <EuiFlexItem grow={false}>
             <ColorPicker
               onChange={handleColorChange}
-              name={this.props.secondaryVarName}
-              value={model[this.props.secondaryVarName]}
+              name={this.props.secondaryVarName ?? 'color'}
+              value={model[this.props.secondaryVarName ?? 'color']}
             />
           </EuiFlexItem>
         </Fragment>
@@ -126,7 +144,7 @@ class ColorRulesUI extends Component {
             <FormattedMessage
               id="visTypeTimeseries.colorRules.setPrimaryColorLabel"
               defaultMessage="Set {primaryName} to"
-              values={{ primaryName: this.props.primaryName }}
+              values={{ primaryName: this.props.primaryName ?? defaultPrimaryName }}
               description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
               metric is {greaterOrLessThan} {value}."
             />
@@ -135,8 +153,8 @@ class ColorRulesUI extends Component {
         <EuiFlexItem grow={false}>
           <ColorPicker
             onChange={handleColorChange}
-            name={this.props.primaryVarName}
-            value={model[this.props.primaryVarName]}
+            name={this.props.primaryVarName ?? 'background_color'}
+            value={model[this.props.primaryVarName ?? 'background_color']}
           />
         </EuiFlexItem>
 
@@ -166,8 +184,7 @@ class ColorRulesUI extends Component {
 
         <EuiFlexItem>
           <EuiFieldNumber
-            aria-label={intl.formatMessage({
-              id: 'visTypeTimeseries.colorRules.valueAriaLabel',
+            aria-label={i18n.translate('visTypeTimeseries.colorRules.valueAriaLabel', {
               defaultMessage: 'Value',
             })}
             value={model.value}
@@ -192,33 +209,7 @@ class ColorRulesUI extends Component {
   render() {
     const { model, name } = this.props;
     if (!model[name]) return <div />;
-    const rows = model[name].map(this.renderRow);
+    const rows = (model[name] as any[]).map(this.renderRow);
     return <div>{rows}</div>;
   }
 }
-
-ColorRulesUI.defaultProps = {
-  name: 'color_rules',
-  primaryName: i18n.translate('visTypeTimeseries.colorRules.defaultPrimaryNameLabel', {
-    defaultMessage: 'background',
-  }),
-  primaryVarName: 'background_color',
-  secondaryName: i18n.translate('visTypeTimeseries.colorRules.defaultSecondaryNameLabel', {
-    defaultMessage: 'text',
-  }),
-  secondaryVarName: 'color',
-  hideSecondary: false,
-};
-
-ColorRulesUI.propTypes = {
-  name: PropTypes.string,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-  primaryName: PropTypes.string,
-  primaryVarName: PropTypes.string,
-  secondaryName: PropTypes.string,
-  secondaryVarName: PropTypes.string,
-  hideSecondary: PropTypes.bool,
-};
-
-export const ColorRules = injectI18n(ColorRulesUI);

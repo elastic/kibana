@@ -26,7 +26,7 @@ interface ColorProps {
 
 export interface ColorPickerProps {
   name: string;
-  value: string | null;
+  value?: string | null;
   disableTrash?: boolean;
   onChange: (props: ColorProps) => void;
 }

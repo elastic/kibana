@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+// @ts-expect-error not typed yet
 import { collectionActions } from './lib/collection_actions';
 import { ColorRules } from './color_rules';
 import { keys } from '@elastic/eui';
@@ -14,22 +15,20 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
 
 describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js', () => {
-  let defaultProps;
-  beforeAll(() => {
-    defaultProps = {
-      name: 'gauge_color_rules',
-      model: {
-        gauge_color_rules: [
-          {
-            gauge: null,
-            value: 0,
-            id: 'unique value',
-          },
-        ],
-      },
-      onChange: jest.fn(),
-    };
-  });
+  const defaultProps = {
+    name: 'gauge_color_rules',
+    model: {
+      gauge_color_rules: [
+        {
+          gauge: null,
+          value: 0,
+          id: 'unique value',
+        },
+      ],
+    },
+    onChange: jest.fn(),
+  };
+
   describe('ColorRules', () => {
     it('should render empty <div/> node', () => {
       const emptyProps = {
