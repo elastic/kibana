@@ -11,30 +11,26 @@ import {
   FormattedOverrides,
   InputOverrides,
   FindFileStructureResponse,
-} from '../../../common/types/file_datavisualizer';
+} from '../common';
 
-export type InputData = any[];
+export async function analyzeFile(
+  client: IScopedClusterClient,
+  data: InputData,
+  overrides: InputOverrides
+): Promise<AnalysisResult> {
+  overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
+  const {
+    body,
+  } = await client.asInternalUser.textStructure.findStructure<FindFileStructureResponse>({
+    body: data,
+    ...overrides,
+  });
 
-export function fileDataVisualizerProvider(client: IScopedClusterClient) {
-  async function analyzeFile(data: InputData, overrides: InputOverrides): Promise<AnalysisResult> {
-    overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
-    const {
-      body,
-    } = await client.asInternalUser.textStructure.findStructure<FindFileStructureResponse>({
-      body: data,
-      ...overrides,
-    });
-
-    const { hasOverrides, reducedOverrides } = formatOverrides(overrides);
-
-    return {
-      ...(hasOverrides && { overrides: reducedOverrides }),
-      results: body,
-    };
-  }
+  const { hasOverrides, reducedOverrides } = formatOverrides(overrides);
 
   return {
-    analyzeFile,
+    ...(hasOverrides && { overrides: reducedOverrides }),
+    results: body,
   };
 }
 

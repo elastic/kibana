@@ -7,7 +7,7 @@
 
 import React, { useMemo, FC } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import type { FindFileStructureResponse } from '../../../../../../../file_upload/common';
 import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../../../stats_table';
 import type { FileBasedFieldVisConfig } from '../../../stats_table/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';

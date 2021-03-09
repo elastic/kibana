@@ -20,7 +20,7 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
 } from '../../../../../../../../../src/plugins/discover/public';
-import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../../../../../file_upload/common';
 
 const RECHECK_DELAY_MS = 3000;
 

@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { createFilebeatConfig } from './filebeat_config';
 import { useMlKibana } from '../../../../contexts/kibana';
-import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../../../../../file_upload/common';
 
 export enum EDITOR_MODE {
   HIDDEN,

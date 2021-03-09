@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { IRouter, IScopedClusterClient } from 'kibana/server';
 import { MAX_FILE_SIZE_BYTES, IngestPipelineWrapper, Mappings, Settings } from '../common';
 import { wrapError } from './error_wrapper';
+import { analyzeFile } from './analyze_file';
 import { InputData, importDataProvider } from './import_data';
 
 import { updateTelemetry } from './telemetry';
-import { importFileBodySchema, importFileQuerySchema } from './schemas';
+import { analyzeFileQuerySchema, importFileBodySchema, importFileQuerySchema } from './schemas';
 
 function importData(
   client: IScopedClusterClient,
@@ -30,6 +32,44 @@ function importData(
  * Routes for the file upload.
  */
 export function fileUploadRoutes(router: IRouter) {
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /api/file_upload/analyze_file Analyze file data
+   * @apiName AnalyzeFile
+   * @apiDescription Performs analysis of the file data.
+   *
+   * @apiSchema (query) analyzeFileQuerySchema
+   */
+  router.post(
+    {
+      path: '/api/file_upload/analyze_file',
+      validate: {
+        body: schema.any(),
+        query: analyzeFileQuerySchema,
+      },
+      options: {
+        body: {
+          accepts: ['text/*', 'application/json'],
+          maxBytes: MAX_FILE_SIZE_BYTES,
+        },
+        tags: ['access:fileUpload:import'],
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const result = await analyzeFile(
+          context.core.elasticsearch.client,
+          request.body,
+          request.query
+        );
+        return response.ok({ body: result });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    }
+  );
+
   /**
    * @apiGroup FileDataVisualizer
    *

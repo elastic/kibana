@@ -34,7 +34,6 @@ import { dataFrameAnalyticsRoutes } from './routes/data_frame_analytics';
 import { dataRecognizer } from './routes/modules';
 import { dataVisualizerRoutes } from './routes/data_visualizer';
 import { fieldsService } from './routes/fields_service';
-import { fileDataVisualizerRoutes } from './routes/file_data_visualizer';
 import { filtersRoutes } from './routes/filters';
 import { indicesRoutes } from './routes/indices';
 import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
@@ -174,7 +173,6 @@ export class MlServerPlugin
     dataRecognizer(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    fileDataVisualizerRoutes(routeInit);
     filtersRoutes(routeInit);
     indicesRoutes(routeInit);
     jobAuditMessagesRoutes(routeInit);

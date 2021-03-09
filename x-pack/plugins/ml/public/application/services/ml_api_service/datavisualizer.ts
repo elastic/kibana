@@ -7,13 +7,11 @@
 
 import { http } from '../http_service';
 
-import { basePath } from './index';
-
 export const fileDatavisualizer = {
   analyzeFile(file: string, params: Record<string, string> = {}) {
     const body = JSON.stringify(file);
     return http<any>({
-      path: `${basePath()}/file_data_visualizer/analyze_file`,
+      path: '/api/file_upload/analyze_file',
       method: 'POST',
       body,
       query: params,
