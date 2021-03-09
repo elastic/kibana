@@ -20,7 +20,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./agents/enroll'));
     loadTestFile(require.resolve('./agents/unenroll'));
     loadTestFile(require.resolve('./agents/checkin'));
-    loadTestFile(require.resolve('./agents/events'));
     loadTestFile(require.resolve('./agents/acks'));
     loadTestFile(require.resolve('./agents/complete_flow'));
     loadTestFile(require.resolve('./agents/actions'));

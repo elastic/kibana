@@ -299,7 +299,7 @@ which will load the visualization's editor.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/alerts/README.md[alerts]
+|{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
 |The Kibana alerting plugin provides a common place to set up alerts. You can:
 
 
@@ -367,9 +367,8 @@ security and spaces filtering as well as performing audit logging.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
-|The purpose of this plugin is to provide a way to persist a history of events
-occuring in Kibana, initially just for the Make It Action project - alerts
-and actions.
+|The event log plugin provides a persistent history of alerting and action
+actitivies.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
@@ -520,7 +519,7 @@ Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
 |This plugin provides alertTypes shipped with Kibana for use with the
-the alerts plugin.  When enabled, it will register
+the alerting plugin.  When enabled, it will register
 the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
