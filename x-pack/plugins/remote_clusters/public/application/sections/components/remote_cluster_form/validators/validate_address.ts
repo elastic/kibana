@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function isAddressValid(seedNode) {
+export function isAddressValid(seedNode?: string): boolean {
   if (!seedNode) {
     return false;
   }
@@ -17,14 +17,14 @@ export function isAddressValid(seedNode) {
       // no need to wait for regEx if the part is empty
       return true;
     }
-    const [match] = part.match(/[A-Za-z0-9\-]*/);
+    const [match] = part.match(/[A-Za-z0-9\-]*/)!;
     return match !== part;
   });
 
   return !containsInvalidCharacters;
 }
 
-export function isPortValid(seedNode) {
+export function isPortValid(seedNode?: string): boolean {
   if (!seedNode) {
     return false;
   }
@@ -42,6 +42,6 @@ export function isPortValid(seedNode) {
     return false;
   }
 
-  const isPortNumeric = port.match(/[0-9]*/)[0] === port;
+  const isPortNumeric = port.match(/[0-9]*/)![0] === port;
   return isPortNumeric;
 }
