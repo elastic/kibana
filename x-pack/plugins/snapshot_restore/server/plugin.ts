@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
@@ -43,14 +42,11 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
-  public async setup(
+  public setup(
     { http, getStartServices }: CoreSetup,
     { licensing, features, security, cloud }: Dependencies
-  ): Promise<void> {
-    const pluginConfig = await this.context.config
-      .create<SnapshotRestoreConfig>()
-      .pipe(first())
-      .toPromise();
+  ): void {
+    const pluginConfig = this.context.config.get<SnapshotRestoreConfig>();
 
     if (!pluginConfig.enabled) {
       return;

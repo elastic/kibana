@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 19, 2025 @ 06:31:44.000'
       );
       await filterBar.toggleFilterEnabled('ip');
-      await appsMenu.clickLink('Visualize', { category: 'kibana' });
+      await appsMenu.clickLink('Visualize Library', { category: 'kibana' });
       await PageObjects.visualize.clickNewVisualization();
       await PageObjects.visualize.waitForGroupsSelectPage();
       await PageObjects.visualize.clickVisType('lens');

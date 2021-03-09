@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiOverlayMask, EuiFormFieldset, EuiCheckbox } from '@elastic/eui';
+import { EuiConfirmModal, EuiFormFieldset, EuiCheckbox } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
 import {
@@ -81,90 +81,88 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={
-          isSingleAgent ? (
-            <FormattedMessage
-              id="xpack.fleet.unenrollAgents.deleteSingleTitle"
-              defaultMessage="Unenroll agent"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.unenrollAgents.forceDeleteMultipleTitle"
-              defaultMessage="Unenroll {count} agents"
-              values={{ count: agentCount }}
-            />
-          )
-        }
-        onCancel={onClose}
-        onConfirm={onSubmit}
-        cancelButtonText={
+    <EuiConfirmModal
+      title={
+        isSingleAgent ? (
           <FormattedMessage
-            id="xpack.fleet.unenrollAgents.cancelButtonLabel"
-            defaultMessage="Cancel"
+            id="xpack.fleet.unenrollAgents.deleteSingleTitle"
+            defaultMessage="Unenroll agent"
           />
-        }
-        confirmButtonDisabled={isSubmitting}
-        confirmButtonText={
-          isSingleAgent ? (
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.unenrollAgents.forceDeleteMultipleTitle"
+            defaultMessage="Unenroll {count} agents"
+            values={{ count: agentCount }}
+          />
+        )
+      }
+      onCancel={onClose}
+      onConfirm={onSubmit}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.fleet.unenrollAgents.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonDisabled={isSubmitting}
+      confirmButtonText={
+        isSingleAgent ? (
+          <FormattedMessage
+            id="xpack.fleet.unenrollAgents.confirmSingleButtonLabel"
+            defaultMessage="Unenroll agent"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.unenrollAgents.confirmMultipleButtonLabel"
+            defaultMessage="Unenroll {count} agents"
+            values={{ count: agentCount }}
+          />
+        )
+      }
+      buttonColor="danger"
+    >
+      <p>
+        {isSingleAgent ? (
+          <FormattedMessage
+            id="xpack.fleet.unenrollAgents.deleteSingleDescription"
+            defaultMessage='This action will remove the selected agent running on "{hostName}" from Fleet.
+              Any data that was already sent by the agent will not be deleted. This action cannot be undone.'
+            values={{ hostName: ((agents[0] as Agent).local_metadata.host as any).hostname }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.unenrollAgents.deleteMultipleDescription"
+            defaultMessage="This action will remove multiple agents from Fleet and prevent new data from being ingested.
+              Any data that was already sent by these agents will not be affected. This action cannot be undone."
+          />
+        )}
+      </p>
+      <EuiFormFieldset
+        legend={{
+          children: (
             <FormattedMessage
-              id="xpack.fleet.unenrollAgents.confirmSingleButtonLabel"
-              defaultMessage="Unenroll agent"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.unenrollAgents.confirmMultipleButtonLabel"
-              defaultMessage="Unenroll {count} agents"
+              id="xpack.fleet.unenrollAgents.forceUnenrollLegendText"
+              defaultMessage="Force unenroll {count, plural, one {agent} other {agents}}"
               values={{ count: agentCount }}
             />
-          )
-        }
-        buttonColor="danger"
+          ),
+        }}
       >
-        <p>
-          {isSingleAgent ? (
+        <EuiCheckbox
+          id="fleetForceUnenrollAgents"
+          label={
             <FormattedMessage
-              id="xpack.fleet.unenrollAgents.deleteSingleDescription"
-              defaultMessage='This action will remove the selected agent running on "{hostName}" from Fleet.
-              Any data that was already sent by the agent will not be deleted. This action cannot be undone.'
-              values={{ hostName: ((agents[0] as Agent).local_metadata.host as any).hostname }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.unenrollAgents.deleteMultipleDescription"
-              defaultMessage="This action will remove multiple agents from Fleet and prevent new data from being ingested.
-              Any data that was already sent by these agents will not be affected. This action cannot be undone."
-            />
-          )}
-        </p>
-        <EuiFormFieldset
-          legend={{
-            children: (
-              <FormattedMessage
-                id="xpack.fleet.unenrollAgents.forceUnenrollLegendText"
-                defaultMessage="Force unenroll {count, plural, one {agent} other {agents}}"
-                values={{ count: agentCount }}
-              />
-            ),
-          }}
-        >
-          <EuiCheckbox
-            id="fleetForceUnenrollAgents"
-            label={
-              <FormattedMessage
-                id="xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel"
-                defaultMessage="Remove {count, plural, one {agent} other {agents}} immediately.
+              id="xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel"
+              defaultMessage="Remove {count, plural, one {agent} other {agents}} immediately.
                   Do not wait for agent to send any last data."
-                values={{ count: agentCount }}
-              />
-            }
-            checked={forceUnenroll}
-            onChange={(e) => setForceUnenroll(e.target.checked)}
-            disabled={useForceUnenroll}
-          />
-        </EuiFormFieldset>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+              values={{ count: agentCount }}
+            />
+          }
+          checked={forceUnenroll}
+          onChange={(e) => setForceUnenroll(e.target.checked)}
+          disabled={useForceUnenroll}
+        />
+      </EuiFormFieldset>
+    </EuiConfirmModal>
   );
 };

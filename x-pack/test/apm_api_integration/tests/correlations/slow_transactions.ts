@@ -23,8 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       start: range.start,
       end: range.end,
       durationPercentile: 95,
-      fieldNames:
-        'user.username,user.id,host.ip,user_agent.name,kubernetes.pod.uuid,url.domain,container.id,service.node.name',
+      fieldNames: 'user_agent.name,user_agent.os.name,url.original',
     },
   });
 
@@ -53,37 +52,45 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns significant terms', () => {
-      const sorted = response.body?.significantTerms?.sort();
-      expectSnapshot(sorted?.map((term) => term.fieldName)).toMatchInline(`
-            Array [
-              "user_agent.name",
-              "url.domain",
-              "host.ip",
-              "service.node.name",
-              "container.id",
-              "url.domain",
-              "user_agent.name",
-            ]
-          `);
+      const significantTerms = response.body?.significantTerms as NonNullable<
+        typeof response.body.significantTerms
+      >;
+      expect(significantTerms).to.have.length(9);
+      const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
+      expectSnapshot(sortedFieldNames).toMatchInline(`
+        Array [
+          "url.original",
+          "url.original",
+          "url.original",
+          "url.original",
+          "user_agent.name",
+          "user_agent.name",
+          "user_agent.name",
+          "user_agent.os.name",
+          "user_agent.os.name",
+        ]
+      `);
     });
 
     it('returns a distribution per term', () => {
       expectSnapshot(response.body?.significantTerms?.map((term) => term.distribution.length))
         .toMatchInline(`
-            Array [
-              11,
-              11,
-              11,
-              11,
-              11,
-              11,
-              11,
-            ]
-          `);
+        Array [
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+        ]
+      `);
     });
 
     it('returns overall distribution', () => {
-      expectSnapshot(response.body?.overall?.distribution.length).toMatchInline(`11`);
+      expectSnapshot(response.body?.overall?.distribution.length).toMatchInline(`15`);
     });
   });
 }

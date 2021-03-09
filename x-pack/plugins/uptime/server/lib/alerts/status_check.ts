@@ -17,7 +17,7 @@ import {
   Ping,
   GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
+import { MONITOR_STATUS } from '../../../common/constants/alerts';
 import { updateState } from './common';
 import { commonMonitorStateI18, commonStateTranslations, DOWN_LABEL } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
@@ -29,7 +29,6 @@ import { MonitorStatusTranslations } from '../../../common/translations';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs, UptimeESClient } from '../lib';
 
-const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 
 const getMonIdByLoc = (monitorId: string, location: string) => {

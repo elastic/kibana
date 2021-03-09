@@ -3,14 +3,14 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load() // load from the Jenkins instance
 
-kibanaPipeline(timeoutMinutes: 240) {
+kibanaPipeline(timeoutMinutes: 300) {
   catchErrors {
     def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
     withEnv([
       "TIME_STAMP=${timestamp}",
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
-      workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
+      workers.base(name: 'coverage-worker', size: 'xl', ramDisk: false, bootstrapped: false) {
         catchError {
 
           kibanaPipeline.bash("""

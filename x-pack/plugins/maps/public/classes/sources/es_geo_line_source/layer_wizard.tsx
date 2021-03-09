@@ -12,7 +12,7 @@ import { ESGeoLineSource, geoLineTitle, REQUIRES_GOLD_LICENSE_MSG } from './es_g
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { LAYER_WIZARD_CATEGORY, STYLE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { TracksLayerIcon } from '../../layers/icons/tracks_layer_icon';
 

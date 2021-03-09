@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+
 import { SavedObjectsServiceStart, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 

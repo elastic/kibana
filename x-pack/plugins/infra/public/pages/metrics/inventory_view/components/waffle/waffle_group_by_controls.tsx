@@ -39,7 +39,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-export const WaffleGroupByControls = class extends React.PureComponent<Props, State> {
+export class WaffleGroupByControls extends React.PureComponent<Props, State> {
   public static displayName = 'WaffleGroupByControls';
   public readonly state: State = initialState;
 
@@ -192,7 +192,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
     }
     this.handleClose();
   };
-};
+}
 
 const StyledContextMenu = euiStyled(EuiContextMenu)`
   width: 320px;

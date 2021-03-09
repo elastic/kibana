@@ -7,9 +7,12 @@
  */
 
 import { PluginName } from 'kibana/server';
-import { Plugin } from './plugin';
+import { Plugin, AsyncPlugin } from './plugin';
 
-export type MockedPluginInitializer = jest.Mock<Plugin<unknown, Record<string, unknown>>, any>;
+export type MockedPluginInitializer = jest.Mock<
+  Plugin<unknown, unknown> | AsyncPlugin<unknown, unknown>,
+  any
+>;
 
 export const mockPluginInitializerProvider: jest.Mock<
   MockedPluginInitializer,

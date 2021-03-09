@@ -24,6 +24,7 @@ import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 interface ResultResponse {
   success: boolean;
@@ -175,7 +176,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         // when the field is an aggregation field, because the field doesn't actually exist in the indices
         // we need to pass all the sub aggs from the original datafeed config
         // so that we can access the aggregated field
-        if (typeof aggFields === 'object' && Object.keys(aggFields).length > 0) {
+        if (isPopulatedObject(aggFields)) {
           // first item under aggregations can be any name, not necessarily 'buckets'
           const accessor = Object.keys(aggFields)[0];
           const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };

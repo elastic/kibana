@@ -67,9 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickDocSortAsc();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await retry.try(async function tryingForTime() {
-          const rowData = await dataGrid.getFields();
-          expect(rowData[0][0].startsWith(expectedTimeStamp)).to.be.ok();
+        await retry.waitFor('first cell contains expected timestamp', async () => {
+          const cell = await dataGrid.getCellElement(1, 2);
+          const text = await cell.getVisibleText();
+          return text === expectedTimeStamp;
         });
       });
 

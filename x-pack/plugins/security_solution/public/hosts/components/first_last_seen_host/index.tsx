@@ -31,6 +31,7 @@ export const FirstLastSeenHost = React.memo<FirstLastSeenHostProps>(
       docValueFields,
       hostName,
       indexNames,
+      order: type === FirstLastSeenHostType.FIRST_SEEN ? 'asc' : 'desc',
     });
     const valueSeen = useMemo(
       () => (type === FirstLastSeenHostType.FIRST_SEEN ? firstSeen : lastSeen),

@@ -19,8 +19,9 @@ import { trackUserRequest } from './track_ui_metric';
 
 const apiPrefix = '/api/rollup';
 
-export async function loadJobs() {
-  const { jobs } = await getHttp().get(`${apiPrefix}/jobs`);
+export async function loadJobs({ asSystemRequest } = {}) {
+  const fetchOptions = { asSystemRequest };
+  const { jobs } = await getHttp().get(`${apiPrefix}/jobs`, fetchOptions);
   return jobs;
 }
 

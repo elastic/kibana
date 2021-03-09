@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-import {
+import { KibanaRequest } from 'src/core/server';
+import type {
   ElasticsearchClient,
-  KibanaRequest,
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'src/core/server';
 import uuid from 'uuid';
-import { AuthenticatedUser } from '../../../security/server';
+import type { AuthenticatedUser } from '../../../security/server';
 import {
+  packageToPackagePolicy,
+  isPackageLimited,
+  doesAgentPolicyAlreadyIncludePackage,
+} from '../../common';
+import type {
   DeletePackagePoliciesResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
   PackagePolicyInputStream,
   PackageInfo,
   ListWithKuery,
-  packageToPackagePolicy,
-  isPackageLimited,
-  doesAgentPolicyAlreadyIncludePackage,
+  ListResult,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
-import {
+import { IngestManagerError, ingestErrorToResponseOptions } from '../errors';
+import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
+import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
   CallESAsCurrentUser,
-  NewPackagePolicySchema,
-  UpdatePackagePolicySchema,
 } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
@@ -43,7 +46,7 @@ import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
-import { ExternalCallback } from '..';
+import type { ExternalCallback } from '..';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -63,15 +66,20 @@ class PackagePolicyService {
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
-    } else {
-      if (
-        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-          (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
-        )
-      ) {
-        throw new Error('There is already a package with the same name on this agent policy');
-      }
     }
+    if (parentAgentPolicy.is_managed) {
+      throw new IngestManagerError(
+        `Cannot add integrations to managed policy ${parentAgentPolicy.id}`
+      );
+    }
+    if (
+      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
+        (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
+      )
+    ) {
+      throw new Error('There is already a package with the same name on this agent policy');
+    }
+
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
@@ -242,7 +250,7 @@ class PackagePolicyService {
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
-  ): Promise<{ items: PackagePolicy[]; total: number; page: number; perPage: number }> {
+  ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
     const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
@@ -260,6 +268,30 @@ class PackagePolicyService {
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
       })),
+      total: packagePolicies.total,
+      page,
+      perPage,
+    };
+  }
+
+  public async listIds(
+    soClient: SavedObjectsClientContract,
+    options: ListWithKuery
+  ): Promise<ListResult<string>> {
+    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+
+    const packagePolicies = await soClient.find<{}>({
+      type: SAVED_OBJECT_TYPE,
+      sortField,
+      sortOrder,
+      page,
+      perPage,
+      fields: [],
+      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+    });
+
+    return {
+      items: packagePolicies.saved_objects.map((packagePolicySO) => packagePolicySO.id),
       total: packagePolicies.total,
       page,
       perPage,
@@ -285,6 +317,9 @@ class PackagePolicyService {
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
     } else {
+      if (parentAgentPolicy.is_managed) {
+        throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
+      }
       if (
         (parentAgentPolicy.package_policies as PackagePolicy[]).find(
           (siblingPackagePolicy) =>
@@ -295,7 +330,7 @@ class PackagePolicyService {
       }
     }
 
-    let inputs = await restOfPackagePolicy.inputs.map((input) =>
+    let inputs = restOfPackagePolicy.inputs.map((input) =>
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
 
@@ -363,10 +398,11 @@ class PackagePolicyService {
           name: packagePolicy.name,
           success: true,
         });
-      } catch (e) {
+      } catch (error) {
         result.push({
           id,
           success: false,
+          ...ingestErrorToResponseOptions(error),
         });
       }
     }
@@ -555,3 +591,5 @@ async function _compilePackageStream(
 
 export type PackagePolicyServiceInterface = PackagePolicyService;
 export const packagePolicyService = new PackagePolicyService();
+
+export type { PackagePolicyService };

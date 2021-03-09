@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import type {
+import {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
@@ -23,6 +23,7 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  alignment?: 'left' | 'right' | 'center';
 }
 
 export interface SortingState {
@@ -36,6 +37,10 @@ export interface DatatableVisualizationState {
   sorting?: SortingState;
 }
 
+const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
+  defaultMessage: 'Table',
+});
+
 export const datatableVisualization: Visualization<DatatableVisualizationState> = {
   id: 'lnsDatatable',
 
@@ -43,8 +48,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     {
       id: 'lnsDatatable',
       icon: LensIconChartDatatable,
-      label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
+      label: visualizationLabel,
+      groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
+        defaultMessage: 'Tabular and single value',
       }),
     },
   ],
@@ -67,9 +73,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   getDescription() {
     return {
       icon: LensIconChartDatatable,
-      label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
-      }),
+      label: visualizationLabel,
     };
   },
 
@@ -97,6 +101,12 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       (state && table.changeType === 'unchanged')
     ) {
       return [];
+    }
+    const oldColumnSettings: Record<string, ColumnState> = {};
+    if (state) {
+      state.columns.forEach((column) => {
+        oldColumnSettings[column.columnId] = column;
+      });
     }
     const title =
       table.changeType === 'unchanged'
@@ -126,8 +136,12 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
         score: (Math.min(table.columns.length, 10) / 10) * 0.4,
         state: {
+          ...(state || {}),
           layerId: table.layerId,
-          columns: table.columns.map((col) => ({ columnId: col.columnId })),
+          columns: table.columns.map((col) => ({
+            ...(oldColumnSettings[col.columnId] || {}),
+            columnId: col.columnId,
+          })),
         },
         previewIcon: LensIconChartDatatable,
         // tables are hidden from suggestion bar, but used for drag & drop and chart switching
@@ -254,6 +268,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     columnId: [column.columnId],
                     hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
                     width: typeof column.width === 'undefined' ? [] : [column.width],
+                    alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                   },
                 },
               ],
@@ -266,7 +281,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     return undefined;
   },
 

@@ -222,6 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
               fieldRow.fieldName,
               fieldRow.docCountFormatted,
               fieldRow.topValuesCount,
+              false,
               false
             );
           }
@@ -230,7 +231,8 @@ export default function ({ getService }: FtrProviderContext) {
               fieldRow.type,
               fieldRow.fieldName!,
               fieldRow.docCountFormatted,
-              fieldRow.exampleCount
+              fieldRow.exampleCount,
+              false
             );
           }
 

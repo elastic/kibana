@@ -7,11 +7,11 @@
 
 // handlers that handle agent actions request
 
-import { RequestHandler } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from 'kibana/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
-import { ActionsService } from '../../services/agents';
-import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
+import type { ActionsService } from '../../services/agents';
+import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const postNewAgentActionHandlerBuilder = function (
@@ -30,7 +30,7 @@ export const postNewAgentActionHandlerBuilder = function (
 
       const newAgentAction = request.body.action;
 
-      const savedAgentAction = await actionsService.createAgentAction(soClient, {
+      const savedAgentAction = await actionsService.createAgentAction(soClient, esClient, {
         created_at: new Date().toISOString(),
         ...newAgentAction,
         agent_id: agent.id,

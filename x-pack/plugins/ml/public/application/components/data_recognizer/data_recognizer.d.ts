@@ -7,10 +7,10 @@
 
 import { FC } from 'react';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 declare const DataRecognizer: FC<{
-  indexPattern: IndexPattern;
+  indexPattern: IIndexPattern;
   savedSearch: SavedSearchSavedObject | null;
   results: {
     count: number;

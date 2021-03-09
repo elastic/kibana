@@ -7,8 +7,8 @@
 
 import React, { Fragment } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiCallOut, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface ExampleDocumentJsonProps {
   document: object;

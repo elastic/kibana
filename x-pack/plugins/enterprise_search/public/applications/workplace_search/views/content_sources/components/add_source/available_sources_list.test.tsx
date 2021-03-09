@@ -7,10 +7,10 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues } from '../../../../../__mocks__';
-
 import { mergedAvailableSources } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiCard, EuiToolTip, EuiTitle } from '@elastic/eui';

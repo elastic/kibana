@@ -19,12 +19,12 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { FilterBadgeList } from './FilterBadgeList';
 import { unit, px } from '../../../../../style/variables';
 import { FilterTitleButton } from './FilterTitleButton';
 
-const Popover = styled((EuiPopover as unknown) as FunctionComponent).attrs(
+const Popover = euiStyled((EuiPopover as unknown) as FunctionComponent).attrs(
   () => ({
     anchorClassName: 'anchor',
   })
@@ -34,22 +34,22 @@ const Popover = styled((EuiPopover as unknown) as FunctionComponent).attrs(
   }
 `;
 
-const SelectContainer = styled.div`
+const SelectContainer = euiStyled.div`
   width: ${px(unit * 16)};
 `;
 
-const Counter = styled.div`
+const Counter = euiStyled.div`
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
   background: ${({ theme }) => theme.eui.euiColorLightShade};
   padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
 `;
 
-const ApplyButton = styled(EuiButton)`
+const ApplyButton = euiStyled(EuiButton)`
   align-self: flex-end;
 `;
 
 // needed for IE11
-const FlexItem = styled(EuiFlexItem)`
+const FlexItem = euiStyled(EuiFlexItem)`
   flex-basis: auto !important;
 `;
 

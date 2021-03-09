@@ -248,7 +248,7 @@ describe('ensureLicenseForAlertType()', () => {
     expect(() =>
       licenseState.ensureLicenseForAlertType(alertType)
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Alert test is disabled because it requires a Gold license. Contact your administrator to upgrade your license."`
+      `"Alert test is disabled because it requires a Gold license. Go to License Management to view upgrade options."`
     );
   });
 

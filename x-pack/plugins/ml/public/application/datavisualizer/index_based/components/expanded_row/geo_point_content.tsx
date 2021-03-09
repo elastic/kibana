@@ -9,20 +9,17 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { EuiFlexItem } from '@elastic/eui';
 import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
-import { FieldVisConfig } from '../../../stats_table/types';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { MlEmbeddedMapComponent } from '../../../../components/ml_embedded_map';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { ES_GEO_FIELD_TYPE } from '../../../../../../../maps/common/constants';
-import { LayerDescriptor } from '../../../../../../../maps/common/descriptor_types';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { DocumentStatsTable } from '../../../stats_table/components/field_data_expanded_row/document_stats';
 import { ExpandedRowContent } from '../../../stats_table/components/field_data_expanded_row/expanded_row_content';
+import type { CombinedQuery } from '../../common';
+import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import type { LayerDescriptor } from '../../../../../../../maps/common/descriptor_types';
+import type { FieldVisConfig } from '../../../stats_table/types';
 
-export interface CombinedQuery {
-  searchString: string | { [key: string]: any };
-  searchQueryLanguage: string;
-}
 export const GeoPointContent: FC<{
   config: FieldVisConfig;
   indexPattern: IndexPattern | undefined;
@@ -41,12 +38,13 @@ export const GeoPointContent: FC<{
         indexPattern?.id !== undefined &&
         config !== undefined &&
         config.fieldName !== undefined &&
-        config.type === ML_JOB_FIELD_TYPES.GEO_POINT
+        (config.type === ML_JOB_FIELD_TYPES.GEO_POINT ||
+          config.type === ML_JOB_FIELD_TYPES.GEO_SHAPE)
       ) {
         const params = {
           indexPatternId: indexPattern.id,
           geoFieldName: config.fieldName,
-          geoFieldType: config.type as ES_GEO_FIELD_TYPE.GEO_POINT,
+          geoFieldType: config.type as ES_GEO_FIELD_TYPE,
           query: {
             query: combinedQuery.searchString,
             language: combinedQuery.searchQueryLanguage,
@@ -68,7 +66,7 @@ export const GeoPointContent: FC<{
     <ExpandedRowContent dataTestSubj={'mlDVIndexBasedMapContent'}>
       <DocumentStatsTable config={config} />
 
-      <EuiFlexItem>
+      <EuiFlexItem style={{ maxWidth: '50%' }}>
         <ExamplesList examples={stats.examples} />
       </EuiFlexItem>
       <EuiFlexItem className={'mlDataVisualizerMapWrapper'}>

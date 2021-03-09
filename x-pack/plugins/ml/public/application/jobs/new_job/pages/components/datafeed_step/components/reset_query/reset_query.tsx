@@ -8,13 +8,7 @@
 import React, { FC, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonEmpty,
-  EuiConfirmModal,
-  EuiOverlayMask,
-  EuiCodeBlock,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';
 
@@ -34,35 +28,33 @@ export const ResetQueryButton: FC = () => {
   return (
     <>
       {confirmModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.title', {
-              defaultMessage: 'Reset datafeed query',
-            })}
-            onCancel={closeModal}
-            onConfirm={resetDatafeed}
-            cancelButtonText={i18n.translate(
-              'xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.cancel',
-              { defaultMessage: 'Cancel' }
-            )}
-            confirmButtonText={i18n.translate(
-              'xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.confirm',
-              { defaultMessage: 'Confirm' }
-            )}
-            defaultFocusedButton="confirm"
-          >
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.description"
-              defaultMessage="Set the datafeed query to be the default."
-            />
+        <EuiConfirmModal
+          title={i18n.translate('xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.title', {
+            defaultMessage: 'Reset datafeed query',
+          })}
+          onCancel={closeModal}
+          onConfirm={resetDatafeed}
+          cancelButtonText={i18n.translate(
+            'xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.cancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.confirm',
+            { defaultMessage: 'Confirm' }
+          )}
+          defaultFocusedButton="confirm"
+        >
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.description"
+            defaultMessage="Set the datafeed query to be the default."
+          />
 
-            <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-            <EuiCodeBlock language="js" fontSize="m" paddingSize="s">
-              {defaultQueryString}
-            </EuiCodeBlock>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+          <EuiCodeBlock language="js" fontSize="m" paddingSize="s">
+            {defaultQueryString}
+          </EuiCodeBlock>
+        </EuiConfirmModal>
       )}
 
       <EuiButtonEmpty size="s" onClick={showModal}>

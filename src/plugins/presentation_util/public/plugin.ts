@@ -31,10 +31,10 @@ export class PresentationUtilPlugin
     return {};
   }
 
-  public async start(
+  public start(
     coreStart: CoreStart,
     startPlugins: PresentationUtilPluginStartDeps
-  ): Promise<PresentationUtilPluginStart> {
+  ): PresentationUtilPluginStart {
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
 
     return {

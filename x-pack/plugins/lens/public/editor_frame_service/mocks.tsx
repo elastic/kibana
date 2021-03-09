@@ -29,6 +29,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
         icon: 'empty',
         id: 'TEST_VIS',
         label: 'TEST',
+        groupLabel: 'TEST_VISGroup',
       },
     ],
     getVisualizationTypeId: jest.fn((_state) => 'empty'),
@@ -54,7 +55,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    getErrorMessages: jest.fn((_state, _frame) => undefined),
+    getErrorMessages: jest.fn((_state) => undefined),
   };
 }
 
@@ -88,7 +89,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     uniqueLabels: jest.fn((_state) => ({})),
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),
-    canHandleDrop: jest.fn(),
+    getDropProps: jest.fn(),
     onDrop: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources

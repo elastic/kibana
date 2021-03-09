@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { VisTypeDefinition } from 'src/plugins/visualizations/public';
-import { truncatedColorSchemas } from '../../charts/public';
 
 // @ts-expect-error
 import { supportsCssFilters } from './css_filters';
@@ -17,7 +16,7 @@ import { getDeprecationMessage } from './get_deprecation_message';
 import { TileMapVisualizationDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { TileMapVisParams } from './types';
-import { MapTypes } from './utils/map_types';
+import { setTmsLayers } from './services';
 
 export function createTileMapTypeDefinition(
   dependencies: TileMapVisualizationDependencies
@@ -50,62 +49,6 @@ export function createTileMapTypeDefinition(
     },
     toExpressionAst,
     editorConfig: {
-      collections: {
-        colorSchemas: truncatedColorSchemas,
-        legendPositions: [
-          {
-            value: 'bottomleft',
-            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomLeftText', {
-              defaultMessage: 'Bottom left',
-            }),
-          },
-          {
-            value: 'bottomright',
-            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomRightText', {
-              defaultMessage: 'Bottom right',
-            }),
-          },
-          {
-            value: 'topleft',
-            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topLeftText', {
-              defaultMessage: 'Top left',
-            }),
-          },
-          {
-            value: 'topright',
-            text: i18n.translate('tileMap.vis.editorConfig.legendPositions.topRightText', {
-              defaultMessage: 'Top right',
-            }),
-          },
-        ],
-        mapTypes: [
-          {
-            value: MapTypes.ScaledCircleMarkers,
-            text: i18n.translate('tileMap.vis.editorConfig.mapTypes.scaledCircleMarkersText', {
-              defaultMessage: 'Scaled circle markers',
-            }),
-          },
-          {
-            value: MapTypes.ShadedCircleMarkers,
-            text: i18n.translate('tileMap.vis.editorConfig.mapTypes.shadedCircleMarkersText', {
-              defaultMessage: 'Shaded circle markers',
-            }),
-          },
-          {
-            value: MapTypes.ShadedGeohashGrid,
-            text: i18n.translate('tileMap.vis.editorConfig.mapTypes.shadedGeohashGridText', {
-              defaultMessage: 'Shaded geohash grid',
-            }),
-          },
-          {
-            value: MapTypes.Heatmap,
-            text: i18n.translate('tileMap.vis.editorConfig.mapTypes.heatmapText', {
-              defaultMessage: 'Heatmap',
-            }),
-          },
-        ],
-        tmsLayers: [],
-      },
       optionsTemplate: TileMapOptionsLazy,
       schemas: [
         {
@@ -141,7 +84,7 @@ export function createTileMapTypeDefinition(
         return vis;
       }
 
-      vis.type.editorConfig.collections.tmsLayers = tmsLayers;
+      setTmsLayers(tmsLayers);
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
         vis.params.wms.selectedTmsLayer = tmsLayers[0];
       }

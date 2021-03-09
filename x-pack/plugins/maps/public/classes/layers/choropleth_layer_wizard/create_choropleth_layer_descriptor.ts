@@ -23,7 +23,7 @@ import {
   ESSearchSourceDescriptor,
 } from '../../../../common/descriptor_types';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { VectorLayer } from '../vector_layer/vector_layer';
+import { VectorLayer } from '../vector_layer';
 import { EMSFileSource } from '../../sources/ems_file_source';
 // @ts-ignore
 import { ESSearchSource } from '../../sources/es_search_source';

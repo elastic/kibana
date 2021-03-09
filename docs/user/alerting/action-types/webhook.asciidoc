@@ -1,6 +1,9 @@
 [role="xpack"]
 [[webhook-action-type]]
 === Webhook action
+++++
+<titleabbrev>Webhook</titleabbrev>
+++++
 
 The Webhook action type uses https://github.com/axios/axios[axios] to send a POST or PUT request to a web service.
 
@@ -8,14 +11,15 @@ The Webhook action type uses https://github.com/axios/axios[axios] to send a POS
 [[webhook-connector-configuration]]
 ==== Connector configuration
 
-Webhook connectors have the following configuration properties:
+Webhook connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 URL::       The request URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-Method::    HTTP request method, either `post`(default) or `put`.
+Method::    HTTP request method, either `POST`(default) or `PUT`.
 Headers::   A set of key-value pairs sent as headers with the request
-User::      An optional username. If set, HTTP basic authentication is used. Currently only basic authentication is supported.
-Password::  An optional password. If set, HTTP basic authentication is used. Currently only basic authentication is supported.
+Require authentication:: If true, a username and password for login type authentication must be provided.
+Username::      Username for HTTP basic authentication.
+Password::  Password for HTTP basic authentication.
 
 [float]
 [[Preconfigured-webhook-configuration]]
@@ -36,41 +40,23 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
      password: passwordkeystorevalue
 --
 
-`config` defines the action type specific to the configuration and contains the following properties:
+Config defines information for the action type.
 
-[cols="2*<"]
-|===
+`url`:: A URL string that corresponds to *URL*.
+`method`:: A string that corresponds to *Method*.
+`headers`:: A record<string, string> that corresponds to *Headers*.
+`hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
 
-|`url`
-| A URL string that corresponds to *URL*.
+Secrets defines sensitive information for the action type.
 
-|`method`
-| A string that corresponds to *Method*.
-
-|`headers`
-|A record<string, string> that corresponds to *Headers*.
-
-|===
-
-`secrets` defines sensitive information for the action type:
-
-[cols="2*<"]
-|===
-
-|`user`
-|A string that corresponds to *User*.
-
-|`password`
-|A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
-
-|===
-
+`user`:: A string that corresponds to *User*. Required if `hasAuth` is set to `true`.
+`password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
 
 [float]
 [[webhook-action-configuration]]
 ==== Action configuration
 
-Webhook actions have the following properties:
+Webhook actions have the following properties.
 
 Body::      A JSON payload sent to the request URL. For example: 
 +

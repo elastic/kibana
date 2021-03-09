@@ -45,9 +45,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with logstash_read_user', () => {
+    describe('global dashboard read with logstash_read_user', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'logstash_read_user'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'logstash_read_user'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

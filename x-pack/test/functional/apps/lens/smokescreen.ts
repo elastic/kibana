@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { range } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -438,6 +439,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });
 
+    it('should allow formatting on references', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_column > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'moving_average',
+        keepOpen: true,
+      });
+      await PageObjects.lens.configureReference({
+        operation: 'sum',
+        field: 'bytes',
+      });
+      await PageObjects.lens.editDimensionFormat('Number');
+      await PageObjects.lens.closeDimensionEditor();
+
+      const values = await Promise.all(
+        range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
+      );
+      expect(values).to.eql([
+        '-',
+        '222,420.00',
+        '702,050.00',
+        '1,879,613.33',
+        '3,482,256.25',
+        '4,359,953.00',
+      ]);
+    });
+
     /**
      * The edge cases are:
      *
@@ -561,41 +598,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
       expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
-    });
-
-    it('should able to sort a table by a column', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
-      // Sort by number
-      await PageObjects.lens.changeTableSortingBy(2, 'asc');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
-      // Now sort by IP
-      await PageObjects.lens.changeTableSortingBy(0, 'asc');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('78.83.247.30');
-      // Change the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'desc');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
-      // Remove the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'none');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
-    });
-
-    it('should able to use filters cell actions in table', async () => {
-      const firstCellContent = await PageObjects.lens.getDatatableCellText(0, 0);
-      await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(
-        await find.existsByCssSelector(
-          `[data-test-subj*="filter-value-${firstCellContent}"][data-test-subj*="filter-negated"]`
-        )
-      ).to.eql(true);
     });
   });
 }

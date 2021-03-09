@@ -12,18 +12,6 @@ export type Section = 'repositories' | 'snapshots' | 'restore_status' | 'policie
 // Set a minimum request duration to avoid strange UI flickers
 export const MINIMUM_TIMEOUT_MS = 300;
 
-export enum REPOSITORY_DOC_PATHS {
-  default = 'snapshot-restore.html',
-  fs = 'snapshots-register-repository.html#snapshots-filesystem-repository',
-  url = 'snapshots-register-repository.html#snapshots-read-only-repository',
-  source = 'snapshots-register-repository.html#snapshots-source-only-repository',
-  s3 = 'repository-s3.html',
-  hdfs = 'repository-hdfs.html',
-  azure = 'repository-azure.html',
-  gcs = 'repository-gcs.html',
-  plugins = 'repository.html',
-}
-
 export enum SNAPSHOT_STATE {
   IN_PROGRESS = 'IN_PROGRESS',
   SUCCESS = 'SUCCESS',

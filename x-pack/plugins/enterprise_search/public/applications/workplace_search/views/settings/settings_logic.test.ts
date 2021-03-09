@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
-
 import { mockFlashMessageHelpers, mockHttpValues, mockKibanaValues } from '../../../__mocks__';
+import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { configuredSources, oauthApplication } from '../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { configuredSources, oauthApplication } from '../../__mocks__/content_sources.mock';
-
 import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
+
 import { SettingsLogic } from './settings_logic';
 
 describe('SettingsLogic', () => {

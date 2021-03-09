@@ -15,13 +15,26 @@ interface Props {
   contextId: string;
   endgameParentProcessName: string | null | undefined;
   eventId: string;
+  processParentPid: number | null | undefined;
+  processParentName: string | null | undefined;
   processPpid: number | undefined | null;
   text: string | null | undefined;
 }
 
 export const ParentProcessDraggable = React.memo<Props>(
-  ({ contextId, endgameParentProcessName, eventId, processPpid, text }) => {
-    if (isNillEmptyOrNotFinite(endgameParentProcessName) && isNillEmptyOrNotFinite(processPpid)) {
+  ({
+    contextId,
+    endgameParentProcessName,
+    eventId,
+    processParentName,
+    processParentPid,
+    processPpid,
+    text,
+  }) => {
+    if (
+      isNillEmptyOrNotFinite(processParentName) &&
+      isNillEmptyOrNotFinite(endgameParentProcessName)
+    ) {
       return null;
     }
 
@@ -37,6 +50,17 @@ export const ParentProcessDraggable = React.memo<Props>(
           </TokensFlexItem>
         )}
 
+        {!isNillEmptyOrNotFinite(processParentName) && (
+          <TokensFlexItem grow={false} component="span">
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.parent.name"
+              value={processParentName}
+            />
+          </TokensFlexItem>
+        )}
+
         {!isNillEmptyOrNotFinite(endgameParentProcessName) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
@@ -44,6 +68,18 @@ export const ParentProcessDraggable = React.memo<Props>(
               eventId={eventId}
               field="endgame.parent_process_name"
               value={endgameParentProcessName}
+            />
+          </TokensFlexItem>
+        )}
+
+        {!isNillEmptyOrNotFinite(processParentPid) && (
+          <TokensFlexItem grow={false} component="span">
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.parent.pid"
+              queryValue={String(processParentPid)}
+              value={`(${String(processParentPid)})`}
             />
           </TokensFlexItem>
         )}

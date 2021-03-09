@@ -68,9 +68,9 @@ export class SessionsClient {
     });
   }
 
-  public extend(sessionId: string, keepAlive: string): Promise<SavedObjectsFindResponse> {
+  public extend(sessionId: string, expires: string): Promise<SavedObjectsFindResponse> {
     return this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
-      body: JSON.stringify({ keepAlive }),
+      body: JSON.stringify({ expires }),
     });
   }
 

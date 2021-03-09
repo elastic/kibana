@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
-import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import type { RequestHandler } from '../../../../../../src/core/server';
 import { appContextService, packagePolicyService } from '../../services';
 import {
   GetPackagePoliciesRequestSchema,
@@ -16,7 +17,7 @@ import {
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
 } from '../../types';
-import { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
+import type { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const getPackagePoliciesHandler: RequestHandler<
@@ -79,11 +80,10 @@ export const createPackagePolicyHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  let newData = { ...request.body };
   try {
-    newData = await packagePolicyService.runExternalCallbacks(
+    const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
-      newData,
+      { ...request.body },
       context,
       request
     );

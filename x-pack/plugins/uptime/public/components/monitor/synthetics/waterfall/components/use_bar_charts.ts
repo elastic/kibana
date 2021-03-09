@@ -13,27 +13,36 @@ export interface UseBarHookProps {
   data: IWaterfallContext['data'];
 }
 
-export const useBarCharts = ({ data = [] }: UseBarHookProps) => {
+export const useBarCharts = ({ data }: UseBarHookProps) => {
   const [charts, setCharts] = useState<Array<IWaterfallContext['data']>>([]);
 
   useEffect(() => {
-    if (data.length > 0) {
+    const chartsN: Array<IWaterfallContext['data']> = [];
+
+    if (data?.length > 0) {
       let chartIndex = 0;
-
-      const chartsN: Array<IWaterfallContext['data']> = [];
-
+      /* We want at most CANVAS_MAX_ITEMS **RESOURCES** per array.
+       * Resources !== individual timing items, but are comprised of many individual timing
+       * items. The X value of each item can be used as an id for the resource.
+       * We must keep track of the number of unique resources added to the each array. */
+      const uniqueResources = new Set();
+      let lastIndex: number;
       data.forEach((item) => {
-        // Subtract 1 to account for x value starting from 0
-        if (item.x === CANVAS_MAX_ITEMS * chartIndex && !chartsN[item.x / CANVAS_MAX_ITEMS]) {
-          chartsN.push([item]);
+        if (uniqueResources.size === CANVAS_MAX_ITEMS && item.x > lastIndex) {
           chartIndex++;
+          uniqueResources.clear();
+        }
+        uniqueResources.add(item.x);
+        lastIndex = item.x;
+        if (!chartsN[chartIndex]) {
+          chartsN.push([item]);
           return;
         }
-        chartsN[chartIndex - 1].push(item);
+        chartsN[chartIndex].push(item);
       });
-
-      setCharts(chartsN);
     }
+
+    setCharts(chartsN);
   }, [data]);
 
   return charts;

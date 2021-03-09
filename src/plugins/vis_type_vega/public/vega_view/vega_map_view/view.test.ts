@@ -28,11 +28,8 @@ import {
   setMapServiceSettings,
   setUISettings,
 } from '../../services';
-
-jest.mock('../../lib/vega', () => ({
-  vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
-}));
+import { initVegaLayer, initTmsRasterLayer } from './layers';
+import { Map, NavigationControl, Style } from 'mapbox-gl';
 
 jest.mock('mapbox-gl', () => ({
   Map: jest.fn().mockImplementation(() => ({
@@ -45,6 +42,12 @@ jest.mock('mapbox-gl', () => ({
     getZoom: () => 3,
     addControl: jest.fn(),
     addLayer: jest.fn(),
+    dragRotate: {
+      disable: jest.fn(),
+    },
+    touchZoomRotate: {
+      disableRotation: jest.fn(),
+    },
   })),
   MapboxOptions: jest.fn(),
   NavigationControl: jest.fn(),
@@ -54,9 +57,6 @@ jest.mock('./layers', () => ({
   initVegaLayer: jest.fn(),
   initTmsRasterLayer: jest.fn(),
 }));
-
-import { initVegaLayer, initTmsRasterLayer } from './layers';
-import { Map, NavigationControl } from 'mapbox-gl';
 
 describe('vega_map_view/view', () => {
   describe('VegaMapView', () => {
@@ -76,7 +76,7 @@ describe('vega_map_view/view', () => {
     setUISettings(coreStart.uiSettings);
 
     const getTmsService = jest.fn().mockReturnValue(({
-      getVectorStyleSheet: () => ({
+      getVectorStyleSheet: (): Style => ({
         version: 8,
         sources: {},
         layers: [],
@@ -106,13 +106,18 @@ describe('vega_map_view/view', () => {
 
     async function createVegaMapView() {
       await vegaParser.parseAsync();
-      return new VegaMapView({
+      return new VegaMapView(({
         vegaParser,
         filterManager: dataPluginStart.query.filterManager,
         timefilter: dataPluginStart.query.timefilter.timefilter,
         fireEvent: (event: any) => {},
         parentEl: document.createElement('div'),
-      } as VegaViewParams);
+        vegaStateRestorer: {
+          save: jest.fn(),
+          restore: jest.fn(),
+          clear: jest.fn(),
+        },
+      } as unknown) as VegaViewParams);
     }
 
     beforeEach(() => {

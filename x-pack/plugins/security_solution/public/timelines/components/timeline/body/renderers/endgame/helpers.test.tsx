@@ -182,28 +182,116 @@ describe('helpers', () => {
   });
 
   describe('#getEventDetails', () => {
-    test('it returns successfully logged in when eventAction is undefined', () => {
-      expect(getEventDetails(undefined)).toEqual('successfully logged in');
-    });
-
-    test('it returns successfully logged in when eventAction is null', () => {
-      expect(getEventDetails(null)).toEqual('successfully logged in');
-    });
-
-    test('it returns successfully logged in when eventAction is an empty string', () => {
-      expect(getEventDetails('')).toEqual('successfully logged in');
-    });
-
-    test('it returns successfully logged in when eventAction is a random value', () => {
-      expect(getEventDetails('a random value')).toEqual('successfully logged in');
-    });
-
     test('it returns an empty string when eventAction is "explicit_user_logon"', () => {
-      expect(getEventDetails('explicit_user_logon')).toEqual('');
+      expect(
+        getEventDetails({ eventAction: 'explicit_user_logon', eventOutcome: undefined })
+      ).toEqual('');
     });
 
-    test('it returns logged off when eventAction is "user_logoff"', () => {
-      expect(getEventDetails('user_logoff')).toEqual('logged off');
+    test('it returns logged off when eventAction is "log_off" and eventOutcome is null', () => {
+      expect(getEventDetails({ eventAction: 'log_off', eventOutcome: null })).toEqual('logged off');
+    });
+
+    test('it returns logged off when eventAction is "log_off" and eventOutcome is undefined', () => {
+      expect(getEventDetails({ eventAction: 'log_off', eventOutcome: undefined })).toEqual(
+        'logged off'
+      );
+    });
+
+    test('it returns failed to log off when eventAction is "log_off" and eventOutcome is failure', () => {
+      expect(getEventDetails({ eventAction: 'log_off', eventOutcome: 'failure' })).toEqual(
+        'failed to log off'
+      );
+    });
+
+    test('it returns failed to log off when eventAction is "log_off" and eventOutcome is fAiLuRe', () => {
+      expect(getEventDetails({ eventAction: 'log_off', eventOutcome: 'fAiLuRe' })).toEqual(
+        'failed to log off'
+      );
+    });
+
+    test('it returns logged off when eventAction is "log_off" and eventOutcome is anything_else', () => {
+      expect(getEventDetails({ eventAction: 'log_off', eventOutcome: 'anything_else' })).toEqual(
+        'logged off'
+      );
+    });
+
+    test('it returns logged off when eventAction is "user_logoff" and eventOutcome is null', () => {
+      expect(getEventDetails({ eventAction: 'user_logoff', eventOutcome: null })).toEqual(
+        'logged off'
+      );
+    });
+
+    test('it returns logged off when eventAction is "user_logoff" and eventOutcome is undefined', () => {
+      expect(getEventDetails({ eventAction: 'user_logoff', eventOutcome: undefined })).toEqual(
+        'logged off'
+      );
+    });
+
+    test('it returns failed to log off when eventAction is "user_logoff" and eventOutcome is failure', () => {
+      expect(getEventDetails({ eventAction: 'user_logoff', eventOutcome: 'failure' })).toEqual(
+        'failed to log off'
+      );
+    });
+
+    test('it returns failed to log off when eventAction is "user_logoff" and eventOutcome is fAiLuRe', () => {
+      expect(getEventDetails({ eventAction: 'user_logoff', eventOutcome: 'fAiLuRe' })).toEqual(
+        'failed to log off'
+      );
+    });
+
+    test('it returns logged off when eventAction is "user_logoff" and eventOutcome is anything_else', () => {
+      expect(
+        getEventDetails({ eventAction: 'user_logoff', eventOutcome: 'anything_else' })
+      ).toEqual('logged off');
+    });
+
+    test('it returns successfully logged in when eventAction is null and eventOutcome is undefined', () => {
+      expect(getEventDetails({ eventAction: null, eventOutcome: undefined })).toEqual(
+        'successfully logged in'
+      );
+    });
+
+    test('it returns successfully logged in when eventAction is null and eventOutcome is null', () => {
+      expect(getEventDetails({ eventAction: null, eventOutcome: null })).toEqual(
+        'successfully logged in'
+      );
+    });
+
+    test('it returns successfully logged in when eventAction is undefined and eventOutcome is null', () => {
+      expect(getEventDetails({ eventAction: undefined, eventOutcome: null })).toEqual(
+        'successfully logged in'
+      );
+    });
+
+    test('it returns successfully logged in when eventAction is undefined and eventOutcome is undefined', () => {
+      expect(getEventDetails({ eventAction: undefined, eventOutcome: undefined })).toEqual(
+        'successfully logged in'
+      );
+    });
+
+    test('it returns successfully logged in when eventAction is anything_else and eventOutcome is undefined', () => {
+      expect(getEventDetails({ eventAction: 'anything_else', eventOutcome: undefined })).toEqual(
+        'successfully logged in'
+      );
+    });
+
+    test('it returns successfully logged in when eventAction is anything_else and eventOutcome is null', () => {
+      expect(getEventDetails({ eventAction: 'anything_else', eventOutcome: null })).toEqual(
+        'successfully logged in'
+      );
+    });
+
+    test('it returns failed to log in when eventAction is anything_else and eventOutcome is failure', () => {
+      expect(getEventDetails({ eventAction: 'anything_else', eventOutcome: 'failure' })).toEqual(
+        'failed to log in'
+      );
+    });
+
+    test('it returns failed to log in when eventAction is anything_else and eventOutcome is fAiLuRe', () => {
+      expect(getEventDetails({ eventAction: 'anything_else', eventOutcome: 'fAiLuRe' })).toEqual(
+        'failed to log in'
+      );
     });
   });
 });

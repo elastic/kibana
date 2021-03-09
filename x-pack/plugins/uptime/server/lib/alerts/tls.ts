@@ -9,7 +9,7 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState } from './common';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
+import { TLS } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
@@ -17,7 +17,6 @@ import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 import { ActionGroupIdsOf } from '../../../../alerts/common';
 
-const { TLS } = ACTION_GROUP_DEFINITIONS;
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
 const DEFAULT_SIZE = 20;

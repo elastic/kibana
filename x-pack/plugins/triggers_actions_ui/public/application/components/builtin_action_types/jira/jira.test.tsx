@@ -96,7 +96,7 @@ describe('jira action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { 'subActionParams.incident.summary': [] },
+      errors: { 'subActionParams.incident.summary': [], 'subActionParams.incident.labels': [] },
     });
   });
 
@@ -108,6 +108,23 @@ describe('jira action params validation', () => {
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         'subActionParams.incident.summary': ['Summary is required.'],
+        'subActionParams.incident.labels': [],
+      },
+    });
+  });
+
+  test('params validation fails when labels contain spaces', () => {
+    const actionParams = {
+      subActionParams: {
+        incident: { summary: 'some title', labels: ['label with spaces'] },
+        comments: [],
+      },
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.incident.summary': [],
+        'subActionParams.incident.labels': ['Labels cannot contain spaces.'],
       },
     });
   });

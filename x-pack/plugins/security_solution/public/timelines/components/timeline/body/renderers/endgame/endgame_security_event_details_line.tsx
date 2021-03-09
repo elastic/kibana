@@ -35,6 +35,7 @@ interface Props {
   endgameTargetUserName: string | null | undefined;
   eventAction: string | null | undefined;
   eventCode: string | null | undefined;
+  eventOutcome: string | null | undefined;
   hostName: string | null | undefined;
   id: string;
   processExecutable: string | null | undefined;
@@ -57,6 +58,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     endgameTargetUserName,
     eventAction,
     eventCode,
+    eventOutcome,
     hostName,
     id,
     processExecutable,
@@ -67,7 +69,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     winlogEventId,
   }) => {
     const domain = getTargetUserAndTargetDomain(eventAction) ? endgameTargetDomainName : userDomain;
-    const eventDetails = getEventDetails(eventAction);
+    const eventDetails = getEventDetails({ eventAction, eventOutcome });
     const hostNameSeparator = getHostNameSeparator(eventAction);
     const user = getTargetUserAndTargetDomain(eventAction) ? endgameTargetUserName : userName;
     const userDomainField = getUserDomainField(eventAction);

@@ -19,6 +19,9 @@ import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
+import { BundleMetricsPlugin } from './bundle_metrics_plugin';
+import { EmitStatsPlugin } from './emit_stats_plugin';
+import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
@@ -67,6 +70,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     plugins: [
       new CleanWebpackPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
+      new PopulateBundleCachePlugin(worker, bundle),
+      new BundleMetricsPlugin(bundle),
+      ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 

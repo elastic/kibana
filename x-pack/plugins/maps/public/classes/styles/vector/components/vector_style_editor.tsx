@@ -49,7 +49,7 @@ import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
 import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
 import { StaticTextProperty } from '../properties/static_text_property';
 import { StaticSizeProperty } from '../properties/static_size_property';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 export interface StyleProperties {
   [key: string]: IStyleProperty<StylePropertyOptions>;

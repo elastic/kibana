@@ -17,6 +17,23 @@ import {
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 
+export interface MappedAnomalyHit {
+  id: string;
+  anomalyScore: number;
+  typical: number;
+  actual: number;
+  jobId: string;
+  startTime: number;
+  duration: number;
+  influencers: string[];
+  categoryId?: string;
+}
+
+export interface InfluencerFilter {
+  fieldName: string;
+  fieldValue: string;
+}
+
 export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: string) {
   const finalizeMlGetJobSpan = startTracingSpan('Fetch ml job from ES');
   const {

@@ -20,14 +20,13 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
   let table: TableContext | undefined;
   let direction: TableVisData['direction'];
 
-  const split = visConfig.dimensions.splitColumn || visConfig.dimensions.splitRow;
+  const split = visConfig.splitColumn || visConfig.splitRow;
 
   if (split) {
-    direction = visConfig.dimensions.splitRow ? 'row' : 'column';
-    const splitColumnIndex = split[0].accessor;
-    const splitColumnFormatter = getFormatService().deserialize(split[0].format);
+    direction = visConfig.splitRow ? 'row' : 'column';
+    const splitColumnIndex = split.accessor as number;
+    const splitColumnFormatter = getFormatService().deserialize(split.format);
     const splitColumn = input.columns[splitColumnIndex];
-    const columns = input.columns.filter((c, idx) => idx !== splitColumnIndex);
     const splitMap: { [key: string]: number } = {};
     let splitIndex = 0;
 
@@ -39,7 +38,7 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
         const tableGroup: TableGroup = {
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
           table: {
-            columns,
+            columns: input.columns,
             rows: [],
             formattedColumns: {},
           },
@@ -53,7 +52,7 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
     });
 
     tables.forEach((tg) => {
-      tg.table = createFormattedTable({ ...tg.table, columns: input.columns }, visConfig);
+      tg.table = createFormattedTable(tg.table, visConfig);
 
       if (visConfig.percentageCol) {
         tg.table = addPercentageColumn(tg.table, visConfig.percentageCol);

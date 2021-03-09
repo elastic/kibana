@@ -249,7 +249,6 @@ export function getColumns(
       name: i18n.translate('xpack.ml.anomaliesTable.categoryExamplesColumnName', {
         defaultMessage: 'category examples',
       }),
-      sortable: false,
       truncateText: true,
       render: (item) => {
         const examples = get(examplesByJobId, [item.jobId, item.entityValue], []);
@@ -268,7 +267,6 @@ export function getColumns(
           </EuiLink>
         );
       },
-      textOnly: true,
       width: '13%',
     });
   }

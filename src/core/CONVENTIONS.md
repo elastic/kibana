@@ -19,10 +19,7 @@ Definition of done for a feature:
 - has been verified manually by at least one reviewer
 - can be used by first & third party plugins
 - there is no contradiction between client and server API
-- works for OSS version
-   - works with and without a `server.basePath` configured
-   - cannot crash the Kibana server when it fails
-- works for the commercial version with a license
+- works with the subscription features
    - for a logged-in user
    - for anonymous user
    - compatible with Spaces
@@ -288,7 +285,7 @@ export class Plugin {
 
 #### Usage Collection
 
-For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.md`.
+For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.mdx`.
 
 ```ts
 // server/collectors/register.ts

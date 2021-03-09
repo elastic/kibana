@@ -31,7 +31,7 @@ export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
     'has RUM data with data',
     { config: 'trial', archives: ['8.0.0', 'rum_8.0.0'] },
     () => {
-      it('returns that it has data and service name with most traffice', async () => {
+      it('returns that it has data and service name with most traffic', async () => {
         const response = await supertest.get(
           '/api/apm/observability_overview/has_rum_data?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters='
         );

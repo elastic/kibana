@@ -22,7 +22,7 @@ export function createLegacyEsTestCluster(options = {}) {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
-    license = 'oss',
+    license = 'basic',
     log,
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),

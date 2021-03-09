@@ -6,11 +6,14 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { CaseType } from '../../../../../case/common/api';
 import { Case } from '../../containers/types';
 import { CreateCaseModal } from './create_case_modal';
 
 export interface UseCreateCaseModalProps {
   onCaseCreated: (theCase: Case) => void;
+  caseType?: CaseType;
+  hideConnectorServiceNowSir?: boolean;
 }
 export interface UseCreateCaseModalReturnedValues {
   modal: JSX.Element;
@@ -19,12 +22,16 @@ export interface UseCreateCaseModalReturnedValues {
   openModal: () => void;
 }
 
-export const useCreateCaseModal = ({ onCaseCreated }: UseCreateCaseModalProps) => {
+export const useCreateCaseModal = ({
+  caseType = CaseType.individual,
+  onCaseCreated,
+  hideConnectorServiceNowSir = false,
+}: UseCreateCaseModalProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const onSuccess = useCallback(
-    (theCase) => {
+    async (theCase) => {
       onCaseCreated(theCase);
       closeModal();
     },
@@ -35,6 +42,8 @@ export const useCreateCaseModal = ({ onCaseCreated }: UseCreateCaseModalProps) =
     () => ({
       modal: (
         <CreateCaseModal
+          caseType={caseType}
+          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           isModalOpen={isModalOpen}
           onCloseCaseModal={closeModal}
           onSuccess={onSuccess}
@@ -44,7 +53,7 @@ export const useCreateCaseModal = ({ onCaseCreated }: UseCreateCaseModalProps) =
       closeModal,
       openModal,
     }),
-    [isModalOpen, closeModal, onSuccess, openModal]
+    [caseType, closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal]
   );
 
   return state;

@@ -154,7 +154,10 @@ export interface ElasticsearchLegacySource {
   cluster_state?: {
     status?: string;
     nodes?: {
-      [nodeUuid: string]: {};
+      [nodeUuid: string]: {
+        ephemeral_id?: string;
+        name?: string;
+      };
     };
     master_node?: boolean;
   };
@@ -170,6 +173,7 @@ export interface ElasticsearchLegacySource {
   license?: {
     status?: string;
     type?: string;
+    expiry_date_in_millis?: number;
   };
   logstash_state?: {
     pipeline?: {

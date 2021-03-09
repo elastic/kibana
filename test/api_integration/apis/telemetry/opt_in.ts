@@ -14,10 +14,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function optInTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
+
   describe('/api/telemetry/v2/optIn API', () => {
     let defaultAttributes: TelemetrySavedObjectAttributes;
     let kibanaVersion: any;
     before(async () => {
+      await esArchiver.emptyKibanaIndex();
       const kibanaVersionAccessor = kibanaServer.version;
       kibanaVersion = await kibanaVersionAccessor.get();
       defaultAttributes =

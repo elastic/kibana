@@ -295,43 +295,43 @@ export default function ({ getService }: FtrProviderContext) {
               );
               expect(resp.header['content-type']).to.eql('application/ndjson');
               const objects = ndjsonToObject(resp.text);
-              expect(objects).to.eql([
-                {
-                  attributes: {
-                    description: '',
-                    hits: 0,
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON:
-                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
-                    },
-                    optionsJSON: objects[0].attributes.optionsJSON,
-                    panelsJSON: objects[0].attributes.panelsJSON,
-                    refreshInterval: {
-                      display: 'Off',
-                      pause: false,
-                      value: 0,
-                    },
-                    timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-                    timeRestore: true,
-                    timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-                    title: 'Requests',
-                    version: 1,
+
+              // Sort values aren't deterministic so we need to exclude them
+              const { sort, ...obj } = objects[0];
+              expect(obj).to.eql({
+                attributes: {
+                  description: '',
+                  hits: 0,
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
                   },
-                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                  migrationVersion: objects[0].migrationVersion,
-                  coreMigrationVersion: KIBANA_VERSION,
-                  references: [
-                    {
-                      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                      name: 'panel_0',
-                      type: 'visualization',
-                    },
-                  ],
-                  type: 'dashboard',
-                  updated_at: '2017-09-21T18:57:40.826Z',
-                  version: objects[0].version,
+                  optionsJSON: objects[0].attributes.optionsJSON,
+                  panelsJSON: objects[0].attributes.panelsJSON,
+                  refreshInterval: {
+                    display: 'Off',
+                    pause: false,
+                    value: 0,
+                  },
+                  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+                  timeRestore: true,
+                  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+                  title: 'Requests',
+                  version: 1,
                 },
-              ]);
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                migrationVersion: objects[0].migrationVersion,
+                coreMigrationVersion: KIBANA_VERSION,
+                references: [
+                  {
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    name: 'panel_0',
+                    type: 'visualization',
+                  },
+                ],
+                type: 'dashboard',
+                updated_at: '2017-09-21T18:57:40.826Z',
+                version: objects[0].version,
+              });
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
                 JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
@@ -355,43 +355,43 @@ export default function ({ getService }: FtrProviderContext) {
               );
               expect(resp.header['content-type']).to.eql('application/ndjson');
               const objects = ndjsonToObject(resp.text);
-              expect(objects).to.eql([
-                {
-                  attributes: {
-                    description: '',
-                    hits: 0,
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON:
-                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
-                    },
-                    optionsJSON: objects[0].attributes.optionsJSON,
-                    panelsJSON: objects[0].attributes.panelsJSON,
-                    refreshInterval: {
-                      display: 'Off',
-                      pause: false,
-                      value: 0,
-                    },
-                    timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-                    timeRestore: true,
-                    timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-                    title: 'Requests',
-                    version: 1,
+
+              // Sort values aren't deterministic so we need to exclude them
+              const { sort, ...obj } = objects[0];
+              expect(obj).to.eql({
+                attributes: {
+                  description: '',
+                  hits: 0,
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
                   },
-                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                  migrationVersion: objects[0].migrationVersion,
-                  coreMigrationVersion: KIBANA_VERSION,
-                  references: [
-                    {
-                      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                      name: 'panel_0',
-                      type: 'visualization',
-                    },
-                  ],
-                  type: 'dashboard',
-                  updated_at: '2017-09-21T18:57:40.826Z',
-                  version: objects[0].version,
+                  optionsJSON: objects[0].attributes.optionsJSON,
+                  panelsJSON: objects[0].attributes.panelsJSON,
+                  refreshInterval: {
+                    display: 'Off',
+                    pause: false,
+                    value: 0,
+                  },
+                  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+                  timeRestore: true,
+                  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+                  title: 'Requests',
+                  version: 1,
                 },
-              ]);
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                migrationVersion: objects[0].migrationVersion,
+                coreMigrationVersion: KIBANA_VERSION,
+                references: [
+                  {
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    name: 'panel_0',
+                    type: 'visualization',
+                  },
+                ],
+                type: 'dashboard',
+                updated_at: '2017-09-21T18:57:40.826Z',
+                version: objects[0].version,
+              });
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
                 JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
@@ -420,43 +420,43 @@ export default function ({ getService }: FtrProviderContext) {
               );
               expect(resp.header['content-type']).to.eql('application/ndjson');
               const objects = ndjsonToObject(resp.text);
-              expect(objects).to.eql([
-                {
-                  attributes: {
-                    description: '',
-                    hits: 0,
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON:
-                        objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
-                    },
-                    optionsJSON: objects[0].attributes.optionsJSON,
-                    panelsJSON: objects[0].attributes.panelsJSON,
-                    refreshInterval: {
-                      display: 'Off',
-                      pause: false,
-                      value: 0,
-                    },
-                    timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
-                    timeRestore: true,
-                    timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
-                    title: 'Requests',
-                    version: 1,
+
+              // Sort values aren't deterministic so we need to exclude them
+              const { sort, ...obj } = objects[0];
+              expect(obj).to.eql({
+                attributes: {
+                  description: '',
+                  hits: 0,
+                  kibanaSavedObjectMeta: {
+                    searchSourceJSON: objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON,
                   },
-                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                  migrationVersion: objects[0].migrationVersion,
-                  coreMigrationVersion: KIBANA_VERSION,
-                  references: [
-                    {
-                      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                      name: 'panel_0',
-                      type: 'visualization',
-                    },
-                  ],
-                  type: 'dashboard',
-                  updated_at: '2017-09-21T18:57:40.826Z',
-                  version: objects[0].version,
+                  optionsJSON: objects[0].attributes.optionsJSON,
+                  panelsJSON: objects[0].attributes.panelsJSON,
+                  refreshInterval: {
+                    display: 'Off',
+                    pause: false,
+                    value: 0,
+                  },
+                  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+                  timeRestore: true,
+                  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+                  title: 'Requests',
+                  version: 1,
                 },
-              ]);
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                migrationVersion: objects[0].migrationVersion,
+                coreMigrationVersion: KIBANA_VERSION,
+                references: [
+                  {
+                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                    name: 'panel_0',
+                    type: 'visualization',
+                  },
+                ],
+                type: 'dashboard',
+                updated_at: '2017-09-21T18:57:40.826Z',
+                version: objects[0].version,
+              });
               expect(objects[0].migrationVersion).to.be.ok();
               expect(() =>
                 JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
@@ -511,7 +511,37 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.unload('saved_objects/10k');
         });
 
-        it('should return 400 when exporting more than 10,000', async () => {
+        it('should allow exporting more than 10,000 objects if permitted by maxImportExportSize', async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              type: ['dashboard', 'visualization', 'search', 'index-pattern'],
+              excludeExportDetails: true,
+            })
+            .expect(200)
+            .then((resp) => {
+              expect(resp.header['content-disposition']).to.eql(
+                'attachment; filename="export.ndjson"'
+              );
+              expect(resp.header['content-type']).to.eql('application/ndjson');
+              const objects = ndjsonToObject(resp.text);
+              expect(objects.length).to.eql(10001);
+            });
+        });
+
+        it('should return 400 when exporting more than allowed by maxImportExportSize', async () => {
+          let anotherCustomVisId: string;
+          await supertest
+            .post('/api/saved_objects/visualization')
+            .send({
+              attributes: {
+                title: 'My other favorite vis',
+              },
+            })
+            .expect(200)
+            .then((resp) => {
+              anotherCustomVisId = resp.body.id;
+            });
           await supertest
             .post('/api/saved_objects/_export')
             .send({
@@ -523,9 +553,13 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `Can't export more than 10000 objects`,
+                message: `Can't export more than 10001 objects`,
               });
             });
+          await supertest
+            // @ts-expect-error TS complains about using `anotherCustomVisId` before it is assigned
+            .delete(`/api/saved_objects/visualization/${anotherCustomVisId}`)
+            .expect(200);
         });
       });
     });
@@ -534,7 +568,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await esDeleteAllIndices('.kibana')
+          await esDeleteAllIndices('.kibana*')
       );
 
       it('should return empty response', async () => {

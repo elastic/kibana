@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import {
@@ -21,6 +22,8 @@ import {
 } from '../../../routes';
 import { generateEnginePath } from '../../engine';
 
+import { AnalyticsLayout } from '../analytics_layout';
+import { AnalyticsSection, AnalyticsTable, RecentQueriesTable } from '../components';
 import {
   ANALYTICS_TITLE,
   TOTAL_QUERIES,
@@ -32,9 +35,7 @@ import {
   TOP_QUERIES_NO_CLICKS,
   RECENT_QUERIES,
 } from '../constants';
-import { AnalyticsLayout } from '../analytics_layout';
-import { AnalyticsSection, AnalyticsTable, RecentQueriesTable } from '../components';
-import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
+import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../index';
 
 export const Analytics: React.FC = () => {
   const {

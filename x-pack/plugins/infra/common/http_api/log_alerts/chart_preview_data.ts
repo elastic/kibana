@@ -41,7 +41,21 @@ export type GetLogAlertsChartPreviewDataSuccessResponsePayload = rt.TypeOf<
   typeof getLogAlertsChartPreviewDataSuccessResponsePayloadRT
 >;
 
-export const getLogAlertsChartPreviewDataAlertParamsSubsetRT = rt.intersection([
+// This should not have an explicit `any` return type, but it's here because its
+// inferred type includes `Comparator` which is a string enum exported from
+// common/alerting/logs/log_threshold/types.ts.
+//
+// There's a bug that's fixed in TypeScript 4.2.0 that will allow us to remove
+// the `:any` from this, so remove it when that update happens.
+//
+// If it's removed before then you get:
+//
+//     x-pack/plugins/infra/common/http_api/log_alerts/chart_preview_data.ts:44:14 - error TS4023:
+//     Exported variable 'getLogAlertsChartPreviewDataAlertParamsSubsetRT' has or is using name 'Comparator'
+//     from external module "/Users/smith/Code/kibana/x-pack/plugins/infra/common/alerting/logs/log_threshold/types"
+//     but cannot be named.
+//
+export const getLogAlertsChartPreviewDataAlertParamsSubsetRT: any = rt.intersection([
   rt.type({
     criteria: countCriteriaRT,
     timeUnit: timeUnitRT,

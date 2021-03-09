@@ -38,7 +38,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings/details`,
+      path: '/as/engines/:engineName/search_settings/details',
     })
   );
 
@@ -52,7 +52,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings/reset`,
+      path: '/as/engines/:engineName/search_settings/reset',
     })
   );
 
@@ -67,7 +67,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings`,
+      path: '/as/engines/:engineName/search_settings',
     })
   );
 
@@ -88,7 +88,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings_search`,
+      path: '/as/engines/:engineName/search_settings_search',
     })
   );
 }

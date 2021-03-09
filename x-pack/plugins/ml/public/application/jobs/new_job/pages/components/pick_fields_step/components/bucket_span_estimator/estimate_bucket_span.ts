@@ -40,6 +40,7 @@ export function useEstimateBucketSpan() {
     query: mlContext.combinedQuery,
     splitField: undefined,
     timeField: mlContext.currentIndexPattern.timeFieldName,
+    runtimeMappings: jobCreator.runtimeMappings ?? undefined,
   };
 
   if (

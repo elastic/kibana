@@ -20,12 +20,6 @@ import {
   AxisType,
   CategoryAxis,
 } from '../../../../types';
-import {
-  getScaleTypes,
-  getAxisModes,
-  getPositions,
-  getInterpolationModes,
-} from '../../../collections';
 import { ChartType } from '../../../../../common';
 
 const defaultValueAxisId = 'ValueAxis-1';
@@ -85,16 +79,9 @@ const seriesParam: SeriesParam = {
   valueAxis: defaultValueAxisId,
 };
 
-const positions = getPositions();
-const axisModes = getAxisModes();
-const scaleTypes = getScaleTypes();
-const interpolationModes = getInterpolationModes();
-
 const vis = ({
   type: {
-    editorConfig: {
-      collections: { scaleTypes, axisModes, positions, interpolationModes },
-    },
+    editorConfig: {},
   },
 } as any) as Vis;
 

@@ -35,6 +35,7 @@ export {
   listSchema,
   entry,
   entriesNested,
+  nestedEntryItem,
   entriesMatch,
   entriesMatchAny,
   entriesExists,
@@ -43,6 +44,7 @@ export {
   ExceptionListType,
   Type,
   ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
   osTypeArray,
   OsTypeArray,
 } from '../../lists/common';

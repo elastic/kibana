@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   migratePackagePolicyToV7110,
   migratePackagePolicyToV7120,
-} from '../../../security_solution/common';
+  // @ts-expect-error
+} from './security_solution';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -123,6 +124,8 @@ const getSavedObjectTypes = (
       '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
     },
   },
+  // TODO: Remove this saved object type. Core will drop any saved objects of
+  // this type during migrations. See https://github.com/elastic/kibana/issues/91869
   [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
     name: AGENT_EVENT_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -161,6 +164,7 @@ const getSavedObjectTypes = (
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_default_fleet_server: { type: 'boolean' },
         is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },

@@ -7,7 +7,8 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 
 import {
   saveAction,
@@ -155,7 +156,7 @@ export class EsArchiver {
    *  @return Promise
    */
   async emptyKibanaIndex() {
-    await emptyKibanaIndexAction({
+    return await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
       kbnClient: this.kbnClient,

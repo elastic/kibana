@@ -20,6 +20,7 @@ const createRegistryMock = (): jest.Mocked<
     isNamespaceAgnostic: jest.fn(),
     isSingleNamespace: jest.fn(),
     isMultiNamespace: jest.fn(),
+    isShareable: jest.fn(),
     isHidden: jest.fn(),
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
@@ -36,6 +37,7 @@ const createRegistryMock = (): jest.Mocked<
     (type: string) => type !== 'global' && type !== 'shared'
   );
   mock.isMultiNamespace.mockImplementation((type: string) => type === 'shared');
+  mock.isShareable.mockImplementation((type: string) => type === 'shared');
   mock.isImportableAndExportable.mockReturnValue(true);
 
   return mock;

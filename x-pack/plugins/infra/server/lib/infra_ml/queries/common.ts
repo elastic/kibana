@@ -77,3 +77,35 @@ export const createDatasetsFilters = (datasets?: string[]) =>
         },
       ]
     : [];
+
+export const createInfluencerFilter = ({
+  fieldName,
+  fieldValue,
+}: {
+  fieldName: string;
+  fieldValue: string;
+}) => [
+  {
+    nested: {
+      path: 'influencers',
+      query: {
+        bool: {
+          must: [
+            {
+              match: {
+                'influencers.influencer_field_name': fieldName,
+              },
+            },
+            {
+              query_string: {
+                fields: ['influencers.influencer_field_values'],
+                query: fieldValue,
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    },
+  },
+];

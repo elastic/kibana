@@ -6,23 +6,23 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { px, unit, units } from '../../../style/variables';
 import { Stacktrace } from '.';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
-const Accordion = styled(EuiAccordion)`
+const Accordion = euiStyled(EuiAccordion)`
   border-top: ${({ theme }) => theme.eui.euiBorderThin};
   margin-top: ${px(units.half)};
 `;
 
-const CausedByContainer = styled('h5')`
+const CausedByContainer = euiStyled('h5')`
   padding: ${({ theme }) => theme.eui.spacerSizes.s} 0;
 `;
 
-const CausedByHeading = styled('span')`
+const CausedByHeading = euiStyled('span')`
   color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   display: block;
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
@@ -30,7 +30,7 @@ const CausedByHeading = styled('span')`
   text-transform: uppercase;
 `;
 
-const FramesContainer = styled('div')`
+const FramesContainer = euiStyled('div')`
   padding-left: ${px(unit)};
 `;
 

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Style } from 'mapbox-gl';
 import { TMS_IN_YML_ID } from '../../../../maps_legacy/public';
 
 export const vegaLayerId = 'vega';
@@ -16,7 +17,7 @@ export const defaultMapConfig = {
   tileSize: 256,
 };
 
-export const defaultMabBoxStyle = {
+export const defaultMabBoxStyle: Style = {
   /**
    * according to the MapBox documentation that value should be '8'
    * @see (https://docs.mapbox.com/mapbox-gl-js/style-spec/root/#version)

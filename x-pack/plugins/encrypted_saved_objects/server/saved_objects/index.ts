@@ -6,18 +6,21 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  StartServicesAccessor,
+import type {
+  ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsServiceSetup,
-  ISavedObjectsRepository,
-  ISavedObjectTypeRegistry,
+  StartServicesAccessor,
 } from 'src/core/server';
-import { SecurityPluginSetup } from '../../../security/server';
-import { EncryptedSavedObjectsService } from '../crypto';
+
+import type { SecurityPluginSetup } from '../../../security/server';
+import type { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
-import { getDescriptorNamespace } from './get_descriptor_namespace';
+import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
+
+export { normalizeNamespace };
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;

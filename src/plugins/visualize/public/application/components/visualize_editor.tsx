@@ -22,6 +22,7 @@ import {
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
+import { VisualizeConstants } from '../..';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
@@ -54,7 +55,8 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
-    const { originatingApp: value } = services.stateTransferService.getIncomingEditorState() || {};
+    const { originatingApp: value } =
+      services.stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
     setOriginatingApp(value);
   }, [services]);
 

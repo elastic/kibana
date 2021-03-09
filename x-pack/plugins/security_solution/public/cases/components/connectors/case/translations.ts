@@ -40,7 +40,7 @@ export const CASE_CONNECTOR_COMMENT_REQUIRED = i18n.translate(
 export const CASE_CONNECTOR_CASES_DROPDOWN_ROW_LABEL = i18n.translate(
   'xpack.securitySolution.case.components.connectors.case.casesDropdownRowLabel',
   {
-    defaultMessage: 'Case',
+    defaultMessage: 'Case allowing sub-cases',
   }
 );
 
@@ -72,10 +72,18 @@ export const CASE_CONNECTOR_CASE_REQUIRED = i18n.translate(
   }
 );
 
-export const CASE_CONNECTOR_CALL_OUT_INFO = i18n.translate(
-  'xpack.securitySolution.case.components.connectors.case.callOutInfo',
+export const CASE_CONNECTOR_CALL_OUT_TITLE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.callOutTitle',
   {
-    defaultMessage: 'All alerts after rule creation will be appended to the selected case.',
+    defaultMessage: 'Generated alerts will be attached to sub-cases',
+  }
+);
+
+export const CASE_CONNECTOR_CALL_OUT_MSG = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.callOutMsg',
+  {
+    defaultMessage:
+      'A case can contain multiple sub-cases to allow grouping of generated alerts. Sub-cases will give more granular control over the status of these generated alerts and prevents having too many alerts attached to one case.',
   }
 );
 
@@ -83,5 +91,19 @@ export const CASE_CONNECTOR_ADD_NEW_CASE = i18n.translate(
   'xpack.securitySolution.case.components.connectors.case.addNewCaseOption',
   {
     defaultMessage: 'Add new case',
+  }
+);
+
+export const CREATE_CASE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.createCaseLabel',
+  {
+    defaultMessage: 'Create case',
+  }
+);
+
+export const CONNECTED_CASE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.connectedCaseLabel',
+  {
+    defaultMessage: 'Connected case',
   }
 );

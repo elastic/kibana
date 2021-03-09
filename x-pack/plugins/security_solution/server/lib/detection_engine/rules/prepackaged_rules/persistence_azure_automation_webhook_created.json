@@ -30,7 +30,8 @@
     "SecOps",
     "Configuration Audit"
   ],
+  "timestamp_override": "event.ingested",
   "to": "now-25m",
   "type": "query",
-  "version": 2
+  "version": 3
 }

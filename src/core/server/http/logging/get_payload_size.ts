@@ -6,19 +6,25 @@
  * Side Public License, v 1.
  */
 
-import type { ReadStream } from 'fs';
+import { isPlainObject } from 'lodash';
+import { ReadStream } from 'fs';
+import { Zlib } from 'zlib';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import { Logger } from '../../logging';
 
 type Response = Request['response'];
 
-const isBuffer = (src: unknown, res: Response): src is Buffer => {
-  return !isBoom(res) && res.variety === 'buffer' && res.source === src;
+const isBuffer = (src: unknown, variety: string): src is Buffer =>
+  variety === 'buffer' && Buffer.isBuffer(src);
+const isFsReadStream = (src: unknown, variety: string): src is ReadStream => {
+  return variety === 'stream' && src instanceof ReadStream;
 };
-const isFsReadStream = (src: unknown, res: Response): src is ReadStream => {
-  return !isBoom(res) && res.variety === 'stream' && res.source === src;
+const isZlibStream = (src: unknown, variety: string): src is Zlib => {
+  return variety === 'stream' && typeof src === 'object' && src !== null && 'bytesWritten' in src;
 };
+const isString = (src: unknown, variety: string): src is string =>
+  variety === 'plain' && typeof src === 'string';
 
 /**
  * Attempts to determine the size (in bytes) of a Hapi response
@@ -49,18 +55,27 @@ export function getResponsePayloadBytes(response: Response, log: Logger): number
       return Buffer.byteLength(JSON.stringify(response.output.payload));
     }
 
-    if (isBuffer(response.source, response)) {
+    if (isBuffer(response.source, response.variety)) {
       return response.source.byteLength;
     }
 
-    if (isFsReadStream(response.source, response)) {
+    if (isFsReadStream(response.source, response.variety)) {
       return response.source.bytesRead;
     }
 
-    if (response.variety === 'plain') {
-      return typeof response.source === 'string'
-        ? Buffer.byteLength(response.source)
-        : Buffer.byteLength(JSON.stringify(response.source));
+    if (isZlibStream(response.source, response.variety)) {
+      return response.source.bytesWritten;
+    }
+
+    if (isString(response.source, response.variety)) {
+      return Buffer.byteLength(response.source);
+    }
+
+    if (
+      response.variety === 'plain' &&
+      (isPlainObject(response.source) || Array.isArray(response.source))
+    ) {
+      return Buffer.byteLength(JSON.stringify(response.source));
     }
   } catch (e) {
     // We intentionally swallow any errors as this information is

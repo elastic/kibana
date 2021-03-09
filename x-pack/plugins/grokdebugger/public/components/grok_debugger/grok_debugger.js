@@ -129,7 +129,7 @@ export class GrokDebuggerComponent extends React.Component {
         <EuiPageBody>
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiForm className="grokdebugger-container" data-test-subj="grokDebugger">
+              <EuiForm className="grokdebugger-container" data-test-subj="grokDebuggerContainer">
                 <EventInput value={this.state.rawEvent} onChange={this.onRawEventChange} />
                 <PatternInput value={this.state.pattern} onChange={this.onPatternChange} />
                 <EuiSpacer />

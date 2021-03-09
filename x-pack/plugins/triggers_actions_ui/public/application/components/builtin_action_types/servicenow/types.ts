@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSelectOption } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../../types';
 import {
   ExecutorSubActionPushParamsITSM,
@@ -45,4 +44,3 @@ export interface Choice {
 }
 
 export type Fields = Record<string, Choice[]>;
-export type Options = Record<string, EuiSelectOption[]>;

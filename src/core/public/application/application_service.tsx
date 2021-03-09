@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { MountPoint } from '../types';
@@ -31,6 +31,7 @@ import {
   NavigateToAppOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
+import { getUserConfirmationHandler } from './navigation_confirm';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
 interface SetupDeps {
@@ -92,6 +93,7 @@ export class ApplicationService {
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private redirectTo?: (url: string) => void;
+  private overlayStart$ = new Subject<OverlayStart>();
 
   public setup({
     http: { basePath },
@@ -101,7 +103,14 @@ export class ApplicationService {
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    this.history = history || createBrowserHistory({ basename });
+    this.history =
+      history ||
+      createBrowserHistory({
+        basename,
+        getUserConfirmation: getUserConfirmationHandler({
+          overlayPromise: this.overlayStart$.pipe(take(1)).toPromise(),
+        }),
+      });
 
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
@@ -172,6 +181,8 @@ export class ApplicationService {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
+
+    this.overlayStart$.next(overlays);
 
     const httpLoadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(httpLoadingCount$);

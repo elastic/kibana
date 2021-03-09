@@ -12,16 +12,16 @@ import {
   mockKibanaValues,
   expectedAsyncError,
 } from '../../../__mocks__';
-
-import { AppLogic } from '../../app_logic';
-jest.mock('../../app_logic', () => ({
-  AppLogic: { values: { isOrganization: true } },
-}));
-
 import { fullContentSources, contentItems } from '../../__mocks__/content_sources.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
 import { DEFAULT_META } from '../../../shared/constants';
+
+jest.mock('../../app_logic', () => ({
+  AppLogic: { values: { isOrganization: true } },
+}));
+import { AppLogic } from '../../app_logic';
+
 import { NOT_FOUND_PATH } from '../../routes';
 
 import { SourceLogic } from './source_logic';

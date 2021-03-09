@@ -39,6 +39,7 @@ export interface CreateExecutionHandlerOptions<
   actions: AlertAction[];
   spaceId: string;
   apiKey: RawAlert['apiKey'];
+  kibanaBaseUrl: string | undefined;
   alertType: NormalizedAlertType<
     Params,
     State,
@@ -82,6 +83,7 @@ export function createExecutionHandler<
   spaceId,
   apiKey,
   alertType,
+  kibanaBaseUrl,
   eventLogger,
   request,
   alertParams,
@@ -126,6 +128,7 @@ export function createExecutionHandler<
             context,
             actionParams: action.params,
             state,
+            kibanaBaseUrl,
             alertParams,
           }),
         };

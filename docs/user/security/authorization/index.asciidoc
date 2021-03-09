@@ -12,7 +12,9 @@ NOTE: When running multiple tenants of {kib} by changing the `kibana.index` in y
 [[xpack-kibana-role-management]]
 === {kib} role management
 
-To create a role that grants {kib} privileges, open the menu, then click *Stack Management > Roles* and click **Create role**.
+Roles are a collection of privileges that allow you to perform actions in {kib} and {es}. Users are not directly granted privileges, but are instead assigned one or more roles that describe the desired level of access. When you assign a user multiple roles, the user receives a union of the roles’ privileges. This means that you cannot reduce the privileges of a user by assigning them an additional role. You must instead remove or edit one of their existing roles.
+
+To create a role, open the menu, then click *Stack Management > Roles* and click **Create role**.
 
 [float]
 ==== Required permissions
@@ -22,7 +24,7 @@ The `manage_security` {ref}/security-privileges.html#privileges-list-cluster[clu
 [[adding_cluster_privileges]]
 ==== Cluster privileges
 
-Cluster privileges grant access to monitoring and management features within {es}. They also enable certain <<management, Stack Management>> capabilities within {kib}.
+Cluster privileges grant access to monitoring and management features in {es}. They also enable <<management, Stack Management>> capabilities in {kib}.
 
 Refer to {ref}/security-privileges.html#privileges-list-cluster[cluster privileges] for a complete description of available options.
 
@@ -30,30 +32,34 @@ Refer to {ref}/security-privileges.html#privileges-list-cluster[cluster privileg
 ==== Index privileges
 
 Each role can grant access to multiple data indices, and each index can have a different set of privileges.
-We recommend granting the `read` and `view_index_metadata` privileges to each index that you expect your users to work with inside of {kib}.
+We recommend granting the `read` and `view_index_metadata` privileges to each index that you expect your users to work with in {kib}.
 
 Refer to {ref}/security-privileges.html#privileges-list-indices[index privileges] for a complete description of available options.
 
 Document-level and field-level security affords you even more granularity when it comes to granting access to your data.
-With document-level security ("DLS"), you can write an {es} query to describe which documents your users can access.
-With field-level security ("FLS"), you can instruct {es} to grant or deny access to specific fields within each document.
+With document-level security (DLS), you can write an {es} query to describe which documents this role grants access to.
+With field-level security (FLS), you can instruct {es} to grant or deny access to specific fields within each document.
 
 [[index_privilege_example_1]]
-===== Example 1: Grant access to indices matching the `filebeat-*` pattern
+===== Example: Grant access to indices that match the `filebeat-*` pattern
 
-. Enter `filebeat-*` in the **Index** field under the **Index Privileges** section.
-. Enter `read` and `view_index_metadata` in the **Privileges** field under the **Index Privileges** section.
+. Go to **Stack Management > Roles**, and then click **Create role**.
+. In **Index privileges**, enter:
+.. `filebeat-*` in the **Index** field.
+.. `read` and `view_index_metadata` in the **Privileges** field.
 
 [role="screenshot"]
 image::user/security/images/create-role-index-example.png[Create role with index privileges]
 
 [[index_privilege_dls_example]]
-===== Example 2: Grant read access to specific documents matching the `filebeat-*` pattern
+===== Example: Grant read access to specific documents in indices that match the `filebeat-*` pattern
 
-. Enter `filebeat-*` in the **Indices** field under the **Index Privileges** section.
-. Enter `read` and `view_index_metadata` in the **Privileges** field under the **Index Privileges** section.
-. Select the **Grant read privileges to selected documents** option.
-. Enter an {es} query describing the documents for which you want to grant access. In this example, we are writing a query which allows access to documents that have a `category` field equal to `click`:
+. Go to **Stack Management > Roles**, and then click **Create role**.
+. In **Index privileges**, enter:
+.. `filebeat-*` in the **Indices** field.
+.. `read` and `view_index_metadata` in the **Privileges** field.
+. Select **Grant read privileges to specific documents**.
+. Enter an {es} query that matches the documents your users should access. This example writes a query that allows access to documents that have a `category` field equal to `click`:
 +
 [source,sh]
 --------------------------------------------------
@@ -64,7 +70,7 @@ image::user/security/images/create-role-index-example.png[Create role with index
 }
 --------------------------------------------------
 +
-NOTE: {kib} automatically surrounds your DLS query with a `query` block, so it is not necessary to provide your own.
+NOTE: {kib} automatically surrounds your DLS query with a `query` block, so you don't have to provide your own.
 
 [role="screenshot"]
 image::user/security/images/create-role-dls-example.png[Create role with DLS index privileges]

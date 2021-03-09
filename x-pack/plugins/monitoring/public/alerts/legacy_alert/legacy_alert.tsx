@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiTextColor, EuiSpacer } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { LEGACY_ALERTS, LEGACY_ALERT_DETAILS } from '../../../common/constants';
+import {
+  LEGACY_ALERTS,
+  LEGACY_ALERT_DETAILS,
+  ALERT_REQUIRES_APP_CONTEXT,
+} from '../../../common/constants';
 
 export function createLegacyAlertTypes(): AlertTypeModel[] {
   return LEGACY_ALERTS.map((legacyAlert) => {
@@ -34,7 +38,7 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
       ),
       defaultActionMessage: '{{context.internalFullMessage}}',
       validate: () => ({ errors: {} }),
-      requiresAppContext: true,
+      requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
     };
   });
 }

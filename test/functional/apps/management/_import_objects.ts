@@ -23,13 +23,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89478
-  describe.skip('import objects', function describeIndexTests() {
+  describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
+        await esArchiver.load('management');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
-        await esArchiver.load('management');
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
@@ -213,10 +212,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('.json file', () => {
       beforeEach(async function () {
-        // delete .kibana index and then wait for Kibana to re-create it
+        await esArchiver.load('saved_objects_imports');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
-        await esArchiver.load('saved_objects_imports');
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 

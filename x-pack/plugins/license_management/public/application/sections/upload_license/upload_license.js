@@ -13,7 +13,6 @@ import {
   EuiForm,
   EuiSpacer,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiText,
   EuiTitle,
   EuiFlexGroup,
@@ -62,41 +61,39 @@ export class UploadLicense extends React.PureComponent {
       return null;
     }
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
-              defaultMessage="Confirm License Upload"
-            />
-          }
-          onCancel={this.cancel}
-          onConfirm={() => this.send(true)}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
-              defaultMessage="Confirm"
-            />
-          }
-        >
-          <div>
-            <EuiText>{firstLine}</EuiText>
-            <EuiText>
-              <ul>
-                {messages.map((message) => (
-                  <li key={message}>{message}</li>
-                ))}
-              </ul>
-            </EuiText>
-          </div>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+            defaultMessage="Confirm License Upload"
+          />
+        }
+        onCancel={this.cancel}
+        onConfirm={() => this.send(true)}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+            defaultMessage="Confirm"
+          />
+        }
+      >
+        <div>
+          <EuiText>{firstLine}</EuiText>
+          <EuiText>
+            <ul>
+              {messages.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </EuiText>
+        </div>
+      </EuiConfirmModal>
     );
   }
   errorMessage() {

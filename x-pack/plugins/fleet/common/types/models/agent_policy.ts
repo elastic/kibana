@@ -6,9 +6,9 @@
  */
 
 import { agentPolicyStatuses } from '../../constants';
-import { DataType, ValueOf } from '../../types';
-import { PackagePolicy, PackagePolicyPackage } from './package_policy';
-import { Output } from './output';
+import type { DataType, ValueOf } from '../../types';
+import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
+import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -17,6 +17,7 @@ export interface NewAgentPolicy {
   namespace: string;
   description?: string;
   is_default?: boolean;
+  is_default_fleet_server?: boolean; // Optional when creating a policy
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: Array<ValueOf<DataType>>;
 }

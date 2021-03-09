@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
+import type { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
 import { validatePackagePolicyConfig } from './';
 
 export const hasInvalidButRequiredVar = (

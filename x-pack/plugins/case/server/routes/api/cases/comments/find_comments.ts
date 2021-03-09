@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
+
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
@@ -13,6 +15,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
+  AssociationType,
   CommentsResponseRt,
   SavedObjectFindOptionsRt,
   throwErrors,
@@ -20,8 +23,14 @@ import {
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { defaultPage, defaultPerPage } from '../..';
 
-export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
+const FindQueryParamsRt = rt.partial({
+  ...SavedObjectFindOptionsRt.props,
+  subCaseId: rt.string,
+});
+
+export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: `${CASE_COMMENTS_URL}/_find`,
@@ -36,27 +45,46 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
       try {
         const client = context.core.savedObjects.client;
         const query = pipe(
-          SavedObjectFindOptionsRt.decode(request.query),
+          FindQueryParamsRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
+        const id = query.subCaseId ?? request.params.case_id;
+        const associationType = query.subCaseId ? AssociationType.subCase : AssociationType.case;
         const args = query
           ? {
+              caseService,
               client,
-              caseId: request.params.case_id,
+              id,
               options: {
-                ...query,
+                // We need this because the default behavior of getAllCaseComments is to return all the comments
+                // unless the page and/or perPage is specified. Since we're spreading the query after the request can
+                // still override this behavior.
+                page: defaultPage,
+                perPage: defaultPerPage,
                 sortField: 'created_at',
+                ...query,
               },
+              associationType,
             }
           : {
+              caseService,
               client,
-              caseId: request.params.case_id,
+              id,
+              options: {
+                page: defaultPage,
+                perPage: defaultPerPage,
+                sortField: 'created_at',
+              },
+              associationType,
             };
 
-        const theComments = await caseService.getAllCaseComments(args);
+        const theComments = await caseService.getCommentsByAssociation(args);
         return response.ok({ body: CommentsResponseRt.encode(transformComments(theComments)) });
       } catch (error) {
+        logger.error(
+          `Failed to find comments in route case id: ${request.params.case_id}: ${error}`
+        );
         return response.customError(wrapError(error));
       }
     }

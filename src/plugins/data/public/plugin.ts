@@ -101,23 +101,8 @@ export class DataPublicPlugin
     });
 
     uiActions.registerTrigger(applyFilterTrigger);
-
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
-    );
-
-    uiActions.addTriggerAction(
-      'SELECT_RANGE_TRIGGER',
-      createSelectRangeAction(() => ({
-        uiActions: startServices().plugins.uiActions,
-      }))
-    );
-
-    uiActions.addTriggerAction(
-      'VALUE_CLICK_TRIGGER',
-      createValueClickAction(() => ({
-        uiActions: startServices().plugins.uiActions,
-      }))
     );
 
     inspector.registerView(
@@ -130,7 +115,10 @@ export class DataPublicPlugin
     );
 
     return {
-      autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
+      autocomplete: this.autocomplete.setup(core, {
+        timefilter: queryService.timefilter,
+        usageCollection,
+      }),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -175,6 +163,20 @@ export class DataPublicPlugin
     setSearchService(search);
 
     uiActions.addTriggerAction(
+      'SELECT_RANGE_TRIGGER',
+      createSelectRangeAction(() => ({
+        uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
+      'VALUE_CLICK_TRIGGER',
+      createValueClickAction(() => ({
+        uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
       APPLY_FILTER_TRIGGER,
       uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
     );
@@ -196,10 +198,7 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
-      trackUiMetric: this.usageCollection?.reportUiCounter.bind(
-        this.usageCollection,
-        'data_plugin'
-      ),
+      usageCollection: this.usageCollection,
     });
 
     return {

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
+import { isObject, get, isString, isNumber, isEmpty } from 'lodash';
+import React, { useMemo } from 'react';
 
+import { SearchResponse } from 'elasticsearch';
 import {
   CaseFullExternalService,
   ActionConnector,
   CaseStatuses,
+  CommentType,
 } from '../../../../../case/common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
@@ -24,8 +27,16 @@ import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
-import { Alert } from '../case_view';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
+import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
+import { Ecs } from '../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../common/search_strategy';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { buildAlertsQuery } from '../case_view/helpers';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -194,14 +205,22 @@ export const getUpdateAction = ({
   ),
 });
 
-export const getAlertComment = ({
+export const getAlertAttachment = ({
   action,
-  alert,
+  alertId,
+  index,
+  loadingAlertData,
+  ruleId,
+  ruleName,
   onShowAlertDetails,
 }: {
   action: CaseUserActions;
-  alert: Alert | undefined;
   onShowAlertDetails: (alertId: string, index: string) => void;
+  alertId: string;
+  index: string;
+  loadingAlertData: boolean;
+  ruleId: string;
+  ruleName: string;
 }): EuiCommentProps => {
   return {
     username: (
@@ -212,7 +231,15 @@ export const getAlertComment = ({
     ),
     className: 'comment-alert',
     type: 'update',
-    event: <AlertCommentEvent alert={alert} />,
+    event: (
+      <AlertCommentEvent
+        alertId={alertId}
+        loadingAlertData={loadingAlertData}
+        ruleId={ruleId}
+        ruleName={ruleName}
+        commentType={CommentType.alert}
+      />
+    ),
     'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
     timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
     timelineIcon: 'bell',
@@ -222,23 +249,188 @@ export const getAlertComment = ({
           <UserActionCopyLink id={action.actionId} />
         </EuiFlexItem>
         <EuiFlexItem>
-          {alert != null ? (
-            <UserActionShowAlert
-              id={action.actionId}
-              alert={alert}
-              onShowAlertDetails={onShowAlertDetails}
-            />
-          ) : (
-            <EuiIconTip
-              aria-label={i18n.ALERT_NOT_FOUND_TOOLTIP}
-              size="l"
-              type="alert"
-              color="danger"
-              content={i18n.ALERT_NOT_FOUND_TOOLTIP}
-            />
-          )}
+          <UserActionShowAlert
+            id={action.actionId}
+            alertId={alertId}
+            index={index}
+            onShowAlertDetails={onShowAlertDetails}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
   };
+};
+
+export const toStringArray = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.reduce<string[]>((acc, v) => {
+      if (v != null) {
+        switch (typeof v) {
+          case 'number':
+          case 'boolean':
+            return [...acc, v.toString()];
+          case 'object':
+            try {
+              return [...acc, JSON.stringify(v)];
+            } catch {
+              return [...acc, 'Invalid Object'];
+            }
+          case 'string':
+            return [...acc, v];
+          default:
+            return [...acc, `${v}`];
+        }
+      }
+      return acc;
+    }, []);
+  } else if (value == null) {
+    return [];
+  } else if (!Array.isArray(value) && typeof value === 'object') {
+    try {
+      return [JSON.stringify(value)];
+    } catch {
+      return ['Invalid Object'];
+    }
+  } else {
+    return [`${value}`];
+  }
+};
+
+export const formatAlertToEcsSignal = (alert: {}): Ecs =>
+  Object.keys(alert).reduce<Ecs>((accumulator, key) => {
+    const item = get(alert, key);
+    if (item != null && isObject(item)) {
+      return { ...accumulator, [key]: formatAlertToEcsSignal(item) };
+    } else if (Array.isArray(item) || isString(item) || isNumber(item)) {
+      return { ...accumulator, [key]: toStringArray(item) };
+    }
+    return accumulator;
+  }, {} as Ecs);
+
+const EMPTY_ARRAY: TimelineNonEcsData[] = [];
+export const getGeneratedAlertsAttachment = ({
+  action,
+  alertIds,
+  ruleId,
+  ruleName,
+}: {
+  action: CaseUserActions;
+  alertIds: string[];
+  ruleId: string;
+  ruleName: string;
+}): EuiCommentProps => {
+  const fetchEcsAlertsData = async (fetchAlertIds?: string[]): Promise<Ecs[]> => {
+    if (isEmpty(fetchAlertIds)) {
+      return [];
+    }
+    const alertResponse = await KibanaServices.get().http.fetch<
+      SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
+    >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      method: 'POST',
+      body: JSON.stringify(buildAlertsQuery(fetchAlertIds ?? [])),
+    });
+    return (
+      alertResponse?.hits.hits.reduce<Ecs[]>(
+        (acc, { _id, _index, _source }) => [
+          ...acc,
+          {
+            ...formatAlertToEcsSignal(_source as {}),
+            _id,
+            _index,
+            timestamp: _source['@timestamp'],
+          },
+        ],
+        []
+      ) ?? []
+    );
+  };
+  return {
+    username: <EuiIcon type="logoSecurity" size="m" />,
+    className: 'comment-alert',
+    type: 'update',
+    event: (
+      <AlertCommentEvent
+        alertId={alertIds[0]}
+        ruleId={ruleId}
+        ruleName={ruleName}
+        alertsCount={alertIds.length}
+        commentType={CommentType.generatedAlert}
+      />
+    ),
+    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+    timelineIcon: 'bell',
+    actions: (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UserActionCopyLink id={action.actionId} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <InvestigateInTimelineAction
+            ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
+            alertIds={alertIds}
+            key="investigate-in-timeline"
+            ecsRowData={null}
+            fetchEcsAlertsData={fetchEcsAlertsData}
+            nonEcsRowData={EMPTY_ARRAY}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  };
+};
+
+interface Signal {
+  rule: {
+    id: string;
+    name: string;
+    to: string;
+    from: string;
+  };
+}
+
+interface SignalHit {
+  _id: string;
+  _index: string;
+  _source: {
+    '@timestamp': string;
+    signal: Signal;
+  };
+}
+
+export interface Alert {
+  _id: string;
+  _index: string;
+  '@timestamp': string;
+  signal: Signal;
+  [key: string]: unknown;
+}
+
+export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, Ecs>] => {
+  const { selectedPatterns } = useSourcererScope(SourcererScopeName.detections);
+  const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
+
+  const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
+    alertsQuery,
+    selectedPatterns[0]
+  );
+
+  const alerts = useMemo(
+    () =>
+      alertsData?.hits.hits.reduce<Record<string, Ecs>>(
+        (acc, { _id, _index, _source }) => ({
+          ...acc,
+          [_id]: {
+            ...formatAlertToEcsSignal(_source),
+            _id,
+            _index,
+            timestamp: _source['@timestamp'],
+          },
+        }),
+        {}
+      ) ?? {},
+    [alertsData?.hits.hits]
+  );
+
+  return [isLoadingAlerts, alerts];
 };

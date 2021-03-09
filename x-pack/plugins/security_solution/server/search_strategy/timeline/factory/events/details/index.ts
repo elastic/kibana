@@ -13,11 +13,13 @@ import {
   TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsDetailsRequestOptions,
+  TimelineEventsDetailsItem,
+  EventSource,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
-import { getDataFromFieldsHits, getDataFromSourceHits } from './helpers';
+import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './helpers';
 
 export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (options: TimelineEventsDetailsRequestOptions) => {
@@ -33,7 +35,6 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
-
     if (response.isRunning) {
       return {
         ...response,
@@ -41,9 +42,14 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
         inspect,
       };
     }
-
-    const sourceData = getDataFromSourceHits(_source);
-    const fieldsData = getDataFromFieldsHits(merge(fields, hitsData));
+    const sourceData = await getDataSafety<EventSource, TimelineEventsDetailsItem[]>(
+      getDataFromSourceHits,
+      _source
+    );
+    const fieldsData = await getDataSafety<EventHit['fields'], TimelineEventsDetailsItem[]>(
+      getDataFromFieldsHits,
+      merge(fields, hitsData)
+    );
 
     const data = unionBy('field', fieldsData, sourceData);
     return {

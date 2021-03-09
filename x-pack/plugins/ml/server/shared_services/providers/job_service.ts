@@ -28,7 +28,7 @@ export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider 
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(async ({ scopedClient, mlClient }) => {
+            .ok(({ scopedClient, mlClient }) => {
               const { jobsSummary } = jobServiceProvider(scopedClient, mlClient);
               return jobsSummary(...args);
             });

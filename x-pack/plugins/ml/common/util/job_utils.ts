@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, each, pick } from 'lodash';
+import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
 // @ts-ignore
@@ -16,7 +16,7 @@ import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
-import { CombinedJob, CustomSettings, Datafeed, JobId, Job } from '../types/anomaly_detection_jobs';
+import { CombinedJob, CustomSettings, Datafeed, Job, JobId } from '../types/anomaly_detection_jobs';
 import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
@@ -28,6 +28,8 @@ import {
   getDatafeedAggregations,
 } from './datafeed_utils';
 import { findAggField } from './validation_utils';
+import { isPopulatedObject } from './object_utils';
+import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
   valid: boolean;
@@ -51,17 +53,9 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
 }
 
 export function hasRuntimeMappings(job: CombinedJob): boolean {
-  const hasDatafeed =
-    typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+  const hasDatafeed = isPopulatedObject(job.datafeed_config);
   if (hasDatafeed) {
-    const runtimeMappings =
-      typeof job.datafeed_config.runtime_mappings === 'object'
-        ? Object.keys(job.datafeed_config.runtime_mappings)
-        : undefined;
-
-    if (Array.isArray(runtimeMappings) && runtimeMappings.length > 0) {
-      return true;
-    }
+    return isPopulatedObject(job.datafeed_config.runtime_mappings);
   }
   return false;
 }
@@ -114,7 +108,11 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
     // to invert to a reverse search of the underlying metric data.
-    if (isSourceDataChartable === true && typeof job.datafeed_config?.script_fields === 'object') {
+    if (
+      isSourceDataChartable === true &&
+      job.datafeed_config?.script_fields !== null &&
+      typeof job.datafeed_config?.script_fields === 'object'
+    ) {
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
@@ -123,8 +121,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
 
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+    const hasDatafeed = isPopulatedObject(job.datafeed_config);
     if (hasDatafeed) {
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);
@@ -804,4 +801,17 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
   return indexPatternName.includes(',')
     ? indexPatternName.split(',').map((i) => i.trim())
     : [indexPatternName];
+}
+
+/**
+ * Resolves the longest bucket span from the list.
+ * @param bucketSpans Collection of bucket spans
+ */
+export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
+  return Math.max(
+    ...bucketSpans
+      .map((b) => parseInterval(b))
+      .filter(isDefined)
+      .map((v) => v.asSeconds())
+  );
 }

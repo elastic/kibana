@@ -36,7 +36,7 @@ export const useColorPicker = (
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName
 ): LegendColorPicker =>
   useMemo(
-    () => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
+    () => ({ anchor, color, onClose, onChange, seriesIdentifiers: [seriesIdentifier] }) => {
       const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
       const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
         if (!seriesName) {

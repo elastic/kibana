@@ -336,6 +336,11 @@ describe('Policy Details', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(0);
       });
+
+      it('shows the locked card in place of 1 paid feature', () => {
+        const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
+        expect(lockedCard).toHaveLength(1);
+      });
     });
   });
 });

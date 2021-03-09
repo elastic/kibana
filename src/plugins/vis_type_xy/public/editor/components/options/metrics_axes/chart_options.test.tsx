@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 import { ChartOptions, ChartOptionsParams } from './chart_options';
 import { SeriesParam, ChartMode } from '../../../../types';
 import { LineOptions } from './line_options';
-import { valueAxis, seriesParam, vis } from './mocks';
+import { valueAxis, seriesParam } from './mocks';
 import { ChartType } from '../../../../../common';
 
 describe('ChartOptions component', () => {
@@ -29,7 +29,6 @@ describe('ChartOptions component', () => {
     defaultProps = {
       index: 0,
       chart,
-      vis,
       valueAxes: [valueAxis],
       setParamByIndex,
       changeValueAxis,

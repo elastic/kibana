@@ -8,7 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiOverlayMask,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -27,48 +26,46 @@ const { DatasourceDatasourcePreview: strings } = ComponentStrings;
 const { DatasourceDatasourceComponent: datasourceStrings } = ComponentStrings;
 
 export const DatasourcePreview = ({ done, datatable }) => (
-  <EuiOverlayMask>
-    <EuiModal onClose={done} maxWidth="1000px" className="canvasModal--fixedSize">
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{strings.getModalTitle()}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody className="canvasDatasourcePreview">
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.canvas.datasourceDatasourcePreview.modalDescription"
-              defaultMessage="The following data will be available to the selected element upon clicking {saveLabel} in the sidebar."
-              values={{
-                saveLabel: <strong>{datasourceStrings.getSaveButtonLabel()}</strong>,
-              }}
+  <EuiModal onClose={done} maxWidth="1000px" className="canvasModal--fixedSize">
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>{strings.getModalTitle()}</EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody className="canvasDatasourcePreview">
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.canvas.datasourceDatasourcePreview.modalDescription"
+            defaultMessage="The following data will be available to the selected element upon clicking {saveLabel} in the sidebar."
+            values={{
+              saveLabel: <strong>{datasourceStrings.getSaveButtonLabel()}</strong>,
+            }}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      {datatable.type === 'error' ? (
+        <Error payload={datatable} />
+      ) : (
+        <EuiPanel className="canvasDatasourcePreview__panel" paddingSize="none">
+          {datatable.rows.length > 0 ? (
+            <Datatable datatable={datatable} showHeader paginate />
+          ) : (
+            <EuiEmptyPrompt
+              title={<h2>{strings.getEmptyTitle()}</h2>}
+              titleSize="s"
+              body={
+                <p>
+                  {strings.getEmptyFirstLineDescription()}
+                  <br />
+                  {strings.getEmptySecondLineDescription()}
+                </p>
+              }
             />
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        {datatable.type === 'error' ? (
-          <Error payload={datatable} />
-        ) : (
-          <EuiPanel className="canvasDatasourcePreview__panel" paddingSize="none">
-            {datatable.rows.length > 0 ? (
-              <Datatable datatable={datatable} showHeader paginate />
-            ) : (
-              <EuiEmptyPrompt
-                title={<h2>{strings.getEmptyTitle()}</h2>}
-                titleSize="s"
-                body={
-                  <p>
-                    {strings.getEmptyFirstLineDescription()}
-                    <br />
-                    {strings.getEmptySecondLineDescription()}
-                  </p>
-                }
-              />
-            )}
-          </EuiPanel>
-        )}
-      </EuiModalBody>
-    </EuiModal>
-  </EuiOverlayMask>
+          )}
+        </EuiPanel>
+      )}
+    </EuiModalBody>
+  </EuiModal>
 );
 
 DatasourcePreview.propTypes = {

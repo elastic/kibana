@@ -10,11 +10,13 @@ import {
   loggingSystemMock,
   savedObjectsServiceMock,
 } from 'src/core/server/mocks';
-import { FleetAppContext } from './plugin';
+import { coreMock } from '../../../../src/core/server/mocks';
+import { licensingMock } from '../../../plugins/licensing/server/mocks';
+import type { FleetAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
-import { PackagePolicyServiceInterface } from './services/package_policy';
-import { AgentPolicyServiceInterface, AgentService } from './services';
+import type { PackagePolicyServiceInterface } from './services/package_policy';
+import type { AgentPolicyServiceInterface, AgentService } from './services';
 
 export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
@@ -29,6 +31,17 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
   };
 };
 
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+export const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
+
 export const createPackagePolicyServiceMock = () => {
   return {
     compilePackagePolicyInputs: jest.fn(),
@@ -39,6 +52,7 @@ export const createPackagePolicyServiceMock = () => {
     get: jest.fn(),
     getByIDs: jest.fn(),
     list: jest.fn(),
+    listIds: jest.fn(),
     update: jest.fn(),
     runExternalCallbacks: jest.fn(),
   } as jest.Mocked<PackagePolicyServiceInterface>;

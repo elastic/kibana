@@ -69,9 +69,16 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
       }),
       description:
         includes.length > MAX_INCLUDES_LENGTH
-          ? `${includes.slice(0, MAX_INCLUDES_LENGTH).join(', ')} ... (and ${
-              includes.length - MAX_INCLUDES_LENGTH
-            } more)`
+          ? i18n.translate(
+              'xpack.ml.dataframe.analytics.create.configDetails.includedFieldsAndMoreDescription',
+              {
+                defaultMessage: '{includedFields} ... (and {extraCount} more)',
+                values: {
+                  extraCount: includes.length - MAX_INCLUDES_LENGTH,
+                  includedFields: includes.slice(0, MAX_INCLUDES_LENGTH).join(', '),
+                },
+              }
+            )
           : includes.join(', '),
     },
   ];

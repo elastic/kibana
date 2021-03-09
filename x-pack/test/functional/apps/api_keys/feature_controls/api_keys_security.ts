@@ -45,9 +45,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with manage_security', () => {
+    describe('global dashboard read with manage_security', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'manage_security'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'manage_security'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

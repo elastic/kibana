@@ -73,6 +73,7 @@ describe('unenrollAgents (plural)', () => {
   });
   it('cannot unenroll from a managed policy', async () => {
     const soClient = createClientMock();
+
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const idsToUnenroll = [agentInUnmanagedSO.id, agentInManagedSO.id, agentInUnmanagedSO2.id];
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
@@ -97,6 +98,9 @@ function createClientMock() {
     return {
       saved_objects: [await soClientMock.create(type, attributes)],
     };
+  });
+  soClientMock.bulkUpdate.mockResolvedValue({
+    saved_objects: [],
   });
 
   soClientMock.get.mockImplementation(async (_, id) => {

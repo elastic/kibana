@@ -20,7 +20,7 @@ import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
-import { Plugin } from '../types';
+import { AsyncPlugin } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
@@ -138,7 +138,7 @@ describe('PluginsService', () => {
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         },
-      } as Plugin<void, typeof pluginStartContract, {}, {}>);
+      } as AsyncPlugin<void, typeof pluginStartContract, {}, {}>);
 
     jest.doMock(
       join(pluginPath, 'server'),

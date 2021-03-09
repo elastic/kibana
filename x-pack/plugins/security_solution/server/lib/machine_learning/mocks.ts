@@ -19,6 +19,7 @@ export const mlServicesMock = {
     (({
       modulesProvider: jest.fn(),
       jobServiceProvider: jest.fn(),
+      anomalyDetectorsProvider: jest.fn(),
       mlSystemProvider: createMockMlSystemProvider(),
       mlClient: createMockClient(),
     } as unknown) as jest.Mocked<MlPluginSetup>),

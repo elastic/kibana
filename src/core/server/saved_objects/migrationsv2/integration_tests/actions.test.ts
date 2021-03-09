@@ -213,12 +213,8 @@ describe('migration actions', () => {
       }
     });
     it('resolves right if cloning into a new target index', async () => {
+      const task = cloneIndex(client, 'existing_index_with_write_block', 'clone_target_1');
       expect.assertions(1);
-      const task = cloneIndex(
-        client,
-        'existing_index_with_write_block',
-        'clone_yellow_then_green_index_1'
-      );
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -229,42 +225,48 @@ describe('migration actions', () => {
         }
       `);
     });
-    it('resolves right after waiting for index status to be green if clone target already existed', async () => {
+    it('resolves right after waiting for index status to be yellow if clone target already existed', async () => {
       expect.assertions(2);
+
       // Create a yellow index
-      await client.indices.create({
-        index: 'clone_yellow_then_green_index_2',
-        body: {
-          mappings: { properties: {} },
-          settings: {
-            // Allocate 1 replica so that this index stays yellow
-            number_of_replicas: '1',
+      await client.indices
+        .create({
+          index: 'clone_red_then_yellow_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              'index.routing.allocation.enable': 'none',
+            },
           },
-        },
-      });
+        })
+        .catch((e) => {});
 
       // Call clone even though the index already exists
       const cloneIndexPromise = cloneIndex(
         client,
         'existing_index_with_write_block',
-        'clone_yellow_then_green_index_2'
+        'clone_red_then_yellow_index'
       )();
-      let indexGreen = false;
 
+      let indexYellow = false;
       setTimeout(() => {
         client.indices.putSettings({
+          index: 'clone_red_then_yellow_index',
           body: {
-            index: {
-              number_of_replicas: 0,
-            },
+            // Enable all shard allocation so that the index status goes yellow
+            'index.routing.allocation.enable': 'all',
           },
         });
-        indexGreen = true;
+        indexYellow = true;
       }, 10);
 
       await cloneIndexPromise.then((res) => {
         // Assert that the promise didn't resolve before the index became green
-        expect(indexGreen).toBe(true);
+        expect(indexYellow).toBe(true);
         expect(res).toMatchInlineSnapshot(`
           Object {
             "_tag": "Right",
@@ -278,7 +280,7 @@ describe('migration actions', () => {
     });
     it('resolves left index_not_found_exception if the source index does not exist', async () => {
       expect.assertions(1);
-      const task = cloneIndex(client, 'no_such_index', 'clone_yellow_then_green_index_3');
+      const task = cloneIndex(client, 'no_such_index', 'clone_target_3');
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -674,7 +676,6 @@ describe('migration actions', () => {
 
   describe('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
-      expect.assertions(1);
       const res = (await pickupUpdatedMappings(
         client,
         'existing_index_with_write_block'
@@ -689,7 +690,6 @@ describe('migration actions', () => {
       });
     });
     it('rejects if there is an error', async () => {
-      expect.assertions(1);
       const res = (await pickupUpdatedMappings(
         client,
         'no_such_index'
@@ -703,7 +703,6 @@ describe('migration actions', () => {
                     `);
     });
     it('resolves right when successful', async () => {
-      expect.assertions(1);
       const res = (await pickupUpdatedMappings(
         client,
         'existing_index_with_docs'
@@ -722,7 +721,6 @@ describe('migration actions', () => {
 
   describe('updateAndPickupMappings', () => {
     it('resolves right when mappings were updated and picked up', async () => {
-      expect.assertions(3);
       // Create an index without any mappings and insert documents into it
       await createIndex(client, 'existing_index_without_mappings', {
         dynamic: false as any,
@@ -771,7 +769,6 @@ describe('migration actions', () => {
   describe('updateAliases', () => {
     describe('remove', () => {
       it('resolves left index_not_found_exception when the index does not exist', async () => {
-        expect.assertions(1);
         const task = updateAliases(client, [
           {
             remove: {
@@ -793,7 +790,6 @@ describe('migration actions', () => {
       });
       describe('with must_exist=false', () => {
         it('resolves left alias_not_found_exception when alias does not exist', async () => {
-          expect.assertions(1);
           const task = updateAliases(client, [
             {
               remove: {
@@ -815,7 +811,6 @@ describe('migration actions', () => {
       });
       describe('with must_exist=true', () => {
         it('resolves left alias_not_found_exception when alias does not exist on specified index', async () => {
-          expect.assertions(1);
           const task = updateAliases(client, [
             {
               remove: {
@@ -835,7 +830,6 @@ describe('migration actions', () => {
                   `);
         });
         it('resolves left alias_not_found_exception when alias does not exist', async () => {
-          expect.assertions(1);
           const task = updateAliases(client, [
             {
               remove: {
@@ -858,7 +852,6 @@ describe('migration actions', () => {
     });
     describe('remove_index', () => {
       it('left index_not_found_exception if index does not exist', async () => {
-        expect.assertions(1);
         const task = updateAliases(client, [
           {
             remove_index: {
@@ -877,7 +870,6 @@ describe('migration actions', () => {
                 `);
       });
       it('left remove_index_not_a_concrete_index when remove_index targets an alias', async () => {
-        expect.assertions(1);
         const task = updateAliases(client, [
           {
             remove_index: {
@@ -899,44 +891,50 @@ describe('migration actions', () => {
 
   describe('createIndex', () => {
     afterAll(async () => {
-      await client.indices.delete({ index: 'yellow_then_green_index' });
+      await client.indices.delete({ index: 'red_then_yellow_index' });
     });
-    it('resolves right after waiting for an index status to be green if the index already existed', async () => {
+    it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
       expect.assertions(2);
-      // Create a yellow index
-      await client.indices.create(
-        {
-          index: 'yellow_then_green_index',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
+      // Create a red index
+      await client.indices
+        .create(
+          {
+            index: 'red_then_yellow_index',
+            timeout: '5s',
+            body: {
+              mappings: { properties: {} },
+              settings: {
+                // Allocate 1 replica so that this index stays yellow
+                number_of_replicas: '1',
+                // Disable all shard allocation so that the index status is red
+                'index.routing.allocation.enable': 'none',
+              },
             },
           },
-        },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      );
+          { maxRetries: 0 /** handle retry ourselves for now */ }
+        )
+        .catch((e) => {
+          /** ignore */
+        });
 
       // Call createIndex even though the index already exists
-      const createIndexPromise = createIndex(client, 'yellow_then_green_index', undefined as any)();
-      let indexGreen = false;
+      const createIndexPromise = createIndex(client, 'red_then_yellow_index', undefined as any)();
+      let indexYellow = false;
 
       setTimeout(() => {
         client.indices.putSettings({
-          index: 'yellow_then_green_index',
+          index: 'red_then_yellow_index',
           body: {
-            index: {
-              number_of_replicas: 0,
-            },
+            // Disable all shard allocation so that the index status is red
+            'index.routing.allocation.enable': 'all',
           },
         });
-        indexGreen = true;
+        indexYellow = true;
       }, 10);
 
       await createIndexPromise.then((res) => {
         // Assert that the promise didn't resolve before the index became green
-        expect(indexGreen).toBe(true);
+        expect(indexYellow).toBe(true);
         expect(res).toMatchInlineSnapshot(`
                 Object {
                   "_tag": "Right",
@@ -946,7 +944,6 @@ describe('migration actions', () => {
       });
     });
     it('rejects when there is an unexpected error creating the index', async () => {
-      expect.assertions(1);
       // Creating an index with the same name as an existing alias to induce
       // failure
       await expect(
@@ -957,7 +954,6 @@ describe('migration actions', () => {
 
   describe('bulkOverwriteTransformedDocuments', () => {
     it('resolves right when documents do not yet exist in the index', async () => {
-      expect.assertions(1);
       const newDocs = ([
         { _source: { title: 'doc 5' } },
         { _source: { title: 'doc 6' } },
@@ -972,7 +968,6 @@ describe('migration actions', () => {
               `);
     });
     it('resolves right even if there were some version_conflict_engine_exception', async () => {
-      expect.assertions(1);
       const existingDocs = ((await searchForOutdatedDocuments(
         client,
         'existing_index_with_docs',
@@ -991,7 +986,6 @@ describe('migration actions', () => {
               `);
     });
     it('rejects if there are errors', async () => {
-      expect.assertions(1);
       const newDocs = ([
         { _source: { title: 'doc 5' } },
         { _source: { title: 'doc 6' } },

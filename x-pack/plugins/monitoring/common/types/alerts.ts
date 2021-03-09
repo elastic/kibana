@@ -6,7 +6,12 @@
  */
 
 import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerts/common';
-import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
+import {
+  AlertParamType,
+  AlertMessageTokenType,
+  AlertSeverity,
+  AlertClusterHealthType,
+} from '../enums';
 
 export type CommonAlert = Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 
@@ -60,6 +65,8 @@ export interface AlertInstanceState {
     | AlertDiskUsageState
     | AlertThreadPoolRejectionsState
     | AlertNodeState
+    | AlertLicenseState
+    | AlertNodesChangedState
   >;
   [x: string]: unknown;
 }
@@ -74,6 +81,7 @@ export interface AlertState {
 export interface AlertNodeState extends AlertState {
   nodeId: string;
   nodeName?: string;
+  meta: any;
   [key: string]: unknown;
 }
 
@@ -94,6 +102,14 @@ export interface AlertThreadPoolRejectionsState extends AlertState {
   type: string;
   nodeId: string;
   nodeName?: string;
+}
+
+export interface AlertLicenseState extends AlertState {
+  expiryDateMS: number;
+}
+
+export interface AlertNodesChangedState extends AlertState {
+  node: AlertClusterStatsNode;
 }
 
 export interface AlertUiState {
@@ -227,4 +243,37 @@ export interface LegacyAlertNodesChangedList {
   removed: { [nodeName: string]: string };
   added: { [nodeName: string]: string };
   restarted: { [nodeName: string]: string };
+}
+
+export interface AlertLicense {
+  status: string;
+  type: string;
+  expiryDateMS: number;
+  clusterUuid: string;
+  ccs?: string;
+}
+
+export interface AlertClusterStatsNodes {
+  clusterUuid: string;
+  recentNodes: AlertClusterStatsNode[];
+  priorNodes: AlertClusterStatsNode[];
+  ccs?: string;
+}
+
+export interface AlertClusterStatsNode {
+  nodeUuid: string;
+  nodeEphemeralId?: string;
+  nodeName?: string;
+}
+
+export interface AlertClusterHealth {
+  health: AlertClusterHealthType;
+  clusterUuid: string;
+  ccs?: string;
+}
+
+export interface AlertVersions {
+  clusterUuid: string;
+  ccs?: string;
+  versions: string[];
 }

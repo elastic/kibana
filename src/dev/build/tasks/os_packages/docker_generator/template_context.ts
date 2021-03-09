@@ -9,6 +9,7 @@
 export interface TemplateContext {
   artifactPrefix: string;
   artifactTarball: string;
+  branch: string;
   imageFlavor: string;
   version: string;
   license: string;
@@ -17,10 +18,10 @@ export interface TemplateContext {
   dockerBuildDir: string;
   dockerTargetFilename: string;
   baseOSImage: string;
-  ubiImageFlavor: string;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
-  ubi: boolean;
+  ubi?: boolean;
+  ironbank?: boolean;
   revision: string;
   architecture?: string;
 }

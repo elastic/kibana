@@ -22,7 +22,7 @@ import {
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { VectorLayer } from '../../vector_layer/vector_layer';
+import { VectorLayer } from '../../vector_layer';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 // @ts-ignore
 import { ESSearchSource } from '../../../sources/es_search_source';

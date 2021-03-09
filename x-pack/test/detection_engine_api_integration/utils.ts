@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import { NonEmptyEntriesArray } from '../../plugins/lists/common/schemas';
 import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
@@ -38,6 +39,7 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_RULES_URL,
+  INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
 import { getCreateExceptionListItemMinimalSchemaMockWithoutId } from '../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
@@ -224,7 +226,8 @@ export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
  * created from that rule's regular id.
  * @param ruleIds The rule_id to search for signals
  */
-export const getQuerySignalsId = (ids: string[]) => ({
+export const getQuerySignalsId = (ids: string[], size = 10) => ({
+  size,
   query: {
     terms: {
       'signal.rule.id': ids,
@@ -674,20 +677,27 @@ export const getWebHookAction = () => ({
   name: 'Some connector',
 });
 
-export const getRuleWithWebHookAction = (id: string, enabled = false): CreateRulesSchema => ({
-  ...getSimpleRule('rule-1', enabled),
-  throttle: 'rule',
-  actions: [
-    {
-      group: 'default',
-      id,
-      params: {
-        body: '{}',
+export const getRuleWithWebHookAction = (
+  id: string,
+  enabled = false,
+  rule?: QueryCreateSchema
+): CreateRulesSchema | UpdateRulesSchema => {
+  const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
+  return {
+    ...finalRule,
+    throttle: 'rule',
+    actions: [
+      {
+        group: 'default',
+        id,
+        params: {
+          body: '{}',
+        },
+        action_type_id: '.webhook',
       },
-      action_type_id: '.webhook',
-    },
-  ],
-});
+    ],
+  };
+};
 
 export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
   ...getSimpleRuleOutput(),
@@ -832,6 +842,78 @@ export const createRule = async (
 
 /**
  * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not do any retries.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const updateRule = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  updatedRule: UpdateRulesSchema
+): Promise<FullResponseSchema> => {
+  const { body } = await supertest
+    .put(DETECTION_ENGINE_RULES_URL)
+    .set('kbn-xsrf', 'true')
+    .send(updatedRule)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * creates a new action and expects a 200 and does not do any retries.
+ * @param supertest The supertest deps
+ */
+export const createNewAction = async (supertest: SuperTest<supertestAsPromised.Test>) => {
+  const { body } = await supertest
+    .post('/api/actions/action')
+    .set('kbn-xsrf', 'true')
+    .send(getWebHookAction())
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * creates a new action and expects a 200 and does not do any retries.
+ * @param supertest The supertest deps
+ */
+export const findImmutableRuleById = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ruleId: string
+): Promise<{
+  page: number;
+  perPage: number;
+  total: number;
+  data: FullResponseSchema[];
+}> => {
+  const { body } = await supertest
+    .get(
+      `${DETECTION_ENGINE_RULES_URL}/_find?filter=alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true" AND alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`
+    )
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * creates a new action and expects a 200 and does not do any retries.
+ * @param supertest The supertest deps
+ */
+export const getPrePackagedRulesStatus = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<PrePackagedRulesAndTimelinesStatusSchema> => {
+  const { body } = await supertest
+    .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not try to any retries. Creates exception lists
  * @param supertest The supertest deps
  * @param rule The rule to create
@@ -883,6 +965,19 @@ export const getRule = async (
   return body;
 };
 
+export const waitForAlertToComplete = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  id: string
+): Promise<void> => {
+  await waitFor(async () => {
+    const { body: alertBody } = await supertest
+      .get(`/api/alerts/alert/${id}/state`)
+      .set('kbn-xsrf', 'true')
+      .expect(200);
+    return alertBody.previousStartedAt != null;
+  }, 'waitForAlertToComplete');
+};
+
 /**
  * Waits for the rule in find status to be 'succeeded'
  * or the provided status, before continuing
@@ -891,7 +986,7 @@ export const getRule = async (
 export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   id: string,
-  status: 'succeeded' | 'failed' | 'partial failure' = 'succeeded'
+  status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
 ): Promise<void> => {
   await waitFor(async () => {
     const { body } = await supertest
@@ -915,7 +1010,7 @@ export const waitForSignalsToBePresent = async (
   signalIds: string[]
 ): Promise<void> => {
   await waitFor(async () => {
-    const signalsOpen = await getSignalsByIds(supertest, signalIds);
+    const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
     return signalsOpen.hits.hits.length >= numberOfSignals;
   }, 'waitForSignalsToBePresent');
 };
@@ -949,7 +1044,8 @@ export const getSignalsByRuleIds = async (
  */
 export const getSignalsByIds = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  ids: string[]
+  ids: string[],
+  size?: number
 ): Promise<
   SearchResponse<{
     signal: Signal;
@@ -959,7 +1055,7 @@ export const getSignalsByIds = async (
   const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids))
+    .send(getQuerySignalsId(ids, size))
     .expect(200);
   return signalsOpen;
 };

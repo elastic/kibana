@@ -26,7 +26,7 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       validate: GetPolicyResponseSchema,
       options: { authRequired: true },
     },
-    getHostPolicyResponseHandler(endpointAppContext)
+    getHostPolicyResponseHandler()
   );
 
   router.get(

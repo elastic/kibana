@@ -28,7 +28,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       preconfiguredActions: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -87,7 +87,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       preconfiguredActions: [
         {
           id: '123',
@@ -158,10 +158,10 @@ describe('execute()', () => {
     );
   });
 
-  test('throws when passing isESOUsingEphemeralEncryptionKey with true as a value', async () => {
+  test('throws when passing isESOCanEncrypt with false as a value', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: true,
+      isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       preconfiguredActions: [],
     });
@@ -173,7 +173,7 @@ describe('execute()', () => {
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+      `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
     );
   });
 
@@ -181,7 +181,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [],
     });
@@ -211,7 +211,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [
         {

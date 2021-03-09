@@ -7,7 +7,7 @@
 
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
@@ -16,8 +16,8 @@ import {
   installationStatuses,
   requiredPackages,
 } from '../../constants';
-import { ValueOf } from '../../types';
-import { PackageSpecManifest, PackageSpecScreenshot } from './package_spec';
+import type { ValueOf } from '../../types';
+import type { PackageSpecManifest, PackageSpecScreenshot } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -221,6 +221,7 @@ export interface RegistryDataStream {
   path: string;
   ingest_pipeline: string;
   elasticsearch?: RegistryElasticsearch;
+  dataset_is_prefix?: boolean;
 }
 
 export interface RegistryElasticsearch {
@@ -272,7 +273,7 @@ export type PackageInfo =
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
-  package_assets: PackageAssetReference[];
+  package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;

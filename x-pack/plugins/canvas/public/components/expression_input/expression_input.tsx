@@ -324,7 +324,6 @@ export class ExpressionInput extends React.Component<Props> {
                 minimap: {
                   enabled: false,
                 },
-                wordBasedSuggestions: false,
                 wordWrap: 'on',
                 wrappingIndent: 'indent',
               }}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { AssignmentActionType } from '../table';
@@ -58,40 +58,38 @@ export class ActionControl extends React.PureComponent<ActionControlProps, Actio
           {name}
         </EuiButton>
         {this.state.showModal && (
-          <EuiOverlayMask>
-            <EuiConfirmModal
-              buttonColor={danger ? 'danger' : 'primary'}
-              cancelButtonText={
+          <EuiConfirmModal
+            buttonColor={danger ? 'danger' : 'primary'}
+            cancelButtonText={
+              <FormattedMessage
+                id="xpack.beatsManagement.confirmModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            }
+            confirmButtonText={
+              <FormattedMessage
+                id="xpack.beatsManagement.confirmModal.confirmButtonLabel"
+                defaultMessage="Confirm"
+              />
+            }
+            onConfirm={() => {
+              actionHandler(action);
+              this.setState({ showModal: false });
+            }}
+            onCancel={() => this.setState({ showModal: false })}
+            title={
+              warningHeading ? (
+                warningHeading
+              ) : (
                 <FormattedMessage
-                  id="xpack.beatsManagement.confirmModal.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              }
-              confirmButtonText={
-                <FormattedMessage
-                  id="xpack.beatsManagement.confirmModal.confirmButtonLabel"
+                  id="xpack.beatsManagement.confirmModal.confirmWarningTitle"
                   defaultMessage="Confirm"
                 />
-              }
-              onConfirm={() => {
-                actionHandler(action);
-                this.setState({ showModal: false });
-              }}
-              onCancel={() => this.setState({ showModal: false })}
-              title={
-                warningHeading ? (
-                  warningHeading
-                ) : (
-                  <FormattedMessage
-                    id="xpack.beatsManagement.confirmModal.confirmWarningTitle"
-                    defaultMessage="Confirm"
-                  />
-                )
-              }
-            >
-              {warningMessage}
-            </EuiConfirmModal>
-          </EuiOverlayMask>
+              )
+            }
+          >
+            {warningMessage}
+          </EuiConfirmModal>
         )}
       </div>
     );

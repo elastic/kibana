@@ -9,9 +9,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ResultView } from '.';
 import { SchemaTypes } from '../../../../../shared/types';
 import { Result } from '../../../result/result';
+
+import { ResultView } from '.';
 
 describe('ResultView', () => {
   const result = {
@@ -34,7 +35,7 @@ describe('ResultView', () => {
 
   it('renders', () => {
     const wrapper = shallow(
-      <ResultView result={result} schemaForTypeHighlights={schema} isMetaEngine={true} />
+      <ResultView result={result} schemaForTypeHighlights={schema} isMetaEngine />
     );
     expect(wrapper.find(Result).props()).toEqual({
       result,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { outputService, appContextService } from '../../services';
-import { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
+import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 import { PostFleetSetupRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -24,7 +24,7 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
     const isTLSCheckDisabled = appContextService.getConfig()?.agents?.tlsCheckDisabled ?? false;
-    const isUsingEphemeralEncryptionKey = !appContextService.getEncryptedSavedObjectsSetup();
+    const canEncrypt = appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt === true;
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isAdminUserSetup) {
@@ -37,7 +37,7 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
       missingRequirements.push('tls_required');
     }
 
-    if (isUsingEphemeralEncryptionKey) {
+    if (!canEncrypt) {
       missingRequirements.push('encrypted_saved_object_encryption_key_required');
     }
 

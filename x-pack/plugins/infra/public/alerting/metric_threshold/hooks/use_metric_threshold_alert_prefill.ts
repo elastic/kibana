@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { useState } from 'react';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 
-interface MetricThresholdPrefillOptions {
+export interface MetricThresholdPrefillOptions {
   groupBy: string | string[] | undefined;
   filterQuery: string | undefined;
   metrics: MetricsExplorerMetric[];

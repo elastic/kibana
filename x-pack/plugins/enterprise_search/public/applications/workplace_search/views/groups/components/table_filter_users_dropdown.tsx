@@ -9,11 +9,11 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { EuiFilterButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFilterButton } from '@elastic/eui';
-
 import { GroupsLogic } from '../groups_logic';
+
 import { FilterableUsersPopover } from './filterable_users_popover';
 
 const FILTER_USERS_BUTTON_TEXT = i18n.translate(
@@ -44,7 +44,7 @@ export const TableFilterUsersDropdown: React.FC<{}> = () => {
     <FilterableUsersPopover
       users={users}
       selectedOptions={filteredUsers}
-      itemsClickable={true}
+      itemsClickable
       isPopoverOpen={filterUsersDropdownOpen}
       button={filterButton}
       closePopover={closeFilterUsersDropdown}

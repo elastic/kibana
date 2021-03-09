@@ -217,6 +217,54 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         '{"objectA":{"stringB":"B","arrayC":[{"stringD":"D1","numberE":42},{"stringD":"D2","numberE":43}],"objectF":{"stringG":"G","nullG":null}},"stringH":"H","arrayI":[44,45],"nullJ":null}'
       );
     });
+
+    it('should render kibanaBaseUrl as empty string since not configured', async () => {
+      const actionResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'testing context variable expansion',
+          actionTypeId: '.slack',
+          secrets: {
+            webhookUrl: slackSimulatorURL,
+          },
+        });
+      expect(actionResponse.status).to.eql(200);
+      const createdAction = actionResponse.body;
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+      const varsTemplate = 'kibanaBaseUrl: "{{kibanaBaseUrl}}"';
+
+      const alertResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            name: 'testing context variable kibanaBaseUrl',
+            alertTypeId: 'test.patternFiring',
+            params: {
+              pattern: { instance: [true, true] },
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {
+                  message: `message {{alertId}} - ${varsTemplate}`,
+                },
+              },
+            ],
+          })
+        );
+      expect(alertResponse.status).to.eql(200);
+      const createdAlert = alertResponse.body;
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+
+      const body = await retry.try(async () =>
+        waitForActionBody(slackSimulatorURL, createdAlert.id)
+      );
+      expect(body).to.be('kibanaBaseUrl: ""');
+    });
   });
 
   async function waitForActionBody(url: string, id: string): Promise<string> {

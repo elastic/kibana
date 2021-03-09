@@ -18,7 +18,7 @@ import {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportError,
 } from '../export';
-import { validateTypes, validateObjects } from './utils';
+import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -163,11 +163,11 @@ export const registerExportRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, req, res) => {
       const cleaned = cleanOptions(req.body);
-      const supportedTypes = context.core.savedObjects.typeRegistry
-        .getImportableAndExportableTypes()
-        .map((t) => t.name);
+      const { typeRegistry, getExporter, getClient } = context.core.savedObjects;
+      const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
+
       let options: EitherExportOptions;
       try {
         options = validateOptions(cleaned, {
@@ -181,7 +181,12 @@ export const registerExportRoute = (
         });
       }
 
-      const exporter = context.core.savedObjects.exporter;
+      const includedHiddenTypes = supportedTypes.filter((supportedType) =>
+        typeRegistry.isHidden(supportedType)
+      );
+
+      const client = getClient({ includedHiddenTypes });
+      const exporter = getExporter(client);
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient

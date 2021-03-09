@@ -16,7 +16,7 @@ import { VegaInspectorAdapters } from './vega_inspector/index';
 import { KibanaContext, TimeRange, Query } from '../../data/public';
 import { VegaParser } from './data_model/vega_parser';
 
-type Input = KibanaContext | null;
+type Input = KibanaContext | { type: 'null' };
 type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {

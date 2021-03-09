@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
+import { RuntimeMappings } from '../../../common/types/fields';
 
 export interface BucketSpanEstimatorData {
   aggTypes: Array<ES_AGGREGATION | null>;
@@ -19,6 +20,7 @@ export interface BucketSpanEstimatorData {
   query: any;
   splitField: string | undefined;
   timeField: string | undefined;
+  runtimeMappings: RuntimeMappings | undefined;
 }
 
 export function estimateBucketSpanFactory({

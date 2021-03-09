@@ -8,6 +8,8 @@
 
 import mockFs from 'mock-fs';
 import { createReadStream } from 'fs';
+import { PassThrough } from 'stream';
+import { createGzip, createGunzip } from 'zlib';
 
 import { getResponsePayloadBytes } from './get_payload_size';
 
@@ -26,33 +28,74 @@ describe('getPayloadSize', () => {
     });
   });
 
-  describe('handles fs streams', () => {
+  describe('handles streams', () => {
     afterEach(() => mockFs.restore());
 
-    test('with ascii characters', async () => {
-      mockFs({ 'test.txt': 'heya' });
-      const readStream = createReadStream('test.txt');
-
-      let data = '';
-      for await (const chunk of readStream) {
-        data += chunk;
-      }
-
-      const result = getResponsePayloadBytes(readStream);
-      expect(result).toBe(Buffer.byteLength(data));
+    test('ignores streams that are not fs or zlib streams', async () => {
+      const result = getResponsePayloadBytes(new PassThrough());
+      expect(result).toBe(undefined);
     });
 
-    test('with special characters', async () => {
-      mockFs({ 'test.txt': '¡hola!' });
-      const readStream = createReadStream('test.txt');
+    describe('fs streams', () => {
+      test('with ascii characters', async () => {
+        mockFs({ 'test.txt': 'heya' });
+        const readStream = createReadStream('test.txt');
 
-      let data = '';
-      for await (const chunk of readStream) {
-        data += chunk;
-      }
+        let data = '';
+        for await (const chunk of readStream) {
+          data += chunk;
+        }
 
-      const result = getResponsePayloadBytes(readStream);
-      expect(result).toBe(Buffer.byteLength(data));
+        const result = getResponsePayloadBytes(readStream);
+        expect(result).toBe(Buffer.byteLength(data));
+      });
+
+      test('with special characters', async () => {
+        mockFs({ 'test.txt': '¡hola!' });
+        const readStream = createReadStream('test.txt');
+
+        let data = '';
+        for await (const chunk of readStream) {
+          data += chunk;
+        }
+
+        const result = getResponsePayloadBytes(readStream);
+        expect(result).toBe(Buffer.byteLength(data));
+      });
+
+      describe('zlib streams', () => {
+        test('with ascii characters', async () => {
+          mockFs({ 'test.txt': 'heya' });
+          const readStream = createReadStream('test.txt');
+          const source = readStream.pipe(createGzip()).pipe(createGunzip());
+
+          let data = '';
+          for await (const chunk of source) {
+            data += chunk;
+          }
+
+          const result = getResponsePayloadBytes(source);
+
+          expect(data).toBe('heya');
+          expect(result).toBe(source.bytesWritten);
+        });
+
+        test('with special characters', async () => {
+          mockFs({ 'test.txt': '¡hola!' });
+          const readStream = createReadStream('test.txt');
+          const source = readStream.pipe(createGzip()).pipe(createGunzip());
+
+          let data = '';
+          for await (const chunk of source) {
+            data += chunk;
+          }
+
+          const result = getResponsePayloadBytes(source);
+
+          expect(data).toBe('¡hola!');
+          expect(result).toBe(source.bytesWritten);
+        });
+      });
     });
   });
 
@@ -71,6 +114,20 @@ describe('getPayloadSize', () => {
       const payload = { message: 'heya' };
       const result = getResponsePayloadBytes(payload);
       expect(result).toBe(JSON.stringify(payload).length);
+    });
+
+    test('when source is array object', () => {
+      const payload = [{ message: 'hey' }, { message: 'ya' }];
+      const result = getResponsePayloadBytes(payload);
+      expect(result).toBe(JSON.stringify(payload).length);
+    });
+
+    test('returns undefined when source is not plain object', () => {
+      class TestClass {
+        constructor() {}
+      }
+      const result = getResponsePayloadBytes(new TestClass());
+      expect(result).toBe(undefined);
     });
   });
 

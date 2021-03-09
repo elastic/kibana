@@ -39,7 +39,7 @@ import { ConfigSchema } from '../../config';
 import { getKbnServerError, KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export const enhancedEsSearchStrategyProvider = (
-  config$: Observable<ConfigSchema>,
+  config: ConfigSchema,
   legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
@@ -60,7 +60,6 @@ export const enhancedEsSearchStrategyProvider = (
     const client = esClient.asCurrentUser.asyncSearch;
 
     const search = async () => {
-      const config = await config$.pipe(first()).toPromise();
       const params = id
         ? getDefaultAsyncGetParams(options)
         : {

@@ -15,7 +15,7 @@ import { Adapters } from '../../../../../inspector/common/adapters';
 import { SavedSearch } from '../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../angular/discover_state';
-import { IndexPattern } from '../../../kibana_services';
+import { IndexPattern, ISearchSource } from '../../../kibana_services';
 
 /**
  * Helper function to build the top nav links
@@ -28,6 +28,8 @@ export const getTopNavLinks = ({
   savedSearch,
   services,
   state,
+  onOpenInspector,
+  searchSource,
 }: {
   getFieldCounts: () => Promise<Record<string, number>>;
   indexPattern: IndexPattern;
@@ -36,6 +38,8 @@ export const getTopNavLinks = ({
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
+  onOpenInspector: () => void;
+  searchSource: ISearchSource;
 }) => {
   const newSearch = {
     id: 'new',
@@ -91,7 +95,7 @@ export const getTopNavLinks = ({
         return;
       }
       const sharingData = await getSharingData(
-        savedSearch.searchSource,
+        searchSource,
         state.appStateContainer.getState(),
         services.uiSettings,
         getFieldCounts
@@ -123,6 +127,7 @@ export const getTopNavLinks = ({
     }),
     testId: 'openInspectorButton',
     run: () => {
+      onOpenInspector();
       services.inspector.open(inspectorAdapters, {
         title: savedSearch.title,
       });

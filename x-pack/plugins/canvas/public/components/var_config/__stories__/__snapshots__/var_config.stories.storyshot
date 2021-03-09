@@ -77,8 +77,11 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
         </div>
       </div>
       <div
+        aria-labelledby="generated-id"
         className="euiAccordion__childWrapper"
         id="accordion-variables"
+        role="region"
+        tabIndex={-1}
       />
     </div>
     <div

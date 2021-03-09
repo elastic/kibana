@@ -59,7 +59,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -67,7 +69,11 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "dashboard",
@@ -192,7 +198,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -200,7 +208,11 @@ Array [
       "catalogue": Array [
         "discover",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "search",
@@ -545,7 +557,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -553,7 +567,11 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "dashboard",
@@ -678,7 +696,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -686,7 +706,11 @@ Array [
       "catalogue": Array [
         "discover",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "search",

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { DOCS_PREFIX } from '../../routes';
 
 export const CREDENTIALS_TITLE = i18n.translate(

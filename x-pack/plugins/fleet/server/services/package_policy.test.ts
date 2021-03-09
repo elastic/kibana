@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+  httpServerMock,
+} from 'src/core/server/mocks';
 import { createPackagePolicyMock } from '../../common/mocks';
 import { packagePolicyService } from './package_policy';
-import { PackageInfo, PackagePolicySOAttributes } from '../types';
-import { SavedObjectsUpdateResponse } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { PackageInfo, PackagePolicySOAttributes } from '../types';
+import type { SavedObjectsUpdateResponse } from 'src/core/server';
 import { KibanaRequest } from 'kibana/server';
-import { xpackMocks } from '../../../../mocks';
-import { ExternalCallback } from '..';
+import type { ExternalCallback } from '..';
 import { appContextService } from './app_context';
-import { createAppContextStartContractMock } from '../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {

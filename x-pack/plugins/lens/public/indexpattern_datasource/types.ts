@@ -8,6 +8,7 @@
 import { IFieldType } from 'src/plugins/data/common';
 import { IndexPatternColumn, IncompleteColumn } from './operations';
 import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
+import { DragDropIdentifier } from '../drag_drop/providers';
 
 export {
   IndexPatternColumn,
@@ -32,6 +33,10 @@ export {
   MovingAverageIndexPatternColumn,
 } from './operations';
 
+export type DraggedField = DragDropIdentifier & {
+  field: IndexPatternField;
+  indexPatternId: string;
+};
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];

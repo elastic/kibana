@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { JSON_HEADER as headers } from '../../../../common/constants';
 import { LogicMounter, mockHttpValues } from '../../__mocks__';
+
+import { JSON_HEADER as headers } from '../../../../common/constants';
 
 import { TelemetryLogic } from './telemetry_logic';
 

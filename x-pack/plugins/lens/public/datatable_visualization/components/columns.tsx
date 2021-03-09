@@ -152,14 +152,14 @@ export const createGridColumns = (
           ? false
           : {
               label: i18n.translate('xpack.lens.table.sort.ascLabel', {
-                defaultMessage: 'Sort asc',
+                defaultMessage: 'Sort ascending',
               }),
             },
         showSortDesc: isReadOnly
           ? false
           : {
               label: i18n.translate('xpack.lens.table.sort.descLabel', {
-                defaultMessage: 'Sort desc',
+                defaultMessage: 'Sort descending',
               }),
             },
         additional: isReadOnly

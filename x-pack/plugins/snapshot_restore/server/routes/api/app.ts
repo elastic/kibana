@@ -99,7 +99,7 @@ export function registerAppRoutes({
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

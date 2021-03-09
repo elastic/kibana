@@ -31,7 +31,7 @@ export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> =
   });
 
   return (
-    <EuiFlexItem component="section">
+    <EuiFlexItem component="section" data-test-subj="fleet-agent-policy-section">
       <OverviewPanel
         title={i18n.translate('xpack.fleet.overviewPagePoliciesPanelTitle', {
           defaultMessage: 'Agent policies',

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
@@ -52,22 +50,19 @@ const indexLifecycleDataEnricher = async (
 };
 
 export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, any, any> {
-  private readonly config$: Observable<IndexLifecycleManagementConfig>;
+  private readonly config: IndexLifecycleManagementConfig;
   private readonly license: License;
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config$ = initializerContext.config.create();
+    this.config = initializerContext.config.get();
     this.license = new License();
   }
 
-  async setup(
-    { http }: CoreSetup,
-    { licensing, indexManagement, features }: Dependencies
-  ): Promise<void> {
+  setup({ http }: CoreSetup, { licensing, indexManagement, features }: Dependencies): void {
     const router = http.createRouter();
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = this.config;
 
     this.license.setup(
       {

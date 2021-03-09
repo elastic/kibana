@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+
 import { useActions } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { DocumentCreationLogic, DocumentCreationFlyout } from '../document_creation';
 
@@ -19,7 +20,7 @@ export const DocumentCreationButton: React.FC = () => {
   return (
     <>
       <EuiButton
-        fill={true}
+        fill
         color="primary"
         data-test-subj="IndexDocumentsButton"
         onClick={showCreationModes}

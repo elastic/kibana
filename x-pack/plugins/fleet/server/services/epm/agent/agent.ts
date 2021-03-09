@@ -7,13 +7,12 @@
 
 import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
-import { PackagePolicyConfigRecord } from '../../../../common';
+import type { PackagePolicyConfigRecord } from '../../../../common';
 
 const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables, templateStr);
-
   const template = handlebars.compile(templateStr, { noEscape: true });
   let compiledTemplate = template(vars);
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
@@ -58,6 +57,19 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
+const maybeEscapeString = (value: string) => {
+  // List of special chars that may lead to YAML parsing errors when not quoted.
+  // See YAML specification section 5.3 Indicator characters
+  // https://yaml.org/spec/1.2/spec.html#id2772075
+  const yamlSpecialCharsRegex = /[{}\[\],&*?|\-<>=!%@:]/;
+
+  // In addition, numeric strings need to be quoted to stay strings.
+  if ((value.length && !isNaN(+value)) || yamlSpecialCharsRegex.test(value)) {
+    return `"${value}"`;
+  }
+  return value;
+};
+
 function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateStr: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
@@ -84,6 +96,16 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = `"${yamlKeyPlaceholder}"`;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+    } else if (
+      recordEntry.type &&
+      (recordEntry.type === 'text' || recordEntry.type === 'string') &&
+      recordEntry.value?.length
+    ) {
+      if (Array.isArray(recordEntry.value)) {
+        varPart[lastKeyPart] = recordEntry.value.map((value: string) => maybeEscapeString(value));
+      } else {
+        varPart[lastKeyPart] = maybeEscapeString(recordEntry.value);
+      }
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }

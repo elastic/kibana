@@ -14,8 +14,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SelectOption } from '../../../../../vis_default_editor/public';
 import { GaugeOptionsInternalProps } from '../gauge';
 import { AggGroupNames } from '../../../../../data/public';
+import { getGaugeCollections } from './../../collections';
 
-function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInternalProps) {
+const gaugeCollections = getGaugeCollections();
+
+function StylePanel({ aggs, setGaugeValue, stateParams }: GaugeOptionsInternalProps) {
   const diasableAlignment =
     aggs.byType(AggGroupNames.Metrics).length === 1 && !aggs.byType(AggGroupNames.Buckets);
 
@@ -35,7 +38,7 @@ function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInter
         label={i18n.translate('visTypeVislib.controls.gaugeOptions.gaugeTypeLabel', {
           defaultMessage: 'Gauge type',
         })}
-        options={vis.type.editorConfig.collections.gaugeTypes}
+        options={gaugeCollections.gaugeTypes}
         paramName="gaugeType"
         value={stateParams.gauge.gaugeType}
         setValue={setGaugeValue}
@@ -46,7 +49,7 @@ function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInter
         label={i18n.translate('visTypeVislib.controls.gaugeOptions.alignmentLabel', {
           defaultMessage: 'Alignment',
         })}
-        options={vis.type.editorConfig.collections.alignments}
+        options={gaugeCollections.alignments}
         paramName="alignment"
         value={stateParams.gauge.alignment}
         setValue={setGaugeValue}

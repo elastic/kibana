@@ -60,6 +60,10 @@ const EXTRA_WIDTH = 4; // px
 
 export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
+/**
+ * The Body component is used everywhere timeline is used within the security application. It is the highest level component
+ * that is shared across all implementations of the timeline.
+ */
 export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,

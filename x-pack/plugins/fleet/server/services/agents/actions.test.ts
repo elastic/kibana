@@ -6,14 +6,14 @@
  */
 
 import { createAgentAction } from './actions';
-import { SavedObject } from 'kibana/server';
-import { AgentAction } from '../../../common/types/models';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import type { SavedObject } from 'kibana/server';
+import type { AgentAction } from '../../../common/types/models';
+import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 
 describe('test agent actions services', () => {
   it('should create a new action', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
-
+    const mockedEsClient = elasticsearchServiceMock.createInternalClient();
     const newAgentAction: Omit<AgentAction, 'id'> = {
       agent_id: 'agentid',
       type: 'POLICY_CHANGE',
@@ -32,7 +32,7 @@ describe('test agent actions services', () => {
         },
       } as SavedObject)
     );
-    await createAgentAction(mockSavedObjectsClient, newAgentAction);
+    await createAgentAction(mockSavedObjectsClient, mockedEsClient, newAgentAction);
 
     const createdAction = (mockSavedObjectsClient.create.mock
       .calls[0][1] as unknown) as AgentAction;

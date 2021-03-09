@@ -41,20 +41,26 @@ export const createSendRequestHelpers = (): SendRequestHelpers => {
 
   // Set up successful request helpers.
   sendRequestSpy
-    .withArgs(successRequest.path, {
-      body: JSON.stringify(successRequest.body),
-      query: undefined,
-    })
+    .withArgs(
+      successRequest.path,
+      sinon.match({
+        body: JSON.stringify(successRequest.body),
+        query: undefined,
+      })
+    )
     .resolves(successResponse);
   const sendSuccessRequest = () => sendRequest({ ...successRequest });
   const getSuccessResponse = () => ({ data: successResponse.data, error: null });
 
   // Set up failed request helpers.
   sendRequestSpy
-    .withArgs(errorRequest.path, {
-      body: JSON.stringify(errorRequest.body),
-      query: undefined,
-    })
+    .withArgs(
+      errorRequest.path,
+      sinon.match({
+        body: JSON.stringify(errorRequest.body),
+        query: undefined,
+      })
+    )
     .rejects(errorResponse);
   const sendErrorRequest = () => sendRequest({ ...errorRequest });
   const getErrorResponse = () => ({

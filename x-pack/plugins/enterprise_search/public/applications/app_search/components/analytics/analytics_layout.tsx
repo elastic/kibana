@@ -7,17 +7,20 @@
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+
 import { useValues, useActions } from 'kea';
+
 import { EuiSpacer } from '@elastic/eui';
 
-import { KibanaLogic } from '../../../shared/kibana';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { KibanaLogic } from '../../../shared/kibana';
 import { Loading } from '../../../shared/loading';
 
 import { LogRetentionCallout, LogRetentionOptions } from '../log_retention';
 
-import { AnalyticsLogic } from './';
 import { AnalyticsHeader, AnalyticsUnavailable } from './components';
+
+import { AnalyticsLogic } from './';
 
 interface Props {
   title: string;
