@@ -34,7 +34,10 @@ export const FrozenPhase: FunctionComponent = () => {
   } = useConfigurationIssues();
 
   return (
-    <Phase phase="frozen" topLevelSettings={<SearchableSnapshotField phase="frozen" />}>
+    <Phase
+      phase="frozen"
+      topLevelSettings={<SearchableSnapshotField phase="frozen" canBeDisabled={false} />}
+    >
       <ReplicasField phase="frozen" />
 
       {/* Freeze section */}

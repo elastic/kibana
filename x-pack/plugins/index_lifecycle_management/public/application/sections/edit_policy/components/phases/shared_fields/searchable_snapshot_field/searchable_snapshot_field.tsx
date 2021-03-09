@@ -34,6 +34,7 @@ import './_searchable_snapshot_field.scss';
 
 export interface Props {
   phase: 'hot' | 'cold' | 'frozen';
+  canBeDisabled?: boolean;
 }
 
 /**
@@ -63,7 +64,10 @@ const storageOptions = [
   },
 ];
 
-export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => {
+export const SearchableSnapshotField: FunctionComponent<Props> = ({
+  phase,
+  canBeDisabled = true,
+}) => {
   const {
     services: { cloud },
   } = useKibana();
@@ -339,16 +343,20 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   return (
     <DescribedFormRow
       data-test-subj={`searchableSnapshotField-${phase}`}
-      switchProps={{
-        checked: isFieldToggleChecked,
-        disabled: isDisabledDueToLicense,
-        onChange: setIsFieldToggleChecked,
-        'data-test-subj': 'searchableSnapshotToggle',
-        label: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-          { defaultMessage: 'Create searchable snapshot' }
-        ),
-      }}
+      switchProps={
+        canBeDisabled
+          ? {
+              checked: isFieldToggleChecked,
+              disabled: isDisabledDueToLicense,
+              onChange: setIsFieldToggleChecked,
+              'data-test-subj': 'searchableSnapshotToggle',
+              label: i18n.translate(
+                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
+                { defaultMessage: 'Create searchable snapshot' }
+              ),
+            }
+          : undefined
+      }
       title={
         <h3>
           {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
