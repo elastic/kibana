@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { getOAuthTokenPackageParams } from '../../lib/get_oauth_token_package_params';
+
 import { RouteDependencies } from '../../plugin';
 
 const schemaValuesSchema = schema.recordOf(
@@ -862,9 +864,12 @@ export function registerOauthConnectorParamsRoute({
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/sources/create',
-    })
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/ws/sources/create',
+        params: getOAuthTokenPackageParams(request.headers.cookie),
+      })(context, request, response);
+    }
   );
 }
 
