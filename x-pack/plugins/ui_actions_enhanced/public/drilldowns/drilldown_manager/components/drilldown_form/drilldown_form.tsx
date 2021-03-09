@@ -37,12 +37,16 @@ export interface FormDrilldownWizardProps {
 
   /** Trigger picker props. */
   triggers?: TriggerPickerProps;
+
+  /** Whether the form elements should be disabled. */
+  disabled?: boolean;
 }
 
 export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
   name = '',
   onNameChange,
   triggers,
+  disabled,
   children,
 }) => {
   if (!!triggers && !triggers.items.length) {
@@ -62,7 +66,7 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
         name="drilldown_name"
         placeholder={txtUntitledDrilldown}
         value={name}
-        disabled={!onNameChange}
+        disabled={!onNameChange || disabled}
         onChange={!!onNameChange ? (event) => onNameChange(event.target.value) : undefined}
         data-test-subj="drilldownNameInput"
       />
@@ -71,7 +75,7 @@ export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({
 
   const triggersFragment = !!triggers && triggers.items.length > 1 && (
     <EuiFormRow label={txtTrigger} fullWidth={true}>
-      <TriggerPicker {...triggers} />
+      <TriggerPicker {...triggers} disabled={disabled} />
     </EuiFormRow>
   );
 

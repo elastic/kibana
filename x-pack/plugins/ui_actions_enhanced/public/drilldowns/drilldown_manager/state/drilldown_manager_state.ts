@@ -243,33 +243,31 @@ export class DrilldownManagerState {
   }
 
   /**
-   * Callback called when user presses "Create drilldown" button to save the
+   * Called when user presses "Create drilldown" button to save the
    * currently edited drilldown.
    */
-  public readonly onCreateDrilldown = (): void => {
+  public async createDrilldown(): Promise<void> {
     const { dynamicActionManager, toastService } = this.deps;
     const drilldownState = this.getDrilldownState();
 
     if (!drilldownState) return;
 
-    (async () => {
-      try {
-        await dynamicActionManager.createEvent(
-          drilldownState.serialize(),
-          drilldownState.triggers$.getValue()
-        );
-        toastService.addSuccess({
-          title: toastDrilldownCreated.title(drilldownState.name$.getValue()),
-          text: toastDrilldownCreated.text,
-        });
-        this.setRoute(['manage']);
-      } catch (error) {
-        toastService.addError(error, {
-          title: toastDrilldownsCRUDError,
-        });
-      }
-    })();
-  };
+    try {
+      await dynamicActionManager.createEvent(
+        drilldownState.serialize(),
+        drilldownState.triggers$.getValue()
+      );
+      toastService.addSuccess({
+        title: toastDrilldownCreated.title(drilldownState.name$.getValue()),
+        text: toastDrilldownCreated.text,
+      });
+      this.setRoute(['manage']);
+    } catch (error) {
+      toastService.addError(error, {
+        title: toastDrilldownsCRUDError,
+      });
+    }
+  }
 
   /**
    * Deletes a list of drilldowns and shows toast notifications to the user.

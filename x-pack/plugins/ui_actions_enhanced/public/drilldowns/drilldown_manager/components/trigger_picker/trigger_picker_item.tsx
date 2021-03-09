@@ -23,6 +23,9 @@ export interface TriggerPickerItemProps extends TriggerPickerItemDescription {
   /** Whether the item is selected. */
   checked?: boolean;
 
+  /** Whether to disable user interaction. */
+  disabled?: boolean;
+
   /** Called when item is selected by user. */
   onSelect: (id: string) => void;
 }
@@ -32,6 +35,7 @@ export const TriggerPickerItem: React.FC<TriggerPickerItemProps> = ({
   title = txtUnknown,
   description,
   checked,
+  disabled,
   onSelect,
 }) => {
   const descriptionFragment = !!description && (
@@ -59,6 +63,7 @@ export const TriggerPickerItem: React.FC<TriggerPickerItemProps> = ({
         name={id}
         value={id}
         checked={checked}
+        disabled={disabled}
         onChange={() => onSelect(id)}
         data-test-subj={`triggerPicker-${id}`}
       />

@@ -41,6 +41,9 @@ export interface TriggerPickerProps {
   /** Link to documentation. */
   docs?: string;
 
+  /** Whether user interactions should be disabled. */
+  disabled?: boolean;
+
   /** Called on trigger selection change. */
   onChange: (selected: string[]) => void;
 }
@@ -49,6 +52,7 @@ export const TriggerPicker: React.FC<TriggerPickerProps> = ({
   items,
   selected = [],
   docs,
+  disabled,
   onChange,
 }) => {
   return (
@@ -77,6 +81,7 @@ export const TriggerPicker: React.FC<TriggerPickerProps> = ({
           title={trigger.title}
           description={trigger.description}
           checked={trigger.id === selected[0]}
+          disabled={disabled}
           onSelect={(id) => onChange([id])}
         />
       ))}

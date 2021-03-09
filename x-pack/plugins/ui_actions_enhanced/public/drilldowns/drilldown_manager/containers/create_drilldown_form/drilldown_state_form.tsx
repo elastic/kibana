@@ -13,9 +13,10 @@ import type { TriggerPickerProps } from '../../components/trigger_picker';
 
 export interface DrilldownStateFormProps {
   state: DrilldownState;
+  disabled?: boolean;
 }
 
-export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ state }) => {
+export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ state, disabled }) => {
   const drilldowns = useDrilldownManager();
   const name = state.useName();
   const triggers = state.useTriggers();
@@ -34,10 +35,15 @@ export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ state })
   const context = state.getFactoryContext();
 
   return (
-    <DrilldownForm name={name} onNameChange={state.setName} triggers={triggerPickerProps}>
+    <DrilldownForm
+      name={name}
+      onNameChange={state.setName}
+      triggers={triggerPickerProps}
+      disabled={disabled}
+    >
       <state.factory.ReactCollectConfig
         config={config}
-        onConfig={state.setConfig}
+        onConfig={disabled ? () => {} : state.setConfig}
         context={context}
       />
     </DrilldownForm>

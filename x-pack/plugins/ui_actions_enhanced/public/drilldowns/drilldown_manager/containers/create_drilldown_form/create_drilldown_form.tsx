@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
+import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { useDrilldownManager } from '../context';
 import { ActionFactoryPicker } from '../action_factory_picker';
@@ -31,20 +32,30 @@ const txtCreateDrilldownButton = i18n.translate(
 );
 
 export const CreateDrilldownForm: React.FC = () => {
+  const isMounted = useMountedState();
   const drilldowns = useDrilldownManager();
   const drilldownState = drilldowns.getDrilldownState();
+  const [disabled, setDisabled] = React.useState(false);
+
+  const handleCreate = () => {
+    setDisabled(true);
+    drilldowns.createDrilldown().finally(() => {
+      if (!isMounted()) return;
+      setDisabled(false);
+    });
+  };
 
   return (
     <>
       <DrilldownManagerTitle>{txtCreateDrilldown}</DrilldownManagerTitle>
       <ActionFactoryPicker />
-      {!!drilldownState && <DrilldownStateForm state={drilldownState} />}
+      {!!drilldownState && <DrilldownStateForm state={drilldownState} disabled={disabled} />}
       {!!drilldownState && (
         <DrilldownManagerFooter>
           <EuiButton
-            onClick={drilldowns.onCreateDrilldown}
+            onClick={handleCreate}
             fill
-            // isDisabled={!isActionValid(wizardConfig)}
+            isDisabled={disabled}
             data-test-subj={'drilldownWizardSubmit'}
           >
             {txtCreateDrilldownButton}
