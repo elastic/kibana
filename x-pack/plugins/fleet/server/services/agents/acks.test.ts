@@ -108,16 +108,21 @@ describe('test agent acks services', () => {
       ]
     );
     expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
-    expect(mockSavedObjectsClient.update).toBeCalled();
-    expect(mockSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockElasticsearchClient.update).toBeCalled();
+    expect(mockElasticsearchClient.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "fleet-agents",
-        "id",
         Object {
-          "packages": Array [
-            "system",
-          ],
-          "policy_revision": 4,
+          "body": Object {
+            "doc": Object {
+              "packages": Array [
+                "system",
+              ],
+              "policy_revision_idx": 4,
+            },
+          },
+          "id": "id",
+          "index": ".fleet-agents",
+          "refresh": "wait_for",
         },
       ]
     `);
@@ -170,16 +175,21 @@ describe('test agent acks services', () => {
       ]
     );
     expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
-    expect(mockSavedObjectsClient.update).toBeCalled();
-    expect(mockSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockElasticsearchClient.update).toBeCalled();
+    expect(mockElasticsearchClient.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "fleet-agents",
-        "id",
         Object {
-          "packages": Array [
-            "system",
-          ],
-          "policy_revision": 4,
+          "body": Object {
+            "doc": Object {
+              "packages": Array [
+                "system",
+              ],
+              "policy_revision_idx": 4,
+            },
+          },
+          "id": "id",
+          "index": ".fleet-agents",
+          "refresh": "wait_for",
         },
       ]
     `);
