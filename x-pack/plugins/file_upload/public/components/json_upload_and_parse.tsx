@@ -105,7 +105,11 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     if (!this._isMounted) {
       return;
     }
-    if (initializeImportResp.index === undefined || initializeImportResp.id === undefined) {
+    if (
+      !initializeImportResp.success ||
+      initializeImportResp.index === undefined ||
+      initializeImportResp.id === undefined
+    ) {
       this.setState({
         phase: PHASE.COMPLETE,
       });
