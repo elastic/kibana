@@ -76,6 +76,7 @@ export function getResponseInspectorStats(
 
   if (resp && resp.hits?.total !== undefined) {
     let value: string | undefined;
+    // TODO remove case where total is number when legacyHitsTotal is removed
     if (typeof resp.hits.total === 'number') {
       value = `${resp.hits.total}`;
     } else {
