@@ -73,6 +73,9 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
       const formattedResponse = handleResponse(clusterUuid, response);
       return {
         ...formattedResponse,
+        config: {
+          container: config.get('monitoring.ui.container.apm.enabled'),
+        },
         stats: {
           ...formattedResponse.stats,
           timeOfLastEvent,

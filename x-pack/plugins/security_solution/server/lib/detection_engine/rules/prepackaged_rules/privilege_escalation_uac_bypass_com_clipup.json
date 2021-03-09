@@ -6,16 +6,17 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "UAC Bypass Attempt with IEditionUpgradeManager Elevated COM Interface",
-  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and process.name == \"Clipup.exe\" and \nprocess.executable != \"C:\\\\Windows\\\\System32\\\\ClipUp.exe\" and process.parent.name == \"dllhost.exe\" and\n /* CLSID of the Elevated COM Interface IEditionUpgradeManager */\n wildcard(process.parent.args,\"/Processid:{BD54C901-076B-434E-B6C7-17C531F4AB41}\")\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"Clipup.exe\" and\n  not process.executable : \"C:\\\\Windows\\\\System32\\\\ClipUp.exe\" and process.parent.name : \"dllhost.exe\" and\n  /* CLSID of the Elevated COM Interface IEditionUpgradeManager */\n  process.parent.args : \"/Processid:{BD54C901-076B-434E-B6C7-17C531F4AB41}\"\n",
   "references": [
     "https://github.com/hfiref0x/UACME"
   ],
-  "risk_score": 71,
+  "risk_score": 73,
   "rule_id": "b90cdde7-7e0d-4359-8bf0-2c112ce2008a",
   "severity": "high",
   "tags": [
@@ -51,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

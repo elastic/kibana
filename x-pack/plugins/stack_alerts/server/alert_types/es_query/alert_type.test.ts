@@ -17,7 +17,7 @@ describe('alertType', () => {
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.es-query');
-    expect(alertType.name).toBe('ES query');
+    expect(alertType.name).toBe('Elasticsearch query');
     expect(alertType.actionGroups).toEqual([{ id: 'query matched', name: 'Query matched' }]);
 
     expect(alertType.actionVariables).toMatchInlineSnapshot(`
@@ -54,7 +54,7 @@ describe('alertType', () => {
             "name": "index",
           },
           Object {
-            "description": "The string representation of the ES query.",
+            "description": "The string representation of the Elasticsearch query.",
             "name": "esQuery",
           },
           Object {

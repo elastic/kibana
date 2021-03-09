@@ -64,7 +64,7 @@ export const registerPrivilegesRoute = ({ license, router, config }: RouteDepend
 
         return res.ok({ body: privilegesResult });
       } catch (e) {
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

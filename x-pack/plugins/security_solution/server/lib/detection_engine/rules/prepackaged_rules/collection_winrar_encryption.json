@@ -3,9 +3,11 @@
     "Elastic"
   ],
   "description": "Identifies use of WinRar or 7z to create an encrypted files. Adversaries will often compress and encrypt data in preparation for exfiltration.",
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -43,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

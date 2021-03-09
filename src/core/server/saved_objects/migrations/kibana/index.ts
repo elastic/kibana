@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { KibanaMigrator, IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
+export { KibanaMigrator } from './kibana_migrator';
+export type { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';

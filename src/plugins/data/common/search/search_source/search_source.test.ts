@@ -418,10 +418,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = await searchSource.getSearchRequestBody();
-        expect(request.fields).toEqual([
-          { field: 'field1', include_unmapped: 'true' },
-          { field: 'field2', include_unmapped: 'true' },
-        ]);
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
       test('returns all scripted fields when one fields entry is *', async () => {

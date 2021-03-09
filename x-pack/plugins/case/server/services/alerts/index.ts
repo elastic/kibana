@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { ElasticsearchClient } from 'kibana/server';
-import { CaseStatuses } from '../../../common/api';
+import { ElasticsearchClient, Logger } from 'kibana/server';
 import { MAX_ALERTS_PER_SUB_CASE } from '../../../common/constants';
+import { UpdateAlertRequest } from '../../client/types';
+import { AlertInfo } from '../../common';
+import { createCaseError } from '../../common/error';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
-  ids: string[];
-  status: CaseStatuses;
-  indices: Set<string>;
+  alerts: UpdateAlertRequest[];
   scopedClusterClient: ElasticsearchClient;
+  logger: Logger;
 }
 
 interface GetAlertsArgs {
-  ids: string[];
-  indices: Set<string>;
+  alertsInfo: AlertInfo[];
   scopedClusterClient: ElasticsearchClient;
+  logger: Logger;
 }
 
 interface Alert {
@@ -35,78 +36,63 @@ interface Alert {
 }
 
 interface AlertsResponse {
-  hits: {
-    hits: Alert[];
-  };
+  docs: Alert[];
 }
 
-/**
- * remove empty strings from the indices, I'm not sure how likely this is but in the case that
- * the document doesn't have _index set the security_solution code sets the value to an empty string
- * instead
- */
-function getValidIndices(indices: Set<string>): string[] {
-  return [...indices].filter((index) => !_.isEmpty(index));
+function isEmptyAlert(alert: AlertInfo): boolean {
+  return isEmpty(alert.id) || isEmpty(alert.index);
 }
 
 export class AlertService {
   constructor() {}
 
-  public async updateAlertsStatus({
-    ids,
-    status,
-    indices,
-    scopedClusterClient,
-  }: UpdateAlertsStatusArgs) {
-    const sanitizedIndices = getValidIndices(indices);
-    if (sanitizedIndices.length <= 0) {
-      // log that we only had invalid indices
-      return;
+  public async updateAlertsStatus({ alerts, scopedClusterClient, logger }: UpdateAlertsStatusArgs) {
+    try {
+      const body = alerts
+        .filter((alert) => !isEmptyAlert(alert))
+        .flatMap((alert) => [
+          { update: { _id: alert.id, _index: alert.index } },
+          { doc: { signal: { status: alert.status } } },
+        ]);
+
+      if (body.length <= 0) {
+        return;
+      }
+
+      return scopedClusterClient.bulk({ body });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
+        error,
+        logger,
+      });
     }
-
-    const result = await scopedClusterClient.updateByQuery({
-      index: sanitizedIndices,
-      conflicts: 'abort',
-      body: {
-        script: {
-          source: `ctx._source.signal.status = '${status}'`,
-          lang: 'painless',
-        },
-        query: { ids: { values: ids } },
-      },
-      ignore_unavailable: true,
-    });
-
-    return result;
   }
 
   public async getAlerts({
     scopedClusterClient,
-    ids,
-    indices,
+    alertsInfo,
+    logger,
   }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
-    const index = getValidIndices(indices);
-    if (index.length <= 0) {
-      return;
+    try {
+      const docs = alertsInfo
+        .filter((alert) => !isEmptyAlert(alert))
+        .slice(0, MAX_ALERTS_PER_SUB_CASE)
+        .map((alert) => ({ _id: alert.id, _index: alert.index }));
+
+      if (docs.length <= 0) {
+        return;
+      }
+
+      const results = await scopedClusterClient.mget<AlertsResponse>({ body: { docs } });
+
+      return results.body;
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,
+        error,
+        logger,
+      });
     }
-
-    const result = await scopedClusterClient.search<AlertsResponse>({
-      index,
-      body: {
-        query: {
-          bool: {
-            filter: {
-              ids: {
-                values: ids,
-              },
-            },
-          },
-        },
-      },
-      size: MAX_ALERTS_PER_SUB_CASE,
-      ignore_unavailable: true,
-    });
-
-    return result.body;
   }
 }

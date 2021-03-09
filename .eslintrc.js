@@ -790,6 +790,22 @@ module.exports = {
     },
 
     /**
+     * Fleet overrides
+     */
+    {
+      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/order': [
+          'warn',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent'],
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
@@ -1087,7 +1103,9 @@ module.exports = {
      */
     {
       // typescript for front and back end
-      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1314,9 +1332,58 @@ module.exports = {
       },
     },
 
+    /**
+     * Platform Security Team overrides
+     */
     {
       files: [
-        // platform-team owned code
+        'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
+        'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 1,
+        'import/order': [
+          // This rule sorts import declarations
+          'error',
+          {
+            groups: [
+              'unknown',
+              ['builtin', 'external'],
+              'internal',
+              ['parent', 'sibling', 'index'],
+            ],
+            pathGroups: [
+              {
+                pattern: '{@kbn/**,src/**,kibana{,/**}}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always',
+          },
+        ],
+        'import/no-duplicates': ['error'],
+        'sort-imports': [
+          // This rule sorts imports of multiple members (destructured imports)
+          'error',
+          {
+            ignoreCase: true,
+            ignoreDeclarationSort: true,
+          },
+        ],
+      },
+    },
+
+    {
+      files: [
+        // core-team owned code
         'src/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
@@ -1325,6 +1392,14 @@ module.exports = {
         'packages/kbn-config-schema',
         'src/plugins/status_page/**',
         'src/plugins/saved_objects_management/**',
+        'packages/kbn-analytics/**',
+        'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
@@ -1340,7 +1415,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['lodash/*', '!lodash/fp'],
+            patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
           },
         ],
       },

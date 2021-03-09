@@ -65,7 +65,7 @@ export const registerUpdateRoute = ({
           });
         }
 
-        return res.internalError({ body: error });
+        throw error;
       }
     })
   );

@@ -415,11 +415,10 @@ export class IndexPatternsService {
         },
         spec.fieldAttrs
       );
-      // APPLY RUNTIME FIELDS
+      // CREATE RUNTIME FIELDS
       for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
-        if (spec.fields[key]) {
-          spec.fields[key].runtimeField = value;
-        } else {
+        // do not create runtime field if mapped field exists
+        if (!spec.fields[key]) {
           spec.fields[key] = {
             name: key,
             type: castEsToKbnFieldTypeName(value.type),

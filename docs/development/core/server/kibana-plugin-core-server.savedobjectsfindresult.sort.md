@@ -25,7 +25,7 @@ const page1 = await savedObjectsClient.find({
   type: 'visualization',
   sortField: 'updated_at',
   sortOrder: 'asc',
-  pit,
+  pit: { id },
 });
 const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
 const page2 = await savedObjectsClient.find({

@@ -96,6 +96,7 @@ export const FetchMonitorStatesQueryArgsType = t.intersection([
     pagination: t.string,
     filters: t.string,
     statusFilter: t.string,
+    query: t.string,
   }),
   t.type({
     dateRangeStart: t.string,

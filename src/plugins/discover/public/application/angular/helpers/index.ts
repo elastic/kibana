@@ -7,4 +7,5 @@
  */
 
 export { buildPointSeriesData } from './point_series';
-export { formatRow } from './row_formatter';
+export { formatRow, formatTopLevelObject } from './row_formatter';
+export { handleSourceColumnState } from './state_helpers';

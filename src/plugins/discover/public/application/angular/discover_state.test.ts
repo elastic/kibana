@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from 'kibana/public';
 import {
   getState,
   GetStateReturn,
@@ -14,10 +15,16 @@ import {
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { SavedSearch } from '../../saved_searches';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 
 let history: History;
 let state: GetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
+
+const uiSettingsMock = {
+  get: <T>(key: string) =>
+    ((key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown) as T,
+} as IUiSettingsClient;
 
 describe('Test discover state', () => {
   beforeEach(async () => {
@@ -26,6 +33,7 @@ describe('Test discover state', () => {
     state = getState({
       getStateDefaults: () => ({ index: 'test' }),
       history,
+      uiSettings: uiSettingsMock,
     });
     await state.replaceUrlAppState({});
     await state.startSync();
@@ -81,6 +89,7 @@ describe('Test discover state with legacy migration', () => {
     state = getState({
       getStateDefaults: () => ({ index: 'test' }),
       history,
+      uiSettings: uiSettingsMock,
     });
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
@@ -106,6 +115,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
     data: mockDataPlugin,
     appStateContainer: getState({
       history: createBrowserHistory(),
+      uiSettings: uiSettingsMock,
     }).appStateContainer,
     getSavedSearch: () => mockSavedSearch,
   });
