@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { CaseFullExternalService } from '../../../../case/common/api/cases';
-import { getCaseUserActions, getSubCaseUserActions } from './api';
+import { getCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
@@ -46,7 +46,7 @@ export const initialData: CaseUserActionsState = {
 };
 
 export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (caseId: string, subCaseId?: string) => void;
+  fetchCaseUserActions: (caseId: string) => void;
 }
 
 const getExternalService = (value: string): CaseExternalService | null =>
@@ -238,8 +238,7 @@ export const getPushedInfo = (
 
 export const useGetCaseUserActions = (
   caseId: string,
-  caseConnectorId: string,
-  subCaseId?: string
+  caseConnectorId: string
 ): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
@@ -249,7 +248,7 @@ export const useGetCaseUserActions = (
   const [, dispatchToaster] = useStateToaster();
 
   const fetchCaseUserActions = useCallback(
-    async (thisCaseId: string, thisSubCaseId?: string) => {
+    async (thisCaseId: string) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -259,9 +258,7 @@ export const useGetCaseUserActions = (
           isLoading: true,
         });
 
-        const response = await (thisSubCaseId
-          ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrlRef.current.signal)
-          : getCaseUserActions(thisCaseId, abortCtrlRef.current.signal));
+        const response = await getCaseUserActions(thisCaseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           // Attention Future developer
@@ -271,11 +268,7 @@ export const useGetCaseUserActions = (
             ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
             : [];
 
-          const caseUserActions = !isEmpty(response)
-            ? thisSubCaseId
-              ? response
-              : response.slice(1)
-            : [];
+          const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
 
           setCaseUserActionsState({
             caseUserActions,
@@ -312,7 +305,7 @@ export const useGetCaseUserActions = (
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId, subCaseId);
+      fetchCaseUserActions(caseId);
     }
 
     return () => {
@@ -320,6 +313,6 @@ export const useGetCaseUserActions = (
       abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, subCaseId]);
+  }, [caseId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

@@ -80,7 +80,7 @@ export interface Case extends BasicCase {
   description: string;
   externalService: CaseExternalService | null;
   subCases?: SubCase[] | null;
-  subCaseIds: string[];
+  subCaseIds?: string[];
   settings: CaseAttributes['settings'];
   tags: string[];
   type: CaseType;

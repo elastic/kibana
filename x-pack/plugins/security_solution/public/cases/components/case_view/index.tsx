@@ -53,7 +53,6 @@ import * as i18n from './translations';
 
 interface Props {
   caseId: string;
-  subCaseId?: string;
   userCanCrud: boolean;
 }
 
@@ -87,7 +86,7 @@ export interface CaseProps extends Props {
 }
 
 export const CaseComponent = React.memo<CaseProps>(
-  ({ caseId, caseData, fetchCase, subCaseId, updateCase, userCanCrud }) => {
+  ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
     const dispatch = useDispatch();
     const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
     const allCasesLink = getCaseUrl(search);
@@ -102,11 +101,10 @@ export const CaseComponent = React.memo<CaseProps>(
       hasDataToPush,
       isLoading: isLoadingUserActions,
       participants,
-    } = useGetCaseUserActions(caseId, caseData.connector.id, subCaseId);
+    } = useGetCaseUserActions(caseId, caseData.connector.id);
 
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
-      subCaseId,
     });
 
     /**
@@ -213,9 +211,9 @@ export const CaseComponent = React.memo<CaseProps>(
     const handleUpdateCase = useCallback(
       (newCase: Case) => {
         updateCase(newCase);
-        fetchCaseUserActions(caseId, subCaseId);
+        fetchCaseUserActions(caseId);
       },
-      [updateCase, fetchCaseUserActions, caseId, subCaseId]
+      [updateCase, fetchCaseUserActions, caseId]
     );
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
@@ -283,9 +281,9 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const handleRefresh = useCallback(() => {
-      fetchCaseUserActions(caseId, subCaseId);
+      fetchCaseUserActions(caseId);
       fetchCase();
-    }, [caseId, fetchCase, fetchCaseUserActions, subCaseId]);
+    }, [caseId, fetchCase, fetchCaseUserActions]);
 
     const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
@@ -388,7 +386,7 @@ export const CaseComponent = React.memo<CaseProps>(
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
-                      fetchUserActions={fetchCaseUserActions.bind(null, caseId, subCaseId)}
+                      fetchUserActions={fetchCaseUserActions.bind(null, caseId)}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
                       onShowAlertDetails={showAlert}
@@ -449,9 +447,7 @@ export const CaseComponent = React.memo<CaseProps>(
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
                   disabled={!userCanCrud}
-                  hideConnectorServiceNowSir={
-                    subCaseId != null || caseData.type === CaseType.collection
-                  }
+                  hideConnectorServiceNowSir={false}
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}
@@ -473,8 +469,8 @@ export const CaseComponent = React.memo<CaseProps>(
   }
 );
 
-export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
-  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
+export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
+  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId);
   if (isError) {
     return null;
   }
@@ -493,7 +489,6 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     data && (
       <CaseComponent
         caseId={caseId}
-        subCaseId={subCaseId}
         fetchCase={fetchCase}
         caseData={data}
         updateCase={updateCase}

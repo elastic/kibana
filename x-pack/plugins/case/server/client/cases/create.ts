@@ -66,6 +66,12 @@ export const create = async ({
     fold(throwErrors(Boom.badRequest), identity)
   );
 
+  if (type !== CaseType.individual) {
+    throw Boom.badRequest(
+      `Failed to create case, a case must have type 'individual', but received: '${type}'`
+    );
+  }
+
   try {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;

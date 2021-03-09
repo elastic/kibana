@@ -15,7 +15,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { CommentableCase } from '../../../../common';
 import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
@@ -72,11 +72,6 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
         body: escapeHatch,
       },
     },
@@ -95,7 +90,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
           service: caseService,
           client,
           caseID: request.params.case_id,
-          subCaseId: request.query?.subCaseId,
+          subCaseId: undefined,
           logger,
         });
 
@@ -112,7 +107,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
           throw Boom.badRequest(`You cannot change the type of the comment.`);
         }
 
-        const saveObjType = request.query?.subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const saveObjType = CASE_SAVED_OBJECT;
 
         const caseRef = myComment.references.find((c) => c.type === saveObjType);
         if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
@@ -153,7 +148,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
               actionAt: updatedDate,
               actionBy: { username, full_name, email },
               caseId: request.params.case_id,
-              subCaseId: request.query?.subCaseId,
+              subCaseId: undefined,
               commentId: updatedComment.id,
               fields: ['comment'],
               newValue: JSON.stringify(queryRestAttributes),
@@ -171,7 +166,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
         });
       } catch (error) {
         logger.error(
-          `Failed to patch comment in route case id: ${request.params.case_id} sub case id: ${request.query?.subCaseId}: ${error}`
+          `Failed to patch comment in route case id: ${request.params.case_id}: ${error}`
         );
         return response.customError(wrapError(error));
       }

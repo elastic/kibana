@@ -11,7 +11,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Process Injection by the Microsoft Build Engine",
   "query": "process.name:MSBuild.exe and event.action:\"CreateRemoteThread detected (rule: CreateRemoteThread)\"",
   "risk_score": 21,
