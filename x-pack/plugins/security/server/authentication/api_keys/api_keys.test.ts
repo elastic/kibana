@@ -147,6 +147,7 @@ describe('API Keys', () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.security.createApiKey.mockResolvedValueOnce(
+        // @ts-expect-error @elastic/elsticsearch CreateApiKeyResponse.expiration: number
         securityMock.createApiResponse({
           body: {
             id: '123',

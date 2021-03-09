@@ -681,7 +681,7 @@ describe('Session index', () => {
       mockElasticsearchClient.create.mockResolvedValue(
         securityMock.createApiResponse({
           body: {
-            _shards: { total: 1, failed: 0, successful: 1 },
+            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
             _index: 'my-index',
             _id: 'W0tpsmIBdwcYyG50zbta',
             _version: 1,
@@ -754,7 +754,7 @@ describe('Session index', () => {
         securityMock.createApiResponse({
           statusCode: 409,
           body: {
-            _shards: { total: 1, failed: 0, successful: 1 },
+            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
             _index: 'my-index',
             _id: 'W0tpsmIBdwcYyG50zbta',
             _version: 1,
@@ -799,7 +799,7 @@ describe('Session index', () => {
         securityMock.createApiResponse({
           statusCode: 200,
           body: {
-            _shards: { total: 1, failed: 0, successful: 1 },
+            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
             _index: 'my-index',
             _id: 'W0tpsmIBdwcYyG50zbta',
             _version: 1,

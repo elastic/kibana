@@ -6,7 +6,6 @@
  */
 
 import type { RouteDefinitionParams } from '../..';
-import type { BuiltinESPrivileges } from '../../../../common/model';
 
 export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionParams) {
   router.get(

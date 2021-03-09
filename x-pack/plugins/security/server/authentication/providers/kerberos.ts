@@ -160,7 +160,6 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       tokens = (
         await this.options.client.asInternalUser.security.getToken({
           body: {
-            // @ts-expect-error `GetUserAccessTokenRequest['grant_type']` doesn't support `_kerberos` grant.
             grant_type: '_kerberos',
             kerberos_ticket: kerberosTicket,
           },

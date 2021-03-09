@@ -12,7 +12,6 @@ import type { KibanaFeature } from '../../../../../features/common';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import type { ElasticsearchRole } from './model';
 import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
 const roleGrantsSubFeaturePrivileges = (

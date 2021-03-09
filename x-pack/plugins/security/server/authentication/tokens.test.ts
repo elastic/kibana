@@ -104,6 +104,7 @@ describe('Tokens', () => {
       const authenticationInfo = mockAuthenticatedUser();
       const tokenPair = { accessToken: 'access-token', refreshToken: 'refresh-token' };
       mockElasticsearchClient.security.getToken.mockResolvedValue(
+        // @ts-expect-error @elastic/elsticsearch GetUserAccessTokenResponse requires kerberos_authentication_response_token
         securityMock.createApiResponse({
           body: {
             access_token: tokenPair.accessToken,

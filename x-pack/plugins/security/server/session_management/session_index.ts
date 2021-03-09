@@ -289,8 +289,6 @@ export class SessionIndex {
         try {
           await this.options.elasticsearchClient.indices.putTemplate({
             name: sessionIndexTemplateName,
-            // @ts-expect-error `PutIndexTemplateRequest` type is wrong, since it requires mappings to define not only
-            // `type`, but also `meta`, `name` etc.
             body: getSessionIndexTemplate(this.indexName),
           });
           this.options.logger.debug('Successfully created session index template.');

@@ -11,7 +11,6 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from 'src/core/server';
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 
-import type { AuthenticatedUser } from '../../../common/model';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
