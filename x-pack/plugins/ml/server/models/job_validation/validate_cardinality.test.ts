@@ -282,7 +282,7 @@ describe('ML - validateCardinality', () => {
   const cardinality = 10000;
   it(`disabled model_plot, over field cardinality of ${cardinality} doesn't trigger a warning`, () => {
     const job = (getJobConfig('over_field_name') as unknown) as CombinedJob;
-    job.model_plot_config = { enabled: false };
+    job.model_plot_config = { enabled: false, terms: 'a_term' };
     const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
     return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {
@@ -293,7 +293,7 @@ describe('ML - validateCardinality', () => {
 
   it(`enabled model_plot, over field cardinality of ${cardinality} triggers a model plot warning`, () => {
     const job = (getJobConfig('over_field_name') as unknown) as CombinedJob;
-    job.model_plot_config = { enabled: true };
+    job.model_plot_config = { enabled: true, terms: 'a_term' };
     const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
     return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {
@@ -304,7 +304,7 @@ describe('ML - validateCardinality', () => {
 
   it(`disabled model_plot, by field cardinality of ${cardinality} triggers a field cardinality warning`, () => {
     const job = (getJobConfig('by_field_name') as unknown) as CombinedJob;
-    job.model_plot_config = { enabled: false };
+    job.model_plot_config = { enabled: false, terms: 'a_term' };
     const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
     return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {
@@ -315,7 +315,7 @@ describe('ML - validateCardinality', () => {
 
   it(`enabled model_plot, by field cardinality of ${cardinality} triggers a model plot warning and field cardinality warning`, () => {
     const job = (getJobConfig('by_field_name') as unknown) as CombinedJob;
-    job.model_plot_config = { enabled: true };
+    job.model_plot_config = { enabled: true, terms: 'a_term' };
     const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
     return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {

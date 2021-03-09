@@ -27,7 +27,6 @@ export function createEmptyJob(): Job {
 }
 
 export function createEmptyDatafeed(indexPatternTitle: IndexPatternTitle): Datafeed {
-  // @ts-expect-error
   return {
     datafeed_id: '',
     job_id: '',

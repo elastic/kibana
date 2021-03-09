@@ -130,7 +130,6 @@ describe('filter_runtime_mappings', () => {
 
     test('return no runtime mappings, no mappings in aggs', () => {
       datafeed.aggregations = getAggs();
-      // @ts-expect-error
       datafeed.aggregations!.buckets!.aggregations!.responsetime!.avg!.field! = 'responsetime';
 
       const resp = filterRuntimeMappings(job, datafeed);

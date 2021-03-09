@@ -66,7 +66,6 @@ export function checkPrivilegesWithRequestFactory(
         },
       });
 
-      // @ts-expect-error `HasPrivilegesResponse['application']` type isn't correct.
       const hasPrivilegesResponse: HasPrivilegesResponse = body;
 
       validateEsPrivilegeResponse(

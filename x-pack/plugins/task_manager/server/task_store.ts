@@ -46,7 +46,7 @@ export interface StoreOpts {
 export interface SearchOpts {
   search_after?: Array<number | string>;
   size?: number;
-  sort?: estypes.SearchRequest['sort'];
+  sort?: estypes.Sort;
   query?: estypes.QueryContainer;
   seq_no_primary_term?: boolean;
 }
@@ -373,13 +373,16 @@ export class TaskStore {
       });
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
+        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.updated as optional
         updated,
         version_conflicts,
         max_docs
       );
 
       return {
+        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.total as optional
         total,
+        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.total as optional
         updated,
         version_conflicts: conflictsCorrectedForContinuation,
       };

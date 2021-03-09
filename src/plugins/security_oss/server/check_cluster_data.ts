@@ -22,9 +22,9 @@ export const createClusterDataCheck = () => {
         });
         clusterHasUserData = indices.body.some((indexCount) => {
           const isInternalIndex =
-            indexCount.index.startsWith('.') || indexCount.index.startsWith('kibana_sample_');
+            indexCount.index?.startsWith('.') || indexCount.index?.startsWith('kibana_sample_');
 
-          return !isInternalIndex && parseInt(indexCount['docs.count'], 10) > 0;
+          return !isInternalIndex && parseInt(indexCount['docs.count']!, 10) > 0;
         });
       } catch (e) {
         log.warn(`Error encountered while checking cluster for user data: ${e}`);

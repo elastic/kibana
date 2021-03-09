@@ -356,7 +356,6 @@ export const reindexServiceFactory = (
       refresh: true,
       wait_for_completion: false,
       body: {
-        // @ts-expect-error size is required
         source: { index: indexName },
         dest: { index: reindexOp.attributes.newIndexName },
       },
@@ -394,7 +393,6 @@ export const reindexServiceFactory = (
       return actions.updateReindexOp(reindexOp, {
         reindexTaskPercComplete: perc,
       });
-      // @ts-expect-error TaskStatus doesn't contain canceled
     } else if (taskResponse.task.status.canceled === 'by user request') {
       // Set the status to cancelled
       reindexOp = await actions.updateReindexOp(reindexOp, {
