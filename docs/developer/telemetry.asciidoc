@@ -3,13 +3,14 @@
 
 In order to help us provide a good developer experience we track some very simple metrics when you run certain tasks locally and ship them to a service that we run. To disable this functionality just specify `CI_STATS_DISABLED=true` in your environment.
 
-The metrics we collect include:
+The operations we current report timing data for:
 
 * Total execution time of `yarn kbn bootstrap`
 
 Along with the execution time of each execution we ship the following information about your machine to the service:
 
 * The `branch` property from the package.json file
+* The value of the `data/uuid` file
 * https://nodejs.org/docs/latest/api/os.html#os_os_platform[Operating system platform]
 * https://nodejs.org/docs/latest/api/os.html#os_os_release[Operating system release]
 * https://nodejs.org/docs/latest/api/os.html#os_os_cpus[Count, model, and speed of the CPUs]

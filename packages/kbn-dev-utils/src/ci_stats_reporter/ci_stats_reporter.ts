@@ -8,6 +8,8 @@
 
 import { inspect } from 'util';
 import Os from 'os';
+import Fs from 'fs';
+import Path from 'path';
 
 import Axios from 'axios';
 
@@ -46,6 +48,8 @@ export interface TimingsOptions {
   timings: CiStatsTiming[];
   /** master, 7.x, etc, automatically detected from package.json if not specified */
   upstreamBranch?: string;
+  /** value of data/uuid, automatically loaded if not specified */
+  kibanaUuid?: string;
 }
 export class CiStatsReporter {
   static fromEnv(log: ToolingLog) {
@@ -75,13 +79,15 @@ export class CiStatsReporter {
     const buildId = this.config?.buildId;
     const timings = options.timings;
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
+    const kibanaUuid = options.kibanaUuid !== undefined ? this.getKibanaUuid() : options.kibanaUuid;
     const defaultMetadata = {
-      os_kernel: Os.release(),
-      host_platform: Os.platform(),
-      system_cpu_cores: Os.cpus()?.length,
-      system_cpu_name: Os.cpus()[0]?.model,
-      system_cpu_speed: Os.cpus()[0]?.speed,
-      host_architecture: Os.arch(),
+      osPlatform: Os.platform(),
+      osRelease: Os.release(),
+      osArch: Os.arch(),
+      cpuCount: Os.cpus()?.length,
+      cpuModel: Os.cpus()[0]?.model,
+      cpuSpeed: Os.cpus()[0]?.speed,
+      kibanaUuid,
     };
 
     return await this.req({
@@ -126,8 +132,8 @@ export class CiStatsReporter {
   }
 
   /**
-   * in order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
-   * in the upstreamBranch when constructing the CiStatsTimings object. Outside of @kbn/pm
+   * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
+   * in the upstreamBranch when calling the timings() method. Outside of @kbn/pm
    * we rely on @kbn/utils to find the package.json file.
    */
   private getUpstreamBranch() {
@@ -136,6 +142,27 @@ export class CiStatsReporter {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { kibanaPackageJson } = require(hideFromWebpack.join(''));
     return kibanaPackageJson.branch;
+  }
+
+  /**
+   * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
+   * in the kibanaUuid when calling the timings() method. Outside of @kbn/pm
+   * we rely on @kbn/utils to find the repo root.
+   */
+  private getKibanaUuid() {
+    // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
+    const hideFromWebpack = ['@', 'kbn/utils'];
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { REPO_ROOT } = require(hideFromWebpack.join(''));
+    try {
+      return Fs.readFileSync(Path.resolve(REPO_ROOT, 'data/uuid'), 'utf-8').trim();
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return undefined;
+      }
+
+      throw error;
+    }
   }
 
   private async req({ auth, body, bodyDesc, path }: ReqOptions) {
