@@ -6,17 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { buildRequestBody } from './build_request_body';
-import { getEsShardTimeout } from '../helpers/get_es_shard_timeout';
 import { getIndexPatternObject } from '../../../lib/search_strategies/lib/get_index_pattern';
+import { VisTypeTimeseriesRequestServices, VisTypeTimeseriesVisDataRequest } from '../../../types';
+import { DefaultSearchCapabilities } from '../../search_strategies';
 
-export async function getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities) {
-  const uiSettings = req.getUiSettingsService();
+export async function getSeriesRequestParams(
+  req: VisTypeTimeseriesVisDataRequest,
+  panel: PanelSchema,
+  series: SeriesItemsSchema,
+  capabilities: DefaultSearchCapabilities,
+  {
+    esQueryConfig,
+    esShardTimeout,
+    uiSettings,
+    indexPatternsService,
+  }: VisTypeTimeseriesRequestServices
+) {
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(indexPattern, {
-    indexPatternsService: await req.getIndexPatternsService(),
+    indexPatternsService,
   });
 
   const request = await buildRequestBody(
@@ -28,7 +40,6 @@ export async function getSeriesRequestParams(req, panel, series, esQueryConfig, 
     capabilities,
     uiSettings
   );
-  const esShardTimeout = await getEsShardTimeout(req);
 
   return {
     index: indexPatternString,
