@@ -243,7 +243,7 @@ syslog, Apache, and other webserver logs. See
 [[h_glos]]
 == H
 
-[[glossary-graph]] heat map ::
+[[glossary-heat-map]] heat map ::
 // tag::heat-map-def[]
 A layer type in the *Maps* application. Heat maps cluster locations to show higher
 (or lower) densities. Heat maps describe a visualization with color-coded cells
