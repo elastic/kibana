@@ -12,7 +12,7 @@ import { SecurityPageName } from '../../app/types';
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
+import { useGetUserSavedObjectPermissions, useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
@@ -20,6 +20,7 @@ import { Create } from '../components/create';
 import * as i18n from './translations';
 
 export const CreateCasePage = React.memo(() => {
+  const { case: caseUi } = useKibana().services;
   const history = useHistory();
   const userPermissions = useGetUserSavedObjectPermissions();
   const search = useGetUrlSearch(navTabs.case);
@@ -41,6 +42,7 @@ export const CreateCasePage = React.memo(() => {
   return (
     <>
       <WrapperPage>
+        {caseUi.caseComponent()}
         <CaseHeaderPage backOptions={backOptions} title={i18n.CREATE_TITLE} />
         <Create />
       </WrapperPage>
