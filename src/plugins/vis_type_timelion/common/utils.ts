@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TimelionExpressionArgument } from './parser';
+import type { TimelionExpressionArgument } from './parser';
 import { parseTimelionExpressionAsync } from './parser_async';
 
 const isEsIndexArgument = ({ type, name, function: fn }: TimelionExpressionArgument) =>
