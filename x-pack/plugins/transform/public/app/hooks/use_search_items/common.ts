@@ -79,7 +79,7 @@ export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedS
   return currentSavedSearch;
 }
 
-function isIndexPattern(arg: any): arg is IndexPattern {
+function isIndexPattern(arg: unknown): arg is IndexPattern {
   return arg !== undefined;
 }
 
