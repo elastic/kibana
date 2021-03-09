@@ -8,12 +8,7 @@
 import fs from 'fs';
 import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
-import {
-  KibanaRequest,
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-} from 'kibana/server';
+import { KibanaRequest, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 
 import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
@@ -223,15 +218,10 @@ export class DataRecognizer {
   }
 
   private async _loadSavedObjectModules() {
-    const options: SavedObjectsFindOptions = {
+    const jobs = await this._savedObjectsClient.find<Module>({
       type: ML_MODULE_SAVED_OBJECT_TYPE,
       perPage: 10000,
-      // ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
-      // searchFields,
-      // filter,
-    };
-
-    const jobs = await this._savedObjectsClient.find<Module>(options);
+    });
 
     return jobs.saved_objects.map((o) => o.attributes);
   }
@@ -450,7 +440,7 @@ export class DataRecognizer {
     indexPatternName?: string,
     query?: any,
     useDedicatedIndex?: boolean,
-    _startDatafeed?: boolean,
+    startDatafeed?: boolean,
     start?: number,
     end?: number,
     jobOverrides?: JobOverride | JobOverride[],
@@ -532,7 +522,7 @@ export class DataRecognizer {
       }
       saveResults.datafeeds = await this._saveDatafeeds(moduleConfig.datafeeds);
 
-      if (_startDatafeed) {
+      if (startDatafeed) {
         const savedDatafeeds = moduleConfig.datafeeds.filter((df) => {
           const datafeedResult = saveResults.datafeeds.find((d) => d.id === df.id);
           return datafeedResult !== undefined && datafeedResult.success === true;
