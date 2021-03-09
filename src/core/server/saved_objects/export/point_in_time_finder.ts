@@ -170,8 +170,8 @@ export class PointInTimeFinder {
         sortOrder: 'desc',
         // Bump keep_alive by 2m on every new request to allow for the ES client
         // to make multiple retries in the event of a network failure.
-        ...(id ? { pit: { id, keepAlive: '2m' } } : {}),
-        ...(searchAfter ? { searchAfter } : {}),
+        pit: id ? { id, keepAlive: '2m' } : undefined,
+        searchAfter,
         ...findOptions,
       });
     } catch (e) {

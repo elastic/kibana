@@ -383,7 +383,6 @@ export class SavedObjectsRepository {
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
-              // @ts-expect-error
               docs: bulkGetDocs,
             },
           },
@@ -410,6 +409,7 @@ export class SavedObjectsRepository {
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
         const docFound = indexFound && actualResult?.found === true;
+        // @ts-expect-error MultiGetHit._source is optional
         if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
           return {
@@ -426,7 +426,9 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces ||
+          // @ts-expect-error MultiGetHit._source is optional
           getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+        // @ts-expect-error MultiGetHit._source is optional
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
@@ -555,6 +557,7 @@ export class SavedObjectsRepository {
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
+              // @ts-expect-error MultiGetSourceFilter doesn't have includes, but include
               docs: bulkGetDocs,
             },
           },
@@ -577,6 +580,7 @@ export class SavedObjectsRepository {
           type,
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+            // @ts-expect-error MultiGetHit._source is optional
             ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
               metadata: { isNotOverwritable: true },
             }),
@@ -637,7 +641,7 @@ export class SavedObjectsRepository {
     }
 
     const deleteDocNotFound = body.result === 'not_found';
-    // @ts-expect-error
+    // @ts-expect-error 'error' does not exist on type 'DeleteResponse'
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
     if (deleteDocNotFound || deleteIndexNotFound) {
       // see "404s from missing index" above
@@ -689,7 +693,6 @@ export class SavedObjectsRepository {
             lang: 'painless',
             params: { namespace },
           },
-          // @ts-expect-error UpdateByQueryRequest does not allow conflicts property on body
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
@@ -800,9 +803,9 @@ export class SavedObjectsRepository {
 
     const esOptions = {
       // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
-      ...(pit ? {} : { index: this.getIndicesForTypes(allowedTypes) }),
+      index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
       // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
-      ...(searchAfter ? {} : { from: perPage * (page - 1) }),
+      from: searchAfter ? undefined : perPage * (page - 1),
       _source: includedFields(type, fields),
       preference,
       rest_total_hits_as_int: true,
@@ -831,6 +834,7 @@ export class SavedObjectsRepository {
       },
     };
 
+    // @ts-expect-error Core type seems to be wrong for search_after
     const { body, statusCode } = await this.client.search<SavedObjectsRawDocSource>(esOptions, {
       ignore: [404],
     });
@@ -850,13 +854,14 @@ export class SavedObjectsRepository {
       per_page: perPage,
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
-        (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
+        (hit: estypes.Hit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
+          // @ts-expect-error @elastic/elasticsearch decalred Id as string | number
           ...this._rawToSavedObject(hit),
-          score: (hit as any)._score,
-          ...((hit as any).sort && { sort: (hit as any).sort }),
+          score: hit._score!,
+          sort: hit.sort,
         })
       ),
-      ...(body.pit_id && { pit_id: body.pit_id }),
+      pit_id: body.pit_id,
     } as SavedObjectsFindResponse<T>;
   }
 
@@ -921,6 +926,7 @@ export class SavedObjectsRepository {
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
+              // @ts-expect-error MultiGetSourceFilter doesn't have includes, but include
               docs: bulkGetDocs,
             },
           },
@@ -937,6 +943,7 @@ export class SavedObjectsRepository {
         const { type, id, esRequestIndex } = expectedResult.value;
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
+        // @ts-expect-error MultiGetHit._source is optional
         if (!doc?.found || !this.rawDocExistsInNamespace(doc, namespace)) {
           return ({
             id,
@@ -945,6 +952,7 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
+        // @ts-expect-error MultiGetHit._source is optional
         return this.getSavedObjectFromSource(type, id, doc);
       }),
     };
@@ -1053,7 +1061,6 @@ export class SavedObjectsRepository {
 
     if (
       aliasResponse.statusCode === 404 ||
-      // @ts-expect-error UpdateResponse<T>.get should be required
       aliasResponse.body.get.found === false ||
       // @ts-expect-error UpdateResponse<T>.get should be required
       aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
@@ -1087,23 +1094,28 @@ export class SavedObjectsRepository {
     const exactMatchDoc = bulkGetResponse?.body.docs[0];
     const aliasMatchDoc = bulkGetResponse?.body.docs[1];
     const foundExactMatch =
+      // @ts-expect-error MultiGetHit._source is optional
       exactMatchDoc.found && this.rawDocExistsInNamespace(exactMatchDoc, namespace);
     const foundAliasMatch =
+      // @ts-expect-error MultiGetHit._source is optional
       aliasMatchDoc.found && this.rawDocExistsInNamespace(aliasMatchDoc, namespace);
 
     if (foundExactMatch && foundAliasMatch) {
       return {
+        // @ts-expect-error MultiGetHit._source is optional
         saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
         outcome: 'conflict',
         aliasTargetId: legacyUrlAlias.targetId,
       };
     } else if (foundExactMatch) {
       return {
+        // @ts-expect-error MultiGetHit._source is optional
         saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
         outcome: 'exactMatch',
       };
     } else if (foundAliasMatch) {
       return {
+        // @ts-expect-error MultiGetHit._source is optional
         saved_object: this.getSavedObjectFromSource(type, legacyUrlAlias.targetId, aliasMatchDoc),
         outcome: 'aliasMatch',
         aliasTargetId: legacyUrlAlias.targetId,
@@ -1443,7 +1455,6 @@ export class SavedObjectsRepository {
       ? await this.client.mget(
           {
             body: {
-              // @ts-expect-error
               docs: bulkGetDocs,
             },
           },
@@ -1618,7 +1629,6 @@ export class SavedObjectsRepository {
             },
             lang: 'painless',
           },
-          // @ts-expect-error
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
@@ -1908,6 +1918,7 @@ export class SavedObjectsRepository {
     const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
       body: { id },
     });
+    // @ts-expect-error no typings in @elastic/elatics
     return body;
   }
 

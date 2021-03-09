@@ -81,6 +81,6 @@ export function getSearchDsl(
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
     ...(pit ? getPitParams(pit) : {}),
-    ...(searchAfter ? { search_after: searchAfter } : {}),
+    search_after: searchAfter,
   };
 }
