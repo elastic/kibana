@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type {
@@ -13,7 +13,6 @@ import type {
   InstallablePackage,
   RegistryDataStream,
 } from '../../../../../common/types/models';
-import type { CallESAsCurrentUser } from '../../../../types';
 import { getInstallation } from '../../packages';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getAsset } from '../transform/common';
@@ -33,7 +32,7 @@ interface IlmPathDataset {
 export const installIlmForDataStream = async (
   registryPackage: InstallablePackage,
   paths: string[],
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });
@@ -46,7 +45,7 @@ export const installIlmForDataStream = async (
 
   // delete all previous ilm
   await deleteIlms(
-    callCluster,
+    esClient,
     previousInstalledIlmEsAssets.map((asset) => asset.id)
   );
   // install the latest dataset
@@ -86,7 +85,7 @@ export const installIlmForDataStream = async (
     );
 
     const installationPromises = ilmInstallations.map(async (ilmInstallation) => {
-      return handleIlmInstall({ callCluster, ilmInstallation });
+      return handleIlmInstall({ esClient, ilmInstallation });
     });
 
     installedIlms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -111,13 +110,13 @@ export const installIlmForDataStream = async (
 };
 
 async function handleIlmInstall({
-  callCluster,
+  esClient,
   ilmInstallation,
 }: {
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   ilmInstallation: IlmInstallation;
 }): Promise<EsAssetReference> {
-  await callCluster('transport.request', {
+  await esClient.transport.request({
     method: 'PUT',
     path: `/_ilm/policy/${ilmInstallation.installationName}`,
     body: ilmInstallation.content,
