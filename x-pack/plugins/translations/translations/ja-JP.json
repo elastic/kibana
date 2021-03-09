@@ -10065,8 +10065,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseSwitchLabel": "コールドフェーズを有効にする",
     "xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription": "データをコールドティアに移動します。これは、検索パフォーマンスよりもコスト削減を優先するように最適化されています。通常、コールドフェーズではデータが読み取り専用です。",
     "xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle": "コールドフェーズ",
-    "xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText": "インデックスを読み取り専用にし、メモリー消費量を最小化します。",
-    "xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText": "凍結",
     "xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.defaultOption.helpText": "コールドティアのノードにデータを移動します。",
     "xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.defaultOption.input": "コールドノードを使用 (推奨) ",
     "xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.noneOption.helpText": "コールドフェーズにデータを移動しないでください。",

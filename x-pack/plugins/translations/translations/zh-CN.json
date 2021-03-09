@@ -10192,8 +10192,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseSwitchLabel": "激活冷阶段",
     "xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription": "将数据移到经过优化后节省了成本但牺牲了搜索性能的冷层。数据在冷阶段通常为只读。",
     "xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle": "冷阶段",
-    "xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText": "使索引只读，并最大限度减小其内存占用。",
-    "xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText": "冻结",
     "xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.defaultOption.helpText": "将数据移到冷层中的节点。",
     "xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.defaultOption.input": "使用冷节点 (建议) ",
     "xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.noneOption.helpText": "不要移动冷阶段的数据。",
