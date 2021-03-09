@@ -54,6 +54,13 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
 
+export const PortContainer = styled.div`
+  & svg {
+    position: relative;
+    top: -1px;
+  }
+`;
+
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
@@ -229,15 +236,17 @@ export const PortOrServiceNameLink = React.memo<{
   children?: React.ReactNode;
   portOrServiceName: number | string;
 }>(({ children, portOrServiceName }) => (
-  <EuiLink
-    data-test-subj="port-or-service-name-link"
-    href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
-      String(portOrServiceName)
-    )}`}
-    target="_blank"
-  >
-    {children ? children : portOrServiceName}
-  </EuiLink>
+  <PortContainer>
+    <EuiLink
+      data-test-subj="port-or-service-name-link"
+      href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
+        String(portOrServiceName)
+      )}`}
+      target="_blank"
+    >
+      {children ? children : portOrServiceName}
+    </EuiLink>
+  </PortContainer>
 ));
 
 PortOrServiceNameLink.displayName = 'PortOrServiceNameLink';
