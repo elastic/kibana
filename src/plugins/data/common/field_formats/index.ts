@@ -27,6 +27,7 @@ export {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from './converters';
 
 export { getHighlightRequest } from './utils';

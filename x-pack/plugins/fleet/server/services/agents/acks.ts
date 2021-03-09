@@ -14,6 +14,7 @@ import type {
 } from 'src/core/server';
 import Boom from '@hapi/boom';
 import LRU from 'lru-cache';
+
 import type {
   Agent,
   AgentAction,
@@ -25,6 +26,7 @@ import type {
   AgentActionSOAttributes,
 } from '../../types';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
+
 import { getAgentActionByIds } from './actions';
 import { forceUnenrollAgent } from './unenroll';
 import { ackAgentUpgraded } from './upgrade';
@@ -90,7 +92,7 @@ export async function acknowledgeAgentActions(
   const configChangeAction = getLatestConfigChangePolicyActionIfUpdated(agent, actions);
 
   if (configChangeAction) {
-    await updateAgent(soClient, esClient, agent.id, {
+    await updateAgent(esClient, agent.id, {
       policy_revision: configChangeAction.policy_revision,
       packages: configChangeAction?.ack_data?.packages,
     });
@@ -199,7 +201,6 @@ export interface AcksService {
   ) => Promise<AgentAction[]>;
 
   authenticateAgentWithAccessToken: (
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     request: KibanaRequest
   ) => Promise<Agent>;

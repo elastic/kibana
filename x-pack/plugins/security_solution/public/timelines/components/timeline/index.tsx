@@ -26,6 +26,7 @@ import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
+import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -60,7 +61,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
-  const { timelineFullScreen } = useTimelineFullScreen();
+  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
     if (!savedObjectId) {
@@ -78,9 +79,17 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   }, []);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
-    containerElement.current
-      ?.querySelector<HTMLButtonElement>('.globalFilterBar__addButton')
-      ?.focus();
+    const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(
+      EXIT_FULL_SCREEN_CLASS_NAME
+    );
+
+    if (exitFullScreenButton != null) {
+      exitFullScreenButton.focus();
+    } else {
+      containerElement.current
+        ?.querySelector<HTMLButtonElement>('.globalFilterBar__addButton')
+        ?.focus();
+    }
   }, [containerElement]);
 
   const onSkipFocusAfterEventsTable = useCallback(() => {
@@ -115,15 +124,17 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
         <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
 
-      <FlyoutHeaderPanel timelineId={timelineId} />
       <HideShowContainer $isVisible={!timelineFullScreen}>
+        <FlyoutHeaderPanel timelineId={timelineId} />
         <FlyoutHeader timelineId={timelineId} />
       </HideShowContainer>
 
       <TabsContent
         graphEventId={graphEventId}
+        setTimelineFullScreen={setTimelineFullScreen}
         timelineId={timelineId}
         timelineType={timelineType}
+        timelineFullScreen={timelineFullScreen}
       />
     </TimelineContainer>
   );

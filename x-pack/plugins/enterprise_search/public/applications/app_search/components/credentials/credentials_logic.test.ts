@@ -18,6 +18,8 @@ jest.mock('../../app_logic', () => ({
 }));
 import { AppLogic } from '../../app_logic';
 
+import { EngineTypes } from '../engine/types';
+
 import { ApiTokenTypes } from './constants';
 
 import { CredentialsLogic } from './credentials_logic';
@@ -61,8 +63,8 @@ describe('CredentialsLogic', () => {
 
   const credentialsDetails = {
     engines: [
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
+      { name: 'engine1', type: EngineTypes.indexed, language: 'english', result_fields: {} },
+      { name: 'engine1', type: EngineTypes.indexed, language: 'english', result_fields: {} },
     ],
   };
 

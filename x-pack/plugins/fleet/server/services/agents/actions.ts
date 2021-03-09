@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+
 import type {
   Agent,
   AgentAction,
@@ -16,13 +17,14 @@ import type {
   FleetServerAgentAction,
 } from '../../../common/types/models';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_ACTIONS_INDEX } from '../../../common/constants';
+import { appContextService } from '../app_context';
+import { nodeTypes } from '../../../../../../src/plugins/data/common';
+
 import {
   isAgentActionSavedObject,
   isPolicyActionSavedObject,
   savedObjectToAgentAction,
 } from './saved_objects';
-import { appContextService } from '../app_context';
-import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
 const ONE_MONTH_IN_MS = 2592000000;
 
@@ -74,10 +76,7 @@ async function createAction(
     }
   );
 
-  if (
-    appContextService.getConfig()?.agents?.fleetServerEnabled &&
-    isAgentActionSavedObject(actionSO)
-  ) {
+  if (isAgentActionSavedObject(actionSO)) {
     const body: FleetServerAgentAction = {
       '@timestamp': new Date().toISOString(),
       expiration: new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
@@ -138,7 +137,7 @@ async function bulkCreateActions(
     }))
   );
 
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+  if (actionSOs.length > 0) {
     await esClient.bulk({
       index: AGENT_ACTIONS_INDEX,
       body: actionSOs.flatMap((actionSO) => {
@@ -369,11 +368,7 @@ export async function getLatestConfigChangeAction(
 }
 
 export interface ActionsService {
-  getAgent: (
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentId: string
-  ) => Promise<Agent>;
+  getAgent: (esClient: ElasticsearchClient, agentId: string) => Promise<Agent>;
 
   createAgentAction: (
     soClient: SavedObjectsClientContract,
