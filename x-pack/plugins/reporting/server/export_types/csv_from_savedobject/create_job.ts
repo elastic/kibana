@@ -7,8 +7,8 @@
 
 import { notFound, notImplemented } from '@hapi/boom';
 import { get } from 'lodash';
-import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { CsvFromSavedObjectRequest } from '../../routes/generate_from_savedobject_immediate';
+import type { ReportingRequestHandlerContext } from '../../types';
 import { CreateJobFnFactory } from '../../types';
 import {
   JobParamsPanelCsv,
@@ -18,7 +18,6 @@ import {
   SavedObjectServiceError,
   VisObjectAttributesJSON,
 } from './types';
-import type { ReportingRequestHandlerContext } from '../../types';
 
 export type ImmediateCreateJobFn = (
   jobParams: JobParamsPanelCsv,
@@ -30,7 +29,7 @@ export const createJobFnFactory: CreateJobFnFactory<ImmediateCreateJobFn> = func
   reporting,
   parentLogger
 ) {
-  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
+  const logger = parentLogger.clone(['create-job']);
 
   return async function createJob(jobParams, context, req) {
     const { savedObjectType, savedObjectId } = jobParams;

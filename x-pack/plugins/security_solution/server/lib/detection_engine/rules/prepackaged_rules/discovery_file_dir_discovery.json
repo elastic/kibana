@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "File and Directory Discovery",
   "query": "sequence by agent.id, user.name with maxspan=1m\n[process where event.type in (\"start\", \"process_started\") and\n  ((process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and process.args : \"dir\") or\n    process.name : \"tree.com\"]\n[process where event.type in (\"start\", \"process_started\") and\n  ((process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and process.args : \"dir\") or\n    process.name : \"tree.com\"]\n[process where event.type in (\"start\", \"process_started\") and\n  ((process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and process.args : \"dir\") or\n    process.name : \"tree.com\"]\n",
   "risk_score": 21,
