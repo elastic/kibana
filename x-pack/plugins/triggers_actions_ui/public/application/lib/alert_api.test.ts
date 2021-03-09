@@ -30,7 +30,7 @@ import {
   mapFiltersToKql,
 } from './alert_api';
 import uuid from 'uuid';
-import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerts/common';
+import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerting/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -180,7 +180,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": undefined,
             "search_fields": undefined,
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -210,7 +210,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": "apples",
             "search_fields": "[\\"name\\",\\"tags\\"]",
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -244,7 +244,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": "foo",
             "search_fields": "[\\"name\\",\\"tags\\"]",
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -278,7 +278,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": undefined,
             "search_fields": undefined,
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -313,7 +313,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": "baz",
             "search_fields": "[\\"name\\",\\"tags\\"]",
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -348,7 +348,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": "apples, foo, baz",
             "search_fields": "[\\"name\\",\\"tags\\"]",
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
