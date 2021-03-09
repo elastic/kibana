@@ -5,14 +5,5 @@
  * 2.0.
  */
 
-import events from 'events';
-
-export class QueueMock extends events.EventEmitter {
-  constructor() {
-    super();
-  }
-
-  setClient(client) {
-    this.client = client;
-  }
-}
+export { GeoJsonUploadForm } from './geojson_upload_form';
+export { OnFileSelectParameters } from './geojson_file_picker';
