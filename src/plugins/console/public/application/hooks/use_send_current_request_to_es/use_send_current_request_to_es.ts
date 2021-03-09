@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import { errors as historyErrors } from '../../../services/history';
+import { isQuotaExceededError } from '../../../services/history';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
@@ -62,7 +62,7 @@ export const useSendCurrentRequestToES = () => {
         const errorTitle = i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
           defaultMessage: 'Could not save request to Console history.',
         });
-        if (historyErrors.isQuotaExceeded(saveToHistoryError)) {
+        if (isQuotaExceededError(saveToHistoryError)) {
           notifications.toasts.addError(saveToHistoryError, {
             title: errorTitle,
             toastMessage: i18n.translate('console.notification.error.historyQuotaReachedMessage', {

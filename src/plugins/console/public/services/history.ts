@@ -11,9 +11,7 @@ import { Storage } from './index';
 
 const MAX_NUMBER_OF_HISTORY_ITEMS = 100;
 
-export const errors = {
-  isQuotaExceeded: (e: Error) => e.name === 'QuotaExceededError',
-};
+export const isQuotaExceededError = (e: Error): boolean => e.name === 'QuotaExceededError';
 
 export class History {
   constructor(private readonly storage: Storage) {}
