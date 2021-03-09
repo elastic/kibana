@@ -205,6 +205,7 @@ Object {
         Object {
           "description": "Collect Apache status metrics",
           "input": "apache/metrics",
+          "template_path": "stream.yml.hbs",
           "title": "Apache status metrics",
           "vars": Array [
             Object {

@@ -207,6 +207,7 @@ export function parseAndVerifyDataStreams(
       type,
       dataset,
       ingest_pipeline: ingestPipeline,
+      streams: manifestStreams,
       ...restOfProps
     } = manifest;
     if (!(dataStreamTitle && release && type)) {
@@ -214,7 +215,7 @@ export function parseAndVerifyDataStreams(
         `Invalid manifest for data stream '${dataStreamPath}': one or more fields missing of 'title', 'release', 'type'`
       );
     }
-    const streams = parseAndVerifyStreams(manifest, dataStreamPath);
+    const streams = parseAndVerifyStreams(manifestStreams, dataStreamPath);
 
     // default ingest pipeline name see https://github.com/elastic/package-registry/blob/master/util/dataset.go#L26
     dataStreams.push(
@@ -242,9 +243,11 @@ export function parseAndVerifyDataStreams(
   return dataStreams;
 }
 
-export function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
+export function parseAndVerifyStreams(
+  manifestStreams: any,
+  dataStreamPath: string
+): RegistryStream[] {
   const streams: RegistryStream[] = [];
-  const manifestStreams = manifest.streams;
   if (manifestStreams && manifestStreams.length > 0) {
     manifestStreams.forEach((manifestStream: any) => {
       const {
