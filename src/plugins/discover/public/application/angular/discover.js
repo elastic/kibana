@@ -55,6 +55,7 @@ import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { getDefaultSort } from './doc_table/lib/get_default_sort';
 import { DiscoverSearchSessionManager } from './discover_search_session';
+import { applyAggsToSearchSource } from '../components/histogram/apply_aggs_to_search_source';
 
 const services = getServices();
 
@@ -509,7 +510,14 @@ function discoverController($route, $scope) {
 
     const searchSessionId = searchSessionManager.getNextSearchSessionId();
     updateSearchSourceHelper();
-    setupVisualization();
+
+    $scope.opts.chartAggConfigs = applyAggsToSearchSource(
+      getTimeField() && !$scope.state.hideChart,
+      volatileSearchSource,
+      $scope.state.interval,
+      $scope.indexPattern,
+      data
+    );
 
     $scope.fetchStatus = fetchStatuses.LOADING;
     $scope.resultState = getResultState($scope.fetchStatus, $scope.rows);
@@ -638,42 +646,6 @@ function discoverController($route, $scope) {
   $scope.unmappedFieldsConfig = {
     showUnmappedFields,
   };
-
-  function setupVisualization() {
-    // If no timefield has been specified we don't create a histogram of messages
-    if (!getTimeField() || $scope.state.hideChart) return;
-    const { interval: histogramInterval } = $scope.state;
-
-    const visStateAggs = [
-      {
-        type: 'count',
-        schema: 'metric',
-      },
-      {
-        type: 'date_histogram',
-        schema: 'segment',
-        params: {
-          field: getTimeField(),
-          interval: histogramInterval,
-          timeRange: timefilter.getTime(),
-        },
-      },
-    ];
-    $scope.opts.chartAggConfigs = data.search.aggs.createAggConfigs(
-      $scope.indexPattern,
-      visStateAggs
-    );
-
-    $scope.volatileSearchSource.onRequestStart((searchSource, options) => {
-      if (!$scope.opts.chartAggConfigs) return;
-      return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
-    });
-
-    $scope.volatileSearchSource.setField('aggs', function () {
-      if (!$scope.opts.chartAggConfigs) return;
-      return $scope.opts.chartAggConfigs.toDsl();
-    });
-  }
 
   addHelpMenuToAppChrome(chrome);
 
