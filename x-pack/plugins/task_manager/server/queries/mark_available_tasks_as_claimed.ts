@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   ScriptBasedSortClause,
   ScriptClause,
   mustBeAllOf,
   MustCondition,
-  ShouldCondition,
-  FilterCondition,
+  MustNotCondition,
 } from './query_clauses';
 
 export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): MustCondition {
@@ -31,7 +30,7 @@ export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): 
   };
 }
 
-export function tasksOfType(taskTypes: string[]): ShouldCondition<TermFilter> {
+export function tasksOfType(taskTypes: string[]): estypes.QueryContainer {
   return {
     bool: {
       should: [...taskTypes].map((type) => ({ term: { 'task.taskType': type } })),
@@ -41,7 +40,7 @@ export function tasksOfType(taskTypes: string[]): ShouldCondition<TermFilter> {
 
 export function tasksClaimedByOwner(
   taskManagerId: string,
-  ...taskFilters: Array<FilterCondition<TermFilter> | ShouldCondition<TermFilter>>
+  ...taskFilters: estypes.QueryContainer[]
 ) {
   return mustBeAllOf(
     {

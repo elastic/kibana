@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs/operators';
 
@@ -26,7 +26,6 @@ import {
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { mockLogger } from './test_utils';
-import { ScriptBasedSortClause } from './queries/query_clauses';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
@@ -59,21 +58,6 @@ taskDefinitions.registerTaskDefinitions({
     createTaskRunner: jest.fn(),
   },
 });
-
-type MockedUpdateByQueryRequest = Omit<estypes.UpdateByQueryRequest, 'body'> & {
-  body: {
-    max_docs: number;
-    query: estypes.QueryContainer;
-    script: estypes.Script;
-    sort: ScriptBasedSortClause[];
-  };
-};
-type MockedSearchRequest = Omit<estypes.SearchRequest, 'body'> & {
-  body: estypes.SearchRequest['body'] & {
-    query: estypes.QueryContainer;
-    sort: ScriptBasedSortClause[];
-  };
-};
 
 describe('TaskStore', () => {
   describe('schedule', () => {
@@ -223,7 +207,19 @@ describe('TaskStore', () => {
     });
 
     async function testFetch(opts?: SearchOpts, hits: Array<estypes.Hit<unknown>> = []) {
-      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits, total: hits.length } }));
+      esClient.search.mockResolvedValue(
+        asApiResponse({
+          hits: { hits, total: hits.length },
+          took: 0,
+          timed_out: false,
+          _shards: {
+            failed: 0,
+            successful: 0,
+            total: 0,
+            skipped: 0,
+          },
+        })
+      );
 
       const result = await store.fetch(opts);
 

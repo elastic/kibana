@@ -86,9 +86,11 @@ export interface WorkloadAggregation {
 
 // The type of a bucket in the scheduleDensity range aggregation
 type ScheduleDensityResult = AggregationResultOf<
+  // @ts-expect-error from: stirng is not assignable to AggregationRange
   WorkloadAggregation['aggs']['idleTasks']['aggs']['scheduleDensity'],
   {}
 >['buckets'][0];
+// @ts-expect-error histogram doesn't exist on ScheduleDensityResult
 type ScheduledIntervals = ScheduleDensityResult['histogram']['buckets'][0];
 
 // Set an upper bound just in case a customer sets a really high refresh rate
@@ -237,7 +239,9 @@ export function padBuckets(
   pollInterval: number,
   scheduleDensity: ScheduleDensityResult
 ): number[] {
+  // @ts-expect-error histogram doesn't exist on ScheduleDensityResult
   if (scheduleDensity.from && scheduleDensity.to && scheduleDensity.histogram?.buckets?.length) {
+    // @ts-expect-error histogram doesn't exist on ScheduleDensityResult
     const { histogram, from, to } = scheduleDensity;
     const firstBucket = histogram.buckets[0].key;
     const lastBucket = histogram.buckets[histogram.buckets.length - 1].key;

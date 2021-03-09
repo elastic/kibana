@@ -8,9 +8,10 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import { estypes } from '@elastic/elasticsearch';
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
-import { ReindexResponseBase, SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';
+import { ReindexResponseBase } from 'elasticsearch';
 import {
   SavedObject,
   SavedObjectsSerializer,
@@ -31,7 +32,6 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
