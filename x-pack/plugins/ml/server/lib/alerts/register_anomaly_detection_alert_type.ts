@@ -24,7 +24,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
-} from '../../../../alerts/common';
+} from '../../../../alerting/common';
 
 const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_DETECTION];
 
@@ -41,10 +41,10 @@ export type AnomalyDetectionAlertContext = {
 } & AlertInstanceContext;
 
 export function registerAnomalyDetectionAlertType({
-  alerts,
+  alerting,
   mlSharedServices,
 }: RegisterAlertParams) {
-  alerts.registerType<
+  alerting.registerType<
     MlAnomalyDetectionAlertParams,
     AlertTypeState,
     AlertInstanceState,
@@ -63,19 +63,19 @@ export function registerAnomalyDetectionAlertType({
         {
           name: 'timestamp',
           description: i18n.translate('xpack.ml.alertContext.timestampDescription', {
-            defaultMessage: 'Timestamp of the anomaly',
+            defaultMessage: 'The bucket timestamp of the anomaly',
           }),
         },
         {
           name: 'timestampIso8601',
           description: i18n.translate('xpack.ml.alertContext.timestampIso8601Description', {
-            defaultMessage: 'Time in ISO8601 format',
+            defaultMessage: 'The bucket time of the anomaly in ISO8601 format',
           }),
         },
         {
           name: 'jobIds',
           description: i18n.translate('xpack.ml.alertContext.jobIdsDescription', {
-            defaultMessage: 'List of job IDs triggered the alert instance',
+            defaultMessage: 'List of job IDs that triggered the alert instance',
           }),
         },
         {
@@ -87,7 +87,7 @@ export function registerAnomalyDetectionAlertType({
         {
           name: 'score',
           description: i18n.translate('xpack.ml.alertContext.scoreDescription', {
-            defaultMessage: 'Anomaly score',
+            defaultMessage: 'Anomaly score at the time of the notification action',
           }),
         },
         {
@@ -106,14 +106,6 @@ export function registerAnomalyDetectionAlertType({
           name: 'anomalyExplorerUrl',
           description: i18n.translate('xpack.ml.alertContext.anomalyExplorerUrlDescription', {
             defaultMessage: 'URL to open in the Anomaly Explorer',
-          }),
-          useWithTripleBracesInTemplates: true,
-        },
-        // TODO remove when https://github.com/elastic/kibana/pull/90525 is merged
-        {
-          name: 'kibanaBaseUrl',
-          description: i18n.translate('xpack.ml.alertContext.kibanaBasePathUrlDescription', {
-            defaultMessage: 'Kibana base path',
           }),
           useWithTripleBracesInTemplates: true,
         },
