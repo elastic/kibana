@@ -91,6 +91,7 @@ export default function (providerContext: FtrProviderContext) {
       delete packageInfoRes.body.response.savedObject.attributes.install_started_at;
       delete packageInfoRes.body.response.savedObject.version;
       delete packageInfoRes.body.response.savedObject.updated_at;
+      delete packageInfoRes.body.response.savedObject.coreMigrationVersion;
 
       expectSnapshot(packageInfoRes.body.response).toMatch();
     });

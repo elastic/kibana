@@ -664,7 +664,6 @@ Object {
       "removable": true,
       "version": "0.1.4",
     },
-    "coreMigrationVersion": "8.0.0",
     "id": "apache",
     "namespaces": Array [],
     "references": Array [],
