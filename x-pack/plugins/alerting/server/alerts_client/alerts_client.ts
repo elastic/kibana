@@ -227,7 +227,7 @@ export class AlertsClient {
   public async create<Params extends AlertTypeParams = never>({
     data,
     options,
-  }: CreateOptions<Params>): Promise<Alert<Params>> {
+  }: CreateOptions<Params>): Promise<SanitizedAlert<Params>> {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {

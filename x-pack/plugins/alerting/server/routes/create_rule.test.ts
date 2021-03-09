@@ -13,9 +13,9 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { CreateOptions } from '../alerts_client';
 import { alertsClientMock } from '../alerts_client.mock';
-import { Alert } from '../../common/alert';
 import { AlertTypeDisabledError } from '../lib';
 import { AsApiContract } from './lib';
+import { SanitizedAlert } from '../types';
 
 const alertsClient = alertsClientMock.create();
 
@@ -31,7 +31,7 @@ describe('createRuleRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
 
-  const mockedAlert: Alert<{ bar: boolean }> = {
+  const mockedAlert: SanitizedAlert<{ bar: boolean }> = {
     alertTypeId: '1',
     consumer: 'bar',
     name: 'abc',
@@ -55,7 +55,6 @@ describe('createRuleRoute', () => {
     muteAll: false,
     createdBy: '',
     updatedBy: '',
-    apiKey: '',
     apiKeyOwner: '',
     mutedInstanceIds: [],
     notifyWhen: 'onActionGroupChange',
@@ -81,20 +80,19 @@ describe('createRuleRoute', () => {
     ],
   };
 
-  const createResult: AsApiContract<Alert<{ bar: boolean }>> = {
+  const createResult: AsApiContract<SanitizedAlert<{ bar: boolean }>> = {
     ...ruleToCreate,
-    mute_all: false,
-    created_by: '',
-    updated_by: '',
-    api_key: '',
-    api_key_owner: '',
-    muted_instance_ids: [],
-    created_at: createdAt,
-    updated_at: updatedAt,
-    id: '123',
+    mute_all: mockedAlert.muteAll,
+    created_by: mockedAlert.createdBy,
+    updated_by: mockedAlert.updatedBy,
+    api_key_owner: mockedAlert.apiKeyOwner,
+    muted_instance_ids: mockedAlert.mutedInstanceIds,
+    created_at: mockedAlert.createdAt,
+    updated_at: mockedAlert.updatedAt,
+    id: mockedAlert.id,
     execution_status: {
-      status: 'unknown',
-      last_execution_date: new Date('2020-08-20T19:23:38Z'),
+      status: mockedAlert.executionStatus.status,
+      last_execution_date: mockedAlert.executionStatus.lastExecutionDate,
     },
     actions: [
       {

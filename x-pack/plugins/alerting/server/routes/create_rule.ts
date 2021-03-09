@@ -16,7 +16,7 @@ import {
   verifyAccessAndContext,
 } from './lib';
 import {
-  Alert,
+  SanitizedAlert,
   validateNotifyWhenType,
   AlertTypeParams,
   AlertingRequestHandlerContext,
@@ -55,7 +55,7 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']>
   alertTypeId,
   notifyWhen,
 });
-const rewriteBodyRes: RewriteResponseCase<Alert<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   actions,
   alertTypeId,
   scheduledTaskId,
@@ -63,7 +63,6 @@ const rewriteBodyRes: RewriteResponseCase<Alert<AlertTypeParams>> = ({
   updatedBy,
   createdAt,
   updatedAt,
-  apiKey,
   apiKeyOwner,
   notifyWhen,
   muteAll,
@@ -78,7 +77,6 @@ const rewriteBodyRes: RewriteResponseCase<Alert<AlertTypeParams>> = ({
   updated_by: updatedBy,
   created_at: createdAt,
   updated_at: updatedAt,
-  api_key: apiKey,
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
   mute_all: muteAll,
@@ -118,13 +116,15 @@ export const createRuleRoute = (
           const rule = req.body;
           const params = req.params;
           try {
-            const createdRule: Alert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>({
-              data: rewriteBodyReq({
-                ...rule,
-                notify_when: rule.notify_when as AlertNotifyWhenType,
-              }),
-              options: { id: params?.id },
-            });
+            const createdRule: SanitizedAlert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>(
+              {
+                data: rewriteBodyReq({
+                  ...rule,
+                  notify_when: rule.notify_when as AlertNotifyWhenType,
+                }),
+                options: { id: params?.id },
+              }
+            );
             return res.ok({
               body: rewriteBodyRes(createdRule),
             });
