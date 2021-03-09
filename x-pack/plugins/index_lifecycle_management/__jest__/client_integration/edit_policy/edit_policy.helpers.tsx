@@ -208,8 +208,8 @@ export const setup = async (arg?: {
     };
   };
 
-  const setFreeze = createFormToggleAction('freezeSwitch');
-  const freezeExists = () => exists('freezeSwitch');
+  const createSetFreeze = (phase: Phases) => createFormToggleAction(`${phase}-freezeSwitch`);
+  const createFreezeExists = (phase: Phases) => () => exists(`${phase}-freezeSwitch`);
 
   const createReadonlyActions = (phase: Phases) => {
     const toggleSelector = `${phase}-readonlySwitch`;
@@ -391,8 +391,8 @@ export const setup = async (arg?: {
         enable: enable('cold'),
         ...createMinAgeActions('cold'),
         setReplicas: setReplicas('cold'),
-        setFreeze,
-        freezeExists,
+        setFreeze: createSetFreeze('cold'),
+        freezeExists: createFreezeExists('cold'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
@@ -402,8 +402,8 @@ export const setup = async (arg?: {
         enable: enable('frozen'),
         ...createMinAgeActions('frozen'),
         setReplicas: setReplicas('frozen'),
-        setFreeze,
-        freezeExists,
+        setFreeze: createSetFreeze('frozen'),
+        freezeExists: createFreezeExists('frozen'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-frozen'),
         ...createIndexPriorityActions('frozen'),
         ...createSearchableSnapshotActions('frozen'),

@@ -6,22 +6,16 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiTextColor } from '@elastic/eui';
-
 import { useConfigurationIssues } from '../../../form';
-
-import { LearnMoreLink, ToggleFieldWithDescribedFormRow } from '../../';
-
 import {
   DataTierAllocationField,
   SearchableSnapshotField,
   IndexPriorityField,
   ReplicasField,
+  FreezeField,
 } from '../shared_fields';
-
 import { Phase } from '../phase';
 
 const i18nTexts = {
@@ -45,33 +39,7 @@ export const FrozenPhase: FunctionComponent = () => {
 
       {/* Freeze section */}
       {!isUsingSearchableSnapshotInHotPhase && !isUsingSearchableSnapshotInColdPhase && (
-        <ToggleFieldWithDescribedFormRow
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.freezeText"
-                defaultMessage="Freeze"
-              />
-            </h3>
-          }
-          description={
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.freezeIndexExplanationText"
-                defaultMessage="Make the index read-only and minimize its memory footprint."
-              />{' '}
-              <LearnMoreLink docPath="ilm-freeze.html" />
-            </EuiTextColor>
-          }
-          fullWidth
-          titleSize="xs"
-          switchProps={{
-            'data-test-subj': 'freezeSwitch',
-            path: '_meta.frozen.freezeEnabled',
-          }}
-        >
-          <div />
-        </ToggleFieldWithDescribedFormRow>
+        <FreezeField phase="frozen" />
       )}
 
       {/* Data tier allocation section */}
