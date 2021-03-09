@@ -19,6 +19,7 @@ export interface Role {
   credentialTypes: string[];
   canAccessAllEngines: boolean;
   can(action: AbilityTypes, subject: string): boolean;
+  canHaveScopedEngines(role: RoleTypes): boolean;
   canViewMetaEngines: boolean;
   canViewAccountCredentials: boolean;
   canViewEngineAnalytics: boolean;
@@ -60,7 +61,10 @@ export const getRoleAbilities = (role: Account['role']): Role => {
         (Array.isArray(role.ability[action]) && role.ability[action].includes(subject))
       );
     },
-    // TODO: canHaveScopedEngines fn
+    canHaveScopedEngines: (roleType: RoleTypes): boolean => {
+      const unscopedRoles = ['dev', 'editor', 'analyst'];
+      return unscopedRoles.includes(roleType);
+    },
   };
 
   // Clone top-level role props, and move some props out of `ability` and into the top-level for convenience

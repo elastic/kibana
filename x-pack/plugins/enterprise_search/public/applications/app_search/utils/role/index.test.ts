@@ -20,6 +20,7 @@ describe('getRoleAbilities', () => {
       credentialTypes: ['admin', 'private', 'search'],
       canAccessAllEngines: true,
       can: expect.any(Function),
+      canHaveScopedEngines: expect.any(Function),
       // Has access
       canViewAccountCredentials: true,
       canManageEngines: true,
@@ -68,6 +69,23 @@ describe('getRoleAbilities', () => {
 
       expect(myRole.can('hello' as any, 'world')).toEqual(false);
       expect(myRole.can('edit', 'fakeSubject')).toEqual(false);
+    });
+  });
+
+  describe('canHaveScopedEngines()', () => {
+    it('returns false for owner and admin roles', () => {
+      const myRole = getRoleAbilities(mockRole);
+
+      expect(myRole.canHaveScopedEngines('owner')).toEqual(false);
+      expect(myRole.canHaveScopedEngines('admin')).toEqual(false);
+    });
+
+    it('returns true for dev, editor, and analyst roles', () => {
+      const myRole = getRoleAbilities(mockRole);
+
+      expect(myRole.canHaveScopedEngines('dev')).toEqual(true);
+      expect(myRole.canHaveScopedEngines('editor')).toEqual(true);
+      expect(myRole.canHaveScopedEngines('analyst')).toEqual(true);
     });
   });
 });
