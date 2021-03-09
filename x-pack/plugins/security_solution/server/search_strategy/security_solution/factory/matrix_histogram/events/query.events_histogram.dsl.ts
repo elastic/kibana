@@ -15,6 +15,62 @@ import {
 import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
 import * as i18n from './translations';
 
+export const buildThresholdTermsQuery = ({ query, fields, value }) => {
+  if (fields.length > 0) {
+    return {
+      eventActionGroup: {
+        ...query.eventActionGroup,
+        terms: {
+          ...query.eventActionGroup.terms,
+          script: {
+            lang: 'painless',
+            source: fields.map((f) => `doc["${f}"].value`).join(' : '),
+          },
+          min_doc_count: value,
+        },
+      },
+    };
+  } else {
+    return {
+      eventActionGroup: {
+        ...query.eventActionGroup,
+        terms: {
+          ...query.eventActionGroup.terms,
+          min_doc_count: value,
+        },
+      },
+    };
+  }
+};
+
+export const buildThresholdCardinalityQuery = ({ query, cardinalityField, cardinalityValue }) => {
+  if (cardinalityField != null && cardinalityValue > 0) {
+    return {
+      eventActionGroup: {
+        ...query.eventActionGroup,
+        aggs: {
+          ...query.eventActionGroup.aggs,
+          cardinality_count: {
+            cardinality: {
+              field: cardinalityField,
+            },
+          },
+          cardinality_check: {
+            bucket_selector: {
+              buckets_path: {
+                cardinalityCount: 'cardinality_count',
+              },
+              script: `params.cardinalityCount >= ${cardinalityValue}`,
+            },
+          },
+        },
+      },
+    };
+  } else {
+    return query;
+  }
+};
+
 export const buildEventsHistogramQuery = ({
   filterQuery,
   timerange: { from, to },
@@ -58,22 +114,31 @@ export const buildEventsHistogramQuery = ({
         : {};
 
     if (threshold != null) {
-      return {
+      const query = {
         eventActionGroup: {
           terms: {
-            field: threshold.field ?? stackByField,
-            ...(threshold.field != null ? {} : missing),
             order: {
               _count: 'desc',
             },
             size: 10,
-            min_doc_count: threshold.value,
           },
           aggs: {
             events: dateHistogram,
           },
         },
       };
+      const baseQuery = buildThresholdTermsQuery({
+        query,
+        fields: threshold.field,
+        value: threshold.value,
+      });
+      const enrichedQuery = buildThresholdCardinalityQuery({
+        query: baseQuery,
+        cardinalityField: threshold.cardinality.field[0],
+        cardinalityValue: threshold.cardinality.value,
+      });
+
+      return enrichedQuery;
     }
 
     return {

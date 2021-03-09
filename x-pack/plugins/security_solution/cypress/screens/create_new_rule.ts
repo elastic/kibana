@@ -81,6 +81,9 @@ export const DEFINE_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
 export const DEFINE_INDEX_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="input"]';
 
+export const DEFINE_INDEX_FORM_INPUT =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] input';
+
 export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
 
 export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
@@ -206,3 +209,11 @@ export const THRESHOLD_FIELD_SELECTION = '.euiFilterSelectItem';
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
 
 export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';
+
+// PREVIEW SELECTORS
+export const PREVIEW_TIMEFRAME_SELECT = '[data-test-subj="queryPreviewTimeframeSelect"]';
+
+export const PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
+
+export const PREVIEW_TOTAL_HITS =
+  '[data-test-subj="queryPreviewCustomHistogram"] [data-test-subj="header-panel-subtitle"]';

@@ -34,7 +34,7 @@ import { MlJobSelect } from '../ml_job_select';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
-import { ThresholdInput } from '../threshold_input';
+import { FieldValueThreshold, ThresholdInput } from '../threshold_input';
 import {
   Field,
   Form,
@@ -154,24 +154,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       ruleType: formRuleType,
       queryBar: formQuery,
       threatIndex: formThreatIndex,
-      'threshold.field': formThresholdField,
-      'threshold.value': formThresholdValue,
-      'threshold.cardinality.field': formThresholdCardinalityField,
-      'threshold.cardinality.value': formThresholdCardinalityValue,
+      threshold: formThreshold,
     },
-  ] = useFormData<
-    DefineStepRule & {
-      'threshold.field': string[] | undefined;
-      'threshold.value': number | undefined;
-      'threshold.cardinality.field': string[] | undefined;
-      'threshold.cardinality.value': number | undefined;
-    }
-  >({
+  ] = useFormData<DefineStepRule>({
     form,
     watch: [
       'index',
       'ruleType',
       'queryBar',
+      'threshold',
       'threshold.field',
       'threshold.value',
       'threshold.cardinality.field',
@@ -287,24 +278,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleCloseTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(false);
   }, []);
-
-  const thresholdFormValue = useMemo((): Threshold | undefined => {
-    return formThresholdValue != null
-      ? {
-          field: formThresholdField ?? [],
-          value: formThresholdValue,
-          cardinality: {
-            field: formThresholdCardinalityField ?? [],
-            value: formThresholdCardinalityValue ?? 0, // FIXME
-          },
-        }
-      : undefined;
-  }, [
-    formThresholdField,
-    formThresholdValue,
-    formThresholdCardinalityField,
-    formThresholdCardinalityValue,
-  ]);
 
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
@@ -507,7 +480,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               index={index}
               query={formQuery}
               isDisabled={!isQueryBarValid || index.length === 0}
-              threshold={thresholdFormValue}
+              threshold={formThreshold}
             />
           </>
         )}
