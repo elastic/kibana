@@ -46,6 +46,7 @@ export function registerMlUiActions(
 
   // Assign triggers
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction.id);
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editExplorerPanelAction.id);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInExplorerAction.id);
 
   uiActions.registerTrigger(swimLaneSelectionTrigger);
