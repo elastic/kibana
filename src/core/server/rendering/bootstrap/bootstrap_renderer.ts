@@ -13,6 +13,7 @@ import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
 import { HttpAuth, KibanaRequest } from '../../http';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
+import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
@@ -59,7 +60,10 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       // just use the default values in case of connectivity issues with ES
     }
 
-    const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
+    const themeTag = getThemeTag({
+      themeVersion,
+      darkMode,
+    });
     const buildHash = packageInfo.buildNum;
     const regularBundlePath = `${serverBasePath}/${buildHash}/bundles`;
 
