@@ -264,23 +264,25 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
               buttonContent={moreOptionsLabel}
               onToggle={() => setIsMoreOptionsExpanded((prev) => !prev)}
             >
-              <UseField
-                key={searchableSnapshotStoragePath}
-                path={searchableSnapshotStoragePath}
-                config={{
-                  ...searchableSnapshotFields.storage,
-                  defaultValue: isHotPhase || isColdPhase ? 'full_copy' : 'shared_cache',
-                }}
-                component={SelectField}
-                componentProps={{
-                  'data-test-subj': `searchableSnapshotStorage`,
-                  hasEmptyLabelSpace: true,
-                  euiFieldProps: {
-                    options: storageOptions,
-                    'aria-label': searchableSnapshotFields.storage.label,
-                  },
-                }}
-              />
+              <>
+                <EuiSpacer size="s" />
+                <UseField
+                  key={searchableSnapshotStoragePath}
+                  path={searchableSnapshotStoragePath}
+                  config={{
+                    ...searchableSnapshotFields.storage,
+                    defaultValue: isHotPhase || isColdPhase ? 'full_copy' : 'shared_cache',
+                  }}
+                  component={SelectField}
+                  componentProps={{
+                    'data-test-subj': `searchableSnapshotStorage`,
+                    euiFieldProps: {
+                      options: storageOptions,
+                      'aria-label': searchableSnapshotFields.storage.label,
+                    },
+                  }}
+                />
+              </>
             </EuiAccordion>
           </div>
         );
