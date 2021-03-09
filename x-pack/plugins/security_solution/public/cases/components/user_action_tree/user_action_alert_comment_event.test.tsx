@@ -46,11 +46,10 @@ describe('UserActionAvatar ', () => {
     expect(wrapper.text()).toBe('added an alert from Awesome rule');
   });
 
-  it('does NOT render the link when the alert is undefined', async () => {
+  it('does NOT render the link when the rule is null', async () => {
     const wrapper = mount(
       <TestProviders>
-        {/* @ts-expect-error */}
-        <AlertCommentEvent alert={undefined} commentType={CommentType.alert} />
+        <AlertCommentEvent {...props} ruleId={null} />
       </TestProviders>
     );
 
@@ -58,27 +57,7 @@ describe('UserActionAvatar ', () => {
       wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
     ).toBeFalsy();
 
-    expect(wrapper.text()).toBe('added an alert from ');
-  });
-
-  it('does NOT render the link when the rule is undefined', async () => {
-    const alert = {
-      alertId: 'alert-id-1',
-      commentType: CommentType.alert,
-    };
-
-    const wrapper = mount(
-      <TestProviders>
-        {/* @ts-expect-error*/}
-        <AlertCommentEvent alert={alert} />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
-    ).toBeFalsy();
-
-    expect(wrapper.text()).toBe('added an alert from ');
+    expect(wrapper.text()).toBe('added an alert from Unknown rule');
   });
 
   it('navigate to app on link click', async () => {

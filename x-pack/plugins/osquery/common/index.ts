@@ -8,4 +8,4 @@
 export * from './constants';
 
 export const PLUGIN_ID = 'osquery';
-export const PLUGIN_NAME = 'osquery';
+export const PLUGIN_NAME = 'Osquery';
