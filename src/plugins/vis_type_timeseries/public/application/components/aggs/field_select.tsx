@@ -21,7 +21,7 @@ interface FieldSelectProps {
   type: string;
   fields: Record<string, SanitizedFieldType[]>;
   indexPattern: string;
-  value: string;
+  value?: string | null;
   onChange: (options: Array<EuiComboBoxOptionOption<string>>) => void;
   disabled?: boolean;
   restrict?: string[];

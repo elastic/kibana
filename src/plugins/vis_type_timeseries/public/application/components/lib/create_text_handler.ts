@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { TimeseriesVisParams } from '../../../types';
+// @ts-expect-error TODO: remove detectIE if possible
 import { detectIE } from './detect_ie';
 
-export const createTextHandler = (handleChange) => {
-  return (name, defaultValue) => (e) => {
+export const createTextHandler = (
+  handleChange: (partialModel: Partial<TimeseriesVisParams>) => void
+) => {
+  return (name: keyof TimeseriesVisParams, defaultValue?: string) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     // IE preventDefault breaks input, but we still need top prevent enter from being pressed
     if (!detectIE() || e.keyCode === 13) e.preventDefault();
 
-    const value = _.get(e, 'target.value', defaultValue);
-    return handleChange?.({ [name]: value });
+    return handleChange({ [name]: e.target.value ?? defaultValue });
   };
 };
