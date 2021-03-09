@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from 'kibana/server';
+import { EsQueryConfig, IndexPattern } from 'src/plugins/data/server';
+import { AnnotationItemsSchema, PanelSchema } from '../../../../common/types';
+import { VisTypeTimeseriesVisDataRequest } from '../../../types';
+import { DefaultSearchCapabilities } from '../../search_strategies';
 import { buildProcessorFunction } from '../build_processor_function';
+// @ts-expect-error
 import { processors } from '../request_processors/annotations';
 
 /**
@@ -22,7 +28,17 @@ import { processors } from '../request_processors/annotations';
  * ]
  * @returns {Object} doc - processed body
  */
-export async function buildAnnotationRequest(...args) {
+export async function buildAnnotationRequest(
+  ...args: [
+    VisTypeTimeseriesVisDataRequest,
+    PanelSchema,
+    AnnotationItemsSchema,
+    EsQueryConfig,
+    IndexPattern | null | undefined,
+    DefaultSearchCapabilities,
+    IUiSettingsClient
+  ]
+) {
   const processor = buildProcessorFunction(processors, ...args);
   const doc = await processor({});
   return doc;
