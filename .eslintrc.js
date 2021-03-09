@@ -790,6 +790,22 @@ module.exports = {
     },
 
     /**
+     * Fleet overrides
+     */
+    {
+      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/order': [
+          'warn',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent'],
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
@@ -1087,7 +1103,9 @@ module.exports = {
      */
     {
       // typescript for front and back end
-      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1270,14 +1288,19 @@ module.exports = {
      * Osquery overrides
      */
     {
-      extends: ['eslint:recommended', 'plugin:react/recommended'],
-      plugins: ['react'],
+      extends: [
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+      ],
+      plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'arrow-body-style': ['error', 'as-needed'],
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
     {
@@ -1311,6 +1334,55 @@ module.exports = {
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
+      },
+    },
+
+    /**
+     * Platform Security Team overrides
+     */
+    {
+      files: [
+        'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
+        'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 1,
+        'import/order': [
+          // This rule sorts import declarations
+          'error',
+          {
+            groups: [
+              'unknown',
+              ['builtin', 'external'],
+              'internal',
+              ['parent', 'sibling', 'index'],
+            ],
+            pathGroups: [
+              {
+                pattern: '{@kbn/**,src/**,kibana{,/**}}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always',
+          },
+        ],
+        'import/no-duplicates': ['error'],
+        'sort-imports': [
+          // This rule sorts imports of multiple members (destructured imports)
+          'error',
+          {
+            ignoreCase: true,
+            ignoreDeclarationSort: true,
+          },
+        ],
       },
     },
 
@@ -1348,7 +1420,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['lodash/*', '!lodash/fp'],
+            patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
           },
         ],
       },

@@ -16,9 +16,13 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const esClient: Client = getService('legacyEs');
+  const esArchiver = getService('esArchiver');
 
   describe('Settings - update', async function () {
     skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
     setupFleetAndAgents(providerContext);
 
     const createdAgentPolicyIds: string[] = [];
@@ -28,9 +32,11 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
-          .expect(200)
       );
       await Promise.all(deletedPromises);
+    });
+    after(async () => {
+      await esArchiver.unload('fleet/empty_fleet_server');
     });
     it("should bump all agent policy's revision", async function () {
       const { body: testPolicy1PostRes } = await supertest

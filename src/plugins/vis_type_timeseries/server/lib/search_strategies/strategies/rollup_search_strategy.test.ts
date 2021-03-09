@@ -7,9 +7,11 @@
  */
 
 import { RollupSearchStrategy } from './rollup_search_strategy';
-
-import type { VisPayload } from '../../../../common/types';
-import type { ReqFacade } from './abstract_search_strategy';
+import { Framework } from '../../../plugin';
+import {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
 
 jest.mock('./abstract_search_strategy', () => {
   class AbstractSearchStrategyMock {
@@ -34,26 +36,25 @@ jest.mock('./abstract_search_strategy', () => {
 describe('Rollup Search Strategy', () => {
   let rollupResolvedData: Promise<any>;
 
-  const request = ({
-    requestContext: {
-      core: {
-        elasticsearch: {
-          client: {
-            asCurrentUser: {
-              rollup: {
-                getRollupIndexCaps: jest.fn().mockImplementation(() => rollupResolvedData),
-              },
+  const requestContext = ({
+    core: {
+      elasticsearch: {
+        client: {
+          asCurrentUser: {
+            rollup: {
+              getRollupIndexCaps: jest.fn().mockImplementation(() => rollupResolvedData),
             },
           },
         },
       },
     },
-  } as unknown) as ReqFacade<VisPayload>;
+  } as unknown) as VisTypeTimeseriesRequestHandlerContext;
+  const framework = {} as Framework;
 
   const indexPattern = 'indexPattern';
 
   test('should create instance of RollupSearchRequest', () => {
-    const rollupSearchStrategy = new RollupSearchStrategy();
+    const rollupSearchStrategy = new RollupSearchStrategy(framework);
 
     expect(rollupSearchStrategy).toBeDefined();
   });
@@ -63,7 +64,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy();
+      rollupSearchStrategy = new RollupSearchStrategy(framework);
       rollupSearchStrategy.getRollupData = jest.fn(() =>
         Promise.resolve({
           [rollupIndex]: {
@@ -96,7 +97,8 @@ describe('Rollup Search Strategy', () => {
 
     test('isViable should be false for invalid index', async () => {
       const result = await rollupSearchStrategy.checkForViability(
-        request,
+        requestContext,
+        {} as VisTypeTimeseriesVisDataRequest,
         (null as unknown) as string
       );
 
@@ -111,13 +113,13 @@ describe('Rollup Search Strategy', () => {
     let rollupSearchStrategy: RollupSearchStrategy;
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy();
+      rollupSearchStrategy = new RollupSearchStrategy(framework);
     });
 
     test('should return rollup data', async () => {
       rollupResolvedData = Promise.resolve({ body: 'data' });
 
-      const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
+      const rollupData = await rollupSearchStrategy.getRollupData(requestContext, indexPattern);
 
       expect(rollupData).toBe('data');
     });
@@ -125,7 +127,7 @@ describe('Rollup Search Strategy', () => {
     test('should return empty object in case of exception', async () => {
       rollupResolvedData = Promise.reject('data');
 
-      const rollupData = await rollupSearchStrategy.getRollupData(request, indexPattern);
+      const rollupData = await rollupSearchStrategy.getRollupData(requestContext, indexPattern);
 
       expect(rollupData).toEqual({});
     });
@@ -138,7 +140,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy();
+      rollupSearchStrategy = new RollupSearchStrategy(framework);
       fieldsCapabilities = {
         [rollupIndex]: {
           aggs: {
@@ -151,10 +153,15 @@ describe('Rollup Search Strategy', () => {
     });
 
     test('should return fields for wildcard', async () => {
-      const fields = await rollupSearchStrategy.getFieldsForWildcard(request, indexPattern, {
-        fieldsCapabilities,
-        rollupIndex,
-      });
+      const fields = await rollupSearchStrategy.getFieldsForWildcard(
+        requestContext,
+        {} as VisTypeTimeseriesVisDataRequest,
+        indexPattern,
+        {
+          fieldsCapabilities,
+          rollupIndex,
+        }
+      );
 
       expect(fields).toEqual([
         {

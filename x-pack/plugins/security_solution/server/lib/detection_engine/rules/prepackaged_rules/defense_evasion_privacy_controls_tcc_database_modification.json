@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Privacy Control Bypass via TCCDB Modification",
   "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"sqlite*\" and \n process.args : \"/*/Application Support/com.apple.TCC/TCC.db\"\n",
   "references": [
