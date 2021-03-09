@@ -36,11 +36,11 @@ export class CiStatsTimings {
       {
         ...options?.defaultMetadata,
         os_kernel: Os.release(),
+        host_platform: Os.platform(),
         system_cpu_cores: Os.cpus()?.length,
         system_cpu_name: Os.cpus()[0]?.model,
         system_cpu_speed: Os.cpus()[0]?.speed,
         host_architecture: Os.arch(),
-        host_platform: Os.platform(),
       },
       parseConfig(log)
     );
