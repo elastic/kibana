@@ -65,6 +65,42 @@ export function registerCurationsRoutes({
 
   router.get(
     {
+      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+          curationId: schema.string(),
+        }),
+        body: schema.object({
+          query: schema.string(),
+          queries: schema.arrayOf(schema.string()),
+          promoted: schema.arrayOf(schema.string()),
+          hidden: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:engineName/curations/:curationId',
+    })
+  );
+
+  router.get(
+    {
       path: '/api/app_search/engines/{engineName}/curations/find_or_create',
       validate: {
         params: schema.object({
