@@ -15,50 +15,57 @@ import { ActionFactoryPicker } from '../action_factory_picker';
 import { DrilldownManagerFooter } from '../drilldown_manager_footer';
 import { DrilldownStateForm } from '../drilldown_state_form';
 
-const txtCreateDrilldown = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.containers.createDrilldownForm.title',
+const txtEditDrilldown = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.containers.editDrilldownForm.title',
   {
-    defaultMessage: 'Create Drilldown',
-    description: 'Drilldowns flyout title for new drilldown form.',
+    defaultMessage: 'Edit Drilldown',
+    description: 'Drilldowns flyout title for edit drilldown form.',
   }
 );
 
-const txtCreateDrilldownButton = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.containers.createDrilldownForm.primaryButton',
+const txtEditDrilldownButton = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.containers.editDrilldownForm.primaryButton',
   {
-    defaultMessage: 'Create drilldown',
-    description: 'Primary button on new drilldown creation form.',
+    defaultMessage: 'Save',
+    description: 'Primary button on new drilldown edit form.',
   }
 );
 
-export const CreateDrilldownForm: React.FC = () => {
+export interface EditDrilldownFormProps {
+  eventId: string;
+}
+
+export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId }) => {
   const isMounted = useMountedState();
   const drilldowns = useDrilldownManager();
-  const drilldownState = drilldowns.getDrilldownState();
+  const drilldownState = React.useMemo(() => drilldowns.createEventDrilldownState(eventId), [
+    drilldowns,
+    eventId,
+  ]);
   const [disabled, setDisabled] = React.useState(false);
 
-  const handleCreate = () => {
+  if (!drilldownState) return null;
+
+  const handleSave = () => {
     setDisabled(true);
-    drilldowns.createDrilldown().finally(() => {
-      if (!isMounted()) return;
-      setDisabled(false);
-    });
+    // ...
+    if (!isMounted()) return;
   };
 
   return (
     <>
-      <DrilldownManagerTitle>{txtCreateDrilldown}</DrilldownManagerTitle>
+      <DrilldownManagerTitle>{txtEditDrilldown}</DrilldownManagerTitle>
       <ActionFactoryPicker />
       {!!drilldownState && <DrilldownStateForm state={drilldownState} disabled={disabled} />}
       {!!drilldownState && (
         <DrilldownManagerFooter>
           <EuiButton
-            onClick={handleCreate}
+            onClick={handleSave}
             fill
             isDisabled={disabled}
             data-test-subj={'drilldownWizardSubmit'}
           >
-            {txtCreateDrilldownButton}
+            {txtEditDrilldownButton}
           </EuiButton>
         </DrilldownManagerFooter>
       )}

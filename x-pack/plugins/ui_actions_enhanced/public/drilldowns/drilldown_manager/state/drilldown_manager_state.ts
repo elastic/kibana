@@ -291,6 +291,31 @@ export class DrilldownManagerState {
     })();
   };
 
+  /**
+   * Returns the state object of an existing drilldown for editing purposes.
+   *
+   * @param eventId ID of the saved dynamic action event.
+   */
+  public createEventDrilldownState(eventId: string): null | DrilldownState {
+    const { dynamicActionManager, actionFactories, triggers: placeTriggers } = this.deps;
+    const { events } = dynamicActionManager.state.get();
+    const event = events.find((ev) => ev.eventId === eventId);
+    if (!event) return null;
+    const factory = actionFactories.find(({ id }) => id === event.action.factoryId);
+    if (!factory) return null;
+    const { action, triggers } = event;
+    const { name, config } = action;
+    const state = new DrilldownState({
+      factory,
+      placeContext: this.getActionFactoryContext(),
+      placeTriggers,
+      name,
+      config,
+      triggers,
+    });
+    return state;
+  }
+
   // Below are convenience React hooks for consuming observables in connected
   // React components.
 
