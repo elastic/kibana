@@ -71,7 +71,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
     switch (allocationType) {
       case 'node_roles':
         /**
-         * We'll drive Cloud users to add a cold tier to their deployment if there are no nodes with the cold node role.
+         * We'll drive Cloud users to add a cold or frozen tier to their deployment if there are no nodes with that role.
          */
         if (
           isCloudEnabled &&

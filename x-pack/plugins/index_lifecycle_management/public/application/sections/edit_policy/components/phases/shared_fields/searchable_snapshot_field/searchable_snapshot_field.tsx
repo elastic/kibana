@@ -84,7 +84,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
     Boolean(
-      // New policy on cloud should have searchable snapshot on in cold phase
+      // New policy on cloud should have searchable snapshot on in cold and frozen phase
       (isColdOrFrozenPhase && isNewPolicy && cloud?.isCloudEnabled) ||
         policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
     )
