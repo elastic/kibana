@@ -17,6 +17,7 @@ import { getMockEqlResponse } from '../../../../common/hooks/eql/eql_search_resp
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { FilterMeta } from 'src/plugins/data/common';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -158,7 +159,10 @@ describe('PreviewQuery', () => {
           ruleType="query"
           dataTestSubj="queryPreviewSelect"
           idAria="queryPreview"
-          query={{ query: { query: '', language: 'kql' }, filters: [{ meta: {}, query: {} }] }}
+          query={{
+            query: { query: '', language: 'kuery' },
+            filters: [{ meta: {} as FilterMeta, query: {} }],
+          }}
           index={['foo-*']}
           threshold={undefined}
           isDisabled={false}
