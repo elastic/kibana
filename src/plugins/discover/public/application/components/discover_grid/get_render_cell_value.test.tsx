@@ -8,10 +8,11 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 
-const rowsSource = [
+const rowsSource: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
@@ -19,7 +20,7 @@ const rowsSource = [
     _score: 1,
     _source: { bytes: 100, extension: '.gz' },
     highlight: {
-      extension: '@kibana-highlighted-field.gz@/kibana-highlighted-field',
+      extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
     },
   },
 ];
