@@ -97,3 +97,10 @@ export interface AlertsHealth {
     timestamp: string;
   };
 }
+
+export interface ActionVariable {
+  name: string;
+  description: string;
+  deprecated?: boolean;
+  useWithTripleBracesInTemplates?: boolean;
+}

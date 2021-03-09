@@ -76,10 +76,7 @@ async function createAction(
     }
   );
 
-  if (
-    appContextService.getConfig()?.agents?.fleetServerEnabled &&
-    isAgentActionSavedObject(actionSO)
-  ) {
+  if (isAgentActionSavedObject(actionSO)) {
     const body: FleetServerAgentAction = {
       '@timestamp': new Date().toISOString(),
       expiration: new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
@@ -140,7 +137,7 @@ async function bulkCreateActions(
     }))
   );
 
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+  if (actionSOs.length > 0) {
     await esClient.bulk({
       index: AGENT_ACTIONS_INDEX,
       body: actionSOs.flatMap((actionSO) => {
@@ -371,11 +368,7 @@ export async function getLatestConfigChangeAction(
 }
 
 export interface ActionsService {
-  getAgent: (
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentId: string
-  ) => Promise<Agent>;
+  getAgent: (esClient: ElasticsearchClient, agentId: string) => Promise<Agent>;
 
   createAgentAction: (
     soClient: SavedObjectsClientContract,
