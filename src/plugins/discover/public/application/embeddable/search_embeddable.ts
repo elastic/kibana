@@ -226,6 +226,8 @@ export class SearchEmbeddable
       this.updateInput({ sort });
     };
 
+    searchScope.isLoading = true;
+
     const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
     searchScope.useNewFieldsApi = useNewFieldsApi;
 
@@ -336,6 +338,9 @@ export class SearchEmbeddable
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
+    this.searchScope.$apply(() => {
+      this.searchScope!.isLoading = true;
+    });
     this.updateOutput({ loading: true, error: undefined });
 
     try {
@@ -353,6 +358,7 @@ export class SearchEmbeddable
       this.searchScope.$apply(() => {
         this.searchScope!.hits = resp.hits.hits;
         this.searchScope!.totalHitCount = resp.hits.total;
+        this.searchScope!.isLoading = false;
       });
     } catch (error) {
       this.updateOutput({ loading: false, error });

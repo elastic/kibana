@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+import { EuiProgress } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
 import { getServices } from '../../kibana_services';
@@ -21,6 +22,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridProps) {
 
   return (
     <I18nProvider>
+      {props.isLoading && <EuiProgress size="xs" color="accent" />}
       <DataGridMemoized
         {...props}
         setExpandedDoc={setExpandedDoc}
@@ -38,6 +40,7 @@ export function createDiscoverGridDirective(reactDirective: any) {
   return reactDirective(DiscoverGridEmbeddable, [
     ['columns', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],
+    ['isLoading', { watchDepth: 'reference' }],
     ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],
     ['onFilter', { watchDepth: 'reference', wrapApply: false }],
     ['onRemoveColumn', { watchDepth: 'reference', wrapApply: false }],
