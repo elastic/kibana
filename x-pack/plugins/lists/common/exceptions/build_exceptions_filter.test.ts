@@ -5,41 +5,35 @@
  * 2.0.
  */
 
+import { getEntryMatchExcludeMock, getEntryMatchMock } from '../schemas/types/entry_match.mock';
 import {
-  getEntryMatchMock,
-  getEntryMatchExcludeMock,
-} from '../../../lists/common/schemas/types/entry_match.mock';
-import {
-  getEntryMatchAnyMock,
   getEntryMatchAnyExcludeMock,
-} from '../../../lists/common/schemas/types/entry_match_any.mock';
+  getEntryMatchAnyMock,
+} from '../schemas/types/entry_match_any.mock';
+import { getEntryExistsExcludedMock, getEntryExistsMock } from '../schemas/types/entry_exists.mock';
 import {
-  getEntryExistsMock,
-  getEntryExistsExcludedMock,
-} from '../../../lists/common/schemas/types/entry_exists.mock';
-import {
-  getEntryNestedMock,
   getEntryNestedExcludeMock,
   getEntryNestedMixedEntries,
-} from '../../../lists/common/schemas/types/entry_nested.mock';
+  getEntryNestedMock,
+} from '../schemas/types/entry_nested.mock';
 import {
   getExceptionListItemSchemaMock,
   getExceptionListItemSchemaXMock,
-} from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
+} from '../schemas/response/exception_list_item_schema.mock';
+import { EntryMatchAny, ExceptionListItemSchema } from '../schemas';
 
 import {
+  ExceptionItemSansLargeValueLists,
+  buildExceptionFilter,
   buildExceptionItemFilter,
   buildExclusionClause,
   buildExistsClause,
   buildMatchAnyClause,
   buildMatchClause,
   buildNestedClause,
-  createOrClauses,
   chunkExceptions,
-  buildExceptionFilter,
-  ExceptionItemSansLargeValueLists,
+  createOrClauses,
 } from './build_exceptions_filter';
-import { EntryMatchAny, ExceptionListItemSchema } from '../../common/shared_imports';
 import { hasLargeValueList } from './utils';
 
 const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
@@ -59,22 +53,22 @@ describe('build_exceptions_filter', () => {
   describe('buildExceptionFilter', () => {
     test('it should return undefined if no exception items', () => {
       const booleanFilter = buildExceptionFilter({
-        lists: [],
-        excludeExceptions: false,
         chunkSize: 1,
+        excludeExceptions: false,
+        lists: [],
       });
       expect(booleanFilter).toBeUndefined();
     });
 
     test('it should build a filter given an exception list', () => {
       const booleanFilter = buildExceptionFilter({
-        lists: [getExceptionListItemSchemaMock()],
-        excludeExceptions: false,
         chunkSize: 1,
+        excludeExceptions: false,
+        lists: [getExceptionListItemSchemaMock()],
       });
 
       expect(booleanFilter).toEqual({
-        meta: { alias: null, negate: false, disabled: false },
+        meta: { alias: null, disabled: false, negate: false },
         query: {
           bool: {
             should: [
@@ -86,10 +80,10 @@ describe('build_exceptions_filter', () => {
                         path: 'some.parentField',
                         query: {
                           bool: {
+                            minimum_should_match: 1,
                             should: [
                               { match_phrase: { 'some.parentField.nested.field': 'some value' } },
                             ],
-                            minimum_should_match: 1,
                           },
                         },
                         score_mode: 'none',
@@ -97,8 +91,8 @@ describe('build_exceptions_filter', () => {
                     },
                     {
                       bool: {
-                        should: [{ match_phrase: { 'some.not.nested.field': 'some value' } }],
                         minimum_should_match: 1,
+                        should: [{ match_phrase: { 'some.not.nested.field': 'some value' } }],
                       },
                     },
                   ],
@@ -123,15 +117,15 @@ describe('build_exceptions_filter', () => {
         entries: [{ field: 'user.name', operator: 'included', type: 'match', value: 'name' }],
       };
       const exceptionFilter = buildExceptionFilter({
-        lists: [exceptionItem1, exceptionItem2],
-        excludeExceptions: true,
         chunkSize: 2,
+        excludeExceptions: true,
+        lists: [exceptionItem1, exceptionItem2],
       });
       expect(exceptionFilter).toEqual({
         meta: {
           alias: null,
-          negate: true,
           disabled: false,
+          negate: true,
         },
         query: {
           bool: {
@@ -201,16 +195,16 @@ describe('build_exceptions_filter', () => {
         entries: [{ field: 'file.path', operator: 'included', type: 'match', value: '/safe/path' }],
       };
       const exceptionFilter = buildExceptionFilter({
-        lists: [exceptionItem1, exceptionItem2, exceptionItem3],
-        excludeExceptions: true,
         chunkSize: 2,
+        excludeExceptions: true,
+        lists: [exceptionItem1, exceptionItem2, exceptionItem3],
       });
 
       expect(exceptionFilter).toEqual({
         meta: {
           alias: null,
-          negate: true,
           disabled: false,
+          negate: true,
         },
         query: {
           bool: {
@@ -298,13 +292,13 @@ describe('build_exceptions_filter', () => {
       ];
 
       const booleanFilter = buildExceptionFilter({
-        lists: exceptions,
-        excludeExceptions: true,
         chunkSize: 1,
+        excludeExceptions: true,
+        lists: exceptions,
       });
 
       expect(booleanFilter).toEqual({
-        meta: { alias: null, negate: true, disabled: false },
+        meta: { alias: null, disabled: false, negate: true },
         query: {
           bool: {
             should: [
@@ -319,21 +313,23 @@ describe('build_exceptions_filter', () => {
                             filter: [
                               {
                                 bool: {
+                                  minimum_should_match: 1,
                                   should: [
                                     {
                                       match_phrase: { 'parent.field.host.name': 'some host name' },
                                     },
                                   ],
-                                  minimum_should_match: 1,
                                 },
                               },
                               {
                                 bool: {
                                   must_not: {
                                     bool: {
+                                      minimum_should_match: 1,
                                       should: [
                                         {
                                           bool: {
+                                            minimum_should_match: 1,
                                             should: [
                                               {
                                                 match_phrase: {
@@ -341,11 +337,11 @@ describe('build_exceptions_filter', () => {
                                                 },
                                               },
                                             ],
-                                            minimum_should_match: 1,
                                           },
                                         },
                                         {
                                           bool: {
+                                            minimum_should_match: 1,
                                             should: [
                                               {
                                                 match_phrase: {
@@ -353,19 +349,17 @@ describe('build_exceptions_filter', () => {
                                                 },
                                               },
                                             ],
-                                            minimum_should_match: 1,
                                           },
                                         },
                                       ],
-                                      minimum_should_match: 1,
                                     },
                                   },
                                 },
                               },
                               {
                                 bool: {
-                                  should: [{ exists: { field: 'parent.field.host.name' } }],
                                   minimum_should_match: 1,
+                                  should: [{ exists: { field: 'parent.field.host.name' } }],
                                 },
                               },
                             ],
@@ -382,21 +376,21 @@ describe('build_exceptions_filter', () => {
                   should: [
                     {
                       bool: {
+                        minimum_should_match: 1,
                         should: [
                           {
                             bool: {
-                              should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                               minimum_should_match: 1,
+                              should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                             },
                           },
                           {
                             bool: {
-                              should: [{ match_phrase: { 'host.name': 'some other host name' } }],
                               minimum_should_match: 1,
+                              should: [{ match_phrase: { 'host.name': 'some other host name' } }],
                             },
                           },
                         ],
-                        minimum_should_match: 1,
                       },
                     },
                   ],
@@ -412,16 +406,16 @@ describe('build_exceptions_filter', () => {
                             bool: {
                               must_not: {
                                 bool: {
-                                  should: [{ exists: { field: 'host.name' } }],
                                   minimum_should_match: 1,
+                                  should: [{ exists: { field: 'host.name' } }],
                                 },
                               },
                             },
                           },
                           {
                             bool: {
-                              should: [{ match_phrase: { 'host.name': 'some host name' } }],
                               minimum_should_match: 1,
+                              should: [{ match_phrase: { 'host.name': 'some host name' } }],
                             },
                           },
                         ],
@@ -520,18 +514,18 @@ describe('build_exceptions_filter', () => {
                       filter: [
                         {
                           bool: {
+                            minimum_should_match: 1,
                             should: [
                               { match_phrase: { 'parent.field.host.name': 'some host name' } },
                             ],
-                            minimum_should_match: 1,
                           },
                         },
                         {
                           bool: {
+                            minimum_should_match: 1,
                             should: [
                               { match_phrase: { 'parent.field.host.name': 'some host name' } },
                             ],
-                            minimum_should_match: 1,
                           },
                         },
                       ],
@@ -542,8 +536,8 @@ describe('build_exceptions_filter', () => {
               },
               {
                 bool: {
-                  should: [{ match_phrase: { 'host.name': 'some host name' } }],
                   minimum_should_match: 1,
+                  should: [{ match_phrase: { 'host.name': 'some host name' } }],
                 },
               },
             ],
@@ -560,19 +554,21 @@ describe('build_exceptions_filter', () => {
                       filter: [
                         {
                           bool: {
+                            minimum_should_match: 1,
                             should: [
                               { match_phrase: { 'parent.field.host.name': 'some host name' } },
                             ],
-                            minimum_should_match: 1,
                           },
                         },
                         {
                           bool: {
                             must_not: {
                               bool: {
+                                minimum_should_match: 1,
                                 should: [
                                   {
                                     bool: {
+                                      minimum_should_match: 1,
                                       should: [
                                         {
                                           match_phrase: {
@@ -580,11 +576,11 @@ describe('build_exceptions_filter', () => {
                                           },
                                         },
                                       ],
-                                      minimum_should_match: 1,
                                     },
                                   },
                                   {
                                     bool: {
+                                      minimum_should_match: 1,
                                       should: [
                                         {
                                           match_phrase: {
@@ -592,19 +588,17 @@ describe('build_exceptions_filter', () => {
                                           },
                                         },
                                       ],
-                                      minimum_should_match: 1,
                                     },
                                   },
                                 ],
-                                minimum_should_match: 1,
                               },
                             },
                           },
                         },
                         {
                           bool: {
-                            should: [{ exists: { field: 'parent.field.host.name' } }],
                             minimum_should_match: 1,
+                            should: [{ exists: { field: 'parent.field.host.name' } }],
                           },
                         },
                       ],
@@ -615,29 +609,29 @@ describe('build_exceptions_filter', () => {
               },
               {
                 bool: {
+                  minimum_should_match: 1,
                   should: [
                     {
                       bool: {
-                        should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                         minimum_should_match: 1,
+                        should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                       },
                     },
                     {
                       bool: {
-                        should: [{ match_phrase: { 'host.name': 'some other host name' } }],
                         minimum_should_match: 1,
+                        should: [{ match_phrase: { 'host.name': 'some other host name' } }],
                       },
                     },
                   ],
-                  minimum_should_match: 1,
                 },
               },
               {
                 bool: {
                   must_not: {
                     bool: {
-                      should: [{ match_phrase: { 'host.name': 'some host name' } }],
                       minimum_should_match: 1,
+                      should: [{ match_phrase: { 'host.name': 'some host name' } }],
                     },
                   },
                 },
@@ -645,7 +639,7 @@ describe('build_exceptions_filter', () => {
               {
                 bool: {
                   must_not: {
-                    bool: { should: [{ exists: { field: 'host.name' } }], minimum_should_match: 1 },
+                    bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] },
                   },
                 },
               },
@@ -655,7 +649,7 @@ describe('build_exceptions_filter', () => {
         {
           bool: {
             must_not: {
-              bool: { should: [{ exists: { field: 'host.name' } }], minimum_should_match: 1 },
+              bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] },
             },
           },
         },
@@ -686,6 +680,7 @@ describe('build_exceptions_filter', () => {
                     filter: [
                       {
                         bool: {
+                          minimum_should_match: 1,
                           should: [
                             {
                               match_phrase: {
@@ -693,16 +688,17 @@ describe('build_exceptions_filter', () => {
                               },
                             },
                           ],
-                          minimum_should_match: 1,
                         },
                       },
                       {
                         bool: {
                           must_not: {
                             bool: {
+                              minimum_should_match: 1,
                               should: [
                                 {
                                   bool: {
+                                    minimum_should_match: 1,
                                     should: [
                                       {
                                         match_phrase: {
@@ -710,11 +706,11 @@ describe('build_exceptions_filter', () => {
                                         },
                                       },
                                     ],
-                                    minimum_should_match: 1,
                                   },
                                 },
                                 {
                                   bool: {
+                                    minimum_should_match: 1,
                                     should: [
                                       {
                                         match_phrase: {
@@ -722,19 +718,17 @@ describe('build_exceptions_filter', () => {
                                         },
                                       },
                                     ],
-                                    minimum_should_match: 1,
                                   },
                                 },
                               ],
-                              minimum_should_match: 1,
                             },
                           },
                         },
                       },
                       {
                         bool: {
-                          should: [{ exists: { field: 'parent.field.host.name' } }],
                           minimum_should_match: 1,
+                          should: [{ exists: { field: 'parent.field.host.name' } }],
                         },
                       },
                     ],
@@ -745,29 +739,29 @@ describe('build_exceptions_filter', () => {
             },
             {
               bool: {
+                minimum_should_match: 1,
                 should: [
                   {
                     bool: {
-                      should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                       minimum_should_match: 1,
+                      should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                     },
                   },
                   {
                     bool: {
-                      should: [{ match_phrase: { 'host.name': 'some other host name' } }],
                       minimum_should_match: 1,
+                      should: [{ match_phrase: { 'host.name': 'some other host name' } }],
                     },
                   },
                 ],
-                minimum_should_match: 1,
               },
             },
             {
               bool: {
                 must_not: {
                   bool: {
-                    should: [{ match_phrase: { 'host.name': 'some host name' } }],
                     minimum_should_match: 1,
+                    should: [{ match_phrase: { 'host.name': 'some host name' } }],
                   },
                 },
               },
@@ -775,7 +769,7 @@ describe('build_exceptions_filter', () => {
             {
               bool: {
                 must_not: {
-                  bool: { should: [{ exists: { field: 'host.name' } }], minimum_should_match: 1 },
+                  bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] },
                 },
               },
             },
@@ -905,21 +899,21 @@ describe('build_exceptions_filter', () => {
         bool: {
           must_not: {
             bool: {
+              minimum_should_match: 1,
               should: [
                 {
                   bool: {
-                    should: [{ match_phrase: { 'host.name': 'some host name' } }],
                     minimum_should_match: 1,
+                    should: [{ match_phrase: { 'host.name': 'some host name' } }],
                   },
                 },
                 {
                   bool: {
-                    should: [{ match_phrase: { 'host.name': 'some other host name' } }],
                     minimum_should_match: 1,
+                    should: [{ match_phrase: { 'host.name': 'some other host name' } }],
                   },
                 },
               ],
-              minimum_should_match: 1,
             },
           },
         },
@@ -961,14 +955,14 @@ describe('build_exceptions_filter', () => {
               filter: [
                 {
                   bool: {
-                    should: [{ match_phrase: { 'parent.field.host.name': 'some host name' } }],
                     minimum_should_match: 1,
+                    should: [{ match_phrase: { 'parent.field.host.name': 'some host name' } }],
                   },
                 },
                 {
                   bool: {
-                    should: [{ match_phrase: { 'parent.field.host.name': 'some host name' } }],
                     minimum_should_match: 1,
+                    should: [{ match_phrase: { 'parent.field.host.name': 'some host name' } }],
                   },
                 },
               ],
@@ -992,8 +986,8 @@ describe('build_exceptions_filter', () => {
                   bool: {
                     must_not: {
                       bool: {
-                        should: [{ match_phrase: { 'parent.field.host.name': 'some host name' } }],
                         minimum_should_match: 1,
+                        should: [{ match_phrase: { 'parent.field.host.name': 'some host name' } }],
                       },
                     },
                   },
@@ -1002,17 +996,19 @@ describe('build_exceptions_filter', () => {
                   bool: {
                     must_not: {
                       bool: {
+                        minimum_should_match: 1,
                         should: [
                           {
                             bool: {
+                              minimum_should_match: 1,
                               should: [
                                 { match_phrase: { 'parent.field.host.name': 'some host name' } },
                               ],
-                              minimum_should_match: 1,
                             },
                           },
                           {
                             bool: {
+                              minimum_should_match: 1,
                               should: [
                                 {
                                   match_phrase: {
@@ -1020,11 +1016,9 @@ describe('build_exceptions_filter', () => {
                                   },
                                 },
                               ],
-                              minimum_should_match: 1,
                             },
                           },
                         ],
-                        minimum_should_match: 1,
                       },
                     },
                   },
@@ -1048,25 +1042,27 @@ describe('build_exceptions_filter', () => {
               filter: [
                 {
                   bool: {
-                    should: [{ match_phrase: { 'parent.field.host.name': 'some host name' } }],
                     minimum_should_match: 1,
+                    should: [{ match_phrase: { 'parent.field.host.name': 'some host name' } }],
                   },
                 },
                 {
                   bool: {
                     must_not: {
                       bool: {
+                        minimum_should_match: 1,
                         should: [
                           {
                             bool: {
+                              minimum_should_match: 1,
                               should: [
                                 { match_phrase: { 'parent.field.host.name': 'some host name' } },
                               ],
-                              minimum_should_match: 1,
                             },
                           },
                           {
                             bool: {
+                              minimum_should_match: 1,
                               should: [
                                 {
                                   match_phrase: {
@@ -1074,19 +1070,17 @@ describe('build_exceptions_filter', () => {
                                   },
                                 },
                               ],
-                              minimum_should_match: 1,
                             },
                           },
                         ],
-                        minimum_should_match: 1,
                       },
                     },
                   },
                 },
                 {
                   bool: {
-                    should: [{ exists: { field: 'parent.field.host.name' } }],
                     minimum_should_match: 1,
+                    should: [{ exists: { field: 'parent.field.host.name' } }],
                   },
                 },
               ],
