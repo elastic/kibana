@@ -3306,7 +3306,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 80
+              "lineNumber": 83
             },
             "signature": [
               "({ kind: boolean; text: string; } | { kind: string; text: string; })[]"
@@ -3325,7 +3325,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 82
+              "lineNumber": 85
             }
           },
           {
@@ -3342,7 +3342,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/field_formats/converters/string.ts",
-                  "lineNumber": 102
+                  "lineNumber": 105
                 }
               }
             ],
@@ -3353,7 +3353,7 @@
             "label": "textConvert",
             "source": {
               "path": "src/plugins/data/common/field_formats/converters/string.ts",
-              "lineNumber": 102
+              "lineNumber": 105
             },
             "tags": [],
             "returnComment": []

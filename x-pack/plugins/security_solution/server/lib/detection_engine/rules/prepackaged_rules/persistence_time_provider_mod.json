@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Persistence via Time Provider Modification",
   "query": "registry where event.type:\"change\" and\n  registry.path:\"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\W32Time\\\\TimeProviders\\\\*\" and\n  registry.data.strings:\"*.dll\"\n",
   "references": [
