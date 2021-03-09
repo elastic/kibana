@@ -94,8 +94,6 @@ For detailed information about the n.n.n release, review the following sections.
 [[release-notes-7.11.2]]
 == {kib} 7.11.2
 
-coming::[7.11.2]
-
 The 7.11.2 release includes the following bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
 
 [float]
