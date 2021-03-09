@@ -486,7 +486,7 @@ See
 {kibana-ref}/canvas.html[Create a workpad].
 // end::workpad-def[]
 
-[[glossary-wms]] WMS ::
+[[glossary-wms]] Web Map Service (WMS) ::
 // tag::wms-def[]
 A layer type in the *Maps* application. WMS stands for Web Map Service.
 Add a WMS source to provide authoritative geographic context to your map.
