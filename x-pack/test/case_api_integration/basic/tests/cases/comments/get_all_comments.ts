@@ -12,11 +12,9 @@ import { CASES_URL } from '../../../../../../plugins/case/common/constants';
 import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
-  createSubCase,
   deleteAllCaseItems,
   deleteCaseAction,
 } from '../../../../common/lib/utils';
-import { CommentType } from '../../../../../../plugins/case/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -61,40 +59,6 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(comments.length).to.eql(2);
-    });
-
-    it('should get comments from a case and its sub cases', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      await supertest
-        .post(`${CASES_URL}/${caseInfo.id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      const { body: comments } = await supertest
-        .get(`${CASES_URL}/${caseInfo.id}/comments?includeSubCaseComments=true`)
-        .expect(200);
-
-      expect(comments.length).to.eql(2);
-      expect(comments[0].type).to.eql(CommentType.generatedAlert);
-      expect(comments[1].type).to.eql(CommentType.user);
-    });
-
-    it('should get comments from a sub cases', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      await supertest
-        .post(`${CASES_URL}/${caseInfo.subCases![0].id}/comments`)
-        .set('kbn-xsrf', 'true')
-        .send(postCommentUserReq)
-        .expect(200);
-
-      const { body: comments } = await supertest
-        .get(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-        .expect(200);
-
-      expect(comments.length).to.eql(2);
-      expect(comments[0].type).to.eql(CommentType.generatedAlert);
-      expect(comments[1].type).to.eql(CommentType.user);
     });
 
     it('should not find any comments for an invalid case id', async () => {

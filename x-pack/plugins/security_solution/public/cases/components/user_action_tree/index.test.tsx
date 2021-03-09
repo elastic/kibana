@@ -55,9 +55,7 @@ describe('UserActionTree ', () => {
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     useFormDataMock.mockImplementation(() => [{ content: sampleData.content, comment: '' }]);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
-    jest
-      .spyOn(routeData, 'useParams')
-      .mockReturnValue({ detailName: 'case-id', subCaseId: 'sub-case-id' });
+    jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
   });
 
   it('Loading spinner when user actions loading and displays fullName/username', () => {
@@ -293,7 +291,6 @@ describe('UserActionTree ', () => {
       expect(patchComment).toBeCalledWith({
         commentUpdate: sampleData.content,
         caseId: 'case-id',
-        subCaseId: 'sub-case-id',
         commentId: props.data.comments[0].id,
         fetchUserActions,
         updateCase,

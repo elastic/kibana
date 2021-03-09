@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
@@ -28,11 +28,6 @@ export function initDeleteCommentApi({
           case_id: schema.string(),
           comment_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
       },
     },
     async (context, request, response) => {
@@ -51,8 +46,8 @@ export function initDeleteCommentApi({
           throw Boom.notFound(`This comment ${request.params.comment_id} does not exist anymore.`);
         }
 
-        const type = request.query?.subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-        const id = request.query?.subCaseId ?? request.params.case_id;
+        const type = CASE_SAVED_OBJECT;
+        const id = request.params.case_id;
 
         const caseRef = myComment.references.find((c) => c.type === type);
         if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
@@ -74,7 +69,7 @@ export function initDeleteCommentApi({
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: id,
-              subCaseId: request.query?.subCaseId,
+              subCaseId: undefined,
               commentId: request.params.comment_id,
               fields: ['comment'],
             }),
@@ -84,7 +79,7 @@ export function initDeleteCommentApi({
         return response.noContent();
       } catch (error) {
         logger.error(
-          `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id} sub case id: ${request.query?.subCaseId}: ${error}`
+          `Failed to delete comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id}: ${error}`
         );
         return response.customError(wrapError(error));
       }

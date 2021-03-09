@@ -10,7 +10,7 @@ import { useEffect, useReducer, useCallback, useRef } from 'react';
 import { Case } from './types';
 import * as i18n from './translations';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-import { getCase, getSubCase } from './api';
+import { getCase } from './api';
 
 interface CaseState {
   data: Case | null;
@@ -60,7 +60,7 @@ export interface UseGetCase extends CaseState {
   updateCase: (newCase: Case) => void;
 }
 
-export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
+export const useGetCase = (caseId: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -81,9 +81,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
       abortCtrlRef.current = new AbortController();
       dispatch({ type: 'FETCH_INIT' });
 
-      const response = await (subCaseId
-        ? getSubCase(caseId, subCaseId, true, abortCtrlRef.current.signal)
-        : getCase(caseId, true, abortCtrlRef.current.signal));
+      const response = await getCase(caseId, true, abortCtrlRef.current.signal);
 
       if (!isCancelledRef.current) {
         dispatch({ type: 'FETCH_SUCCESS', payload: response });
@@ -101,7 +99,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, subCaseId]);
+  }, [caseId]);
 
   useEffect(() => {
     callFetch();
@@ -111,6 +109,6 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
       abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, subCaseId]);
+  }, [caseId]);
   return { ...state, fetchCase: callFetch, updateCase };
 };

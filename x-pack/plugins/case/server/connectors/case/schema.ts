@@ -39,8 +39,8 @@ export type ContextTypeAlertSchemaType = typeof ContextTypeAlertSchema.type;
 
 export const CommentSchema = schema.oneOf([
   ContextTypeUserSchema,
-  ContextTypeAlertSchema,
-  ContextTypeAlertGroupSchema,
+  // ContextTypeAlertSchema,
+  // ContextTypeAlertGroupSchema,
 ]);
 
 export type CommentSchemaType = typeof CommentSchema.type;
