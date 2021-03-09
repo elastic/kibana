@@ -344,8 +344,20 @@ function discoverController($route, $scope) {
     requests: new RequestAdapter(),
   });
 
+  const shouldSearchOnPageLoad = () => {
+    // A saved search is created on every page load, so we check the ID to see if we're loading a
+    // previously saved search or if it is just transient
+    return (
+      config.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      savedSearch.id !== undefined ||
+      timefilter.getRefreshInterval().pause === false ||
+      searchSessionManager.hasSearchSessionIdInURL()
+    );
+  };
+
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
+  $scope.resultState = shouldSearchOnPageLoad() ? 'loading' : 'uninitialized';
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -442,19 +454,7 @@ function discoverController($route, $scope) {
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
-  const shouldSearchOnPageLoad = () => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    return (
-      config.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL()
-    );
-  };
-
-  const updateResultState = (() => {
-    let prev = {};
+  const getResultState = (fetchStatus, rows) => {
     const status = {
       UNINITIALIZED: 'uninitialized',
       LOADING: 'loading', // initial data load
@@ -462,33 +462,15 @@ function discoverController($route, $scope) {
       NO_RESULTS: 'none', // no results came back
     };
 
-    function pick(rows, oldRows, fetchStatus) {
-      // initial state, pretend we're already loading if we're about to execute a search so
-      // that the uninitilized message doesn't flash on screen
-      if (!$scope.fetchError && rows == null && oldRows == null && shouldSearchOnPageLoad()) {
-        return status.LOADING;
-      }
-
-      if (fetchStatus === fetchStatuses.UNINITIALIZED) {
-        return status.UNINITIALIZED;
-      }
-
-      const rowsEmpty = _.isEmpty(rows);
-      if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
-      else if (!rowsEmpty) return status.READY;
-      else return status.NO_RESULTS;
+    if (fetchStatus === fetchStatuses.UNINITIALIZED) {
+      return status.UNINITIALIZED;
     }
 
-    return function () {
-      const current = {
-        rows: $scope.rows,
-        fetchStatus: $scope.fetchStatus,
-      };
-      $scope.resultState = pick(current.rows, prev.rows, current.fetchStatus, prev.fetchStatus);
-
-      prev = current;
-    };
-  })();
+    const rowsEmpty = _.isEmpty(rows);
+    if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
+    else if (!rowsEmpty) return status.READY;
+    else return status.NO_RESULTS;
+  };
 
   const init = () => {
     const fetch$ = merge(
@@ -530,7 +512,7 @@ function discoverController($route, $scope) {
     setupVisualization();
 
     $scope.fetchStatus = fetchStatuses.LOADING;
-    updateResultState();
+    $scope.resultState = getResultState($scope.fetchStatus, $scope.rows);
     logInspectorRequest({ searchSessionId });
     return $scope.volatileSearchSource
       .fetch({
@@ -547,7 +529,7 @@ function discoverController($route, $scope) {
         data.search.showError(error);
       })
       .finally(() => {
-        updateResultState();
+        $scope.resultState = getResultState($scope.resultState, $scope.rows);
         $scope.$apply();
       });
   };
