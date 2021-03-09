@@ -24,7 +24,6 @@ export type {
   AlertTypeRegistryContract,
   AlertTypeParamsExpressionProps,
   ValidationResult,
-  ActionVariable,
   ActionVariables,
   ActionConnector,
   IErrorObject,

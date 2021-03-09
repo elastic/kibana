@@ -3966,7 +3966,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 185
+              "lineNumber": 213
             }
           },
           {
@@ -3977,7 +3977,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 186
+              "lineNumber": 214
             },
             "signature": [
               "string | undefined"
@@ -3991,7 +3991,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 187
+              "lineNumber": 215
             },
             "signature": [
               {
@@ -4011,7 +4011,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 188
+              "lineNumber": 216
             },
             "signature": [
               {
@@ -4031,13 +4031,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 189
+              "lineNumber": 217
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 184
+          "lineNumber": 212
         },
         "initialIsOpen": false
       },
@@ -4277,7 +4277,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 178
+              "lineNumber": 206
             }
           },
           {
@@ -4288,7 +4288,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 179
+              "lineNumber": 207
             }
           },
           {
@@ -4299,13 +4299,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 180
+              "lineNumber": 208
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 177
+          "lineNumber": 205
         },
         "initialIsOpen": false
       },
@@ -5043,7 +5043,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 257
+              "lineNumber": 312
             }
           },
           {
@@ -5054,7 +5054,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 258
+              "lineNumber": 313
             }
           },
           {
@@ -5065,7 +5065,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 259
+              "lineNumber": 314
             },
             "signature": [
               {
@@ -5085,7 +5085,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 260
+              "lineNumber": 315
             },
             "signature": [
               "boolean | undefined"
@@ -5094,7 +5094,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 256
+          "lineNumber": 311
         },
         "initialIsOpen": false
       },
@@ -7900,7 +7900,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 328
+              "lineNumber": 383
             }
           },
           {
@@ -7911,7 +7911,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 329
+              "lineNumber": 384
             },
             "signature": [
               "string[]"
@@ -7925,7 +7925,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 330
+              "lineNumber": 385
             },
             "signature": [
               "{ settings: any; mappings: any; }"
@@ -7939,7 +7939,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 334
+              "lineNumber": 389
             },
             "signature": [
               "{ hidden?: boolean | undefined; }"
@@ -7953,7 +7953,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 335
+              "lineNumber": 390
             },
             "signature": [
               "string[]"
@@ -7967,7 +7967,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 336
+              "lineNumber": 391
             },
             "signature": [
               "object"
@@ -7976,7 +7976,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 327
+          "lineNumber": 382
         },
         "initialIsOpen": false
       },
@@ -7995,7 +7995,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 321
+              "lineNumber": 376
             },
             "signature": [
               "any"
@@ -8004,7 +8004,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 320
+          "lineNumber": 375
         },
         "initialIsOpen": false
       },
@@ -8034,7 +8034,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 276
+              "lineNumber": 331
             },
             "signature": [
               {
@@ -8055,7 +8055,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 277
+              "lineNumber": 332
             },
             "signature": [
               {
@@ -8076,7 +8076,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 278
+              "lineNumber": 333
             },
             "signature": [
               {
@@ -8097,7 +8097,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 279
+              "lineNumber": 334
             },
             "signature": [
               "Record<string, string>"
@@ -8111,7 +8111,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 280
+              "lineNumber": 335
             }
           },
           {
@@ -8122,7 +8122,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 281
+              "lineNumber": 336
             }
           },
           {
@@ -8133,7 +8133,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 282
+              "lineNumber": 337
             },
             "signature": [
               {
@@ -8153,7 +8153,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 283
+              "lineNumber": 338
             }
           },
           {
@@ -8164,7 +8164,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 284
+              "lineNumber": 339
             }
           },
           {
@@ -8175,7 +8175,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 285
+              "lineNumber": 340
             },
             "signature": [
               {
@@ -8190,7 +8190,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 275
+          "lineNumber": 330
         },
         "initialIsOpen": false
       },
@@ -9945,13 +9945,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 289
+              "lineNumber": 344
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 288
+          "lineNumber": 343
         },
         "initialIsOpen": false
       },
@@ -10856,24 +10856,24 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.type",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.type]",
             "type": "string",
-            "label": "type",
+            "label": "[RegistryDataStreamKeys.type]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 215
+              "lineNumber": 258
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.ilm_policy",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.ilm_policy]",
             "type": "string",
-            "label": "ilm_policy",
+            "label": "[RegistryDataStreamKeys.ilm_policy]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 216
+              "lineNumber": 259
             },
             "signature": [
               "string | undefined"
@@ -10881,13 +10881,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.hidden",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.hidden]",
             "type": "CompoundType",
-            "label": "hidden",
+            "label": "[RegistryDataStreamKeys.hidden]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 217
+              "lineNumber": 260
             },
             "signature": [
               "boolean | undefined"
@@ -10895,46 +10895,46 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.dataset",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.dataset]",
             "type": "string",
-            "label": "dataset",
+            "label": "[RegistryDataStreamKeys.dataset]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 218
+              "lineNumber": 261
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.title",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.title]",
             "type": "string",
-            "label": "title",
+            "label": "[RegistryDataStreamKeys.title]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 219
+              "lineNumber": 262
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.release",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.release]",
             "type": "string",
-            "label": "release",
+            "label": "[RegistryDataStreamKeys.release]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 220
+              "lineNumber": 263
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.streams",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.streams]",
             "type": "Array",
-            "label": "streams",
+            "label": "[RegistryDataStreamKeys.streams]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 221
+              "lineNumber": 264
             },
             "signature": [
               {
@@ -10949,46 +10949,46 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.package",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.package]",
             "type": "string",
-            "label": "package",
+            "label": "[RegistryDataStreamKeys.package]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 222
+              "lineNumber": 265
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.path",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.path]",
             "type": "string",
-            "label": "path",
+            "label": "[RegistryDataStreamKeys.path]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 223
+              "lineNumber": 266
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.ingest_pipeline",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.ingest_pipeline]",
             "type": "string",
-            "label": "ingest_pipeline",
+            "label": "[RegistryDataStreamKeys.ingest_pipeline]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 224
+              "lineNumber": 267
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.elasticsearch",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.elasticsearch]",
             "type": "Object",
-            "label": "elasticsearch",
+            "label": "[RegistryDataStreamKeys.elasticsearch]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 225
+              "lineNumber": 268
             },
             "signature": [
               {
@@ -11003,13 +11003,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.dataset_is_prefix",
+            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.dataset_is_prefix]",
             "type": "CompoundType",
-            "label": "dataset_is_prefix",
+            "label": "[RegistryDataStreamKeys.dataset_is_prefix]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 226
+              "lineNumber": 269
             },
             "signature": [
               "boolean | undefined"
@@ -11018,7 +11018,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 214
+          "lineNumber": 257
         },
         "initialIsOpen": false
       },
@@ -11037,7 +11037,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 230
+              "lineNumber": 273
             },
             "signature": [
               "object | undefined"
@@ -11051,7 +11051,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 231
+              "lineNumber": 274
             },
             "signature": [
               "object | undefined"
@@ -11060,7 +11060,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 229
+          "lineNumber": 272
         },
         "initialIsOpen": false
       },
@@ -11151,46 +11151,46 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryInput.type",
+            "id": "def-common.RegistryInput.[RegistryInputKeys.type]",
             "type": "string",
-            "label": "type",
+            "label": "[RegistryInputKeys.type]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 128
+              "lineNumber": 146
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.title",
+            "id": "def-common.RegistryInput.[RegistryInputKeys.title]",
             "type": "string",
-            "label": "title",
+            "label": "[RegistryInputKeys.title]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 129
+              "lineNumber": 147
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.description",
+            "id": "def-common.RegistryInput.[RegistryInputKeys.description]",
             "type": "string",
-            "label": "description",
+            "label": "[RegistryInputKeys.description]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 130
+              "lineNumber": 148
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.template_path",
+            "id": "def-common.RegistryInput.[RegistryInputKeys.template_path]",
             "type": "string",
-            "label": "template_path",
+            "label": "[RegistryInputKeys.template_path]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 131
+              "lineNumber": 149
             },
             "signature": [
               "string | undefined"
@@ -11198,13 +11198,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.condition",
+            "id": "def-common.RegistryInput.[RegistryInputKeys.condition]",
             "type": "string",
-            "label": "condition",
+            "label": "[RegistryInputKeys.condition]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 132
+              "lineNumber": 150
             },
             "signature": [
               "string | undefined"
@@ -11212,13 +11212,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.vars",
+            "id": "def-common.RegistryInput.[RegistryInputKeys.vars]",
             "type": "Array",
-            "label": "vars",
+            "label": "[RegistryInputKeys.vars]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 133
+              "lineNumber": 151
             },
             "signature": [
               {
@@ -11234,7 +11234,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 127
+          "lineNumber": 145
         },
         "initialIsOpen": false
       },
@@ -11247,46 +11247,46 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.name",
+            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.name]",
             "type": "string",
-            "label": "name",
+            "label": "[RegistryPolicyTemplateKeys.name]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 121
+              "lineNumber": 129
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.title",
+            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.title]",
             "type": "string",
-            "label": "title",
+            "label": "[RegistryPolicyTemplateKeys.title]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 122
+              "lineNumber": 130
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.description",
+            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.description]",
             "type": "string",
-            "label": "description",
+            "label": "[RegistryPolicyTemplateKeys.description]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 123
+              "lineNumber": 131
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.inputs",
+            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.inputs]",
             "type": "Array",
-            "label": "inputs",
+            "label": "[RegistryPolicyTemplateKeys.inputs]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 124
+              "lineNumber": 132
             },
             "signature": [
               {
@@ -11301,13 +11301,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.multiple",
+            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.multiple]",
             "type": "CompoundType",
-            "label": "multiple",
+            "label": "[RegistryPolicyTemplateKeys.multiple]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 125
+              "lineNumber": 133
             },
             "signature": [
               "boolean | undefined"
@@ -11316,7 +11316,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 120
+          "lineNumber": 128
         },
         "initialIsOpen": false
       },
@@ -11329,35 +11329,35 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryStream.input",
+            "id": "def-common.RegistryStream.[RegistryStreamKeys.input]",
             "type": "string",
-            "label": "input",
+            "label": "[RegistryStreamKeys.input]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 136
+              "lineNumber": 164
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.title",
+            "id": "def-common.RegistryStream.[RegistryStreamKeys.title]",
             "type": "string",
-            "label": "title",
+            "label": "[RegistryStreamKeys.title]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 137
+              "lineNumber": 165
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.description",
+            "id": "def-common.RegistryStream.[RegistryStreamKeys.description]",
             "type": "string",
-            "label": "description",
+            "label": "[RegistryStreamKeys.description]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 138
+              "lineNumber": 166
             },
             "signature": [
               "string | undefined"
@@ -11365,13 +11365,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.enabled",
+            "id": "def-common.RegistryStream.[RegistryStreamKeys.enabled]",
             "type": "CompoundType",
-            "label": "enabled",
+            "label": "[RegistryStreamKeys.enabled]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 139
+              "lineNumber": 167
             },
             "signature": [
               "boolean | undefined"
@@ -11379,13 +11379,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.vars",
+            "id": "def-common.RegistryStream.[RegistryStreamKeys.vars]",
             "type": "Array",
-            "label": "vars",
+            "label": "[RegistryStreamKeys.vars]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 140
+              "lineNumber": 168
             },
             "signature": [
               {
@@ -11400,19 +11400,19 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.template_path",
+            "id": "def-common.RegistryStream.[RegistryStreamKeys.template_path]",
             "type": "string",
-            "label": "template_path",
+            "label": "[RegistryStreamKeys.template_path]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 141
+              "lineNumber": 169
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 135
+          "lineNumber": 163
         },
         "initialIsOpen": false
       },
@@ -11425,24 +11425,24 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.name",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.name]",
             "type": "string",
-            "label": "name",
+            "label": "[RegistryVarsEntryKeys.name]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 239
+              "lineNumber": 294
             }
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.title",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.title]",
             "type": "string",
-            "label": "title",
+            "label": "[RegistryVarsEntryKeys.title]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 240
+              "lineNumber": 295
             },
             "signature": [
               "string | undefined"
@@ -11450,13 +11450,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.description",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.description]",
             "type": "string",
-            "label": "description",
+            "label": "[RegistryVarsEntryKeys.description]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 241
+              "lineNumber": 296
             },
             "signature": [
               "string | undefined"
@@ -11464,13 +11464,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.type",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.type]",
             "type": "CompoundType",
-            "label": "type",
+            "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 242
+              "lineNumber": 297
             },
             "signature": [
               {
@@ -11484,13 +11484,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.required",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.required]",
             "type": "CompoundType",
-            "label": "required",
+            "label": "[RegistryVarsEntryKeys.required]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 243
+              "lineNumber": 298
             },
             "signature": [
               "boolean | undefined"
@@ -11498,13 +11498,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.show_user",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.show_user]",
             "type": "CompoundType",
-            "label": "show_user",
+            "label": "[RegistryVarsEntryKeys.show_user]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 244
+              "lineNumber": 299
             },
             "signature": [
               "boolean | undefined"
@@ -11512,13 +11512,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.multi",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.multi]",
             "type": "CompoundType",
-            "label": "multi",
+            "label": "[RegistryVarsEntryKeys.multi]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 245
+              "lineNumber": 300
             },
             "signature": [
               "boolean | undefined"
@@ -11526,13 +11526,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.default",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.default]",
             "type": "CompoundType",
-            "label": "default",
+            "label": "[RegistryVarsEntryKeys.default]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 246
+              "lineNumber": 301
             },
             "signature": [
               "string | string[] | undefined"
@@ -11540,13 +11540,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.os",
+            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.os]",
             "type": "Object",
-            "label": "os",
+            "label": "[RegistryVarsEntryKeys.os]",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 247
+              "lineNumber": 302
             },
             "signature": [
               "{ [key: string]: { default: string | string[]; }; } | undefined"
@@ -11555,7 +11555,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 238
+          "lineNumber": 293
         },
         "initialIsOpen": false
       },
@@ -11574,13 +11574,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 147
+              "lineNumber": 175
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 146
+          "lineNumber": 174
         },
         "initialIsOpen": false
       },
@@ -11673,7 +11673,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 340
+              "lineNumber": 395
             }
           },
           {
@@ -11684,7 +11684,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-              "lineNumber": 341
+              "lineNumber": 396
             },
             "signature": [
               {
@@ -11699,7 +11699,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 339
+          "lineNumber": 394
         },
         "initialIsOpen": false
       },
@@ -11871,6 +11871,66 @@
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
           "lineNumber": 58
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.RegistryDataStreamKeys",
+        "type": "Enum",
+        "label": "RegistryDataStreamKeys",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+          "lineNumber": 242
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.RegistryInputKeys",
+        "type": "Enum",
+        "label": "RegistryInputKeys",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+          "lineNumber": 136
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.RegistryPolicyTemplateKeys",
+        "type": "Enum",
+        "label": "RegistryPolicyTemplateKeys",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+          "lineNumber": 120
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.RegistryStreamKeys",
+        "type": "Enum",
+        "label": "RegistryStreamKeys",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+          "lineNumber": 154
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.RegistryVarsEntryKeys",
+        "type": "Enum",
+        "label": "RegistryVarsEntryKeys",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+          "lineNumber": 277
         },
         "initialIsOpen": false
       }
@@ -12346,7 +12406,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 303
+          "lineNumber": 358
         },
         "signature": [
           {
@@ -12390,7 +12450,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 192
+          "lineNumber": 220
         },
         "signature": [
           "Record<\"kibana\", Record<KibanaAssetType, KibanaAssetParts[]>> & Record<\"elasticsearch\", Record<ElasticsearchAssetType, ElasticsearchAssetParts[]>>"
@@ -12459,7 +12519,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 191
+          "lineNumber": 219
         },
         "signature": [
           "Record<KibanaAssetType, KibanaAssetParts[]> & Record<ElasticsearchAssetType, ElasticsearchAssetParts[]>"
@@ -12503,7 +12563,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 176
+          "lineNumber": 204
         },
         "signature": [
           "string"
@@ -12518,7 +12578,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 175
+          "lineNumber": 203
         },
         "signature": [
           "CategorySummaryItem[]"
@@ -12575,7 +12635,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 318
+          "lineNumber": 373
         },
         "signature": [
           "{ readonly System: \"system\"; readonly Endpoint: \"endpoint\"; readonly ElasticAgent: \"elastic_agent\"; }"
@@ -12620,7 +12680,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 203
+          "lineNumber": 231
         },
         "signature": [
           "AssetParts & { service: Extract<ServiceName, 'elasticsearch'>; type: ElasticsearchAssetType; }"
@@ -12635,7 +12695,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 209
+          "lineNumber": 237
         },
         "signature": [
           "{ component_template: ElasticsearchAssetParts[]; ingest_pipeline: ElasticsearchAssetParts[]; index_template: ElasticsearchAssetParts[]; ilm_policy: ElasticsearchAssetParts[]; transform: ElasticsearchAssetParts[]; data_stream_ilm_policy: ElasticsearchAssetParts[]; }"
@@ -12722,7 +12782,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 308
+          "lineNumber": 363
         },
         "signature": [
           "Pick<SavedObjectReference, \"id\"> & { type: ElasticsearchAssetType; }"
@@ -12854,7 +12914,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 292
+          "lineNumber": 347
         },
         "signature": [
           {
@@ -12928,7 +12988,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 294
+          "lineNumber": 349
         },
         "signature": [
           "T & { status: InstallationStatus['Installed']; savedObject: SavedObject<Installation>; }"
@@ -12973,7 +13033,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 198
+          "lineNumber": 226
         },
         "signature": [
           "AssetParts & { service: Extract<ServiceName, 'kibana'>; type: KibanaAssetType; }"
@@ -12988,7 +13048,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 305
+          "lineNumber": 360
         },
         "signature": [
           "Pick<SavedObjectReference, \"id\"> & { type: KibanaSavedObjectType; }"
@@ -13003,7 +13063,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 208
+          "lineNumber": 236
         },
         "signature": [
           "{ dashboard: KibanaAssetParts[]; visualization: KibanaAssetParts[]; search: KibanaAssetParts[]; index_pattern: KibanaAssetParts[]; map: KibanaAssetParts[]; lens: KibanaAssetParts[]; }"
@@ -13048,7 +13108,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 299
+          "lineNumber": 354
         },
         "signature": [
           "T & { status: InstallationStatus['NotInstalled']; }"
@@ -13150,7 +13210,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 312
+          "lineNumber": 367
         },
         "signature": [
           "Pick<SavedObjectReference, \"id\"> & { type: typeof ASSETS_SAVED_OBJECT_TYPE; }"
@@ -13165,7 +13225,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 271
+          "lineNumber": 326
         },
         "signature": [
           {
@@ -13218,7 +13278,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 267
+          "lineNumber": 322
         },
         "signature": [
           "Installable<Pick<RegistryPackage, \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\" | \"internal\">>[]"
@@ -13233,7 +13293,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 269
+          "lineNumber": 324
         },
         "signature": [
           {
@@ -13324,7 +13384,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 270
+          "lineNumber": 325
         },
         "signature": [
           "{ installed: PackageList; not_installed: PackageList; }"
@@ -13414,7 +13474,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 155
+          "lineNumber": 183
         },
         "signature": [
           "{ type?: \"integration\" | undefined; description: string; title: string; name: string; version: string; path: string; download: string; data_streams?: RegistryDataStream[] | undefined; release: \"experimental\" | \"beta\" | \"ga\"; icons?: (",
@@ -13437,7 +13497,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 153
+          "lineNumber": 181
         },
         "signature": [
           "Pick<RegistryPackage, \"type\" | \"description\" | \"title\" | \"name\" | \"version\" | \"path\" | \"download\" | \"data_streams\" | \"release\" | \"icons\" | \"policy_templates\" | \"internal\">[]"
@@ -13452,7 +13512,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 234
+          "lineNumber": 289
         },
         "signature": [
           "\"string\" | \"text\" | \"password\" | \"integer\" | \"bool\" | \"yaml\""
@@ -13467,7 +13527,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 316
+          "lineNumber": 371
         },
         "signature": [
           "{ readonly System: \"system\"; readonly Endpoint: \"endpoint\"; readonly ElasticAgent: \"elastic_agent\"; }"
@@ -13482,7 +13542,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 183
+          "lineNumber": 211
         },
         "signature": [
           "undefined | Record<\"kibana\", { version: string; }>"
@@ -13497,7 +13557,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 144
+          "lineNumber": 172
         },
         "signature": [
           "string"
@@ -13512,7 +13572,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 145
+          "lineNumber": 173
         },
         "signature": [
           "string"
@@ -13527,7 +13587,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
-          "lineNumber": 171
+          "lineNumber": 199
         },
         "signature": [
           {

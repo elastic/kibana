@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Privilege Escalation via Sudoers File Modification",
   "query": "event.category:process and event.type:start and process.args:(echo and *NOPASSWD*ALL*)",
   "risk_score": 73,

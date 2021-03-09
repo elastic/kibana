@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "PsExec Network Connection",
   "query": "sequence by process.entity_id\n  [process where process.name : \"PsExec.exe\" and event.type == \"start\"]\n  [network where process.name : \"PsExec.exe\"]\n",
   "risk_score": 21,
