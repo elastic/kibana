@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/ingest_manager'],
-};
+import { useContext } from 'react';
+import { AnomalyDetectionJobsContext } from './anomaly_detection_jobs_context';
+
+export function useAnomalyDetectionJobsContext() {
+  return useContext(AnomalyDetectionJobsContext);
+}
