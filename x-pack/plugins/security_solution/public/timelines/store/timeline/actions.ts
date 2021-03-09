@@ -17,13 +17,13 @@ import {
 import { SerializedFilterQuery } from '../../../common/store/types';
 
 import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
-import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import { FieldsEqlOptions, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
-  TimelineExpandedEventType,
+  TimelineExpandedDetail,
+  TimelineExpandedDetailType,
   TimelineTypeLiteral,
   RowRendererId,
-  TimelineExpandedEvent,
   TimelineTabs,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
@@ -38,12 +38,12 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export interface ToggleExpandedEvent {
-  event?: TimelineExpandedEventType;
+export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;
   timelineId: string;
-}
-export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
+};
+
+export const toggleDetailPanel = actionCreator<ToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;
@@ -67,7 +67,7 @@ export interface TimelineInput {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
-  expandedEvent?: TimelineExpandedEvent;
+  expandedDetail?: TimelineExpandedDetail;
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
@@ -289,3 +289,9 @@ export const toggleModalSaveTimeline = actionCreator<{
   id: string;
   showModalSaveTimeline: boolean;
 }>('TOGGLE_MODAL_SAVE_TIMELINE');
+
+export const updateEqlOptions = actionCreator<{
+  id: string;
+  field: FieldsEqlOptions;
+  value: string | null;
+}>('UPDATE_EQL_OPTIONS_TIMELINE');

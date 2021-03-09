@@ -8,7 +8,7 @@
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { LocationDurationLine, MonitorDurationResult } from '../../../common/types';
-import { QUERY } from '../../../common/constants';
+import { QUERY, UNNAMED_LOCATION } from '../../../common/constants';
 
 export interface GetMonitorChartsParams {
   /** @member monitorId ID value for the selected monitor */
@@ -47,7 +47,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
           location: {
             terms: {
               field: 'observer.geo.name',
-              missing: 'N/A',
+              missing: UNNAMED_LOCATION,
             },
             aggs: {
               duration: { stats: { field: 'monitor.duration.us' } },

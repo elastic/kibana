@@ -296,16 +296,20 @@ interface AllowlistFields {
 // Allow list for the data we include in the events. True means that it is deep-cloned
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
+/* eslint-disable @typescript-eslint/naming-convention */
 const allowlistEventFields: AllowlistFields = {
   '@timestamp': true,
   agent: true,
   Endpoint: true,
+  Memory_protection: true,
   Ransomware: true,
   data_stream: true,
   ecs: true,
   elastic: true,
   event: true,
   rule: {
+    id: true,
+    name: true,
     ruleset: true,
   },
   file: {
@@ -320,6 +324,9 @@ const allowlistEventFields: AllowlistFields = {
     Ext: {
       code_signature: true,
       malware_classification: true,
+      malware_signature: true,
+      quarantine_result: true,
+      quarantine_message: true,
     },
   },
   host: {
@@ -333,7 +340,12 @@ const allowlistEventFields: AllowlistFields = {
     pid: true,
     uptime: true,
     Ext: {
+      architecture: true,
       code_signature: true,
+      dll: true,
+      token: {
+        integrity_level_name: true,
+      },
     },
     parent: {
       name: true,
@@ -341,7 +353,12 @@ const allowlistEventFields: AllowlistFields = {
       command_line: true,
       hash: true,
       Ext: {
+        architecture: true,
         code_signature: true,
+        dll: true,
+        token: {
+          integrity_level_name: true,
+        },
       },
       uptime: true,
       pid: true,
@@ -349,6 +366,91 @@ const allowlistEventFields: AllowlistFields = {
     },
     token: {
       integrity_level_name: true,
+    },
+    thread: true,
+  },
+  Target: {
+    process: {
+      Ext: {
+        architecture: true,
+        code_signature: true,
+        dll: true,
+        token: {
+          integrity_level_name: true,
+        },
+      },
+      parent: {
+        process: {
+          Ext: {
+            architecture: true,
+            code_signature: true,
+            dll: true,
+            token: {
+              integrity_level_name: true,
+            },
+          },
+        },
+      },
+      thread: {
+        Ext: {
+          call_stack: true,
+          start_address: true,
+          start_address_allocation_offset: true,
+          start_address_bytes: true,
+          start_address_bytes_disasm: true,
+          start_address_bytes_disasm_hash: true,
+          start_address_details: {
+            allocation_base: true,
+            allocation_protection: true,
+            allocation_size: true,
+            allocation_type: true,
+            bytes_address: true,
+            bytes_allocation_offset: true,
+            bytes_compressed: true,
+            mapped_pe: {
+              Ext: {
+                code_signature: {
+                  status: true,
+                  subject_name: true,
+                  trusted: true,
+                },
+                legal_copyright: true,
+                product_version: true,
+              },
+              company: true,
+              description: true,
+              file_version: true,
+              imphash: true,
+              original_file_name: true,
+              product: true,
+            },
+            mapped_pe_path: true,
+            memory_pe: {
+              Ext: {
+                code_signature: {
+                  status: true,
+                  subject_name: true,
+                  trusted: true,
+                },
+                legal_copyright: true,
+                product_version: true,
+              },
+              company: true,
+              description: true,
+              file_version: true,
+              imphash: true,
+              original_file_name: true,
+              product: true,
+            },
+            memory_pe_detected: true,
+            region_base: true,
+            region_protection: true,
+            region_size: true,
+            region_state: true,
+            strings: true,
+          },
+        },
+      },
     },
   },
 };

@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
-import { AnomalyRecordDoc } from '../types/anomalies';
+import type { AnomalyRecordDoc } from '../types/anomalies';
 
 export interface SeverityType {
   id: ANOMALY_SEVERITY;
@@ -230,8 +230,6 @@ export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined
   if (record.partition_field_name !== undefined) {
     return record.partition_field_name;
   }
-
-  return undefined;
 }
 
 // Returns the value of the field to use as the entity value from the source record
@@ -249,8 +247,6 @@ export function getEntityFieldValue(record: AnomalyRecordDoc): string | number |
   if (record.partition_field_value !== undefined) {
     return record.partition_field_value;
   }
-
-  return undefined;
 }
 
 // Returns the list of partitioning entity fields for the source record as a list

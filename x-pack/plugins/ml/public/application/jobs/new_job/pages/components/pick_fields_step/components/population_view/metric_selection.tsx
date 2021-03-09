@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState, useReducer, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -14,6 +14,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Field, AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
@@ -36,7 +37,10 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const { fields } = newJobCapsService;
+  const fields = useMemo(
+    () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    []
+  );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
@@ -155,7 +159,8 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           jobCreator.end,
           aggFieldPairList,
           jobCreator.splitField,
-          cs.intervalMs
+          cs.intervalMs,
+          jobCreator.runtimeMappings
         );
 
         setLineChartsData(resp);
@@ -175,7 +180,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           (async (index: number, field: Field) => {
             return {
               index,
-              fields: await chartLoader.loadFieldExampleValues(field),
+              fields: await chartLoader.loadFieldExampleValues(field, jobCreator.runtimeMappings),
             };
           })(i, af.by.field)
         );

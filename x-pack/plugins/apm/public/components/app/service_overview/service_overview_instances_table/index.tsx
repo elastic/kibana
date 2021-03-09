@@ -24,6 +24,7 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
@@ -32,6 +33,7 @@ import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { getLatencyColumnLabel } from '../get_latency_column_label';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
 type ServiceInstanceItem = ValuesType<
@@ -50,6 +52,9 @@ export function ServiceOverviewInstancesTable({
   status,
 }: Props) {
   const { agentName } = useApmServiceContext();
+  const {
+    urlParams: { latencyAggregationType },
+  } = useUrlParams();
 
   const columns: Array<EuiBasicTableColumn<ServiceInstanceItem>> = [
     {
@@ -95,12 +100,7 @@ export function ServiceOverviewInstancesTable({
     },
     {
       field: 'latencyValue',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTableColumnLatency',
-        {
-          defaultMessage: 'Latency',
-        }
-      ),
+      name: getLatencyColumnLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { latency }) => {
         return (
@@ -182,7 +182,7 @@ export function ServiceOverviewInstancesTable({
           defaultMessage: 'Memory usage (avg.)',
         }
       ),
-      width: px(unit * 8),
+      width: px(unit * 9),
       render: (_, { memoryUsage }) => {
         return (
           <SparkPlot

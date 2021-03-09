@@ -14,7 +14,6 @@ import {
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
@@ -215,103 +214,99 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
   const noSwimlaneSelected = Object.values(selectedSwimlanes).every((isSelected) => !isSelected);
 
   return (
-    <EuiOverlayMask data-test-subj="mlAddToDashboardModal">
-      <EuiModal onClose={onClose.bind(null, undefined)}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
+    <EuiModal onClose={onClose.bind(null, undefined)} data-test-subj="mlAddToDashboardModal">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="xpack.ml.explorer.dashboardsTitle"
+            defaultMessage="Add swim lanes to dashboards"
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiFormRow
+          label={
             <FormattedMessage
-              id="xpack.ml.explorer.dashboardsTitle"
-              defaultMessage="Add swim lanes to dashboards"
+              id="xpack.ml.explorer.addToDashboard.selectSwimlanesLabel"
+              defaultMessage="Select swim lane view:"
             />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.explorer.addToDashboard.selectSwimlanesLabel"
-                defaultMessage="Select swim lane view:"
-              />
-            }
-          >
-            <EuiCheckboxGroup
-              options={swimlaneTypeOptions}
-              idToSelectedMap={selectedSwimlanes}
-              onChange={(optionId) => {
-                const newSelection = {
-                  ...selectedSwimlanes,
-                  [optionId]: !selectedSwimlanes[optionId as SwimlaneType],
-                };
-                setSelectedSwimlanes(newSelection);
-              }}
-              data-test-subj="mlAddToDashboardSwimlaneTypeSelector"
-            />
-          </EuiFormRow>
-
-          <EuiSpacer size="m" />
-
-          <EuiFormRow
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.ml.explorer.addToDashboard.selectDashboardsLabel"
-                defaultMessage="Select dashboards:"
-              />
-            }
-            data-test-subj="mlDashboardSelectionContainer"
-          >
-            <EuiInMemoryTable
-              itemId="id"
-              isSelectable={true}
-              selection={selection}
-              items={dashboardItems}
-              loading={isLoading}
-              columns={columns}
-              search={search}
-              pagination={true}
-              sorting={true}
-              data-test-subj="mlDashboardSelectionTable"
-            />
-          </EuiFormRow>
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose.bind(null, undefined)}>
-            <FormattedMessage
-              id="xpack.ml.explorer.addToDashboard.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-          <EuiButton
-            disabled={noSwimlaneSelected || selectedItems.length !== 1}
-            onClick={async () => {
-              onClose(async () => {
-                const selectedDashboardId = selectedItems[0].id;
-                await addSwimlaneToDashboardCallback();
-                await navigateToUrl(
-                  await dashboardService.getDashboardEditUrl(selectedDashboardId)
-                );
-              });
+          }
+        >
+          <EuiCheckboxGroup
+            options={swimlaneTypeOptions}
+            idToSelectedMap={selectedSwimlanes}
+            onChange={(optionId) => {
+              const newSelection = {
+                ...selectedSwimlanes,
+                [optionId]: !selectedSwimlanes[optionId as SwimlaneType],
+              };
+              setSelectedSwimlanes(newSelection);
             }}
-            data-test-subj="mlAddAndEditDashboardButton"
-          >
+            data-test-subj="mlAddToDashboardSwimlaneTypeSelector"
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow
+          fullWidth
+          label={
             <FormattedMessage
-              id="xpack.ml.explorer.dashboardsTable.addAndEditDashboardLabel"
-              defaultMessage="Add and edit dashboard"
+              id="xpack.ml.explorer.addToDashboard.selectDashboardsLabel"
+              defaultMessage="Select dashboards:"
             />
-          </EuiButton>
-          <EuiButton
-            fill
-            onClick={onClose.bind(null, addSwimlaneToDashboardCallback)}
-            disabled={noSwimlaneSelected || selectedItems.length === 0}
-            data-test-subj="mlAddToDashboardsButton"
-          >
-            <FormattedMessage
-              id="xpack.ml.explorer.dashboardsTable.addToDashboardLabel"
-              defaultMessage="Add to dashboards"
-            />
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+          }
+          data-test-subj="mlDashboardSelectionContainer"
+        >
+          <EuiInMemoryTable
+            itemId="id"
+            isSelectable={true}
+            selection={selection}
+            items={dashboardItems}
+            loading={isLoading}
+            columns={columns}
+            search={search}
+            pagination={true}
+            sorting={true}
+            data-test-subj="mlDashboardSelectionTable"
+          />
+        </EuiFormRow>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onClose.bind(null, undefined)}>
+          <FormattedMessage
+            id="xpack.ml.explorer.addToDashboard.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+        <EuiButton
+          disabled={noSwimlaneSelected || selectedItems.length !== 1}
+          onClick={async () => {
+            onClose(async () => {
+              const selectedDashboardId = selectedItems[0].id;
+              await addSwimlaneToDashboardCallback();
+              await navigateToUrl(await dashboardService.getDashboardEditUrl(selectedDashboardId));
+            });
+          }}
+          data-test-subj="mlAddAndEditDashboardButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.explorer.dashboardsTable.addAndEditDashboardLabel"
+            defaultMessage="Add and edit dashboard"
+          />
+        </EuiButton>
+        <EuiButton
+          fill
+          onClick={onClose.bind(null, addSwimlaneToDashboardCallback)}
+          disabled={noSwimlaneSelected || selectedItems.length === 0}
+          data-test-subj="mlAddToDashboardsButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.explorer.dashboardsTable.addToDashboardLabel"
+            defaultMessage="Add to dashboards"
+          />
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

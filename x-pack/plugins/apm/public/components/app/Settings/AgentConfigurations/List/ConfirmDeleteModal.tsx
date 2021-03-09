@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
@@ -29,41 +29,39 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
   const { toasts } = useApmPluginContext().core.notifications;
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={i18n.translate('xpack.apm.agentConfig.deleteModal.title', {
-          defaultMessage: `Delete configuration`,
+    <EuiConfirmModal
+      title={i18n.translate('xpack.apm.agentConfig.deleteModal.title', {
+        defaultMessage: `Delete configuration`,
+      })}
+      onCancel={onCancel}
+      onConfirm={async () => {
+        setIsDeleting(true);
+        await deleteConfig(config, toasts);
+        setIsDeleting(false);
+        onConfirm();
+      }}
+      cancelButtonText={i18n.translate(
+        'xpack.apm.agentConfig.deleteModal.cancel',
+        { defaultMessage: `Cancel` }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.apm.agentConfig.deleteModal.confirm',
+        { defaultMessage: `Delete` }
+      )}
+      confirmButtonDisabled={isDeleting}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      <p>
+        {i18n.translate('xpack.apm.agentConfig.deleteModal.text', {
+          defaultMessage: `You are about to delete the configuration for service "{serviceName}" and environment "{environment}".`,
+          values: {
+            serviceName: getOptionLabel(config.service.name),
+            environment: getOptionLabel(config.service.environment),
+          },
         })}
-        onCancel={onCancel}
-        onConfirm={async () => {
-          setIsDeleting(true);
-          await deleteConfig(config, toasts);
-          setIsDeleting(false);
-          onConfirm();
-        }}
-        cancelButtonText={i18n.translate(
-          'xpack.apm.agentConfig.deleteModal.cancel',
-          { defaultMessage: `Cancel` }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.apm.agentConfig.deleteModal.confirm',
-          { defaultMessage: `Delete` }
-        )}
-        confirmButtonDisabled={isDeleting}
-        buttonColor="danger"
-        defaultFocusedButton="confirm"
-      >
-        <p>
-          {i18n.translate('xpack.apm.agentConfig.deleteModal.text', {
-            defaultMessage: `You are about to delete the configuration for service "{serviceName}" and environment "{environment}".`,
-            values: {
-              serviceName: getOptionLabel(config.service.name),
-              environment: getOptionLabel(config.service.environment),
-            },
-          })}
-        </p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+      </p>
+    </EuiConfirmModal>
   );
 }
 

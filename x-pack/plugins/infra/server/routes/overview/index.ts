@@ -36,77 +36,71 @@ export const initOverviewRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const overviewRequest = pipe(
-          OverviewRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const overviewRequest = pipe(
+        OverviewRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const client = createSearchClient(requestContext, framework);
-        const source = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          overviewRequest.sourceId
-        );
+      const client = createSearchClient(requestContext, framework);
+      const source = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        overviewRequest.sourceId
+      );
 
-        const inventoryModelFields = findInventoryFields('host', source.configuration.fields);
+      const inventoryModelFields = findInventoryFields('host', source.configuration.fields);
 
-        const params = {
-          index: source.configuration.metricAlias,
-          body: {
-            query: {
-              range: {
-                [source.configuration.fields.timestamp]: {
-                  gte: overviewRequest.timerange.from,
-                  lte: overviewRequest.timerange.to,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-            aggs: {
-              hosts: {
-                cardinality: {
-                  field: inventoryModelFields.id,
-                },
-              },
-              cpu: {
-                avg: {
-                  field: 'system.cpu.total.norm.pct',
-                },
-              },
-              memory: {
-                avg: {
-                  field: 'system.memory.actual.used.pct',
-                },
+      const params = {
+        index: source.configuration.metricAlias,
+        body: {
+          query: {
+            range: {
+              [source.configuration.fields.timestamp]: {
+                gte: overviewRequest.timerange.from,
+                lte: overviewRequest.timerange.to,
+                format: 'epoch_millis',
               },
             },
           },
-        };
-
-        const esResponse = await client<{}, OverviewESAggResponse>(params);
-
-        return response.ok({
-          body: {
-            stats: {
-              hosts: {
-                type: 'number',
-                value: esResponse.aggregations?.hosts.value ?? 0,
+          aggs: {
+            hosts: {
+              cardinality: {
+                field: inventoryModelFields.id,
               },
-              cpu: {
-                type: 'percent',
-                value: esResponse.aggregations?.cpu.value ?? 0,
+            },
+            cpu: {
+              avg: {
+                field: 'system.cpu.total.norm.pct',
               },
-              memory: {
-                type: 'percent',
-                value: esResponse.aggregations?.memory.value ?? 0,
+            },
+            memory: {
+              avg: {
+                field: 'system.memory.actual.used.pct',
               },
             },
           },
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+        },
+      };
+
+      const esResponse = await client<{}, OverviewESAggResponse>(params);
+
+      return response.ok({
+        body: {
+          stats: {
+            hosts: {
+              type: 'number',
+              value: esResponse.aggregations?.hosts.value ?? 0,
+            },
+            cpu: {
+              type: 'percent',
+              value: esResponse.aggregations?.cpu.value ?? 0,
+            },
+            memory: {
+              type: 'percent',
+              value: esResponse.aggregations?.memory.value ?? 0,
+            },
+          },
+        },
+      });
     }
   );
 };

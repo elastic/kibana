@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`returns the \`JsonCodeEditor\` component 1`] = `
+<EuiFlexGroup
+  className="dscJsonCodeEditor"
+  direction="column"
+  gutterSize="s"
+>
+  <EuiFlexItem
+    grow={true}
+  >
+    <EuiSpacer
+      size="s"
+    />
+    <div
+      className="eui-textRight"
+    >
+      <EuiCopy
+        afterMessage="Copied"
+        textToCopy="{
+  \\"_index\\": \\"test\\",
+  \\"_type\\": \\"doc\\",
+  \\"_id\\": \\"foo\\",
+  \\"_score\\": 1,
+  \\"_source\\": {
+    \\"test\\": 123
+  }
+}"
+      >
+        <Component />
+      </EuiCopy>
+    </div>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={true}
+  >
+    <CodeEditor
+      aria-label="Read only JSON view of an elasticsearch document"
+      editorDidMount={[Function]}
+      languageId="xjson"
+      onChange={[Function]}
+      options={
+        Object {
+          "automaticLayout": true,
+          "fontSize": 12,
+          "minimap": Object {
+            "enabled": false,
+          },
+          "overviewRulerBorder": false,
+          "readOnly": true,
+          "scrollBeyondLastLine": false,
+          "scrollbar": Object {
+            "alwaysConsumeMouseWheel": false,
+          },
+          "wordWrap": "on",
+          "wrappingIndent": "indent",
+        }
+      }
+      value="{
+  \\"_index\\": \\"test\\",
+  \\"_type\\": \\"doc\\",
+  \\"_id\\": \\"foo\\",
+  \\"_score\\": 1,
+  \\"_source\\": {
+    \\"test\\": 123
+  }
+}"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -31,6 +31,12 @@ export const SEVERITY_COLORS = {
   BLANK: '#ffffff',
 };
 
+export const ANOMALY_RESULT_TYPE = {
+  BUCKET: 'bucket',
+  RECORD: 'record',
+  INFLUENCER: 'influencer',
+} as const;
+
 export const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
 export const JOB_ID = 'job_id';
 export const PARTITION_FIELD_VALUE = 'partition_field_value';

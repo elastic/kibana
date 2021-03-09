@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import {
+import { KibanaRequest } from 'kibana/server';
+import type {
   CoreSetup,
-  KibanaRequest,
   LifecycleResponseFactory,
   OnPreAuthToolkit,
+  OnPreAuthHandler,
 } from 'kibana/server';
+
 import { LIMITED_CONCURRENCY_ROUTE_TAG } from '../../common';
-import { FleetConfigType } from '../index';
+import type { FleetConfigType } from '../index';
 
 export class MaxCounter {
   constructor(private readonly max: number = 1) {}
@@ -48,7 +50,7 @@ export function createLimitedPreAuthHandler({
 }: {
   isMatch: (request: KibanaRequest) => boolean;
   maxCounter: IMaxCounter;
-}) {
+}): OnPreAuthHandler {
   return function preAuthHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,

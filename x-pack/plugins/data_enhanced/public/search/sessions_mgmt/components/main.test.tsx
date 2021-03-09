@@ -13,14 +13,17 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SessionsConfigSchema } from '..';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper, mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { managementPluginMock } from '../../../../../../../src/plugins/management/public/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
+let mockPluginsSetup: IManagementSectionsPluginsSetup;
 let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 let api: SearchSessionsMgmtAPI;
@@ -29,6 +32,10 @@ describe('Background Search Session Management Main', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockPluginsSetup = {
+      data: dataPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
+    };
     mockConfig = {
       defaultExpiration: moment.duration('7d'),
       management: {
@@ -67,6 +74,7 @@ describe('Background Search Session Management Main', () => {
           <LocaleWrapper>
             <SearchSessionsMgmtMain
               core={mockCoreStart}
+              plugins={mockPluginsSetup}
               api={api}
               http={mockCoreSetup.http}
               timezone="UTC"

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
 
 interface Props {
@@ -16,10 +17,10 @@ interface Props {
   }>;
 }
 export const AnalyticsCards: React.FC<Props> = ({ stats }) => (
-  <EuiFlexGroup>
+  <EuiFlexGroup direction="column">
     {stats.map(({ text, stat, dataTestSubj }) => (
       <EuiFlexItem key={text}>
-        <EuiPanel>
+        <EuiPanel color="subdued" hasShadow={false}>
           <EuiStat
             title={stat}
             description={text}

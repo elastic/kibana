@@ -9,8 +9,8 @@ import { UIM_CLUSTER_ADD, UIM_CLUSTER_UPDATE } from '../constants';
 import { trackUserRequest } from './ui_metric';
 import { sendGet, sendPost, sendPut, sendDelete } from './http';
 
-export async function loadClusters() {
-  return await sendGet();
+export async function loadClusters(options) {
+  return await sendGet(undefined, options);
 }
 
 export async function addCluster(cluster) {

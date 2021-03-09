@@ -20,6 +20,10 @@ export default function ({ getService, getPageObjects }) {
 
     it('allows to register links into the context menu', async () => {
       await dashboardPanelActions.openContextMenu();
+      const actionExists = await testSubjects.exists('embeddablePanelAction-samplePanelLink');
+      if (!actionExists) {
+        await dashboardPanelActions.clickContextMenuMoreItem();
+      }
       const actionElement = await testSubjects.find('embeddablePanelAction-samplePanelLink');
       const actionElementTag = await actionElement.getTagName();
       expect(actionElementTag).to.be('a');

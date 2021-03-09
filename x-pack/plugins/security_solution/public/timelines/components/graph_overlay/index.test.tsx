@@ -15,7 +15,6 @@ import {
 } from '../../../common/containers/use_full_screen';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-
 import { GraphOverlay } from '.';
 
 jest.mock('../../../common/hooks/use_selector', () => ({
@@ -27,6 +26,10 @@ jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
   useTimelineFullScreen: jest.fn(),
 }));
+
+jest.mock('../../../resolver/view/use_resolver_query_params_cleaner');
+jest.mock('../../../resolver/view/use_state_syncing_actions');
+jest.mock('../../../resolver/view/use_sync_selected_node');
 
 describe('GraphOverlay', () => {
   beforeEach(() => {
@@ -42,12 +45,11 @@ describe('GraphOverlay', () => {
 
   describe('when used in an events viewer (i.e. in the Detections view, or the Host > Events view)', () => {
     const isEventViewer = true;
-    const timelineId = 'used-as-an-events-viewer';
 
     test('it has 100% width when isEventViewer is true and NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
+          <GraphOverlay timelineId={TimelineId.test} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
@@ -69,7 +71,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
+          <GraphOverlay timelineId={TimelineId.test} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 

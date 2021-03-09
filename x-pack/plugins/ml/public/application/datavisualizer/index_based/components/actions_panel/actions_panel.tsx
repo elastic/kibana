@@ -9,24 +9,15 @@ import React, { FC, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiIcon,
-} from '@elastic/eui';
-import { Link } from 'react-router-dom';
-import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { EuiSpacer, EuiTitle, EuiFlexGroup } from '@elastic/eui';
+import { LinkCard } from '../../../../components/link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGeneratorState,
 } from '../../../../../../../../../src/plugins/discover/public';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlKibana, useMlLink } from '../../../../contexts/kibana';
 import { isFullLicense } from '../../../../license';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
@@ -44,6 +35,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
   const [discoverLink, setDiscoverLink] = useState('');
   const {
     services: {
+      application: { capabilities },
       share: {
         urlGenerators: { getUrlGenerator },
       },
@@ -57,18 +49,29 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       setRecognizerResultsCount(recognizerResults.count);
     },
   };
-  const showCreateJob =
-    isFullLicense() &&
-    checkPermission('canCreateJob') &&
-    mlNodesAvailable() &&
-    indexPattern.timeFieldName !== undefined;
-  const createJobLink = `/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB}/advanced?index=${indexPattern.id}`;
+  const mlAvailable = isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
+  const showCreateAnomalyDetectionJob = mlAvailable && indexPattern.timeFieldName !== undefined;
+
+  const createJobLink = useMlLink({
+    page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED,
+    pageState: { index: indexPattern.id },
+  });
+
+  const createDataFrameAnalyticsLink = useMlLink({
+    page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
+    pageState: { index: indexPattern.id },
+  });
 
   useEffect(() => {
     let unmounted = false;
 
     const indexPatternId = indexPattern.id;
     const getDiscoverUrl = async (): Promise<void> => {
+      const isDiscoverAvailable = capabilities.discover?.show ?? false;
+      if (!isDiscoverAvailable) {
+        return;
+      }
+
       const state: DiscoverUrlGeneratorState = {
         indexPatternId,
       };
@@ -95,6 +98,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
         setDiscoverLink(discoverUrl);
       }
     };
+
     getDiscoverUrl();
     return () => {
       unmounted = true;
@@ -106,61 +110,72 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
   // controls whether the recognizer section is ultimately displayed.
   return (
     <div data-test-subj="mlDataVisualizerActionsPanel">
-      {showCreateJob && (
+      {mlAvailable && (
         <>
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
                 id="xpack.ml.datavisualizer.actionsPanel.createJobTitle"
-                defaultMessage="Create Job"
+                defaultMessage="Create job"
               />
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <div hidden={recognizerResultsCount === 0}>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.datavisualizer.actionsPanel.selectKnownConfigurationDescription"
-                  defaultMessage="Select known configurations for recognized data:"
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="l" responsive={true} wrap={true}>
-              <DataRecognizer
-                indexPattern={indexPattern}
-                savedSearch={null}
-                results={recognizerResults}
+          {showCreateAnomalyDetectionJob && (
+            <>
+              <div hidden={recognizerResultsCount === 0}>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup gutterSize="l" responsive={true} wrap={true}>
+                  <DataRecognizer
+                    indexPattern={indexPattern}
+                    savedSearch={null}
+                    results={recognizerResults}
+                  />
+                </EuiFlexGroup>
+                <EuiSpacer size="l" />
+              </div>
+              <EuiSpacer size="m" />
+              <LinkCard
+                href={createJobLink}
+                icon="createAdvancedJob"
+                title={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedTitle', {
+                  defaultMessage: 'Advanced anomaly detection',
+                })}
+                description={i18n.translate(
+                  'xpack.ml.datavisualizer.actionsPanel.advancedDescription',
+                  {
+                    defaultMessage:
+                      'Create a job with the full range of options for more advanced use cases.',
+                  }
+                )}
+                data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
               />
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-          </div>
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.actionsPanel.createJobDescription"
-                defaultMessage="Use the Advanced job wizard to create a job to find anomalies in this data:"
-              />
-            </p>
-          </EuiText>
+              <EuiSpacer size="m" />
+            </>
+          )}
+        </>
+      )}
+      {mlAvailable && indexPattern.id !== undefined && createDataFrameAnalyticsLink && (
+        <>
           <EuiSpacer size="m" />
-          <Link to={createJobLink}>
-            <CreateJobLinkCard
-              icon="createAdvancedJob"
-              title={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedTitle', {
-                defaultMessage: 'Advanced',
-              })}
-              description={i18n.translate(
-                'xpack.ml.datavisualizer.actionsPanel.advancedDescription',
-                {
-                  defaultMessage:
-                    'Use the full range of options to create a job for more advanced use cases',
-                }
-              )}
-              data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
-            />
-          </Link>
+          <LinkCard
+            href={createDataFrameAnalyticsLink}
+            icon="classificationJob"
+            description={i18n.translate(
+              'xpack.ml.datavisualizer.actionsPanel.dataframeTypesDescription',
+              {
+                defaultMessage:
+                  'Create outlier detection, regression, or classification analytics.',
+              }
+            )}
+            title={
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.actionsPanel.dataframeAnalyticsTitle"
+                defaultMessage="Data frame analytics"
+              />
+            }
+            data-test-subj="mlDataVisualizerCreateDataFrameAnalyticsCard"
+          />
           <EuiSpacer size="m" />
         </>
       )}
@@ -171,30 +186,28 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
             <h2>
               <FormattedMessage
                 id="xpack.ml.datavisualizer.actionsPanel.exploreTitle"
-                defaultMessage="Explore"
+                defaultMessage="Explore your data"
               />
             </h2>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiFlexItem>
-            <EuiCard
-              data-test-subj="mlDataVisualizerViewInDiscoverCard"
-              icon={<EuiIcon size="xxl" type={`discoverApp`} />}
-              description={i18n.translate(
-                'xpack.ml.datavisualizer.actionsPanel.viewIndexInDiscoverDescription',
-                {
-                  defaultMessage: 'Explore index in Discover',
-                }
-              )}
-              title={
-                <FormattedMessage
-                  id="xpack.ml.datavisualizer.actionsPanel.discoverAppTitle"
-                  defaultMessage="Discover"
-                />
+          <LinkCard
+            href={discoverLink}
+            icon="discoverApp"
+            description={i18n.translate(
+              'xpack.ml.datavisualizer.actionsPanel.viewIndexInDiscoverDescription',
+              {
+                defaultMessage: 'Explore the documents in your index.',
               }
-              href={discoverLink}
-            />
-          </EuiFlexItem>
+            )}
+            title={
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.actionsPanel.discoverAppTitle"
+                defaultMessage="Discover"
+              />
+            }
+            data-test-subj="mlDataVisualizerViewInDiscoverCard"
+          />
         </>
       )}
     </div>

@@ -17,7 +17,7 @@ describe('alertType', () => {
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.es-query');
-    expect(alertType.name).toBe('ES query');
+    expect(alertType.name).toBe('Elasticsearch query');
     expect(alertType.actionGroups).toEqual([{ id: 'query matched', name: 'Query matched' }]);
 
     expect(alertType.actionVariables).toMatchInlineSnapshot(`
@@ -54,8 +54,12 @@ describe('alertType', () => {
             "name": "index",
           },
           Object {
-            "description": "The string representation of the ES query.",
+            "description": "The string representation of the Elasticsearch query.",
             "name": "esQuery",
+          },
+          Object {
+            "description": "The number of hits to retrieve for each query.",
+            "name": "size",
           },
           Object {
             "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
@@ -75,6 +79,7 @@ describe('alertType', () => {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
       thresholdComparator: '<',
@@ -92,6 +97,7 @@ describe('alertType', () => {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
       thresholdComparator: 'between',

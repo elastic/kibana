@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApiToken } from '../credentials/types';
 import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/types';
+import { ApiToken } from '../credentials/types';
 
 export interface Engine {
   name: string;

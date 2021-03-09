@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './entries';
 export * from './highlights';
 export * from './summary';
 export * from './summary_highlights';

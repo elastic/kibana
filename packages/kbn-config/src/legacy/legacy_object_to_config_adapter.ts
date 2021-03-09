@@ -44,7 +44,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     const loggingConfig = {
       appenders: {
         ...appenders,
-        default: { kind: 'legacy-appender', legacyLoggingConfig },
+        default: { type: 'legacy-appender', legacyLoggingConfig },
       },
       root: { level: 'info', ...root },
       loggers,

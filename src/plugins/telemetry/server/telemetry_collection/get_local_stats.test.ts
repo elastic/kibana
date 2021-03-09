@@ -15,6 +15,7 @@ import {
   createCollectorFetchContextMock,
 } from '../../../usage_collection/server/mocks';
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { StatsCollectionConfig } from '../../../telemetry_collection_manager/server';
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -34,24 +35,21 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   esClient.cluster.stats
     // @ts-expect-error we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
-  esClient.nodes.usage.mockResolvedValue({
+  esClient.nodes.usage.mockResolvedValue(
     // @ts-expect-error we only care about the response body
-    body: {
-      cluster_name: 'testCluster',
-      nodes: {
-        some_node_id: {
-          timestamp: 1588617023177,
-          since: 1588616945163,
-          rest_actions: {
-            nodes_usage_action: 1,
-            create_index_action: 1,
-            document_get_action: 1,
-            search_action: 19,
-            nodes_info_action: 36,
-          },
-          aggregations: {
-            terms: {
-              bytes: 2,
+    {
+      body: {
+        cluster_name: 'testCluster',
+        nodes: {
+          some_node_id: {
+            timestamp: 1588617023177,
+            since: 1588616945163,
+            rest_actions: {
+              nodes_usage_action: 1,
+              create_index_action: 1,
+              document_get_action: 1,
+              search_action: 19,
+              nodes_info_action: 36,
             },
             scripted_metric: {
               other: 7,
@@ -59,8 +57,8 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
           },
         },
       },
-    },
-  });
+    }
+  );
   // @ts-expect-error we only care about the response body
   esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
   // @ts-expect-error we only care about the response body
@@ -68,13 +66,16 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   return esClient;
 }
 
-function mockStatsCollectionConfig(clusterInfo: any, clusterStats: any, kibana: {}) {
+function mockStatsCollectionConfig(
+  clusterInfo: any,
+  clusterStats: any,
+  kibana: {}
+): StatsCollectionConfig {
   return {
     ...createCollectorFetchContextMock(),
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
     kibanaRequest: httpServerMock.createKibanaRequest(),
-    timestamp: Date.now(),
   };
 }
 
@@ -226,7 +227,7 @@ describe('get_local_stats', () => {
       const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
       const response = await getLocalStats(
         [{ clusterUuid: 'abc123' }],
-        { ...statsCollectionConfig },
+        statsCollectionConfig,
         context
       );
       const result = response[0];
@@ -242,7 +243,7 @@ describe('get_local_stats', () => {
 
     it('returns an empty array when no cluster uuid is provided', async () => {
       const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
-      const response = await getLocalStats([], { ...statsCollectionConfig }, context);
+      const response = await getLocalStats([], statsCollectionConfig, context);
       expect(response).toBeDefined();
       expect(response.length).toEqual(0);
     });

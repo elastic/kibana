@@ -19,10 +19,14 @@ export interface TagAttributes {
   color: string;
 }
 
+export interface GetAllTagsOptions {
+  asSystemRequest?: boolean;
+}
+
 export interface ITagsClient {
   create(attributes: TagAttributes): Promise<Tag>;
   get(id: string): Promise<Tag>;
-  getAll(): Promise<Tag[]>;
+  getAll(options?: GetAllTagsOptions): Promise<Tag[]>;
   delete(id: string): Promise<void>;
   update(id: string, attributes: TagAttributes): Promise<Tag>;
 }

@@ -28,6 +28,7 @@ import {
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
+import { PresentationUtilPluginStart } from './services/presentation_util';
 import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
@@ -61,6 +62,7 @@ import {
   UnlinkFromLibraryAction,
   AddToLibraryAction,
   LibraryNotificationAction,
+  CopyToDashboardAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -74,6 +76,7 @@ import { UrlGeneratorState } from '../../share/public';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { replaceUrlHashQuery } from '../../kibana_utils/public';
+import { SpacesOssPluginStart } from './services/spaces';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -109,7 +112,9 @@ export interface DashboardStartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  spacesOss?: SpacesOssPluginStart;
 }
 
 export type DashboardSetup = void;
@@ -337,8 +342,8 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications } = core;
-    const { uiActions, data, share } = plugins;
+    const { notifications, overlays } = core;
+    const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
@@ -376,6 +381,18 @@ export class DashboardPlugin
       const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
+
+      const copyToDashboardAction = new CopyToDashboardAction(
+        overlays,
+        embeddable.getStateTransfer(),
+        {
+          canCreateNew: Boolean(core.application.capabilities.dashboard.createNew),
+          canEditExisting: !Boolean(core.application.capabilities.dashboard.hideWriteControls),
+        },
+        presentationUtil.ContextProvider
+      );
+      uiActions.registerAction(copyToDashboardAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
     }
 
     const savedDashboardLoader = createSavedDashboardLoader({

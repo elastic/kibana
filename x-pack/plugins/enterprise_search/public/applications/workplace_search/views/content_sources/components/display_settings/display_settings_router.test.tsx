@@ -10,12 +10,11 @@ import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues } from '../../../../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { Route, Switch } from 'react-router-dom';
 
-import { DisplaySettings } from './display_settings';
+import { shallow } from 'enzyme';
 
+import { DisplaySettings } from './display_settings';
 import { DisplaySettingsRouter } from './display_settings_router';
 
 describe('DisplaySettingsRouter', () => {

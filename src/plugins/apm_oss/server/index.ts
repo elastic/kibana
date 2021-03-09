@@ -21,6 +21,7 @@ export const config = {
     sourcemapIndices: schema.string({ defaultValue: 'apm-*' }),
     onboardingIndices: schema.string({ defaultValue: 'apm-*' }),
     indexPattern: schema.string({ defaultValue: 'apm-*' }),
+    fleetMode: schema.boolean({ defaultValue: true }),
   }),
 };
 
@@ -46,4 +47,5 @@ export {
   createGoAgentInstructions,
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
+  createPhpAgentInstructions,
 } from './tutorial/instructions/apm_agent_instructions';

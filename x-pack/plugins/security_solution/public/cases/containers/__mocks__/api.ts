@@ -25,16 +25,12 @@ import {
   caseUserActions,
   pushedCase,
   respReporters,
-  serviceConnector,
   tags,
 } from '../mock';
 import {
-  CaseExternalServiceRequest,
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
-  ServiceConnectorCaseParams,
-  ServiceConnectorCaseResponse,
   User,
   CaseStatuses,
 } from '../../../../../case/common/api';
@@ -110,15 +106,9 @@ export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promi
 
 export const pushCase = async (
   caseId: string,
-  push: CaseExternalServiceRequest,
+  connectorId: string,
   signal: AbortSignal
 ): Promise<Case> => Promise.resolve(pushedCase);
-
-export const pushToService = async (
-  connectorId: string,
-  casePushParams: ServiceConnectorCaseParams,
-  signal: AbortSignal
-): Promise<ServiceConnectorCaseResponse> => Promise.resolve(serviceConnector);
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> =>
   Promise.resolve(actionLicenses);

@@ -19,7 +19,7 @@ import {
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
 import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
-import { getHighLevelStats, ClustersHighLevelStats } from './get_high_level_stats';
+import { getLogstashStats, LogstashStatsByClusterUuid } from './get_logstash_stats';
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
@@ -38,7 +38,7 @@ export async function getAllStats(
   const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
     getKibanaStats(callCluster, clusterUuids, start, end, maxBucketSize), // stack_stats.kibana
-    getHighLevelStats(callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID, maxBucketSize), // stack_stats.logstash
+    getLogstashStats(callCluster, clusterUuids), // stack_stats.logstash
     getBeatsStats(callCluster, clusterUuids, start, end), // stack_stats.beats
   ]);
 
@@ -63,7 +63,7 @@ export function handleAllStats(
     beats,
   }: {
     kibana: KibanaStats;
-    logstash: ClustersHighLevelStats;
+    logstash: LogstashStatsByClusterUuid;
     beats: BeatsStatsByClusterUuid;
   }
 ) {

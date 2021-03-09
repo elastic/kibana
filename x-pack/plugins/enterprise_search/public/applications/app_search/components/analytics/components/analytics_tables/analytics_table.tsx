@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { Query } from '../../types';
+
 import {
   TERM_COLUMN_PROPS,
-  TAGS_COLUMN,
+  TAGS_LIST_COLUMN,
+  TAGS_COUNT_COLUMN,
   COUNT_COLUMN_PROPS,
   ACTIONS_COLUMN,
 } from './shared_columns';
@@ -20,14 +23,17 @@ import {
 interface Props {
   items: Query[];
   hasClicks?: boolean;
+  isSmall?: boolean;
 }
 type Columns = Array<EuiBasicTableColumn<Query>>;
 
-export const AnalyticsTable: React.FC<Props> = ({ items, hasClicks }) => {
+export const AnalyticsTable: React.FC<Props> = ({ items, hasClicks, isSmall }) => {
   const TERM_COLUMN = {
     field: 'key',
     ...TERM_COLUMN_PROPS,
   };
+
+  const TAGS_COLUMN = isSmall ? TAGS_COUNT_COLUMN : TAGS_LIST_COLUMN;
 
   const COUNT_COLUMNS = [
     {

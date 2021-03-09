@@ -8,7 +8,9 @@
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFlyoutFooter, EuiButtonEmpty } from '@elastic/eui';
 
 import { CredentialsFlyoutFooter } from './footer';

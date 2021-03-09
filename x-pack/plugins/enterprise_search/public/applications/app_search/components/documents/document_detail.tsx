@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect } from 'react';
-import { useActions, useValues } from 'kea';
 import { useParams } from 'react-router-dom';
+
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
@@ -21,15 +22,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../shared/loading';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { Loading } from '../../../shared/loading';
 import { useDecodedParams } from '../../utils/encode_path_params';
 import { ResultFieldValue } from '../result';
 
+import { DOCUMENTS_TITLE } from './constants';
 import { DocumentDetailLogic } from './document_detail_logic';
 import { FieldDetails } from './types';
-import { DOCUMENTS_TITLE } from './constants';
 
 const DOCUMENT_DETAIL_TITLE = (documentId: string) =>
   i18n.translate('xpack.enterpriseSearch.appSearch.documentDetail.title', {

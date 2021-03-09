@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
-import { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions } from './saved_objects';
+import type { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+} from './saved_objects';
 
-function createEncryptedSavedObjectsSetupMock() {
+function createEncryptedSavedObjectsSetupMock(
+  { canEncrypt }: { canEncrypt: boolean } = { canEncrypt: false }
+) {
   return {
     registerType: jest.fn(),
     __legacyCompat: { registerLegacyAPI: jest.fn() },
-    usingEphemeralEncryptionKey: true,
+    canEncrypt,
     createMigration: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsPluginSetup>;
 }

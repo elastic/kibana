@@ -11,7 +11,7 @@ import { GetFieldsResponse } from '../../../common/api';
 import { ConfigureFields } from '../types';
 import { createDefaultMapping, formatFields } from './utils';
 
-export const getFields = () => async ({
+export const getFields = async ({
   actionsClient,
   connectorType,
   connectorId,

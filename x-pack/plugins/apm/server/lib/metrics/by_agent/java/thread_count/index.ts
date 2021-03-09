@@ -7,6 +7,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_JAVA_THREAD_COUNT,
   AGENT_NAME,
@@ -41,23 +42,31 @@ const chartBase: ChartBase = {
 };
 
 export async function getThreadCountChart({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  return fetchAndTransformMetrics({
-    setup,
-    serviceName,
-    serviceNodeName,
-    chartBase,
-    aggs: {
-      threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
-      threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
-    },
-    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
-  });
+  return withApmSpan('get_thread_count_charts', () =>
+    fetchAndTransformMetrics({
+      environment,
+      kuery,
+      setup,
+      serviceName,
+      serviceNodeName,
+      chartBase,
+      aggs: {
+        threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
+        threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
+      },
+      additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
+    })
+  );
 }

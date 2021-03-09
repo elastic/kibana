@@ -21,8 +21,8 @@ import {
 
 import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { SourceDataItem } from '../../../../types';
 import { getSourcesPath } from '../../../../routes';
+import { SourceDataItem } from '../../../../types';
 
 import {
   CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,

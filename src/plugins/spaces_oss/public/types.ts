@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SpacesApi } from './api';
+import type { SpacesApi } from './api';
 
-interface SpacesAvailableStartContract extends SpacesApi {
+export interface SpacesAvailableStartContract extends SpacesApi {
   isSpacesAvailable: true;
 }
 
-interface SpacesUnavailableStartContract {
+export interface SpacesUnavailableStartContract {
   isSpacesAvailable: false;
 }
 

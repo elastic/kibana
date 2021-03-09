@@ -15,6 +15,7 @@ import { RowRendererId } from '../../../../../../../common/types/timeline';
 import { DnsRequestEventDetails } from '../dns/dns_request_event_details';
 import { EndgameSecurityEventDetails } from '../endgame/endgame_security_event_details';
 import { isFileEvent, isNillEmptyOrNotFinite } from '../helpers';
+import { RegistryEventDetails } from '../registry/registry_event_details';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
 
 import { SystemGenericDetails } from './generic_details';
@@ -107,6 +108,86 @@ export const createFimRowRenderer = ({
         browserFields={browserFields}
         data={data}
         contextId={`fim-${actionName}-${timelineId}`}
+        showMessage={false}
+        text={text}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
+  ),
+});
+
+export interface EndpointAlertCriteria {
+  eventAction: string;
+  eventCategory: string;
+  eventType: string;
+  skipRedundantFileDetails?: boolean;
+  skipRedundantProcessDetails?: boolean;
+  text: string;
+}
+
+export const createEndpointAlertsRowRenderer = ({
+  eventAction,
+  eventCategory,
+  eventType,
+  skipRedundantFileDetails = false,
+  skipRedundantProcessDetails = false,
+  text,
+}: EndpointAlertCriteria): RowRenderer => ({
+  id: RowRendererId.alerts,
+  isInstance: (ecs) => {
+    const action: string[] | null | undefined = get('event.action', ecs);
+    const category: string[] | null | undefined = get('event.category', ecs);
+    const dataset: string | null | undefined = get('event.dataset[0]', ecs);
+    const type: string[] | null | undefined = get('event.type', ecs);
+
+    const eventActionMatches = action?.includes(eventAction) ?? false;
+    const eventCategoryMatches = category?.includes(eventCategory) ?? false;
+    const eventTypeMatches = type?.includes(eventType) ?? false;
+
+    return (
+      dataset?.toLowerCase() === 'endpoint.alerts' &&
+      eventTypeMatches &&
+      eventCategoryMatches &&
+      eventActionMatches
+    );
+  },
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <SystemGenericFileDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`endpoint-alerts-row-renderer-${eventAction}-${eventCategory}-${eventType}-${timelineId}`}
+        showMessage={false}
+        skipRedundantFileDetails={skipRedundantFileDetails}
+        skipRedundantProcessDetails={skipRedundantProcessDetails}
+        text={text}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
+  ),
+});
+
+export const createEndpointLibraryRowRenderer = ({
+  actionName,
+  text,
+}: {
+  actionName: string;
+  text: string;
+}): RowRenderer => ({
+  id: RowRendererId.library,
+  isInstance: (ecs) => {
+    const action: string | null | undefined = get('event.action[0]', ecs);
+    const dataset: string | null | undefined = get('event.dataset[0]', ecs);
+    return (
+      dataset?.toLowerCase() === 'endpoint.events.library' && action?.toLowerCase() === actionName
+    );
+  },
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <SystemGenericFileDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`library-row-renderer-${actionName}-${timelineId}`}
         showMessage={false}
         text={text}
         timelineId={timelineId}
@@ -218,6 +299,34 @@ export const createDnsRowRenderer = (): RowRenderer => ({
   ),
 });
 
+export const createEndpointRegistryRowRenderer = ({
+  actionName,
+  text,
+}: {
+  actionName: string;
+  text: string;
+}): RowRenderer => ({
+  id: RowRendererId.registry,
+  isInstance: (ecs) => {
+    const action: string | null | undefined = get('event.action[0]', ecs);
+    const dataset: string | null | undefined = get('event.dataset[0]', ecs);
+
+    return (
+      dataset?.toLowerCase() === 'endpoint.events.registry' && action?.toLowerCase() === actionName
+    );
+  },
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <RegistryEventDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`registry-event-${timelineId}`}
+        text={text}
+      />
+    </RowRendererContainer>
+  ),
+});
+
 const systemLoginRowRenderer = createGenericSystemRowRenderer({
   actionName: 'user_login',
   text: i18n.ATTEMPTED_LOGIN,
@@ -236,6 +345,11 @@ const endgameProcessStartedRowRenderer = createEndgameProcessRowRenderer({
 const endpointProcessStartRowRenderer = createEndgameProcessRowRenderer({
   actionName: 'start',
   text: i18n.PROCESS_STARTED,
+});
+
+const endpointRegistryModificationRowRenderer = createEndpointRegistryRowRenderer({
+  actionName: 'modification',
+  text: i18n.MODIFIED_REGISTRY_KEY,
 });
 
 const systemProcessStoppedRowRenderer = createGenericFileRowRenderer({
@@ -278,6 +392,21 @@ const endpointFileDeletionEventRowRenderer = createFimRowRenderer({
   text: i18n.DELETED_FILE,
 });
 
+const endpointModificationEventRowRenderer = createFimRowRenderer({
+  actionName: 'modification',
+  text: i18n.MODIFIED_FILE,
+});
+
+const endpointFileOverwriteEventRowRenderer = createFimRowRenderer({
+  actionName: 'overwrite',
+  text: i18n.OVERWROTE_FILE,
+});
+
+const endpointFileRenamedEventRowRenderer = createFimRowRenderer({
+  actionName: 'rename',
+  text: i18n.RENAMED_FILE,
+});
+
 const fimFileDeletedEventRowRenderer = createFimRowRenderer({
   actionName: 'deleted',
   text: i18n.DELETED_FILE,
@@ -286,6 +415,88 @@ const fimFileDeletedEventRowRenderer = createFimRowRenderer({
 const systemExistingRowRenderer = createGenericFileRowRenderer({
   actionName: 'existing_process',
   text: i18n.EXISTING_PROCESS,
+});
+
+const endpointAlertCriteria: EndpointAlertCriteria[] = [
+  {
+    eventAction: 'creation',
+    eventCategory: 'file',
+    eventType: 'denied',
+    skipRedundantProcessDetails: true,
+    text: i18n.WAS_PREVENTED_FROM_CREATING_A_MALICIOUS_FILE,
+  },
+  {
+    eventAction: 'creation',
+    eventCategory: 'file',
+    eventType: 'allowed',
+    skipRedundantProcessDetails: true,
+    text: i18n.WAS_DETECTED_CREATING_A_MALICIOUS_FILE,
+  },
+  {
+    eventAction: 'files-encrypted',
+    eventCategory: 'file',
+    eventType: 'denied',
+    skipRedundantFileDetails: true,
+    text: i18n.RANSOMWARE_WAS_PREVENTED_FROM_ENCRYPTING_FILES,
+  },
+  {
+    eventAction: 'files-encrypted',
+    eventCategory: 'file',
+    eventType: 'allowed',
+    skipRedundantFileDetails: true,
+    text: i18n.RANSOMWARE_WAS_DETECTED_ENCRYPTING_FILES,
+  },
+  {
+    eventAction: 'modification',
+    eventCategory: 'file',
+    eventType: 'denied',
+    skipRedundantProcessDetails: true,
+    text: i18n.WAS_PREVENTED_FROM_MODIFYING_A_MALICIOUS_FILE,
+  },
+  {
+    eventAction: 'modification',
+    eventCategory: 'file',
+    eventType: 'allowed',
+    skipRedundantProcessDetails: true,
+    text: i18n.WAS_DETECTED_MODIFYING_A_MALICIOUS_FILE,
+  },
+  {
+    eventAction: 'rename',
+    eventCategory: 'file',
+    eventType: 'denied',
+    skipRedundantProcessDetails: true,
+    text: i18n.WAS_PREVENTED_FROM_RENAMING_A_MALICIOUS_FILE,
+  },
+  {
+    eventAction: 'rename',
+    eventCategory: 'file',
+    eventType: 'allowed',
+    skipRedundantProcessDetails: true,
+    text: i18n.WAS_DETECTED_RENAMING_A_MALICIOUS_FILE,
+  },
+  {
+    eventAction: 'execution',
+    eventCategory: 'process',
+    eventType: 'denied',
+    skipRedundantFileDetails: true,
+    text: i18n.WAS_PREVENTED_FROM_EXECUTING_A_MALICIOUS_PROCESS,
+  },
+  {
+    eventAction: 'execution',
+    eventCategory: 'process',
+    eventType: 'allowed',
+    skipRedundantFileDetails: true,
+    text: i18n.WAS_DETECTED_EXECUTING_A_MALICIOUS_PROCESS,
+  },
+];
+
+const endpointAlertsRowRenderers: RowRenderer[] = endpointAlertCriteria.map((criteria) =>
+  createEndpointAlertsRowRenderer(criteria)
+);
+
+const endpointLibraryLoadRowRenderer = createEndpointLibraryRowRenderer({
+  actionName: 'load',
+  text: i18n.LOADED_LIBRARY,
 });
 
 const systemSocketOpenedRowRenderer = createSocketRowRenderer({
@@ -306,6 +517,21 @@ const endgameIpv4ConnectionAcceptEventRowRenderer = createSocketRowRenderer({
 const endpointConnectionAcceptedEventRowRenderer = createSocketRowRenderer({
   actionName: 'connection_accepted',
   text: i18n.ACCEPTED_A_CONNECTION_VIA,
+});
+
+const endpointHttpRequestEventRowRenderer = createSocketRowRenderer({
+  actionName: 'http_request',
+  text: i18n.MADE_A_HTTP_REQUEST_VIA,
+});
+
+const endpointProcessExecRowRenderer = createEndgameProcessRowRenderer({
+  actionName: 'exec',
+  text: i18n.EXECUTED_PROCESS,
+});
+
+const endpointProcessForkRowRenderer = createEndgameProcessRowRenderer({
+  actionName: 'fork',
+  text: i18n.FORKED_PROCESS,
 });
 
 const endgameIpv6ConnectionAcceptEventRowRenderer = createSocketRowRenderer({
@@ -448,8 +674,17 @@ export const systemRowRenderers: RowRenderer[] = [
   endpointFileCreationEventRowRenderer,
   endgameFileDeleteEventRowRenderer,
   endpointFileDeletionEventRowRenderer,
+  endpointFileOverwriteEventRowRenderer,
+  endpointFileRenamedEventRowRenderer,
+  ...endpointAlertsRowRenderers,
+  endpointLibraryLoadRowRenderer,
+  endpointModificationEventRowRenderer,
+  endpointRegistryModificationRowRenderer,
   endgameIpv4ConnectionAcceptEventRowRenderer,
   endpointConnectionAcceptedEventRowRenderer,
+  endpointHttpRequestEventRowRenderer,
+  endpointProcessExecRowRenderer,
+  endpointProcessForkRowRenderer,
   endgameIpv6ConnectionAcceptEventRowRenderer,
   endgameIpv4DisconnectReceivedEventRowRenderer,
   endpointDisconnectReceivedEventRowRenderer,

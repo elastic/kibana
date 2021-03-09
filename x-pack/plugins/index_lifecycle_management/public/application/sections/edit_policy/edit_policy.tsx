@@ -142,10 +142,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                 <h1>
                   {isNewPolicy
                     ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                        defaultMessage: 'Create Policy',
+                        defaultMessage: 'Create policy',
                       })
                     : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                        defaultMessage: 'Edit Policy {originalPolicyName}',
+                        defaultMessage: 'Edit policy {originalPolicyName}',
                         values: { originalPolicyName },
                       })}
                 </h1>
@@ -259,32 +259,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
-                  {isShowingPolicyJsonFlyout ? (
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
-                      defaultMessage="Hide request"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
-                      defaultMessage="Show request"
-                    />
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
                 <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       data-test-subj="savePolicyButton"
@@ -307,7 +282,32 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                       )}
                     </EuiButton>
                   </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
+                  {isShowingPolicyJsonFlyout ? (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
+                      defaultMessage="Hide request"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
+                      defaultMessage="Show request"
+                    />
+                  )}
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
 

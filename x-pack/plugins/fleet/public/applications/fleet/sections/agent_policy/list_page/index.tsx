@@ -23,6 +23,7 @@ import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
+
 import { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
@@ -38,6 +39,7 @@ import {
 } from '../../../hooks';
 import { LinkAndRevision, SearchBar } from '../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
+
 import { CreateAgentPolicyFlyout } from './components';
 
 const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (

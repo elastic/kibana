@@ -21,6 +21,5 @@ export const capabilitiesServiceFactory: CapabilitiesServiceFactory = ({ coreSta
   return {
     canAccessDashboards: () => Boolean(dashboard.show),
     canCreateNewDashboards: () => Boolean(dashboard.createNew),
-    canEditDashboards: () => !Boolean(dashboard.hideWriteControls),
   };
 };

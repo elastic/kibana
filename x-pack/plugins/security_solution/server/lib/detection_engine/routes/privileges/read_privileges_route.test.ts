@@ -18,7 +18,7 @@ describe('read_privileges route', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getMockPrivilegesResult());
-    readPrivilegesRoute(server.router, false);
+    readPrivilegesRoute(server.router, true);
   });
 
   describe('normal status codes', () => {

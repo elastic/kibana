@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies files written or modified in the startup folder by unsigned processes. Adversaries may abuse this technique to maintain persistence in an environment.",
+  "from": "now-9m",
   "index": [
     "logs-endpoint.events.*"
   ],
@@ -45,5 +46,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

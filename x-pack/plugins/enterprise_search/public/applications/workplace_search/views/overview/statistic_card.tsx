@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+
 import { EuiCard, EuiFlexItem, EuiTitle, EuiTextColor } from '@elastic/eui';
 
-import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { EuiCardTo } from '../../../shared/react_router_helpers';
 
 interface StatisticCardProps {
   title: string;
@@ -17,28 +18,31 @@ interface StatisticCardProps {
 }
 
 export const StatisticCard: React.FC<StatisticCardProps> = ({ title, count = 0, actionPath }) => {
-  const linkProps = actionPath
-    ? {
-        href: getWorkplaceSearchUrl(actionPath),
-        target: '_blank',
-        rel: 'noopener',
+  const linkableCard = (
+    <EuiCardTo
+      to={actionPath || ''}
+      layout="horizontal"
+      title={title}
+      titleSize="xs"
+      description={
+        <EuiTitle size="l">
+          <EuiTextColor color="default">{count}</EuiTextColor>
+        </EuiTitle>
       }
-    : {};
-  // TODO: When we port this destination to Kibana, we'll want to create a EuiReactRouterCard component (see shared/react_router_helpers/eui_link.tsx)
-
-  return (
-    <EuiFlexItem>
-      <EuiCard
-        {...linkProps}
-        layout="horizontal"
-        title={title}
-        titleSize="xs"
-        description={
-          <EuiTitle size="l">
-            <EuiTextColor color={actionPath ? 'default' : 'subdued'}>{count}</EuiTextColor>
-          </EuiTitle>
-        }
-      />
-    </EuiFlexItem>
+    />
   );
+  const card = (
+    <EuiCard
+      layout="horizontal"
+      title={title}
+      titleSize="xs"
+      description={
+        <EuiTitle size="l">
+          <EuiTextColor color="subdued">{count}</EuiTextColor>
+        </EuiTitle>
+      }
+    />
+  );
+
+  return <EuiFlexItem>{actionPath ? linkableCard : card}</EuiFlexItem>;
 };

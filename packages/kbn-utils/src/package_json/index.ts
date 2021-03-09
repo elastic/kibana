@@ -9,7 +9,7 @@
 import { dirname, resolve } from 'path';
 import { REPO_ROOT } from '../repo_root';
 
-export const kibanaPackageJSON = {
+export const kibanaPackageJson = {
   __filename: resolve(REPO_ROOT, 'package.json'),
   __dirname: dirname(resolve(REPO_ROOT, 'package.json')),
   ...require(resolve(REPO_ROOT, 'package.json')),

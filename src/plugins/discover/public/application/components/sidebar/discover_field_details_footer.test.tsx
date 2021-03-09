@@ -9,7 +9,7 @@
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+import stubbedLogstashFields from '../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';

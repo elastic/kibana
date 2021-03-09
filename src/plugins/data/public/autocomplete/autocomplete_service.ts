@@ -16,6 +16,8 @@ import {
 } from './providers/value_suggestion_provider';
 
 import { ConfigSchema } from '../../config';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { createUsageCollector } from './collectors';
 
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];
@@ -47,9 +49,17 @@ export class AutocompleteService {
   private hasQuerySuggestions = (language: string) => this.querySuggestionProviders.has(language);
 
   /** @public **/
-  public setup(core: CoreSetup, { timefilter }: { timefilter: TimefilterSetup }) {
+  public setup(
+    core: CoreSetup,
+    {
+      timefilter,
+      usageCollection,
+    }: { timefilter: TimefilterSetup; usageCollection?: UsageCollectionSetup }
+  ) {
+    const usageCollector = createUsageCollector(core.getStartServices, usageCollection);
+
     this.getValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
-      ? setupValueSuggestionProvider(core, { timefilter })
+      ? setupValueSuggestionProvider(core, { timefilter, usageCollector })
       : getEmptyValueSuggestions;
 
     return {

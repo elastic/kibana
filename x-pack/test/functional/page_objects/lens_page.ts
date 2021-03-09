@@ -17,7 +17,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize', 'dashboard']);
+
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'timePicker',
+    'common',
+    'visualize',
+    'dashboard',
+    'timeToVisualize',
+  ]);
 
   return logWrapper('lensPage', log, {
     /**
@@ -341,16 +350,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title: string,
       saveAsNew?: boolean,
       redirectToOrigin?: boolean,
-      addToDashboard?: boolean,
+      addToDashboard?: 'new' | 'existing' | null,
       dashboardId?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
 
-      await PageObjects.visualize.setSaveModalValues(title, {
+      await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
         redirectToOrigin,
-        addToDashboard,
+        addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
       });
 
@@ -410,19 +419,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
      * lnsDatatable or bar_stacked
      */
-    async switchToVisualization(subVisualizationId: string) {
+    async switchToVisualization(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async openChartSwitchPopover() {
-      if (await testSubjects.exists('visTypeTitle')) {
+      if (await testSubjects.exists('lnsChartSwitchList')) {
         return;
       }
       await retry.try(async () => {
         await testSubjects.click('lnsChartSwitchPopover');
-        await testSubjects.existOrFail('visTypeTitle');
+        await testSubjects.existOrFail('lnsChartSwitchList');
       });
     },
 
@@ -443,17 +453,28 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return errors?.length ?? 0;
     },
 
+    async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
+      // Because the new chart switcher is now a virtualized list, the process needs some help
+      // So either pass a search string or pick the last 3 letters from the id (3 because pie
+      // is the smallest chart name) and use them to search
+      const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
+      return await testSubjects.setValue('lnsChartSwitchSearch', queryTerm, {
+        clearWithKeyboard: true,
+      });
+    },
+
     /**
      * Checks a specific subvisualization in the chart switcher for a "data loss" indicator
      *
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
      * lnsDatatable or bar_stacked
      */
-    async hasChartSwitchWarning(subVisualizationId: string) {
+    async hasChartSwitchWarning(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
       const element = await testSubjects.find(`lnsChartSwitchPopover_${subVisualizationId}`);
-      return await find.descendantExistsByCssSelector(
-        '.euiKeyPadMenuItem__betaBadgeWrapper',
+      return await testSubjects.descendantExists(
+        `lnsChartSwitchPopoverAlert_${subVisualizationId}`,
         element
       );
     },
@@ -613,7 +634,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'asc' | 'desc') {
+    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
       await el.click();
       let buttonEl;
@@ -706,6 +727,50 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       } else {
         await this.saveAndReturn();
       }
+    },
+
+    /**
+     * Asserts that the focused element is a field with a specified text
+     *
+     * @param name - the element visible text
+     */
+    async assertFocusedField(name: string) {
+      const input = await find.activeElement();
+      const fieldAncestor = await input.findByXpath('./../../..');
+      const focusedElementText = await fieldAncestor.getVisibleText();
+      const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
+      expect(focusedElementText).to.eql(name);
+      expect(dataTestSubj).to.eql('lnsFieldListPanelField');
+    },
+
+    /**
+     * Asserts that the focused element is a dimension with with a specified text
+     *
+     * @param name - the element visible text
+     */
+    async assertFocusedDimension(name: string) {
+      const input = await find.activeElement();
+      const fieldAncestor = await input.findByXpath('./../../..');
+      const focusedElementText = await fieldAncestor.getVisibleText();
+      expect(focusedElementText).to.eql(name);
+    },
+
+    async waitForVisualization() {
+      async function getRenderingCount() {
+        const visualizationContainer = await testSubjects.find('lnsVisualizationContainer');
+        const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
+        return Number(renderingCount);
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('rendering count to stabilize', async () => {
+        const firstCount = await getRenderingCount();
+
+        await PageObjects.common.sleep(1000);
+
+        const secondCount = await getRenderingCount();
+
+        return firstCount === secondCount;
+      });
     },
   });
 }

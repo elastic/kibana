@@ -42,18 +42,12 @@ export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framew
         );
       }
 
-      try {
-        const results = await getVisData(
-          requestContext,
-          request as KibanaRequest<{}, {}, GetVisDataOptions>,
-          framework
-        );
-        return response.ok({ body: results });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      const results = await getVisData(
+        requestContext,
+        request as KibanaRequest<{}, {}, GetVisDataOptions>,
+        framework
+      );
+      return response.ok({ body: results });
     }
   );
 };

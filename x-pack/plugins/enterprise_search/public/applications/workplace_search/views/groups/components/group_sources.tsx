@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { MAX_TABLE_ROW_ICONS } from '../../../constants';
-
 import { ContentSource } from '../../../types';
 
 import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';

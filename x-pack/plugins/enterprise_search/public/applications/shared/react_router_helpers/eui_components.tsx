@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
+
 import {
   EuiLink,
   EuiButton,
@@ -20,8 +22,9 @@ import {
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { KibanaLogic } from '../kibana';
 import { HttpLogic } from '../http';
+import { KibanaLogic } from '../kibana';
+
 import { letBrowserHandleEvent, createHref } from './';
 
 /**

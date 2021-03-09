@@ -131,6 +131,10 @@ export const REOPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.
   defaultMessage: 'Reopen case',
 });
 
+export const OPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.openCase', {
+  defaultMessage: 'Open case',
+});
+
 export const CASE_NAME = i18n.translate('xpack.securitySolution.case.caseView.caseName', {
   defaultMessage: 'Case name',
 });
@@ -288,5 +292,12 @@ export const ALERT_ADDED_TO_CASE = i18n.translate(
   'xpack.securitySolution.common.alertAddedToCase',
   {
     defaultMessage: 'added to case',
+  }
+);
+
+export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
+  'xpack.securitySolution.common.allCases.table.selectableMessageCollections',
+  {
+    defaultMessage: 'Cases with sub-cases cannot be selected',
   }
 );

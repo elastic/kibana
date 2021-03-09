@@ -99,6 +99,13 @@ describe('DiscoverFieldSearch', () => {
     expect(badge.text()).toEqual('0');
   });
 
+  test('missing switch appears with new fields api', () => {
+    const component = mountComponent({ ...defaultProps, useNewFieldsApi: true });
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    btn.simulate('click');
+    expect(findTestSubject(component, 'missingSwitch').exists()).toBeTruthy();
+  });
+
   test('change in filters triggers onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
@@ -135,23 +142,5 @@ describe('DiscoverFieldSearch', () => {
     btn.simulate('click');
     popover = component.find(EuiPopover);
     expect(popover.prop('isOpen')).toBe(false);
-  });
-
-  test('unmapped fields', () => {
-    const onChangeUnmappedFields = jest.fn();
-    const componentProps = {
-      ...defaultProps,
-      showUnmappedFields: true,
-      useNewFieldsApi: false,
-      onChangeUnmappedFields,
-    };
-    const component = mountComponent(componentProps);
-    const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    btn.simulate('click');
-    const unmappedFieldsSwitch = findTestSubject(component, 'unmappedFieldsSwitch');
-    act(() => {
-      unmappedFieldsSwitch.simulate('click');
-    });
-    expect(onChangeUnmappedFields).toHaveBeenCalledWith(false);
   });
 });

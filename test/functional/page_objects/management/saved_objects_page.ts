@@ -315,6 +315,18 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         })
       );
     }
+
+    async getImportErrorsCount() {
+      log.debug(`Toggling overwriteAll`);
+      const errorCountNode = await testSubjects.find('importSavedObjectsErrorsCount');
+      const errorCountText = await errorCountNode.getVisibleText();
+      const match = errorCountText.match(/(\d)+/);
+      if (!match) {
+        throw Error(`unable to parse error count from text ${errorCountText}`);
+      }
+
+      return +match[1];
+    }
   }
 
   return new SavedObjectsPage();

@@ -8,11 +8,13 @@
 import { setMockValues, rerender } from '../../__mocks__';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiIcon } from '@elastic/eui';
 
-import { SetupInstructions } from './instructions';
 import { CloudSetupInstructions } from './cloud/instructions';
+import { SetupInstructions } from './instructions';
 
 import { SetupGuideLayout } from './';
 

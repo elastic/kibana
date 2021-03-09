@@ -410,7 +410,18 @@ describe('ElasticIndex', () => {
       expect(await read()).toEqual([]);
 
       expect(client.search).toHaveBeenCalledWith({
-        body: { size: 100 },
+        body: {
+          size: 100,
+          query: {
+            bool: {
+              must_not: {
+                term: {
+                  type: 'fleet-agent-events',
+                },
+              },
+            },
+          },
+        },
         index,
         scroll: '5m',
       });

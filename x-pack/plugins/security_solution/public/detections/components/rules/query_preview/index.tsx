@@ -56,7 +56,16 @@ export const initialState: State = {
   showNonEqlHistogram: false,
 };
 
-export type Threshold = { field: string | undefined; value: number } | undefined;
+export type Threshold =
+  | {
+      field: string | string[] | undefined;
+      value: number;
+      cardinality?: {
+        field: string[];
+        value: number;
+      };
+    }
+  | undefined;
 
 interface PreviewQueryProps {
   dataTestSubj: string;

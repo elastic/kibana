@@ -8,13 +8,14 @@
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiFieldSearch, EuiFilterSelectItem, EuiCard, EuiPopoverTitle } from '@elastic/eui';
 
-import { FilterableUsersList } from './filterable_users_list';
-
 import { User } from '../../../types';
+
+import { FilterableUsersList } from './filterable_users_list';
 
 const mockSetState = jest.fn();
 const useStateMock: any = (initState: any) => [initState, mockSetState];

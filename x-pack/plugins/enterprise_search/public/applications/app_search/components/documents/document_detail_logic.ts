@@ -6,11 +6,12 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
-import { KibanaLogic } from '../../../shared/kibana';
 import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import { ENGINE_DOCUMENTS_PATH } from '../../routes';
 import { EngineLogic, generateEnginePath } from '../engine';

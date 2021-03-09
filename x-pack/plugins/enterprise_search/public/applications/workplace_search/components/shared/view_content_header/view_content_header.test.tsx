@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFlexGroup } from '@elastic/eui';
 
 import { ViewContentHeader } from './';

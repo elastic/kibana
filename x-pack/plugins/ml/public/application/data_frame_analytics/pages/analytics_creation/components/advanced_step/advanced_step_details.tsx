@@ -131,20 +131,6 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
   }
 
   if (isRegOrClassJob) {
-    if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
-      advancedFirstCol.push({
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {
-          defaultMessage: 'Top classes',
-        }),
-        description:
-          numTopClasses === -1
-            ? i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.allClasses', {
-                defaultMessage: 'All classes',
-              })
-            : getStringValue(numTopClasses),
-      });
-    }
-
     advancedFirstCol.push({
       title: i18n.translate(
         'xpack.ml.dataframe.analytics.create.configDetails.numTopFeatureImportanceValues',
@@ -170,15 +156,23 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       }
     );
 
-    advancedSecondCol.push({
-      title: i18n.translate(
-        'xpack.ml.dataframe.analytics.create.configDetails.predictionFieldName',
-        {
-          defaultMessage: 'Prediction field name',
-        }
-      ),
-      description: predictionFieldName ? predictionFieldName : `${dependentVariable}_prediction`,
-    });
+    advancedSecondCol.push(
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.configDetails.predictionFieldName',
+          {
+            defaultMessage: 'Prediction field name',
+          }
+        ),
+        description: predictionFieldName ? predictionFieldName : `${dependentVariable}_prediction`,
+      },
+      {
+        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.randomizedSeed', {
+          defaultMessage: 'Randomized seed',
+        }),
+        description: getStringValue(randomizeSeed),
+      }
+    );
 
     hyperSecondCol.push(
       {
@@ -205,20 +199,26 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       description: `${modelMemoryLimit}`,
     });
 
-    hyperThirdCol.push(
-      {
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.gamma', {
-          defaultMessage: 'Gamma',
-        }),
-        description: getStringValue(gamma),
-      },
-      {
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.randomizedSeed', {
-          defaultMessage: 'Randomized seed',
-        }),
-        description: getStringValue(randomizeSeed),
-      }
-    );
+    hyperThirdCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.gamma', {
+        defaultMessage: 'Gamma',
+      }),
+      description: getStringValue(gamma),
+    });
+  }
+
+  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
+    advancedThirdCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {
+        defaultMessage: 'Top classes',
+      }),
+      description:
+        numTopClasses === -1
+          ? i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.allClasses', {
+              defaultMessage: 'All classes',
+            })
+          : getStringValue(numTopClasses),
+    });
   }
 
   if (maxNumThreads !== undefined) {

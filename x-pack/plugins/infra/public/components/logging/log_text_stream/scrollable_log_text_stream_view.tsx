@@ -39,7 +39,7 @@ interface ScrollableLogTextStreamViewProps {
   hasMoreBeforeStart: boolean;
   hasMoreAfterEnd: boolean;
   isStreaming: boolean;
-  lastLoadedTime: Date | null;
+  lastLoadedTime?: Date;
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
   reportVisibleInterval: (params: {
@@ -50,7 +50,6 @@ interface ScrollableLogTextStreamViewProps {
     endKey: TimeKey | null;
     fromScroll: boolean;
   }) => any;
-  loadNewerItems: () => void;
   reloadItems: () => void;
   onOpenLogEntryFlyout?: (logEntryId?: string) => void;
   setContextEntry?: (entry: LogEntry) => void;

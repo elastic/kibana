@@ -17,9 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const uptimeService = getService('uptime');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/90555
-  describe.skip('uptime', () => {
+  describe('uptime', () => {
     before(async () => {
       await esArchiver.load('uptime/blank');
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
@@ -60,7 +60,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('overview alert popover controls', async () => {
       await uptimeService.overview.openAlertsPopover();
+      await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
+    });
+
+    it('overview alert popover controls nested content', async () => {
       await uptimeService.overview.navigateToNestedPopover();
       await a11y.testAppSnapshot();
     });

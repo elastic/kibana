@@ -17,9 +17,12 @@ import { SortOrder } from '../../saved_searches/types';
 
 describe('updateSearchSource', () => {
   test('updates a given search source', async () => {
-    const searchSourceMock = createSearchSourceMock({});
+    const persistentSearchSourceMock = createSearchSourceMock({});
+    const volatileSearchSourceMock = createSearchSourceMock({});
     const sampleSize = 250;
-    const result = updateSearchSource(searchSourceMock, {
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -36,15 +39,18 @@ describe('updateSearchSource', () => {
       columns: [],
       useNewFieldsApi: false,
     });
-    expect(result.getField('index')).toEqual(indexPatternMock);
-    expect(result.getField('size')).toEqual(sampleSize);
-    expect(result.getField('fields')).toBe(undefined);
+    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
+    expect(volatileSearchSourceMock.getField('fields')).toBe(undefined);
   });
 
   test('updates a given search source with the usage of the new fields api', async () => {
-    const searchSourceMock = createSearchSourceMock({});
+    const persistentSearchSourceMock = createSearchSourceMock({});
+    const volatileSearchSourceMock = createSearchSourceMock({});
     const sampleSize = 250;
-    const result = updateSearchSource(searchSourceMock, {
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -61,16 +67,19 @@ describe('updateSearchSource', () => {
       columns: [],
       useNewFieldsApi: true,
     });
-    expect(result.getField('index')).toEqual(indexPatternMock);
-    expect(result.getField('size')).toEqual(sampleSize);
-    expect(result.getField('fields')).toEqual([{ field: '*' }]);
-    expect(result.getField('fieldsFromSource')).toBe(undefined);
+    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
+    expect(volatileSearchSourceMock.getField('fields')).toEqual([{ field: '*' }]);
+    expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });
 
   test('requests unmapped fields when the flag is provided, using the new fields api', async () => {
-    const searchSourceMock = createSearchSourceMock({});
+    const persistentSearchSourceMock = createSearchSourceMock({});
+    const volatileSearchSourceMock = createSearchSourceMock({});
     const sampleSize = 250;
-    const result = updateSearchSource(searchSourceMock, {
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -88,16 +97,21 @@ describe('updateSearchSource', () => {
       useNewFieldsApi: true,
       showUnmappedFields: true,
     });
-    expect(result.getField('index')).toEqual(indexPatternMock);
-    expect(result.getField('size')).toEqual(sampleSize);
-    expect(result.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
-    expect(result.getField('fieldsFromSource')).toBe(undefined);
+    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
+    expect(volatileSearchSourceMock.getField('fields')).toEqual([
+      { field: '*', include_unmapped: 'true' },
+    ]);
+    expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });
 
   test('updates a given search source when showUnmappedFields option is set to true', async () => {
-    const searchSourceMock = createSearchSourceMock({});
+    const persistentSearchSourceMock = createSearchSourceMock({});
+    const volatileSearchSourceMock = createSearchSourceMock({});
     const sampleSize = 250;
-    const result = updateSearchSource(searchSourceMock, {
+    updateSearchSource({
+      persistentSearchSource: persistentSearchSourceMock,
+      volatileSearchSource: volatileSearchSourceMock,
       indexPattern: indexPatternMock,
       services: ({
         data: dataPluginMock.createStartContract(),
@@ -115,9 +129,11 @@ describe('updateSearchSource', () => {
       useNewFieldsApi: true,
       showUnmappedFields: true,
     });
-    expect(result.getField('index')).toEqual(indexPatternMock);
-    expect(result.getField('size')).toEqual(sampleSize);
-    expect(result.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
-    expect(result.getField('fieldsFromSource')).toBe(undefined);
+    expect(persistentSearchSourceMock.getField('index')).toEqual(indexPatternMock);
+    expect(volatileSearchSourceMock.getField('size')).toEqual(sampleSize);
+    expect(volatileSearchSourceMock.getField('fields')).toEqual([
+      { field: '*', include_unmapped: 'true' },
+    ]);
+    expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });
 });

@@ -162,7 +162,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-
+      meta: {
+        keywords: [
+          'RUM',
+          'Real User Monitoring',
+          'DEM',
+          'Digital Experience Monitoring',
+          'EUM',
+          'End User Monitoring',
+          'UX',
+          'Javascript',
+          'APM',
+          'Mobile',
+          'digital',
+          'performance',
+          'web performance',
+          'web perf',
+        ],
+      },
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([

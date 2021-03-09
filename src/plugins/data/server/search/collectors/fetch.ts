@@ -10,14 +10,14 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { Usage } from './register';
 
+import { CollectedUsage, ReportedUsage } from './register';
 interface SearchTelemetry {
-  'search-telemetry': Usage;
+  'search-telemetry': CollectedUsage;
 }
 
 export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
-  return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
+  return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
     const config = await config$.pipe(first()).toPromise();
     const { body: esResponse } = await esClient.search<SearchTelemetry>(
       {
@@ -36,7 +36,10 @@ export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
         averageDuration: null,
       };
     }
-    // Safe to use ! since we checked the hits.length above
-    return esResponse.hits.hits[0]._source?.['search-telemetry']!;
+    const { successCount, errorCount, totalDuration } = esResponse.hits.hits[0]._source[
+      'search-telemetry'
+    ];
+    const averageDuration = totalDuration / successCount;
+    return { successCount, errorCount, averageDuration };
   };
 }

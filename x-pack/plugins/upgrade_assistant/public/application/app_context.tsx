@@ -19,6 +19,7 @@ export interface ContextValue {
   isCloudEnabled: boolean;
   docLinks: DocLinksStart;
   kibanaVersionInfo: KibanaVersionContext;
+  isReadOnlyMode: boolean;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

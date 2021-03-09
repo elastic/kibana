@@ -6,28 +6,34 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
-import { Logger, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import { SecurityPluginSetup } from '../../security/server';
-import { createConfig, ConfigSchema } from './config';
+
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+
+import type { SecurityPluginSetup } from '../../security/server';
+import { EncryptedSavedObjectsAuditLogger } from './audit';
+import type { ConfigType } from './config';
+import type { CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
+import { getCreateMigration } from './create_migration';
+import type { EncryptedSavedObjectTypeRegistration } from './crypto';
 import {
   EncryptedSavedObjectsService,
-  EncryptedSavedObjectTypeRegistration,
   EncryptionError,
   EncryptionKeyRotationService,
 } from './crypto';
-import { EncryptedSavedObjectsAuditLogger } from './audit';
-import { setupSavedObjects, ClientInstanciator } from './saved_objects';
-import { getCreateMigration, CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 import { defineRoutes } from './routes';
+import type { ClientInstanciator } from './saved_objects';
+import { setupSavedObjects } from './saved_objects';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
 }
 
 export interface EncryptedSavedObjectsPluginSetup {
+  /**
+   * Indicates if Saved Object encryption is possible. Requires an encryption key to be explicitly set via `xpack.encryptedSavedObjects.encryptionKey`.
+   */
+  canEncrypt: boolean;
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
-  usingEphemeralEncryptionKey: boolean;
   createMigration: CreateEncryptedSavedObjectsMigrationFn;
 }
 
@@ -50,19 +56,24 @@ export class EncryptedSavedObjectsPlugin
   }
 
   public setup(core: CoreSetup, deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
-    const config = createConfig(
-      this.initializerContext.config.get<TypeOf<typeof ConfigSchema>>(),
-      this.initializerContext.logger.get('config')
+    const config = this.initializerContext.config.get<ConfigType>();
+    const canEncrypt = config.encryptionKey !== undefined;
+    if (!canEncrypt) {
+      this.logger.warn(
+        'Saved objects encryption key is not set. This will severely limit Kibana functionality. ' +
+          'Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+      );
+    }
+
+    const primaryCrypto = config.encryptionKey
+      ? nodeCrypto({ encryptionKey: config.encryptionKey })
+      : undefined;
+    const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
+      nodeCrypto({ encryptionKey: decryptionKey })
     );
     const auditLogger = new EncryptedSavedObjectsAuditLogger(
       deps.security?.audit.getLogger('encryptedSavedObjects')
     );
-
-    const primaryCrypto = nodeCrypto({ encryptionKey: config.encryptionKey });
-    const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
-      nodeCrypto({ encryptionKey: decryptionKey })
-    );
-
     const service = Object.freeze(
       new EncryptedSavedObjectsService({
         primaryCrypto,
@@ -94,9 +105,9 @@ export class EncryptedSavedObjectsPlugin
     });
 
     return {
+      canEncrypt,
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
-      usingEphemeralEncryptionKey: config.usingEphemeralEncryptionKey,
       createMigration: getCreateMigration(
         service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {

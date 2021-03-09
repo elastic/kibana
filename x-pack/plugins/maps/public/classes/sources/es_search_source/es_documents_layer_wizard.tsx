@@ -13,7 +13,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 // @ts-ignore
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer } from '../../layers/blended_vector_layer/blended_vector_layer';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../common/constants';
 import { TiledVectorLayer } from '../../layers/tiled_vector_layer/tiled_vector_layer';
 import { DocumentsLayerIcon } from '../../layers/icons/documents_layer_icon';

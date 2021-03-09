@@ -193,6 +193,23 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  threatIndicatorPath: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
+      {
+        defaultMessage: 'Indicator prefix override',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
+      {
+        defaultMessage:
+          'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   timestampOverride: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(

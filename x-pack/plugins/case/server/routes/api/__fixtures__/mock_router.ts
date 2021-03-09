@@ -19,14 +19,10 @@ export const createRoute = async (
   const router = httpService.createRouter();
 
   const log = loggingSystemMock.create().get('case');
-
-  const caseServicePlugin = new CaseService(log);
+  const auth = badAuth ? authenticationMock.createInvalid() : authenticationMock.create();
+  const caseService = new CaseService(log, auth);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
   const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
-
-  const caseService = await caseServicePlugin.setup({
-    authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
-  });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
 
@@ -39,6 +35,7 @@ export const createRoute = async (
       postUserActions: jest.fn(),
       getUserActions: jest.fn(),
     },
+    logger: log,
   });
 
   return router[method].mock.calls[0][1];

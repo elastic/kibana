@@ -119,6 +119,7 @@ const rule: SanitizedAlert<RuleTypeParams> = {
     threshold: undefined,
     threatFilters: undefined,
     threatIndex: undefined,
+    threatIndicatorPath: undefined,
     threatQuery: undefined,
     threatMapping: undefined,
     threatLanguage: undefined,

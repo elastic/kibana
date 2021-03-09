@@ -49,11 +49,16 @@ function makeDefaultServices(): DashboardAppServices {
       hits,
     });
   };
+  const dashboardPanelStorage = ({
+    getDashboardIdsWithUnsavedChanges: jest
+      .fn()
+      .mockResolvedValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
+  } as unknown) as DashboardPanelStorage;
+
   return {
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
     dashboardCapabilities: {} as DashboardCapabilities,
-    dashboardPanelStorage: {} as DashboardPanelStorage,
     initializerContext: {} as PluginInitializerContext,
     chrome: chromeServiceMock.createStartContract(),
     navigation: {} as NavigationPublicPluginStart,
@@ -68,6 +73,7 @@ function makeDefaultServices(): DashboardAppServices {
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
     allowByValueEmbeddables: true,
+    dashboardPanelStorage,
     savedDashboards,
     core,
   };

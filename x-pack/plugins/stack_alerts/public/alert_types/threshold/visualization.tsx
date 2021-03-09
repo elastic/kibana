@@ -202,6 +202,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   if (loadingState === LoadingStateType.FirstLoad) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="firstLoad"
         title={<EuiLoadingChart size="xl" />}
         body={
           <EuiText color="subdued">
@@ -220,6 +221,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="l" />
         <EuiCallOut
+          data-test-subj="errorCallout"
           title={
             <FormattedMessage
               id="xpack.stackAlerts.threshold.ui.visualization.errorLoadingAlertVisualizationTitle"
@@ -309,6 +311,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           </Chart>
         ) : (
           <EuiCallOut
+            data-test-subj="noDataCallout"
             size="s"
             title={
               <FormattedMessage

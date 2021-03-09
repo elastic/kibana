@@ -9,7 +9,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
@@ -19,27 +18,84 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { OverlayStart } from '../../../../../core/public';
-import { createConfirmStrings, leaveConfirmStrings } from '../../dashboard_strings';
+import {
+  createConfirmStrings,
+  discardConfirmStrings,
+  leaveEditModeConfirmStrings,
+} from '../../dashboard_strings';
 import { toMountPoint } from '../../services/kibana_react';
 
-export const confirmDiscardUnsavedChanges = (
-  overlays: OverlayStart,
-  discardCallback: () => void,
-  cancelButtonText = leaveConfirmStrings.getCancelButtonText()
-) =>
+export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
+
+export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
   overlays
-    .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
-      confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
-      cancelButtonText,
+    .openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
+      confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
+      cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
       buttonColor: 'danger',
       defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-      title: leaveConfirmStrings.getDiscardTitle(),
+      title: discardConfirmStrings.getDiscardTitle(),
     })
     .then((isConfirmed) => {
       if (isConfirmed) {
         discardCallback();
       }
     });
+
+export const confirmDiscardOrKeepUnsavedChanges = (
+  overlays: OverlayStart
+): Promise<DiscardOrKeepSelection> => {
+  return new Promise((resolve) => {
+    const session = overlays.openModal(
+      toMountPoint(
+        <>
+          <EuiModalHeader data-test-subj="dashboardDiscardConfirm">
+            <EuiModalHeaderTitle>
+              {leaveEditModeConfirmStrings.getLeaveEditModeTitle()}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            <EuiText>{leaveEditModeConfirmStrings.getLeaveEditModeSubtitle()}</EuiText>
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              data-test-subj="dashboardDiscardConfirmCancel"
+              onClick={() => session.close()}
+            >
+              {leaveEditModeConfirmStrings.getLeaveEditModeCancelButtonText()}
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              color="danger"
+              data-test-subj="dashboardDiscardConfirmDiscard"
+              onClick={() => {
+                session.close();
+                resolve('discard');
+              }}
+            >
+              {leaveEditModeConfirmStrings.getLeaveEditModeDiscardButtonText()}
+            </EuiButtonEmpty>
+            <EuiButton
+              fill
+              data-test-subj="dashboardDiscardConfirmKeep"
+              onClick={() => {
+                session.close();
+                resolve('keep');
+              }}
+            >
+              {leaveEditModeConfirmStrings.getLeaveEditModeKeepChangesText()}
+            </EuiButton>
+          </EuiModalFooter>
+        </>
+      ),
+      {
+        'data-test-subj': 'dashboardDiscardConfirmModal',
+        maxWidth: 550,
+      }
+    );
+  });
+};
 
 export const confirmCreateWithUnsaved = (
   overlays: OverlayStart,
@@ -48,7 +104,7 @@ export const confirmCreateWithUnsaved = (
 ) => {
   const session = overlays.openModal(
     toMountPoint(
-      <EuiModal onClose={() => session.close()}>
+      <>
         <EuiModalHeader data-test-subj="dashboardCreateConfirm">
           <EuiModalHeaderTitle>{createConfirmStrings.getCreateTitle()}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -85,7 +141,7 @@ export const confirmCreateWithUnsaved = (
             {createConfirmStrings.getContinueButtonText()}
           </EuiButton>
         </EuiModalFooter>
-      </EuiModal>
+      </>
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

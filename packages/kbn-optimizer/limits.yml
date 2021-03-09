@@ -14,7 +14,7 @@ pageLoadAssetSize:
   dashboard: 374194
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 1319839
+  data: 900000
   dataEnhanced: 50420
   devTools: 38637
   discover: 105145
@@ -33,8 +33,8 @@ pageLoadAssetSize:
   home: 41661
   indexLifecycleManagement: 107090
   indexManagement: 140608
-  indexPatternManagement: 154222
-  infra: 204800
+  indexPatternManagement: 28222
+  infra: 184320
   fleet: 415829
   ingestPipelines: 58003
   inputControlVis: 172675
@@ -91,7 +91,7 @@ pageLoadAssetSize:
   visTypeMetric: 42790
   visTypeTable: 94934
   visTypeTagcloud: 37575
-  visTypeTimelion: 51933
+  visTypeTimelion: 68883
   visTypeTimeseries: 155203
   visTypeVega: 153573
   visTypeVislib: 242838
@@ -103,5 +103,7 @@ pageLoadAssetSize:
   stackAlerts: 29684
   presentationUtil: 28545
   spacesOss: 18817
+  indexPatternFieldEditor: 90489
   osquery: 107090
-  mapsFileUpload: 23775
+  fileUpload: 25664
+  banners: 17946

@@ -6,11 +6,12 @@
  */
 
 import { uniq } from 'lodash';
+
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
-import { HasPrivilegesResponse } from './types';
-
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import type { HasPrivilegesResponse } from './types';
 
 const application = 'kibana-our_application';
 
@@ -316,7 +317,7 @@ describe('#atSpace', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [saved_object:bar-type/get]: definition for this key is missing]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
 
@@ -338,7 +339,7 @@ describe('#atSpace', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [saved_object:foo-type/get]: expected value of type [boolean] but got [undefined]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
   });
@@ -1092,7 +1093,7 @@ describe('#atSpaces', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(
-      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [mock-action:version]: expected value of type [boolean] but got [undefined]]`
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
     );
   });
 
@@ -2266,7 +2267,7 @@ describe('#globally', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(
-      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [mock-action:version]: expected value of type [boolean] but got [undefined]]`
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
     );
   });
 
@@ -2384,7 +2385,7 @@ describe('#globally', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [saved_object:bar-type/get]: definition for this key is missing]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
 
@@ -2405,7 +2406,7 @@ describe('#globally', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [saved_object:foo-type/get]: expected value of type [boolean] but got [undefined]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected actions]`
       );
     });
   });

@@ -72,7 +72,7 @@ describe('Connectors', () => {
     const newWrapper = mount(
       <Connectors
         {...props}
-        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.servicenow }}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
         wrappingComponent: TestProviders,
@@ -99,7 +99,7 @@ describe('Connectors', () => {
     const newWrapper = mount(
       <Connectors
         {...props}
-        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.servicenow }}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
         wrappingComponent: TestProviders,

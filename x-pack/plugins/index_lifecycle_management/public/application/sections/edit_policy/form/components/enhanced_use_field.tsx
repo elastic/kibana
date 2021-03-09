@@ -70,5 +70,14 @@ export const EnhancedUseField = <T, F = FormData, I = T>(
     };
   }, []);
 
+  // Make sure to clear error message if the field is unmounted.
+  useEffect(() => {
+    return () => {
+      if (isMounted.current === false) {
+        clearError(phase, path);
+      }
+    };
+  }, [phase, path, clearError]);
+
   return <UseField {...props} onError={onError} />;
 };

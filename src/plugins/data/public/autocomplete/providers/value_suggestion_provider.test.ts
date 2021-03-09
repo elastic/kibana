@@ -18,7 +18,7 @@ describe('FieldSuggestions', () => {
 
   beforeEach(() => {
     const uiSettings = { get: (key: string) => shouldSuggestValues } as IUiSettingsClient;
-    http = { fetch: jest.fn() };
+    http = { fetch: jest.fn().mockResolvedValue([]) };
 
     getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup, {
       timefilter: ({

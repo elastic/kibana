@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   onClick(): void;

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiButtonIcon } from '@elastic/eui';
 
 import { Key } from './key';

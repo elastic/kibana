@@ -26,7 +26,7 @@ const Visible = styled.div<{ show?: boolean }>`
 Visible.displayName = 'Visible';
 
 interface OwnProps {
-  timelineId: string;
+  timelineId: TimelineId;
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
 

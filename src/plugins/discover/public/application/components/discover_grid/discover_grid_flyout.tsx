@@ -81,9 +81,11 @@ export function DiscoverGridFlyout({
               <EuiButtonEmpty
                 size="xs"
                 iconType="document"
-                href={`#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
-                  hit._id as string
-                )}`}
+                href={services.addBasePath(
+                  `#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
+                    hit._id as string
+                  )}`
+                )}
                 data-test-subj="docTableRowAction"
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
@@ -97,10 +99,11 @@ export function DiscoverGridFlyout({
                   size="xs"
                   iconType="documents"
                   href={getContextUrl(
-                    hit._id as string,
+                    hit._id,
                     indexPattern.id,
                     columns,
-                    services.filterManager
+                    services.filterManager,
+                    services.addBasePath
                   )}
                   data-test-subj="docTableRowAction"
                 >

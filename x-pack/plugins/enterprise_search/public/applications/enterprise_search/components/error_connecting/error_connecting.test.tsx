@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
+
 import { ErrorConnecting } from './';
 
 describe('ErrorConnecting', () => {

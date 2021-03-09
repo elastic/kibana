@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { Section } from '../sections';
 import { AlphaMessaging, SettingFlyout } from '../components';
 import { useLink, useConfig } from '../hooks';
@@ -110,7 +111,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                   <EuiFlexItem>
                     <EuiButtonEmpty
                       iconType="popout"
-                      href="https://ela.st/ingest-manager-feedback"
+                      href="https://ela.st/fleet-feedback"
                       target="_blank"
                     >
                       <FormattedMessage

@@ -15,3 +15,32 @@ export const META_ENGINES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngines.title',
   { defaultMessage: 'Meta Engines' }
 );
+
+export const CREATE_AN_ENGINE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.createAnEngineButton.ButtonLabel',
+  {
+    defaultMessage: 'Create an engine',
+  }
+);
+
+export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.createAMetaEngineButton.ButtonLabel',
+  {
+    defaultMessage: 'Create a meta engine',
+  }
+);
+
+export const META_ENGINE_EMPTY_PROMPT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPrompTitle',
+  {
+    defaultMessage: 'No meta engines yet',
+  }
+);
+
+export const META_ENGINE_EMPTY_PROMPT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPromptDescription',
+  {
+    defaultMessage:
+      'Meta engines allow you to combine multiple engines into one searchable engine.',
+  }
+);

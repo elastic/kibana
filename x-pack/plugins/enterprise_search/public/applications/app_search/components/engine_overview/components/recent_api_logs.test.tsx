@@ -8,9 +8,8 @@
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { RecentApiLogs } from './recent_api_logs';
 
@@ -23,8 +22,7 @@ describe('RecentApiLogs', () => {
   });
 
   it('renders the recent API logs table', () => {
-    expect(wrapper.find('h2').text()).toEqual('Recent API events');
-    expect(wrapper.find(EuiButtonTo).prop('to')).toEqual('/engines/some-engine/api-logs');
+    expect(wrapper.prop('title')).toEqual(<h2>Recent API events</h2>);
     // TODO: expect(wrapper.find(ApiLogsTable)).toHaveLength(1)
   });
 });

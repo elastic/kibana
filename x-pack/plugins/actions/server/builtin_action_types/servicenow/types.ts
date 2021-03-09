@@ -121,6 +121,7 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
   params: PushToServiceApiParams;
   secrets: Record<string, unknown>;
   logger: Logger;
+  commentFieldKey: string;
 }
 
 export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {

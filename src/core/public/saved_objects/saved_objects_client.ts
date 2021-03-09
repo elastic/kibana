@@ -21,12 +21,14 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
+type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
+
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+  'pit' | 'rootSearchFields' | 'searchAfter' | 'sortOrder' | 'typeToNamespacesMap'
 >;
 
-type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
+type SavedObjectsFindResponse = Omit<PromiseType<ReturnType<SavedObjectsApi['find']>>, 'pit_id'>;
 
 /** @public */
 export interface SavedObjectsCreateOptions {
@@ -345,10 +347,7 @@ export class SavedObjectsClient {
       query,
     });
     return request.then((resp) => {
-      return renameKeys<
-        PromiseType<ReturnType<SavedObjectsApi['find']>>,
-        SavedObjectsFindResponsePublic
-      >(
+      return renameKeys<SavedObjectsFindResponse, SavedObjectsFindResponsePublic>(
         {
           saved_objects: 'savedObjects',
           total: 'total',

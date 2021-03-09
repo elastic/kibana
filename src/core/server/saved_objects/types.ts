@@ -13,7 +13,7 @@ import { SavedObjectMigrationMap } from './migrations';
 import { SavedObjectsExportTransform } from './export';
 import { SavedObjectsImportHook } from './import/types';
 
-export {
+export type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -32,7 +32,7 @@ import { SavedObject } from '../../types';
 
 type KueryNode = any;
 
-export {
+export type {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
@@ -64,6 +64,14 @@ export interface SavedObjectsFindOptionsReference {
 }
 
 /**
+ * @public
+ */
+export interface SavedObjectsPitParams {
+  id: string;
+  keepAlive?: string;
+}
+
+/**
  *
  * @public
  */
@@ -83,6 +91,10 @@ export interface SavedObjectsFindOptions {
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
+  /**
+   * Use the sort values from the previous page to retrieve the next page of results.
+   */
+  searchAfter?: unknown[];
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
@@ -115,6 +127,10 @@ export interface SavedObjectsFindOptions {
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional ES preference value to be used for the query **/
   preference?: string;
+  /**
+   * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
+   */
+  pit?: SavedObjectsPitParams;
 }
 
 /**
@@ -198,13 +214,17 @@ export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObj
 
 /**
  * The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:
- *  * single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace.
- *  * multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces.
- *  * agnostic: this type of saved object is global.
+ *  * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.
+ *  * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.
+ *  * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be
+ *    unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being
+ *    converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be *share-capable*,
+ *    but will not actually be shareable until the namespace type is changed to "multiple".
+ *  * agnostic: This type of saved object is global.
  *
  * @public
  */
-export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 /**
  * @remarks This is only internal for now, and will only be public when we expose the registerType API
@@ -244,15 +264,17 @@ export interface SavedObjectsType {
    */
   migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
   /**
-   * If defined, objects of this type will be converted to multi-namespace objects when migrating to this version.
+   * If defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this
+   * version.
    *
    * Requirements:
    *
    *  1. This string value must be a valid semver version
    *  2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}
-   *  3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`}
+   *  3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`} *or*
+   *     {@link SavedObjectsNamespaceType | `namespaceType: 'multiple-isolated'`}
    *
-   * Example of a single-namespace type in 7.10:
+   * Example of a single-namespace type in 7.12:
    *
    * ```ts
    * {
@@ -263,7 +285,19 @@ export interface SavedObjectsType {
    * }
    * ```
    *
-   * Example after converting to a multi-namespace type in 7.11:
+   * Example after converting to a multi-namespace (isolated) type in 8.0:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'multiple-isolated',
+   *   mappings: {...},
+   *   convertToMultiNamespaceTypeVersion: '8.0.0'
+   * }
+   * ```
+   *
+   * Example after converting to a multi-namespace (shareable) type in 8.1:
    *
    * ```ts
    * {
@@ -271,11 +305,11 @@ export interface SavedObjectsType {
    *   hidden: false,
    *   namespaceType: 'multiple',
    *   mappings: {...},
-   *   convertToMultiNamespaceTypeVersion: '7.11.0'
+   *   convertToMultiNamespaceTypeVersion: '8.0.0'
    * }
    * ```
    *
-   * Note: a migration function can be optionally specified for the same version.
+   * Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
    */
   convertToMultiNamespaceTypeVersion?: string;
   /**

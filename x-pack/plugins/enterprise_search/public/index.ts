@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
+
 import { EnterpriseSearchPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {

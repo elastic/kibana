@@ -135,7 +135,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       <FormattedMessage
         id="xpack.ingestPipelines.processors.description.dateIndexName"
         defaultMessage="Uses a date or timestamp to add documents to the correct time-based index. Index names must use a date math pattern, such as {value}."
-        values={{ value: <EuiCode inline>{'my-index-yyyy-MM-dd'}</EuiCode> }}
+        values={{ value: <EuiCode>{'my-index-yyyy-MM-dd'}</EuiCode> }}
       />
     ),
   },

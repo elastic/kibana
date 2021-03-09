@@ -16,6 +16,7 @@ import { pluginServices } from '../services';
 export interface DashboardPickerProps {
   onChange: (dashboard: { name: string; id: string } | null) => void;
   isDisabled: boolean;
+  idsToOmit?: string[];
 }
 
 interface DashboardOption {
@@ -49,7 +50,18 @@ export function DashboardPicker(props: DashboardPickerProps) {
       }
 
       if (objects) {
-        setDashboardOptions(objects.map((d) => ({ value: d.id, label: d.attributes.title })));
+        setDashboardOptions(
+          objects
+            .filter((d) => !props.idsToOmit || !props.idsToOmit.includes(d.id))
+            .map((d) => ({
+              value: d.id,
+              label: d.attributes.title,
+              'data-test-subj': `dashboard-picker-option-${d.attributes.title.replaceAll(
+                ' ',
+                '-'
+              )}`,
+            }))
+        );
       }
 
       setIsLoadingDashboards(false);
@@ -60,10 +72,11 @@ export function DashboardPicker(props: DashboardPickerProps) {
     return () => {
       cleanedUp = true;
     };
-  }, [findDashboardsByTitle, query]);
+  }, [findDashboardsByTitle, query, props.idsToOmit]);
 
   return (
     <EuiComboBox
+      data-test-subj="dashboardPickerInput"
       placeholder={i18n.translate('presentationUtil.dashboardPicker.searchDashboardPlaceholder', {
         defaultMessage: 'Search dashboards...',
       })}

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import createContainer from 'constate';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
@@ -31,7 +32,10 @@ interface LogStreamState {
   bottomCursor: LogEntryCursor | null;
   hasMoreBefore: boolean;
   hasMoreAfter: boolean;
+  lastLoadedTime?: Date;
 }
+
+type FetchPageCallback = (params?: { force?: boolean; extendTo?: number }) => void;
 
 const INITIAL_STATE: LogStreamState = {
   entries: [],
@@ -53,6 +57,7 @@ export function useLogStream({
   columns,
 }: LogStreamProps) {
   const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
+  const [resetOnSuccess, setResetOnSuccess] = useState<boolean>(false);
 
   // Ensure the pagination keeps working when the timerange gets extended
   const prevStartTimestamp = usePrevious(startTimestamp);
@@ -104,14 +109,21 @@ export function useLogStream({
   useSubscription(logEntriesAroundSearchResponses$, {
     next: ({ before, after, combined }) => {
       if ((before.response.data != null || after?.response.data != null) && !combined.isPartial) {
-        setState((prevState) => ({
-          ...prevState,
-          entries: combined.entries,
-          hasMoreAfter: combined.hasMoreAfter ?? prevState.hasMoreAfter,
-          hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
-          bottomCursor: combined.bottomCursor,
-          topCursor: combined.topCursor,
-        }));
+        setState((_prevState) => {
+          const prevState = resetOnSuccess ? INITIAL_STATE : _prevState;
+          return {
+            ...(resetOnSuccess ? INITIAL_STATE : prevState),
+            entries: combined.entries,
+            hasMoreAfter: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+            hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+            bottomCursor: combined.bottomCursor,
+            topCursor: combined.topCursor,
+            lastLoadedTime: new Date(),
+          };
+        });
+        if (resetOnSuccess) {
+          setResetOnSuccess(false);
+        }
       }
     },
   });
@@ -125,30 +137,43 @@ export function useLogStream({
   useSubscription(logEntriesBeforeSearchResponse$, {
     next: ({ response: { data, isPartial } }) => {
       if (data != null && !isPartial) {
-        setState((prevState) => ({
-          ...prevState,
-          entries: [...data.entries, ...prevState.entries],
-          hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
-          topCursor: data.topCursor ?? prevState.topCursor,
-          bottomCursor: prevState.bottomCursor ?? data.bottomCursor,
-        }));
+        setState((_prevState) => {
+          const prevState = resetOnSuccess ? INITIAL_STATE : _prevState;
+          return {
+            ...(resetOnSuccess ? INITIAL_STATE : prevState),
+            entries: [...data.entries, ...prevState.entries],
+            hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
+            topCursor: data.topCursor ?? prevState.topCursor,
+            bottomCursor: prevState.bottomCursor ?? data.bottomCursor,
+            lastLoadedTime: new Date(),
+          };
+        });
+        if (resetOnSuccess) {
+          setResetOnSuccess(false);
+        }
       }
     },
   });
 
-  const fetchPreviousEntries = useCallback(() => {
-    if (state.topCursor === null) {
-      throw new Error(
-        'useLogState: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
-      );
-    }
+  const fetchPreviousEntries = useCallback<FetchPageCallback>(
+    (params) => {
+      if (state.topCursor === null) {
+        throw new Error(
+          'useLogStream: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+        );
+      }
 
-    if (!state.hasMoreBefore) {
-      return;
-    }
+      if (!state.hasMoreBefore && !params?.force) {
+        return;
+      }
 
-    fetchLogEntriesBefore(state.topCursor, LOG_ENTRIES_CHUNK_SIZE);
-  }, [fetchLogEntriesBefore, state.topCursor, state.hasMoreBefore]);
+      fetchLogEntriesBefore(state.topCursor, {
+        size: LOG_ENTRIES_CHUNK_SIZE,
+        extendTo: params?.extendTo,
+      });
+    },
+    [fetchLogEntriesBefore, state.topCursor, state.hasMoreBefore]
+  );
 
   const {
     fetchLogEntriesAfter,
@@ -159,30 +184,43 @@ export function useLogStream({
   useSubscription(logEntriesAfterSearchResponse$, {
     next: ({ response: { data, isPartial } }) => {
       if (data != null && !isPartial) {
-        setState((prevState) => ({
-          ...prevState,
-          entries: [...prevState.entries, ...data.entries],
-          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
-          topCursor: prevState.topCursor ?? data.topCursor,
-          bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
-        }));
+        setState((_prevState) => {
+          const prevState = resetOnSuccess ? INITIAL_STATE : _prevState;
+          return {
+            ...(resetOnSuccess ? INITIAL_STATE : prevState),
+            entries: [...prevState.entries, ...data.entries],
+            hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+            topCursor: prevState.topCursor ?? data.topCursor,
+            bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
+            lastLoadedTime: new Date(),
+          };
+        });
+        if (resetOnSuccess) {
+          setResetOnSuccess(false);
+        }
       }
     },
   });
 
-  const fetchNextEntries = useCallback(() => {
-    if (state.bottomCursor === null) {
-      throw new Error(
-        'useLogState: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
-      );
-    }
+  const fetchNextEntries = useCallback<FetchPageCallback>(
+    (params) => {
+      if (state.bottomCursor === null) {
+        throw new Error(
+          'useLogStream: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+        );
+      }
 
-    if (!state.hasMoreAfter) {
-      return;
-    }
+      if (!state.hasMoreAfter && !params?.force) {
+        return;
+      }
 
-    fetchLogEntriesAfter(state.bottomCursor, LOG_ENTRIES_CHUNK_SIZE);
-  }, [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]);
+      fetchLogEntriesAfter(state.bottomCursor, {
+        size: LOG_ENTRIES_CHUNK_SIZE,
+        extendTo: params?.extendTo,
+      });
+    },
+    [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]
+  );
 
   const fetchEntries = useCallback(() => {
     setState(INITIAL_STATE);
@@ -190,9 +228,17 @@ export function useLogStream({
     if (center) {
       fetchLogEntriesAround(center, LOG_ENTRIES_CHUNK_SIZE);
     } else {
-      fetchLogEntriesBefore('last', LOG_ENTRIES_CHUNK_SIZE);
+      fetchLogEntriesBefore('last', { size: LOG_ENTRIES_CHUNK_SIZE });
     }
   }, [center, fetchLogEntriesAround, fetchLogEntriesBefore, setState]);
+
+  // Specialized version of `fetchEntries` for streaming.
+  // - Reset the entries _after_ the network request succeeds.
+  // - Ignores `center`.
+  const fetchNewestEntries = useCallback(() => {
+    setResetOnSuccess(true);
+    fetchLogEntriesBefore('last', { size: LOG_ENTRIES_CHUNK_SIZE });
+  }, [fetchLogEntriesBefore]);
 
   const isReloading = useMemo(
     () =>
@@ -216,7 +262,10 @@ export function useLogStream({
     fetchEntries,
     fetchNextEntries,
     fetchPreviousEntries,
+    fetchNewestEntries,
     isLoadingMore,
     isReloading,
   };
 }
+
+export const [LogStreamProvider, useLogStreamContext] = createContainer(useLogStream);

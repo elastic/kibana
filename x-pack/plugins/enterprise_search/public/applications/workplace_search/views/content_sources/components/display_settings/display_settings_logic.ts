@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import { cloneDeep, isEqual, differenceBy } from 'lodash';
 import { DropResult } from 'react-beautiful-dnd';
 
 import { kea, MakeLogicType } from 'kea';
-
-import { HttpLogic } from '../../../../../shared/http';
+import { cloneDeep, isEqual, differenceBy } from 'lodash';
 
 import {
   setSuccessMessage,
   clearFlashMessages,
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../../../shared/http';
 import { AppLogic } from '../../../../app_logic';
+import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
-import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
 import { LEAVE_UNASSIGNED_FIELD, SUCCESS_MESSAGE } from './constants';
+
 export interface DisplaySettingsResponseProps {
   sourceName: string;
   searchResultConfig: SearchResultConfig;
