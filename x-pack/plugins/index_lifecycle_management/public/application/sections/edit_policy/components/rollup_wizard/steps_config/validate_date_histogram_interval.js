@@ -14,7 +14,7 @@ const {
   parseEsInterval,
 } = search.aggs;
 
-export function validateDateHistogramInterval(dateHistogramInterval) {
+export function validateDateHistogramInterval(dateHistogramInterval, dateHistogramIntervalType) {
   if (!dateHistogramInterval || !dateHistogramInterval.trim()) {
     return [
       <FormattedMessage
@@ -24,41 +24,43 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
     ];
   }
 
-  try {
-    parseEsInterval(dateHistogramInterval);
-  } catch (error) {
-    if (error instanceof InvalidEsIntervalFormatError) {
-      return [
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidFormat"
-          defaultMessage="Invalid interval format."
-        />,
-      ];
-    }
+  if (dateHistogramIntervalType === 'fixed') {
+    try {
+      parseEsInterval(dateHistogramInterval);
+    } catch (error) {
+      if (error instanceof InvalidEsIntervalFormatError) {
+        return [
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidFormat"
+            defaultMessage="Invalid interval format."
+          />,
+        ];
+      }
 
-    if (error instanceof InvalidEsCalendarIntervalError) {
-      const { unit } = error;
-      return [
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidCalendarInterval"
-          defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
-          values={{
-            unit,
-            suggestion: (
-              <strong>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidCalendarIntervalSuggestion"
-                  defaultMessage="1{unit}"
-                  values={{ unit }}
-                />
-              </strong>
-            ),
-          }}
-        />,
-      ];
-    }
+      if (error instanceof InvalidEsCalendarIntervalError) {
+        const { unit } = error;
+        return [
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidCalendarInterval"
+            defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
+            values={{
+              unit,
+              suggestion: (
+                <strong>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.rollup.create.errors.dateHistogramIntervalInvalidCalendarIntervalSuggestion"
+                    defaultMessage="1{unit}"
+                    values={{ unit }}
+                  />
+                </strong>
+              ),
+            }}
+          />,
+        ];
+      }
 
-    throw error;
+      throw error;
+    }
   }
 
   return undefined;

@@ -29,12 +29,66 @@ import {
 import { search } from '../../../../../../../../../../src/plugins/data/public';
 const { parseEsInterval } = search.aggs;
 
+import { CALENDAR_INTERVAL_OPTIONS } from '../constants';
+
 import { StepError } from './components';
 
 const timeZoneOptions = moment.tz.names().map((name) => ({
   value: name,
   text: name,
 }));
+
+const calendarIntervalOptions = [
+  {
+    value: CALENDAR_INTERVAL_OPTIONS.minute,
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalField.minuteOptionLabel',
+      { defaultMessage: 'Every minute' }
+    ),
+  },
+  {
+    value: CALENDAR_INTERVAL_OPTIONS.hour,
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalField.hourOptionLabel',
+      { defaultMessage: 'Every hour' }
+    ),
+  },
+  {
+    value: CALENDAR_INTERVAL_OPTIONS.day,
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalField.dayOptionLabel',
+      { defaultMessage: 'Every day' }
+    ),
+  },
+  {
+    value: CALENDAR_INTERVAL_OPTIONS.week,
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalField.weekOptionLabel',
+      { defaultMessage: 'Every week' }
+    ),
+  },
+  {
+    value: CALENDAR_INTERVAL_OPTIONS.month,
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalField.monthOptionLabel',
+      { defaultMessage: 'Every month' }
+    ),
+  },
+  {
+    value: CALENDAR_INTERVAL_OPTIONS.quarter,
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalField.quarterOptionLabel',
+      { defaultMessage: 'Every quarter' }
+    ),
+  },
+  {
+    value: CALENDAR_INTERVAL_OPTIONS.year,
+    text: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalField.yearOptionLabel',
+      { defaultMessage: 'Every year' }
+    ),
+  },
+];
 
 export const i18nTexts = {
   timeIntervalField: {
@@ -235,28 +289,6 @@ export class StepDateHistogram extends Component {
                 data-test-subj="rollupCreateDateFieldSelect"
               />
             </EuiFormRow>
-
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalLabel"
-                  defaultMessage="Time bucket size"
-                />
-              }
-              error={errorDateHistogramInterval}
-              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
-              helpText={this.renderIntervalHelpText()}
-              fullWidth
-            >
-              <EuiFieldText
-                value={dateHistogramInterval || ''}
-                onChange={(e) => onFieldsChange({ dateHistogramInterval: e.target.value })}
-                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
-                fullWidth
-                data-test-subj="rollupInterval"
-              />
-            </EuiFormRow>
-
             <EuiFormRow
               label={
                 <FormattedMessage
@@ -269,22 +301,6 @@ export class StepDateHistogram extends Component {
               <EuiSuperSelect
                 valueOfSelected={dateHistogramIntervalType}
                 options={[
-                  {
-                    value: 'fixed',
-                    inputDisplay: i18nTexts.timeIntervalField.fixed,
-                    dropdownDisplay: (
-                      <>
-                        <EuiText size="s">{i18nTexts.timeIntervalField.fixed}</EuiText>
-                        <EuiText size="s" color="subdued">
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalType.fixedHelpText"
-                            // TODO: Copy required
-                            defaultMessage="Each time interval is the same size."
-                          />
-                        </EuiText>
-                      </>
-                    ),
-                  },
                   {
                     value: 'calendar',
                     inputDisplay: i18nTexts.timeIntervalField.calendar,
@@ -301,11 +317,63 @@ export class StepDateHistogram extends Component {
                       </>
                     ),
                   },
+                  {
+                    value: 'fixed',
+                    inputDisplay: i18nTexts.timeIntervalField.fixed,
+                    dropdownDisplay: (
+                      <>
+                        <EuiText size="s">{i18nTexts.timeIntervalField.fixed}</EuiText>
+                        <EuiText size="s" color="subdued">
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalType.fixedHelpText"
+                            // TODO: Copy required
+                            defaultMessage="Each time interval is the same size."
+                          />
+                        </EuiText>
+                      </>
+                    ),
+                  },
                 ]}
-                onChange={(value) => onFieldsChange({ dateHistogramIntervalType: value })}
+                onChange={(value) =>
+                  onFieldsChange({
+                    dateHistogramIntervalType: value,
+                    // Also reset the date histogram interval value
+                    dateHistogramInterval: undefined,
+                  })
+                }
                 fullWidth
                 data-test-subj="rollupIntervalType"
               />
+            </EuiFormRow>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldIntervalLabel"
+                  defaultMessage="Time bucket size"
+                />
+              }
+              error={errorDateHistogramInterval}
+              isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
+              fullWidth
+            >
+              {dateHistogramIntervalType === 'calendar' ? (
+                <EuiSelect
+                  hasNoInitialSelection
+                  options={calendarIntervalOptions}
+                  value={dateHistogramInterval}
+                  onChange={(e) => onFieldsChange({ dateHistogramInterval: e.target.value })}
+                  fullWidth
+                  data-test-subj="rollupCreateCalendarIntervalSelect"
+                />
+              ) : (
+                <EuiFieldText
+                  value={dateHistogramInterval || ''}
+                  onChange={(e) => onFieldsChange({ dateHistogramInterval: e.target.value })}
+                  isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramInterval)}
+                  fullWidth
+                  data-test-subj="rollupCreateFixedIntervalTextField"
+                />
+              )}
             </EuiFormRow>
 
             <EuiFormRow

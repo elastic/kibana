@@ -43,11 +43,14 @@ export const stepIdToStepConfigMap = {
       };
     },
     fieldsValidator: (fields) => {
-      const { dateHistogramField, dateHistogramInterval } = fields;
+      const { dateHistogramField, dateHistogramInterval, dateHistogramIntervalType } = fields;
 
       return {
         dateHistogramField: validateDateHistogramField(dateHistogramField),
-        dateHistogramInterval: validateDateHistogramInterval(dateHistogramInterval),
+        dateHistogramInterval: validateDateHistogramInterval(
+          dateHistogramInterval,
+          dateHistogramIntervalType
+        ),
       };
     },
   },

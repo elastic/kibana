@@ -9,6 +9,8 @@ import { RollupAction } from '../../../../../../common/types';
 
 import { InternalRollup } from './types';
 
+import { CALENDAR_INTERVAL_OPTIONS } from './constants';
+
 function removeEmptyValues<O extends { [key: string]: unknown }>(object: O): O {
   Object.entries(object).forEach(([key, value]) => {
     if (value == null || (typeof value === 'string' && value.trim() === '')) {
@@ -94,13 +96,41 @@ export function deserializeRollup(rollupAction: RollupAction['config']): Interna
     },
   } = rollupAction;
 
-  // `interval` is deprecated but still supported. All three of the various interval types are
-  // mutually exclusive.
-  const dateHistogramInterval = interval || fixedInterval || calendarInterval || '';
-
   const dateHistogramIntervalType: InternalRollup['dateHistogramIntervalType'] = calendarInterval
     ? 'calendar'
     : 'fixed';
+
+  // `interval` is deprecated but still supported. All three of the various interval types are
+  // mutually exclusive.
+  let dateHistogramInterval = interval || fixedInterval || calendarInterval || '';
+
+  if (dateHistogramInterval && dateHistogramIntervalType === 'calendar') {
+    switch (dateHistogramInterval) {
+      case '1m':
+        dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.minute;
+        break;
+      case '1h':
+        dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.hour;
+        break;
+      case '1d':
+        dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.day;
+        break;
+      case '1w':
+        dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.week;
+        break;
+      case '1M':
+        dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.month;
+        break;
+      case '1q':
+        dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.quarter;
+        break;
+      case '1y':
+        dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.year;
+        break;
+      default:
+        dateHistogramInterval = '';
+    }
+  }
 
   const deserializedJob: InternalRollup = {
     dateHistogramIntervalType,
