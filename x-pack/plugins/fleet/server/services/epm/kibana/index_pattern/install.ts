@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { loadFieldsFromYaml } from '../../fields/field';
 import type { Fields, Field } from '../../fields/field';

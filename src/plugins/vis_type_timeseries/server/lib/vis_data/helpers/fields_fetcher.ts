@@ -7,15 +7,20 @@
  */
 
 import {
-  AbstractSearchStrategy,
-  DefaultSearchCapabilities,
-  ReqFacade,
-} from '../../search_strategies';
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
+import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
+
+export interface FieldsFetcherServices {
+  requestContext: VisTypeTimeseriesRequestHandlerContext;
+  searchStrategy: AbstractSearchStrategy;
+  capabilities: DefaultSearchCapabilities;
+}
 
 export const createFieldsFetcher = (
-  req: ReqFacade,
-  searchStrategy: AbstractSearchStrategy,
-  capabilities: DefaultSearchCapabilities
+  req: VisTypeTimeseriesVisDataRequest,
+  { capabilities, requestContext, searchStrategy }: FieldsFetcherServices
 ) => {
   const fieldsCacheMap = new Map();
 
@@ -24,7 +29,12 @@ export const createFieldsFetcher = (
       return fieldsCacheMap.get(index);
     }
 
-    const fields = await searchStrategy.getFieldsForWildcard(req, index, capabilities);
+    const fields = await searchStrategy.getFieldsForWildcard(
+      requestContext,
+      req,
+      index,
+      capabilities
+    );
 
     fieldsCacheMap.set(index, fields);
 
