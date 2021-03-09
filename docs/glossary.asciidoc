@@ -228,7 +228,7 @@ See {ref}/geo-point.html[geo-point].
 // tag::geo-shape-def[]
 A field type in {es}. A geo-shape field accepts arbitrary geographic primitives,
 like polygons, lines, or rectangles (and more). You can populate a geo-shape
-field from GeoJSON or WKT.
+field from GeoJSON or well-known text.
 See {ref}/geo-shape.html[geo-shape].
 // end::geo-shape-def[]
 
