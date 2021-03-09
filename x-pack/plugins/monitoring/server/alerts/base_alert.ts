@@ -103,11 +103,11 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
-      executor: (
+      executor: async (
         options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
           state: ExecutedState;
         }
-      ): Promise<any> => this.execute(options),
+      ): Promise<any> => await this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,

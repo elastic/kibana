@@ -27,7 +27,7 @@ export function getAlertPanelsByCategory(
   for (const category of ALERT_PANEL_MENU) {
     let categoryFiringAlertCount = 0;
     if (inSetupMode) {
-      const alertsInCategory = [];
+      const alertsInCategory: Array<{ alertName: string }> = [];
       for (const categoryAlert of category.alerts) {
         if (
           Boolean(alerts.find(({ rawAlert }) => rawAlert.alertTypeId === categoryAlert.alertName))
@@ -36,14 +36,17 @@ export function getAlertPanelsByCategory(
         }
       }
       if (alertsInCategory.length > 0) {
+        const categoryAlerts = alerts.filter(
+          ({ rawAlert }) =>
+            rawAlert && alertsInCategory.find(({ alertName }) => alertName === rawAlert.alertTypeId)
+        );
         menu.push({
           ...category,
-          alerts: alertsInCategory.map(({ alertName }) => {
-            const alertStatus = alertsContext.allAlerts[alertName];
+          alerts: categoryAlerts.map((categoryAlert) => {
             return {
-              alert: alertStatus.rawAlert,
+              alert: categoryAlert.rawAlert,
               states: [],
-              alertName,
+              alertName: categoryAlert.rawAlert.alertTypeId,
             };
           }),
           alertCount: 0,
@@ -116,10 +119,9 @@ export function getAlertPanelsByCategory(
       panels.push({
         id: nodeIndex + 1,
         title: `${category.label}`,
-        items: category.alerts.map(({ alertName }) => {
-          const alertStatus = alertsContext.allAlerts[alertName];
+        items: category.alerts.map(({ alert }) => {
           return {
-            name: <EuiText>{alertStatus.rawAlert.name}</EuiText>,
+            name: <EuiText>{alert.name}</EuiText>,
             panel: ++secondaryPanelIndex,
           };
         }),
@@ -128,13 +130,12 @@ export function getAlertPanelsByCategory(
     }
 
     for (const category of menu) {
-      for (const { alert, alertName } of category.alerts) {
-        const alertStatus = alertsContext.allAlerts[alertName];
+      for (const { alert } of category.alerts) {
         panels.push({
           id: ++tertiaryPanelIndex,
           title: `${alert.name}`,
           width: 400,
-          content: <AlertPanel alert={alertStatus.rawAlert} />,
+          content: <AlertPanel alert={alert} />,
         });
       }
     }
@@ -145,14 +146,11 @@ export function getAlertPanelsByCategory(
       panels.push({
         id: nodeIndex + 1,
         title: `${category.label}`,
-        items: category.alerts.map(({ alertName, states }) => {
+        items: category.alerts.map(({ states, alert }) => {
           const filteredStates = states.filter(({ state }) => stateFilter(state));
-          const alertStatus = alertsContext.allAlerts[alertName];
-          const name = inSetupMode ? (
-            <EuiText>{alertStatus.rawAlert.name}</EuiText>
-          ) : (
+          const name = (
             <EuiText>
-              {alertStatus.rawAlert.name} ({filteredStates.length})
+              {alert.name} ({filteredStates.length})
             </EuiText>
           );
           return {

@@ -27,7 +27,7 @@ export function shouldShowAlertBadge(
       continue;
     }
     const alert = alerts[key];
-    if (alertTypeIds.indexOf(alert.rawAlert.alertTypeId) >= 0 && alert.states.length) {
+    if (alertTypeIds.indexOf(alert.rawAlert?.alertTypeId) >= 0) {
       return true;
     }
   }

@@ -287,7 +287,9 @@ export function ElasticsearchPanel(props) {
 
   let nodesAlertStatus = null;
   if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
-    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    const alertsList = Object.values(alerts).filter(
+      ({ rawAlert }) => NODES_PANEL_ALERTS.indexOf(rawAlert && rawAlert.alertTypeId) >= 0
+    );
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertsBadge alerts={alertsList} />
@@ -297,7 +299,9 @@ export function ElasticsearchPanel(props) {
 
   let overviewAlertStatus = null;
   if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS, setupModeContext)) {
-    const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    const alertsList = Object.values(alerts).filter(
+      ({ rawAlert }) => OVERVIEW_PANEL_ALERTS.indexOf(rawAlert && rawAlert.alertTypeId) >= 0
+    );
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertsBadge alerts={alertsList} />
@@ -307,7 +311,9 @@ export function ElasticsearchPanel(props) {
 
   let indicesAlertStatus = null;
   if (shouldShowAlertBadge(alerts, INDICES_PANEL_ALERTS, setupModeContext)) {
-    const alertsList = INDICES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    const alertsList = Object.values(alerts).filter(
+      ({ rawAlert }) => INDICES_PANEL_ALERTS.indexOf(rawAlert && rawAlert.alertTypeId) >= 0
+    );
     indicesAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertsBadge alerts={alertsList} />

@@ -46,6 +46,7 @@ export async function fetchStatus(
       }
       return accum;
     }, []);
+
     const key = `${alertTypeId}:${id}`;
     byType[key] = result;
   });

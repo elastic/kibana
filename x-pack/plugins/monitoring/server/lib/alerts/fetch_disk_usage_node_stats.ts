@@ -113,6 +113,9 @@ export async function fetchDiskUsageNodeStats(
       if (isNaN(diskUsage) || diskUsage === undefined || diskUsage === null) {
         continue;
       }
+
+      // console.log('...diskUsage:', diskUsage);
+
       stats.push({
         diskUsage,
         clusterUuid: clusterBucket.key,
