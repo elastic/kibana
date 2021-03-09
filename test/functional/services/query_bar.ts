@@ -45,7 +45,8 @@ export function QueryBarProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async clearQuery(): Promise<void> {
       await this.setQuery('');
-      await PageObjects.common.pressTabKey();
+      await PageObjects.common.pressTabKey(); // move outside of input into language switcher
+      await PageObjects.common.pressTabKey(); // move outside of language switcher so time picker appears
     }
 
     public async submitQuery(): Promise<void> {
