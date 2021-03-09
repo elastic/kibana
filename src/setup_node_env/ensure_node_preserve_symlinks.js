@@ -31,6 +31,10 @@
       : [preserveSymlinksOption];
   var restArgs = nodeArgv.length >= 2 ? nodeArgv.slice(1, nodeArgv.length) : [];
 
-  execa.sync(nodeArgv[0], nodeArgs.concat(restArgs), { stdio: 'inherit' });
-  process.exit(0);
+  try {
+    var cmdResult = execa.sync(nodeArgv[0], nodeArgs.concat(restArgs), { stdio: 'inherit' });
+    process.exit(cmdResult.exitCode);
+  } catch (error) {
+    process.exit(error.exitCode);
+  }
 })();
