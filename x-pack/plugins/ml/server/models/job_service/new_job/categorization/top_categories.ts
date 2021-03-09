@@ -81,6 +81,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
     const catCounts: Array<{
       id: CategoryId;
       count: number;
+      // @ts-expect-error
     }> = body.aggregations?.cat_count?.buckets.map((c: any) => ({
       id: c.key,
       count: c.doc_count,
@@ -116,6 +117,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
                     job_id: jobId,
                   },
                 },
+                // @ts-expect-error
                 categoryFilter,
               ],
             },
@@ -125,6 +127,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
       []
     );
 
+    // @ts-expect-error
     return body.hits.hits?.map((c: { _source: Category }) => c._source) || [];
   }
 

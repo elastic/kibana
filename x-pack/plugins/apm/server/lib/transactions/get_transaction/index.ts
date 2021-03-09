@@ -34,11 +34,11 @@ export function getTransaction({
         size: 1,
         query: {
           bool: {
-            filter: [
+            filter: asMutableArray([
               { term: { [TRANSACTION_ID]: transactionId } },
               { term: { [TRACE_ID]: traceId } },
               ...rangeQuery(start, end),
-            ],
+            ]),
           },
         },
       },

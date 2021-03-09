@@ -952,10 +952,9 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
-        // @ts-expect-error MultiGetHit._source is optional
         return this.getSavedObjectFromSource(type, id, doc);
-      }),
-    };
+      })
+    }
   }
 
   /**
@@ -1028,7 +1027,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
 
     // retrieve the alias, and if it is not disabled, update it
-    const aliasResponse = await this.client.update(
+    const aliasResponse = await this.client.update<{ 'legacy-url-alias': LegacyUrlAlias }>(
       {
         id: rawAliasId,
         index: this.getIndexForType(LEGACY_URL_ALIAS_TYPE),
@@ -1062,13 +1061,12 @@ export class SavedObjectsRepository {
     if (
       aliasResponse.statusCode === 404 ||
       aliasResponse.body.get.found === false ||
-      // @ts-expect-error UpdateResponse<T>.get should be required
       aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
     ) {
       // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
       return this.resolveExactMatch(type, id, options);
     }
-    // @ts-expect-error UpdateResponse<T>.get should be required
+
     const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE];
     const objectIndex = this.getIndexForType(type);
     const bulkGetResponse = await this.client.mget<SavedObjectsRawDocSource>(
@@ -1918,7 +1916,8 @@ export class SavedObjectsRepository {
     const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
       body: { id },
     });
-    // @ts-expect-error no typings in @elastic/elatics
+
+    // @ts-expect-error no typings in @elastic/elaticsearch
     return body;
   }
 
@@ -2063,7 +2062,7 @@ export class SavedObjectsRepository {
   private getSavedObjectFromSource<T>(
     type: string,
     id: string,
-    doc: { _seq_no: number; _primary_term: number; _source: SavedObjectsRawDocSource }
+    doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
   ): SavedObject<T> {
     const { originId, updated_at: updatedAt } = doc._source;
 

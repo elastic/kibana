@@ -67,7 +67,7 @@ export function getStoredAnnotations({
       return response.hits.hits.map((hit) => {
         return {
           type: AnnotationType.VERSION,
-          id: hit._id,
+          id: hit._id as string,
           '@timestamp': new Date(hit._source['@timestamp']).getTime(),
           text: hit._source.message,
         };

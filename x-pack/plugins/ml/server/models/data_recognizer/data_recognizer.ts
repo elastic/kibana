@@ -272,6 +272,7 @@ export class DataRecognizer {
       body: searchBody,
     });
 
+    // @ts-expect-error fix search response
     return body.hits.total.value > 0;
   }
 

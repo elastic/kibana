@@ -106,7 +106,7 @@ export async function getBuckets({
                     should: [
                       { term: { [TRACE_ID]: traceId } },
                       { term: { [TRANSACTION_ID]: transactionId } },
-                    ],
+                    ] as QueryContainer[],
                   },
                 },
                 aggs: {
@@ -125,7 +125,7 @@ export async function getBuckets({
                           ] as const,
                           size: 10,
                           sort: {
-                            _score: 'desc',
+                            _score: 'desc' as const
                           },
                         },
                       },

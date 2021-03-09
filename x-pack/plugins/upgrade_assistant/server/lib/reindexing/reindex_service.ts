@@ -226,7 +226,7 @@ export const reindexServiceFactory = (
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { 'index.blocks.write': false },
+        body: { index: { blocks: { write: true } } }
       });
     }
 
@@ -290,7 +290,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const { body: putReadonly } = await esClient.indices.putSettings({
       index: indexName,
-      body: { 'index.blocks.write': true },
+      body: { index: { blocks: { write: true } } }
     });
 
     if (!putReadonly.acknowledged) {
@@ -356,6 +356,7 @@ export const reindexServiceFactory = (
       refresh: true,
       wait_for_completion: false,
       body: {
+        // @ts-expect-error size is required
         source: { index: indexName },
         dest: { index: reindexOp.attributes.newIndexName },
       },
@@ -393,6 +394,7 @@ export const reindexServiceFactory = (
       return actions.updateReindexOp(reindexOp, {
         reindexTaskPercComplete: perc,
       });
+      // @ts-expect-error TaskStatus doesn't contain canceled
     } else if (taskResponse.task.status.canceled === 'by user request') {
       // Set the status to cancelled
       reindexOp = await actions.updateReindexOp(reindexOp, {
@@ -403,7 +405,7 @@ export const reindexServiceFactory = (
       reindexOp = await cleanupChanges(reindexOp);
     } else {
       // Check that it reindexed all documents
-      const { body: count } = await esClient.count({ index: reindexOp.attributes.indexName });
+      const { body: { count } } = await esClient.count({ index: reindexOp.attributes.indexName });
 
       if (taskResponse.task.status.created < count) {
         // Include the entire task result in the error message. This should be guaranteed

@@ -8,10 +8,11 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import { estypes } from '@elastic/elasticsearch';
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
-import { ReindexResponseBase } from 'elasticsearch';
+
+import type { estypes } from '@elastic/elasticsearch';
+
 import {
   SavedObject,
   SavedObjectsSerializer,
@@ -397,9 +398,10 @@ export class TaskStore {
  * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
  * have for an unhealthy cluster distribution of Task Manager polling intervals
  */
+
 export function correctVersionConflictsForContinuation(
-  updated: ReindexResponseBase['updated'],
-  versionConflicts: ReindexResponseBase['version_conflicts'],
+  updated: estypes.ReindexResponse['updated'],
+  versionConflicts: estypes.ReindexResponse['version_conflicts'],
   maxDocs?: number
 ) {
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;

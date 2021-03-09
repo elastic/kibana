@@ -49,7 +49,7 @@ export function listCustomLinks({
         sort: [
           {
             'label.keyword': {
-              order: 'asc',
+              order: 'asc' as const,
             },
           },
         ],

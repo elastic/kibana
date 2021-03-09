@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { cloneDeep } from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
-import { rollupServiceProvider, RollupJob } from './rollup';
+import { rollupServiceProvider } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
 
 const supportedTypes: string[] = [
@@ -109,7 +110,9 @@ class FieldsService {
         this._mlClusterClient,
         this._savedObjectsClient
       );
-      const rollupConfigs: RollupJob[] | null = await rollupService.getRollupJobs();
+      const rollupConfigs:
+        | estypes.RollupCapabilitiesJob[]
+        | null = await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
       // rollup configs, return with no results
@@ -131,14 +134,16 @@ class FieldsService {
   }
 }
 
-function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
+function combineAllRollupFields(rollupConfigs: estypes.RollupCapabilitiesJob[]): RollupFields {
   const rollupFields: RollupFields = {};
   rollupConfigs.forEach((conf) => {
     Object.keys(conf.fields).forEach((fieldName) => {
       if (rollupFields[fieldName] === undefined) {
+        // @ts-expect-error fix type. our RollupFields type is better
         rollupFields[fieldName] = conf.fields[fieldName];
       } else {
         const aggs = conf.fields[fieldName];
+        // @ts-expect-error fix type. our RollupFields type is better
         aggs.forEach((agg) => {
           if (rollupFields[fieldName].find((f) => f.agg === agg.agg) === null) {
             rollupFields[fieldName].push(agg);

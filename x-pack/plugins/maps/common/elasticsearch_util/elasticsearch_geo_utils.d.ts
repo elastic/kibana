@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { FeatureCollection, GeoJsonProperties, Polygon } from 'geojson';
 import { MapExtent } from '../descriptor_types';
 import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../constants';
@@ -18,7 +18,7 @@ export function clampToLatBounds(lat: number): number;
 export function clampToLonBounds(lon: number): number;
 
 export function hitsToGeoJson(
-  hits: Array<Record<string, unknown>>,
+  hits: Array<estypes.Hit<unknown>>,
   flattenHit: (elasticSearchHit: Record<string, unknown>) => GeoJsonProperties,
   geoFieldName: string,
   geoFieldType: ES_GEO_FIELD_TYPE,

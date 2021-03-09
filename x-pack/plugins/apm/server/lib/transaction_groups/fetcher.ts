@@ -133,14 +133,14 @@ export function transactionGroupsFetcher(
             ...(isTopTraces
               ? {
                   composite: {
-                    sources: [
+                    sources: asMutableArray([
                       { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
                       {
                         [TRANSACTION_NAME]: {
                           terms: { field: TRANSACTION_NAME },
                         },
                       },
-                    ],
+                    ] as const),
                     size,
                   },
                 }

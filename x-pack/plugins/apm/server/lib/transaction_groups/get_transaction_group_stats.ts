@@ -71,7 +71,7 @@ export function getCounts({ request, setup }: MetricParams) {
       transaction_type: {
         top_metrics: {
           sort: {
-            '@timestamp': 'desc',
+            '@timestamp': 'desc' as const,
           },
           metrics: {
             field: TRANSACTION_TYPE,

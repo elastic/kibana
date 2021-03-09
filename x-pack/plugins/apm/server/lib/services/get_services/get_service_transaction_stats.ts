@@ -110,7 +110,7 @@ export async function getServiceTransactionStats({
                     top_metrics: {
                       metrics: { field: AGENT_NAME } as const,
                       sort: {
-                        '@timestamp': 'desc',
+                        '@timestamp': 'desc' as const,
                       },
                     },
                   },

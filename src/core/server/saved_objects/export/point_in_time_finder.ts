@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from '../types';
 import { SavedObjectsFindResponse } from '../service';
@@ -99,12 +99,12 @@ export class PointInTimeFinder {
     await this.open();
 
     let lastResultsCount: number;
-    let lastHitSortValue: unknown[] | undefined;
+    let lastHitSortValue: estypes.Id[] | undefined;
     do {
       const results = await this.findNext({
         findOptions: this.#findOptions,
         id: this.#pitId,
-        ...(lastHitSortValue ? { searchAfter: lastHitSortValue } : {}),
+        searchAfter: lastHitSortValue,
       });
       this.#pitId = results.pit_id;
       lastResultsCount = results.saved_objects.length;
@@ -161,7 +161,7 @@ export class PointInTimeFinder {
   }: {
     findOptions: SavedObjectsFindOptions;
     id?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
   }) {
     try {
       return await this.#savedObjectsClient.find({
@@ -183,7 +183,7 @@ export class PointInTimeFinder {
     }
   }
 
-  private getLastHitSortValue(res: SavedObjectsFindResponse): unknown[] | undefined {
+  private getLastHitSortValue(res: SavedObjectsFindResponse): estypes.Id[] | undefined {
     if (res.saved_objects.length < 1) {
       return undefined;
     }

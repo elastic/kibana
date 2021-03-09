@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
 import { isEmpty, dropRightWhile } from 'lodash';
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
+=======
+<<<<<<< HEAD
+import { isEmpty } from 'lodash';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
+=======
+import { isEmpty, dropRightWhile } from 'lodash';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
+>>>>>>> master
+>>>>>>> delvedor/new-types-client
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';

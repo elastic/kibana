@@ -10,7 +10,6 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-
 import { CollectedUsage, ReportedUsage } from './register';
 interface SearchTelemetry {
   'search-telemetry': CollectedUsage;

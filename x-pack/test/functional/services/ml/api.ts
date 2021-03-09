@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 import { IndexDocumentParams } from 'elasticsearch';
-import { Calendar, CalendarEvent } from '../../../../plugins/ml/server/models/calendar/index';
+import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
 import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -23,6 +24,8 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../../plugins/ml/common/constants/index_patterns';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+
+type ScheduledEvent = estypes.ScheduledEvent;
 
 interface EsIndexResult {
   _index: string;
@@ -393,7 +396,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createCalendarEvents(calendarId: string, events: CalendarEvent[]) {
+    async createCalendarEvents(calendarId: string, events: ScheduledEvent[]) {
       log.debug(`Creating events for calendar with id '${calendarId}'...`);
       await esSupertest.post(`/_ml/calendars/${calendarId}/events`).send({ events }).expect(200);
       await this.waitForEventsToExistInCalendar(calendarId, events);
@@ -405,10 +408,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     assertAllEventsExistInCalendar: (
-      eventsToCheck: CalendarEvent[],
+      eventsToCheck: ScheduledEvent[],
       calendar: Calendar
     ): boolean => {
-      const updatedCalendarEvents = calendar.events as CalendarEvent[];
+      const updatedCalendarEvents = calendar.events as ScheduledEvent[];
       let allEventsAreUpdated = true;
       for (const eventToCheck of eventsToCheck) {
         // if at least one of the events that we need to check is not in the updated events
@@ -436,7 +439,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForEventsToExistInCalendar(
       calendarId: string,
-      eventsToCheck: CalendarEvent[],
+      eventsToCheck: ScheduledEvent[],
       errorMsg?: string
     ) {
       await retry.waitForWithTimeout(`'${calendarId}' events to exist`, 5 * 1000, async () => {

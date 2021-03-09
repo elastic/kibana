@@ -5,33 +5,41 @@
  * 2.0.
  */
 
-import { IndexPatternTitle } from '../kibana';
-import { RuntimeMappings } from '../fields';
-import { JobId } from './job';
+import { estypes } from '@elastic/elasticsearch';
+// import { IndexPatternTitle } from '../kibana';
+// import { RuntimeMappings } from '../fields';
+// import { JobId } from './job';
 export type DatafeedId = string;
 
-export interface Datafeed {
-  datafeed_id: DatafeedId;
-  aggregations?: Aggregation;
-  aggs?: Aggregation;
-  chunking_config?: ChunkingConfig;
-  frequency?: string;
-  indices: IndexPatternTitle[];
-  indexes?: IndexPatternTitle[]; // The datafeed can contain indexes and indices
-  job_id: JobId;
-  query: object;
-  query_delay?: string;
-  script_fields?: Record<string, any>;
-  runtime_mappings?: RuntimeMappings;
-  scroll_size?: number;
-  delayed_data_check_config?: object;
-  indices_options?: IndicesOptions;
-}
+export type Datafeed = estypes.DatafeedConfig;
+// export interface Datafeed extends estypes.DatafeedConfig {
+//   runtime_mappings?: RuntimeMappings;
+//   aggs?: Aggregation;
+// }
+// export interface Datafeed {
+//   datafeed_id: DatafeedId;
+//   aggregations?: Aggregation;
+//   aggs?: Aggregation;
+//   chunking_config?: ChunkingConfig;
+//   frequency?: string;
+//   indices: IndexPatternTitle[];
+//   indexes?: IndexPatternTitle[]; // The datafeed can contain indexes and indices
+//   job_id: JobId;
+//   query: object;
+//   query_delay?: string;
+//   script_fields?: Record<string, any>;
+//   runtime_mappings?: RuntimeMappings;
+//   scroll_size?: number;
+//   delayed_data_check_config?: object;
+//   indices_options?: IndicesOptions;
+// }
 
-export interface ChunkingConfig {
-  mode: 'auto' | 'manual' | 'off';
-  time_span?: string;
-}
+export type ChunkingConfig = estypes.ChunkingConfig;
+
+// export interface ChunkingConfig {
+//   mode: 'auto' | 'manual' | 'off';
+//   time_span?: string;
+// }
 
 export type Aggregation = Record<
   string,
@@ -45,9 +53,10 @@ export type Aggregation = Record<
   }
 >;
 
-interface IndicesOptions {
-  expand_wildcards?: 'all' | 'open' | 'closed' | 'hidden' | 'none';
-  ignore_unavailable?: boolean;
-  allow_no_indices?: boolean;
-  ignore_throttled?: boolean;
-}
+export type IndicesOptions = estypes.IndicesOptions;
+// interface IndicesOptions {
+//   expand_wildcards?: 'all' | 'open' | 'closed' | 'hidden' | 'none';
+//   ignore_unavailable?: boolean;
+//   allow_no_indices?: boolean;
+//   ignore_throttled?: boolean;
+// }

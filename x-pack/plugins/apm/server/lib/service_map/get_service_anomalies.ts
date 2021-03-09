@@ -85,9 +85,10 @@ export async function getServiceAnomalies({
                     { field: 'result_type' },
                     { field: 'record_score' },
                   ] as const,
-                  sort: {
+                  sort: ({
                     record_score: 'desc' as const,
-                  },
+                    // FIXME: TopMetricsAggregation.sort is incorrect
+                  } as unknown) as Sort,
                 },
               },
             },
