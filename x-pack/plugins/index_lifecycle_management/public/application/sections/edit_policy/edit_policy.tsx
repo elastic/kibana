@@ -30,7 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { TextField, useForm, useFormData } from '../../../shared_imports';
+import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
 import { createDocLink } from '../../services/documentation';
 import { UseField } from './form';
@@ -44,7 +44,13 @@ import {
   Timeline,
   FormErrorsCallout,
 } from './components';
-import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
+import {
+  createPolicyNameValidations,
+  createSerializer,
+  deserializer,
+  Form,
+  getSchema,
+} from './form';
 import { useEditPolicyContext } from './edit_policy_context';
 import { FormInternal } from './types';
 
@@ -67,6 +73,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     policyName,
   } = useEditPolicyContext();
 
+  const {
+    services: { cloud },
+  } = useKibana();
+
   const [saveAsNew, setSaveAsNew] = useState(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
 
@@ -81,6 +91,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     }),
     [currentPolicy, originalPolicyName]
   );
+
+  const schema = useMemo(() => {
+    return getSchema(Boolean(cloud?.isCloudEnabled));
+  }, [cloud?.isCloudEnabled]);
 
   const { form } = useForm({
     schema,

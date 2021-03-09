@@ -8,17 +8,20 @@
 import { produce } from 'immer';
 
 import { SerializedPolicy } from '../../../../../common/types';
-
 import { splitSizeAndUnits } from '../../../lib/policies';
-
 import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
-
+import { getDefaultRepository } from '../lib';
 import { FormInternal } from '../types';
 
 export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const {
     phases: { hot, warm, cold, delete: deletePhase },
   } = policy;
+
+  const defaultRepository = getDefaultRepository([
+    hot?.actions.searchable_snapshot,
+    cold?.actions.searchable_snapshot,
+  ]);
 
   const _meta: FormInternal['_meta'] = {
     hot: {
@@ -43,6 +46,9 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
     },
     delete: {
       enabled: Boolean(deletePhase),
+    },
+    searchableSnapshot: {
+      repository: defaultRepository,
     },
   };
 

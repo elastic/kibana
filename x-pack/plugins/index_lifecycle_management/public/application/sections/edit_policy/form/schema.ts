@@ -10,9 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS } from '../constants';
-
-const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
-
+import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
@@ -20,7 +18,13 @@ import {
   minAgeValidator,
 } from './validations';
 
-import { i18nTexts } from '../i18n_texts';
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
+
+/**
+ * This repository is provisioned by Elastic Cloud and will always
+ * exist as a "managed" repository.
+ */
+const CLOUD_DEFAULT_REPO = 'found-snapshots';
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
@@ -34,11 +38,10 @@ const searchableSnapshotFields = {
     validations: [
       { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
     ],
-    defaultValue: [],
   },
 };
 
-export const schema: FormSchema = {
+export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
   _meta: {
     hot: {
       isUsingDefaultRollover: {
@@ -128,6 +131,11 @@ export const schema: FormSchema = {
       },
       minAgeUnit: {
         defaultValue: 'd',
+      },
+    },
+    searchableSnapshot: {
+      repository: {
+        defaultValue: isCloudEnabled ? CLOUD_DEFAULT_REPO : '',
       },
     },
   },
@@ -377,4 +385,4 @@ export const schema: FormSchema = {
       },
     },
   },
-};
+});

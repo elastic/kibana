@@ -164,7 +164,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           <div className="ilmSearchableSnapshotField">
             <UseField
               path={searchableSnapshotRepoPath}
-              defaultValue={[searchableSnapshotGlobalRepo]}
+              defaultValue={!!searchableSnapshotGlobalRepo ? [searchableSnapshotGlobalRepo] : []}
               component={RepositoryComboBoxField}
               componentProps={{
                 globalRepository: searchableSnapshotGlobalRepo,
