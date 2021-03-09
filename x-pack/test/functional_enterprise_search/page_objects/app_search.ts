@@ -20,12 +20,12 @@ export function AppSearchPageProvider({ getService, getPageObjects }: FtrProvide
 
     async getEngineLinks(): Promise<WebElementWrapper[]> {
       const engines = await testSubjects.find('appSearchEngines');
-      return await testSubjects.findAllDescendant('engineNameLink', engines);
+      return await testSubjects.findAllDescendant('EngineNameLink', engines);
     },
 
     async getMetaEngineLinks(): Promise<WebElementWrapper[]> {
       const metaEngines = await testSubjects.find('appSearchMetaEngines');
-      return await testSubjects.findAllDescendant('engineNameLink', metaEngines);
+      return await testSubjects.findAllDescendant('EngineNameLink', metaEngines);
     },
   };
 }

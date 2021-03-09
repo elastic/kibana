@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Command Shell Activity Started via RunDLL32",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.name : (\"cmd.exe\", \"powershell.exe\") and\n  process.parent.name : \"rundll32.exe\" and \n  /* common FPs can be added here */\n  not process.parent.args : \"C:\\\\Windows\\\\System32\\\\SHELL32.dll,RunAsNewUser_RunDLL\"\n",
   "risk_score": 21,

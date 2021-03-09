@@ -63,7 +63,7 @@ export const dateHistogramOperation: OperationDefinition<
   getHelpMessage: (props) => <AutoDateHistogramPopover {...props} />,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
-      type === 'date' &&
+      (type === 'date' || type === 'date_range') &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.date_histogram)
     ) {

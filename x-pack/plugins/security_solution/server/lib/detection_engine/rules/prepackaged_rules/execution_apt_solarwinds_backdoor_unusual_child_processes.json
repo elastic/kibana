@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious SolarWinds Child Process",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name: (\"SolarWinds.BusinessLayerHost.exe\", \"SolarWinds.BusinessLayerHostx64.exe\") and\n not process.name : (\n        \"APMServiceControl*.exe\",\n        \"ExportToPDFCmd*.Exe\",\n        \"SolarWinds.Credentials.Orion.WebApi*.exe\",\n        \"SolarWinds.Orion.Topology.Calculator*.exe\",\n        \"Database-Maint.exe\",\n        \"SolarWinds.Orion.ApiPoller.Service.exe\",\n        \"WerFault.exe\",\n        \"WerMgr.exe\")\n",
   "references": [
