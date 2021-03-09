@@ -54,8 +54,7 @@ One of the primary advantages Bazel provides is that the builds are hermetic, me
 
 Building TypeScript reference definitions and using `@babel/register` will be negated by using the TypeScript compiler directly instead of using Babel. Currently, we use Babel for code generation and `tsc` for type check and type declaration output. Additionally, the TypeScript implementation in [rules_nodejs](https://bazelbuild.github.io/rules_nodejs/TypeScript.html) for Bazel handles incremental builds, resulting in faster re-builds.
 
-In addition to the benefits of building code, there are also benefits regarding running unit tests. Developers currently need to understand what unit tests to run to validate changes or rely on waiting for CI, which has a long feedback loop. Since Bazel knows the dependency tree, it will only run unit tests for a package or plugin modified or dependent on those modifications. This optimization helps developers and will significantly reduce the amount of work CI needs to do.
-
+In addition to the benefits of building code, there are also benefits regarding running unit tests. Developers currently need to understand what unit tests to run to validate changes or rely on waiting for CI, which has a long feedback loop. Since Bazel knows the dependency tree, it will only run unit tests for a package or plugin modified or dependent on those modifications. This optimization helps developers and will significantly reduce the amount of work CI needs to do. On CI, unit tests take 35 minutes to complete, where the average single Jest project takes just twenty seconds.
 
 # Detailed design
 
