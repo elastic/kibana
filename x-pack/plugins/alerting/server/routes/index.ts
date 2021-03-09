@@ -10,6 +10,7 @@ import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import { createRuleRoute } from './create_rule';
 
 export function defineRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
@@ -17,4 +18,5 @@ export function defineRoutes(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   defineLegacyRoutes(router, licenseState, encryptedSavedObjects);
+  createRuleRoute(router, licenseState);
 }

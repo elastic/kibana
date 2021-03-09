@@ -11,10 +11,20 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `ruleId`
   : K extends `alertExecutionStatus`
   ? `ruleExecutionStatus`
+  : K extends `actionTypeId`
+  ? `connectorTypeId`
   : K;
 
 export type AsApiContract<T> = {
-  [K in keyof T as CamelToSnake<RenameAlertToRule<Extract<K, string>>>]: T[K];
+  [K in keyof T as CamelToSnake<RenameAlertToRule<Extract<K, string>>>]: T[K] extends any[]
+    ? T[K][number] extends object
+      ? Array<AsApiContract<T[K][number]>>
+      : T[K]
+    : T[K] extends Date
+    ? T[K]
+    : T[K] extends object
+    ? AsApiContract<T[K]>
+    : T[K];
 };
 
 export type RewriteRequestCase<T> = (requested: AsApiContract<T>) => T;
