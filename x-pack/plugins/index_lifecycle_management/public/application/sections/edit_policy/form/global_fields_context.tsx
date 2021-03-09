@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, FunctionComponent, useContext } from 'react';
-import { UseMultiFields, FieldHook } from '../../../../shared_imports';
+import { UseMultiFields, FieldHook, FieldConfig } from '../../../../shared_imports';
 
 export interface GlobalFields {
   deleteEnabled: FieldHook<boolean>;
@@ -16,12 +16,12 @@ export interface GlobalFields {
 const GlobalFieldsContext = createContext<GlobalFields | null>(null);
 
 export const GlobalFieldsProvider: FunctionComponent = ({ children }) => {
-  const fields = {
+  const fields: Record<keyof GlobalFields, { path: string; config?: FieldConfig<any> }> = {
     deleteEnabled: {
       path: '_meta.delete.enabled',
     },
     searchableSnapshotRepo: {
-      path: '_meta.globalFields.searchableSnapshot.repository',
+      path: '_meta.searchableSnapshot.repository',
     },
   };
 

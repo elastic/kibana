@@ -11,8 +11,6 @@ import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
-import { FormInternal } from '../types';
-
 const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 import {
@@ -30,7 +28,17 @@ const serializers = {
   stringToNumber: (v: string): any => (v != null ? parseInt(v, 10) : undefined),
 };
 
-export const schema: FormSchema<FormInternal> = {
+const searchableSnapshotFields = {
+  snapshot_repository: {
+    label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+    validations: [
+      { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+    ],
+    defaultValue: [],
+  },
+};
+
+export const schema: FormSchema = {
   _meta: {
     hot: {
       isUsingDefaultRollover: {
@@ -120,16 +128,6 @@ export const schema: FormSchema<FormInternal> = {
       },
       minAgeUnit: {
         defaultValue: 'd',
-      },
-    },
-    globalFields: {
-      searchableSnapshot: {
-        repository: {
-          label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
-          validations: [
-            { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
-          ],
-        },
       },
     },
   },
@@ -232,6 +230,7 @@ export const schema: FormSchema<FormInternal> = {
             serializer: serializers.stringToNumber,
           },
         },
+        searchable_snapshot: searchableSnapshotFields,
       },
     },
     warm: {
@@ -352,14 +351,7 @@ export const schema: FormSchema<FormInternal> = {
             serializer: serializers.stringToNumber,
           },
         },
-        searchable_snapshot: {
-          snapshot_repository: {
-            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
-            validations: [
-              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
-            ],
-          },
-        },
+        searchable_snapshot: searchableSnapshotFields,
       },
     },
     delete: {

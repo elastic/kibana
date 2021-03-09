@@ -31,14 +31,10 @@ import {
 } from '@elastic/eui';
 
 import { TextField, useForm, useFormData } from '../../../shared_imports';
-
 import { toasts } from '../../services/notification';
 import { createDocLink } from '../../services/documentation';
-
 import { UseField } from './form';
-
 import { savePolicy } from './save_policy';
-
 import {
   ColdPhase,
   DeletePhase,
@@ -48,11 +44,8 @@ import {
   Timeline,
   FormErrorsCallout,
 } from './components';
-
 import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
-
 import { useEditPolicyContext } from './edit_policy_context';
-
 import { FormInternal } from './types';
 
 export interface Props {
@@ -74,19 +67,24 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     policyName,
   } = useEditPolicyContext();
 
+  const [saveAsNew, setSaveAsNew] = useState(false);
+  const originalPolicyName: string = isNewPolicy ? '' : policyName!;
+
   const serializer = useMemo(() => {
     return createSerializer(isNewPolicy ? undefined : currentPolicy);
   }, [isNewPolicy, currentPolicy]);
 
-  const [saveAsNew, setSaveAsNew] = useState(false);
-  const originalPolicyName: string = isNewPolicy ? '' : policyName!;
+  const defaultValue = useMemo(
+    () => ({
+      ...currentPolicy,
+      name: originalPolicyName,
+    }),
+    [currentPolicy, originalPolicyName]
+  );
 
   const { form } = useForm({
     schema,
-    defaultValue: {
-      ...currentPolicy,
-      name: originalPolicyName,
-    },
+    defaultValue,
     deserializer,
     serializer,
   });

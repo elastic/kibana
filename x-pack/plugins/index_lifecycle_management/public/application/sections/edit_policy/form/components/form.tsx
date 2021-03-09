@@ -9,7 +9,7 @@ import React, { FunctionComponent } from 'react';
 
 import { Form as LibForm, FormHook } from '../../../../../shared_imports';
 
-import { ConfigurationIssuesProvider } from '../configuration_issues_context';
+import { ConfigurationProvider } from '../configuration_context';
 import { FormErrorsProvider } from '../form_errors_context';
 import { PhaseTimingsProvider } from '../phase_timings_context';
 import { GlobalFieldsProvider } from '../global_fields_context';
@@ -18,14 +18,16 @@ interface Props {
   form: FormHook;
 }
 
-export const Form: FunctionComponent<Props> = ({ form, children }) => (
-  <LibForm form={form}>
-    <ConfigurationIssuesProvider>
-      <FormErrorsProvider>
-        <GlobalFieldsProvider>
-          <PhaseTimingsProvider>{children}</PhaseTimingsProvider>
-        </GlobalFieldsProvider>
-      </FormErrorsProvider>
-    </ConfigurationIssuesProvider>
-  </LibForm>
-);
+export const Form: FunctionComponent<Props> = ({ form, children }) => {
+  return (
+    <LibForm form={form}>
+      <ConfigurationProvider>
+        <FormErrorsProvider>
+          <GlobalFieldsProvider>
+            <PhaseTimingsProvider>{children}</PhaseTimingsProvider>
+          </GlobalFieldsProvider>
+        </FormErrorsProvider>
+      </ConfigurationProvider>
+    </LibForm>
+  );
+};
