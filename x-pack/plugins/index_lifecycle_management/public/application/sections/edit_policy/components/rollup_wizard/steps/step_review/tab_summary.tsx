@@ -12,11 +12,9 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiTitle,
   EuiIconTip,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { InternalRollup } from '../../types';
@@ -42,17 +40,6 @@ export const TabSummary: FunctionComponent<Props> = ({ rollupAction }) => {
         aria-labelledby="rollupDetailDateHistogramTitle"
         data-test-subj="rollupDetailSummaryDateHistogramSection"
       >
-        <EuiTitle size="s">
-          <h3 id="rollupDetailDateHistogramTitle" data-test-subj="rollupDetailDateHistogramTitle">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.rollup.summary.sectionDateHistogramLabel"
-              defaultMessage="Date histogram"
-            />
-          </h3>
-        </EuiTitle>
-
-        <EuiSpacer size="s" />
-
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiDescriptionList textStyle="reverse">

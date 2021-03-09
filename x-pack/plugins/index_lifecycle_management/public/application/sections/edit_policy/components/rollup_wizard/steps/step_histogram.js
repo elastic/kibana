@@ -70,7 +70,7 @@ export class StepHistogram extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle data-test-subj="rollupJobCreateHistogramTitle">
+            <EuiTitle size="s" data-test-subj="rollupJobCreateHistogramTitle">
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepHistogramTitle"

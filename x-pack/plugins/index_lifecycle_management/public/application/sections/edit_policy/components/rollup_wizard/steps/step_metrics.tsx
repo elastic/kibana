@@ -363,7 +363,7 @@ export class StepMetrics extends Component<Props, State> {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle data-test-subj="rollupJobCreateMetricsTitle">
+            <EuiTitle size="s" data-test-subj="rollupJobCreateMetricsTitle">
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepMetricsTitle"

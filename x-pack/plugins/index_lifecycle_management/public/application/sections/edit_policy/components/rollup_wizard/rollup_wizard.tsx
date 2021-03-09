@@ -72,7 +72,7 @@ const stepIdToTitleMap = {
     defaultMessage: 'Metrics',
   }),
   [STEP_REVIEW]: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.steps.stepReviewTitle', {
-    defaultMessage: 'Review and save',
+    defaultMessage: 'Review',
   }),
 };
 
@@ -144,19 +144,31 @@ export class RollupWizard extends Component<Props, State> {
 
     const { value } = props;
     const stepsFields = deriveStepFields(value);
+    const stepsFieldErrors = this.getStepsFieldsErrors(stepsFields);
     this.state = {
       isNewRollup: !value,
       indexPattern: '',
-      checkpointStepId: stepIds[0],
+      checkpointStepId: this.calculateLastPossibleStepCheckPoint(stepsFieldErrors),
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
       previousStepId: undefined,
-      stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
+      stepsFieldErrors,
       areStepErrorsVisible: false,
       stepsFields,
     };
 
     this.lastIndexPatternValidationTime = 0;
+  }
+
+  calculateLastPossibleStepCheckPoint(stepsFieldErrors = this.state.stepsFieldErrors) {
+    for (const stepId of stepIds) {
+      for (const value of Object.values(stepsFieldErrors[stepId])) {
+        if (value) {
+          return stepId;
+        }
+      }
+    }
+    return stepIds[stepIds.length - 1];
   }
 
   componentDidMount() {
@@ -429,8 +441,7 @@ export class RollupWizard extends Component<Props, State> {
 
     const hasNextStep = nextStepId != null;
 
-    // Users can click the next step button as long as validation hasn't executed, and as long
-    // as we're not waiting on async validation to complete.
+    // Users can click the next step button as long as validation hasn't executed
     const canGoToNextStep = hasNextStep && (!areStepErrorsVisible || this.canGoToStep(nextStepId));
 
     return (

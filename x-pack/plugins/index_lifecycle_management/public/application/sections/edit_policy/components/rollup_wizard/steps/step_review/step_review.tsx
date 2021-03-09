@@ -8,7 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { InternalRollup } from '../../types';
 
@@ -21,7 +21,7 @@ interface Props {
 export const StepReview: FunctionComponent<Props> = ({ rollupAction }) => {
   return (
     <>
-      <EuiTitle data-test-subj="rollupJobCreateReviewTitle">
+      <EuiTitle size="s" data-test-subj="rollupJobCreateReviewTitle">
         <h2>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.rollup.create.stepReviewTitle"
@@ -29,6 +29,7 @@ export const StepReview: FunctionComponent<Props> = ({ rollupAction }) => {
           />
         </h2>
       </EuiTitle>
+      <EuiSpacer />
       <TabSummary rollupAction={rollupAction} />
     </>
   );

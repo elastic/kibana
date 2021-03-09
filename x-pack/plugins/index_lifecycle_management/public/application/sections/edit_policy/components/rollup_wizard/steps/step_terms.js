@@ -58,7 +58,7 @@ export class StepTerms extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle data-test-subj="rollupJobCreateTermsTitle">
+            <EuiTitle size="s" data-test-subj="rollupJobCreateTermsTitle">
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepTermsTitle"
