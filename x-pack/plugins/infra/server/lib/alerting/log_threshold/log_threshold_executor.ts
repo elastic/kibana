@@ -607,7 +607,7 @@ const getQueryMappingForComparator = (comparator: Comparator) => {
 };
 
 const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
-  return decodeOrThrow(UngroupedSearchQueryResponseRT)(await esClient.search(query));
+  return decodeOrThrow(UngroupedSearchQueryResponseRT)((await esClient.search(query)).body);
 };
 
 const getGroupedResults = async (query: object, esClient: ElasticsearchClient) => {
@@ -618,7 +618,7 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
     const queryWithAfterKey: any = { ...query };
     queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
     const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
-      await esClient.search(queryWithAfterKey)
+      (await esClient.search(queryWithAfterKey)).body
     );
     compositeGroupBuckets = [
       ...compositeGroupBuckets,
