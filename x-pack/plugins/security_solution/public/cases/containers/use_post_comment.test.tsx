@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CommentType } from '../../../../case/common/api';
+import { CommentType } from '../../../../cases/common/api';
 import { usePostComment, UsePostComment } from './use_post_comment';
 import { basicCaseId, basicSubCaseId } from './mock';
 import * as api from './api';

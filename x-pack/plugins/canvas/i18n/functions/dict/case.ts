@@ -24,7 +24,7 @@ export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
     },
   }),
   args: {
-    when: i18n.translate('xpack.canvas.functions.case.args.whenHelpText', {
+    when: i18n.translate('xpack.canvas.functions.cases.args.whenHelpText', {
       defaultMessage:
         'The value compared to the {CONTEXT} to see if they are equal. The {WHEN_ARG} argument is ignored when the {IF_ARG} argument is also specified.',
       values: {
@@ -33,7 +33,7 @@ export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
         WHEN_ARG,
       },
     }),
-    if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
+    if: i18n.translate('xpack.canvas.functions.cases.args.ifHelpText', {
       defaultMessage:
         'This value indicates whether the condition is met. The {IF_ARG} argument overrides the {WHEN_ARG} argument when both are provided.',
       values: {
@@ -41,7 +41,7 @@ export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
         WHEN_ARG,
       },
     }),
-    then: i18n.translate('xpack.canvas.functions.case.args.thenHelpText', {
+    then: i18n.translate('xpack.canvas.functions.cases.args.thenHelpText', {
       defaultMessage: 'The value returned if the condition is met.',
     }),
   },

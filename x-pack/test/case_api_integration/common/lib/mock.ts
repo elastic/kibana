@@ -11,7 +11,7 @@ import {
   createAlertsString,
   isCommentGeneratedAlert,
   transformConnectorComment,
-} from '../../../../plugins/case/server/connectors';
+} from '../../../../plugins/cases/server/connectors';
 import {
   CasePostRequest,
   CaseResponse,
@@ -28,7 +28,7 @@ import {
   AssociationType,
   SubCasesFindResponse,
   CommentRequest,
-} from '../../../../plugins/case/common/api';
+} from '../../../../plugins/cases/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
