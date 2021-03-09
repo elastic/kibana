@@ -38,7 +38,7 @@ describe('loadActionTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/list_action_types",
+        "/api/actions/list_connector_types",
       ]
     `);
   });
@@ -74,7 +74,7 @@ describe('createActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/action",
+        "/api/actions/connector",
         Object {
           "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
@@ -100,7 +100,7 @@ describe('updateActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/action/123",
+        "/api/actions/connector/123",
         Object {
           "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
@@ -118,13 +118,13 @@ describe('deleteActions', () => {
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/actions/action/1",
+          "/api/actions/connector/1",
         ],
         Array [
-          "/api/actions/action/2",
+          "/api/actions/connector/2",
         ],
         Array [
-          "/api/actions/action/3",
+          "/api/actions/connector/3",
         ],
       ]
     `);
@@ -151,7 +151,7 @@ describe('executeAction', () => {
     });
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/action/123/_execute",
+        "/api/actions/connector/123/_execute",
         Object {
           "body": "{\\"params\\":{\\"stringParams\\":\\"someString\\",\\"numericParams\\":123}}",
         },

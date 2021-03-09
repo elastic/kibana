@@ -17,7 +17,7 @@ export async function getIncidentTypes({
   signal: AbortSignal;
   connectorId: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'incidentTypes', subActionParams: {} },
     }),
@@ -34,7 +34,7 @@ export async function getSeverity({
   signal: AbortSignal;
   connectorId: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'severity', subActionParams: {} },
     }),

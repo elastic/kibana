@@ -11,7 +11,7 @@ import type { ActionConnector, ActionConnectorWithoutId, ActionType } from '../.
 import { ActionTypeExecutorResult } from '../../../../../plugins/actions/common';
 
 export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
-  return await http.get(`${BASE_ACTION_API_PATH}/list_action_types`);
+  return await http.get(`${BASE_ACTION_API_PATH}/list_connector_types`);
 }
 
 export async function loadAllActions({ http }: { http: HttpSetup }): Promise<ActionConnector[]> {
@@ -25,7 +25,7 @@ export async function createActionConnector({
   http: HttpSetup;
   connector: Omit<ActionConnectorWithoutId, 'referencedByCount'>;
 }): Promise<ActionConnector> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action`, {
+  return await http.post(`${BASE_ACTION_API_PATH}/connector`, {
     body: JSON.stringify(connector),
   });
 }
@@ -39,7 +39,7 @@ export async function updateActionConnector({
   connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
-  return await http.put(`${BASE_ACTION_API_PATH}/action/${id}`, {
+  return await http.put(`${BASE_ACTION_API_PATH}/connector/${id}`, {
     body: JSON.stringify({
       name: connector.name,
       config: connector.config,
@@ -57,7 +57,7 @@ export async function deleteActions({
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
-  await Promise.all(ids.map((id) => http.delete(`${BASE_ACTION_API_PATH}/action/${id}`))).then(
+  await Promise.all(ids.map((id) => http.delete(`${BASE_ACTION_API_PATH}/connector/${id}`))).then(
     function (fulfilled) {
       successes.push(...fulfilled);
     },
@@ -77,7 +77,7 @@ export async function executeAction({
   http: HttpSetup;
   params: Record<string, unknown>;
 }): Promise<ActionTypeExecutorResult<unknown>> {
-  return http.post(`${BASE_ACTION_API_PATH}/action/${id}/_execute`, {
+  return http.post(`${BASE_ACTION_API_PATH}/connector/${id}/_execute`, {
     body: JSON.stringify({ params }),
   });
 }
