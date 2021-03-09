@@ -243,7 +243,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     getModelPlotOutput(
       jobId: string,
       detectorIndex: number,
-      criteriaFields: any[],
+      criteriaFields: CriteriaField[],
       earliestMs: number,
       latestMs: number,
       intervalMs: number,

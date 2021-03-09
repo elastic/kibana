@@ -29,9 +29,10 @@ import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/ag
 import { parseInterval } from '../../../common/util/parse_interval';
 import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
 import { getChartType, chartLimits } from '../util/chart_utils';
-import { MlResultsService } from './results_service';
+import { CriteriaField, MlResultsService } from './results_service';
 import { TimefilterContract } from '../../../../../../src/plugins/data/public';
 import { CHART_TYPE } from '../explorer/explorer_constants';
+import type { ChartRecord } from '../explorer/explorer_utils';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -39,9 +40,6 @@ const ML_TIME_FIELD_NAME = 'timestamp';
 const USE_OVERALL_CHART_LIMITS = false;
 const MAX_CHARTS_PER_ROW = 4;
 
-interface ChartRecord extends RecordForInfluencer {
-  function: string;
-}
 interface SeriesConfig {
   jobId: JobId;
   detectorIndex: number;
@@ -338,7 +336,7 @@ export class AnomalyExplorerService {
   public async getAnomalyData(
     combinedJobRecords: Record<string, CombinedJob>,
     chartsContainerWidth: number,
-    anomalyRecords: RecordForInfluencer[],
+    anomalyRecords: ChartRecord[] | undefined,
     selectedEarliestMs: number,
     selectedLatestMs: number,
     timefilter: TimefilterContract,
@@ -348,6 +346,7 @@ export class AnomalyExplorerService {
     const data = this.getDefaultChartsData();
 
     const containerWith = chartsContainerWidth + SWIM_LANE_LABEL_WIDTH;
+    if (anomalyRecords === undefined) return;
     const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= severity;
     });
@@ -469,7 +468,7 @@ export class AnomalyExplorerService {
           .toPromise();
       } else {
         // Extract the partition, by, over fields on which to filter.
-        const criteriaFields = [];
+        const criteriaFields: CriteriaField[] = [];
         const detector = job.analysis_config.detectors[detectorIndex];
         if (detector.partition_field_name !== undefined) {
           const partitionEntity = find(entityFields, {

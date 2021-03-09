@@ -544,7 +544,8 @@ export async function loadDataForCharts(
   latestMs,
   influencers = [],
   selectedCells,
-  influencersFilterQuery
+  influencersFilterQuery,
+  useRequestCount = true
 ) {
   return new Promise((resolve) => {
     // Just skip doing the request when this function
@@ -573,7 +574,7 @@ export async function loadDataForCharts(
       )
       .then((resp) => {
         // Ignore this response if it's returned by an out of date promise
-        if (newRequestCount < requestCount) {
+        if (useRequestCount && newRequestCount < requestCount) {
           resolve([]);
         }
 

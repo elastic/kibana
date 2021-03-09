@@ -76,7 +76,8 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
     refresh,
     services,
     chartWidth,
-    severity.val
+    severity.val,
+    id
   );
 
   useEffect(() => {

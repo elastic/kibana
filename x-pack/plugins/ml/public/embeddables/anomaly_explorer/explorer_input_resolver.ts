@@ -12,7 +12,6 @@ import {
   catchError,
   debounceTime,
   distinctUntilChanged,
-  mergeMap,
   pluck,
   skipWhile,
   startWith,
@@ -22,7 +21,6 @@ import {
 import { CoreStart } from 'kibana/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
-import { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
@@ -44,6 +42,7 @@ import {
 } from '..';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { AnomalyChartData } from '../../application/services/anomaly_explorer_service';
+import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -79,12 +78,10 @@ export function useExplorerInputResolver(
   const { timefilter } = dataServices.query.timefilter;
 
   const [chartsData, setChartsData] = useState<any>();
-  const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>();
   const [error, setError] = useState<Error | null>();
   const [isLoading, setIsLoading] = useState(false);
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
-  // const selectedCells$ = useMemo(() => new Subject<AppStateSelectedCells | undefined>(), []);
   const severity$ = useMemo(() => new Subject<number>(), []);
 
   const timeBuckets = useMemo(() => {
@@ -101,7 +98,6 @@ export function useExplorerInputResolver(
       getJobsObservable(embeddableInput, anomalyDetectorService, setError),
       embeddableInput,
       chartWidth$.pipe(skipWhile((v) => !v)),
-      // selectedCells$,
       severity$,
       refresh.pipe(startWith(null)),
     ])
@@ -113,22 +109,11 @@ export function useExplorerInputResolver(
             // couldn't load the list of jobs
             return of(undefined);
           }
-          const {
-            viewBy,
-            swimlaneType: swimlaneTypeInput,
-            maxSeriesToPlot,
-            timeRange: timeRangeInput,
-            filters,
-            query,
-          } = input;
+          const { viewBy, maxSeriesToPlot, timeRange: timeRangeInput, filters, query } = input;
 
           const viewBySwimlaneFieldName = viewBy;
 
           anomalyTimelineService.setTimeRange(timeRangeInput);
-
-          if (!swimlaneType) {
-            setSwimlaneType(swimlaneTypeInput);
-          }
 
           const explorerJobs: ExplorerJob[] = jobs.map((job) => {
             const bucketSpan = parseInterval(job.analysis_config.bucket_span);
@@ -138,7 +123,8 @@ export function useExplorerInputResolver(
               bucketSpanSeconds: bucketSpan!.asSeconds(),
             };
           });
-          if (viewBySwimlaneFieldName !== undefined) return of(undefined);
+          if (viewBySwimlaneFieldName === undefined) return of(undefined);
+
           let influencersFilterQuery: any;
           try {
             influencersFilterQuery = processFilters(filters, query);
@@ -149,11 +135,12 @@ export function useExplorerInputResolver(
           }
 
           const bounds = anomalyTimelineService.getTimeBounds();
+
           // Can be from input time range or from the timefilter bar
           const selections: AppStateSelectedCells = {
-            lanes: ['Overall'],
+            lanes: [OVERALL_LABEL],
             times: [bounds.min?.unix()!, bounds.max?.unix()!],
-            type: 'overall',
+            type: SWIMLANE_TYPE.OVERALL,
           };
 
           const selectionInfluencers = getSelectionInfluencers(
@@ -178,10 +165,11 @@ export function useExplorerInputResolver(
               timeRange.latestMs,
               selectionInfluencers,
               selections,
-              influencersFilterQuery
+              influencersFilterQuery,
+              false
             ),
           }).pipe(
-            mergeMap(({ combinedJobs, anomalyChartRecords }) => {
+            switchMap(({ combinedJobs, anomalyChartRecords }) => {
               const combinedJobRecords: Record<
                 string,
                 CombinedJob
@@ -194,7 +182,6 @@ export function useExplorerInputResolver(
                   anomalyExplorerService.getAnomalyData(
                     combinedJobRecords,
                     swimlaneContainerWidth,
-                    // @ts-ignore
                     anomalyChartRecords,
                     timeRange.earliestMs,
                     timeRange.latestMs,
@@ -225,11 +212,6 @@ export function useExplorerInputResolver(
       subscription.unsubscribe();
     };
   }, []);
-
-  // useEffect(() => {
-  //   if (selectedCells === undefined) return;
-  //   selectedCells$.next(selectedCells);
-  // }, [selectedCells]);
 
   useEffect(() => {
     chartWidth$.next(chartWidth);

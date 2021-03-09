@@ -9,6 +9,7 @@ import { AnnotationsTable } from '../../../common/types/annotations';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { SwimlaneType } from './explorer_constants';
 import { TimeRangeBounds } from '../util/time_buckets';
+import { RecordForInfluencer } from '../services/results_service/results_service';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -28,6 +29,10 @@ export declare interface SwimlaneData {
   laneLabels: string[];
   points: SwimlanePoint[];
   interval: number;
+}
+
+interface ChartRecord extends RecordForInfluencer {
+  function: string;
 }
 
 export declare interface OverallSwimlaneData extends SwimlaneData {
@@ -135,8 +140,10 @@ export declare const loadDataForCharts: (
   latestMs: number,
   influencers: any[],
   selectedCells: AppStateSelectedCells | undefined,
-  influencersFilterQuery: any
-) => Promise<any[] | undefined>;
+  influencersFilterQuery: any,
+  // choose whether or not to keep track of the request could be out of date
+  useRequestCount: boolean
+) => Promise<ChartRecord[] | undefined>;
 
 export declare const loadFilteredTopInfluencers: (
   jobIds: string[],
