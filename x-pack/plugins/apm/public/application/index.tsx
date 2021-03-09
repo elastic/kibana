@@ -35,6 +35,7 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
+import { AnomalyDetectionJobsContextProvider } from '../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 
 const MainContainer = euiStyled.div`
   height: 100%;
@@ -84,7 +85,9 @@ export function ApmAppRoot({
             <Router history={history}>
               <UrlParamsProvider>
                 <LicenseProvider>
-                  <App />
+                  <AnomalyDetectionJobsContextProvider>
+                    <App />
+                  </AnomalyDetectionJobsContextProvider>
                 </LicenseProvider>
               </UrlParamsProvider>
             </Router>
