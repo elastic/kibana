@@ -1,3692 +1,689 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Fleet Endpoints EPM Endpoints installs packages from direct upload should install a robust package and return the correct package information after validation 1`] = `
+exports[`Fleet Endpoints EPM Endpoints installs packages from direct upload should install a zip archive correctly and package info should return correctly after validation 1`] = `
 Object {
-  "response": Object {
-    "assets": Object {
-      "elasticsearch": Object {
-        "ingest_pipeline": Array [
-          Object {
-            "dataset": "syslog",
-            "file": "default.yml",
-            "path": "system-0.10.7/data_stream/syslog/elasticsearch/ingest_pipeline/default.yml",
-            "pkgkey": "system-0.10.7",
-            "service": "elasticsearch",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "dataset": "syslog",
-            "file": "default.json",
-            "path": "system-0.10.7/data_stream/syslog/elasticsearch/ingest_pipeline/default.json",
-            "pkgkey": "system-0.10.7",
-            "service": "elasticsearch",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "dataset": "security",
-            "file": "default.yml",
-            "path": "system-0.10.7/data_stream/security/elasticsearch/ingest_pipeline/default.yml",
-            "pkgkey": "system-0.10.7",
-            "service": "elasticsearch",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "dataset": "auth",
-            "file": "default.yml",
-            "path": "system-0.10.7/data_stream/auth/elasticsearch/ingest_pipeline/default.yml",
-            "pkgkey": "system-0.10.7",
-            "service": "elasticsearch",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "dataset": "auth",
-            "file": "default.json",
-            "path": "system-0.10.7/data_stream/auth/elasticsearch/ingest_pipeline/default.json",
-            "pkgkey": "system-0.10.7",
-            "service": "elasticsearch",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "dataset": "system",
-            "file": "default.yml",
-            "path": "system-0.10.7/data_stream/system/elasticsearch/ingest_pipeline/default.yml",
-            "pkgkey": "system-0.10.7",
-            "service": "elasticsearch",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "dataset": "application",
-            "file": "default.yml",
-            "path": "system-0.10.7/data_stream/application/elasticsearch/ingest_pipeline/default.yml",
-            "pkgkey": "system-0.10.7",
-            "service": "elasticsearch",
-            "type": "ingest_pipeline",
-          },
-        ],
-      },
-      "kibana": Object {
-        "dashboard": Array [
-          Object {
-            "file": "system-71f720f0-ff18-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/dashboard/system-71f720f0-ff18-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-d401ef40-a7d5-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/dashboard/system-d401ef40-a7d5-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-Winlogbeat-Dashboard.json",
-            "path": "system-0.10.7/kibana/dashboard/system-Winlogbeat-Dashboard.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-01c54730-fee6-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/dashboard/system-01c54730-fee6-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-277876d0-fa2c-11e6-bbd3-29c986c96e5a.json",
-            "path": "system-0.10.7/kibana/dashboard/system-277876d0-fa2c-11e6-bbd3-29c986c96e5a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-Filebeat-syslog-dashboard.json",
-            "path": "system-0.10.7/kibana/dashboard/system-Filebeat-syslog-dashboard.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-Metricbeat-system-overview.json",
-            "path": "system-0.10.7/kibana/dashboard/system-Metricbeat-system-overview.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-8223bed0-b9e9-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/dashboard/system-8223bed0-b9e9-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-035846a0-a249-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/dashboard/system-035846a0-a249-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-5517a150-f9ce-11e6-8115-a7c18106d86a.json",
-            "path": "system-0.10.7/kibana/dashboard/system-5517a150-f9ce-11e6-8115-a7c18106d86a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-bb858830-f412-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/dashboard/system-bb858830-f412-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-bae11b00-9bfc-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/dashboard/system-bae11b00-9bfc-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-f49f3170-9ffc-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/dashboard/system-f49f3170-9ffc-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-79ffd6e0-faa0-11e6-947f-177f697178b8.json",
-            "path": "system-0.10.7/kibana/dashboard/system-79ffd6e0-faa0-11e6-947f-177f697178b8.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-          Object {
-            "file": "system-0d3f2380-fa78-11e6-ae9b-81e5311e8cab.json",
-            "path": "system-0.10.7/kibana/dashboard/system-0d3f2380-fa78-11e6-ae9b-81e5311e8cab.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "dashboard",
-          },
-        ],
-        "search": Array [
-          Object {
-            "file": "system-7e178c80-fee1-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/search/system-7e178c80-fee1-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-62439dc0-f9c9-11e6-a747-6121780e0414.json",
-            "path": "system-0.10.7/kibana/search/system-62439dc0-f9c9-11e6-a747-6121780e0414.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-6f4071a0-7a78-11ea-bc9a-0baf2ca323a3.json",
-            "path": "system-0.10.7/kibana/search/system-6f4071a0-7a78-11ea-bc9a-0baf2ca323a3.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-b6f321e0-fa25-11e6-bbd3-29c986c96e5a.json",
-            "path": "system-0.10.7/kibana/search/system-b6f321e0-fa25-11e6-bbd3-29c986c96e5a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-9066d5b0-fef2-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/search/system-9066d5b0-fef2-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-757510b0-a87f-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/search/system-757510b0-a87f-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-324686c0-fefb-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/search/system-324686c0-fefb-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-8030c1b0-fa77-11e6-ae9b-81e5311e8cab.json",
-            "path": "system-0.10.7/kibana/search/system-8030c1b0-fa77-11e6-ae9b-81e5311e8cab.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-eb0039f0-fa7f-11e6-a1df-a78bd7504d38.json",
-            "path": "system-0.10.7/kibana/search/system-eb0039f0-fa7f-11e6-a1df-a78bd7504d38.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-06b6b060-7a80-11ea-bc9a-0baf2ca323a3.json",
-            "path": "system-0.10.7/kibana/search/system-06b6b060-7a80-11ea-bc9a-0baf2ca323a3.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-ce71c9a0-a25e-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/search/system-ce71c9a0-a25e-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-          Object {
-            "file": "system-Syslog-system-logs.json",
-            "path": "system-0.10.7/kibana/search/system-Syslog-system-logs.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "search",
-          },
-        ],
-        "visualization": Array [
-          Object {
-            "file": "system-bf45dc50-ff1a-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-bf45dc50-ff1a-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-2c71e0f0-9c0d-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-2c71e0f0-9c0d-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-4d546850-1b15-11e7-b09e-037021c4f8df.json",
-            "path": "system-0.10.7/kibana/visualization/system-4d546850-1b15-11e7-b09e-037021c4f8df.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-855957d0-bcdd-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-855957d0-bcdd-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-546febc0-f49b-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-546febc0-f49b-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-bb9cf7a0-f49d-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-bb9cf7a0-f49d-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-ffebe440-f419-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-ffebe440-f419-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-Number-of-Events.json",
-            "path": "system-0.10.7/kibana/visualization/system-Number-of-Events.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-Event-Levels.json",
-            "path": "system-0.10.7/kibana/visualization/system-Event-Levels.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-e22c6f40-f498-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-e22c6f40-f498-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5c9ee410-9b74-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-5c9ee410-9b74-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-dc589770-fa2b-11e6-bbd3-29c986c96e5a.json",
-            "path": "system-0.10.7/kibana/visualization/system-dc589770-fa2b-11e6-bbd3-29c986c96e5a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-4e4bb1e0-1b1b-11e7-b09e-037021c4f8df.json",
-            "path": "system-0.10.7/kibana/visualization/system-4e4bb1e0-1b1b-11e7-b09e-037021c4f8df.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-78b74f30-f9cd-11e6-8115-a7c18106d86a.json",
-            "path": "system-0.10.7/kibana/visualization/system-78b74f30-f9cd-11e6-8115-a7c18106d86a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-97c70300-ff1c-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-97c70300-ff1c-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5e19ff80-231c-11ea-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-5e19ff80-231c-11ea-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-7322f9f0-ff1c-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-7322f9f0-ff1c-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-089b85d0-1b16-11e7-b09e-037021c4f8df.json",
-            "path": "system-0.10.7/kibana/visualization/system-089b85d0-1b16-11e7-b09e-037021c4f8df.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-Navigation.json",
-            "path": "system-0.10.7/kibana/visualization/system-Navigation.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-175a5760-a7d5-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-175a5760-a7d5-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-117f5a30-9b71-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-117f5a30-9b71-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-a5f664c0-f49a-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-a5f664c0-f49a-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-Number-of-Events-Over-Time-By-Event-Log.json",
-            "path": "system-0.10.7/kibana/visualization/system-Number-of-Events-Over-Time-By-Event-Log.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-0cb2d940-bcde-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-0cb2d940-bcde-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-4b683ac0-a7d7-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-4b683ac0-a7d7-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-7de2e3f0-9b4d-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-7de2e3f0-9b4d-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-a79395f0-6aba-11ea-896f-0d70f7ec3956.json",
-            "path": "system-0.10.7/kibana/visualization/system-a79395f0-6aba-11ea-896f-0d70f7ec3956.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-25f31ee0-9c23-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-25f31ee0-9c23-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-98884120-f49d-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-98884120-f49d-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-84502430-bce8-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-84502430-bce8-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-568a8130-bcde-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-568a8130-bcde-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-fa876300-231a-11ea-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-fa876300-231a-11ea-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-58fb9480-9b46-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-58fb9480-9b46-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-855899e0-1b1c-11e7-b09e-037021c4f8df.json",
-            "path": "system-0.10.7/kibana/visualization/system-855899e0-1b1c-11e7-b09e-037021c4f8df.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-Syslog-events-by-hostname.json",
-            "path": "system-0.10.7/kibana/visualization/system-Syslog-events-by-hostname.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-1b6725f0-ff1d-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-1b6725f0-ff1d-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-Syslog-hostnames-and-processes.json",
-            "path": "system-0.10.7/kibana/visualization/system-Syslog-hostnames-and-processes.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-ee0319a0-bcd4-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-ee0319a0-bcd4-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-c5e3cf90-4d60-11e7-9a4c-ed99bbcaa42b.json",
-            "path": "system-0.10.7/kibana/visualization/system-c5e3cf90-4d60-11e7-9a4c-ed99bbcaa42b.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-abf96c10-bcea-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-abf96c10-bcea-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-99381c80-4d60-11e7-9a4c-ed99bbcaa42b.json",
-            "path": "system-0.10.7/kibana/visualization/system-99381c80-4d60-11e7-9a4c-ed99bbcaa42b.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-327417e0-8462-11e7-bab8-bd2f0fb42c54.json",
-            "path": "system-0.10.7/kibana/visualization/system-327417e0-8462-11e7-bab8-bd2f0fb42c54.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-522ee670-1b92-11e7-bec4-a5e9ec5cab8b.json",
-            "path": "system-0.10.7/kibana/visualization/system-522ee670-1b92-11e7-bec4-a5e9ec5cab8b.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-341ffe70-f9ce-11e6-8115-a7c18106d86a.json",
-            "path": "system-0.10.7/kibana/visualization/system-341ffe70-f9ce-11e6-8115-a7c18106d86a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-ce867840-f49e-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-ce867840-f49e-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-3cec3eb0-f9d3-11e6-8a3e-2b904044ea1d.json",
-            "path": "system-0.10.7/kibana/visualization/system-3cec3eb0-f9d3-11e6-8a3e-2b904044ea1d.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-729443b0-a7d6-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-729443b0-a7d6-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-421f0610-af98-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-421f0610-af98-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-a13bf640-fee8-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-a13bf640-fee8-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-0620c3d0-bcd4-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-0620c3d0-bcd4-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-12667040-fa80-11e6-a1df-a78bd7504d38.json",
-            "path": "system-0.10.7/kibana/visualization/system-12667040-fa80-11e6-a1df-a78bd7504d38.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-c6f2ffd0-4d17-11e7-a196-69b9a7a020a9.json",
-            "path": "system-0.10.7/kibana/visualization/system-c6f2ffd0-4d17-11e7-a196-69b9a7a020a9.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-da5ffe40-bcd9-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-da5ffe40-bcd9-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-9e534190-f49d-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-9e534190-f49d-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-e121b140-fa78-11e6-a1df-a78bd7504d38.json",
-            "path": "system-0.10.7/kibana/visualization/system-e121b140-fa78-11e6-a1df-a78bd7504d38.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-825fdb80-4d1d-11e7-b5f2-2b7c1895bf32.json",
-            "path": "system-0.10.7/kibana/visualization/system-825fdb80-4d1d-11e7-b5f2-2b7c1895bf32.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-f42f3b20-fee6-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-f42f3b20-fee6-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-d3166e80-1b91-11e7-bec4-a5e9ec5cab8b.json",
-            "path": "system-0.10.7/kibana/visualization/system-d3166e80-1b91-11e7-bec4-a5e9ec5cab8b.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-c359b020-bcdd-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-c359b020-bcdd-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-2e224660-1b19-11e7-b09e-037021c4f8df.json",
-            "path": "system-0.10.7/kibana/visualization/system-2e224660-1b19-11e7-b09e-037021c4f8df.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-60301890-ff1d-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-60301890-ff1d-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-6f0f2ea0-f414-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-6f0f2ea0-f414-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-a3c3f350-9b6d-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-a3c3f350-9b6d-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-3d65d450-a9c3-11e7-af20-67db8aecb295.json",
-            "path": "system-0.10.7/kibana/visualization/system-3d65d450-a9c3-11e7-af20-67db8aecb295.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-1f271bc0-231a-11ea-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-1f271bc0-231a-11ea-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-83e12df0-1b91-11e7-bec4-a5e9ec5cab8b.json",
-            "path": "system-0.10.7/kibana/visualization/system-83e12df0-1b91-11e7-bec4-a5e9ec5cab8b.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-34f97ee0-1b96-11e7-8ada-3df93aab833e.json",
-            "path": "system-0.10.7/kibana/visualization/system-34f97ee0-1b96-11e7-8ada-3df93aab833e.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-804dd400-a248-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-804dd400-a248-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-7cdb1330-4d1a-11e7-a196-69b9a7a020a9.json",
-            "path": "system-0.10.7/kibana/visualization/system-7cdb1330-4d1a-11e7-a196-69b9a7a020a9.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-26732e20-1b91-11e7-bec4-a5e9ec5cab8b.json",
-            "path": "system-0.10.7/kibana/visualization/system-26732e20-1b91-11e7-bec4-a5e9ec5cab8b.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-7a329a00-a7d5-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-7a329a00-a7d5-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-da2110c0-bcea-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-da2110c0-bcea-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-51164310-fa2b-11e6-bbd3-29c986c96e5a.json",
-            "path": "system-0.10.7/kibana/visualization/system-51164310-fa2b-11e6-bbd3-29c986c96e5a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-8ef59f90-6ab8-11ea-896f-0d70f7ec3956.json",
-            "path": "system-0.10.7/kibana/visualization/system-8ef59f90-6ab8-11ea-896f-0d70f7ec3956.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-96976150-4d5d-11e7-aa29-87a97a796de6.json",
-            "path": "system-0.10.7/kibana/visualization/system-96976150-4d5d-11e7-aa29-87a97a796de6.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-bc165210-f4b8-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-bc165210-f4b8-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-c9d959f0-ff1d-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-c9d959f0-ff1d-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-346bb290-fa80-11e6-a1df-a78bd7504d38.json",
-            "path": "system-0.10.7/kibana/visualization/system-346bb290-fa80-11e6-a1df-a78bd7504d38.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-9dd22440-ff1d-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-9dd22440-ff1d-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-ee292bc0-f499-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-ee292bc0-f499-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-2dc6b820-b9e8-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-2dc6b820-b9e8-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-Sources.json",
-            "path": "system-0.10.7/kibana/visualization/system-Sources.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-102efd20-bcdd-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-102efd20-bcdd-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-19e123b0-4d5a-11e7-aee5-fdc812cc3bec.json",
-            "path": "system-0.10.7/kibana/visualization/system-19e123b0-4d5a-11e7-aee5-fdc812cc3bec.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-d770b040-9b35-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-d770b040-9b35-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-d3a5fec0-ff18-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-d3a5fec0-ff18-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-4bedf650-9ffd-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-4bedf650-9ffd-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-c2ea73f0-a4bd-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-c2ea73f0-a4bd-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-e2516c10-a249-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-e2516c10-a249-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5dd15c00-fa78-11e6-ae9b-81e5311e8cab.json",
-            "path": "system-0.10.7/kibana/visualization/system-5dd15c00-fa78-11e6-ae9b-81e5311e8cab.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-8f20c950-bcd4-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-8f20c950-bcd4-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-e0f001c0-1b18-11e7-b09e-037021c4f8df.json",
-            "path": "system-0.10.7/kibana/visualization/system-e0f001c0-1b18-11e7-b09e-037021c4f8df.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-6b7b9a40-faa1-11e6-86b1-cd7735ff7e23.json",
-            "path": "system-0.10.7/kibana/visualization/system-6b7b9a40-faa1-11e6-86b1-cd7735ff7e23.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-fe064790-1b1f-11e7-bec4-a5e9ec5cab8b.json",
-            "path": "system-0.10.7/kibana/visualization/system-fe064790-1b1f-11e7-bec4-a5e9ec5cab8b.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-4ac8f5f0-bcfe-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-4ac8f5f0-bcfe-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-400b63e0-f49a-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-400b63e0-f49a-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-006d75f0-9c03-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-006d75f0-9c03-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-f398d2f0-fa77-11e6-ae9b-81e5311e8cab.json",
-            "path": "system-0.10.7/kibana/visualization/system-f398d2f0-fa77-11e6-ae9b-81e5311e8cab.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-b89b0c90-9b41-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-b89b0c90-9b41-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-caf4d2b0-9b76-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-caf4d2b0-9b76-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-26877510-9b72-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-26877510-9b72-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-aa31c9d0-9b75-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-aa31c9d0-9b75-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-ab2d1e90-1b1a-11e7-b09e-037021c4f8df.json",
-            "path": "system-0.10.7/kibana/visualization/system-ab2d1e90-1b1a-11e7-b09e-037021c4f8df.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5d117970-9ffd-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-5d117970-9ffd-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-Top-Event-IDs.json",
-            "path": "system-0.10.7/kibana/visualization/system-Top-Event-IDs.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-0f2f5280-feeb-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-0f2f5280-feeb-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-b5f38780-fee6-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-b5f38780-fee6-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-860706a0-9bfd-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-860706a0-9bfd-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-18348f30-a24d-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-18348f30-a24d-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-2084e300-a884-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-2084e300-a884-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-21aadac0-9c0b-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-21aadac0-9c0b-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-d56ee420-fa79-11e6-a1df-a78bd7504d38.json",
-            "path": "system-0.10.7/kibana/visualization/system-d56ee420-fa79-11e6-a1df-a78bd7504d38.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-ab6f8d80-bce8-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-ab6f8d80-bce8-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-d2e80340-4d5c-11e7-aa29-87a97a796de6.json",
-            "path": "system-0.10.7/kibana/visualization/system-d2e80340-4d5c-11e7-aa29-87a97a796de6.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5e7f0ed0-bcd2-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-5e7f0ed0-bcd2-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5c7af030-fa2a-11e6-bbd3-29c986c96e5a.json",
-            "path": "system-0.10.7/kibana/visualization/system-5c7af030-fa2a-11e6-bbd3-29c986c96e5a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-fee83900-f49f-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-fee83900-f49f-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5eeaafd0-fee7-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-5eeaafd0-fee7-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-abd44840-9c0f-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-abd44840-9c0f-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-0622da40-9bfd-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-0622da40-9bfd-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-1b5f17d0-feea-11e9-8405-516218e3d268.json",
-            "path": "system-0.10.7/kibana/visualization/system-1b5f17d0-feea-11e9-8405-516218e3d268.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-1aae9140-1b93-11e7-8ada-3df93aab833e.json",
-            "path": "system-0.10.7/kibana/visualization/system-1aae9140-1b93-11e7-8ada-3df93aab833e.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-590a60f0-5d87-11e7-8884-1bb4c3b890e4.json",
-            "path": "system-0.10.7/kibana/visualization/system-590a60f0-5d87-11e7-8884-1bb4c3b890e4.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-33462600-9b47-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-33462600-9b47-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-162d7ab0-a7d6-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-162d7ab0-a7d6-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5d92b100-bce8-11e9-b6a2-c9b4015c4baf.json",
-            "path": "system-0.10.7/kibana/visualization/system-5d92b100-bce8-11e9-b6a2-c9b4015c4baf.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-e20c02d0-9b48-11ea-87e4-49f31ec44891.json",
-            "path": "system-0.10.7/kibana/visualization/system-e20c02d0-9b48-11ea-87e4-49f31ec44891.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-a909b930-685f-11ea-896f-0d70f7ec3956.json",
-            "path": "system-0.10.7/kibana/visualization/system-a909b930-685f-11ea-896f-0d70f7ec3956.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-d16bb400-f9cc-11e6-8115-a7c18106d86a.json",
-            "path": "system-0.10.7/kibana/visualization/system-d16bb400-f9cc-11e6-8115-a7c18106d86a.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-bfa5e400-1b16-11e7-b09e-037021c4f8df.json",
-            "path": "system-0.10.7/kibana/visualization/system-bfa5e400-1b16-11e7-b09e-037021c4f8df.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-          Object {
-            "file": "system-5bb93ed0-a249-11e9-a422-d144027429da.json",
-            "path": "system-0.10.7/kibana/visualization/system-5bb93ed0-a249-11e9-a422-d144027429da.json",
-            "pkgkey": "system-0.10.7",
-            "service": "kibana",
-            "type": "visualization",
-          },
-        ],
-      },
-    },
-    "categories": Array [
-      "os_system",
-      "security",
-    ],
-    "conditions": Object {
-      "kibana.version": "^7.11.0",
-    },
-    "data_streams": Array [
-      Object {
-        "dataset": "system.diskio",
-        "ingest_pipeline": "default",
-        "path": "diskio",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System diskio metrics",
-            "input": "system/metrics",
-            "title": "System diskio metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-              Object {
-                "description": "Provide a specific list of devices to monitor. By default, all devices are monitored.
-",
-                "multi": true,
-                "name": "diskio.include_devices",
-                "required": false,
-                "show_user": true,
-                "title": "Include Devices",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System diskio metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.syslog",
-        "ingest_pipeline": "default",
-        "path": "syslog",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System syslog logs using log input",
-            "input": "logfile",
-            "template_path": "log.yml.hbs",
-            "title": "System syslog logs (log)",
-            "vars": Array [
-              Object {
-                "default": Array [
-                  "/var/log/messages*",
-                  "/var/log/syslog*",
-                ],
-                "multi": true,
-                "name": "paths",
-                "required": true,
-                "show_user": true,
-                "title": "Paths",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System syslog logs",
-        "type": "logs",
-      },
-      Object {
-        "dataset": "system.core",
-        "ingest_pipeline": "default",
-        "path": "core",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System core metrics",
-            "enabled": false,
-            "input": "system/metrics",
-            "title": "System core metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-              Object {
-                "default": Array [
-                  "percentages",
-                ],
-                "description": "How to report core metrics. Can be \\"percentages\\" or \\"ticks\\"
-",
-                "multi": true,
-                "name": "core.metrics",
-                "required": true,
-                "show_user": true,
-                "title": "Core Metrics",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System core metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.memory",
-        "ingest_pipeline": "default",
-        "path": "memory",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System memory metrics",
-            "input": "system/metrics",
-            "title": "System memory metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System memory metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.socket_summary",
-        "ingest_pipeline": "default",
-        "path": "socket_summary",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System socket_summary metrics",
-            "input": "system/metrics",
-            "title": "System socket_summary metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System socket_summary metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.cpu",
-        "ingest_pipeline": "default",
-        "path": "cpu",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System cpu metrics",
-            "input": "system/metrics",
-            "title": "System cpu metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-              Object {
-                "default": Array [
-                  "percentages",
-                  "normalized_percentages",
-                ],
-                "description": "How to report CPU metrics. Can be \\"percentages\\", \\"normalized_percentages\\", or \\"ticks\\"
-",
-                "multi": true,
-                "name": "cpu.metrics",
-                "required": true,
-                "show_user": true,
-                "title": "Cpu Metrics",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System cpu metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.security",
-        "ingest_pipeline": "default",
-        "path": "security",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect Windows security logs",
-            "input": "winlog",
-            "template_path": "winlog.yml.hbs",
-            "title": "Security",
-          },
-        ],
-        "title": "Windows security logs",
-        "type": "logs",
-      },
-      Object {
-        "dataset": "system.auth",
-        "ingest_pipeline": "default",
-        "path": "auth",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System auth logs using log input",
-            "input": "logfile",
-            "template_path": "log.yml.hbs",
-            "title": "System auth logs (log)",
-            "vars": Array [
-              Object {
-                "default": Array [
-                  "/var/log/auth.log*",
-                  "/var/log/secure*",
-                ],
-                "multi": true,
-                "name": "paths",
-                "required": true,
-                "show_user": true,
-                "title": "Paths",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System auth logs",
-        "type": "logs",
-      },
-      Object {
-        "dataset": "system.network",
-        "ingest_pipeline": "default",
-        "path": "network",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System network metrics",
-            "input": "system/metrics",
-            "title": "System network metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-              Object {
-                "description": "List of interfaces to monitor. Will monitor all by default.
-",
-                "multi": true,
-                "name": "network.interfaces",
-                "required": false,
-                "show_user": true,
-                "title": "Interfaces",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System network metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.filesystem",
-        "ingest_pipeline": "default",
-        "path": "filesystem",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System filesystem metrics",
-            "enabled": true,
-            "input": "system/metrics",
-            "title": "System filesystem metrics",
-            "vars": Array [
-              Object {
-                "default": "1m",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-              Object {
-                "default": "- drop_event.when.regexp:
-    system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
-",
-                "description": "Processors are used to reduce the number of fields in the exported event or to enhance the event with external metadata.
-",
-                "multi": false,
-                "name": "processors",
-                "required": true,
-                "show_user": true,
-                "title": "Processors",
-                "type": "yaml",
-              },
-            ],
-          },
-        ],
-        "title": "System filesystem metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.system",
-        "ingest_pipeline": "default",
-        "path": "system",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect Windows system logs",
-            "input": "winlog",
-            "template_path": "winlog.yml.hbs",
-            "title": "System",
-          },
-        ],
-        "title": "Windows System Events",
-        "type": "logs",
-      },
-      Object {
-        "dataset": "system.load",
-        "ingest_pipeline": "default",
-        "path": "load",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System load metrics",
-            "input": "system/metrics",
-            "title": "System load metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System load metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.fsstat",
-        "ingest_pipeline": "default",
-        "path": "fsstat",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System fsstat metrics",
-            "enabled": true,
-            "input": "system/metrics",
-            "title": "System fsstat metrics",
-            "vars": Array [
-              Object {
-                "default": "1m",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-              Object {
-                "default": "- drop_event.when.regexp:
-    system.fsstat.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
-",
-                "description": "Processors are used to reduce the number of fields in the exported event or to enhance the event with external metadata.
-",
-                "multi": false,
-                "name": "processors",
-                "required": true,
-                "show_user": true,
-                "title": "Processors",
-                "type": "yaml",
-              },
-            ],
-          },
-        ],
-        "title": "System fsstat metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.process_summary",
-        "ingest_pipeline": "default",
-        "path": "process_summary",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System process_summary metrics",
-            "input": "system/metrics",
-            "title": "System process_summary metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System process_summary metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.application",
-        "ingest_pipeline": "default",
-        "path": "application",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect Windows application logs",
-            "input": "winlog",
-            "template_path": "winlog.yml.hbs",
-            "title": "Application",
-          },
-        ],
-        "title": "Windows Application Events",
-        "type": "logs",
-      },
-      Object {
-        "dataset": "system.uptime",
-        "ingest_pipeline": "default",
-        "path": "uptime",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System uptime metrics",
-            "input": "system/metrics",
-            "title": "System uptime metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System uptime metrics",
-        "type": "metrics",
-      },
-      Object {
-        "dataset": "system.process",
-        "ingest_pipeline": "default",
-        "path": "process",
-        "release": "experimental",
-        "streams": Array [
-          Object {
-            "description": "Collect System process metrics",
-            "input": "system/metrics",
-            "title": "System process metrics",
-            "vars": Array [
-              Object {
-                "default": "10s",
-                "multi": false,
-                "name": "period",
-                "required": true,
-                "show_user": true,
-                "title": "Period",
-                "type": "text",
-              },
-              Object {
-                "default": 5,
-                "description": "Include the top N processes by CPU usage.
-",
-                "multi": false,
-                "name": "process.include_top_n.by_cpu",
-                "required": true,
-                "show_user": true,
-                "title": "Process Include Top N By Cpu",
-                "type": "integer",
-              },
-              Object {
-                "default": 5,
-                "description": "Include the top N processes by memory usage.
-",
-                "multi": false,
-                "name": "process.include_top_n.by_memory",
-                "required": true,
-                "show_user": true,
-                "title": "Process Include Top N By Memory",
-                "type": "integer",
-              },
-              Object {
-                "default": true,
-                "description": "If false, cmdline of a process is not cached.
-",
-                "multi": false,
-                "name": "process.cmdline.cache.enabled",
-                "required": false,
-                "show_user": true,
-                "title": "Enable cmdline cache",
-                "type": "bool",
-              },
-              Object {
-                "default": false,
-                "description": "Enable collection of cgroup metrics from processes on Linux.
-",
-                "multi": false,
-                "name": "process.cgroups.enabled",
-                "required": false,
-                "show_user": true,
-                "title": "Enable cgroup reporting",
-                "type": "bool",
-              },
-              Object {
-                "description": "A list of regular expressions used to whitelist environment variables reported with the process metricset's events. Defaults to empty.
-",
-                "multi": true,
-                "name": "process.env.whitelist",
-                "required": false,
-                "show_user": true,
-                "title": "Env whitelist",
-                "type": "text",
-              },
-              Object {
-                "default": false,
-                "description": "Include the cumulative CPU tick values with the process metrics.
-",
-                "multi": false,
-                "name": "process.include_cpu_ticks",
-                "required": false,
-                "show_user": true,
-                "title": "Include CPU Ticks",
-                "type": "bool",
-              },
-              Object {
-                "default": Array [
-                  ".*",
-                ],
-                "description": "A glob to match reported processes. By default all processes are reported.
-",
-                "multi": true,
-                "name": "processes",
-                "required": true,
-                "show_user": true,
-                "title": "Processes",
-                "type": "text",
-              },
-            ],
-          },
-        ],
-        "title": "System process metrics",
-        "type": "metrics",
-      },
-    ],
-    "description": "System Integration",
-    "format_version": "1.0.0",
-    "icons": Array [
-      Object {
-        "size": "1000x1000",
-        "src": "/img/system.svg",
-        "title": "system",
-        "type": "image/svg+xml",
-      },
-    ],
-    "latestVersion": "0.11.0",
-    "license": "basic",
-    "name": "system",
-    "owner": Object {
-      "github": "elastic/integrations-services",
-    },
-    "policy_templates": Array [
-      Object {
-        "description": "Collect logs and metrics from System instances",
-        "inputs": Array [
-          Object {
-            "description": "Collecting System auth and syslog logs",
-            "title": "Collect logs from System instances",
-            "type": "logfile",
-            "vars": Array [],
-          },
-          Object {
-            "description": "Collecting events from Windows event log",
-            "title": "Collect events from the Windows event log",
-            "type": "winlog",
-            "vars": Array [],
-          },
-          Object {
-            "description": "Collecting System core, CPU, diskio, entropy, filesystem, fsstat, load, memory, network, Network Summary, process, Process Summary, raid, service, socket, Socket Summary, uptime and users metrics",
-            "title": "Collect metrics from System instances",
-            "type": "system/metrics",
-            "vars": Array [],
-          },
-        ],
-        "multiple": true,
-        "name": "system",
-        "title": "System logs and metrics",
-      },
-    ],
-    "readme": "/package/system/0.10.7/docs/README.md",
-    "release": "beta",
-    "removable": false,
-    "savedObject": Object {
-      "attributes": Object {
-        "es_index_patterns": Object {
-          "application": "logs-system.application-*",
-          "auth": "logs-system.auth-*",
-          "core": "metrics-system.core-*",
-          "cpu": "metrics-system.cpu-*",
-          "diskio": "metrics-system.diskio-*",
-          "filesystem": "metrics-system.filesystem-*",
-          "fsstat": "metrics-system.fsstat-*",
-          "load": "metrics-system.load-*",
-          "memory": "metrics-system.memory-*",
-          "network": "metrics-system.network-*",
-          "process": "metrics-system.process-*",
-          "process_summary": "metrics-system.process_summary-*",
-          "security": "logs-system.security-*",
-          "socket_summary": "metrics-system.socket_summary-*",
-          "syslog": "logs-system.syslog-*",
-          "system": "logs-system.system-*",
-          "uptime": "metrics-system.uptime-*",
+  "assets": Object {
+    "elasticsearch": Object {
+      "ingest_pipeline": Array [
+        Object {
+          "dataset": "access",
+          "file": "default.yml",
+          "path": "apache-0.1.4/data_stream/access/elasticsearch/ingest_pipeline/default.yml",
+          "pkgkey": "apache-0.1.4",
+          "service": "elasticsearch",
+          "type": "ingest_pipeline",
         },
-        "install_source": "upload",
-        "install_started_at": "2021-03-09T01:49:13.685Z",
-        "install_status": "installed",
-        "install_version": "0.10.7",
-        "installed_es": Array [
-          Object {
-            "id": "logs-system.syslog-0.10.7",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "id": "logs-system.syslog-0.10.7",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "id": "logs-system.security-0.10.7",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "id": "logs-system.auth-0.10.7",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "id": "logs-system.auth-0.10.7",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "id": "logs-system.system-0.10.7",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "id": "logs-system.application-0.10.7",
-            "type": "ingest_pipeline",
-          },
-          Object {
-            "id": "metrics-system.diskio",
-            "type": "index_template",
-          },
-          Object {
-            "id": "logs-system.syslog",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.core",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.memory",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.socket_summary",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.cpu",
-            "type": "index_template",
-          },
-          Object {
-            "id": "logs-system.security",
-            "type": "index_template",
-          },
-          Object {
-            "id": "logs-system.auth",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.network",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.filesystem",
-            "type": "index_template",
-          },
-          Object {
-            "id": "logs-system.system",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.load",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.fsstat",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.process_summary",
-            "type": "index_template",
-          },
-          Object {
-            "id": "logs-system.application",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.uptime",
-            "type": "index_template",
-          },
-          Object {
-            "id": "metrics-system.process",
-            "type": "index_template",
-          },
-        ],
-        "installed_kibana": Array [
-          Object {
-            "id": "windows-71f720f0-ff18-11e9-8405-516218e3d268",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "windows-d401ef40-a7d5-11e9-a422-d144027429da",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "Windows-Dashboard",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "windows-01c54730-fee6-11e9-8405-516218e3d268",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "system-277876d0-fa2c-11e6-bbd3-29c986c96e5a",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "system-Filebeat-syslog-dashboard",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "system-Metrics-system-overview",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "windows-8223bed0-b9e9-11e9-b6a2-c9b4015c4baf",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "windows-035846a0-a249-11e9-a422-d144027429da",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "system-5517a150-f9ce-11e6-8115-a7c18106d86a",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "windows-bb858830-f412-11e9-8405-516218e3d268",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "windows-bae11b00-9bfc-11ea-87e4-49f31ec44891",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "windows-f49f3170-9ffc-11ea-87e4-49f31ec44891",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "system-79ffd6e0-faa0-11e6-947f-177f697178b8",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "system-0d3f2380-fa78-11e6-ae9b-81e5311e8cab",
-            "type": "dashboard",
-          },
-          Object {
-            "id": "windows-bf45dc50-ff1a-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-2c71e0f0-9c0d-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-4d546850-1b15-11e7-b09e-037021c4f8df",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-855957d0-bcdd-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-546febc0-f49b-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-bb9cf7a0-f49d-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-ffebe440-f419-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-Number-of-Events",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-Event-Levels",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-e22c6f40-f498-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-5c9ee410-9b74-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-dc589770-fa2b-11e6-bbd3-29c986c96e5a",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-4e4bb1e0-1b1b-11e7-b09e-037021c4f8df",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-78b74f30-f9cd-11e6-8115-a7c18106d86a",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-97c70300-ff1c-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-5e19ff80-231c-11ea-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-7322f9f0-ff1c-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-089b85d0-1b16-11e7-b09e-037021c4f8df",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-Navigation",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-175a5760-a7d5-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-117f5a30-9b71-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-a5f664c0-f49a-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-Number-of-Events-Over-Time-By-Event-Log",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-0cb2d940-bcde-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-4b683ac0-a7d7-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-7de2e3f0-9b4d-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-a79395f0-6aba-11ea-896f-0d70f7ec3956",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-25f31ee0-9c23-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-98884120-f49d-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-84502430-bce8-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-568a8130-bcde-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-fa876300-231a-11ea-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-58fb9480-9b46-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-855899e0-1b1c-11e7-b09e-037021c4f8df",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-Syslog-events-by-hostname",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-1b6725f0-ff1d-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-Syslog-hostnames-and-processes",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-ee0319a0-bcd4-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-c5e3cf90-4d60-11e7-9a4c-ed99bbcaa42b",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-abf96c10-bcea-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-99381c80-4d60-11e7-9a4c-ed99bbcaa42b",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-327417e0-8462-11e7-bab8-bd2f0fb42c54",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-522ee670-1b92-11e7-bec4-a5e9ec5cab8b",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-341ffe70-f9ce-11e6-8115-a7c18106d86a",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-ce867840-f49e-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-3cec3eb0-f9d3-11e6-8a3e-2b904044ea1d",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-729443b0-a7d6-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-421f0610-af98-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-a13bf640-fee8-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-0620c3d0-bcd4-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-12667040-fa80-11e6-a1df-a78bd7504d38",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-c6f2ffd0-4d17-11e7-a196-69b9a7a020a9",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-da5ffe40-bcd9-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-9e534190-f49d-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-e121b140-fa78-11e6-a1df-a78bd7504d38",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-825fdb80-4d1d-11e7-b5f2-2b7c1895bf32",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-f42f3b20-fee6-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-d3166e80-1b91-11e7-bec4-a5e9ec5cab8b",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-c359b020-bcdd-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-2e224660-1b19-11e7-b09e-037021c4f8df",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-60301890-ff1d-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-6f0f2ea0-f414-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-a3c3f350-9b6d-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-3d65d450-a9c3-11e7-af20-67db8aecb295",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-1f271bc0-231a-11ea-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-83e12df0-1b91-11e7-bec4-a5e9ec5cab8b",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-34f97ee0-1b96-11e7-8ada-3df93aab833e",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-804dd400-a248-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-7cdb1330-4d1a-11e7-a196-69b9a7a020a9",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-26732e20-1b91-11e7-bec4-a5e9ec5cab8b",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-7a329a00-a7d5-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-da2110c0-bcea-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-51164310-fa2b-11e6-bbd3-29c986c96e5a",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-8ef59f90-6ab8-11ea-896f-0d70f7ec3956",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-96976150-4d5d-11e7-aa29-87a97a796de6",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-bc165210-f4b8-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-c9d959f0-ff1d-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-346bb290-fa80-11e6-a1df-a78bd7504d38",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-9dd22440-ff1d-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-ee292bc0-f499-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-2dc6b820-b9e8-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-Sources",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-102efd20-bcdd-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-19e123b0-4d5a-11e7-aee5-fdc812cc3bec",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-d770b040-9b35-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-d3a5fec0-ff18-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-4bedf650-9ffd-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-c2ea73f0-a4bd-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-e2516c10-a249-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-5dd15c00-fa78-11e6-ae9b-81e5311e8cab",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-8f20c950-bcd4-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-e0f001c0-1b18-11e7-b09e-037021c4f8df",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-6b7b9a40-faa1-11e6-86b1-cd7735ff7e23",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-fe064790-1b1f-11e7-bec4-a5e9ec5cab8b",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-4ac8f5f0-bcfe-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-400b63e0-f49a-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-006d75f0-9c03-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-f398d2f0-fa77-11e6-ae9b-81e5311e8cab",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-b89b0c90-9b41-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-caf4d2b0-9b76-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-26877510-9b72-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-aa31c9d0-9b75-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-ab2d1e90-1b1a-11e7-b09e-037021c4f8df",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-5d117970-9ffd-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-Top-Event-IDs",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-0f2f5280-feeb-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-b5f38780-fee6-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-860706a0-9bfd-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-18348f30-a24d-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-2084e300-a884-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-21aadac0-9c0b-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-d56ee420-fa79-11e6-a1df-a78bd7504d38",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-ab6f8d80-bce8-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-d2e80340-4d5c-11e7-aa29-87a97a796de6",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-5e7f0ed0-bcd2-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-5c7af030-fa2a-11e6-bbd3-29c986c96e5a",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-fee83900-f49f-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-5eeaafd0-fee7-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-abd44840-9c0f-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-0622da40-9bfd-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-1b5f17d0-feea-11e9-8405-516218e3d268",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-1aae9140-1b93-11e7-8ada-3df93aab833e",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-590a60f0-5d87-11e7-8884-1bb4c3b890e4",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-33462600-9b47-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-162d7ab0-a7d6-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-5d92b100-bce8-11e9-b6a2-c9b4015c4baf",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-e20c02d0-9b48-11ea-87e4-49f31ec44891",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-a909b930-685f-11ea-896f-0d70f7ec3956",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-d16bb400-f9cc-11e6-8115-a7c18106d86a",
-            "type": "visualization",
-          },
-          Object {
-            "id": "system-bfa5e400-1b16-11e7-b09e-037021c4f8df",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-5bb93ed0-a249-11e9-a422-d144027429da",
-            "type": "visualization",
-          },
-          Object {
-            "id": "windows-7e178c80-fee1-11e9-8405-516218e3d268",
-            "type": "search",
-          },
-          Object {
-            "id": "system-62439dc0-f9c9-11e6-a747-6121780e0414",
-            "type": "search",
-          },
-          Object {
-            "id": "windows-6f4071a0-7a78-11ea-bc9a-0baf2ca323a3",
-            "type": "search",
-          },
-          Object {
-            "id": "system-b6f321e0-fa25-11e6-bbd3-29c986c96e5a",
-            "type": "search",
-          },
-          Object {
-            "id": "windows-9066d5b0-fef2-11e9-8405-516218e3d268",
-            "type": "search",
-          },
-          Object {
-            "id": "windows-757510b0-a87f-11e9-a422-d144027429da",
-            "type": "search",
-          },
-          Object {
-            "id": "windows-324686c0-fefb-11e9-8405-516218e3d268",
-            "type": "search",
-          },
-          Object {
-            "id": "system-8030c1b0-fa77-11e6-ae9b-81e5311e8cab",
-            "type": "search",
-          },
-          Object {
-            "id": "system-eb0039f0-fa7f-11e6-a1df-a78bd7504d38",
-            "type": "search",
-          },
-          Object {
-            "id": "windows-06b6b060-7a80-11ea-bc9a-0baf2ca323a3",
-            "type": "search",
-          },
-          Object {
-            "id": "windows-ce71c9a0-a25e-11e9-a422-d144027429da",
-            "type": "search",
-          },
-          Object {
-            "id": "system-Syslog-system-logs",
-            "type": "search",
-          },
-        ],
-        "internal": false,
-        "name": "system",
-        "package_assets": Array [
-          Object {
-            "id": "dc4cb12c-016e-5829-85e5-c72724794b33",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "db63153a-1fe0-5bef-aeeb-ea8e0647927f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f8ba5181-bd17-552f-a69a-cbce9ee4af83",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e9ddcb93-3184-50ea-bb64-ee303263c293",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ec15e2e9-be16-59a7-a737-d3a438d5b1c6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f0fb6c8f-3409-50a1-acf6-3d678857a8e4",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1ab31db7-44fc-547d-9e8a-89858c10c1e1",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c5d8c730-e27d-513e-a48b-d07acab97de2",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8f7bac89-a825-5d03-8887-e779099bc103",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "0c3355c1-dfbb-57d9-ab81-855014f0ef63",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f25417fe-57f1-5676-94d9-00296a50cdce",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "bbaba826-88dc-5bde-b993-a2d6870647dc",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "eac6bf9e-dc7e-5f06-8f32-df9a60fbf8d8",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d8ecf0d5-c022-5d39-9c9a-72370bb6bb1d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b3ed70d3-98a3-5456-8ebf-d7f67f55860e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8321725a-b9a6-557e-9f4a-8ed8d6f7bd3f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ab028b40-ea43-5eac-9446-6b2e49ea6ee3",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8e740669-4b3e-55f3-ab46-4745763a3fdb",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b5365cae-f7ce-50dd-86b2-3053879373d9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "23e3eff8-cbd2-55d9-9b39-3e9fedf79826",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "400b6d42-cd72-5799-801c-dce06946164b",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b323301e-60ac-5563-b402-68e739e502f9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c6a04e9c-f35a-561b-ba4f-ed73d32edfcb",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e93f61db-150a-50ce-bf02-2fcb2245ffbd",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "cf99b4f2-f62a-5fac-b310-1c4e654b6e7d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "5b60a6c5-def2-56df-bac9-b74ba791dc42",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c9d4297d-cbb8-5c89-a025-0419cdfa830f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d7cf039d-d505-5c17-acbc-cf8019fd4c77",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "77ef0eef-1f83-5818-916e-a74e534f479e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "0e9efb9c-1de5-5bbb-915f-43777f633f32",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "0a9b7399-3da8-5fa9-b61c-3cfadf915f81",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f3b97a35-3034-537d-8504-1abf41f9af31",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e4703d61-240d-5eb8-be0a-e87eec7f2022",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "5054463a-a5a9-5c84-8485-96cc62a99fb8",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "6016cd0d-b5c5-57b0-b3e8-240710c17d86",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1485044f-c466-5c49-9d4d-2694cda4f7f8",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "26fc0beb-cbe0-5087-ae0d-4ed45513fc5e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "59ec0c28-4f48-5cff-89e0-1a6ea475cfee",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a770abe9-27fb-59ed-8caa-67b974a3e7d5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "eb140165-c8f3-55ce-9904-ac569e6ed9f6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "14f69f46-6c7d-564b-bbb9-a65a81b9f57b",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "99227fdc-cb8b-5735-80cb-f07767f8d5ac",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b127fb3a-9a59-5d0f-a517-c288e43de0f0",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "df601340-7afe-567d-bb2e-f65fd43f83e2",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "87bc9dd0-7ceb-5833-82ca-58eb3761c59c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8b1b8680-7621-5e10-a41e-45873d3f41b3",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a1798487-8062-5085-b0bd-249d939bbb8e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "7c333974-5f88-547e-a752-7c4aca986a19",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4a1ded18-63a1-503f-b670-16f6502c1301",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1d962585-96df-57d7-8ac8-ce3097cca5a6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8337ec5e-ed0e-58b8-950b-5c6a4da83868",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "2ed0a24a-be75-56a0-ba2b-34d0cd3beb21",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1c857c8e-c6a7-5e32-b267-8c65d1b44625",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "9eb92851-5446-5f20-a095-deb5043087d4",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "697edf52-1a41-5f8c-a741-8a85937faccf",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b40cf3e4-7e7b-5aa9-ab54-e54fe105f7a0",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "9b5a2fe5-ec90-587c-8015-03be239601d9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d3827a83-bb7e-5542-8f3c-ca7edc77158e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "95aa8f63-83fa-5de3-ba8d-2eac5efdf6a1",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a42d40ac-3401-5ef0-ad5a-6962b6937943",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "95100e85-a101-514a-b680-fde6127d29c8",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "82be9b3e-081c-5539-916d-b851b887e8ae",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "041b05bd-a4f3-5170-9152-34274def53c5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f98afd17-ed7c-505b-b551-27339cc05fb9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "47e6c305-d738-5e72-a76d-479a5906bcfb",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "14b19e58-d99e-524f-b8db-8d6d8e9a70a5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "7104000e-6ed7-5e85-a942-abcb25c765b5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "63d1a4ce-2fa3-5138-a90c-5c848e324d7d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "dc43894a-d5c4-51d5-b285-5a1022e7e3c8",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "dd529a80-b947-5171-a92a-2f472ebf5221",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "da1ab038-dcd3-5235-b39c-26629db0c992",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "9e347b6c-4234-5024-bdfc-d552552bdc5d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e5491215-c5f8-5b92-b77f-bec839b36fa5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "14f527e2-8c6d-54e2-be40-b8fb3d3f1287",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8534f42b-7b52-5ace-9de2-862b4b71c415",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4ba07c15-278c-5660-b883-3d7535594c77",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1e383f5e-aca6-5615-9993-e1c2a061c908",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8fa0e34d-9743-5feb-be1c-da20453c6c37",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "df47d692-775b-5e24-b72a-5d48a391907a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "88feabd9-9082-5799-9cf3-5d078c12803e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "94f24d23-da4a-52c1-8f6c-21bbd7748360",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e193ac95-9baf-552a-a365-028e1bb9435e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "7ef14d7d-2e24-5c32-9be4-cec38a841790",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d28574c9-d3d3-53b0-ab4d-1aa6693fa894",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "7a4e813b-70f6-5b56-b328-f3ccb5405a0a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "757ba39c-3a2e-5f19-880e-38230d9dc640",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f359e1bf-65c8-5270-9dea-64be3f51e2f9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b642e5a3-d12d-5fc9-b6a2-c2110ab7a498",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b9d48c3a-a4fc-594a-a1f2-5de250d05e8c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "fb76dfff-d772-537f-b4b4-a353fa34bb9a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "fa6b3009-ba1a-5810-942a-e50dcf7c08e1",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "30b2c7c3-0cba-5ec9-9b9b-58302c3a9b13",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "beb6d69c-2c52-5f29-9d42-1bad541df4f5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "bcec123c-9800-51dc-9385-c1f76623b6d9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8e28699a-3d4e-5ac3-9a7f-d44e213f869a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a0a0ccdb-492a-5303-a0b4-2b6bf5bcf6b5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b8f471a8-29a2-50c9-8c2b-772ca7241c51",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "abf72030-5631-5cf1-977b-9bec4b077dd5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "489eabe8-0144-5d00-bbf1-09a687da4e6f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "acfb33a1-5137-50db-b48a-9bfde37036e2",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "32305dcf-e4fd-535f-a167-815526bf397c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8e9eb4c6-7cff-51d8-9bdb-8f97d9fc050e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "5889f8fd-2aba-5736-8870-571772ebf045",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "5d21d696-5e1d-5d0c-8ad9-281ea66309eb",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b7482161-b8f7-58c3-9ba3-a472b1936292",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "30fe9af7-0651-5e4d-8c32-b594638bea3f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ec176b2f-62bb-5606-9fd2-82be6ef721b7",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b2e5a4a5-754c-5e4e-838e-e0bbfcff0cd0",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d55ac966-1866-5f38-8ddb-ca7cd47c3959",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "dbd8f09b-33a6-5e1c-8dea-79cbcc876843",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8ee7ae56-2c2c-551f-a49e-5e5742194461",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ea36b2b6-b785-57de-91f5-40aa5622ee7d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "7e6909c2-459a-5a8c-8880-4645035abe54",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c17a9738-7ccd-581d-8423-7a536d77be12",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1d933214-cd1a-5f4a-844d-1bcd58bbcc4f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c696cbcd-0eec-5c04-9112-fa1f3f10c8f2",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "02b4052d-a430-57e8-8521-aa9d9ac47e6e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "3d7bfb58-8ef9-50d8-8cb7-65edba536142",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "fccb0f86-e1d8-5ee2-96c5-fdeb287192ba",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "de72d7de-f39c-5465-9c95-507820c1cef3",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b03e14af-219e-5229-b826-971e9ca8cdc0",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "77de7255-631f-5fb1-ac0a-31ceb7eadc11",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a9cc430b-0bd9-5258-8ea7-8c3a78e28c52",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "fba6732c-9e0f-5576-bf0f-e91a0d5e3d32",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e5c70591-ab0b-5dad-add3-e34acb17eb0b",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "bfde35c6-bf9f-59d8-95b2-7e30467897f6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "6d6f34a3-e000-50fd-8290-0b8a0ee1a094",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "74c40618-d662-5098-ac37-e289feeae389",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "82963b9e-8e66-512e-a45c-da43f0df027d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "bea9f382-3b51-596f-a305-e69f235ddca2",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a9607dc3-8b92-5718-af84-3be0b574f3ff",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "6e468193-97dc-5497-aec9-46eaa7fef024",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a97464a3-a842-51c5-9361-bfee8dcd9447",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "69104407-1611-5476-8439-70d1b45e1537",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "9207fd08-a30e-54a6-9fcc-0a1602ce2de6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "30bc551d-77f3-5f17-a68f-274c84e75b75",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "3fee72db-bb7a-5327-a888-2cc92c4850a3",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "6786bee1-7e9e-5863-b967-620a0336cf31",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "72c208c7-7ac7-5ddc-804a-41f807de5fed",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c0c03fa6-22e3-57a7-b311-4f9c03991ad6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ea278c13-220b-52af-a9ad-a63ea0eefe69",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "069c652e-b1eb-5287-8a1f-20112a8a1e05",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1d700312-2a23-56d7-a898-78621479e67d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "31c5480b-151f-5b9d-b870-cd20f58d1ec2",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "18d71a67-4384-5e54-988c-f2eff5dab004",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "374248ba-8387-5503-8ab1-c20a01c25177",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "39655876-c787-5723-b015-c7cd4cedec6c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "53cf462a-b9a8-5ba7-9d38-d951044c5955",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "519c4058-fe47-5fe6-9803-e735be777d3d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "dc0091ce-da8a-56b9-b9c2-12b466a8f2a6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c1ac87ad-2f5d-5c3d-aec2-56d7c964e1ca",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c87320db-3881-5378-a2db-9da5e533026a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "89496704-406a-571d-bef2-51283b3120d7",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "7f60efb3-a27e-5fe1-9688-e40553f6f013",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4e661240-0fdf-55d0-9e95-3cfc66516428",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "74b9078e-1d4b-519c-864b-6a887b0ea5fa",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f40e656b-bc09-5049-a11f-ccbcbb76d785",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "402b887a-d365-5c2c-92d9-950e5ce61fc6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d08379ba-952c-59c6-a548-715bb8ca9d61",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "41e8f0a7-eb2a-5e82-95c2-d44041b5d6a1",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "2e582a8f-010d-5784-b04d-c516dcb8b28d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b590bddf-c79e-5a45-8b71-7c869b89d385",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "cde8b749-a013-50b3-a1bf-a5041da9fb0b",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c80c90e8-c967-553f-acfe-74034300d0be",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "80a4b5c2-c131-5a1c-9004-33f2729c5624",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e6cec716-805c-551a-899f-cb0a5d4843f4",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "cb50cefc-733c-52ce-ba03-38aef82005e7",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "edeb09fd-4df8-5199-ae5f-ca4fbc7e8811",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "62e06347-5d08-5466-8a73-3a11a6e8e636",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "feb0f0a0-3ddc-5b83-9825-94c8233ff46a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ce695bd0-dccc-5f72-b73d-e759fbb1a679",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "66b29002-47ba-5163-9e2b-27ab80629096",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "71bb9904-c095-52d9-b45c-53561d1644df",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4691ddf6-f44f-5823-ba86-b6e6633a175f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "2cdfa521-83b0-5596-bb94-09fa729af855",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "2dcddb2c-fa5d-5290-a6d0-5fccf0f1d543",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d0b5c860-3753-5933-9982-1fe8a26b8f16",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c65b3bae-8c3b-515a-a17f-185ff1d7cf8c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d73aff60-2d11-53f1-9e4c-69f82c21cb8a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a67fe7ae-dd88-569d-9033-0030b2a04642",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "67956cfd-7523-5195-8d7b-3be3d95dd42c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b9a89a9e-3a83-52ac-acb5-2d426be22114",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a1330e6a-9f4a-5c29-a292-06f88aaae9c0",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f5584541-7b20-5589-9bc9-adced786ff26",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "7c6e569a-51fb-5245-a2a3-b05969755be0",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "af81910d-cdc7-5c73-a594-d417f6216f4e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "344be5cf-6d9c-54c6-8866-9c8eaeff85cf",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "2542376b-44f1-5f6d-adf4-e8bf966a4a4a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "5379f0b0-2295-5af3-a3bf-b0e81ce888df",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "78f7a59a-3da9-5ceb-841d-6998df600e9b",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "36741504-2b0c-5fd7-8aec-6873703045df",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1e7b5480-c9ed-559a-b9ba-556516b15fb4",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "115d2e97-7f4f-5907-9aeb-18ccd55b0f83",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "3df974f4-5161-5225-ad7d-65098e944e0e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "7457bfcc-3db9-5205-80f0-1476b8798480",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "641745f8-6075-5be8-ae58-eef968607fcf",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "774c6c01-e5ec-55ec-8305-7abc954e02f6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f14f79bd-d642-555f-9d78-42f68b821bc8",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "71606a72-c27f-578d-b7f2-d4a6c5a7f9c0",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4fd116c7-47db-50a3-bb30-b7efc5f8dd32",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "85048a7a-4c27-538d-b5bb-b2dfbe8d12b5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "098827b5-0535-5856-bd07-ab007616b2b9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "df565b92-5b54-5fa4-86dc-e2a6af865eea",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "709a3734-3fd2-5a46-8919-664ea8967d66",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "3e5b0c2a-ede1-5217-bc3f-f6c4b1a6c1ba",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ec1830aa-956f-5423-a172-1078a86eaaa6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "93111803-c74a-5f6d-bd75-6b6781b4a150",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "edc4e771-efee-5973-9fbb-f020b20979a5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ae088ec0-dd70-55e3-8c84-81fe986b24bb",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "125f6e3d-bff0-5d42-bfde-7c9e11cd5311",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "176bbbe8-75d4-5f6a-84ff-da6eba1296ba",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4b091fc4-813d-5d6a-880a-30ac9b37189b",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "693f0c13-f433-5e44-b90a-a6aabd388aea",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "443139d5-3c77-57fa-97d3-5d40501fe84c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "797560df-0f2c-5a95-9c58-86275c4d4bb9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "385d4ded-969b-5678-9cc7-8f1552e13b5f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "cf600b7b-ddbb-585e-8336-0333d1961a4c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "16ae5ad6-cc83-5205-a274-543afba3d5e3",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "b07edb6a-6212-555f-af2b-7d24c840080a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "14379af8-2fe5-5f1d-923a-9ce9b320471c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e77217a3-8065-507f-802f-af86e577c0a2",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4ecd7bb2-3c4e-50c4-b941-85610ab94928",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "826a454c-0360-568c-b063-6a88b5faad4c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ccf6704f-7711-54c2-a518-2675a5eebecc",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ac01bd3f-574d-5e8a-b1c0-50e5a4670dbb",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "fe80ef75-b6c6-5699-a08f-39860563b78b",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "0e1e00df-63af-582b-9b40-5a52ba2e892c",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "acf2fcab-3750-52cd-9bc2-ce7bc9edbfab",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "538f3351-98e1-531d-a035-038b53841d25",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "2c25b2f6-d369-5d13-ab04-09a8924e5817",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "04b5f54a-08d7-55db-b31a-d5cda9965eb6",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4f532dd0-a46c-5db3-993f-5fb8a793be21",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "84d172e7-3c95-5ce9-988c-0eaedd30b9f7",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a5a92c68-1faf-5888-9a4a-f55e0768b09d",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "0b520e70-1651-51df-8327-e26d8b3de39a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d213c31e-fcc3-501f-ade5-3cef6d045b75",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "4cb68e07-ed56-56e9-a7d1-12251f6e6c90",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "bc42431b-6b54-5438-ac14-91ee0ea90c36",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "94999676-755f-5476-8d1f-6f220f6c8cfa",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "6f50872b-1a48-5ac8-8c0a-bb1c1a373aba",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1642be2a-f467-5ad3-bed8-4b2bdf10b25a",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "bad1973d-f6c8-5a43-b411-2471a4c0f5ff",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "c7e7cbf5-b31e-5f8d-bad9-0a9b5c980991",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "19add845-0614-572b-8dbd-1f0c47faae46",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f559bd03-3230-56ae-a631-578572b8bfa9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e95e2ad8-4dc5-556a-9017-ae48d47371fa",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a35f646a-9ac5-57a2-bf26-9a5331e42a19",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "1b0ad8bf-442d-5696-8084-4fb549b468a9",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "07db544d-eb5f-5762-8e9f-6b727fe91747",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "162fb739-f39d-5fbe-bfc1-610abe19cf25",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "bc21d0fb-0e52-53ee-a382-408f51894c48",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "e3c8c9b5-ac3c-5f40-b682-c0873237b98e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "f908b7ac-9ae9-5ee0-9e5a-60e6b1514c93",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "a968c0ab-3aab-5bed-b9fd-2ef1f85f6965",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d3b87762-c052-525e-8839-909a9c1a9a26",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "719c87d6-02e7-5518-b942-6fa93e365c7f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "712a8945-e038-5e6c-8472-7295a1d4a2c5",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "3bb49ef3-d83a-5663-bb73-9dc18f76c5a8",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "dfea58ea-cfea-55fe-9c04-4c2946ee9c03",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "ef926f2c-47ab-5fb5-af0a-b324fb0578df",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "d9a352f8-22c8-5fd4-b963-206f7f1f0145",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "80bbf2e2-5c6a-5433-9615-9675bd727484",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "eadd2610-b3b9-5348-b626-f053041c59ce",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8d4d7433-8c7e-5858-b376-1b5c313a5564",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "9df213c5-cad4-5818-81e0-fec37b76a777",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "8b532da9-31e7-5c03-8f78-cf0e758b616f",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "fb3e7f32-a863-5724-b78d-1434f8702b1e",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "90bd440e-0366-5fe3-8fa4-2182a3c685ab",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "75cce549-e7ee-5a48-8b4b-44e022c21551",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "742a88c3-96cf-5466-a128-de55ea72fdd3",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "2f724675-aabc-5d04-b108-8ccaf26938fa",
-            "type": "epm-packages-assets",
-          },
-          Object {
-            "id": "94e873b5-8d04-51ac-8494-5ef0b958cfef",
-            "type": "epm-packages-assets",
-          },
-        ],
-        "removable": false,
-        "version": "0.10.7",
-      },
-      "coreMigrationVersion": "8.0.0",
-      "id": "system",
-      "namespaces": Array [],
-      "references": Array [],
-      "type": "epm-packages",
-      "updated_at": "2021-03-09T01:49:21.721Z",
-      "version": "WzQ0OSwxXQ==",
+        Object {
+          "dataset": "error",
+          "file": "default.yml",
+          "path": "apache-0.1.4/data_stream/error/elasticsearch/ingest_pipeline/default.yml",
+          "pkgkey": "apache-0.1.4",
+          "service": "elasticsearch",
+          "type": "ingest_pipeline",
+        },
+      ],
     },
-    "screenshots": Array [
-      Object {
-        "size": "1220x852",
-        "src": "/img/kibana-system.png",
-        "title": "kibana system",
-        "type": "image/png",
-      },
-      Object {
-        "size": "2097x1933",
-        "src": "/img/metricbeat_system_dashboard.png",
-        "title": "metricbeat system dashboard",
-        "type": "image/png",
-      },
-    ],
-    "status": "installed",
-    "title": "System",
-    "type": "integration",
-    "version": "0.10.7",
+    "kibana": Object {
+      "dashboard": Array [
+        Object {
+          "file": "apache-Logs-Apache-Dashboard-ecs-new.json",
+          "path": "apache-0.1.4/kibana/dashboard/apache-Logs-Apache-Dashboard-ecs-new.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "dashboard",
+        },
+        Object {
+          "file": "apache-Metrics-Apache-HTTPD-server-status-ecs.json",
+          "path": "apache-0.1.4/kibana/dashboard/apache-Metrics-Apache-HTTPD-server-status-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "dashboard",
+        },
+      ],
+      "search": Array [
+        Object {
+          "file": "Apache-access-logs-ecs.json",
+          "path": "apache-0.1.4/kibana/search/Apache-access-logs-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "search",
+        },
+        Object {
+          "file": "Apache-errors-log-ecs.json",
+          "path": "apache-0.1.4/kibana/search/Apache-errors-log-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "search",
+        },
+        Object {
+          "file": "Apache-HTTPD-ecs.json",
+          "path": "apache-0.1.4/kibana/search/Apache-HTTPD-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "search",
+        },
+      ],
+      "visualization": Array [
+        Object {
+          "file": "Apache-access-unique-IPs-map-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-access-unique-IPs-map-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-HTTPD-CPU-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-CPU-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-HTTPD-Load1-slash-5-slash-15-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Load1-slash-5-slash-15-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-response-codes-over-time-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-response-codes-over-time-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-HTTPD-Workers-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Workers-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-HTTPD-Hostname-list-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Hostname-list-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-error-logs-over-time-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-error-logs-over-time-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-HTTPD-Scoreboard-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Scoreboard-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-HTTPD-Uptime-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Uptime-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-operating-systems-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-operating-systems-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-HTTPD-Total-accesses-and-kbytes-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-HTTPD-Total-accesses-and-kbytes-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-browsers-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-browsers-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+        Object {
+          "file": "Apache-response-codes-of-top-URLs-ecs.json",
+          "path": "apache-0.1.4/kibana/visualization/Apache-response-codes-of-top-URLs-ecs.json",
+          "pkgkey": "apache-0.1.4",
+          "service": "kibana",
+          "type": "visualization",
+        },
+      ],
+    },
   },
+  "categories": Array [
+    "web",
+  ],
+  "conditions": Object {
+    "kibana.version": "^7.9.0",
+  },
+  "data_streams": Array [
+    Object {
+      "dataset": "apache.access",
+      "ingest_pipeline": "default",
+      "path": "access",
+      "release": "experimental",
+      "streams": Array [
+        Object {
+          "description": "Collect Apache access logs",
+          "input": "logfile",
+          "template_path": "log.yml.hbs",
+          "title": "Apache access logs",
+          "vars": Array [
+            Object {
+              "default": Array [
+                "/var/log/apache2/access.log*",
+                "/var/log/apache2/other_vhosts_access.log*",
+                "/var/log/httpd/access_log*",
+              ],
+              "multi": true,
+              "name": "paths",
+              "required": true,
+              "show_user": true,
+              "title": "Paths",
+              "type": "text",
+            },
+          ],
+        },
+      ],
+      "title": "Apache access logs",
+      "type": "logs",
+    },
+    Object {
+      "dataset": "apache.status",
+      "ingest_pipeline": "default",
+      "path": "status",
+      "release": "experimental",
+      "streams": Array [
+        Object {
+          "description": "Collect Apache status metrics",
+          "input": "apache/metrics",
+          "title": "Apache status metrics",
+          "vars": Array [
+            Object {
+              "default": "10s",
+              "multi": false,
+              "name": "period",
+              "required": true,
+              "show_user": true,
+              "title": "Period",
+              "type": "text",
+            },
+            Object {
+              "default": "/server-status",
+              "multi": false,
+              "name": "server_status_path",
+              "required": true,
+              "show_user": false,
+              "title": "Server Status Path",
+              "type": "text",
+            },
+          ],
+        },
+      ],
+      "title": "Apache status metrics",
+      "type": "metrics",
+    },
+    Object {
+      "dataset": "apache.error",
+      "ingest_pipeline": "default",
+      "path": "error",
+      "release": "experimental",
+      "streams": Array [
+        Object {
+          "description": "Collect Apache error logs",
+          "input": "logfile",
+          "template_path": "log.yml.hbs",
+          "title": "Apache error logs",
+          "vars": Array [
+            Object {
+              "default": Array [
+                "/var/log/apache2/error.log*",
+                "/var/log/httpd/error_log*",
+              ],
+              "multi": true,
+              "name": "paths",
+              "required": true,
+              "show_user": true,
+              "title": "Paths",
+              "type": "text",
+            },
+          ],
+        },
+      ],
+      "title": "Apache error logs",
+      "type": "logs",
+    },
+  ],
+  "description": "Apache Uploaded Test Integration",
+  "format_version": "1.0.0",
+  "icons": Array [
+    Object {
+      "size": "32x32",
+      "src": "/img/logo_apache_test.svg",
+      "title": "Apache Logo",
+      "type": "image/svg+xml",
+    },
+  ],
+  "latestVersion": "0.3.3",
+  "license": "basic",
+  "name": "apache",
+  "owner": Object {
+    "github": "elastic/integrations-services",
+  },
+  "policy_templates": Array [
+    Object {
+      "description": "Collect logs and metrics from Apache instances",
+      "inputs": Array [
+        Object {
+          "description": "Collecting Apache access and error logs",
+          "title": "Collect logs from Apache instances",
+          "type": "logfile",
+          "vars": Array [],
+        },
+        Object {
+          "description": "Collecting Apache status metrics",
+          "title": "Collect metrics from Apache instances",
+          "type": "apache/metrics",
+          "vars": Array [
+            Object {
+              "default": Array [
+                "http://127.0.0.1",
+              ],
+              "multi": true,
+              "name": "hosts",
+              "required": true,
+              "show_user": true,
+              "title": "Hosts",
+              "type": "text",
+            },
+          ],
+        },
+      ],
+      "multiple": true,
+      "name": "apache",
+      "title": "Apache logs and metrics",
+    },
+  ],
+  "readme": "/package/apache/0.1.4/docs/README.md",
+  "release": "experimental",
+  "removable": true,
+  "savedObject": Object {
+    "attributes": Object {
+      "es_index_patterns": Object {
+        "access": "logs-apache.access-*",
+        "error": "logs-apache.error-*",
+        "status": "metrics-apache.status-*",
+      },
+      "install_source": "upload",
+      "install_started_at": "2021-03-09T02:12:26.449Z",
+      "install_status": "installed",
+      "install_version": "0.1.4",
+      "installed_es": Array [
+        Object {
+          "id": "logs-apache.access-0.1.4",
+          "type": "ingest_pipeline",
+        },
+        Object {
+          "id": "logs-apache.error-0.1.4",
+          "type": "ingest_pipeline",
+        },
+        Object {
+          "id": "logs-apache.access",
+          "type": "index_template",
+        },
+        Object {
+          "id": "metrics-apache.status",
+          "type": "index_template",
+        },
+        Object {
+          "id": "logs-apache.error",
+          "type": "index_template",
+        },
+      ],
+      "installed_kibana": Array [
+        Object {
+          "id": "apache-Logs-Apache-Dashboard-ecs",
+          "type": "dashboard",
+        },
+        Object {
+          "id": "apache-Metrics-Apache-HTTPD-server-status-ecs",
+          "type": "dashboard",
+        },
+        Object {
+          "id": "Apache-access-unique-IPs-map-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-HTTPD-CPU-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-HTTPD-Load1-slash-5-slash-15-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-response-codes-over-time-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-HTTPD-Workers-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-HTTPD-Hostname-list-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-error-logs-over-time-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-HTTPD-Scoreboard-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-HTTPD-Uptime-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-operating-systems-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-HTTPD-Total-accesses-and-kbytes-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-browsers-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-response-codes-of-top-URLs-ecs",
+          "type": "visualization",
+        },
+        Object {
+          "id": "Apache-access-logs-ecs",
+          "type": "search",
+        },
+        Object {
+          "id": "Apache-errors-log-ecs",
+          "type": "search",
+        },
+        Object {
+          "id": "Apache-HTTPD-ecs",
+          "type": "search",
+        },
+      ],
+      "internal": false,
+      "name": "apache",
+      "package_assets": Array [
+        Object {
+          "id": "2f1ab9c0-8cf6-5e83-afcd-0d12851c8108",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "841166f1-6db0-5f7a-a8d9-768e88ddf984",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "b12ae5e1-daf2-51a7-99d8-0888d1f13b5b",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "2f263b24-c36a-5ea8-a707-76d1f274c888",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "bd5ff9ad-ba4a-5215-b5af-cef58a3aa886",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "5fc59aa9-1d7e-50ae-8ce5-b875ab44cfc5",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "7c850453-346b-5010-a946-28b83fc69e48",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "f02f8adb-3e0c-5f2f-b4f2-a04dc645b713",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "889d88db-6214-5836-aeff-1a87f8513b27",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "06a6b940-a745-563c-abf4-83eb3335926b",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "e68fd7ac-302e-5b75-bbbb-d69b441c8848",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "2c57fe0f-3b1a-57da-a63b-28f9b9e82bce",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "13db43e8-f8f9-57f0-b131-a171c2f2070f",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "e8750081-1c0b-5c55-bcab-fa6d47f01a85",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "71af57fe-25c4-5935-9879-ca4a2fba730e",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "cc287718-9573-5c56-a9ed-6dfef6589506",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "8badd8ba-289a-5e60-a1c0-f3d39e15cda3",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "20300efc-10eb-5fac-ba90-f6aa9b467e84",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "047c89df-33c2-5d74-b0a4-8b441879761c",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "9838a13f-1b89-5c54-844e-978620d66a1d",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "e105414b-221d-5433-8b24-452625f59b7c",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "eb166c25-843b-5271-8d43-6fb005d2df5a",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "342dbf4d-d88d-53e8-b365-d3639ebbbb14",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "f98c44a3-eaea-505f-8598-3b7f1097ef59",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "12da8c6c-d0e3-589c-9244-88d857ea76b6",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "e2d151ed-709c-542d-b797-cb95f353b9b3",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "f434cffe-0b00-59de-a17f-c1e71bd4ab0f",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "5bd0c25f-04a5-5fd0-8298-ba9aa2f6fe5e",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "279da3a3-8e9b-589b-86e0-bd7364821bab",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "b8758fcb-08bf-50fa-89bd-24398955298a",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "96e4eb36-03c3-5856-af44-559fd5133f2b",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "a59a79c3-66bd-5cfc-91f5-ee84f7227855",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "395143f9-54bf-5b46-b1be-a7b2a6142ad9",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "3449b8d2-ffd5-5aec-bb32-4245f2fbcde4",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "ab44094e-6c9d-50b8-b5c4-2e518d89912e",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "b093bfc0-6e98-5a1b-a502-e838a36f6568",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "03d86823-b756-5b91-850d-7ad231d33546",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "a76af2f0-049b-5be1-8d20-e87c9d1c2709",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "bc2f0c1e-992e-5407-9435-fedb39ff74ea",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "84668ac1-d5ef-545b-88f3-1e49f8f1c8ad",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "69b41271-91a0-5a2e-a62c-60364d5a9c8f",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "8e4ec555-5fbf-55d3-bea3-3af12c9aca3f",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "aa18f3f9-f62a-5ab8-9b34-75696efa5c48",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "71c8c6b1-2116-5817-b65f-7a87ef5ef2b7",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "8f6d7a1f-1e7f-5a60-8fe7-ce19115ed460",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "c115dbbf-edad-59f2-b046-c65a0373a81c",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "b7d696c3-8106-585c-9ecc-94a75cf1e3da",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "639e6a78-59d8-5ce8-9687-64e8f9af7e71",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "ae60c853-7a90-58d2-ab6c-04d3be5f1847",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "0cd33163-2ae4-57eb-96f6-c50af6685cab",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "39e0f78f-1172-5e61-9446-65ef3c0cb46c",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "b08f10ee-6afd-5e89-b9b4-569064fbdd9f",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "efcbe1c6-b2d5-521c-b27a-2146f08a604d",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "f9422c02-d43f-5ebb-b7c5-9e32f9b77c21",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "c276e880-3ba8-58e7-a5d5-c07707dba6b7",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "561a3711-c386-541c-9a77-2d0fa256caf6",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "1378350d-2e2b-52dd-ab3a-d8b9a09df92f",
+          "type": "epm-packages-assets",
+        },
+        Object {
+          "id": "94e40729-4aea-59c8-86ba-075137c000dc",
+          "type": "epm-packages-assets",
+        },
+      ],
+      "removable": true,
+      "version": "0.1.4",
+    },
+    "coreMigrationVersion": "8.0.0",
+    "id": "apache",
+    "namespaces": Array [],
+    "references": Array [],
+    "type": "epm-packages",
+  },
+  "screenshots": Array [
+    Object {
+      "size": "1215x1199",
+      "src": "/img/kibana-apache-test.png",
+      "title": "Apache Integration",
+      "type": "image/png",
+    },
+    Object {
+      "size": "1919x1079",
+      "src": "/img/apache_httpd_server_status.png",
+      "title": "Apache HTTPD Server Status",
+      "type": "image/png",
+    },
+  ],
+  "status": "installed",
+  "title": "Apache",
+  "type": "integration",
+  "version": "0.1.4",
 }
 `;
