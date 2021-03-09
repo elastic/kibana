@@ -64,7 +64,7 @@ export const findList = async ({
     sortOrder,
   });
 
-  const { body: count } = await esClient.count<number>({
+  const { body: totalCount } = await esClient.count({
     body: {
       query,
     },
@@ -96,7 +96,7 @@ export const findList = async ({
       data: transformElasticToList({ response }),
       page,
       per_page: perPage,
-      total: count,
+      total: totalCount.count,
     };
   } else {
     return {
@@ -104,7 +104,7 @@ export const findList = async ({
       data: [],
       page,
       per_page: perPage,
-      total: count,
+      total: totalCount.count,
     };
   }
 };

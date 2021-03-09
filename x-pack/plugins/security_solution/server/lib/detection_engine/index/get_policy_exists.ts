@@ -21,6 +21,9 @@ export const getPolicyExists = async (
     // into the API to get it if it exists or rely on it to throw a 404
     return true;
   } catch (err) {
+    // we may use one of the next err props:
+    // 1. body: { error: [Object], status: 404 },
+    // 2. statusCode: 404,
     if (err.statusCode === 404) {
       return false;
     } else {
