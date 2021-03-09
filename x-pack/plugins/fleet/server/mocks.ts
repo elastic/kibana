@@ -19,6 +19,8 @@ import { securityMock } from '../../security/server/mocks';
 import { PackagePolicyServiceInterface } from './services/package_policy';
 import { AgentPolicyServiceInterface, AgentService } from './services';
 
+export { createArtifactsClientMock } from './services/artifacts';
+
 export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
