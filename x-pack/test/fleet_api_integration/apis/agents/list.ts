@@ -104,6 +104,14 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/api/fleet/agents?kuery=m`) // missing saved object type
         .expect(400);
     });
+
+    it('should return a 200 and an empty list when given a "kuery" value with a missing saved object type', async () => {
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?kuery=m`) // missing saved object type
+        .expect(200);
+      expect(apiResponse.total).to.eql(0);
+    });
+
     it('should accept a valid "kuery" value', async () => {
       const filter = encodeURIComponent('fleet-agents.access_api_key_id : "api-key-2"');
       const { body: apiResponse } = await supertest
