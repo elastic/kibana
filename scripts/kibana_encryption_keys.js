@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+require('../src/dev/ensure_node_preserve_symlinks');
 require('../src/cli_encryption_keys/dev');

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+require('../src/dev/ensure_node_preserve_symlinks');
 // eslint-disable-next-line no-restricted-syntax
 const alwaysImportedTests = [
   require.resolve('../test/functional/config.js'),

@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+require('../src/dev/ensure_node_preserve_symlinks');
 require('../src/setup_node_env');
 require('../src/dev/run_check_published_api_changes');

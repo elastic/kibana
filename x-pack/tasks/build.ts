@@ -94,12 +94,16 @@ async function copySourceAndBabelify() {
 }
 
 async function buildCanvasShareableRuntime() {
-  await execa(process.execPath, ['plugins/canvas/scripts/shareable_runtime'], {
-    cwd: XPACK_DIR,
-    stdio: ['ignore', 'inherit', 'inherit'],
-    // @ts-ignore Incorrect @types - execa supports `buffer`
-    buffer: false,
-  });
+  await execa(
+    process.execPath,
+    ['--preserve-symlinks', 'plugins/canvas/scripts/shareable_runtime'],
+    {
+      cwd: XPACK_DIR,
+      stdio: ['ignore', 'inherit', 'inherit'],
+      // @ts-ignore Incorrect @types - execa supports `buffer`
+      buffer: false,
+    }
+  );
 }
 
 async function generateNoticeText() {

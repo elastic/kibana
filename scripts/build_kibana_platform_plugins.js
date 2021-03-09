@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+require('../src/dev/ensure_node_preserve_symlinks');
 require('@kbn/optimizer').runKbnOptimizerCli({
   defaultLimitsPath: require.resolve('../packages/kbn-optimizer/limits.yml'),
 });
