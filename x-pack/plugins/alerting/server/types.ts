@@ -31,6 +31,7 @@ import {
   AlertsHealth,
   AlertNotifyWhenType,
   WithoutReservedActionGroups,
+  ActionVariable,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -93,12 +94,6 @@ export interface AlertExecutorOptions<
   tags: string[];
   createdBy: string | null;
   updatedBy: string | null;
-}
-
-export interface ActionVariable {
-  name: string;
-  description: string;
-  useWithTripleBracesInTemplates?: boolean;
 }
 
 export type ExecutorType<
