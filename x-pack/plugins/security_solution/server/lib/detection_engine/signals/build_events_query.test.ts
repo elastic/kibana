@@ -20,10 +20,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -84,10 +84,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -149,10 +149,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -215,10 +215,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -280,10 +280,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -352,10 +352,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [{ field: '@timestamp', format: 'strict_date_optional_time' }],
         query: {

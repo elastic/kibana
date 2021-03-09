@@ -73,10 +73,10 @@ export const buildEventsSearchQuery = ({
   const filterWithTime = [filter, { bool: { filter: rangeFilter } }];
 
   const searchQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index,
     size,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       docvalue_fields: docFields,
       query: {
