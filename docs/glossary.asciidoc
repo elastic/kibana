@@ -362,7 +362,7 @@ Scripted field data is shown in Discover and used in visualizations.
 A group of one or more queries that are executed asynchronously.
 The results of the session are stored for a period of time,
 so you can recall the query. Search sessions are user specific.
-// end::tag-def[]
+// end::search-session-def[]
 
 [[glossary-shareable]] shareable ::
 // tag::shareable-def[]
