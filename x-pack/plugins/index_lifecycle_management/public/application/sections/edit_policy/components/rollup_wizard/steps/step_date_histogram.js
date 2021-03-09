@@ -235,7 +235,7 @@ export class StepDateHistogram extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle data-test-subj="rollupCreateDateHistogramTitle">
+            <EuiTitle size="s" data-test-subj="rollupCreateDateHistogramTitle">
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogramTitle"

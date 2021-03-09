@@ -18,6 +18,7 @@ export const Navigation = ({
   goToPreviousStep,
   save,
   canGoToNextStep,
+  isNewRollup,
 }) => {
   const previousStepButton = (
     <EuiFlexItem grow={false}>
@@ -54,17 +55,18 @@ export const Navigation = ({
 
   const saveButton = (
     <EuiFlexItem grow={false}>
-      <EuiButton
-        color="secondary"
-        iconType="check"
-        onClick={save}
-        fill
-        data-test-subj="rollupJobSaveButton"
-      >
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.rollup.create.saveButton.label"
-          defaultMessage="Save"
-        />
+      <EuiButton color="secondary" fill onClick={save} data-test-subj="rollupJobSaveButton">
+        {isNewRollup ? (
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.rollup.create.addRollupToPolicyButton.label"
+            defaultMessage="Add rollup"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.rollup.create.updatePolicyRollupButton.label"
+            defaultMessage="Update rollup"
+          />
+        )}
       </EuiButton>
     </EuiFlexItem>
   );

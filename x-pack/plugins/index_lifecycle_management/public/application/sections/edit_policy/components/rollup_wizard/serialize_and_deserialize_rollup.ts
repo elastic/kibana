@@ -104,27 +104,37 @@ export function deserializeRollup(rollupAction: RollupAction['config']): Interna
   // mutually exclusive.
   let dateHistogramInterval = interval || fixedInterval || calendarInterval || '';
 
+  /**
+   * Normalize the calendar interval value to ones the UI knows about
+   */
   if (dateHistogramInterval && dateHistogramIntervalType === 'calendar') {
     switch (dateHistogramInterval) {
       case '1m':
+      case CALENDAR_INTERVAL_OPTIONS.minute:
         dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.minute;
         break;
       case '1h':
+      case CALENDAR_INTERVAL_OPTIONS.hour:
         dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.hour;
         break;
       case '1d':
+      case CALENDAR_INTERVAL_OPTIONS.day:
         dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.day;
         break;
       case '1w':
+      case CALENDAR_INTERVAL_OPTIONS.week:
         dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.week;
         break;
       case '1M':
+      case CALENDAR_INTERVAL_OPTIONS.month:
         dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.month;
         break;
       case '1q':
+      case CALENDAR_INTERVAL_OPTIONS.quarter:
         dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.quarter;
         break;
       case '1y':
+      case CALENDAR_INTERVAL_OPTIONS.year:
         dateHistogramInterval = CALENDAR_INTERVAL_OPTIONS.year;
         break;
       default:

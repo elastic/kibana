@@ -157,109 +157,109 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   }, [hasCurrentRollupField, history]);
 
   return (
-    <>
-      <EuiPage style={{ display: currentView.id === 'policy' ? undefined : 'none' }}>
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle size="l" data-test-subj="policyTitle">
-                  <h1>
-                    {isNewPolicy
-                      ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                          defaultMessage: 'Create policy',
-                        })
-                      : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                          defaultMessage: 'Edit policy {originalPolicyName}',
-                          values: { originalPolicyName },
-                        })}
-                  </h1>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-              <EuiPageContentHeaderSection>
-                <EuiButtonEmpty
-                  href={createDocLink('index-lifecycle-management.html')}
-                  target="_blank"
-                  iconType="help"
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
-                    defaultMessage="Documentation"
-                  />
-                </EuiButtonEmpty>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
-            <Form form={form}>
-              {isNewPolicy ? null : (
-                <Fragment>
-                  <EuiText>
-                    <p>
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
-                          defaultMessage="You are editing an existing policy"
-                        />
-                      </strong>
-                      .{' '}
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiPageContentHeaderSection>
+              <EuiTitle size="l" data-test-subj="policyTitle">
+                <h1>
+                  {isNewPolicy
+                    ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
+                        defaultMessage: 'Create policy',
+                      })
+                    : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
+                        defaultMessage: 'Edit policy {originalPolicyName}',
+                        values: { originalPolicyName },
+                      })}
+                </h1>
+              </EuiTitle>
+            </EuiPageContentHeaderSection>
+            <EuiPageContentHeaderSection>
+              <EuiButtonEmpty
+                href={createDocLink('index-lifecycle-management.html')}
+                target="_blank"
+                iconType="help"
+              >
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
+                  defaultMessage="Documentation"
+                />
+              </EuiButtonEmpty>
+            </EuiPageContentHeaderSection>
+          </EuiPageContentHeader>
+          <Form form={form}>
+            {isNewPolicy ? null : (
+              <Fragment>
+                <EuiText>
+                  <p>
+                    <strong>
                       <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
-                        defaultMessage="Any changes you make will affect the indices that are
+                        id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
+                        defaultMessage="You are editing an existing policy"
+                      />
+                    </strong>
+                    .{' '}
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
+                      defaultMessage="Any changes you make will affect the indices that are
                               attached to this policy. Alternatively, you can save these changes in
                               a new policy."
-                      />
-                    </p>
-                  </EuiText>
-                  <EuiSpacer />
-
-                  <EuiFormRow>
-                    <EuiSwitch
-                      data-test-subj="saveAsNewSwitch"
-                      style={{ maxWidth: '100%' }}
-                      checked={saveAsNew}
-                      onChange={(e) => {
-                        setSaveAsNew(e.target.checked);
-                      }}
-                      label={
-                        <span>
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
-                            defaultMessage="Save as new policy"
-                          />
-                        </span>
-                      }
                     />
-                  </EuiFormRow>
-                </Fragment>
-              )}
+                  </p>
+                </EuiText>
+                <EuiSpacer />
 
-              {saveAsNew || isNewPolicy ? (
-                <UseField<string, FormInternal>
-                  path={policyNamePath}
-                  config={{
-                    label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
-                      defaultMessage: 'Policy name',
-                    }),
-                    helpText: i18n.translate(
-                      'xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage',
-                      {
-                        defaultMessage:
-                          'A policy name cannot start with an underscore and cannot contain a comma or a space.',
-                      }
-                    ),
-                    validations: policyNameValidations,
-                  }}
-                  component={TextField}
-                  componentProps={{
-                    fullWidth: false,
-                    euiFieldProps: {
-                      'data-test-subj': 'policyNameField',
-                    },
-                  }}
-                />
-              ) : null}
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="saveAsNewSwitch"
+                    style={{ maxWidth: '100%' }}
+                    checked={saveAsNew}
+                    onChange={(e) => {
+                      setSaveAsNew(e.target.checked);
+                    }}
+                    label={
+                      <span>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
+                          defaultMessage="Save as new policy"
+                        />
+                      </span>
+                    }
+                  />
+                </EuiFormRow>
+              </Fragment>
+            )}
 
-              <EuiHorizontalRule />
+            {saveAsNew || isNewPolicy ? (
+              <UseField<string, FormInternal>
+                path={policyNamePath}
+                config={{
+                  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
+                    defaultMessage: 'Policy name',
+                  }),
+                  helpText: i18n.translate(
+                    'xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage',
+                    {
+                      defaultMessage:
+                        'A policy name cannot start with an underscore and cannot contain a comma or a space.',
+                    }
+                  ),
+                  validations: policyNameValidations,
+                }}
+                component={TextField}
+                componentProps={{
+                  fullWidth: false,
+                  euiFieldProps: {
+                    'data-test-subj': 'policyNameField',
+                  },
+                }}
+              />
+            ) : null}
 
+            <EuiHorizontalRule />
+
+            <div style={{ display: currentView.id === 'policy' ? undefined : 'none' }}>
               <Timeline />
 
               <EuiSpacer size="l" />
@@ -342,38 +342,47 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                   close={() => setIsShowingPolicyJsonFlyout(false)}
                 />
               ) : null}
-            </Form>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-      {currentView.id === 'rollupAction' && hasCurrentRollupField && (
-        <RollupWizard
-          form={form}
-          phase={currentView.phase}
-          onDone={(rollupAction) => {
-            const { phase } = currentView;
-            const fieldPath = `phases.${phase}.actions.rollup.config`;
-            const rollupField = form.getFields()[fieldPath];
-            const newCurrentPolicy = cloneDeep({
-              ...currentPolicy,
-              name: originalPolicyName,
-            });
+            </div>
+          </Form>
+          {currentView.id === 'rollupAction' && hasCurrentRollupField && (
+            <RollupWizard
+              form={form}
+              phase={currentView.phase}
+              onCancel={() => {
+                const { phase } = currentView;
+                const { search } = history.location;
+                const newQueryParams = qs.parse(search);
+                delete newQueryParams.rollup;
+                history.push({
+                  search: qs.stringify(newQueryParams),
+                  hash: `#${phase}-rollup`,
+                });
+              }}
+              onDone={(rollupAction) => {
+                const { phase } = currentView;
+                const fieldPath = `phases.${phase}.actions.rollup.config`;
+                const rollupField = form.getFields()[fieldPath];
+                const newCurrentPolicy = cloneDeep({
+                  ...currentPolicy,
+                  name: originalPolicyName,
+                });
 
-            set(newCurrentPolicy, fieldPath, rollupAction);
-            setCurrentPolicy(newCurrentPolicy);
-            rollupField.setValue(rollupAction);
+                set(newCurrentPolicy, fieldPath, rollupAction);
+                setCurrentPolicy(newCurrentPolicy);
+                rollupField.setValue(rollupAction);
 
-            const { search } = history.location;
-            const newQueryParams = qs.parse(search);
-            delete newQueryParams.rollup;
-            history.push({
-              search: qs.stringify(newQueryParams),
-              hash: `#${phase}-rollup`,
-            });
-          }}
-          onCancel={() => {}}
-        />
-      )}
-    </>
+                const { search } = history.location;
+                const newQueryParams = qs.parse(search);
+                delete newQueryParams.rollup;
+                history.push({
+                  search: qs.stringify(newQueryParams),
+                  hash: `#${phase}-rollup`,
+                });
+              }}
+            />
+          )}
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 };

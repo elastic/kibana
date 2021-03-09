@@ -7,12 +7,13 @@
 
 import React, { Component } from 'react';
 import {
-  EuiPage,
-  EuiPageContent,
-  EuiPageContentHeader,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiStepsHorizontal,
+  EuiHorizontalRule,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { cloneDeep, mapValues } from 'lodash';
@@ -38,7 +39,6 @@ import {
 } from './steps';
 
 import {
-  STEP_,
   STEP_DATE_HISTOGRAM,
   STEP_TERMS,
   STEP_HISTOGRAM,
@@ -112,6 +112,7 @@ export interface StepFields {
 
 interface State {
   checkpointStepId: string;
+  isNewRollup: boolean;
   currentStepId: keyof StepFields;
   nextStepId: keyof StepFields;
   previousStepId?: keyof StepFields;
@@ -144,6 +145,7 @@ export class RollupWizard extends Component<Props, State> {
     const { value } = props;
     const stepsFields = deriveStepFields(value);
     this.state = {
+      isNewRollup: !value,
       indexPattern: '',
       checkpointStepId: stepIds[0],
       currentStepId: stepIds[0],
@@ -166,6 +168,7 @@ export class RollupWizard extends Component<Props, State> {
     if (prev.value !== this.props.value) {
       const stepsFields = deriveStepFields(this.props.value);
       this.setState({
+        isNewRollup: !this.props.value,
         stepsFields,
         stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
       });
@@ -314,12 +317,12 @@ export class RollupWizard extends Component<Props, State> {
   };
 
   render() {
-    const { phase } = this.props;
+    const { phase, onCancel } = this.props;
     return (
-      <EuiPage>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiTitle size="l">
+      <>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m">
               <h1>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.createTitle"
@@ -330,19 +333,26 @@ export class RollupWizard extends Component<Props, State> {
                 />
               </h1>
             </EuiTitle>
-          </EuiPageContentHeader>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onCancel} iconType="cross" iconSide="left">
+              Back to policy
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          <EuiStepsHorizontal steps={this.getSteps()} />
+        <EuiSpacer />
 
-          <EuiSpacer />
+        <EuiStepsHorizontal steps={this.getSteps()} />
 
-          {this.renderCurrentStep()}
+        <EuiSpacer />
 
-          <EuiSpacer size="l" />
+        {this.renderCurrentStep()}
 
-          {this.renderNavigation()}
-        </EuiPageContent>
-      </EuiPage>
+        <EuiHorizontalRule />
+
+        {this.renderNavigation()}
+      </>
     );
   }
 
@@ -415,7 +425,7 @@ export class RollupWizard extends Component<Props, State> {
   }
 
   renderNavigation() {
-    const { nextStepId, previousStepId, areStepErrorsVisible } = this.state;
+    const { nextStepId, previousStepId, areStepErrorsVisible, isNewRollup } = this.state;
 
     const hasNextStep = nextStepId != null;
 
@@ -425,6 +435,7 @@ export class RollupWizard extends Component<Props, State> {
 
     return (
       <Navigation
+        isNewRollup={isNewRollup}
         hasNextStep={hasNextStep}
         hasPreviousStep={previousStepId != null}
         goToNextStep={this.goToNextStep}
