@@ -167,6 +167,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             datasourceLayers: framePublicAPI.datasourceLayers,
           });
           if (ast) {
+            // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
+            // turning it into a string will make sure the expression renderer only re-renders if the
+            // expression actually changed.
             return toExpression(ast);
           } else {
             return null;
