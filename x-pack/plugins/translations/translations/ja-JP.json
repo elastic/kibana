@@ -13038,7 +13038,6 @@
     "xpack.ml.alertContext.anomalyExplorerUrlDescription": "異常エクスプローラーを開くURL",
     "xpack.ml.alertContext.isInterimDescription": "上位の一致に中間結果が含まれるかどうかを示します",
     "xpack.ml.alertContext.jobIdsDescription": "アラートインスタンスをトリガーしたジョブIDのリスト。",
-    "xpack.ml.alertContext.kibanaBasePathUrlDescription": "Kibanaベースパス",
     "xpack.ml.alertContext.scoreDescription": "異常スコア",
     "xpack.ml.alertContext.timestampDescription": "異常のタイムスタンプ",
     "xpack.ml.alertContext.timestampIso8601Description": "ISO8601形式の時刻",
