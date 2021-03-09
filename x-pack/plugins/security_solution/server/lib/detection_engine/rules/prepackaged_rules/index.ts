@@ -65,21 +65,21 @@ import rule52 from './defense_evasion_volume_shadow_copy_deletion_via_wmic.json'
 import rule53 from './discovery_process_discovery_via_tasklist_command.json';
 import rule54 from './discovery_whoami_command_activity.json';
 import rule55 from './discovery_whoami_commmand.json';
-import rule56 from './endpoint_adversary_behavior_detected.json';
-import rule57 from './endpoint_cred_dumping_detected.json';
-import rule58 from './endpoint_cred_dumping_prevented.json';
-import rule59 from './endpoint_cred_manipulation_detected.json';
-import rule60 from './endpoint_cred_manipulation_prevented.json';
-import rule61 from './endpoint_exploit_detected.json';
-import rule62 from './endpoint_exploit_prevented.json';
-import rule63 from './endpoint_malware_detected.json';
-import rule64 from './endpoint_malware_prevented.json';
-import rule65 from './endpoint_permission_theft_detected.json';
-import rule66 from './endpoint_permission_theft_prevented.json';
-import rule67 from './endpoint_process_injection_detected.json';
-import rule68 from './endpoint_process_injection_prevented.json';
-import rule69 from './endpoint_ransomware_detected.json';
-import rule70 from './endpoint_ransomware_prevented.json';
+import rule56 from './endgame_adversary_behavior_detected.json';
+import rule57 from './endgame_cred_dumping_detected.json';
+import rule58 from './endgame_cred_dumping_prevented.json';
+import rule59 from './endgame_cred_manipulation_detected.json';
+import rule60 from './endgame_cred_manipulation_prevented.json';
+import rule61 from './endgame_exploit_detected.json';
+import rule62 from './endgame_exploit_prevented.json';
+import rule63 from './endgame_malware_detected.json';
+import rule64 from './endgame_malware_prevented.json';
+import rule65 from './endgame_permission_theft_detected.json';
+import rule66 from './endgame_permission_theft_prevented.json';
+import rule67 from './endgame_process_injection_detected.json';
+import rule68 from './endgame_process_injection_prevented.json';
+import rule69 from './endgame_ransomware_detected.json';
+import rule70 from './endgame_ransomware_prevented.json';
 import rule71 from './execution_command_prompt_connecting_to_the_internet.json';
 import rule72 from './execution_command_shell_started_by_powershell.json';
 import rule73 from './execution_command_shell_started_by_svchost.json';
@@ -225,7 +225,7 @@ import rule212 from './initial_access_via_system_manager.json';
 import rule213 from './privilege_escalation_root_login_without_mfa.json';
 import rule214 from './privilege_escalation_updateassumerolepolicy.json';
 import rule215 from './impact_hosts_file_modified.json';
-import rule216 from './elastic_endpoint.json';
+import rule216 from './elastic_endpoint_security.json';
 import rule217 from './external_alerts.json';
 import rule218 from './initial_access_login_failures.json';
 import rule219 from './initial_access_login_location.json';
@@ -552,6 +552,10 @@ import rule539 from './privilege_escalation_ld_preload_shared_object_modif.json'
 import rule540 from './privilege_escalation_root_crontab_filemod.json';
 import rule541 from './defense_evasion_create_mod_root_certificate.json';
 import rule542 from './privilege_escalation_sudo_buffer_overflow.json';
+import rule543 from './execution_installer_spawned_network_event.json';
+import rule544 from './initial_access_suspicious_ms_exchange_files.json';
+import rule545 from './initial_access_suspicious_ms_exchange_process.json';
+import rule546 from './initial_access_suspicious_ms_exchange_worker_child_process.json';
 
 export const rawRules = [
   rule1,
@@ -1096,4 +1100,8 @@ export const rawRules = [
   rule540,
   rule541,
   rule542,
+  rule543,
+  rule544,
+  rule545,
+  rule546,
 ];
