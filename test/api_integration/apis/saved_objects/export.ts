@@ -553,7 +553,7 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `Can't export more than 10001 objects`,
+                message: `Can't export more than 10001 objects. If your server has enough memory, this limit can be increased by adjusting the \"savedObjects.maxImportExportSize\" setting.`,
               });
             });
           await supertest
