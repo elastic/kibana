@@ -30,8 +30,8 @@
           "description": [],
           "source": {
             "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-            "lineNumber": 48,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/vis_type_timeseries/server/plugin.ts#L48"
+            "lineNumber": 53,
+            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/vis_type_timeseries/server/plugin.ts#L53"
           },
           "signature": [
             "(requestContext: ",
@@ -46,19 +46,11 @@
             {
               "pluginId": "core",
               "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.FakeRequest",
-              "text": "FakeRequest"
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
             },
-            ", options: ",
-            {
-              "pluginId": "visTypeTimeseries",
-              "scope": "server",
-              "docId": "kibVisTypeTimeseriesPluginApi",
-              "section": "def-server.GetVisDataOptions",
-              "text": "GetVisDataOptions"
-            },
-            ") => Promise<",
+            "<unknown, unknown, unknown, any>, options: any) => Promise<",
             {
               "pluginId": "visTypeTimeseries",
               "scope": "common",
@@ -72,8 +64,8 @@
       ],
       "source": {
         "path": "src/plugins/vis_type_timeseries/server/plugin.ts",
-        "lineNumber": 47,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/vis_type_timeseries/server/plugin.ts#L47"
+        "lineNumber": 52,
+        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/vis_type_timeseries/server/plugin.ts#L52"
       },
       "lifecycle": "setup",
       "initialIsOpen": true

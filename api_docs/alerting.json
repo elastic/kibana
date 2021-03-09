@@ -156,60 +156,6 @@
     ],
     "interfaces": [
       {
-        "id": "def-server.ActionVariable",
-        "type": "Interface",
-        "label": "ActionVariable",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ActionVariable.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 106,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L106"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ActionVariable.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 107,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L107"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ActionVariable.useWithTripleBracesInTemplates",
-            "type": "CompoundType",
-            "label": "useWithTripleBracesInTemplates",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 108,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L108"
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 105,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L105"
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.AlertType",
         "type": "Interface",
         "label": "AlertType",
@@ -234,8 +180,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L132"
+              "lineNumber": 127,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L127"
             }
           },
           {
@@ -246,8 +192,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 133,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L133"
+              "lineNumber": 128,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L128"
             }
           },
           {
@@ -258,8 +204,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 134,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L134"
+              "lineNumber": 129,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L129"
             },
             "signature": [
               "{ params?: ",
@@ -281,8 +227,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 137,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L137"
+              "lineNumber": 132,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L132"
             },
             "signature": [
               {
@@ -303,8 +249,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 138,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L138"
+              "lineNumber": 133,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L133"
             },
             "signature": [
               "ActionGroupIds"
@@ -318,8 +264,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 139,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L139"
+              "lineNumber": 134,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L134"
             },
             "signature": [
               {
@@ -340,8 +286,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 140,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L140"
+              "lineNumber": 135,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L135"
             },
             "signature": [
               {
@@ -370,8 +316,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 151,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L151"
+              "lineNumber": 146,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L146"
             }
           },
           {
@@ -382,32 +328,32 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 152,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L152"
+              "lineNumber": 147,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L147"
             },
             "signature": [
               "{ context?: ",
               {
                 "pluginId": "alerting",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.ActionVariable",
+                "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; state?: ",
               {
                 "pluginId": "alerting",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.ActionVariable",
+                "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; params?: ",
               {
                 "pluginId": "alerting",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.ActionVariable",
+                "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; } | undefined"
@@ -421,8 +367,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 157,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L157"
+              "lineNumber": 152,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L152"
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -431,8 +377,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 124,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L124"
+          "lineNumber": 119,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L119"
         },
         "initialIsOpen": false
       },
@@ -503,8 +449,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 231,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L231"
+              "lineNumber": 226,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L226"
             },
             "signature": [
               {
@@ -524,8 +470,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 232,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L232"
+              "lineNumber": 227,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L227"
             },
             "signature": [
               {
@@ -540,8 +486,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 230,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L230"
+          "lineNumber": 225,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L225"
         },
         "initialIsOpen": false
       },
@@ -570,8 +516,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 91,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L91"
+              "lineNumber": 92,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L92"
             }
           },
           {
@@ -582,8 +528,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 92,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L92"
+              "lineNumber": 93,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L93"
             },
             "signature": [
               "Date"
@@ -597,8 +543,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 93,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L93"
+              "lineNumber": 94,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L94"
             },
             "signature": [
               "Date | null"
@@ -612,8 +558,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 94,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L94"
+              "lineNumber": 95,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L95"
             },
             "signature": [
               {
@@ -634,8 +580,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 95,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L95"
+              "lineNumber": 96,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L96"
             },
             "signature": [
               "Params"
@@ -649,8 +595,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 96,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L96"
+              "lineNumber": 97,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L97"
             },
             "signature": [
               "State"
@@ -664,8 +610,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L97"
+              "lineNumber": 98,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L98"
             }
           },
           {
@@ -676,8 +622,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 98,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L98"
+              "lineNumber": 99,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L99"
             },
             "signature": [
               "string | undefined"
@@ -691,8 +637,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 99,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L99"
+              "lineNumber": 100,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L100"
             }
           },
           {
@@ -703,8 +649,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 100,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L100"
+              "lineNumber": 101,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L101"
             },
             "signature": [
               "string[]"
@@ -718,8 +664,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 101,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L101"
+              "lineNumber": 102,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L102"
             },
             "signature": [
               "string | null"
@@ -733,8 +679,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 102,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L102"
+              "lineNumber": 103,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L103"
             },
             "signature": [
               "string | null"
@@ -743,8 +689,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 84,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L84"
+          "lineNumber": 85,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L85"
         },
         "initialIsOpen": false
       },
@@ -774,8 +720,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L79"
+              "lineNumber": 80,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L80"
             },
             "signature": [
               "(id: string) => Pick<",
@@ -792,8 +738,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 74,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L74"
+          "lineNumber": 75,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L75"
         },
         "initialIsOpen": false
       },
@@ -814,8 +760,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L47"
+              "lineNumber": 48,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L48"
             },
             "signature": [
               "() => ",
@@ -836,8 +782,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L48"
+              "lineNumber": 49,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L49"
             },
             "signature": [
               "() => Set<",
@@ -859,8 +805,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L49"
+              "lineNumber": 50,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L50"
             },
             "signature": [
               "() => Promise<",
@@ -877,8 +823,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 46,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L46"
+          "lineNumber": 47,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L47"
         },
         "initialIsOpen": false
       },
@@ -1262,8 +1208,8 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 190,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L190"
+          "lineNumber": 185,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/server/types.ts#L185"
         },
         "signature": [
           "Pick<Alert<Params>, \"id\"> & Partial<Pick<Alert<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"apiKey\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>"
@@ -2292,6 +2238,75 @@
           "path": "x-pack/plugins/alerting/common/alert.ts",
           "lineNumber": 86,
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L86"
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ActionVariable",
+        "type": "Interface",
+        "label": "ActionVariable",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.ActionVariable.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert.ts",
+              "lineNumber": 102,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L102"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionVariable.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert.ts",
+              "lineNumber": 103,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L103"
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionVariable.deprecated",
+            "type": "CompoundType",
+            "label": "deprecated",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert.ts",
+              "lineNumber": 104,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L104"
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionVariable.useWithTripleBracesInTemplates",
+            "type": "CompoundType",
+            "label": "useWithTripleBracesInTemplates",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert.ts",
+              "lineNumber": 105,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L105"
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/alerting/common/alert.ts",
+          "lineNumber": 101,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/alerting/common/alert.ts#L101"
         },
         "initialIsOpen": false
       },
