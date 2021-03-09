@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { sendRequest, useRequest } from './use_request';
 import { packagePolicyRouteService } from '../../services';
 import type {
   CreatePackagePolicyRequest,
@@ -20,6 +19,8 @@ import type {
   GetPackagePoliciesResponse,
   GetOnePackagePolicyResponse,
 } from '../../../../../common/types/rest_spec';
+
+import { sendRequest, useRequest } from './use_request';
 
 export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
   return sendRequest<CreatePackagePolicyResponse>({

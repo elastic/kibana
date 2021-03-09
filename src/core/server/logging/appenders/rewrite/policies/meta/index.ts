@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export {
-  MetaRewritePolicy,
-  MetaRewritePolicyConfig,
-  metaRewritePolicyConfigSchema,
-} from './meta_policy';
+export { MetaRewritePolicy, metaRewritePolicyConfigSchema } from './meta_policy';
+
+export type { MetaRewritePolicyConfig } from './meta_policy';

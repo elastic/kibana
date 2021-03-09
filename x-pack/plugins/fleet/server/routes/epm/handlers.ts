@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
-import path from 'path';
 import type { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
+
 import type {
   GetInfoResponse,
   InstallPackageResponse,
@@ -224,7 +226,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
@@ -233,7 +235,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
       installSource: 'registry',
       savedObjectsClient,
       pkgkey,
-      callCluster,
+      esClient,
       force: request.body?.force,
     });
     const body: InstallPackageResponse = {
@@ -248,7 +250,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
       pkgName,
       pkgVersion,
       installedPkg,
-      callCluster,
+      esClient,
     });
 
     return defaultResult;
@@ -276,10 +278,10 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
-    callCluster,
+    esClient,
     packagesToUpgrade: request.body.packages,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
@@ -301,14 +303,14 @@ export const installPackageByUploadHandler: RequestHandler<
     });
   }
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   try {
     const res = await installPackage({
       installSource: 'upload',
       savedObjectsClient,
-      callCluster,
+      esClient,
       archiveBuffer,
       contentType,
     });
@@ -327,8 +329,8 @@ export const deletePackageHandler: RequestHandler<
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const res = await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     const body: DeletePackageResponse = {
       response: res,
     };

@@ -20,9 +20,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+
 import { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
 import { useLink } from '../../../../../hooks';
 import { PackageIcon } from '../../../../../components';
+
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 
 const StyledEuiAccordion = styled(EuiAccordion)`

@@ -11,6 +11,7 @@ import { nextTick } from '@kbn/test/jest';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 // Note: this import must be before other relative imports for the mocks to work as intended.
+// eslint-disable-next-line import/order
 import {
   mockAuthorizationModeFactory,
   mockCheckPrivilegesDynamicallyWithRequestFactory,

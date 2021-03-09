@@ -6,10 +6,10 @@
  */
 
 import type { Request } from '@hapi/hapi';
+
 import { KibanaRequest } from '../../../../../../src/core/server';
 import type { SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { FleetAdminUserInvalidError, isESClientError } from '../../errors';
-import type { CallESAsCurrentUser } from '../../types';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';
 
@@ -53,16 +53,6 @@ export async function createAPIKey(
     }
 
     throw err;
-  }
-}
-export async function authenticate(callCluster: CallESAsCurrentUser) {
-  try {
-    await callCluster('transport.request', {
-      path: '/_security/_authenticate',
-      method: 'GET',
-    });
-  } catch (e) {
-    throw new Error('ApiKey is not valid: impossible to authenticate user');
   }
 }
 

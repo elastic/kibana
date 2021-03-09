@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { isValidNamespace } from '../../../common';
 
 export const NamespaceSchema = schema.string({
