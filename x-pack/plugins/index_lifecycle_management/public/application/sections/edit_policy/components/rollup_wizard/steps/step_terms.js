@@ -18,8 +18,6 @@ import { FieldChooser } from './components';
 export class StepTerms extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
-    indexPattern: PropTypes.string.isRequired,
-    onIndexPatternChange: PropTypes.func.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
   };
 
@@ -42,7 +40,7 @@ export class StepTerms extends Component {
   };
 
   render() {
-    const { fields, onIndexPatternChange, indexPattern } = this.props;
+    const { fields } = this.props;
 
     const { terms } = fields;
 
@@ -91,12 +89,6 @@ export class StepTerms extends Component {
           emptyMessage={<p>No terms fields added</p>}
           addButton={
             <FieldChooser
-              indexPattern={indexPattern}
-              onIndexPatternChange={onIndexPatternChange}
-              includeFieldTypes={{
-                numeric: true,
-                keyword: true,
-              }}
               buttonLabel={
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepTerms.fieldsChooserLabel"

@@ -116,11 +116,6 @@ interface State {
   currentStepId: keyof StepFields;
   nextStepId: keyof StepFields;
   previousStepId?: keyof StepFields;
-  /**
-   * This index pattern is stored in the wizard and used to enable users to more easily add fields
-   * to terms, histogram and metrics. It is not stored in the rollup configuration.
-   */
-  indexPattern: string;
   stepsFieldErrors: Record<string, Record<string, string | undefined>>;
   areStepErrorsVisible: boolean;
   stepsFields: StepFields;
@@ -147,7 +142,6 @@ export class RollupWizard extends Component<Props, State> {
     const stepsFieldErrors = this.getStepsFieldsErrors(stepsFields);
     this.state = {
       isNewRollup: !value,
-      indexPattern: '',
       checkpointStepId: this.calculateLastPossibleStepCheckPoint(stepsFieldErrors),
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
@@ -208,10 +202,6 @@ export class RollupWizard extends Component<Props, State> {
           : `createRollupStep${index + 1}`,
     }));
   }
-
-  updateIndexPattern = (value: string) => {
-    this.setState({ indexPattern: value });
-  };
 
   goToNextStep = () => {
     this.goToStep(this.state.nextStepId);
@@ -370,13 +360,7 @@ export class RollupWizard extends Component<Props, State> {
 
   renderCurrentStep() {
     const { phase } = this.props;
-    const {
-      currentStepId,
-      stepsFields,
-      stepsFieldErrors,
-      areStepErrorsVisible,
-      indexPattern,
-    } = this.state;
+    const { currentStepId, stepsFields, stepsFieldErrors, areStepErrorsVisible } = this.state;
 
     const currentStepFields = stepsFields[currentStepId];
     const currentStepFieldErrors = stepsFieldErrors[currentStepId];
@@ -386,8 +370,6 @@ export class RollupWizard extends Component<Props, State> {
         return (
           <StepDateHistogram
             fields={currentStepFields}
-            indexPattern={indexPattern}
-            onIndexPatternChange={this.updateIndexPattern}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             hasErrors={hasErrors(currentStepFieldErrors)}
@@ -396,21 +378,12 @@ export class RollupWizard extends Component<Props, State> {
         );
 
       case STEP_TERMS:
-        return (
-          <StepTerms
-            indexPattern={indexPattern}
-            onIndexPatternChange={this.updateIndexPattern}
-            fields={currentStepFields}
-            onFieldsChange={this.onFieldsChange}
-          />
-        );
+        return <StepTerms fields={currentStepFields} onFieldsChange={this.onFieldsChange} />;
 
       case STEP_HISTOGRAM:
         return (
           <StepHistogram
             fields={currentStepFields}
-            indexPattern={indexPattern}
-            onIndexPatternChange={this.updateIndexPattern}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             hasErrors={hasErrors(currentStepFieldErrors)}
@@ -422,8 +395,6 @@ export class RollupWizard extends Component<Props, State> {
         return (
           <StepMetrics
             fields={currentStepFields}
-            indexPattern={indexPattern}
-            onIndexPatternChange={this.updateIndexPattern}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}
             areStepErrorsVisible={areStepErrorsVisible}

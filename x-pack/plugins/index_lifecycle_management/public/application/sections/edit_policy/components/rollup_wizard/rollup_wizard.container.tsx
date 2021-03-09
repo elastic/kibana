@@ -10,6 +10,7 @@ import { get } from 'lodash';
 
 import { useFormData, FormHook } from '../../../../../shared_imports';
 import { RollupWizard as RollupWizardView, Props as RollupWizardViewProps } from './rollup_wizard';
+import { FieldChooserProvider } from './field_chooser_context';
 
 type Props = Omit<RollupWizardViewProps, 'value'> & { form: FormHook };
 
@@ -17,5 +18,9 @@ export const RollupWizard: FunctionComponent<Props> = ({ phase, form, ...rest })
   const path = `phases.${phase}.actions.rollup.config`;
   const [data] = useFormData({ form, watch: path });
   const value = get(data, path);
-  return <RollupWizardView value={value} phase={phase} {...rest} />;
+  return (
+    <FieldChooserProvider>
+      <RollupWizardView value={value} phase={phase} {...rest} />
+    </FieldChooserProvider>
+  );
 };

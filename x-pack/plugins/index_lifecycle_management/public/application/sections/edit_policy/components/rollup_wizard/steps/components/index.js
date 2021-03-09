@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { FieldChooser } from './field_chooser';
+export { FieldChooser } from './field_chooser.container';
 export { StepError } from './step_error';

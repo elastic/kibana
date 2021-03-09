@@ -75,8 +75,6 @@ interface State {
 
 interface Props {
   fields: StepFields['STEP_METRICS'];
-  indexPattern: string;
-  onIndexPatternChange: (value: string) => void;
   onFieldsChange: (value: StepFields['STEP_METRICS']) => void;
   fieldErrors: Record<string, unknown>;
   areStepErrorsVisible: boolean;
@@ -355,7 +353,7 @@ export class StepMetrics extends Component<Props, State> {
   };
 
   render() {
-    const { fields, indexPattern, onIndexPatternChange } = this.props;
+    const { fields } = this.props;
 
     const { metrics } = fields;
 
@@ -404,8 +402,6 @@ export class StepMetrics extends Component<Props, State> {
               <EuiFlexItem>
                 <FieldChooser
                   key="stepMetricsFieldChooser"
-                  indexPattern={indexPattern}
-                  onIndexPatternChange={onIndexPatternChange}
                   buttonLabel={
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.rollup.create.stepMetrics.fieldsChooserLabel"
