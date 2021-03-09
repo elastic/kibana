@@ -124,8 +124,9 @@ export const Page: FC = () => {
     ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
     restorableDefaults
   );
+  const [currentSavedSearch, setCurrentSavedSearch] = useState(mlContext.currentSavedSearch);
 
-  const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = mlContext;
+  const { combinedQuery, currentIndexPattern, kibanaConfig } = mlContext;
   const timefilter = useTimefilter({
     timeRangeSelector: currentIndexPattern.timeFieldName !== undefined,
     autoRefreshSelector: true,
@@ -193,6 +194,9 @@ export const Page: FC = () => {
     searchString: Query['query'];
     queryLanguage: SearchQueryLanguage;
   }) => {
+    if (currentSavedSearch !== null && searchParams.searchString === '') {
+      setCurrentSavedSearch(null);
+    }
     setDataVisualizerListState({
       ...dataVisualizerListState,
       searchQuery: searchParams.searchQuery,
