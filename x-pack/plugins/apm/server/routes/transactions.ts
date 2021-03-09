@@ -15,7 +15,7 @@ import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
-import { getServiceTransactionGroupComparisonStatistics } from '../lib/services/get_service_transaction_group_comparison_statistics';
+import { getServiceTransactionGroupComparisonStatisticsPeriods } from '../lib/services/get_service_transaction_group_comparison_statistics';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
@@ -24,7 +24,12 @@ import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
 import { createRoute } from './create_route';
-import { environmentRt, kueryRt, rangeRt } from './default_api_types';
+import {
+  environmentRt,
+  comparisonRangeRt,
+  rangeRt,
+  kueryRt,
+} from './default_api_types';
 
 /**
  * Returns a list of transactions grouped by name
@@ -118,6 +123,7 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       environmentRt,
       kueryRt,
       rangeRt,
+      comparisonRangeRt,
       t.type({
         transactionNames: jsonRt.pipe(t.array(t.string)),
         numBuckets: toNumberRt,
@@ -145,10 +151,12 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
         latencyAggregationType,
         numBuckets,
         transactionType,
+        comparisonStart,
+        comparisonEnd,
       },
     } = context.params;
 
-    return getServiceTransactionGroupComparisonStatistics({
+    return await getServiceTransactionGroupComparisonStatisticsPeriods({
       environment,
       kuery,
       setup,
@@ -158,6 +166,8 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       transactionType,
       numBuckets,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     });
   },
 });
