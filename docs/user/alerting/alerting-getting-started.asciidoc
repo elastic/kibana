@@ -32,7 +32,7 @@ A rule specifies a background task that runs on the {kib} server to check for sp
 
 For example, when monitoring a set of servers, a rule might check for average CPU usage > 0.9 on each server for the last two minutes (condition), checked every minute (schedule), sending a warning email message via SMTP with subject `CPU on {{server}} is high` (action).
 
-image::images/what-is-an-alert.svg[Three components of a rule]
+image::images/what-is-a-rule.svg[Three components of a rule]
 
 The following sections describe each part of the rule in more detail.
 
@@ -57,7 +57,7 @@ Rule schedules are defined as an interval between subsequent checks, and can ran
 
 [IMPORTANT]
 ==============================================
-The intervals of rule checks in {kib} are approximate. The timing of their execution is affected by factors such as the frequency at which tasks are claimed and the task load on the system. See <<alerting-production-considerations>> for more information. 
+The intervals of rule checks in {kib} are approximate. The timing of their execution is affected by factors such as the frequency at which tasks are claimed and the task load on the system. See <<alerting-production-considerations, Alerting production considerations>> for more information.
 ==============================================
 
 [float]
@@ -86,11 +86,11 @@ See <<action-types>> for details on the types of connectors provided by {kib}.
 [[alerting-concepts-alert-instances]]
 === Alerts
 
-When checking for a condition, a rule might identify multiple occurrences of the condition. {kib} tracks each of these *alerts* separately and takes action per instance.
+When checking for a condition, a rule might identify multiple occurrences of the condition. {kib} tracks each of these *alerts* separately and takes an action per alert.
 
 Using the server monitoring example, each server with average CPU > 0.9 is tracked as an alert. This means a separate email is sent for each server that exceeds the threshold.
 
-image::images/alert-instances.svg[{kib} tracks each detected condition as an alert and takes action on each instance]
+image::images/alerts.svg[{kib} tracks each detected condition as an alert and takes action on each alert]
 
 [float]
 [[alerting-concepts-suppressing-duplicate-notifications]]
@@ -117,14 +117,14 @@ Rather than repeatedly entering connection information and credentials for each 
 
 *Connectors* provide a central place to store connection information for services and integrations. For example if four rules send email notifications via the same SMTP service, they can all reference the same SMTP connector. When the SMTP settings change, you can update them once in the connector, instead of having to update four rules.
 
-image::images/alert-concepts-connectors.svg[Connectors provide a central place to store service connection settings]
+image::images/rule-concepts-connectors.svg[Connectors provide a central place to store service connection settings]
 
 [float]
 === Summary
 
 A *rule* consists of conditions, *actions*, and a schedule. When conditions are met, *alerts* are created that render *actions* and invoke them. To make action setup and update easier, actions use *connectors* that centralize the information used to connect with {kib} services and third-party integrations. The following example ties these concepts together:
 
-image::images/alert-concepts-summary.svg[Rules, connectors, alerts and actions work together to convert detection into action]
+image::images/rule-concepts-summary.svg[Rules, connectors, alerts and actions work together to convert detection into action]
 
 . Anytime a *rule*'s conditions are met, an *alert* is created.  This example checks for servers with average CPU > 0.9. Three servers meet the condition, so three alerts are created. 
 . Alerts create *actions* as long as they are not muted or throttled. When actions are created, the template that was setup in the rule is filled with actual values. In this example, three actions are created, and the template string {{server}} is replaced with the server name for each alert.
@@ -167,7 +167,7 @@ If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-w
 [[alerting-setup-production]]
 == Production considerations and scaling guidance
 
-When relying on alerts and actions as mission critical services, make sure you follow the <<alerting-production-considerations,Alerting production considerations>>.
+When relying on alerting and actions as mission critical services, make sure you follow the <<alerting-production-considerations,Alerting production considerations>>.
 
 See <<alerting-scaling-guidance>> for more information on the scalability of {kib} alerting.
 

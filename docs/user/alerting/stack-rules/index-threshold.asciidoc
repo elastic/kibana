@@ -15,18 +15,18 @@ Fill in the <<defining-alerts-general-details, rule details>>, then select *Inde
 Define properties to detect the condition.
 
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-conditions.png[Five clauses define the condition to detect]
+image::user/alerting/images/rule-types-index-threshold-conditions.png[Five clauses define the condition to detect]
 
 Index:: This clause requires an *index or index pattern* and a *time field* that will be used for the *time window*.
 When:: This clause specifies how the value to be compared to the threshold is calculated. The value is calculated by aggregating a numeric field a the *time window*. The aggregation options are: `count`, `average`, `sum`, `min`, and `max`. When using `count` the document count is used, and an aggregation field is not necessary. 
-Over/Grouped Over:: This clause lets you configure whether the aggregation is applied over all documents, or should be split into groups using a grouping field. If grouping is used, an  <<alerting-concepts-alert-instances, alert>> will be created for each group when it exceeds the threshold. To limit the number of instances on high cardinality fields, you must specify the number of groups to check against the threshold. Only the *top* groups are checked. 
+Over/Grouped Over:: This clause lets you configure whether the aggregation is applied over all documents, or should be split into groups using a grouping field. If grouping is used, an  <<alerting-concepts-alert-instances, alert>> will be created for each group when it exceeds the threshold. To limit the number of alerts on high cardinality fields, you must specify the number of groups to check against the threshold. Only the *top* groups are checked.
 Threshold:: This clause defines a threshold value and a comparison operator  (one of `is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The result of the aggregation is compared to this threshold. 
 Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be to a value higher than the *check every* value in the <<defining-alerts-general-details, general rule details>>, to avoid gaps in detection. 
 
 If data is available and all clauses have been defined, a preview chart will render the threshold value and display a line chart showing the value for the last 30 intervals. This can provide an indication of recent values and their proximity to the threshold, and help you tune the clauses. 
 
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-preview.png[Five clauses define the condition to detect]
+image::user/alerting/images/rule-types-index-threshold-preview.png[Five clauses define the condition to detect]
 
 [float]
 ==== Add action variables
@@ -55,46 +55,46 @@ In this example, you will use the {kib} <<add-sample-data, sample weblog dataset
 .  Create a new rule that is checked every four hours and executes actions when the rule status changes.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-select.png[Choosing an index threshold rule type]
+image::user/alerting/images/rule-types-index-threshold-select.png[Choosing an index threshold rule type]
 
 .  Select the **Index threshold** rule type.
 
 . Click *Index*, and set *Indices to query* to *kibana_sample_data_logs*.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-example-index.png[Choosing an index]
+image::user/alerting/images/rule-types-index-threshold-example-index.png[Choosing an index]
 
 . Set the *Time field* to *@timestamp*.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-example-timefield.png[Choosing a time field]
+image::user/alerting/images/rule-types-index-threshold-example-timefield.png[Choosing a time field]
 
 . To detect the number of bytes served during the time window, click *When* and select `sum` as the aggregation, and bytes as the field to aggregate.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-example-aggregation.png[Choosing the aggregation]
+image::user/alerting/images/rule-types-index-threshold-example-aggregation.png[Choosing the aggregation]
 
 . To detect the four sites that have the most traffic, click *Over* and select `top`, enter `4`, and select `host.keyword` as the field.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-example-grouping.png[Choosing the groups]
+image::user/alerting/images/rule-types-index-threshold-example-grouping.png[Choosing the groups]
 
 . To trigger the rule when any of the top four sites exceeds 420,000 bytes over a 24 hour period, select `is above` and enter `420000`.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-example-threshold.png[Setting the threshold]
+image::user/alerting/images/rule-types-index-threshold-example-threshold.png[Setting the threshold]
 
 . Finally, click *For the last*, enter `24` and select `hours` to complete the rule configuration.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-example-window.png[Setting the time window]
+image::user/alerting/images/rule-types-index-threshold-example-window.png[Setting the time window]
 
 . The preview chart will render showing the 24 hour sum of bytes at 4 hours intervals (the *check every* interval) for the past 120 hours (the last 30 intervals).
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-example-preview.png[Setting the time window]
+image::user/alerting/images/rule-types-index-threshold-example-preview.png[Setting the time window]
 
 . Change the time window and observe the effect it has on the chart. Compare a 24 window to a 12 hour window. Notice the variability in the sum of bytes, due to different traffic levels during the day compared to at night. This variability would result in noisy rules, so the 24 hour window is better. The preview chart can help you find the right values for your rule. 
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-index-threshold-example-comparison.png[Comparing two time windows]
+image::user/alerting/images/rule-types-index-threshold-example-comparison.png[Comparing two time windows]

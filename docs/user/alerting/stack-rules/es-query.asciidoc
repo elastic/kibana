@@ -15,7 +15,7 @@ Fill in the <<defining-alerts-general-details, rule details>>, then select *{es}
 Define properties to detect the condition.
 
 [role="screenshot"]
-image::user/alerting/images/alert-types-es-query-conditions.png[Five clauses define the condition to detect]
+image::user/alerting/images/rule-types-es-query-conditions.png[Five clauses define the condition to detect]
 
 Index:: This clause requires an *index or index pattern* and a *time field* that will be used for the *time window*.
 Size:: This clause specifies the number of documents to pass to the configured actions when the the threshold condition is met.
@@ -43,7 +43,7 @@ Time window:: This clause determines how far back to search for documents, using
 `context.hits`:: The most recent ES documents that matched the query. Using the https://mustache.github.io/[Mustache] template array syntax, you can iterate over these hits to get values from the ES documents into your actions.
 +
 [role="screenshot"]
-image::images/alert-types-es-query-example-action-variable.png[Iterate over hits using Mustache template syntax]
+image::images/rule-types-es-query-example-action-variable.png[Iterate over hits using Mustache template syntax]
 
 
 [float]
@@ -55,9 +55,9 @@ Use the *Test query* feature to verify that your query DSL is valid.
 match the query will be displayed.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-es-query-valid.png[Test {es} query returns number of matches when valid]
+image::user/alerting/images/rule-types-es-query-valid.png[Test {es} query returns number of matches when valid]
 
 * An error message is shown if the query is invalid.
 +
 [role="screenshot"]
-image::user/alerting/images/alert-types-es-query-invalid.png[Test {es} query shows error when invalid]
+image::user/alerting/images/rule-types-es-query-invalid.png[Test {es} query shows error when invalid]
