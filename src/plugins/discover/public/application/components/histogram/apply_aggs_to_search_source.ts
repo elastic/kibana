@@ -9,7 +9,7 @@ import { IndexPattern, SearchSource } from '../../../../../data/common';
 import { DataPublicPluginStart } from '../../../../../data/public';
 
 export function applyAggsToSearchSource(
-  isActive: boolean = true,
+  isActive: boolean,
   searchSource: SearchSource,
   histogramInterval: string,
   indexPattern: IndexPattern,
