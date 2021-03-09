@@ -231,6 +231,7 @@ export function parseAndVerifyDataStreams(
           title: dataStreamTitle,
           release,
           type,
+          package: pkgName,
           dataset: dataset || `${pkgName}.${dataStreamPath}`,
           ingest_pipeline: ingestPipeline || 'default',
           path: dataStreamPath,

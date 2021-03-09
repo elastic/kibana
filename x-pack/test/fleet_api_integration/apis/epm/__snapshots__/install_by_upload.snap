@@ -168,6 +168,7 @@ Object {
     Object {
       "dataset": "apache.access",
       "ingest_pipeline": "default",
+      "package": "apache",
       "path": "access",
       "release": "experimental",
       "streams": Array [
@@ -199,6 +200,7 @@ Object {
     Object {
       "dataset": "apache.status",
       "ingest_pipeline": "default",
+      "package": "apache",
       "path": "status",
       "release": "experimental",
       "streams": Array [
@@ -235,6 +237,7 @@ Object {
     Object {
       "dataset": "apache.error",
       "ingest_pipeline": "default",
+      "package": "apache",
       "path": "error",
       "release": "experimental",
       "streams": Array [
