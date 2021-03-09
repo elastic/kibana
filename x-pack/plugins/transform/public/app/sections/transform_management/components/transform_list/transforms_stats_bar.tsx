@@ -6,11 +6,17 @@
  */
 
 import React, { FC } from 'react';
+
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListRow } from '../../../../common';
+
+import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 
 import { StatsBar, TransformStatsBarStats } from '../stats_bar';
 
@@ -103,10 +109,41 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
   transformNodes,
   transformsList,
 }) => {
+  const { esNodeRoles } = useDocumentationLinks();
+
   const transformStats: TransformStatsBarStats = createTranformStats(
     transformNodes,
     transformsList
   );
 
-  return <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />;
+  return (
+    <>
+      <StatsBar stats={transformStats} dataTestSub={'transformStatsBar'} />
+      {transformNodes === 0 && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.transform.transformNodes.noTransformNodesMessage"
+                defaultMessage="There are no transform nodes available. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink href={esNodeRoles} target="_blank">
+                      <FormattedMessage
+                        id="xpack.transform.transformNodes.noTransformNodesLearnMoreLinkText"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+            color="warning"
+            iconType="alert"
+          />
+        </>
+      )}
+    </>
+  );
 };

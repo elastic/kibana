@@ -129,6 +129,7 @@ export class DocLinksService {
         elasticsearch: {
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
+          nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           remoteClusters: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html`,
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#remote-cluster-proxy-settings`,

@@ -191,8 +191,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     stepDefineForm.advancedPivotEditor.actions.setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
-  const { esQueryDsl } = useDocumentationLinks();
-  const { esTransformPivot } = useDocumentationLinks();
+  const { esQueryDsl, esTransformPivot } = useDocumentationLinks();
 
   const advancedEditorsSidebarWidth = '220px';
 
