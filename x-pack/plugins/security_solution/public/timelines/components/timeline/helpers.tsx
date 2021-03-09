@@ -73,7 +73,7 @@ const convertNestedFieldToQuery = (
   const browserField = get(pathBrowserField, browserFields);
   const nestedPath = browserField.subType.nested.path;
   const key = field.replace(`${nestedPath}.`, '');
-  return `${nestedPath}: { ${key}: ${value} }`;
+  return `${nestedPath}: { ${key}: ${browserField.type === 'date' ? `"${value}"` : value} }`;
 };
 
 const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFields) => {
@@ -87,7 +87,7 @@ const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFie
 const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) => {
   const pathBrowserField = getBrowserFieldPath(field, browserFields);
   const browserField = get(pathBrowserField, browserFields);
-  if (browserField != null && browserField.subType.nested) {
+  if (browserField != null && browserField.subType && browserField.subType.nested) {
     return true;
   }
   return false;
@@ -101,7 +101,11 @@ const buildQueryMatch = (
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
     dataProvider.type !== DataProviderType.template
       ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-        ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
+        ? convertNestedFieldToQuery(
+            dataProvider.queryMatch.field,
+            dataProvider.queryMatch.value,
+            browserFields
+          )
         : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
