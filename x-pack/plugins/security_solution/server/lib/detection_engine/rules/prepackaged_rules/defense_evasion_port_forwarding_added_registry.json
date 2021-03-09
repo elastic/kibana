@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Port Forwarding Rule Addition",
   "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\PortProxy\\\\v4tov4\\\\*\"\n",
   "references": [

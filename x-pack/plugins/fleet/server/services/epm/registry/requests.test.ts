@@ -109,6 +109,7 @@ describe('setupIngestManager', () => {
         await expect(promise).rejects.toThrow(
           `'404 Not Found' error response from package registry at https://example.com`
         );
+        await expect(promise).rejects.toMatchObject({ status: 404 });
         expect(fetchMock).toHaveBeenCalledTimes(1);
       });
 
@@ -124,6 +125,7 @@ describe('setupIngestManager', () => {
         await expect(promise).rejects.toThrow(
           `'429 Too Many Requests' error response from package registry at https://example.com`
         );
+        await expect(promise).rejects.toMatchObject({ status: 429 });
         expect(fetchMock).toHaveBeenCalledTimes(1);
       });
 
@@ -139,6 +141,7 @@ describe('setupIngestManager', () => {
         await expect(promise).rejects.toThrow(
           `'500 Internal Server Error' error response from package registry at https://example.com`
         );
+        await expect(promise).rejects.toMatchObject({ status: 500 });
         expect(fetchMock).toHaveBeenCalledTimes(1);
       });
     });

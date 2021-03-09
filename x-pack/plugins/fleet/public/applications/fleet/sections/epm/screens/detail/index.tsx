@@ -151,11 +151,11 @@ export function Detail() {
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m" className="eui-textTruncate">
+              <EuiFlexGroup alignItems="center" gutterSize="m">
                 <FlexItemWithMinWidth grow={false}>
                   <EuiText>
                     {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1 className="eui-textTruncate">{packageInfo?.title || '\u00A0'}</h1>
+                    <h1>{packageInfo?.title || '\u00A0'}</h1>
                   </EuiText>
                 </FlexItemWithMinWidth>
                 {packageInfo?.release && packageInfo.release !== 'ga' ? (
