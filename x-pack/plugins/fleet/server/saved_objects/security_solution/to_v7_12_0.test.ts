@@ -6,14 +6,15 @@
  */
 
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { PackagePolicy } from '../../../../../fleet/common';
-import { PolicyData, ProtectionModes } from '../../types';
+
+import { PackagePolicy } from '../../../common';
+
 import { migratePackagePolicyToV7120 } from './to_v7_12_0';
 
 describe('7.12.0 Endpoint Package Policy migration', () => {
   const migration = migratePackagePolicyToV7120;
   it('adds ransomware option and notification customization', () => {
-    const doc: SavedObjectUnsanitizedDoc<PolicyData> = {
+    const doc = {
       id: 'mock-saved-object-id',
       attributes: {
         name: 'Some Policy Name',
@@ -41,7 +42,6 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
               policy: {
                 value: {
                   windows: {
-                    // @ts-expect-error
                     popup: {
                       malware: {
                         message: '',
@@ -58,9 +58,7 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
       type: ' nested',
     };
 
-    expect(
-      migration(doc, {} as SavedObjectMigrationContext) as SavedObjectUnsanitizedDoc<PolicyData>
-    ).toEqual({
+    expect(migration(doc, {} as SavedObjectMigrationContext)).toEqual({
       attributes: {
         name: 'Some Policy Name',
         package: {
@@ -88,7 +86,7 @@ describe('7.12.0 Endpoint Package Policy migration', () => {
                 value: {
                   windows: {
                     ransomware: {
-                      mode: ProtectionModes.off,
+                      mode: 'off',
                     },
                     popup: {
                       malware: {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { cloneDeep } from 'lodash';
-import { PackagePolicy } from '../../../../../fleet/common';
-import { ProtectionModes } from '../../types';
 
-export const migratePackagePolicyToV7120: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
+import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+
+import { PackagePolicy } from '../../../../../fleet/common';
+
+export const migratePackagePolicyToV7110: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc
 ) => {
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
@@ -18,18 +19,20 @@ export const migratePackagePolicyToV7120: SavedObjectMigrationFn<PackagePolicy, 
   );
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
-    const ransomware = {
-      mode: ProtectionModes.off,
-    };
-    const ransomwarePopup = {
-      message: '',
-      enabled: false,
+    const popup = {
+      malware: {
+        message: '',
+        enabled: false,
+      },
     };
     if (input && input.config) {
       const policy = input.config.policy.value;
 
-      policy.windows.ransomware = ransomware;
-      policy.windows.popup.ransomware = ransomwarePopup;
+      policy.windows.antivirus_registration = policy.windows.antivirus_registration || {
+        enabled: false,
+      };
+      policy.windows.popup = popup;
+      policy.mac.popup = popup;
     }
   }
 

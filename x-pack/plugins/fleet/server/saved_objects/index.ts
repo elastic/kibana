@@ -21,11 +21,7 @@ import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
-import {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-  // @ts-expect-error
-} from './security_solution';
+import { migratePackagePolicyToV7110, migratePackagePolicyToV7120 } from './security_solution';
 import {
   migrateAgentToV7100,
   migrateAgentEventToV7100,

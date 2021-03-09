@@ -6,7 +6,9 @@
  */
 
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { PackagePolicy } from '../../../../../fleet/common';
+
+import { PackagePolicy } from '../../../common';
+
 import { migratePackagePolicyToV7110 } from './to_v7_11_0';
 
 describe('7.11.0 Endpoint Package Policy migration', () => {
