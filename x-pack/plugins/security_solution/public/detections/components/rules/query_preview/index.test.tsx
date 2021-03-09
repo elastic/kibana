@@ -17,6 +17,14 @@ import { PreviewQuery } from './';
 import { getMockEqlResponse } from '../../../../common/hooks/eql/eql_search_response.mock';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { FilterMeta } from 'src/plugins/data/common';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiSuperDatePickerWidth: '180px',
+  },
+});
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/matrix_histogram');
@@ -123,6 +131,49 @@ describe('PreviewQuery', () => {
     expect(
       wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
     ).toBeTruthy();
+  });
+
+  test('it renders preview button enabled if query exists', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'host.name:"foo"', language: 'kql' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
+  });
+
+  test('it renders preview button enabled if no query exists but filters do exist', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{
+            query: { query: '', language: 'kuery' },
+            filters: [{ meta: {} as FilterMeta, query: {} }],
+          }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
   });
 
   test('it renders query histogram when rule type is query and preview button clicked', () => {
