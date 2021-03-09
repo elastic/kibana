@@ -78,11 +78,11 @@ export class CiStatsReporter {
   constructor(private config: Config | undefined, private log: ToolingLog) {}
 
   isEnabled() {
-    return !!this.config;
+    return !!this.config && process.env.CI_STATS_DISABLED !== 'true';
   }
 
   async metrics(metrics: CiStatsMetrics) {
-    if (!this.config) {
+    if (this.isEnabled() || !this.config) {
       return;
     }
 

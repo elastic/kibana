@@ -63,8 +63,12 @@ export class CiStatsTimings {
     private config?: Config
   ) {}
 
+  isEnabled() {
+    return process.env.CI_STATS_DISABLED !== 'true';
+  }
+
   async timings(timings: CiStatsTiming[]) {
-    if (timings.length === 0) {
+    if (!this.isEnabled() || timings.length === 0) {
       return true;
     }
 
