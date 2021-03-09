@@ -50,6 +50,7 @@ import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 import { MlJobsStatsResponse } from '../../../common/types/job_service';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { JobSavedObjectService } from '../../saved_objects';
+import { isDefined } from '../../../common/types/guards';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -72,15 +73,25 @@ interface FileBasedModule extends Omit<Module, 'jobs' | 'datafeeds' | 'kibana'> 
 }
 
 function isModule(arg: any): arg is Module {
-  return arg.jobs && arg.jobs.length && arg.jobs[0].config !== undefined;
+  return (
+    typeof arg === 'object' &&
+    arg !== null &&
+    Array.isArray(arg.jobs) &&
+    arg.jobs[0]?.config !== undefined
+  );
 }
 
 function isFileBasedModule(arg: any): arg is FileBasedModule {
-  return arg.jobs && arg.jobs.length && arg.jobs[0].file !== undefined;
+  return (
+    typeof arg === 'object' &&
+    arg !== null &&
+    Array.isArray(arg.jobs) &&
+    arg.jobs[0]?.file !== undefined
+  );
 }
 
 interface Config {
-  dirName: any;
+  dirName?: string;
   module: FileBasedModule | Module;
   isSavedObject: boolean;
 }
@@ -208,13 +219,12 @@ export class DataRecognizer {
       })
     );
 
-    const soConfigs = (await this._loadSavedObjectModules()).map((module) => ({
-      dirName: '',
+    const savedObjectConfigs = (await this._loadSavedObjectModules()).map((module) => ({
       module,
       isSavedObject: true,
     }));
 
-    return [...configs, ...soConfigs];
+    return [...configs, ...savedObjectConfigs];
   }
 
   private async _loadSavedObjectModules() {
@@ -303,7 +313,7 @@ export class DataRecognizer {
     const manifestFiles = await this._loadConfigs();
     manifestFiles.sort((a, b) => a.module.id.localeCompare(b.module.id)); // sort as json files are read from disk and could be in any order.
 
-    const configs = [];
+    const configs: Array<Module | FileBasedModule> = [];
     for (const config of manifestFiles) {
       if (config.isSavedObject) {
         configs.push(config.module);
@@ -311,7 +321,7 @@ export class DataRecognizer {
         configs.push(await this.getModule(config.module.id));
       }
     }
-    return configs as Module[];
+    return configs;
   }
 
   // called externally by an endpoint
@@ -324,7 +334,7 @@ export class DataRecognizer {
     const config = await this._findConfig(id);
     if (config !== undefined) {
       module = config.module;
-      dirName = config.dirName;
+      dirName = config.dirName ?? null;
     } else {
       throw Boom.notFound(`Module with the id "${id}" not found`);
     }
@@ -334,59 +344,65 @@ export class DataRecognizer {
     const kibana: KibanaObjects = {};
     // load all of the job configs
     if (isModule(module)) {
-      const tempJobs = module.jobs.map((j) => ({ id: `${prefix}${j.id}`, config: j.config }));
-      jobs.push(...((tempJobs as unknown) as ModuleJob[]));
-      const tempDatafeeds = module.datafeeds.map((d) => ({
-        id: prefixDatafeedId(d.id, prefix),
-        config: {
-          ...d.config,
-          job_id: `${prefix}${d.job_id}`,
-        },
+      const tempJobs: ModuleJob[] = module.jobs.map((j) => ({
+        id: `${prefix}${j.id}`,
+        config: j.config,
       }));
-      datafeeds.push(...((tempDatafeeds as unknown) as ModuleDatafeed[]));
+      jobs.push(...tempJobs);
+      const tempDatafeeds: ModuleDatafeed[] = module.datafeeds.map((d) => {
+        const jobId = `${prefix}${d.job_id}`;
+        return {
+          id: prefixDatafeedId(d.id, prefix),
+          job_id: jobId,
+          config: {
+            ...d.config,
+            job_id: jobId,
+          },
+        };
+      });
+      datafeeds.push(...tempDatafeeds);
     } else if (isFileBasedModule(module)) {
-      await Promise.all(
-        module.jobs.map(async (job) => {
-          try {
-            const jobConfig = await this._readFile(
-              `${this._modulesDir}/${dirName}/${ML_DIR}/${job.file}`
-            );
-            // use the file name for the id
-            jobs.push({
-              id: `${prefix}${job.id}`,
-              config: JSON.parse(jobConfig),
-            });
-          } catch (error) {
-            mlLog.warn(
-              `Data recognizer error loading config for job ${job.id} for module ${id}. ${error}`
-            );
-          }
-        })
-      );
+      const tempJobs = module.jobs.map(async (job) => {
+        try {
+          const jobConfig = await this._readFile(
+            `${this._modulesDir}/${dirName}/${ML_DIR}/${job.file}`
+          );
+          // use the file name for the id
+          return {
+            id: `${prefix}${job.id}`,
+            config: JSON.parse(jobConfig),
+          };
+        } catch (error) {
+          mlLog.warn(
+            `Data recognizer error loading config for job ${job.id} for module ${id}. ${error}`
+          );
+        }
+      });
+      jobs.push(...(await Promise.all(tempJobs)).filter(isDefined));
 
       // load all of the datafeed configs
-      await Promise.all(
-        module.datafeeds.map(async (datafeed) => {
-          try {
-            const datafeedConfigString = await this._readFile(
-              `${this._modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`
-            );
-            const datafeedConfig = JSON.parse(datafeedConfigString) as Datafeed;
-            // use the job id from the module
-            datafeedConfig.job_id = `${prefix}${datafeed.job_id}`;
+      const tempDatafeed = module.datafeeds.map(async (datafeed) => {
+        try {
+          const datafeedConfigString = await this._readFile(
+            `${this._modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`
+          );
+          const datafeedConfig = JSON.parse(datafeedConfigString) as Datafeed;
+          // use the job id from the module
+          datafeedConfig.job_id = `${prefix}${datafeed.job_id}`;
 
-            datafeeds.push({
-              id: prefixDatafeedId(datafeed.id, prefix),
-              job_id: datafeedConfig.job_id,
-              config: datafeedConfig,
-            });
-          } catch (error) {
-            mlLog.warn(
-              `Data recognizer error loading config for datafeed ${datafeed.id} for module ${id}. ${error}`
-            );
-          }
-        })
-      );
+          return {
+            id: prefixDatafeedId(datafeed.id, prefix),
+            job_id: datafeedConfig.job_id,
+            config: datafeedConfig,
+          };
+        } catch (error) {
+          mlLog.warn(
+            `Data recognizer error loading config for datafeed ${datafeed.id} for module ${id}. ${error}`
+          );
+        }
+      });
+
+      datafeeds.push(...(await Promise.all(tempDatafeed)).filter(isDefined));
     }
     // load all of the kibana saved objects
     if (module.kibana !== undefined) {
@@ -396,7 +412,7 @@ export class DataRecognizer {
           kibana[key] = [];
           if (isFileBasedModule(module)) {
             await Promise.all(
-              module!.kibana[key].map(async (obj) => {
+              module.kibana[key].map(async (obj) => {
                 try {
                   const kConfigString = await this._readFile(
                     `${this._modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`

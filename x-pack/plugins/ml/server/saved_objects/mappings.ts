@@ -42,7 +42,6 @@ export const mlModule: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-
     title: {
       type: 'text',
       fields: {
