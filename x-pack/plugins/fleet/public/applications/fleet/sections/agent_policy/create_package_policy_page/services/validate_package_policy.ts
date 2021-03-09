@@ -229,11 +229,7 @@ export const validatePackagePolicyConfig = (
         })
       );
     }
-    if (
-      (varDef.type === 'text' || varDef.type === 'string') &&
-      parsedValue &&
-      Array.isArray(parsedValue)
-    ) {
+    if (varDef.type === 'text' && parsedValue && Array.isArray(parsedValue)) {
       const invalidStrings = parsedValue.filter((cand) => /^[*&]/.test(cand));
       // only show one error if multiple strings in array are invalid
       if (invalidStrings.length > 0) {
@@ -247,11 +243,7 @@ export const validatePackagePolicyConfig = (
     }
   }
 
-  if (
-    (varDef.type === 'text' || varDef.type === 'string') &&
-    parsedValue &&
-    !Array.isArray(parsedValue)
-  ) {
+  if (varDef.type === 'text' && parsedValue && !Array.isArray(parsedValue)) {
     if (/^[*&]/.test(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.quoteStringErrorMessage', {
