@@ -15,12 +15,18 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('fleet_reassign_agent', () => {
-    setupFleetAndAgents(providerContext);
-    beforeEach(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+    before(async () => {
+      await esArchiver.load('fleet/empty_fleet_server');
     });
+    beforeEach(async () => {
+      await esArchiver.load('fleet/agents');
+    });
+    setupFleetAndAgents(providerContext);
     afterEach(async () => {
       await esArchiver.unload('fleet/agents');
+    });
+    after(async () => {
+      await esArchiver.unload('fleet/empty_fleet_server');
     });
 
     it('should allow to reassign single agent', async () => {
