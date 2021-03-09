@@ -1066,7 +1066,7 @@ export class SavedObjectsRepository {
       return this.resolveExactMatch(type, id, options);
     }
 
-    const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE];
+    const legacyUrlAlias: LegacyUrlAlias = aliasResponse.body.get!._source[LEGACY_URL_ALIAS_TYPE];
     const objectIndex = this.getIndexForType(type);
     const bulkGetResponse = await this.client.mget<SavedObjectsRawDocSource>(
       {
@@ -1646,7 +1646,7 @@ export class SavedObjectsRepository {
     }
 
     return {
-      updated: body.updated,
+      updated: body.updated!,
     };
   }
 
