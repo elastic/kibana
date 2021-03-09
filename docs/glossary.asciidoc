@@ -220,7 +220,7 @@ See {kibana-ref}/indexing-geojson-data-tutorial.html[GeoJSON data].
 // tag::geo-point-def[]
 A field type in {es}. A geo-point field accepts latitude-longitude pairs
 for storing point locations. The latitude-longitude format can be from a string,
-geohash, array, WKT, or object.
+geohash, array, well-known text, or object.
 See {ref}/geo-point.html[geo-point].
 // end::geo-point-def[]
 
