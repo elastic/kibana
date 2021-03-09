@@ -315,7 +315,6 @@ const waitForTask = (
     })
     .then((res) => {
       const body = res.body;
-      // @ts-expect-error - this could satisfy the types by using `res.context.meta.response`, but not sure if correct
       const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,

@@ -557,7 +557,6 @@ export class SavedObjectsRepository {
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
-              // @ts-expect-error MultiGetSourceFilter doesn't have includes, but include
               docs: bulkGetDocs,
             },
           },
@@ -926,7 +925,6 @@ export class SavedObjectsRepository {
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
             body: {
-              // @ts-expect-error MultiGetSourceFilter doesn't have includes, but include
               docs: bulkGetDocs,
             },
           },
@@ -954,8 +952,8 @@ export class SavedObjectsRepository {
 
         // @ts-expect-error MultiGetHit._source is optional
         return this.getSavedObjectFromSource(type, id, doc);
-      })
-    }
+      }),
+    };
   }
 
   /**
@@ -1061,8 +1059,8 @@ export class SavedObjectsRepository {
 
     if (
       aliasResponse.statusCode === 404 ||
-      aliasResponse.body.get.found === false ||
-      aliasResponse.body.get._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
+      aliasResponse.body.get?.found === false ||
+      aliasResponse.body.get?._source[LEGACY_URL_ALIAS_TYPE]?.disabled === true
     ) {
       // no legacy URL alias exists, or one exists but it's disabled; just attempt to get the object
       return this.resolveExactMatch(type, id, options);
