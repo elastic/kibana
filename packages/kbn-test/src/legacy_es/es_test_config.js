@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { REPO_ROOT } from '@kbn/utils';
 import url, { format as formatUrl } from 'url';
-import pkg from '../../../../package.json';
+import loadJsonFile from 'load-json-file';
+import { join } from 'path';
 import { adminTestUser } from '../kbn';
+
+const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json'));
 
 export const esTestConfig = new (class EsTestConfig {
   getVersion() {
