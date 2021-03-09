@@ -85,8 +85,7 @@ async function getIndicesFromPattern(
 ): Promise<string[]> {
   const params = {
     index: pattern,
-    ignore: [404],
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       size: 0, // no hits
       aggs: {

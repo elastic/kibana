@@ -58,9 +58,8 @@ export async function timeSeriesQuery(
       },
       // aggs: {...}, filled in below
     },
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: [404],
+    ignore_unavailable: true,
+    allow_no_indices: true,
   };
 
   // add the aggregations
