@@ -17,7 +17,7 @@ import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from '../services';
 import type { FleetAppContext } from '../plugin';
 
-export { createArtifactsClientMock } from './services/artifacts';
+export { createArtifactsClientMock } from '../services/artifacts';
 
 export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
