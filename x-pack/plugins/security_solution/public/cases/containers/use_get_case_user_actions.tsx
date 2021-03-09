@@ -307,7 +307,7 @@ export const useGetCaseUserActions = (
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseConnectorId]
+    [caseUserActionsState]
   );
 
   useEffect(() => {
