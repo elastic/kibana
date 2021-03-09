@@ -59,7 +59,7 @@ export const Navigation = ({
         {isNewRollup ? (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.rollup.create.addRollupToPolicyButton.label"
-            defaultMessage="Add rollup"
+            defaultMessage="Add to policy"
           />
         ) : (
           <FormattedMessage
