@@ -7,7 +7,7 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Auditd Login Attempt at Forbidden Time",
   "query": "event.module:auditd and event.action:\"attempted-log-in-during-unusual-hour-to\"",
   "references": [

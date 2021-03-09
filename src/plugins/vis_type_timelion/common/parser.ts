@@ -48,17 +48,3 @@ export interface ParsedExpression {
 }
 
 export const parseTimelionExpression = (input: string): ParsedExpression => parse(input);
-
-const isEsIndexArgument = ({ type, name, function: fn }: TimelionExpressionArgument) =>
-  type === 'namedArg' && fn === 'es' && name === 'index';
-
-export const extractIndexesFromExpression = (expression: string) => {
-  const args = parseTimelionExpression(expression)?.args ?? [];
-
-  return args.reduce<string[]>((acc, arg) => {
-    if (arg.value && isEsIndexArgument(arg)) {
-      acc.push(arg.value.text);
-    }
-    return acc;
-  }, []);
-};

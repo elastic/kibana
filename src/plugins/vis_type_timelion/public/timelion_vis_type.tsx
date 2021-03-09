@@ -16,7 +16,7 @@ import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { getIndexPatterns } from './helpers/plugin_services';
 
-import { extractIndexesFromExpression } from '../common/parser';
+import { extractIndexesFromExpression } from '../common/utils';
 
 import { VIS_EVENT_TO_TRIGGER, VisParams } from '../../visualizations/public';
 
@@ -54,7 +54,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     getUsedIndexPattern: async (params: VisParams) => {
       try {
         let indexPatterns: IndexPattern[] = [];
-        const indexes = extractIndexesFromExpression(params.expression);
+        const indexes = await extractIndexesFromExpression(params.expression);
 
         for (const index of indexes) {
           const foundIndexPatterns = await getIndexPatterns().find(index);

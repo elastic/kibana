@@ -11,7 +11,7 @@ import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 import { SavedObjectsClientContract, ISavedObjectsRepository } from 'kibana/server';
 import { IFieldType } from '../../../data/common';
-import { extractIndexesFromExpression } from '../../common/parser';
+import { extractIndexesFromExpression } from '../../common/utils';
 
 type ESResponse = SearchResponse<{ visualization: { visState: string }; updated_at: string }>;
 
@@ -79,7 +79,7 @@ export const getStats = async (
     }
 
     if (visState.type === 'timelion' && getPastDays(lastUpdated) <= 90) {
-      const indexes = extractIndexesFromExpression(visState.params.expression);
+      const indexes = await extractIndexesFromExpression(visState.params.expression);
 
       for (const indexPatternTitle of indexes) {
         const indexPattern = await soClient.find<IndexPatternSavedObjectAttrs>({
