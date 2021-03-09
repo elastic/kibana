@@ -6,12 +6,13 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { subCasesMigrations } from './migrations';
 
 export const SUB_CASE_SAVED_OBJECT = 'cases-sub-case';
 
 export const subCaseSavedObjectType: SavedObjectsType = {
   name: SUB_CASE_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
@@ -30,6 +31,9 @@ export const subCaseSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
         },
+      },
+      consumer: {
+        type: 'keyword',
       },
       created_at: {
         type: 'date',
@@ -68,4 +72,5 @@ export const subCaseSavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: subCasesMigrations,
 };

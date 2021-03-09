@@ -12,10 +12,13 @@ export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
 
 export const caseConfigureSavedObjectType: SavedObjectsType = {
   name: CASE_CONFIGURE_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
+      consumer: {
+        type: 'keyword',
+      },
       created_at: {
         type: 'date',
       },

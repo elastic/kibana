@@ -12,7 +12,7 @@ export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 
 export const caseUserActionSavedObjectType: SavedObjectsType = {
   name: CASE_USER_ACTION_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
@@ -37,6 +37,9 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
         },
+      },
+      consumer: {
+        type: 'keyword',
       },
       new_value: {
         type: 'text',

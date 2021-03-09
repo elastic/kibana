@@ -6,17 +6,21 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { connectorMappingsMigrations } from './migrations';
 
 export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
 
 export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   name: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
       mappings: {
         properties: {
+          consumer: {
+            type: 'keyword',
+          },
           source: {
             type: 'keyword',
           },
@@ -30,4 +34,5 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: connectorMappingsMigrations,
 };

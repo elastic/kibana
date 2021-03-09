@@ -55,3 +55,6 @@ export const SUPPORTED_CONNECTORS = [
 
 export const MAX_ALERTS_PER_SUB_CASE = 5000;
 export const MAX_GENERATED_ALERTS_PER_SUB_CASE = MAX_ALERTS_PER_SUB_CASE / DEFAULT_MAX_SIGNALS;
+
+// TODO: figure out what the value will actually be when a security solution case is created
+export const SECURITY_SOLUTION_PLUGIN = 'security-solution';

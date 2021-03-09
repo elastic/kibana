@@ -12,7 +12,7 @@ export const CASE_SAVED_OBJECT = 'cases';
 
 export const caseSavedObjectType: SavedObjectsType = {
   name: CASE_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
@@ -31,6 +31,9 @@ export const caseSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
         },
+      },
+      consumer: {
+        type: 'keyword',
       },
       created_at: {
         type: 'date',

@@ -15,6 +15,7 @@ import {
   AssociationType,
   ESConnectorFields,
 } from '../../common/api';
+import { SECURITY_SOLUTION_PLUGIN } from '../../common/constants';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -57,6 +58,10 @@ interface SanitizedCaseSettings {
 
 interface SanitizedCaseType {
   type: string;
+}
+
+interface SanitizedCaseConsumer {
+  consumer: string;
 }
 
 export const caseMigrations = {
@@ -113,6 +118,19 @@ export const caseMigrations = {
       references: doc.references || [],
     };
   },
+  '7.13.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        // TODO: figure out what to default this to
+        consumer: SECURITY_SOLUTION_PLUGIN,
+      },
+      references: doc.references || [],
+    };
+  },
 };
 
 export const configureMigrations = {
@@ -131,6 +149,19 @@ export const configureMigrations = {
           type: ConnectorTypes.none,
           fields: null,
         },
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.13.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        // TODO: figure out what to default this to
+        consumer: SECURITY_SOLUTION_PLUGIN,
       },
       references: doc.references || [],
     };
@@ -172,6 +203,19 @@ export const userActionsMigrations = {
                 fields: null,
               })
             : old_value,
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.13.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        // TODO: figure out what to default this to
+        consumer: SECURITY_SOLUTION_PLUGIN,
       },
       references: doc.references || [],
     };
@@ -223,6 +267,51 @@ export const commentsMigrations = {
     return {
       ...doc,
       attributes,
+      references: doc.references || [],
+    };
+  },
+  '7.13.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        // TODO: figure out what to default this to
+        consumer: SECURITY_SOLUTION_PLUGIN,
+      },
+      references: doc.references || [],
+    };
+  },
+};
+
+export const connectorMappingsMigrations = {
+  '7.13.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        // TODO: figure out what to default this to
+        consumer: SECURITY_SOLUTION_PLUGIN,
+      },
+      references: doc.references || [],
+    };
+  },
+};
+
+export const subCasesMigrations = {
+  '7.13.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        // TODO: figure out what to default this to
+        consumer: SECURITY_SOLUTION_PLUGIN,
+      },
       references: doc.references || [],
     };
   },
