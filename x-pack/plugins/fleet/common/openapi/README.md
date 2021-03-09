@@ -4,7 +4,9 @@ The current self-contained spec file is [as JSON](https://raw.githubusercontent.
 
 For example, online viewers for the specification like these:
 
-[<img width="40%" alt="Screen Shot 2021-03-09 at 10 14 52 AM" src="https://user-images.githubusercontent.com/57655/110493024-8944dd80-80c0-11eb-97b2-0666fcca3b09.png">](https://mrin9.github.io/OpenAPI-Viewer/#/load/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fkibana%2Fmaster%2Fx-pack%2Fplugins%2Ffleet%2Fcommon%2Fopenapi%2Fbundled.json) [<img align="top" width="40%" alt="Screen Shot 2021-03-09 at 10 14 04 AM" src="https://user-images.githubusercontent.com/57655/110493019-88ac4700-80c0-11eb-982b-d5d352143003.png">](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.json)
+| <a href="https://mrin9.github.io/OpenAPI-Viewer/#/load/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fkibana%2Fmaster%2Fx-pack%2Fplugins%2Ffleet%2Fcommon%2Fopenapi%2Fbundled.json">View spec using MrinDoc</a>  |  <a href="https://petstore.swagger.io/?url=https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.json">View spec using Swagger UI</a> |
+|----|----|
+| <img alt="Screen Shot 2021-03-09 at 10 14 52 AM" src="https://user-images.githubusercontent.com/57655/110493024-8944dd80-80c0-11eb-97b2-0666fcca3b09.png">  | <img alt="Screen Shot 2021-03-09 at 10 14 04 AM" src="https://user-images.githubusercontent.com/57655/110493019-88ac4700-80c0-11eb-982b-d5d352143003.png"> |
 
 
 ## The `openapi` folder
