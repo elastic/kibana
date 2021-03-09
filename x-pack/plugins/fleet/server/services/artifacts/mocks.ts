@@ -28,8 +28,11 @@ export const generateArtifactMock = (): Artifact => {
   };
 };
 
+export interface GenerateEsRequestErrorApiResponseMockProps {
+  statusCode?: number;
+}
 export const generateEsRequestErrorApiResponseMock = (
-  { statusCode }: { statusCode: number } = { statusCode: 500 }
+  { statusCode = 500 }: GenerateEsRequestErrorApiResponseMockProps = { statusCode: 500 }
 ): ApiResponse => {
   return {
     body: {

@@ -10,14 +10,27 @@ import {
   generateArtifactEsSearchHitMock,
   generateArtifactMock,
   generateEsRequestErrorApiResponseMock,
+  GenerateEsRequestErrorApiResponseMockProps,
 } from './mocks';
-import { getArtifact } from './artifacts';
+import { createArtifact, deleteArtifact, getArtifact } from './artifacts';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ArtifactsElasticsearchError } from './errors';
+import { NewArtifact } from './types';
 
 describe('When using the artifacts services', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+
+  const setEsClientMethodResponseToError = (
+    method: keyof Pick<typeof esClientMock, 'get' | 'create' | 'delete' | 'search'>,
+    options?: GenerateEsRequestErrorApiResponseMockProps
+  ) => {
+    esClientMock[method].mockImplementation(() => {
+      return elasticsearchServiceMock.createErrorTransportRequestPromise(
+        new ResponseError(generateEsRequestErrorApiResponseMock(options))
+      );
+    });
+  };
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createInternalClient();
@@ -39,11 +52,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should return undefined if artifact is not found', async () => {
-      esClientMock.get.mockImplementation(() => {
-        return elasticsearchServiceMock.createErrorTransportRequestPromise(
-          new ResponseError(generateEsRequestErrorApiResponseMock({ statusCode: 404 }))
-        );
-      });
+      setEsClientMethodResponseToError('get', { statusCode: 404 });
       expect(await getArtifact(esClientMock, '123')).toBeUndefined();
     });
 
@@ -61,15 +70,58 @@ describe('When using the artifacts services', () => {
   });
 
   describe('and calling `createArtifact()`', () => {
-    it.todo('should create and return artifact');
+    let newArtifact: NewArtifact;
 
-    it.todo('should throw an ArtifactElasticsearchError if one is encountered');
+    beforeEach(() => {
+      const { id, created, ...artifact } = generateArtifactMock();
+      newArtifact = artifact;
+    });
+
+    it('should create and return artifact', async () => {
+      const artifact = await createArtifact(esClientMock, newArtifact);
+
+      expect(esClientMock.create).toHaveBeenCalledWith({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        id: expect.any(String),
+        body: {
+          ...newArtifact,
+          created: expect.any(String),
+        },
+        refresh: 'wait_for',
+      });
+
+      expect(artifact).toEqual({
+        ...newArtifact,
+        id: expect.any(String),
+        created: expect.any(String),
+      });
+    });
+
+    it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
+      setEsClientMethodResponseToError('create');
+      await expect(createArtifact(esClientMock, newArtifact)).rejects.toBeInstanceOf(
+        ArtifactsElasticsearchError
+      );
+    });
   });
 
   describe('and calling `deleteArtifact()`', () => {
-    it.todo('should delete the artifact');
+    it('should delete the artifact', async () => {
+      deleteArtifact(esClientMock, '123');
 
-    it.todo('should throw an ArtifactElasticsearchError if one is encountered');
+      expect(esClientMock.delete).toHaveBeenCalledWith({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        id: '123',
+      });
+    });
+
+    it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
+      setEsClientMethodResponseToError('delete');
+
+      await expect(deleteArtifact(esClientMock, '123')).rejects.toBeInstanceOf(
+        ArtifactsElasticsearchError
+      );
+    });
   });
 
   describe('and calling `listArtifacts()`', () => {
