@@ -707,7 +707,7 @@ describe('case connector', () => {
         expect(validateParams(caseActionType, params)).toEqual(params);
       });
 
-      it('succeeds when type is an alert', () => {
+      it('fails when type is an alert', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
           subActionParams: {
@@ -724,7 +724,9 @@ describe('case connector', () => {
           },
         };
 
-        expect(validateParams(caseActionType, params)).toEqual(params);
+        expect(() => {
+          validateParams(caseActionType, params);
+        }).toThrow();
       });
 
       it('fails when params is not valid', () => {

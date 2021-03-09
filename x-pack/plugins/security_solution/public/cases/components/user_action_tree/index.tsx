@@ -122,10 +122,9 @@ export const UserActionTree = React.memo(
     userCanCrud,
     onShowAlertDetails,
   }: UserActionTreeProps) => {
-    const { detailName: caseId, commentId, subCaseId } = useParams<{
+    const { detailName: caseId, commentId } = useParams<{
       detailName: string;
       commentId?: string;
-      subCaseId?: string;
     }>();
     const handlerTimeoutId = useRef(0);
     const addCommentRef = useRef<AddCommentRefObject>(null);
@@ -159,10 +158,9 @@ export const UserActionTree = React.memo(
           fetchUserActions,
           version,
           updateCase,
-          subCaseId,
         });
       },
-      [caseId, fetchUserActions, patchComment, subCaseId, updateCase]
+      [caseId, fetchUserActions, patchComment, updateCase]
     );
 
     const handleOutlineComment = useCallback(
@@ -234,10 +232,9 @@ export const UserActionTree = React.memo(
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
-          subCaseId={subCaseId}
         />
       ),
-      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, subCaseId]
+      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId]
     );
 
     useEffect(() => {
@@ -379,10 +376,11 @@ export const UserActionTree = React.memo(
                   return comments;
                 }
 
-                const ruleId = comment?.rule?.id ?? manualAlertsData[alertId]?.rule?.id?.[0] ?? '';
+                const ruleId =
+                  comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? '';
                 const ruleName =
                   comment?.rule?.name ??
-                  manualAlertsData[alertId]?.rule?.name?.[0] ??
+                  manualAlertsData[alertId]?.signal?.rule?.name?.[0] ??
                   i18n.UNKNOWN_RULE;
 
                 return [

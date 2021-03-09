@@ -280,7 +280,7 @@ describe('create', () => {
       return (
         caseClient.client
           // @ts-expect-error
-          .create({ theCase: postCase })
+          .create(postCase)
           .catch((e) => {
             expect(e).not.toBeNull();
             expect(e.isBoom).toBe(true);
@@ -309,7 +309,7 @@ describe('create', () => {
       return (
         caseClient.client
           // @ts-expect-error
-          .create({ theCase: postCase })
+          .create(postCase)
           .catch((e) => {
             expect(e).not.toBeNull();
             expect(e.isBoom).toBe(true);
@@ -338,7 +338,7 @@ describe('create', () => {
       return (
         caseClient.client
           // @ts-expect-error
-          .create({ theCase: postCase })
+          .create(postCase)
           .catch((e) => {
             expect(e).not.toBeNull();
             expect(e.isBoom).toBe(true);
@@ -362,7 +362,7 @@ describe('create', () => {
       return (
         caseClient.client
           // @ts-expect-error
-          .create({ theCase: postCase })
+          .create(postCase)
           .catch((e) => {
             expect(e).not.toBeNull();
             expect(e.isBoom).toBe(true);
@@ -392,7 +392,7 @@ describe('create', () => {
       return (
         caseClient.client
           // @ts-expect-error
-          .create({ theCase: postCase })
+          .create(postCase)
           .catch((e) => {
             expect(e).not.toBeNull();
             expect(e.isBoom).toBe(true);
@@ -458,6 +458,35 @@ describe('create', () => {
         const boomErr = e.boomify();
         expect(boomErr.isBoom).toBe(true);
         expect(boomErr.output.statusCode).toBe(400);
+      });
+    });
+
+    test('it throws if type != individual', async () => {
+      expect.assertions(3);
+      const postCase = {
+        title: 'Super Bad Security Issue',
+        description: 'This is a brand new case of a bad meanie defacing data',
+        tags: ['defacement'],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+        settings: {
+          syncAlerts: true,
+        },
+        type: CaseType.collection,
+      };
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      });
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return caseClient.client.create(postCase).catch((e) => {
+        expect(e).not.toBeNull();
+        expect(e.isBoom).toBe(true);
+        expect(e.output.statusCode).toBe(400);
       });
     });
   });
