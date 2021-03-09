@@ -63,11 +63,11 @@ export function ErrorCorrelations({ onClose }: Props) {
     `apm.correlations.errors.fields:${serviceName}`,
     defaultFieldNames
   );
-  const hasFieldsNames = fieldNames.length > 0;
+  const hasFieldNames = fieldNames.length > 0;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && hasFieldsNames) {
+      if (start && end && hasFieldNames) {
         return callApmApi({
           endpoint: 'GET /api/apm/correlations/failed_transactions',
           params: {
@@ -94,7 +94,7 @@ export function ErrorCorrelations({ onClose }: Props) {
       transactionName,
       transactionType,
       fieldNames,
-      hasFieldsNames,
+      hasFieldNames,
     ]
   );
 
@@ -125,7 +125,7 @@ export function ErrorCorrelations({ onClose }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <ErrorTimeseriesChart
-            data={hasFieldsNames ? data : undefined}
+            data={hasFieldNames ? data : undefined}
             status={status}
             selectedSignificantTerm={selectedSignificantTerm}
           />
@@ -136,7 +136,7 @@ export function ErrorCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.error.percentageColumnName',
               { defaultMessage: '% of failed transactions' }
             )}
-            significantTerms={hasFieldsNames ? data?.significantTerms : []}
+            significantTerms={hasFieldNames ? data?.significantTerms : []}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             onFilter={onClose}
