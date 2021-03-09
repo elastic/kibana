@@ -700,7 +700,11 @@ function discoverController($route, $scope, Promise) {
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
-    if (!getTimeField() || $scope.state.hideChart) return;
+    if (!getTimeField() || $scope.state.hideChart) {
+      if ($scope.volatileSearchSource.getField('aggs'));
+      $scope.volatileSearchSource.removeField('aggs');
+      return;
+    }
     const { interval: histogramInterval } = $scope.state;
 
     const visStateAggs = [
@@ -722,11 +726,6 @@ function discoverController($route, $scope, Promise) {
       $scope.indexPattern,
       visStateAggs
     );
-
-    $scope.volatileSearchSource.onRequestStart((searchSource, options) => {
-      if (!$scope.opts.chartAggConfigs) return;
-      return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
-    });
 
     $scope.volatileSearchSource.setField('aggs', function () {
       if (!$scope.opts.chartAggConfigs) return;
