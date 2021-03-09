@@ -59549,6 +59549,7 @@ async function runCommand(command, config) {
       const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"]);
       await reporter.timings({
         upstreamBranch: kbn.kibanaProject.json.branch,
+        kibanaUuid: kbn.getUuid(),
         timings: [{
           group: command.reportTiming.group,
           id: command.reportTiming.id,
@@ -59624,6 +59625,8 @@ exports.CiStatsReporter = void 0;
 const tslib_1 = __webpack_require__(7);
 const util_1 = __webpack_require__(112);
 const os_1 = tslib_1.__importDefault(__webpack_require__(121));
+const fs_1 = tslib_1.__importDefault(__webpack_require__(134));
+const path_1 = tslib_1.__importDefault(__webpack_require__(4));
 const axios_1 = tslib_1.__importDefault(__webpack_require__(516));
 const ci_stats_config_1 = __webpack_require__(556);
 const BASE_URL = 'https://ci-stats.kibana.dev';
@@ -59655,13 +59658,15 @@ class CiStatsReporter {
         const buildId = (_a = this.config) === null || _a === void 0 ? void 0 : _a.buildId;
         const timings = options.timings;
         const upstreamBranch = (_b = options.upstreamBranch) !== null && _b !== void 0 ? _b : this.getUpstreamBranch();
+        const kibanaUuid = options.kibanaUuid !== undefined ? this.getKibanaUuid() : options.kibanaUuid;
         const defaultMetadata = {
-            os_kernel: os_1.default.release(),
-            host_platform: os_1.default.platform(),
-            system_cpu_cores: (_c = os_1.default.cpus()) === null || _c === void 0 ? void 0 : _c.length,
-            system_cpu_name: (_d = os_1.default.cpus()[0]) === null || _d === void 0 ? void 0 : _d.model,
-            system_cpu_speed: (_e = os_1.default.cpus()[0]) === null || _e === void 0 ? void 0 : _e.speed,
-            host_architecture: os_1.default.arch(),
+            osPlatform: os_1.default.platform(),
+            osRelease: os_1.default.release(),
+            osArch: os_1.default.arch(),
+            cpuCount: (_c = os_1.default.cpus()) === null || _c === void 0 ? void 0 : _c.length,
+            cpuModel: (_d = os_1.default.cpus()[0]) === null || _d === void 0 ? void 0 : _d.model,
+            cpuSpeed: (_e = os_1.default.cpus()[0]) === null || _e === void 0 ? void 0 : _e.speed,
+            kibanaUuid,
         };
         return await this.req({
             auth: !!buildId,
@@ -59701,8 +59706,8 @@ class CiStatsReporter {
         });
     }
     /**
-     * in order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
-     * in the upstreamBranch when constructing the CiStatsTimings object. Outside of @kbn/pm
+     * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
+     * in the upstreamBranch when calling the timings() method. Outside of @kbn/pm
      * we rely on @kbn/utils to find the package.json file.
      */
     getUpstreamBranch() {
@@ -59711,6 +59716,26 @@ class CiStatsReporter {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { kibanaPackageJson } = __webpack_require__(557)(hideFromWebpack.join(''));
         return kibanaPackageJson.branch;
+    }
+    /**
+     * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
+     * in the kibanaUuid when calling the timings() method. Outside of @kbn/pm
+     * we rely on @kbn/utils to find the repo root.
+     */
+    getKibanaUuid() {
+        // specify the module id in a way that will keep webpack from bundling extra code into @kbn/pm
+        const hideFromWebpack = ['@', 'kbn/utils'];
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { REPO_ROOT } = __webpack_require__(557)(hideFromWebpack.join(''));
+        try {
+            return fs_1.default.readFileSync(path_1.default.resolve(REPO_ROOT, 'data/uuid'), 'utf-8').trim();
+        }
+        catch (error) {
+            if (error.code === 'ENOENT') {
+                return undefined;
+            }
+            throw error;
+        }
     }
     async req({ auth, body, bodyDesc, path }) {
         var _a;
@@ -63246,13 +63271,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Kibana", function() { return Kibana; });
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var multimatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(559);
-/* harmony import */ var multimatch__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(multimatch__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var is_path_inside__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(239);
-/* harmony import */ var is_path_inside__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(is_path_inside__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _yarn_lock__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(366);
-/* harmony import */ var _projects__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(248);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(562);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(134);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var multimatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(559);
+/* harmony import */ var multimatch__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(multimatch__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var is_path_inside__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(239);
+/* harmony import */ var is_path_inside__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(is_path_inside__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _yarn_lock__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(366);
+/* harmony import */ var _projects__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(248);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(562);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -63266,6 +63293,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -63286,7 +63314,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 class Kibana {
   static async loadFrom(rootPath) {
-    return new Kibana(await Object(_projects__WEBPACK_IMPORTED_MODULE_4__["getProjects"])(rootPath, Object(_config__WEBPACK_IMPORTED_MODULE_5__["getProjectPaths"])({
+    return new Kibana(await Object(_projects__WEBPACK_IMPORTED_MODULE_5__["getProjects"])(rootPath, Object(_config__WEBPACK_IMPORTED_MODULE_6__["getProjectPaths"])({
       rootPath
     })));
   }
@@ -63345,7 +63373,7 @@ class Kibana {
 
   getProjectAndDeps(name) {
     const project = this.getProject(name);
-    return Object(_projects__WEBPACK_IMPORTED_MODULE_4__["includeTransitiveProjects"])([project], this.allWorkspaceProjects);
+    return Object(_projects__WEBPACK_IMPORTED_MODULE_5__["includeTransitiveProjects"])([project], this.allWorkspaceProjects);
   }
   /** filter the projects to just those matching certain paths/include/exclude tags */
 
@@ -63354,10 +63382,10 @@ class Kibana {
     const allProjects = this.getAllProjects();
     const filteredProjects = new Map();
     const pkgJsonPaths = Array.from(allProjects.values()).map(p => p.packageJsonLocation);
-    const filteredPkgJsonGlobs = Object(_config__WEBPACK_IMPORTED_MODULE_5__["getProjectPaths"])(_objectSpread(_objectSpread({}, options), {}, {
+    const filteredPkgJsonGlobs = Object(_config__WEBPACK_IMPORTED_MODULE_6__["getProjectPaths"])(_objectSpread(_objectSpread({}, options), {}, {
       rootPath: this.kibanaProject.path
     })).map(g => path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(g, 'package.json'));
-    const matchingPkgJsonPaths = multimatch__WEBPACK_IMPORTED_MODULE_1___default()(pkgJsonPaths, filteredPkgJsonGlobs);
+    const matchingPkgJsonPaths = multimatch__WEBPACK_IMPORTED_MODULE_2___default()(pkgJsonPaths, filteredPkgJsonGlobs);
 
     for (const project of allProjects.values()) {
       const pathMatches = matchingPkgJsonPaths.includes(project.packageJsonLocation);
@@ -63373,7 +63401,7 @@ class Kibana {
   }
 
   isPartOfRepo(project) {
-    return project.path === this.kibanaProject.path || is_path_inside__WEBPACK_IMPORTED_MODULE_2___default()(project.path, this.kibanaProject.path);
+    return project.path === this.kibanaProject.path || is_path_inside__WEBPACK_IMPORTED_MODULE_3___default()(project.path, this.kibanaProject.path);
   }
 
   isOutsideRepo(project) {
@@ -63381,7 +63409,7 @@ class Kibana {
   }
 
   resolveAllProductionDependencies(yarnLock, log) {
-    const kibanaDeps = Object(_yarn_lock__WEBPACK_IMPORTED_MODULE_3__["resolveDepsForProject"])({
+    const kibanaDeps = Object(_yarn_lock__WEBPACK_IMPORTED_MODULE_4__["resolveDepsForProject"])({
       project: this.kibanaProject,
       yarnLock,
       kbn: this,
@@ -63389,7 +63417,7 @@ class Kibana {
       productionDepsOnly: true,
       log
     });
-    const xpackDeps = Object(_yarn_lock__WEBPACK_IMPORTED_MODULE_3__["resolveDepsForProject"])({
+    const xpackDeps = Object(_yarn_lock__WEBPACK_IMPORTED_MODULE_4__["resolveDepsForProject"])({
       project: this.getProject('x-pack'),
       yarnLock,
       kbn: this,
@@ -63398,6 +63426,18 @@ class Kibana {
       log
     });
     return new Map([...kibanaDeps.entries(), ...xpackDeps.entries()]);
+  }
+
+  getUuid() {
+    try {
+      return fs__WEBPACK_IMPORTED_MODULE_1___default.a.readFileSync(this.getAbsolute('data/uuid'), 'utf-8').trim();
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return undefined;
+      }
+
+      throw error;
+    }
   }
 
 }
