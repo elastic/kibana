@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Automator Workflows Execution",
   "query": "sequence by host.id with maxspan=30s\n [process where event.type in (\"start\", \"process_started\") and process.name == \"automator\"]\n [network where process.name:\"com.apple.automator.runner\"]\n",
   "references": [

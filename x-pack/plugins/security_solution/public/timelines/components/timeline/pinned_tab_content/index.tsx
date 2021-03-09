@@ -25,6 +25,7 @@ import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { TimelineModel } from '../../../store/timeline/model';
 import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
@@ -32,6 +33,7 @@ import { calculateTotalPages } from '../helpers';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -52,6 +54,18 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   background: none;
   padding: 0;
+
+  &.euiFlyoutFooter {
+    ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}
+  }
+`;
+
+const ExitFullScreenFlexItem = styled(EuiFlexItem)`
+  &.euiFlexItem {
+    ${({ theme }) => `margin: ${theme.eui.euiSizeS} 0 0 ${theme.eui.euiSizeS};`}
+  }
+
+  width: 180px;
 `;
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
@@ -98,6 +112,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const { browserFields, docValueFields, loading: loadingSourcerer } = useSourcererScope(
     SourcererScopeName.timeline
   );
+  const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
   const existingIndexNamesSelector = useMemo(
     () => sourcererSelectors.getAllExistingIndexNamesSelector(),
@@ -183,7 +198,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
-      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
+      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`} direction="column">
+        {timelineFullScreen && setTimelineFullScreen != null && (
+          <ExitFullScreenFlexItem grow={false}>
+            <ExitFullScreen fullScreen={timelineFullScreen} setFullScreen={setTimelineFullScreen} />
+          </ExitFullScreenFlexItem>
+        )}
+
         <ScrollableFlexItem grow={2}>
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody

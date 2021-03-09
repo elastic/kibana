@@ -37,7 +37,6 @@ import type {
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
-  CallESAsCurrentUser,
 } from '../types';
 import { ExternalCallback } from '..';
 
@@ -60,7 +59,6 @@ class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    callCluster: CallESAsCurrentUser,
     packagePolicy: NewPackagePolicy,
     options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
   ): Promise<PackagePolicy> {
@@ -94,7 +92,7 @@ class PackagePolicyService {
         ensureInstalledPackage({
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
-          callCluster,
+          esClient,
         }),
         getPackageInfo({
           savedObjectsClient: soClient,

@@ -28,6 +28,12 @@ const signalsMigrationSOGeneratedAttributes = {
   updatedBy: t.string,
 };
 
+const signalsMigrationSOError = {
+  statusCode: t.number,
+  error: t.string,
+  message: t.string,
+};
+
 /**
  The attributes necessary to create a Signals Migration Saved Object
  */
@@ -59,11 +65,14 @@ export const signalsMigrationSOAttributes = t.exact(
 );
 export type SignalsMigrationSOAttributes = t.TypeOf<typeof signalsMigrationSOAttributes>;
 
-export const signalsMigrationSO = t.type({
-  id: t.string,
-  attributes: signalsMigrationSOAttributes,
-  type: t.string,
-});
+export const signalsMigrationSO = t.intersection([
+  t.type({
+    id: t.string,
+    attributes: signalsMigrationSOAttributes,
+    type: t.string,
+  }),
+  t.partial({ error: t.type(signalsMigrationSOError) }),
+]);
 export type SignalsMigrationSO = t.TypeOf<typeof signalsMigrationSO>;
 
 export const signalsMigrationSOs = t.array(signalsMigrationSO);
