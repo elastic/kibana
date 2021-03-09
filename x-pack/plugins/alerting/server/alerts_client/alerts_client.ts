@@ -155,7 +155,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
   };
 }
 
-interface UpdateOptions<Params extends AlertTypeParams> {
+export interface UpdateOptions<Params extends AlertTypeParams> {
   id: string;
   data: {
     name: string;

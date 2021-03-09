@@ -16,7 +16,9 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   : K;
 
 export type AsApiContract<T> = {
-  [K in keyof T as CamelToSnake<RenameAlertToRule<Extract<K, string>>>]: T[K] extends any[]
+  [K in keyof T as CamelToSnake<RenameAlertToRule<Extract<K, string>>>]: K extends `params`
+    ? T[K]
+    : T[K] extends any[]
     ? T[K][number] extends object
       ? Array<AsApiContract<T[K][number]>>
       : T[K]
