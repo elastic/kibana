@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Sudo Heap-Based Buffer Overflow Attempt",
   "query": "event.category:process and event.type:start and process.name:(sudo or sudoedit) and process.args:(*\\\\ and (\"-i\" or \"-s\"))",
   "references": [
@@ -50,7 +50,9 @@
     }
   ],
   "threshold": {
-    "field": "host.hostname",
+    "field": [
+      "host.hostname"
+    ],
     "value": 100
   },
   "type": "threshold",

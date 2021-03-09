@@ -942,7 +942,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 156
+              "lineNumber": 161
             }
           },
           {
@@ -953,7 +953,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 157
+              "lineNumber": 162
             }
           },
           {
@@ -964,7 +964,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 158
+              "lineNumber": 163
             },
             "signature": [
               "boolean | undefined"
@@ -973,7 +973,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 155
+          "lineNumber": 160
         },
         "initialIsOpen": false
       },
@@ -1130,7 +1130,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 221
+              "lineNumber": 227
             }
           },
           {
@@ -1141,7 +1141,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 222
+              "lineNumber": 228
             }
           },
           {
@@ -1152,7 +1152,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 223
+              "lineNumber": 229
             }
           },
           {
@@ -1163,7 +1163,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 224
+              "lineNumber": 230
             },
             "signature": [
               "string | ((docLinks: ",
@@ -1185,7 +1185,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 225
+              "lineNumber": 231
             },
             "signature": [
               "(alertParams: Params) => ",
@@ -1206,7 +1206,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 226
+              "lineNumber": 232
             },
             "signature": [
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<",
@@ -1228,7 +1228,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 229
+              "lineNumber": 235
             }
           },
           {
@@ -1239,7 +1239,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 230
+              "lineNumber": 236
             },
             "signature": [
               "string | undefined"
@@ -1248,7 +1248,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 220
+          "lineNumber": 226
         },
         "initialIsOpen": false
       },
@@ -1277,7 +1277,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 203
+              "lineNumber": 209
             },
             "signature": [
               "Params"
@@ -1291,7 +1291,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 204
+              "lineNumber": 210
             }
           },
           {
@@ -1302,7 +1302,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 205
+              "lineNumber": 211
             }
           },
           {
@@ -1313,7 +1313,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 206
+              "lineNumber": 212
             },
             "signature": [
               "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
@@ -1327,7 +1327,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 207
+              "lineNumber": 213
             },
             "signature": [
               "<Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void"
@@ -1341,7 +1341,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 208
+              "lineNumber": 214
             },
             "signature": [
               "<Prop extends \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">(key: Prop, value: Pick<",
@@ -1363,7 +1363,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 212
+              "lineNumber": 218
             },
             "signature": [
               {
@@ -1383,7 +1383,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 213
+              "lineNumber": 219
             }
           },
           {
@@ -1394,7 +1394,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 214
+              "lineNumber": 220
             },
             "signature": [
               {
@@ -1415,7 +1415,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 215
+              "lineNumber": 221
             },
             "signature": [
               "MetaData | undefined"
@@ -1429,7 +1429,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 216
+              "lineNumber": 222
             },
             "signature": [
               {
@@ -1449,7 +1449,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 217
+              "lineNumber": 223
             },
             "signature": [
               {
@@ -1464,7 +1464,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 198
+          "lineNumber": 204
         },
         "initialIsOpen": false
       },
@@ -1591,7 +1591,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 234
+              "lineNumber": 240
             },
             "signature": [
               "any"
@@ -1600,7 +1600,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 233
+          "lineNumber": 239
         },
         "initialIsOpen": false
       },
@@ -1924,7 +1924,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-              "lineNumber": 110
+              "lineNumber": 115
             },
             "signature": [
               "Record<string, any>"
@@ -1933,7 +1933,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 109
+          "lineNumber": 114
         },
         "initialIsOpen": false
       }
@@ -1997,7 +1997,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 142
+          "lineNumber": 147
         },
         "signature": [
           "PreConfiguredActionConnector",
@@ -2060,7 +2060,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-          "lineNumber": 166
+          "lineNumber": 171
         },
         "signature": [
           "AsActionVariables<\"params\" | \"state\"> & Partial<AsActionVariables<\"context\">>"
