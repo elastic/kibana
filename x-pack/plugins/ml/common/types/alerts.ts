@@ -14,7 +14,7 @@ export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_in
 
 export interface AlertExecutionResult {
   count: number;
-  key: number;
+  key?: number;
   alertInstanceKey: string;
   isInterim: boolean;
   jobIds: string[];
