@@ -19,6 +19,7 @@ import {
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { ServiceIcons } from './';
+import * as useThemeHook from '../../../../hooks/use_theme';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -51,6 +52,12 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('ServiceIcons', () => {
+  beforeEach(() => {
+    jest.spyOn(useThemeHook, 'useTheme').mockReturnValue({
+      eui: {},
+      darkMode: false,
+    });
+  });
   describe('icons', () => {
     it('Shows loading spinner while fetching data', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
