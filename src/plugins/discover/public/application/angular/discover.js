@@ -537,7 +537,7 @@ function discoverController($route, $scope) {
         data.search.showError(error);
       })
       .finally(() => {
-        $scope.resultState = getResultState($scope.resultState, $scope.rows);
+        $scope.resultState = getResultState($scope.fetchStatus, $scope.rows);
         $scope.$apply();
       });
   };
