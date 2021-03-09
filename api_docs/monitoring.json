@@ -55,8 +55,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 95,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L95"
+              "lineNumber": 95
             },
             "signature": [
               "() => void"
@@ -70,8 +69,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 96,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L96"
+              "lineNumber": 96
             },
             "signature": [
               "() => void"
@@ -136,12 +134,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/monitoring/server/types.ts",
-<<<<<<< HEAD
-            "lineNumber": 100,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L100"
-=======
-            "lineNumber": 98
->>>>>>> elastic/master
+            "lineNumber": 100
           },
           "signature": [
             "() => any"
@@ -150,12 +143,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/monitoring/server/types.ts",
-<<<<<<< HEAD
-        "lineNumber": 99,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L99"
-=======
-        "lineNumber": 97
->>>>>>> elastic/master
+        "lineNumber": 99
       },
       "lifecycle": "setup",
       "initialIsOpen": true
