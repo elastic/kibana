@@ -10,6 +10,7 @@ import { EuiSpacer, EuiTabbedContent, EuiTabbedContentProps } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { useDrilldownManager } from '../context';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
+import { DrilldownList } from '../drilldown_list';
 
 export const txtCreateNew = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.containers.DrilldownManager.createNew',
@@ -39,7 +40,12 @@ const tabs: EuiTabbedContentProps['tabs'] = [
   {
     id: 'manage',
     name: txtManage,
-    content: 'manage...',
+    content: (
+      <>
+        <EuiSpacer />
+        <DrilldownList />
+      </>
+    ),
   },
 ];
 

@@ -41,11 +41,9 @@ interface Trigger {
 
 export interface ListManageDrilldownsProps {
   items: DrilldownListItem[];
-
-  onEdit?: (id: string) => void;
   onCreate?: () => void;
+  onEdit?: (id: string) => void;
   onDelete?: (ids: string[]) => void;
-
   showTriggerColumn?: boolean;
 }
 
@@ -55,8 +53,8 @@ export const TEST_SUBJ_DRILLDOWN_ITEM = 'listManageDrilldownsItem';
 
 export function ListManageDrilldowns({
   items: drilldowns,
+  onCreate,
   onEdit = noop,
-  onCreate = noop,
   onDelete = noop,
   showTriggerColumn = true,
 }: ListManageDrilldownsProps) {
@@ -146,11 +144,12 @@ export function ListManageDrilldowns({
         hasActions={true}
       />
       <EuiSpacer />
-      {selectedDrilldowns.length === 0 ? (
+      {!!onCreate && !selectedDrilldowns.length && (
         <EuiButton fill onClick={() => onCreate()}>
           {txtCreateDrilldown}
         </EuiButton>
-      ) : (
+      )}
+      {selectedDrilldowns.length > 0 && (
         <EuiButton
           color="danger"
           fill
