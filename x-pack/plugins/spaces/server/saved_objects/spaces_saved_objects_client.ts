@@ -18,6 +18,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
@@ -432,12 +433,20 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    *
    * @param {object} findOptions - {@link SavedObjectsCreatePointInTimeFinderOptions}
    */
-  createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions) {
+  createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ) {
     throwErrorIfNamespaceSpecified(findOptions);
     // We don't need to handle namespaces here, because `createPointInTimeFinder`
     // is simply a helper that calls `find`, `openPointInTimeForType`, and
     // `closePointInTime` internally, so namespaces will already be handled
     // in those methods.
-    return this.client.createPointInTimeFinder(findOptions);
+    return this.client.createPointInTimeFinder(findOptions, {
+      find: this.find.bind(this),
+      openPointInTimeForType: this.openPointInTimeForType.bind(this),
+      closePointInTime: this.closePointInTime.bind(this),
+      ...dependencies,
+    });
   }
 }

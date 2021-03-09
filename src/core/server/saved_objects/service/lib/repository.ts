@@ -16,8 +16,9 @@ import {
 import { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
-  createPointInTimeFinder,
+  PointInTimeFinder,
   SavedObjectsPointInTimeFinderOptions,
+  SavedObjectsPointInTimeFinderDependencies,
 } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
@@ -1939,11 +1940,13 @@ export class SavedObjectsRepository {
    * }
    * ```
    */
-  createPointInTimeFinder(findOptions: SavedObjectsPointInTimeFinderOptions['findOptions']) {
-    return createPointInTimeFinder({
-      findOptions,
+  createPointInTimeFinder(
+    findOptions: SavedObjectsPointInTimeFinderOptions,
+    dependencies: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>
+  ) {
+    return new PointInTimeFinder(findOptions, {
       logger: this._logger,
-      savedObjectsRepository: this,
+      ...dependencies,
     });
   }
 

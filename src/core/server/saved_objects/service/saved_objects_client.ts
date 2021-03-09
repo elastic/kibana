@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, SavedObjectsPointInTimeFinderOptions } from './lib';
+import type {
+  ISavedObjectsRepository,
+  PointInTimeFinder,
+  SavedObjectsPointInTimeFinderOptions,
+  SavedObjectsPointInTimeFinderDependencies,
+} from './lib';
 import {
   SavedObject,
   SavedObjectError,
@@ -392,7 +397,15 @@ export interface SavedObjectsClosePointInTimeResponse {
 /**
  * @public
  */
-export type SavedObjectsCreatePointInTimeFinderOptions = SavedObjectsPointInTimeFinderOptions['findOptions'];
+export type SavedObjectsCreatePointInTimeFinderOptions = SavedObjectsPointInTimeFinderOptions;
+
+/**
+ * @internal
+ */
+export type SavedObjectsCreatePointInTimeFinderDependencies = Omit<
+  SavedObjectsPointInTimeFinderDependencies,
+  'logger'
+>;
 
 /**
  *
@@ -613,7 +626,15 @@ export class SavedObjectsClient {
    * Returns a generator help page through large sets of saved objects by wrapping
    * calls to {@link SavedObjectsClient.find}
    */
-  createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions) {
-    return this._repository.createPointInTimeFinder(findOptions);
+  createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ): PointInTimeFinder {
+    return this._repository.createPointInTimeFinder(findOptions, {
+      find: this.find.bind(this),
+      openPointInTimeForType: this.openPointInTimeForType.bind(this),
+      closePointInTime: this.closePointInTime.bind(this),
+      ...dependencies,
+    });
   }
 }

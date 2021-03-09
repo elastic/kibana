@@ -9,8 +9,11 @@
 export type { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
 export { SavedObjectsClientProvider } from './scoped_client_provider';
 
-export { createPointInTimeFinder } from './point_in_time_finder';
-export type { SavedObjectsPointInTimeFinderOptions } from './point_in_time_finder';
+export type {
+  PointInTimeFinder,
+  SavedObjectsPointInTimeFinderOptions,
+  SavedObjectsPointInTimeFinderDependencies,
+} from './point_in_time_finder';
 
 export type {
   SavedObjectsClientWrapperFactory,

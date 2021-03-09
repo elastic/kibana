@@ -6,29 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '../../../logging';
-import { SavedObjectsFindOptions } from '../../types';
-import { SavedObjectsFindResponse } from '../';
-import { ISavedObjectsRepository } from './repository';
+import type { Logger } from '../../../logging';
+import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
+import type { SavedObjectsFindResponse } from '../';
+
+type SavedObjectsFind = SavedObjectsClientContract['find'];
+type SavedObjectsOpenPointInTimeForType = SavedObjectsClientContract['openPointInTimeForType'];
+type SavedObjectsClosePointInTime = SavedObjectsClientContract['closePointInTime'];
 
 /**
  * @internal
  */
-export interface SavedObjectsPointInTimeFinderOptions {
-  findOptions: Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'>;
+export type SavedObjectsPointInTimeFinderOptions = Omit<
+  SavedObjectsFindOptions,
+  'page' | 'pit' | 'searchAfter'
+>;
+
+/**
+ * @internal
+ */
+export interface SavedObjectsPointInTimeFinderDependencies {
   logger: Logger;
-  savedObjectsRepository: ISavedObjectsRepository;
-}
-
-/**
- * @internal
- */
-export function createPointInTimeFinder({
-  findOptions,
-  logger,
-  savedObjectsRepository,
-}: SavedObjectsPointInTimeFinderOptions) {
-  return new PointInTimeFinder({ findOptions, logger, savedObjectsRepository });
+  find: SavedObjectsFind;
+  openPointInTimeForType: SavedObjectsOpenPointInTimeForType;
+  closePointInTime: SavedObjectsClosePointInTime;
 }
 
 /**
@@ -36,18 +37,26 @@ export function createPointInTimeFinder({
  */
 export class PointInTimeFinder {
   readonly #log: Logger;
-  readonly #savedObjectsRepository: ISavedObjectsRepository;
+  readonly #find: SavedObjectsFind;
+  readonly #openPointInTimeForType: SavedObjectsOpenPointInTimeForType;
+  readonly #closePointInTime: SavedObjectsClosePointInTime;
   readonly #findOptions: SavedObjectsFindOptions;
   #open: boolean = false;
   #pitId?: string;
 
-  constructor({
-    findOptions,
-    logger,
-    savedObjectsRepository,
-  }: SavedObjectsPointInTimeFinderOptions) {
+  constructor(
+    findOptions: SavedObjectsPointInTimeFinderOptions,
+    {
+      logger,
+      find,
+      openPointInTimeForType,
+      closePointInTime,
+    }: SavedObjectsPointInTimeFinderDependencies
+  ) {
     this.#log = logger.get('point-in-time-finder');
-    this.#savedObjectsRepository = savedObjectsRepository;
+    this.#find = find;
+    this.#openPointInTimeForType = openPointInTimeForType;
+    this.#closePointInTime = closePointInTime;
     this.#findOptions = {
       // Default to 1000 items per page as a tradeoff between
       // speed and memory consumption.
@@ -98,7 +107,7 @@ export class PointInTimeFinder {
     try {
       if (this.#pitId) {
         this.#log.debug(`Closing PIT for types [${this.#findOptions.type}]`);
-        await this.#savedObjectsRepository.closePointInTime(this.#pitId);
+        await this.#closePointInTime(this.#pitId);
         this.#pitId = undefined;
       }
       this.#open = false;
@@ -110,15 +119,14 @@ export class PointInTimeFinder {
 
   private async open() {
     try {
-      const { id } = await this.#savedObjectsRepository.openPointInTimeForType(
-        this.#findOptions.type
-      );
+      const { id } = await this.#openPointInTimeForType(this.#findOptions.type);
       this.#pitId = id;
       this.#open = true;
     } catch (e) {
       // Since `find` swallows 404s, it is expected that finder will do the same,
       // so we only rethrow non-404 errors here.
-      if (e.output.statusCode !== 404) {
+      if (e.output?.statusCode !== 404) {
+        this.#log.error(`Failed to open PIT for types [${this.#findOptions.type}]`);
         throw e;
       }
       this.#log.debug(`Unable to open PIT for types [${this.#findOptions.type}]: 404 ${e}`);
@@ -135,7 +143,7 @@ export class PointInTimeFinder {
     searchAfter?: unknown[];
   }) {
     try {
-      return await this.#savedObjectsRepository.find({
+      return await this.#find({
         // Sort fields are required to use searchAfter, so we set some defaults here
         sortField: 'updated_at',
         sortOrder: 'desc',

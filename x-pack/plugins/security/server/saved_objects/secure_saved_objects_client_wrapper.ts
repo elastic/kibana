@@ -16,6 +16,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
@@ -617,11 +618,19 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.baseClient.closePointInTime(id, options);
   }
 
-  public createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions) {
+  public createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ) {
     // We don't need to perform an authorization check here or add an audit log, because
     // `createPointInTimeFinder` is simply a helper that calls `find`, `openPointInTimeForType`,
     // and `closePointInTime` internally, so authz checks and audit logs will already be applied.
-    return this.baseClient.createPointInTimeFinder(findOptions);
+    return this.baseClient.createPointInTimeFinder(findOptions, {
+      find: this.find.bind(this),
+      openPointInTimeForType: this.openPointInTimeForType.bind(this),
+      closePointInTime: this.closePointInTime.bind(this),
+      ...dependencies,
+    });
   }
 
   private async checkPrivileges(

@@ -46,11 +46,11 @@ const createPointInTimeFinderMock = ({
   }
 
   mock.mockImplementation((findOptions) => {
-    return new PointInTimeFinder({
-      findOptions,
+    return new PointInTimeFinder(findOptions, {
       logger,
-      // @ts-expect-error To make testing easier, we're taking a mocked client or repository here
-      savedObjectsRepository: savedObjectsMock,
+      find: savedObjectsMock.find,
+      openPointInTimeForType: savedObjectsMock.openPointInTimeForType,
+      closePointInTime: savedObjectsMock.closePointInTime,
     });
   });
 
