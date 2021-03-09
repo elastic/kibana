@@ -6,7 +6,9 @@
  */
 
 import moment from 'moment';
-import { handleResponse } from './get_node_info';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { handleResponse, getNodeInfo } from './get_node_info';
+import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
 
 describe('get_logstash_info', () => {
   // TODO: test was not running before and is not up to date
@@ -146,5 +148,30 @@ describe('get_logstash_info', () => {
         failures: 2,
       },
     });
+  });
+
+  it('works with standalone cluster', async () => {
+    const callWithRequest = jest.fn().mockReturnValue({
+      then: jest.fn(),
+    });
+    const req = {
+      server: {
+        plugins: {
+          elasticsearch: {
+            getCluster: () => ({
+              callWithRequest,
+            }),
+          },
+        },
+      },
+    };
+    await getNodeInfo(req, '.monitoring-logstash-*', {
+      clusterUuid: STANDALONE_CLUSTER_CLUSTER_UUID,
+    });
+    expect(callWithRequest.mock.calls.length).toBe(1);
+    expect(callWithRequest.mock.calls[0].length).toBe(3);
+    expect(callWithRequest.mock.calls[0][2].body.query.bool.filter[0]).toBe(
+      standaloneClusterFilter
+    );
   });
 });

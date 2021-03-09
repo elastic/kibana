@@ -167,6 +167,9 @@ kibana_vars=(
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
+    xpack.alerting.healthCheck.interval
+    xpack.alerting.invalidateApiKeysTask.interval
+    xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.apm.enabled
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled

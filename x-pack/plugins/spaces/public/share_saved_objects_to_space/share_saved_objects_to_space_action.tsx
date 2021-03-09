@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
-import type { SpacesApiUi, ShareToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
+import type { ShareToSpaceFlyoutProps, SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
 
