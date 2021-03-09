@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-require('../../src/dev/ensure_node_preserve_symlinks');
+require('./ensure_node_preserve_symlinks');
 
 // The following require statements MUST be executed before any others - BEGIN
 require('./exit_on_warning');

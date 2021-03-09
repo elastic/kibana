@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-require('../src/dev/ensure_node_preserve_symlinks');
+require('../src/setup_node_env/ensure_node_preserve_symlinks');
 
 var execFileSync = require('child_process').execFileSync;
 var path = require('path');
