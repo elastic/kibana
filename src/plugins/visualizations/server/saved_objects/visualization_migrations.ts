@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
@@ -236,6 +236,48 @@ const migrateDateHistogramAggregation: SavedObjectMigrationFn<any, any> = (doc) 
           delete agg.params.customBucket.params.customInterval;
         }
       });
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+// Migrate schemas inside aggregation (replace 'schema' object to name of the schema)
+const migrateSchema: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    function replaceSchema(agg: any) {
+      forOwn(agg, (value: any, key: string) => {
+        if (typeof value === 'object') {
+          if (key === 'schema') {
+            agg[key] = value.name;
+          } else {
+            replaceSchema(value);
+          }
+        }
+      });
+    }
+
+    if (visState && visState.aggs) {
+      for (const agg of visState.aggs) {
+        if (typeof agg === 'object') {
+          replaceSchema(agg);
+        }
+      }
       return {
         ...doc,
         attributes: {
@@ -883,5 +925,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
   '7.11.0': flow(enableDataTableVisToolbar),
-  '7.12.0': flow(migrateVislibAreaLineBarTypes),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes, migrateSchema),
 };
