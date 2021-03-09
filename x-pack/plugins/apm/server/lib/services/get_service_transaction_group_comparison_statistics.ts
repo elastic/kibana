@@ -247,7 +247,6 @@ export async function getServiceTransactionGroupComparisonStatisticsPeriods({
           getOffsetXCoordinate: (timeseries: Coordinate[]) =>
             offsetPreviousPeriodCoordinates({
               currentPeriodStart: start,
-              previousPeriodStart: comparisonStart,
               previousPeriodTimeseries: timeseries,
             }),
         })
