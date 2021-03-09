@@ -11,7 +11,7 @@ import {
   generateArtifactEsSearchResultHitsMock,
   generateArtifactMock,
   generateEsRequestErrorApiResponseMock,
-  GenerateEsRequestErrorApiResponseMockProps,
+  setEsClientMethodResponseToError,
 } from './mocks';
 import {
   createArtifact,
@@ -28,17 +28,6 @@ import { NewArtifact } from './types';
 
 describe('When using the artifacts services', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
-
-  const setEsClientMethodResponseToError = (
-    method: keyof Pick<typeof esClientMock, 'get' | 'create' | 'delete' | 'search'>,
-    options?: GenerateEsRequestErrorApiResponseMockProps
-  ) => {
-    esClientMock[method].mockImplementation(() => {
-      return elasticsearchServiceMock.createErrorTransportRequestPromise(
-        new ResponseError(generateEsRequestErrorApiResponseMock(options))
-      );
-    });
-  };
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createInternalClient();
@@ -60,7 +49,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should return undefined if artifact is not found', async () => {
-      setEsClientMethodResponseToError('get', { statusCode: 404 });
+      setEsClientMethodResponseToError(esClientMock, 'get', { statusCode: 404 });
       expect(await getArtifact(esClientMock, '123')).toBeUndefined();
     });
 
@@ -106,7 +95,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
-      setEsClientMethodResponseToError('create');
+      setEsClientMethodResponseToError(esClientMock, 'create');
       await expect(createArtifact(esClientMock, newArtifact)).rejects.toBeInstanceOf(
         ArtifactsElasticsearchError
       );
@@ -124,7 +113,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
-      setEsClientMethodResponseToError('delete');
+      setEsClientMethodResponseToError(esClientMock, 'delete');
 
       await expect(deleteArtifact(esClientMock, '123')).rejects.toBeInstanceOf(
         ArtifactsElasticsearchError
@@ -191,7 +180,7 @@ describe('When using the artifacts services', () => {
     });
 
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
-      setEsClientMethodResponseToError('search');
+      setEsClientMethodResponseToError(esClientMock, 'search');
 
       await expect(listArtifacts(esClientMock)).rejects.toBeInstanceOf(ArtifactsElasticsearchError);
     });

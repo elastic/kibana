@@ -11,11 +11,11 @@ import {
   ArtifactEncodedMetadata,
   ArtifactsClientInterface,
   NewArtifact,
+  ListArtifactsProps,
 } from './types';
 import { ListResult } from '../../../common';
 import { relativeDownloadUrlFromArtifact } from './mappings';
-import { ArtifactAccessDeniedError } from './errors';
-import { ListWithKuery } from '../../types';
+import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from './errors';
 import {
   createArtifact,
   deleteArtifact,
@@ -26,18 +26,18 @@ import {
 } from './artifacts';
 
 /**
- * Exposes an interface for access artifacts from within the context of an integration (`packageName`)
+ * Exposes an interface for access artifacts from within the context of a single integration (`packageName`)
  */
 export class FleetArtifactsClient implements ArtifactsClientInterface {
   constructor(private esClient: ElasticsearchClient, private packageName: string) {
     if (!packageName) {
-      throw new Error('packageName is required');
+      throw new ArtifactsClientError('packageName is required');
     }
   }
 
   private validate(artifact: Artifact): Artifact {
     if (artifact.packageName !== this.packageName) {
-      throw new ArtifactAccessDeniedError(artifact.packageName, this.packageName);
+      throw new ArtifactsClientAccessDeniedError(artifact.packageName, this.packageName);
     }
 
     return artifact;
@@ -81,7 +81,9 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     }
   }
 
-  async listArtifacts({ kuery, ...options }: ListWithKuery): Promise<ListResult<Artifact>> {
+  async listArtifacts({ kuery, ...options }: ListArtifactsProps = {}): Promise<
+    ListResult<Artifact>
+  > {
     // All filtering for artifacts should be bound to the `packageName`, so we insert
     // that into the KQL value and use `AND` to add the defined `kuery` (if any) to it.
     const filter = `(packageName: "${this.packageName}")${kuery ? ` AND ${kuery}` : ''}`;

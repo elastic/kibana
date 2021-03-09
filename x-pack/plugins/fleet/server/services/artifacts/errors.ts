@@ -9,7 +9,9 @@
 
 import { isErrorWithMeta } from './utils';
 
-export class ArtifactAccessDeniedError extends Error {
+export class ArtifactsClientError extends Error {}
+
+export class ArtifactsClientAccessDeniedError extends Error {
   constructor(deniedPackageName: string, allowedPackageName: string) {
     super(
       `Access denied. Artifact package name (${deniedPackageName}) does not match ${allowedPackageName}`

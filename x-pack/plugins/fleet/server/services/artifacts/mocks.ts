@@ -7,6 +7,7 @@
 import { URL } from 'url';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { Artifact, ArtifactElasticsearchProperties } from './types';
 
@@ -128,5 +129,20 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
       aborted: false,
     },
     ...otherProps,
+  });
+};
+
+type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+type EsClientMockMethods = keyof Pick<EsClientMock, 'get' | 'create' | 'delete' | 'search'>;
+
+export const setEsClientMethodResponseToError = (
+  esClientMock: EsClientMock,
+  method: EsClientMockMethods,
+  options?: GenerateEsRequestErrorApiResponseMockProps
+) => {
+  esClientMock[method].mockImplementation(() => {
+    return elasticsearchServiceMock.createErrorTransportRequestPromise(
+      new ResponseError(generateEsRequestErrorApiResponseMock(options))
+    );
   });
 };

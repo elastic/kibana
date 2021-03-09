@@ -57,6 +57,10 @@ export type ArtifactsClientCreateOptions = Partial<ArtifactUserDefinedMetadata> 
   content: string;
 };
 
+export type ListArtifactsProps = Pick<ListWithKuery, 'perPage' | 'page' | 'kuery' | 'sortOrder'> & {
+  sortField?: string | keyof ArtifactElasticsearchProperties;
+};
+
 /**
  * The interface exposed out of Fleet's Artifact service via the client class
  */

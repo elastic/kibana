@@ -27,7 +27,7 @@ export const relativeDownloadUrlFromArtifact = <
   decodedSha256,
 }: T): string => {
   return ARTIFACT_DOWNLOAD_RELATIVE_PATH.replace('{identifier}', identifier).replace(
-    'decodedSha256',
+    '{decodedSha256}',
     decodedSha256
   );
 };
