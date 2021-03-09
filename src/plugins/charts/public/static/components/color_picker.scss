@@ -4,16 +4,23 @@ $visColorPickerWidth: $euiSizeL * 8; // 8 columns
   width: $visColorPickerWidth;
 }
 
+.visColorPicker__radio {
+  position: relative;
+
+  input[type="radio"] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+}
+
 .visColorPicker__valueDot {
   cursor: pointer;
 
   &:hover {
     transform: scale(1.4);
-  }
-
-  // removes the grey background that appears on the first dot when the popover is open
-  &:focus {
-    background-color: $euiColorEmptyShade;
   }
 
   &-isSelected {
