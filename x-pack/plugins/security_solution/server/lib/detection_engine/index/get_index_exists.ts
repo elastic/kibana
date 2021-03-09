@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { CallWithRequest } from '../types';
 
 export const getIndexExists = async (
   esClient: ElasticsearchClient,
