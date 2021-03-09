@@ -29,7 +29,6 @@ import { InternalRollup } from './types';
 import { Navigation } from './navigation';
 
 import {
-  StepLogistics,
   StepDateHistogram,
   StepTerms,
   StepHistogram,
@@ -39,7 +38,7 @@ import {
 } from './steps';
 
 import {
-  STEP_LOGISTICS,
+  STEP_,
   STEP_DATE_HISTOGRAM,
   STEP_TERMS,
   STEP_HISTOGRAM,
@@ -54,12 +53,6 @@ import {
 // TODO: fix anys in this file!
 
 const stepIdToTitleMap = {
-  [STEP_LOGISTICS]: i18n.translate(
-    'xpack.indexLifecycleMgmt.rollup.create.steps.stepLogisticsTitle',
-    {
-      defaultMessage: 'Logistics',
-    }
-  ),
   [STEP_DATE_HISTOGRAM]: i18n.translate(
     'xpack.indexLifecycleMgmt.rollupJob.create.steps.stepDateHistogramTitle',
     {
@@ -105,7 +98,6 @@ export interface Props {
 }
 
 export interface StepFields {
-  STEP_LOGISTICS: { rollupIndexIlmPolicy?: string };
   STEP_DATE_HISTOGRAM: {
     dateHistogramIntervalType: InternalRollup['dateHistogramIntervalType'];
     dateHistogramInterval: string;
@@ -291,7 +283,6 @@ export class RollupWizard extends Component<Props, State> {
   getAllFields(): InternalRollup {
     const {
       stepsFields: {
-        STEP_LOGISTICS: { rollupIndexIlmPolicy },
         STEP_DATE_HISTOGRAM: {
           dateHistogramInterval,
           dateHistogramTimeZone,
@@ -306,7 +297,6 @@ export class RollupWizard extends Component<Props, State> {
     } = this.state;
 
     return {
-      rollupIndexIlmPolicy,
       dateHistogramIntervalType,
       dateHistogramInterval,
       dateHistogramTimeZone,
@@ -322,9 +312,6 @@ export class RollupWizard extends Component<Props, State> {
     const rollupConfig = this.getAllFields();
     this.props.onDone({
       config: serializeRollup(rollupConfig),
-      rollup_policy: rollupConfig.rollupIndexIlmPolicy
-        ? rollupConfig.rollupIndexIlmPolicy
-        : undefined,
     });
   };
 
@@ -375,17 +362,6 @@ export class RollupWizard extends Component<Props, State> {
     const currentStepFieldErrors = stepsFieldErrors[currentStepId];
 
     switch (currentStepId) {
-      case STEP_LOGISTICS:
-        return (
-          <StepLogistics
-            fields={currentStepFields}
-            onFieldsChange={this.onFieldsChange}
-            fieldErrors={currentStepFieldErrors}
-            hasErrors={hasErrors(currentStepFieldErrors)}
-            areStepErrorsVisible={areStepErrorsVisible}
-          />
-        );
-
       case STEP_DATE_HISTOGRAM:
         return (
           <StepDateHistogram

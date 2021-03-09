@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { StepLogistics } from './step_logistics';
 export { StepDateHistogram } from './step_date_histogram';
 export { StepTerms } from './step_terms';
 export { StepHistogram } from './step_histogram';

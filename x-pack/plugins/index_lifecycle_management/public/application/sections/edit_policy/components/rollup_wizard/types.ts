@@ -15,5 +15,4 @@ export interface InternalRollup {
   histogram: Array<{ name: string }>;
   histogramInterval?: string;
   rollupDelay?: string;
-  rollupIndexIlmPolicy?: string;
 }

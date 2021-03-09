@@ -94,7 +94,6 @@ export function deserializeRollup(rollupAction: RollupAction): InternalRollup {
         histogram,
       },
     },
-    rollup_policy: rollupIndexIlmPolicy,
   } = rollupAction;
 
   // `interval` is deprecated but still supported. All three of the various interval types are
@@ -114,7 +113,6 @@ export function deserializeRollup(rollupAction: RollupAction): InternalRollup {
     metrics: [],
     terms: [],
     histogram: [],
-    rollupIndexIlmPolicy,
   };
 
   if (metrics) {

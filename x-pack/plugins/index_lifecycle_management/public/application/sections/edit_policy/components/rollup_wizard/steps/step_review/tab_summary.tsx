@@ -34,7 +34,6 @@ export const TabSummary: FunctionComponent<Props> = ({ rollupAction }) => {
     dateHistogramInterval,
     dateHistogramTimeZone,
     dateHistogramField,
-    rollupIndexIlmPolicy,
   } = rollupAction;
 
   return (
@@ -120,51 +119,6 @@ export const TabSummary: FunctionComponent<Props> = ({ rollupAction }) => {
             </EuiDescriptionList>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </section>
-
-      <EuiSpacer />
-
-      <section
-        aria-labelledby="rollupActionConfigDetailLogisticsTitle"
-        data-test-subj="rollupDetailSummaryLogisticsSection"
-      >
-        <EuiTitle size="s">
-          <h3 id="rollupDetailLogisticsTitle" data-test-subj="rollupDetailLogisticsTitle">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.rollup.summary.sectionLogisticsLabel"
-              defaultMessage="Logistics"
-            />
-          </h3>
-        </EuiTitle>
-
-        <EuiSpacer size="s" />
-
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiDescriptionList textStyle="reverse">
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.rollup.summary.itemRollupIndexILMPolicy"
-                  data-test-subj="rollupDetailLogisticsDelayTitle"
-                  // TODO: Copy required
-                  defaultMessage="[Rollup index ILM policy]"
-                />
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="rollupActionDetailLogisticsDelayDescription">
-                {rollupIndexIlmPolicy || (
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.rollup.summary.itemRollupIndexILMPolicy.default"
-                    // TODO: Copy required
-                    defaultMessage="[The rollup index will be managed by this policy]"
-                  />
-                )}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
       </section>
     </>
   );
