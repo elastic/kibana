@@ -7,7 +7,7 @@
 
 import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
 
-export const APP_ID = 'case';
+export const APP_ID = 'cases';
 
 /**
  * Case routes
