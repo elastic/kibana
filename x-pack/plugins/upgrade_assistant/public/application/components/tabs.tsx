@@ -160,7 +160,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
       const resp = await this.props.http.get('/api/upgrade_assistant/status');
       this.setState({
         loadingState: LoadingState.Success,
-        checkupData: resp,
+        checkupData: resp.data ? resp.data : resp,
       });
     } catch (e) {
       if (get(e, 'response.status') === 426) {
@@ -243,8 +243,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
 
     this.setState({ telemetryState: TelemetryState.Running });
 
-    await this.props.http.fetch('/api/upgrade_assistant/stats/ui_open', {
-      method: 'PUT',
+    await this.props.http.put('/api/upgrade_assistant/stats/ui_open', {
       body: JSON.stringify(set({}, tabName, true)),
     });
 

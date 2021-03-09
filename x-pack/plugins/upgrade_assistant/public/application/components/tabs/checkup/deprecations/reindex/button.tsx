@@ -240,8 +240,7 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   };
 
   private async sendUIReindexTelemetryInfo(uiReindexAction: UIReindexOption) {
-    await this.props.http.fetch('/api/upgrade_assistant/stats/ui_reindex', {
-      method: 'PUT',
+    await this.props.http.put('/api/upgrade_assistant/stats/ui_reindex', {
       body: JSON.stringify(set({}, uiReindexAction, true)),
     });
   }

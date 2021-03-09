@@ -36,17 +36,16 @@ export const FixIndexSettingsButton: React.FunctionComponent<Props> = ({ setting
   return (
     <RemoveIndexSettingsProvider>
       {(removeIndexSettingsPrompt, successfulRequests) => {
+        const isSuccessfulRequest = successfulRequests[index] === true;
         return (
           <EuiButton
             size="s"
             data-test-subj="removeIndexSettingsButton"
             onClick={() => removeIndexSettingsPrompt(index, settings)}
-            isDisabled={successfulRequests[index] === true}
-            iconType={successfulRequests[index] === true ? 'check' : undefined}
+            isDisabled={isSuccessfulRequest}
+            iconType={isSuccessfulRequest ? 'check' : undefined}
           >
-            {successfulRequests[index] === true
-              ? i18nTexts.doneButtonLabel
-              : i18nTexts.fixButtonLabel}
+            {isSuccessfulRequest ? i18nTexts.doneButtonLabel : i18nTexts.fixButtonLabel}
           </EuiButton>
         );
       }}

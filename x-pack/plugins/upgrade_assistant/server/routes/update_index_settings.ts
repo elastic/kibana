@@ -43,7 +43,9 @@ export function registerUpdateSettingsRoute({ router }: RouteDependencies) {
 
           const { body: settingsResponse } = await client.asCurrentUser.indices.putSettings({
             index: indexName,
-            body: settingsToDelete,
+            body: {
+              index: settingsToDelete,
+            },
           });
 
           return response.ok({

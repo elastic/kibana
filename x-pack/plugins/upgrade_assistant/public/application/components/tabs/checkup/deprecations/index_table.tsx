@@ -99,6 +99,11 @@ export class IndexDeprecationTable extends React.Component<
         pagination={pagination}
         onChange={this.onTableChange}
         hasActions={false}
+        rowProps={(indexDetails) => {
+          return {
+            'data-test-subj': `indexTableRow-${indexDetails.index}`,
+          };
+        }}
       />
     );
   }

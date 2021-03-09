@@ -31,7 +31,7 @@ interface CheckedIds {
   [id: string]: boolean;
 }
 
-const mapWarningToComponent: {
+const warningToComponentMap: {
   [key in ReindexWarningTypes]: React.FunctionComponent<WarningCheckboxProps>;
 } = {
   customTypeName: CustomTypeNameWarningCheckbox,
@@ -107,7 +107,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
         {kibanaVersionInfo.currentMajor === 7 &&
           warnings.map((warning, index) => {
-            const WarningCheckbox = mapWarningToComponent[warning.warningType];
+            const WarningCheckbox = warningToComponentMap[warning.warningType];
             return (
               <WarningCheckbox
                 key={idForWarning(index)}
