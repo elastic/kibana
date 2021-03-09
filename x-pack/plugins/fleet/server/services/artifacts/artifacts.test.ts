@@ -7,12 +7,20 @@
 
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import {
-  generateArtifactEsSearchHitMock,
+  generateArtifactEsGetSingleHitMock,
+  generateArtifactEsSearchResultHitsMock,
   generateArtifactMock,
   generateEsRequestErrorApiResponseMock,
   GenerateEsRequestErrorApiResponseMockProps,
 } from './mocks';
-import { createArtifact, deleteArtifact, getArtifact } from './artifacts';
+import {
+  createArtifact,
+  deleteArtifact,
+  encodeArtifactContent,
+  generateArtifactContentHash,
+  getArtifact,
+  listArtifacts,
+} from './artifacts';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ArtifactsElasticsearchError } from './errors';
@@ -40,7 +48,7 @@ describe('When using the artifacts services', () => {
     it('should get artifact using id', async () => {
       esClientMock.get.mockImplementation(() => {
         return elasticsearchServiceMock.createSuccessTransportRequestPromise(
-          generateArtifactEsSearchHitMock()
+          generateArtifactEsGetSingleHitMock()
         );
       });
 
@@ -125,20 +133,88 @@ describe('When using the artifacts services', () => {
   });
 
   describe('and calling `listArtifacts()`', () => {
-    it.todo('should use defaults when options is not provided');
+    beforeEach(() => {
+      esClientMock.search.mockImplementation(() => {
+        return elasticsearchServiceMock.createSuccessTransportRequestPromise(
+          generateArtifactEsSearchResultHitsMock()
+        );
+      });
+    });
 
-    it.todo('should allow for options to be defined');
+    it('should use defaults when options is not provided', async () => {
+      const results = await listArtifacts(esClientMock);
 
-    it.todo('should calculate correct elasticsearch `from` value');
+      expect(esClientMock.search).toHaveBeenCalledWith({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        sort: 'created:asc',
+        q: '',
+        from: 0,
+        size: 20,
+      });
 
-    it.todo('should throw an ArtifactElasticsearchError if one is encountered');
+      expect(results).toEqual({
+        items: [
+          {
+            ...generateArtifactMock(),
+            id: expect.any(String),
+            created: expect.any(String),
+          },
+        ],
+        page: 1,
+        perPage: 20,
+        total: 1,
+      });
+    });
+
+    it('should allow for options to be defined', async () => {
+      const { items, ...listMeta } = await listArtifacts(esClientMock, {
+        perPage: 50,
+        page: 10,
+        kuery: 'packageName:endpoint',
+        sortField: 'identifier',
+        sortOrder: 'desc',
+      });
+
+      expect(esClientMock.search).toHaveBeenCalledWith({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        sort: 'identifier:desc',
+        q: 'packageName:endpoint',
+        from: 450,
+        size: 50,
+      });
+
+      expect(listMeta).toEqual({
+        perPage: 50,
+        page: 10,
+        total: 1,
+      });
+    });
+
+    it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
+      setEsClientMethodResponseToError('search');
+
+      await expect(listArtifacts(esClientMock)).rejects.toBeInstanceOf(ArtifactsElasticsearchError);
+    });
   });
 
   describe('and calling `generateArtifactContentHash()`', () => {
-    it.todo('should return a sha256 string');
+    it('should return a sha256 string', () => {
+      expect(generateArtifactContentHash('eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==')).toBe(
+        'e40a028b3dab7e567135b80ed69934a52be5b4c2d901faa8e0997b256c222473'
+      );
+    });
   });
 
   describe('and calling `encodeArtifactContent()`', () => {
-    it.todo('should encode content');
+    it('should encode content', async () => {
+      expect(await encodeArtifactContent('{"key": "value"}')).toEqual({
+        body: 'eJyrVspOrVSyUlAqS8wpTVWqBQArrwVB',
+        compressionAlgorithm: 'zlib',
+        decodedSha256: '9724c1e20e6e3e4d7f57ed25f9d4efb006e508590d528c90da597f6a775c13e5',
+        decodedSize: 16,
+        encodedSha256: '446086d1609189c3ad93a943976e4b7474c028612e5ec4810a81cc01a631f0f9',
+        encodedSize: 24,
+      });
+    });
   });
 });

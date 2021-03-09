@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { URL } from 'url';
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { ApiResponse } from '@elastic/elasticsearch';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { Artifact, ArtifactElasticsearchProperties } from './types';
 
 export const generateArtifactMock = (): Artifact => {
@@ -31,57 +31,23 @@ export const generateArtifactMock = (): Artifact => {
 export interface GenerateEsRequestErrorApiResponseMockProps {
   statusCode?: number;
 }
+
 export const generateEsRequestErrorApiResponseMock = (
   { statusCode = 500 }: GenerateEsRequestErrorApiResponseMockProps = { statusCode: 500 }
 ): ApiResponse => {
-  return {
-    body: {
+  return generateEsApiResponseMock(
+    {
       _index: '.fleet-artifacts_1',
       _id: '123',
       found: false,
     },
-    statusCode,
-    headers: {
-      'content-type': 'application/json',
-      'content-length': '57',
-    },
-    meta: {
-      context: null,
-      request: {
-        params: {
-          method: 'GET',
-          path: '/.fleet-artifacts/_doc/123',
-          body: undefined,
-          querystring: '',
-        },
-        options: {},
-        id: 64,
-      },
-      name: 'elasticsearch-js',
-      // We don't need a full connection object
-      // @ts-ignore
-      connection: {
-        url: new URL('http://localhost:9200/'),
-        id: 'http://localhost:9200/',
-        headers: {},
-        deadCount: 0,
-        resurrectTimeout: 0,
-        _openRequests: 2,
-        status: 'alive',
-        roles: {
-          master: true,
-          data: true,
-          ingest: true,
-          ml: false,
-        },
-      },
-      attempts: 0,
-      aborted: false,
-    },
-  };
+    {
+      statusCode,
+    }
+  );
 };
 
-export const generateArtifactEsSearchHitMock = (): ESSearchHit<ArtifactElasticsearchProperties> => {
+export const generateArtifactEsGetSingleHitMock = (): ESSearchHit<ArtifactElasticsearchProperties> => {
   const { id, ..._source } = generateArtifactMock();
 
   return {
@@ -94,16 +60,36 @@ export const generateArtifactEsSearchHitMock = (): ESSearchHit<ArtifactElasticse
   };
 };
 
-/**
- * Generate a response from the elasticsearch client for a single hit
- * @param body
- */
-export const generateESClientSearchHitResponse = (
-  body: ESSearchHit<ArtifactElasticsearchProperties>
-): RequestEvent<ESSearchHit<ArtifactElasticsearchProperties>> => {
+export const generateArtifactEsSearchResultHitsMock = (): ESSearchResponse<
+  ArtifactElasticsearchProperties,
+  {}
+> => {
   return {
+    took: 0,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      total: {
+        value: 1,
+        relation: 'eq',
+      },
+      max_score: 2,
+      hits: [generateArtifactEsGetSingleHitMock()],
+    },
+  };
+};
+
+export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
+  body: TBody,
+  otherProps: Partial<Exclude<ApiResponse, 'body'>> = {}
+): ApiResponse => {
+  return elasticsearchServiceMock.createApiResponse({
     body,
-    statusCode: 200,
     headers: {
       'content-type': 'application/json',
       'content-length': '697',
@@ -141,5 +127,6 @@ export const generateESClientSearchHitResponse = (
       attempts: 0,
       aborted: false,
     },
-  };
+    ...otherProps,
+  });
 };

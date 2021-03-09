@@ -86,7 +86,9 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
 
 export const listArtifacts = async (
   esClient: ElasticsearchClient,
-  options: Pick<ListWithKuery, 'perPage' | 'page' | 'kuery' | 'sortField' | 'sortOrder'> = {}
+  options: Pick<ListWithKuery, 'perPage' | 'page' | 'kuery' | 'sortOrder'> & {
+    sortField?: string | keyof ArtifactElasticsearchProperties;
+  } = {}
 ): Promise<ListResult<Artifact>> => {
   const { perPage = 20, page = 1, kuery = '', sortField = 'created', sortOrder = 'asc' } = options;
 
