@@ -391,35 +391,37 @@ We may need to have each worker uses a distinct data folder. Should this be cons
 
 # Drawbacks
 
-Why should we *not* do this? Please consider:
-
-- implementation cost, both in term of code size and complexity
-- the impact on teaching people Kibana development
-- integration of this feature with other existing and planned features
-- cost of migrating existing Kibana plugins (is it a breaking change?)
-
-There are tradeoffs to choosing any path. Attempt to identify them here.
+- Implementation cost is going to be significant, both in core and in plugins. Also, this will have to be a collaborative
+  effort, as we can't enable the clustered mode in production until all the identified breaking changes has been addressed.
+  
+- Even if easier to deploy, it doesn't really provide anything more than a multi-instances Kibana setup.
+  
+- This will complexify the code, especially in Core were some part of the logic will drastically change between clustered and 
+non-clustered modes (e.g the status API).
+  
+- It could introduce subtle bugs in clustered mode, as we may overlook some breaking changes, or new features may omit to
+ensure clustered mode compatibility.
+  
+- Proper testing of all the edge case is going to be tedious, if not just realistically impossible. 
 
 # Alternatives
 
-What other designs have been considered? What is the impact of not doing this?
+Regarding the whole proposal, an alternative would be to provide tooling to ease the deployment of multi-instance Kibana setups.
+
+Regarding the implementation proposal, the discussion is still ongoing.
 
 # Adoption strategy
 
-If we implement this proposal, how will existing Kibana developers adopt it? Is
-this a breaking change? Can we write a codemod? Should we coordinate with
-other projects or libraries?
+Phase 1: we perform the required changes in `Core`, and add the `clustering.enabled` configuration property for development mode only.
+That way, we allow developers to test their features against clustering mode and to adapt their code to use the new `clustering` API
+and service.
+
+Phase 2: when all the required changes have been performed, we enable the `clustering` configuration on production mode as a `beta` feature.
+We would ideally also add telemetry collection for the clustering usages (actual metrics TBD) to have a precise vision of the adoption of the feature.
 
 # How we teach this
 
-What names and terminology work best for these concepts and why? How is this
-idea best presented? As a continuation of existing Kibana patterns?
-
-Would the acceptance of this proposal mean the Kibana documentation must be
-re-organized or altered? Does it change how Kibana is taught to new developers
-at any level?
-
-How should this feature be taught to existing Kibana developers?
+During phase 1, we should create documentation on the clustering mode: best practices, how to identify code that may breaks in clustered mode, and so on.
 
 # Unresolved questions
 
