@@ -17029,7 +17029,6 @@
     "xpack.osquery.actions.failSearchDescription": "无法获取操作",
     "xpack.osquery.agents.errorSearchDescription": "搜索所有代理时发生错误",
     "xpack.osquery.agents.failSearchDescription": "无法获取代理",
-    "xpack.osquery.helloWorldText": "{name}",
     "xpack.osquery.results.errorSearchDescription": "搜索所有结果时发生错误",
     "xpack.osquery.results.failSearchDescription": "无法获取结果",
     "xpack.painlessLab.apiReferenceButtonLabel": "API 参考",
