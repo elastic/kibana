@@ -16,8 +16,8 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 14,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/public/types.ts#L14"
+        "lineNumber": 18,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/public/types.ts#L18"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -31,8 +31,8 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 16,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/public/types.ts#L16"
+        "lineNumber": 20,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/public/types.ts#L20"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -54,8 +54,8 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 15,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/server/types.ts#L15"
+        "lineNumber": 16,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/server/types.ts#L16"
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -69,8 +69,8 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 17,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/server/types.ts#L17"
+        "lineNumber": 18,
+        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/server/types.ts#L18"
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -110,7 +110,7 @@
           "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/osquery/common/index.ts#L11"
         },
         "signature": [
-          "\"osquery\""
+          "\"Osquery\""
         ],
         "initialIsOpen": false
       },

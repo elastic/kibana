@@ -1060,8 +1060,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 105,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L105"
+                  "lineNumber": 106,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L106"
                 }
               },
               {
@@ -1080,8 +1080,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 105,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L105"
+                  "lineNumber": 106,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L106"
                 }
               }
             ],
@@ -1089,8 +1089,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 105,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L105"
+              "lineNumber": 106,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/plugin.ts#L106"
             }
           }
         ],
@@ -1133,8 +1133,31 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 58,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L58"
+                  "lineNumber": 65,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L65"
+                }
+              },
+              {
+                "type": "Object",
+                "label": "context",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "ByteSizeValue",
+                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 65,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L65"
                 }
               }
             ],
@@ -1142,8 +1165,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L58"
+              "lineNumber": 65,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L65"
             }
           },
           {
@@ -1179,8 +1202,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 63,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L63"
+                  "lineNumber": 75,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L75"
                 }
               }
             ],
@@ -1188,8 +1211,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 63,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L63"
+              "lineNumber": 75,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L75"
             }
           },
           {
@@ -1205,7 +1228,7 @@
                 "section": "def-server.ReportingInternalStart",
                 "text": "ReportingInternalStart"
               },
-              ") => void"
+              ") => Promise<void>"
             ],
             "description": [],
             "children": [
@@ -1225,8 +1248,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 71,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L71"
+                  "lineNumber": 89,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L89"
                 }
               }
             ],
@@ -1234,8 +1257,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L71"
+              "lineNumber": 89,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L89"
             }
           },
           {
@@ -1251,8 +1274,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 79,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L79"
+              "lineNumber": 102,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L102"
             }
           },
           {
@@ -1268,8 +1291,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 90,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L90"
+              "lineNumber": 113,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L113"
             }
           },
           {
@@ -1285,8 +1308,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 97,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L97"
+              "lineNumber": 120,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L120"
             }
           },
           {
@@ -1322,8 +1345,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 104,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L104"
+                  "lineNumber": 127,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L127"
                 }
               }
             ],
@@ -1331,8 +1354,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 104,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L104"
+              "lineNumber": 127,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L127"
             }
           },
           {
@@ -1350,8 +1373,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 112,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L112"
+              "lineNumber": 135,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L135"
             }
           },
           {
@@ -1374,8 +1397,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 132,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L132"
+              "lineNumber": 155,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L155"
             }
           },
           {
@@ -1399,8 +1422,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 142,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L142"
+              "lineNumber": 165,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L165"
             }
           },
           {
@@ -1423,22 +1446,93 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 150,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L150"
+              "lineNumber": 173,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L173"
             }
           },
           {
-            "id": "def-server.ReportingCore.getEsqueue",
+            "id": "def-server.ReportingCore.scheduleTask",
             "type": "Function",
-            "label": "getEsqueue",
+            "label": "scheduleTask",
+            "signature": [
+              "(report: ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportTaskParams",
+                "text": "ReportTaskParams"
+              },
+              "<",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.BasePayload",
+                "text": "BasePayload"
+              },
+              ">) => Promise<",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.ConcreteTaskInstance",
+                "text": "ConcreteTaskInstance"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "report",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.ReportTaskParams",
+                    "text": "ReportTaskParams"
+                  },
+                  "<",
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.BasePayload",
+                    "text": "BasePayload"
+                  },
+                  ">"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 177,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L177"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 177,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L177"
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.getStore",
+            "type": "Function",
+            "label": "getStore",
             "signature": [
               "() => Promise<",
               {
                 "pluginId": "reporting",
                 "scope": "server",
                 "docId": "kibReportingPluginApi",
-                "section": "def-server.ESQueueInstance",
-                "text": "ESQueueInstance"
+                "section": "def-server.ReportingStore",
+                "text": "ReportingStore"
               },
               ">"
             ],
@@ -1448,8 +1542,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 154,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L154"
+              "lineNumber": 181,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L181"
             }
           },
           {
@@ -1473,8 +1567,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 158,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L158"
+              "lineNumber": 185,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L185"
             }
           },
           {
@@ -1498,8 +1592,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 168,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L168"
+              "lineNumber": 195,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L195"
             }
           },
           {
@@ -1522,8 +1616,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 177,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L177"
+              "lineNumber": 204,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L204"
             }
           },
           {
@@ -1546,8 +1640,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 184,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L184"
+              "lineNumber": 211,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L211"
             }
           },
           {
@@ -1593,8 +1687,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 193,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L193"
+                  "lineNumber": 220,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L220"
                 }
               }
             ],
@@ -1602,8 +1696,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 193,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L193"
+              "lineNumber": 220,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L220"
             }
           },
           {
@@ -1648,8 +1742,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L199"
+                  "lineNumber": 226,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L226"
                 }
               },
               {
@@ -1668,8 +1762,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 199,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L199"
+                  "lineNumber": 226,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L226"
                 }
               }
             ],
@@ -1677,8 +1771,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 199,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L199"
+              "lineNumber": 226,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L226"
             }
           },
           {
@@ -1716,8 +1810,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L213"
+                  "lineNumber": 240,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L240"
                 }
               },
               {
@@ -1730,8 +1824,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L213"
+                  "lineNumber": 240,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L240"
                 }
               },
               {
@@ -1750,8 +1844,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L213"
+                  "lineNumber": 240,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L240"
                 }
               }
             ],
@@ -1759,8 +1853,8 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 213,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L213"
+              "lineNumber": 240,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L240"
             }
           },
           {
@@ -1813,8 +1907,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 233,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L233"
+                  "lineNumber": 260,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L260"
                 }
               },
               {
@@ -1833,8 +1927,8 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 233,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L233"
+                  "lineNumber": 260,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L260"
                 }
               }
             ],
@@ -1842,15 +1936,96 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 233,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L233"
+              "lineNumber": 260,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L260"
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.trackReport",
+            "type": "Function",
+            "label": "trackReport",
+            "signature": [
+              "(reportId: string) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "reportId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 270,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L270"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 270,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L270"
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.untrackReport",
+            "type": "Function",
+            "label": "untrackReport",
+            "signature": [
+              "(reportId: string) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "reportId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 274,
+                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L274"
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 274,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L274"
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.countConcurrentReports",
+            "type": "Function",
+            "label": "countConcurrentReports",
+            "signature": [
+              "() => number"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 278,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L278"
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/core.ts",
-          "lineNumber": 50,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L50"
+          "lineNumber": 54,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/core.ts#L54"
         },
         "initialIsOpen": false
       }
@@ -1872,8 +2047,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L28"
+              "lineNumber": 29,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L29"
             },
             "signature": [
               {
@@ -1893,8 +2068,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L29"
+              "lineNumber": 30,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L30"
             },
             "signature": [
               {
@@ -1914,8 +2089,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L30"
+              "lineNumber": 31,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L31"
             },
             "signature": [
               {
@@ -1936,8 +2111,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L31"
+              "lineNumber": 32,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L32"
             },
             "signature": [
               {
@@ -1952,14 +2127,35 @@
           },
           {
             "tags": [],
+            "id": "def-server.ReportingSetupDeps.taskManager",
+            "type": "CompoundType",
+            "label": "taskManager",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 33,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L33"
+            },
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerSetupContract",
+                "text": "TaskManagerSetupContract"
+              }
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-server.ReportingSetupDeps.usageCollection",
             "type": "Object",
             "label": "usageCollection",
             "description": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L32"
+              "lineNumber": 34,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L34"
             },
             "signature": [
               "Pick<",
@@ -1976,8 +2172,8 @@
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/types.ts",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L27"
+          "lineNumber": 28,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L28"
         },
         "initialIsOpen": false
       },
@@ -1996,8 +2192,8 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/types.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L36"
+              "lineNumber": 38,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L38"
             },
             "signature": [
               {
@@ -2008,12 +2204,33 @@
                 "text": "DataPluginStart"
               }
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.ReportingStartDeps.taskManager",
+            "type": "CompoundType",
+            "label": "taskManager",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/types.ts",
+              "lineNumber": 39,
+              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L39"
+            },
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerStartContract",
+                "text": "TaskManagerStartContract"
+              }
+            ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/types.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L35"
+          "lineNumber": 37,
+          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/reporting/server/types.ts#L37"
         },
         "initialIsOpen": false
       },
