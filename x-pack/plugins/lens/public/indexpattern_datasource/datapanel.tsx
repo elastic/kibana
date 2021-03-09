@@ -70,6 +70,9 @@ const supportedFieldTypes = new Set([
   'boolean',
   'date',
   'ip',
+  'number_range',
+  'date_range',
+  'ip_range',
   'histogram',
   'document',
 ]);

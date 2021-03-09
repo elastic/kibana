@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Hidden Child Process of Launchd",
   "query": "event.category:process and event.type:(start or process_started) and process.name:.* and process.parent.executable:/sbin/launchd",
   "references": [

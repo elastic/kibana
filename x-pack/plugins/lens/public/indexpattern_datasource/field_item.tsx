@@ -136,7 +136,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   });
 
   function fetchData() {
-    if (state.isLoading || field.type === 'document') {
+    // Range types don't have any useful stats we can show
+    if (state.isLoading || field.type === 'document' || field.type.includes('range')) {
       return;
     }
 
@@ -418,6 +419,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
       <>
         <EuiLoadingSpinner />
         {runtimeFieldControls}
+      </>
+    );
+  } else if (field.type.includes('range')) {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
+            defaultMessage: `Summary information is not available for range type fields.`,
+          })}
+        </EuiText>
       </>
     );
   } else if (

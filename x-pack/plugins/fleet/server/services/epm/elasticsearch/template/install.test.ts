@@ -20,17 +20,10 @@ describe('EPM install', () => {
   });
 
   it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix not set', async () => {
-    const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient()
-      .callAsCurrentUser;
-    callCluster.mockImplementation(async (_, params) => {
-      if (
-        params &&
-        params.method === 'GET' &&
-        params.path === '/_index_template/metrics-package.dataset'
-      ) {
-        return { index_templates: [] };
-      }
-    });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.indices.getIndexTemplate.mockImplementation(() =>
+      elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] })
+    );
 
     const fields: Field[] = [];
     const dataStreamDatasetIsPrefixUnset = {
@@ -49,31 +42,28 @@ describe('EPM install', () => {
     const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
     const templatePriorityDatasetIsPrefixUnset = 200;
     await installTemplate({
-      callCluster,
+      esClient,
       fields,
       dataStream: dataStreamDatasetIsPrefixUnset,
       packageVersion: pkg.version,
       packageName: pkg.name,
     });
-    // @ts-ignore
-    const sentTemplate = callCluster.mock.calls[1][1].body;
+
+    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+      string,
+      any
+    >;
+
     expect(sentTemplate).toBeDefined();
     expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
     expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
   });
 
   it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to false', async () => {
-    const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient()
-      .callAsCurrentUser;
-    callCluster.mockImplementation(async (_, params) => {
-      if (
-        params &&
-        params.method === 'GET' &&
-        params.path === '/_index_template/metrics-package.dataset'
-      ) {
-        return { index_templates: [] };
-      }
-    });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.indices.getIndexTemplate.mockImplementation(() =>
+      elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] })
+    );
 
     const fields: Field[] = [];
     const dataStreamDatasetIsPrefixFalse = {
@@ -93,31 +83,28 @@ describe('EPM install', () => {
     const templateIndexPatternDatasetIsPrefixFalse = 'metrics-package.dataset-*';
     const templatePriorityDatasetIsPrefixFalse = 200;
     await installTemplate({
-      callCluster,
+      esClient,
       fields,
       dataStream: dataStreamDatasetIsPrefixFalse,
       packageVersion: pkg.version,
       packageName: pkg.name,
     });
-    // @ts-ignore
-    const sentTemplate = callCluster.mock.calls[1][1].body;
+
+    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+      string,
+      any
+    >;
+
     expect(sentTemplate).toBeDefined();
     expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixFalse);
     expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixFalse]);
   });
 
   it('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to true', async () => {
-    const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient()
-      .callAsCurrentUser;
-    callCluster.mockImplementation(async (_, params) => {
-      if (
-        params &&
-        params.method === 'GET' &&
-        params.path === '/_index_template/metrics-package.dataset'
-      ) {
-        return { index_templates: [] };
-      }
-    });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.indices.getIndexTemplate.mockImplementation(() =>
+      elasticsearchServiceMock.createSuccessTransportRequestPromise({ index_templates: [] })
+    );
 
     const fields: Field[] = [];
     const dataStreamDatasetIsPrefixTrue = {
@@ -137,41 +124,37 @@ describe('EPM install', () => {
     const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
     const templatePriorityDatasetIsPrefixTrue = 150;
     await installTemplate({
-      callCluster,
+      esClient,
       fields,
       dataStream: dataStreamDatasetIsPrefixTrue,
       packageVersion: pkg.version,
       packageName: pkg.name,
     });
-    // @ts-ignore
-    const sentTemplate = callCluster.mock.calls[1][1].body;
+    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+      string,
+      any
+    >;
+
     expect(sentTemplate).toBeDefined();
     expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixTrue);
     expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixTrue]);
   });
 
   it('tests installPackage remove the aliases property if the property existed', async () => {
-    const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient()
-      .callAsCurrentUser;
-    callCluster.mockImplementation(async (_, params) => {
-      if (
-        params &&
-        params.method === 'GET' &&
-        params.path === '/_index_template/metrics-package.dataset'
-      ) {
-        return {
-          index_templates: [
-            {
-              name: 'metrics-package.dataset',
-              index_template: {
-                index_patterns: ['metrics-package.dataset-*'],
-                template: { aliases: {} },
-              },
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.indices.getIndexTemplate.mockImplementation(() =>
+      elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        index_templates: [
+          {
+            name: 'metrics-package.dataset',
+            index_template: {
+              index_patterns: ['metrics-package.dataset-*'],
+              template: { aliases: {} },
             },
-          ],
-        };
-      }
-    });
+          },
+        ],
+      })
+    );
 
     const fields: Field[] = [];
     const dataStreamDatasetIsPrefixUnset = {
@@ -190,18 +173,23 @@ describe('EPM install', () => {
     const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
     const templatePriorityDatasetIsPrefixUnset = 200;
     await installTemplate({
-      callCluster,
+      esClient,
       fields,
       dataStream: dataStreamDatasetIsPrefixUnset,
       packageVersion: pkg.version,
       packageName: pkg.name,
     });
 
-    // @ts-ignore
-    const removeAliases = callCluster.mock.calls[1][1].body;
+    const removeAliases = esClient.indices.putIndexTemplate.mock.calls[0][0]!.body as Record<
+      string,
+      any
+    >;
     expect(removeAliases.template.aliases).not.toBeDefined();
-    // @ts-ignore
-    const sentTemplate = callCluster.mock.calls[2][1].body;
+
+    const sentTemplate = esClient.indices.putIndexTemplate.mock.calls[1][0]!.body as Record<
+      string,
+      any
+    >;
     expect(sentTemplate).toBeDefined();
     expect(sentTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
     expect(sentTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
