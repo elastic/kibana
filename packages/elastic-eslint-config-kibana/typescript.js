@@ -3,9 +3,12 @@
 // Some IDEs could not be running eslint with the correct extensions yet
 // as this package was moved from typescript-eslint-parser to @typescript-eslint/parser
 
+const { REPO_ROOT } = require('@kbn/utils');
+const { join } = require('path');
+const loadJsonFile = require('load-json-file');
 const semver = require('semver');
-const PKG = require('../../package.json');
 
+const PKG = loadJsonFile.sync(join(REPO_ROOT, 'package.json'));
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
 
 // The current implementation excluded all the variables matching the regexp.
