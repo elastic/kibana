@@ -12,7 +12,7 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Calendar File Modification",
   "query": "event.category:file and event.action:modification and file.path:/Users/*/Library/Calendars/*.calendar/Events/*.ics and process.executable: (* and not ( /System/Library/* or /System/Applications/Calendar.app/Contents/MacOS/* or /usr/libexec/xpcproxy or /sbin/launchd or /Applications/* ) )",
   "references": [
