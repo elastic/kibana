@@ -49,7 +49,7 @@ export interface TimingsOptions {
   /** master, 7.x, etc, automatically detected from package.json if not specified */
   upstreamBranch?: string;
   /** value of data/uuid, automatically loaded if not specified */
-  kibanaUuid?: string;
+  kibanaUuid?: string | null;
 }
 export class CiStatsReporter {
   static fromEnv(log: ToolingLog) {
@@ -79,7 +79,7 @@ export class CiStatsReporter {
     const buildId = this.config?.buildId;
     const timings = options.timings;
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
-    const kibanaUuid = options.kibanaUuid !== undefined ? this.getKibanaUuid() : options.kibanaUuid;
+    const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     const defaultMetadata = {
       osPlatform: Os.platform(),
       osRelease: Os.release(),

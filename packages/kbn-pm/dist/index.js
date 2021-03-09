@@ -59549,7 +59549,8 @@ async function runCommand(command, config) {
       const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"]);
       await reporter.timings({
         upstreamBranch: kbn.kibanaProject.json.branch,
-        kibanaUuid: kbn.getUuid(),
+        // prevent loading @kbn/utils by passing null
+        kibanaUuid: kbn.getUuid() || null,
         timings: [{
           group: command.reportTiming.group,
           id: command.reportTiming.id,
@@ -59658,7 +59659,7 @@ class CiStatsReporter {
         const buildId = (_a = this.config) === null || _a === void 0 ? void 0 : _a.buildId;
         const timings = options.timings;
         const upstreamBranch = (_b = options.upstreamBranch) !== null && _b !== void 0 ? _b : this.getUpstreamBranch();
-        const kibanaUuid = options.kibanaUuid !== undefined ? this.getKibanaUuid() : options.kibanaUuid;
+        const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
         const defaultMetadata = {
             osPlatform: os_1.default.platform(),
             osRelease: os_1.default.release(),

@@ -51,7 +51,8 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
       const reporter = CiStatsReporter.fromEnv(log);
       await reporter.timings({
         upstreamBranch: kbn.kibanaProject.json.branch,
-        kibanaUuid: kbn.getUuid(),
+        // prevent loading @kbn/utils by passing null
+        kibanaUuid: kbn.getUuid() || null,
         timings: [
           {
             group: command.reportTiming.group,
