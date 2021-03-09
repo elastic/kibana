@@ -91,7 +91,7 @@ export interface Props {
   /**
    * The rollup action to configure, otherwise default to empty rollup action.
    */
-  value?: RollupAction;
+  value?: RollupAction['config'];
   phase: 'hot' | 'cold';
   onCancel: () => void;
   onDone: (value: RollupAction['config']) => void;
@@ -125,7 +125,7 @@ interface State {
   stepsFields: StepFields;
 }
 
-const deriveStepFields = (value: RollupAction | undefined): StepFields => {
+const deriveStepFields = (value: RollupAction['config'] | undefined): StepFields => {
   const deserializedRollup = value ? deserializeRollup(value) : {};
 
   return mapValues(stepIdToStepConfigMap, (step) =>

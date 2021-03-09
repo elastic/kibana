@@ -77,22 +77,20 @@ export function serializeRollup(rollupConfig: InternalRollup): RollupAction['con
   return serializedRollup;
 }
 
-export function deserializeRollup(rollupAction: RollupAction): InternalRollup {
+export function deserializeRollup(rollupAction: RollupAction['config']): InternalRollup {
   const {
-    config: {
-      metrics,
-      groups: {
-        date_histogram: {
-          interval,
-          fixed_interval: fixedInterval,
-          calendar_interval: calendarInterval,
-          delay: rollupDelay,
-          time_zone: dateHistogramTimeZone,
-          field: dateHistogramField,
-        },
-        terms,
-        histogram,
+    metrics,
+    groups: {
+      date_histogram: {
+        interval,
+        fixed_interval: fixedInterval,
+        calendar_interval: calendarInterval,
+        delay: rollupDelay,
+        time_zone: dateHistogramTimeZone,
+        field: dateHistogramField,
       },
+      terms,
+      histogram,
     },
   } = rollupAction;
 
