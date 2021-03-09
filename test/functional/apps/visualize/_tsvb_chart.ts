@@ -106,52 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch index patterns', () => {
-      beforeEach(async () => {
-        await esArchiver.loadIfNeeded('logstash_functional');
-        await esArchiver.loadIfNeeded('index_pattern_without_timefield');
-
-        await PageObjects.visualBuilder.resetPage();
-        await PageObjects.visualBuilder.clickMetric();
-        await PageObjects.visualBuilder.checkMetricTabIsPresent();
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Sep 22, 2019 @ 00:00:00.000',
-          'Sep 23, 2019 @ 00:00:00.000'
-        );
-      });
-
-      after(async () => {
-        await security.testUser.restoreDefaults();
-        await esArchiver.unload('logstash_functional');
-        await esArchiver.unload('index_pattern_without_timefield');
-      });
-
-      const switchIndexTest = async (useKibanaIndicies: boolean) => {
-        await PageObjects.visualBuilder.clickPanelOptions('metric');
-        await PageObjects.visualBuilder.setIndexPatternValue('', false);
-
-        const value = await PageObjects.visualBuilder.getMetricValue();
-        expect(value).to.eql('0');
-
-        // Sometimes popovers take some time to appear in Firefox (#71979)
-        await retry.tryForTime(20000, async () => {
-          await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndicies);
-          await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
-          await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
-        });
-        const newValue = await PageObjects.visualBuilder.getMetricValue();
-        expect(newValue).to.eql('1');
-      };
-
-      it('should be able to switch using text mode selection', async () => {
-        await switchIndexTest(false);
-      });
-
-      it('should be able to switch combo box mode selection', async () => {
-        await switchIndexTest(true);
-      });
-    });
-
     describe('browser history changes', () => {
       it('should activate previous/next chart tab and panel config', async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -225,6 +179,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const legendItems3 = await PageObjects.visualBuilder.getLegendItemsContent();
         expect(legendItems3).to.eql(finalLegendItems);
+      });
+    });
+
+    describe('switch index patterns', () => {
+      beforeEach(async () => {
+        await esArchiver.loadIfNeeded('logstash_functional');
+        await esArchiver.loadIfNeeded('index_pattern_without_timefield');
+
+        await PageObjects.visualBuilder.resetPage();
+        await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 22, 2019 @ 00:00:00.000',
+          'Sep 23, 2019 @ 00:00:00.000'
+        );
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+        await esArchiver.unload('logstash_functional');
+        await esArchiver.unload('index_pattern_without_timefield');
+      });
+
+      const switchIndexTest = async (useKibanaIndicies: boolean) => {
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        await PageObjects.visualBuilder.setIndexPatternValue('', false);
+
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        expect(value).to.eql('0');
+
+        // Sometimes popovers take some time to appear in Firefox (#71979)
+        await retry.tryForTime(20000, async () => {
+          await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndicies);
+          await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
+          await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        });
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        expect(newValue).to.eql('1');
+      };
+
+      it('should be able to switch using text mode selection', async () => {
+        await switchIndexTest(false);
+      });
+
+      it('should be able to switch combo box mode selection', async () => {
+        await switchIndexTest(true);
       });
     });
   });
