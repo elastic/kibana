@@ -109,9 +109,9 @@ export function useExplorerInputResolver(
             // couldn't load the list of jobs
             return of(undefined);
           }
-          const { viewBy, maxSeriesToPlot, timeRange: timeRangeInput, filters, query } = input;
+          const { maxSeriesToPlot, timeRange: timeRangeInput, filters, query } = input;
 
-          const viewBySwimlaneFieldName = viewBy;
+          const viewBySwimlaneFieldName = OVERALL_LABEL;
 
           anomalyTimelineService.setTimeRange(timeRangeInput);
 

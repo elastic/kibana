@@ -15,60 +15,32 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelect,
   EuiFieldNumber,
   EuiFieldText,
   EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { AnomalyExplorerEmbeddableInput } from '..';
 
 const MAX_SERIES_ALLOWED = 48;
 export interface AnomalyExplorerInitializerProps {
   defaultTitle: string;
-  influencers: string[];
-  initialInput?: Partial<
-    Pick<AnomalyExplorerEmbeddableInput, 'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage'>
-  >;
-  onCreate: (swimlaneProps: {
-    panelTitle: string;
-    swimlaneType: SwimlaneType;
-    viewBy?: string;
-    maxSeriesToPlot?: number;
-  }) => void;
+  initialInput?: Partial<Pick<AnomalyExplorerEmbeddableInput, 'jobIds' | 'maxSeriesToPlot'>>;
+  onCreate: (swimlaneProps: { panelTitle: string; maxSeriesToPlot?: number }) => void;
   onCancel: () => void;
 }
 
 export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = ({
   defaultTitle,
-  influencers,
   onCreate,
   onCancel,
-  initialInput,
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
-  const [swimlaneType] = useState(initialInput?.swimlaneType ?? SWIMLANE_TYPE.VIEW_BY);
-  const [viewByExplorerFieldName, setViewByExplorerFieldName] = useState(
-    initialInput?.viewBy ?? 'Overall'
-  );
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(6);
-
-  const viewByExplorerOptions = ['Overall', ...influencers].map((influencer) => {
-    return {
-      value: influencer,
-      text: influencer,
-    };
-  });
 
   const isPanelTitleValid = panelTitle.length > 0;
 
-  const isFormValid =
-    isPanelTitleValid &&
-    (swimlaneType === SWIMLANE_TYPE.OVERALL ||
-      (swimlaneType === SWIMLANE_TYPE.VIEW_BY && viewByExplorerFieldName === 'Overall') ||
-      (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewByExplorerFieldName));
-
+  const isFormValid = isPanelTitleValid && maxSeriesToPlot > 0;
   return (
     <EuiModal initialFocus="[name=panelTitle]" onClose={onCancel}>
       <EuiModalHeader>
@@ -97,23 +69,6 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
               value={panelTitle}
               onChange={(e) => setPanelTitle(e.target.value)}
               isInvalid={!isPanelTitleValid}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.explorer.influencerLabel"
-                defaultMessage="Influencer"
-              />
-            }
-          >
-            <EuiSelect
-              id="selectViewBy"
-              name="selectViewBy"
-              options={viewByExplorerOptions}
-              value={viewByExplorerFieldName}
-              onChange={(e) => setViewByExplorerFieldName(e.target.value)}
             />
           </EuiFormRow>
 
@@ -149,8 +104,6 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           isDisabled={!isFormValid}
           onClick={onCreate.bind(null, {
             panelTitle,
-            swimlaneType,
-            viewBy: viewByExplorerFieldName,
             maxSeriesToPlot,
           })}
           fill

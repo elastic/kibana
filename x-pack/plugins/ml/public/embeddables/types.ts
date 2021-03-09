@@ -76,9 +76,6 @@ export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
  */
 export interface AnomalyExplorerEmbeddableCustomInput {
   jobIds: JobId[];
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-  perPage?: number;
   maxSeriesToPlot: number;
 
   // Embeddable inputs which are not included in the default interface

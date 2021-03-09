@@ -10,7 +10,7 @@ import { CoreStart } from 'kibana/public';
 import moment from 'moment';
 import { takeUntil } from 'rxjs/operators';
 import { from } from 'rxjs';
-import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
+import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import {
   KibanaContextProvider,
   toMountPoint,
@@ -76,16 +76,13 @@ export async function resolveAnomalyExplorerUserInput(
                 toMountPoint(
                   <AnomalyExplorerInitializer
                     defaultTitle={title}
-                    influencers={influencers}
                     initialInput={input}
-                    onCreate={({ panelTitle, viewBy, swimlaneType, maxSeriesToPlot }) => {
+                    onCreate={({ panelTitle, maxSeriesToPlot }) => {
                       modalSession.close();
 
                       resolve({
                         jobIds,
                         title: panelTitle,
-                        swimlaneType: viewBy === 'Overall' ? SWIMLANE_TYPE.OVERALL : swimlaneType,
-                        viewBy,
                         maxSeriesToPlot,
                       });
                     }}
