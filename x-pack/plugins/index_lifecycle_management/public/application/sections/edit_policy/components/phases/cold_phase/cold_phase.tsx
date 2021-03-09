@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiTextColor } from '@elastic/eui';
 
-import { useConfigurationIssues } from '../../../form';
+import { useConfiguration } from '../../../form';
 
 import { LearnMoreLink, ToggleFieldWithDescribedFormRow } from '../../';
 
@@ -34,7 +34,7 @@ const i18nTexts = {
 };
 
 export const ColdPhase: FunctionComponent = () => {
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   return (
     <Phase phase="cold" topLevelSettings={<SearchableSnapshotField phase="cold" />}>

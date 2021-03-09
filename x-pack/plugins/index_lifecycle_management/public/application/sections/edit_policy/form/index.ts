@@ -15,10 +15,7 @@ export * from './validations';
 
 export { Form, EnhancedUseField as UseField } from './components';
 
-export {
-  ConfigurationIssuesProvider,
-  useConfigurationIssues,
-} from './configuration_issues_context';
+export { ConfigurationProvider, useConfiguration } from './configuration_context';
 
 export { FormErrorsProvider, useFormErrorsContext } from './form_errors_context';
 

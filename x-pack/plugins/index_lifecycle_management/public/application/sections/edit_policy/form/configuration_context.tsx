@@ -12,7 +12,7 @@ import { useFormData } from '../../../../shared_imports';
 
 import { isUsingDefaultRolloverPath, isUsingCustomRolloverPath } from '../constants';
 
-export interface ConfigurationIssues {
+export interface Configuration {
   /**
    * Whether the serialized policy will use rollover. This blocks certain actions in
    * the form such as hot phase (forcemerge, shrink) and cold phase (searchable snapshot).
@@ -27,12 +27,12 @@ export interface ConfigurationIssues {
   isUsingSearchableSnapshotInHotPhase: boolean;
 }
 
-const ConfigurationIssuesContext = createContext<ConfigurationIssues>(null as any);
+const ConfigurationContext = createContext<Configuration>(null as any);
 
 const pathToHotPhaseSearchableSnapshot =
   'phases.hot.actions.searchable_snapshot.snapshot_repository';
 
-export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
+export const ConfigurationProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData({
     watch: [
       pathToHotPhaseSearchableSnapshot,
@@ -44,23 +44,17 @@ export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => 
   // Provide default value, as path may become undefined if removed from the DOM
   const isUsingCustomRollover = get(formData, isUsingCustomRolloverPath, true);
 
-  return (
-    <ConfigurationIssuesContext.Provider
-      value={{
-        isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
-        isUsingSearchableSnapshotInHotPhase:
-          get(formData, pathToHotPhaseSearchableSnapshot) != null,
-      }}
-    >
-      {children}
-    </ConfigurationIssuesContext.Provider>
-  );
+  const context: Configuration = {
+    isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
+    isUsingSearchableSnapshotInHotPhase: get(formData, pathToHotPhaseSearchableSnapshot) != null,
+  };
+
+  return <ConfigurationContext.Provider value={context}>{children}</ConfigurationContext.Provider>;
 };
 
-export const useConfigurationIssues = () => {
-  const ctx = useContext(ConfigurationIssuesContext);
-  if (!ctx)
-    throw new Error('Cannot use configuration issues outside of configuration issues context');
+export const useConfiguration = () => {
+  const ctx = useContext(ConfigurationContext);
+  if (!ctx) throw new Error('Cannot use configuration outside of configuration context');
 
   return ctx;
 };

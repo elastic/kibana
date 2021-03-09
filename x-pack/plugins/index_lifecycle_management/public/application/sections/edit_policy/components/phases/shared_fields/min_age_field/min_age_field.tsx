@@ -22,7 +22,7 @@ import {
 
 import { getFieldValidityAndErrorMessage } from '../../../../../../../shared_imports';
 
-import { UseField, useConfigurationIssues } from '../../../../form';
+import { UseField, useConfiguration } from '../../../../form';
 
 import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
 
@@ -81,7 +81,7 @@ interface Props {
 }
 
 export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
-  const { isUsingRollover } = useConfigurationIssues();
+  const { isUsingRollover } = useConfiguration();
   return (
     <UseField path={`phases.${phase}.min_age`}>
       {(field) => {
