@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import { CallESAsCurrentUser } from '../../../types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import * as Registry from '../registry';
+
 import { getInstallationObject } from './index';
-import { BulkInstallResponse, IBulkInstallPackageError, upgradePackage } from './install';
+import { upgradePackage } from './install';
+import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
   packagesToUpgrade: string[];
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
 }
 
 export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToUpgrade,
-  callCluster,
+  esClient,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const installedAndLatestPromises = packagesToUpgrade.map((pkgToUpgrade) =>
     Promise.all([
@@ -35,7 +37,7 @@ export async function bulkInstallPackages({
       const [installedPkg, latestPkg] = result.value;
       return upgradePackage({
         savedObjectsClient,
-        callCluster,
+        esClient,
         installedPkg,
         latestPkg,
         pkgToUpgrade,

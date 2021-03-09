@@ -58,6 +58,7 @@ describe('Doc Table', () => {
     setServices({
       uiSettings: core.uiSettings,
       filterManager: dataMock.query.filterManager,
+      addBasePath: (path) => path,
     });
 
     setDocViewsRegistry({

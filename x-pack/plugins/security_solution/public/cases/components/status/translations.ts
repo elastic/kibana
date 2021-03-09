@@ -8,6 +8,10 @@
 import { i18n } from '@kbn/i18n';
 export * from '../../translations';
 
+export const ALL = i18n.translate('xpack.securitySolution.case.status.all', {
+  defaultMessage: 'All',
+});
+
 export const OPEN = i18n.translate('xpack.securitySolution.case.status.open', {
   defaultMessage: 'Open',
 });

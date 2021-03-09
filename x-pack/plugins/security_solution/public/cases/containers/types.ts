@@ -17,10 +17,9 @@ import {
   CaseType,
   AssociationType,
 } from '../../../../case/common/api';
+import { CaseStatusWithAllStatus } from '../components/status';
 
 export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';
-
-export type AllCaseType = AssociationType & CaseType;
 
 export type Comment = CommentRequest & {
   associationType: AssociationType;
@@ -96,7 +95,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  status: CaseStatuses;
+  status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
   onlyCollectionType?: boolean;
@@ -151,8 +150,8 @@ export interface ActionLicense {
 
 export interface DeleteCase {
   id: string;
+  type: CaseType | null;
   title?: string;
-  type?: CaseType;
 }
 
 export interface FieldMappings {
@@ -168,7 +167,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, subCaseId?: string) => void;
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;

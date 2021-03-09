@@ -14,6 +14,7 @@ import {
   createCollectorFetchContextMock,
 } from '../../../usage_collection/server/mocks';
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { StatsCollectionConfig } from '../../../telemetry_collection_manager/server';
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -24,19 +25,17 @@ function mockUsageCollection(kibanaUsage = {}) {
 // set up successful call mocks for info, cluster stats, nodes usage and data telemetry
 function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info
-    // @ts-ignore we only care about the response body
-    .mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: { ...clusterInfo },
-      }
-    );
+  esClient.info.mockResolvedValue(
+    // @ts-expect-error we only care about the response body
+    {
+      body: { ...clusterInfo },
+    }
+  );
   esClient.cluster.stats
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
   esClient.nodes.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     {
       body: {
         cluster_name: 'testCluster',
@@ -64,20 +63,23 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
       },
     }
   );
-  // @ts-ignore we only care about the response body
+  // @ts-expect-error we only care about the response body
   esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
-  // @ts-ignore we only care about the response body
+  // @ts-expect-error we only care about the response body
   esClient.indices.stats.mockResolvedValue({ body: { indices: {} } });
   return esClient;
 }
 
-function mockStatsCollectionConfig(clusterInfo: any, clusterStats: any, kibana: {}) {
+function mockStatsCollectionConfig(
+  clusterInfo: any,
+  clusterStats: any,
+  kibana: {}
+): StatsCollectionConfig {
   return {
     ...createCollectorFetchContextMock(),
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
     kibanaRequest: httpServerMock.createKibanaRequest(),
-    timestamp: Date.now(),
   };
 }
 
@@ -229,7 +231,7 @@ describe('get_local_stats', () => {
       const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
       const response = await getLocalStats(
         [{ clusterUuid: 'abc123' }],
-        { ...statsCollectionConfig },
+        statsCollectionConfig,
         context
       );
       const result = response[0];
@@ -245,7 +247,7 @@ describe('get_local_stats', () => {
 
     it('returns an empty array when no cluster uuid is provided', async () => {
       const statsCollectionConfig = mockStatsCollectionConfig(clusterInfo, clusterStats, kibana);
-      const response = await getLocalStats([], { ...statsCollectionConfig }, context);
+      const response = await getLocalStats([], statsCollectionConfig, context);
       expect(response).toBeDefined();
       expect(response.length).toEqual(0);
     });
