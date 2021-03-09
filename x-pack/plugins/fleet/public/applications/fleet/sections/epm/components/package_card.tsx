@@ -8,9 +8,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
+
 import { PackageInfo, PackageListItem } from '../../../types';
 import { useLink } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
+
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
 
 type PackageCardProps = PackageListItem | PackageInfo;

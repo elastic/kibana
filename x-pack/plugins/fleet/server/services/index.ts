@@ -7,7 +7,9 @@
 
 import { KibanaRequest } from 'kibana/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+
 import type { AgentStatus, Agent, EsAssetReference } from '../types';
+
 import { getAgent, listAgents } from './agents';
 import { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
@@ -49,18 +51,13 @@ export interface AgentService {
    * Authenticate an agent with access toekn
    */
   authenticateAgentWithAccessToken(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     request: KibanaRequest
   ): Promise<Agent>;
   /**
    * Return the status by the Agent's id
    */
-  getAgentStatusById(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentId: string
-  ): Promise<AgentStatus>;
+  getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
   /**
    * List agents
    */
