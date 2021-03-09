@@ -35,7 +35,7 @@ We recommend granting the `read` and `view_index_metadata` privileges to each in
 Refer to {ref}/security-privileges.html#privileges-list-indices[index privileges] for a complete description of available options.
 
 Document-level and field-level security affords you even more granularity when it comes to granting access to your data.
-With document-level security ("DLS"), you can write an {es} query to describe which documents this role should grant access to.
+With document-level security ("DLS"), you can write an {es} query to describe which documents your users can access.
 With field-level security ("FLS"), you can instruct {es} to grant or deny access to specific fields within each document.
 
 [[index_privilege_example_1]]
@@ -53,7 +53,7 @@ image::user/security/images/create-role-index-example.png[Create role with index
 . Enter `filebeat-*` in the **Indices** field under the **Index Privileges** section.
 . Enter `read` and `view_index_metadata` in the **Privileges** field under the **Index Privileges** section.
 . Select the **Grant read privileges to selected documents** option.
-. Enter an {es} query describing the documents you wish to grant access to. In this example, we are writing a query which allows access to documents that have a `category` field equal to `click`:
+. Enter an {es} query describing the documents for which you want to grant access. In this example, we are writing a query which allows access to documents that have a `category` field equal to `click`:
 +
 [source,sh]
 --------------------------------------------------
