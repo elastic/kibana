@@ -442,6 +442,18 @@ module.exports = {
       },
     },
 
+    {
+      files: ['x-pack/plugins/**/*.ts', 'src/plugins/**/*.(ts|tsx)'],
+      rules: {
+        '@kbn/eslint/require-import-paths': [
+          'error',
+          {
+            paths: ['src/plugins/*', 'x-pack/plugins/*'],
+          },
+        ],
+      },
+    },
+
     /**
      * Allow default exports
      */

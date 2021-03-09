@@ -587,6 +587,7 @@
     "babel-loader": "^8.2.2",
     "babel-plugin-add-module-exports": "^1.0.4",
     "babel-plugin-istanbul": "^6.0.0",
+    "babel-plugin-module-resolver": "^4.1.0",
     "babel-plugin-require-context-hook": "^1.0.0",
     "babel-plugin-styled-components": "^1.10.7",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",

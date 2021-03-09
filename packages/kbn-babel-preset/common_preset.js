@@ -32,6 +32,18 @@ const plugins = [
   // Proposal is on stage 4, and included in ECMA-262 (https://github.com/tc39/proposal-export-ns-from)
   // Need this since we are using TypeScript 3.9+
   require.resolve('@babel/plugin-proposal-private-methods'),
+
+  [
+    require.resolve('babel-plugin-module-resolver'),
+    {
+      root: ['.'],
+      alias: {
+        'src/core': './src/core',
+        'src/plugins': './src/plugins',
+        'x-pack/plugins': './x-pack/plugins',
+      },
+    },
+  ],
 ];
 
 module.exports = {

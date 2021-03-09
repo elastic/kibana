@@ -49,10 +49,6 @@ module.exports = {
           disallowedMessage: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`
         },
         {
-          from: 'x-pack',
-          toRelative: 'x-pack',
-        },
-        {
           from: 'react-router',
           to: 'react-router-dom',
         },
