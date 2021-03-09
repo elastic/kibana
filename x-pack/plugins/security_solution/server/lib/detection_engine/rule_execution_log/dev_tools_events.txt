@@ -1,0 +1,344 @@
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 10,
+    "kind": "metric",
+    "type": [
+      "info"
+    ],
+    "action": "metric-execution-gap",
+    "duration": 600000000000,
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 0
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "info"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ]
+  }
+}
+
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 10,
+    "kind": "metric",
+    "type": [
+      "info"
+    ],
+    "action": "metric-search-duration-min",
+    "duration": 1250000,
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 1
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "info"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ]
+  }
+}
+
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 10,
+    "kind": "metric",
+    "type": [
+      "info"
+    ],
+    "action": "metric-search-duration-max",
+    "duration": 3140000,
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 2
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "info"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ]
+  }
+}
+
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 10,
+    "kind": "metric",
+    "type": [
+      "info"
+    ],
+    "action": "metric-search-duration-sum",
+    "duration": 4390000,
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 3
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "info"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ]
+  }
+}
+
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 10,
+    "kind": "metric",
+    "type": [
+      "info"
+    ],
+    "action": "metric-indexing-duration-min",
+    "duration": 5450000,
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 4
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "info"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ]
+  }
+}
+
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 10,
+    "kind": "metric",
+    "type": [
+      "info"
+    ],
+    "action": "metric-indexing-duration-max",
+    "duration": 7620000,
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 5
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "info"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ]
+  }
+}
+
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 10,
+    "kind": "metric",
+    "type": [
+      "info"
+    ],
+    "action": "metric-indexing-duration-sum",
+    "duration": 13070000,
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 6
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "info"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ]
+  }
+}
+
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 10,
+    "kind": "metric",
+    "type": [
+      "info"
+    ],
+    "action": "metric-indexing-lookback",
+    "end": "2021-03-09T10:55:54.567Z",
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 7
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "info"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ]
+  }
+}
+
+POST /try-ecs-event-log/_doc
+{
+  "ecs": {
+    "version": "1.9.0"
+  },
+  "event": {
+    "provider": "detection-engine",
+    "dataset": "detection-engine.rule-execution-log",
+    "severity": 20,
+    "kind": "event",
+    "type": [
+      "change"
+    ],
+    "action": "status-changed",
+    "created": "2021-03-09T10:55:54.568Z",
+    "sequence": 8
+  },
+  "log": {
+    "logger": "detection-engine.rule-execution-log",
+    "level": "warning"
+  },
+  "@timestamp": "2021-03-09T10:55:54.567Z",
+  "message": "Missing read privileges on indices [your-index-1, your-index-2]",
+  "rule": {
+    "id": "1234-56789-dfgdfhgfgh-122346567"
+  },
+  "kibana": {
+    "saved_objects": [
+      {
+        "type": "alert",
+        "id": "1234-56789-dfgdfhgfgh-122346567",
+        "namespace": "some-space"
+      }
+    ],
+    "detection_engine": {
+      "rule_status": "warning",
+      "rule_status_severity": 20
+    }
+  }
+}

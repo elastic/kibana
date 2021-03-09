@@ -160,6 +160,9 @@ export const signalRulesAlertType = ({
         alertId,
         ruleStatusClient,
       });
+
+      await ruleStatusService.goingToRun();
+
       const savedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
         'alert',
         alertId
@@ -187,7 +190,6 @@ export const signalRulesAlertType = ({
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
       let wroteWarningStatus = false;
-      await ruleStatusService.goingToRun();
 
       // check if rule has permissions to access given index pattern
       // move this collection of lines into a function in utils
@@ -255,6 +257,7 @@ export const signalRulesAlertType = ({
         hasError = true;
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
+
       try {
         const { listClient, exceptionsClient } = getListsClient({
           services,
@@ -300,6 +303,8 @@ export const signalRulesAlertType = ({
             logger.warn(errorMessage);
             hasError = true;
             await ruleStatusService.error(errorMessage);
+
+            // TODO: return?
           }
 
           const anomalyResults = await findMlSignals({
@@ -687,6 +692,9 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
+
+          // NOTE: (hasError || wroteWarningStatus) means the status has already been written.
+          // BUT! We will not store bulkCreateTimeDurations, searchAfterTimeDurations, lastLookBackDate.
           if (!hasError && !wroteWarningStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
