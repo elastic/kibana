@@ -35,30 +35,28 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
   esClient.cluster.stats
     // @ts-expect-error we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
-  esClient.nodes.usage.mockResolvedValue(
-    // @ts-expect-error we only care about the response body
-    {
-      body: {
-        cluster_name: 'testCluster',
-        nodes: {
-          some_node_id: {
-            timestamp: 1588617023177,
-            since: 1588616945163,
-            rest_actions: {
-              nodes_usage_action: 1,
-              create_index_action: 1,
-              document_get_action: 1,
-              search_action: 19,
-              nodes_info_action: 36,
-            },
-            scripted_metric: {
-              other: 7,
-            },
+  esClient.nodes.usage.mockResolvedValue({
+    body: {
+      cluster_name: 'testCluster',
+      nodes: {
+        some_node_id: {
+          timestamp: '1588617023177',
+          since: '1588616945163',
+          rest_actions: {
+            nodes_usage_action: 1,
+            create_index_action: 1,
+            document_get_action: 1,
+            search_action: 19,
+            nodes_info_action: 36,
+          },
+          // @ts-expect-error`NodeUsageInformation` doesn't contain `scripted_metric`
+          scripted_metric: {
+            other: 7,
           },
         },
       },
-    }
-  );
+    },
+  });
   // @ts-expect-error we only care about the response body
   esClient.indices.getMapping.mockResolvedValue({ body: { mappings: {} } });
   // @ts-expect-error we only care about the response body
