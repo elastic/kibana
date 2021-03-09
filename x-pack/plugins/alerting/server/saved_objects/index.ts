@@ -43,6 +43,12 @@ export function setupSavedObjects(
     namespaceType: 'single',
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert,
+    management: {
+      importableAndExportable: true,
+      getTitle(obj) {
+        return `Rule: [${obj.attributes.name}]`;
+      },
+    },
   });
 
   savedObjects.registerType({

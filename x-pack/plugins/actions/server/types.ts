@@ -68,6 +68,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
   id: string;
+  enabled: boolean;
   actionTypeId: string;
   name: string;
   config?: Config;
@@ -121,6 +122,7 @@ export interface ActionType<
 export interface RawAction extends SavedObjectAttributes {
   actionTypeId: string;
   name: string;
+  enabled: boolean;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }

@@ -229,6 +229,7 @@ export class AlertsClient {
     data,
     options,
   }: CreateOptions<Params>): Promise<Alert<Params>> {
+    console.log(JSON.stringify(data));
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
@@ -288,6 +289,8 @@ export class AlertsClient {
         error: null,
       },
     };
+
+    console.log(JSON.stringify(rawAlert));
 
     this.auditLogger?.log(
       alertAuditEvent({

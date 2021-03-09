@@ -12,6 +12,9 @@
       "actionTypeId": {
         "type": "keyword"
       },
+      "enabled": {
+        "type": "boolean"
+      },
       "config": {
         "enabled": false,
         "type": "object"

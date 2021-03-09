@@ -138,6 +138,7 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const enabled = true;
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
@@ -153,6 +154,7 @@ export class ActionsClient {
       'action',
       {
         actionTypeId,
+        enabled,
         name,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
@@ -162,6 +164,7 @@ export class ActionsClient {
 
     return {
       id: result.id,
+      enabled: result.attributes.enabled,
       actionTypeId: result.attributes.actionTypeId,
       name: result.attributes.name,
       config: result.attributes.config,
@@ -210,6 +213,7 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const enabled = true;
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
@@ -227,6 +231,7 @@ export class ActionsClient {
         ...attributes,
         actionTypeId,
         name,
+        enabled,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -245,6 +250,7 @@ export class ActionsClient {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
       name: result.attributes.name as string,
+      enabled: result.attributes.enabled as boolean,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
     };
@@ -280,6 +286,7 @@ export class ActionsClient {
 
       return {
         id,
+        enabled: preconfiguredActionsList.enabled,
         actionTypeId: preconfiguredActionsList.actionTypeId,
         name: preconfiguredActionsList.name,
         isPreconfigured: true,
@@ -297,6 +304,7 @@ export class ActionsClient {
 
     return {
       id,
+      enabled: result.attributes.enabled as boolean,
       actionTypeId: result.attributes.actionTypeId,
       name: result.attributes.name,
       config: result.attributes.config,
@@ -340,6 +348,7 @@ export class ActionsClient {
       ...savedObjectsActions,
       ...this.preconfiguredActions.map((preconfiguredAction) => ({
         id: preconfiguredAction.id,
+        enabled: preconfiguredAction.enabled,
         actionTypeId: preconfiguredAction.actionTypeId,
         name: preconfiguredAction.name,
         isPreconfigured: true,
