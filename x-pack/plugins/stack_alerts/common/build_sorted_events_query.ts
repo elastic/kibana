@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { estypes } from '@elastic/elasticsearch';
-import { ESSearchRequest } from '../../../typings/elasticsearch';
-import { SortOrder } from '../../../typings/elasticsearch/aggregations';
+import type { ESSearchRequest } from '../../../typings/elasticsearch';
 
 interface BuildSortedEventsQueryOpts {
   aggs?: Record<string, estypes.AggregationContainer>;
@@ -19,7 +18,7 @@ export interface BuildSortedEventsQuery extends BuildSortedEventsQueryOpts {
   filter: unknown;
   from: string;
   to: string;
-  sortOrder?: SortOrder | undefined;
+  sortOrder?: 'asc' | 'desc';
   searchAfterSortId: string | number | undefined;
   timeField: string;
 }

@@ -834,7 +834,6 @@ export class SavedObjectsRepository {
       },
     };
 
-    // @ts-expect-error Core type seems to be wrong for search_after
     const { body, statusCode } = await this.client.search<SavedObjectsRawDocSource>(esOptions, {
       ignore: [404],
     });
@@ -858,6 +857,7 @@ export class SavedObjectsRepository {
           // @ts-expect-error @elastic/elasticsearch decalred Id as string | number
           ...this._rawToSavedObject(hit),
           score: hit._score!,
+          // @ts-expect-error @elastic/elasticsearch decalred sort as string | number
           sort: hit.sort,
         })
       ),
@@ -952,6 +952,7 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
+        // @ts-expect-error MultiGetHit._source is optional
         return this.getSavedObjectFromSource(type, id, doc);
       })
     }
