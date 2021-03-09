@@ -449,10 +449,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       if (useKibanaIndices === false) {
         const el = await testSubjects.find(metricsIndexPatternInput);
         await el.clearValue();
-        await el.type(value, { charByChar: true });
+        if (value) {
+          await el.type(value, { charByChar: true });
+        }
       } else {
         await comboBox.clearInputField(metricsIndexPatternInput);
-        await comboBox.setCustom(metricsIndexPatternInput, value);
+        if (value) {
+          await comboBox.setCustom(metricsIndexPatternInput, value);
+        }
       }
 
       await PageObjects.header.waitUntilLoadingHasFinished();

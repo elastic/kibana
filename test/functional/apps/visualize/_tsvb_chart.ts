@@ -108,32 +108,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('switch index patterns', () => {
       beforeEach(async () => {
-        log.debug('Load kibana_sample_data_flights data');
-        await esArchiver.loadIfNeeded('kibana_sample_data_flights');
+        await esArchiver.loadIfNeeded('logstash_functional');
+        await esArchiver.loadIfNeeded('index_pattern_without_timefield');
+
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
-      });
-      after(async () => {
-        await security.testUser.restoreDefaults();
-        await esArchiver.unload('kibana_sample_data_flights');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 22, 2019 @ 00:00:00.000',
+          'Sep 23, 2019 @ 00:00:00.000'
+        );
       });
 
-      it('should be able to switch between index patterns', async () => {
-        const value = await PageObjects.visualBuilder.getMetricValue();
-        expect(value).to.eql('156');
+      after(async () => {
+        await security.testUser.restoreDefaults();
+        await esArchiver.unload('logstash_functional');
+        await esArchiver.unload('index_pattern_without_timefield');
+      });
+
+      const switchIndexTest = async (useKibanaIndicies: boolean) => {
         await PageObjects.visualBuilder.clickPanelOptions('metric');
-        const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
-        const toTime = 'Oct 28, 2018 @ 23:59:59.999';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualBuilder.setIndexPatternValue('', false);
+
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        expect(value).to.eql('0');
+
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
-          await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights', false);
+          await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndicies);
           await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        expect(newValue).to.eql('18');
+        expect(newValue).to.eql('1');
+      };
+
+      it('should be able to switch using text mode selection', async () => {
+        await switchIndexTest(false);
+      });
+
+      it('should be able to switch combo box mode selection', async () => {
+        await switchIndexTest(true);
       });
     });
 
