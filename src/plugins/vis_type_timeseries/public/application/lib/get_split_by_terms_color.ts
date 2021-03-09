@@ -1,0 +1,71 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { PALETTES, PanelData } from '../../../common/types';
+import { computeGradientFinalColor } from './compute_gradient_final_color';
+
+interface PaletteParams {
+  colors: string[];
+  gradient: boolean;
+}
+
+interface SplitByTermsColorProps {
+  seriesById: PanelData[];
+  seriesName: string;
+  seriesId: string;
+  baseColor: string;
+  seriesPalette: PaletteOutput<PaletteParams>;
+  palettesRegistry: PaletteRegistry;
+  syncColors: boolean;
+}
+
+export const getSplitByTermsColor = ({
+  seriesById,
+  seriesName,
+  seriesId,
+  baseColor,
+  seriesPalette,
+  palettesRegistry,
+  syncColors,
+}: SplitByTermsColorProps) => {
+  if (!seriesName) {
+    return null;
+  }
+
+  const paletteName =
+    seriesPalette.name === PALETTES.RAINBOW || seriesPalette.name === PALETTES.GRADIENT
+      ? 'custom'
+      : seriesPalette.name;
+
+  const gradientFinalColor = computeGradientFinalColor(baseColor);
+  const paletteParams =
+    seriesPalette.name === PALETTES.GRADIENT
+      ? {
+          ...seriesPalette.params,
+          colors: [baseColor, gradientFinalColor],
+        }
+      : seriesPalette.params;
+
+  const outputColor = palettesRegistry?.get(paletteName).getColor(
+    [
+      {
+        name: seriesName,
+        rankAtDepth: seriesById.findIndex(({ id }) => id === seriesId),
+        totalSeriesAtDepth: seriesById.length,
+      },
+    ],
+    {
+      maxDepth: 1,
+      totalSeries: seriesById.length,
+      behindText: false,
+      syncColors,
+    },
+    paletteParams
+  );
+  return outputColor;
+};

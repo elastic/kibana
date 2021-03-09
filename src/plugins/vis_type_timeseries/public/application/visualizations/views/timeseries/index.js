@@ -24,7 +24,6 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
 import { activeCursor$ } from '../../lib/active_cursor';
-import { computeGradientFinalColor } from '../../../lib/compute_gradient_final_color';
 import { getUISettings, getChartsSetup } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
@@ -32,7 +31,7 @@ import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
 import { emptyLabel } from '../../../../../common/empty_label';
-import { PALETTES } from '../../../../../common/types';
+import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -113,43 +112,17 @@ export const TimeSeries = ({
 
   const getSeriesColor = useCallback(
     (seriesName, seriesGroupId, seriesId) => {
-      if (!seriesName) {
-        return null;
-      }
-
       const seriesById = series.filter((s) => s.seriesId === seriesGroupId);
-      const paletteName =
-        seriesById[0].palette.name === PALETTES.RAINBOW ||
-        seriesById[0].palette.name === PALETTES.GRADIENT
-          ? 'custom'
-          : seriesById[0].palette.name;
-
-      const gradientFinalColor = computeGradientFinalColor(seriesById[0].baseColor);
-      const paletteParams =
-        seriesById[0].palette.name === PALETTES.GRADIENT
-          ? {
-              ...seriesById[0].palette.params,
-              colors: [seriesById[0].baseColor, gradientFinalColor],
-            }
-          : seriesById[0].palette.params;
-
-      const outputColor = palettesRegistry?.get(paletteName).getColor(
-        [
-          {
-            name: seriesName,
-            rankAtDepth: seriesById.findIndex(({ id }) => id === seriesId),
-            totalSeriesAtDepth: seriesById.length,
-          },
-        ],
-        {
-          maxDepth: 1,
-          totalSeries: seriesById.length,
-          behindText: false,
-          syncColors,
-        },
-        paletteParams
-      );
-      return outputColor || null;
+      const props = {
+        seriesById,
+        seriesName,
+        seriesId,
+        baseColor: seriesById[0].baseColor,
+        seriesPalette: seriesById[0].palette,
+        palettesRegistry,
+        syncColors,
+      };
+      return getSplitByTermsColor(props) || null;
     },
     [palettesRegistry, series, syncColors]
   );
@@ -238,7 +211,8 @@ export const TimeSeries = ({
             seriesName = labelDateFormatter(labelFormatted);
           }
           // The colors from the paletteService should be applied only when the timeseries is split by terms
-          const finalColor = isSplitByTerms ? getSeriesColor(seriesName, seriesId, id) : color;
+          const splitColor = getSeriesColor(seriesName, seriesId, id);
+          const finalColor = isSplitByTerms && splitColor ? splitColor : color;
           if (bars?.show) {
             return (
               <BarSeriesDecorator

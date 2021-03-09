@@ -6,15 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
+import { getChartsSetup } from '../../services';
 import { emptyLabel } from '../../../common/empty_label';
+import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
-    const { model, visData } = props;
+    const [palettesRegistry, setPalettesRegistry] = useState(null);
+    const { model, visData, syncColors } = props;
+    const { palettes } = getChartsSetup();
+
+    useEffect(() => {
+      const fetchPalettes = async () => {
+        const palettesService = await palettes.getPalettes();
+        setPalettesRegistry(palettesService);
+      };
+      fetchPalettes();
+    }, [palettes]);
+
+    const getSeriesColor = useCallback(
+      (seriesName, seriesId, baseColor) => {
+        const props = {
+          seriesById: visData[model.id].series,
+          seriesName,
+          seriesId,
+          baseColor,
+          seriesPalette: model.series[0].palette,
+          palettesRegistry,
+          syncColors,
+        };
+        return getSplitByTermsColor(props) || null;
+      },
+      [model, palettesRegistry, syncColors, visData]
+    );
+
     if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
     if (visData[model.id].series.every((s) => s.id.split(':').length === 1)) {
       return <WrappedComponent {...props} />;
@@ -36,11 +65,14 @@ export function visWithSplits(WrappedComponent) {
       }
 
       const labelHasKeyPlaceholder = /{{\s*key\s*}}/.test(seriesModel.label);
+      const color = series.color || seriesModel.color;
+      const finalColor =
+        model.series[0].split_mode === 'terms' ? getSeriesColor(label, series.id, color) : color;
 
       acc[splitId].series.push({
         ...series,
         id: seriesId,
-        color: series.color || seriesModel.color,
+        color: finalColor,
         label: seriesModel.label && !labelHasKeyPlaceholder ? seriesModel.label : label,
       });
       return acc;
