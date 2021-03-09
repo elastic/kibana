@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { SeriesEditor } from '../series_editor';
-import { AnnotationsEditor } from '../annotations_editor';
-import { IndexPattern } from '../index_pattern';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
-import { ColorPicker } from '../color_picker';
-import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -30,17 +22,34 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { QueryBarWrapper } from '../query_bar_wrapper';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-class TimeseriesPanelConfigUi extends Component {
-  constructor(props) {
+// @ts-expect-error not typed yet
+import { SeriesEditor } from '../series_editor';
+// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+import { AnnotationsEditor } from '../annotations_editor';
+// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+import { IndexPattern } from '../index_pattern';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createTextHandler } from '../lib/create_text_handler';
+import { ColorPicker } from '../color_picker';
+import { YesNo } from '../yes_no';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
+import { QueryBarWrapper } from '../query_bar_wrapper';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+
+export class TimeseriesPanelConfig extends Component<
+  PanelConfigProps,
+  { selectedTab: PANEL_CONFIG_TABS }
+> {
+  constructor(props: PanelConfigProps) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };
   }
 
-  switchTab(selectedTab) {
+  switchTab(selectedTab: PANEL_CONFIG_TABS) {
     this.setState({ selectedTab });
   }
 
@@ -58,19 +67,16 @@ class TimeseriesPanelConfigUi extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
-    const { intl } = this.props;
 
     const positionOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.positionOptions.rightLabel',
+        label: i18n.translate('visTypeTimeseries.timeseries.positionOptions.rightLabel', {
           defaultMessage: 'Right',
         }),
         value: 'right',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.positionOptions.leftLabel',
+        label: i18n.translate('visTypeTimeseries.timeseries.positionOptions.leftLabel', {
           defaultMessage: 'Left',
         }),
         value: 'left',
@@ -78,15 +84,13 @@ class TimeseriesPanelConfigUi extends Component {
     ];
     const tooltipModeOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.tooltipOptions.showAll',
+        label: i18n.translate('visTypeTimeseries.timeseries.tooltipOptions.showAll', {
           defaultMessage: 'Show all values',
         }),
         value: 'show_all',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.tooltipOptions.showFocused',
+        label: i18n.translate('visTypeTimeseries.timeseries.tooltipOptions.showFocused', {
           defaultMessage: 'Show focused values',
         }),
         value: 'show_focused',
@@ -97,15 +101,13 @@ class TimeseriesPanelConfigUi extends Component {
     });
     const scaleOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.scaleOptions.normalLabel',
+        label: i18n.translate('visTypeTimeseries.timeseries.scaleOptions.normalLabel', {
           defaultMessage: 'Normal',
         }),
         value: 'normal',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.scaleOptions.logLabel',
+        label: i18n.translate('visTypeTimeseries.timeseries.scaleOptions.logLabel', {
           defaultMessage: 'Log',
         }),
         value: 'log',
@@ -116,22 +118,19 @@ class TimeseriesPanelConfigUi extends Component {
     });
     const legendPositionOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.legendPositionOptions.rightLabel',
+        label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.rightLabel', {
           defaultMessage: 'Right',
         }),
         value: 'right',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.legendPositionOptions.leftLabel',
+        label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.leftLabel', {
           defaultMessage: 'Left',
         }),
         value: 'left',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.timeseries.legendPositionOptions.bottomLabel',
+        label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.bottomLabel', {
           defaultMessage: 'Bottom',
         }),
         value: 'bottom',
@@ -146,16 +145,15 @@ class TimeseriesPanelConfigUi extends Component {
     });
 
     let view;
-    if (selectedTab === 'data') {
+    if (selectedTab === PANEL_CONFIG_TABS.DATA) {
       view = (
         <SeriesEditor
           fields={this.props.fields}
           model={this.props.model}
-          name={this.props.name}
           onChange={this.props.onChange}
         />
       );
-    } else if (selectedTab === 'annotations') {
+    } else if (selectedTab === PANEL_CONFIG_TABS.ANNOTATIONS) {
       view = (
         <AnnotationsEditor
           fields={this.props.fields}
@@ -201,8 +199,8 @@ class TimeseriesPanelConfigUi extends Component {
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
@@ -250,7 +248,10 @@ class TimeseriesPanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiFieldText onChange={handleTextChange('axis_min')} value={model.axis_min} />
+                  <EuiFieldText
+                    onChange={handleTextChange('axis_min')}
+                    value={model.axis_min ?? ''}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -263,7 +264,10 @@ class TimeseriesPanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiFieldText onChange={handleTextChange('axis_max')} value={model.axis_max} />
+                  <EuiFieldText
+                    onChange={handleTextChange('axis_max')}
+                    value={model.axis_max ?? ''}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -394,15 +398,18 @@ class TimeseriesPanelConfigUi extends Component {
     return (
       <>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+          <EuiTab
+            isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+          >
             <FormattedMessage
               id="visTypeTimeseries.timeseries.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
           <EuiTab
-            isSelected={selectedTab === 'options'}
-            onClick={() => this.switchTab('options')}
+            isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
             data-test-subj="timeSeriesEditorPanelOptionsBtn"
           >
             <FormattedMessage
@@ -411,8 +418,8 @@ class TimeseriesPanelConfigUi extends Component {
             />
           </EuiTab>
           <EuiTab
-            isSelected={selectedTab === 'annotations'}
-            onClick={() => this.switchTab('annotations')}
+            isSelected={selectedTab === PANEL_CONFIG_TABS.ANNOTATIONS}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.ANNOTATIONS)}
           >
             <FormattedMessage
               id="visTypeTimeseries.timeseries.annotationsTab.annotationsButtonLabel"
@@ -425,11 +432,3 @@ class TimeseriesPanelConfigUi extends Component {
     );
   }
 }
-
-TimeseriesPanelConfigUi.propTypes = {
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-};
-
-export const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);

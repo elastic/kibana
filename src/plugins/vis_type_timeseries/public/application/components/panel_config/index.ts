@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-// these are not typed yet
-// @ts-expect-error
 import { TimeseriesPanelConfig as timeseries } from './timeseries';
-// @ts-expect-error
 import { MetricPanelConfig as metric } from './metric';
-// @ts-expect-error
 import { TopNPanelConfig as topN } from './top_n';
-// @ts-expect-error
 import { TablePanelConfig as table } from './table';
-// @ts-expect-error
 import { GaugePanelConfig as gauge } from './gauge';
-// @ts-expect-error
 import { MarkdownPanelConfig as markdown } from './markdown';
 
 export const panelConfigTypes = {

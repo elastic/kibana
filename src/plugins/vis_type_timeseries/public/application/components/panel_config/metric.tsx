@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { SeriesEditor } from '../series_editor';
-import { IndexPattern } from '../index_pattern';
-import { ColorRules } from '../color_rules';
-import { YesNo } from '../yes_no';
 import uuid from 'uuid';
 import {
   htmlIdGenerator,
@@ -28,15 +23,27 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+// @ts-expect-error
+import { SeriesEditor } from '../series_editor';
+// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+import { IndexPattern } from '../index_pattern';
+import { ColorRules } from '../color_rules';
+import { YesNo } from '../yes_no';
+
+// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { limitOfSeries } from '../../../../common/ui_restrictions';
 import { PANEL_TYPES } from '../../../../common/panel_types';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 
-export class MetricPanelConfig extends Component {
-  constructor(props) {
+export class MetricPanelConfig extends Component<
+  PanelConfigProps,
+  { selectedTab: PANEL_CONFIG_TABS }
+> {
+  constructor(props: PanelConfigProps) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };
   }
 
   UNSAFE_componentWillMount() {
@@ -51,7 +58,7 @@ export class MetricPanelConfig extends Component {
     }
   }
 
-  switchTab(selectedTab) {
+  switchTab(selectedTab: PANEL_CONFIG_TABS) {
     this.setState({ selectedTab });
   }
 
@@ -61,14 +68,13 @@ export class MetricPanelConfig extends Component {
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
     let view;
-    if (selectedTab === 'data') {
+    if (selectedTab === PANEL_CONFIG_TABS.DATA) {
       view = (
         <SeriesEditor
           colorPicker={false}
           fields={this.props.fields}
           limit={limitOfSeries[PANEL_TYPES.METRIC]}
           model={this.props.model}
-          name={this.props.name}
           onChange={this.props.onChange}
         />
       );
@@ -108,8 +114,8 @@ export class MetricPanelConfig extends Component {
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
@@ -158,15 +164,18 @@ export class MetricPanelConfig extends Component {
     return (
       <>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+          <EuiTab
+            isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+          >
             <FormattedMessage
               id="visTypeTimeseries.metric.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
           <EuiTab
-            isSelected={selectedTab === 'options'}
-            onClick={() => this.switchTab('options')}
+            isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
             data-test-subj="metricEditorPanelOptionsBtn"
           >
             <FormattedMessage
@@ -180,9 +189,3 @@ export class MetricPanelConfig extends Component {
     );
   }
 }
-
-MetricPanelConfig.propTypes = {
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-};

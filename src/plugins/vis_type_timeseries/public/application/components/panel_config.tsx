@@ -8,26 +8,15 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Observable } from 'rxjs';
 
-import { IUiSettingsClient } from 'kibana/public';
 import { TimeseriesVisData } from '../../../common/types';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { VisDataContext } from '../contexts/vis_data_context';
 import { panelConfigTypes } from './panel_config/index';
-import { TimeseriesVisParams } from '../../types';
-import { VisFields } from '../lib/fetch_fields';
+import { PanelConfigProps } from './panel_config/types';
 
 interface FormValidationResults {
   [key: string]: boolean;
-}
-
-interface PanelConfigProps {
-  fields?: VisFields;
-  model: TimeseriesVisParams;
-  visData$: Observable<TimeseriesVisData | undefined>;
-  getConfig: IUiSettingsClient['get'];
-  onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
 }
 
 const checkModelValidity = (validationResults: FormValidationResults) =>

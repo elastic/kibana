@@ -6,16 +6,7 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { SeriesEditor } from '../series_editor';
-import { IndexPattern } from '../index_pattern';
-import 'brace/mode/less';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { ColorPicker } from '../color_picker';
-import { YesNo } from '../yes_no';
-import { MarkdownEditor } from '../markdown_editor';
-import less from 'less/lib/less-browser';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -31,35 +22,61 @@ import {
   EuiHorizontalRule,
   EuiCodeEditor,
 } from '@elastic/eui';
-const lessC = less(window, { env: 'production' });
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+// @ts-expect-error
+import less from 'less/lib/less-browser';
+import 'brace/mode/less';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import type { Writable } from '@kbn/utility-types';
+
+// @ts-expect-error not typed yet
+import { SeriesEditor } from '../series_editor';
+// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+import { IndexPattern } from '../index_pattern';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { ColorPicker } from '../color_picker';
+import { YesNo } from '../yes_no';
+// @ts-expect-error not typed yet
+import { MarkdownEditor } from '../markdown_editor';
+// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { TimeseriesVisParams } from '../../../types';
 
-class MarkdownPanelConfigUi extends Component {
-  constructor(props) {
+const lessC = less(window, { env: 'production' });
+
+export class MarkdownPanelConfig extends Component<
+  PanelConfigProps,
+  { selectedTab: PANEL_CONFIG_TABS }
+> {
+  constructor(props: PanelConfigProps) {
     super(props);
-    this.state = { selectedTab: 'markdown' };
+    this.state = { selectedTab: PANEL_CONFIG_TABS.MARKDOWN };
     this.handleCSSChange = this.handleCSSChange.bind(this);
   }
 
-  switchTab(selectedTab) {
+  switchTab(selectedTab: PANEL_CONFIG_TABS) {
     this.setState({ selectedTab });
   }
 
-  handleCSSChange(value) {
+  handleCSSChange(value: string) {
     const { model } = this.props;
-    const lessSrc = `#markdown-${model.id} {
-  ${value}
-}`;
-    lessC.render(lessSrc, { compress: true, javascriptEnabled: false }, (e, output) => {
-      const parts = { markdown_less: value };
-      if (output) {
-        parts.markdown_css = output.css;
+    const lessSrc = `#markdown-${model.id} {${value}}`;
+    lessC.render(
+      lessSrc,
+      { compress: true, javascriptEnabled: false },
+      (e: unknown, output: any) => {
+        const parts: Writable<Pick<TimeseriesVisParams, 'markdown_less' | 'markdown_css'>> = {
+          markdown_less: value,
+        };
+        if (output) {
+          parts.markdown_css = output.css;
+        }
+        this.props.onChange(parts);
       }
-      this.props.onChange(parts);
-    });
+    );
   }
 
   render() {
@@ -67,28 +84,23 @@ class MarkdownPanelConfigUi extends Component {
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const { intl } = this.props;
-
     const htmlId = htmlIdGenerator();
 
     const alignOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.markdown.alignOptions.topLabel',
+        label: i18n.translate('visTypeTimeseries.markdown.alignOptions.topLabel', {
           defaultMessage: 'Top',
         }),
         value: 'top',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.markdown.alignOptions.middleLabel',
+        label: i18n.translate('visTypeTimeseries.markdown.alignOptions.middleLabel', {
           defaultMessage: 'Middle',
         }),
         value: 'middle',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.markdown.alignOptions.bottomLabel',
+        label: i18n.translate('visTypeTimeseries.markdown.alignOptions.bottomLabel', {
           defaultMessage: 'Bottom',
         }),
         value: 'bottom',
@@ -110,7 +122,6 @@ class MarkdownPanelConfigUi extends Component {
           colorPicker={false}
           fields={this.props.fields}
           model={this.props.model}
-          name={this.props.name}
           onChange={this.props.onChange}
         />
       );
@@ -275,7 +286,7 @@ class MarkdownPanelConfigUi extends Component {
               width="100%"
               name={`ace-css-${model.id}`}
               setOptions={{ fontSize: '14px' }}
-              value={model.markdown_less}
+              value={model.markdown_less ?? ''}
               onChange={this.handleCSSChange}
             />
           </EuiPanel>
@@ -286,16 +297,16 @@ class MarkdownPanelConfigUi extends Component {
       <>
         <EuiTabs size="s">
           <EuiTab
-            isSelected={selectedTab === 'markdown'}
-            onClick={() => this.switchTab('markdown')}
+            isSelected={selectedTab === PANEL_CONFIG_TABS.MARKDOWN}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.MARKDOWN)}
             data-test-subj="markdown-subtab"
           >
             Markdown
           </EuiTab>
           <EuiTab
             data-test-subj="data-subtab"
-            isSelected={selectedTab === 'data'}
-            onClick={() => this.switchTab('data')}
+            isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
           >
             <FormattedMessage
               id="visTypeTimeseries.markdown.dataTab.dataButtonLabel"
@@ -303,8 +314,8 @@ class MarkdownPanelConfigUi extends Component {
             />
           </EuiTab>
           <EuiTab
-            isSelected={selectedTab === 'options'}
-            onClick={() => this.switchTab('options')}
+            isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
             data-test-subj="options-subtab"
           >
             <FormattedMessage
@@ -318,11 +329,3 @@ class MarkdownPanelConfigUi extends Component {
     );
   }
 }
-
-MarkdownPanelConfigUi.propTypes = {
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-};
-
-export const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);
