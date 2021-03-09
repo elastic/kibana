@@ -85,7 +85,7 @@ Using the https://mustache.github.io/[Mustache] template syntax `{{variable name
 `kibanaBaseUrl`:: The configured <<server-publicBaseUrl, `server.publicBaseUrl`>>. If not configured, this will be empty.
 
 [role="screenshot"]
-image::images/alert-flyout-action-variables.png[Passing rule values to an action]
+image::images/rule-flyout-action-variables.png[Passing rule values to an action]
 
 Some cases exist where the variable values will be "escaped", when used in a context where escaping is needed:
 
