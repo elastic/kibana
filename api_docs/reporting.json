@@ -851,7 +851,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 65
+                  "lineNumber": 69
                 }
               },
               {
@@ -873,7 +873,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 65
+                  "lineNumber": 69
                 }
               }
             ],
@@ -881,7 +881,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 65
+              "lineNumber": 69
             }
           },
           {
@@ -917,7 +917,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 75
+                  "lineNumber": 79
                 }
               }
             ],
@@ -925,7 +925,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 75
+              "lineNumber": 79
             }
           },
           {
@@ -961,7 +961,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 89
+                  "lineNumber": 93
                 }
               }
             ],
@@ -969,7 +969,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 89
+              "lineNumber": 93
             }
           },
           {
@@ -985,7 +985,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 102
+              "lineNumber": 106
             }
           },
           {
@@ -1001,7 +1001,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 113
+              "lineNumber": 117
             }
           },
           {
@@ -1017,7 +1017,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 120
+              "lineNumber": 124
             }
           },
           {
@@ -1053,7 +1053,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 127
+                  "lineNumber": 131
                 }
               }
             ],
@@ -1061,7 +1061,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 127
+              "lineNumber": 131
             }
           },
           {
@@ -1079,7 +1079,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 135
+              "lineNumber": 139
             }
           },
           {
@@ -1102,7 +1102,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 155
+              "lineNumber": 159
             }
           },
           {
@@ -1126,7 +1126,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 165
+              "lineNumber": 169
             }
           },
           {
@@ -1149,7 +1149,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 173
+              "lineNumber": 177
             }
           },
           {
@@ -1210,7 +1210,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 177
+                  "lineNumber": 181
                 }
               }
             ],
@@ -1218,7 +1218,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 177
+              "lineNumber": 181
             }
           },
           {
@@ -1242,7 +1242,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 181
+              "lineNumber": 185
             }
           },
           {
@@ -1266,7 +1266,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 185
+              "lineNumber": 189
             }
           },
           {
@@ -1290,7 +1290,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 195
+              "lineNumber": 199
             }
           },
           {
@@ -1313,7 +1313,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 204
+              "lineNumber": 208
             }
           },
           {
@@ -1336,7 +1336,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 211
+              "lineNumber": 216
             }
           },
           {
@@ -1382,7 +1382,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 220
+                  "lineNumber": 225
                 }
               }
             ],
@@ -1390,7 +1390,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 220
+              "lineNumber": 225
             }
           },
           {
@@ -1435,7 +1435,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 226
+                  "lineNumber": 231
                 }
               },
               {
@@ -1454,7 +1454,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 226
+                  "lineNumber": 231
                 }
               }
             ],
@@ -1462,7 +1462,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 226
+              "lineNumber": 231
             }
           },
           {
@@ -1500,7 +1500,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 240
+                  "lineNumber": 245
                 }
               },
               {
@@ -1513,7 +1513,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 240
+                  "lineNumber": 245
                 }
               },
               {
@@ -1532,7 +1532,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 240
+                  "lineNumber": 245
                 }
               }
             ],
@@ -1540,7 +1540,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 240
+              "lineNumber": 245
             }
           },
           {
@@ -1593,7 +1593,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 260
+                  "lineNumber": 265
                 }
               },
               {
@@ -1612,7 +1612,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 260
+                  "lineNumber": 265
                 }
               }
             ],
@@ -1620,7 +1620,55 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 260
+              "lineNumber": 265
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.getDataService",
+            "type": "Function",
+            "label": "getDataService",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "server",
+                "docId": "kibDataPluginApi",
+                "section": "def-server.DataPluginStart",
+                "text": "DataPluginStart"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 275
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.getEsClient",
+            "type": "Function",
+            "label": "getEsClient",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IClusterClient",
+                "text": "IClusterClient"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 280
             }
           },
           {
@@ -1642,7 +1690,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 270
+                  "lineNumber": 285
                 }
               }
             ],
@@ -1650,7 +1698,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 270
+              "lineNumber": 285
             }
           },
           {
@@ -1672,7 +1720,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 274
+                  "lineNumber": 289
                 }
               }
             ],
@@ -1680,7 +1728,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 274
+              "lineNumber": 289
             }
           },
           {
@@ -1696,13 +1744,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 278
+              "lineNumber": 293
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/core.ts",
-          "lineNumber": 54
+          "lineNumber": 58
         },
         "initialIsOpen": false
       },
