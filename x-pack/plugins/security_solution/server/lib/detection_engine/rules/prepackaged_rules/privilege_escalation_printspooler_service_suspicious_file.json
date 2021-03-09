@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious PrintSpooler Service Executable File Creation",
   "query": "event.category:file and not event.type:deletion and process.name:spoolsv.exe and file.extension:(exe or dll) and not file.path:(C\\:\\\\Windows\\\\System32\\\\spool\\\\* or C\\:\\\\Windows\\\\Temp\\\\* or C\\:\\\\Users\\\\*)",
   "references": [

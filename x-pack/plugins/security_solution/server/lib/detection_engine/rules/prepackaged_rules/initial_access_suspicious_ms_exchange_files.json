@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic",
+    "Austin Songer"
+  ],
+  "description": "Identifies suspicious files being written by the Microsoft Exchange Server Unified Messaging (UM) service. This activity has been observed exploiting CVE-2021-26858.",
+  "false_positives": [
+    "Files generated during installation will generate a lot of noise, so the rule should only be enabled after the fact."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Microsoft Exchange Server UM Writing Suspicious Files",
+  "query": "file where event.type == \"creation\" and\n  process.parent.name : (\"UMWorkerProcess.exe\", \"umservice.exe\") and\n  file.extension : (\"php\", \"jsp\", \"js\", \"aspx\", \"asmx\", \"asax\", \"cfm\", \"shtml\") and\n  (\n    file.path : (\"C:\\\\inetpub\\\\wwwroot\\\\aspnet_client\\\\*\",\n                 \"C:\\\\*\\\\FrontEnd\\\\HttpProxy\\\\owa\\\\auth\\\\*\") or\n    (file.path : \"C:\\\\*\\\\FrontEnd\\\\HttpProxy\\\\ecp\\\\auth\\\\*\" and not file.name : \"TimeoutLogoff.aspx\")\n  )\n",
+  "references": [
+    "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers",
+    "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities"
+  ],
+  "risk_score": 47,
+  "rule_id": "6cd1779c-560f-4b68-a8f1-11009b27fe63",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Initial Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}
