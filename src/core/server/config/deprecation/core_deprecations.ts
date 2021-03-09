@@ -102,7 +102,7 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
   }
   return settings;
 };
-// TODO: convert all links to the logging README to doc_links once we have formal docs for KP logging
+
 const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'logging.events.ops')) {
     log(
@@ -138,7 +138,7 @@ const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) 
   }
   return settings;
 };
-// logging.dest
+
 const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'logging.dest')) {
     log(
@@ -150,56 +150,52 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   }
   return settings;
 };
-// logging.quiet -> logging.root.level: error
-const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if (has(settings, 'logging.quiet')) {
+
+const quietSilentVerboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (
+    has(settings, 'logging.quiet') ||
+    has(settings, 'logging.silent') ||
+    has(settings, 'logging.verbose')
+  ) {
     log(
-      '"logging.quiet" has been deprecated and will be removed ' +
-        'in 8.0. To suppress logging output other than error messages moving forward, ' +
-        'you can use "logging.root.level: error" in your logging configuration. For more details, see ' +
-        'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
-    );
-  }
-  return settings;
-};
-// logging.silent ->  logging.root.level: off
-const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if (has(settings, 'logging.silent')) {
-    log(
-      '"logging.silent" has been deprecated and will be removed ' +
-        'in 8.0. To suppress all logging output moving forward, ' +
-        'you can use "logging.root.level: off" in your logging configuration. For more details, see ' +
-        'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
-    );
-  }
-  return settings;
-};
-// logging.verbose -> logging.root.level: all
-const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if (has(settings, 'logging.verbose')) {
-    log(
-      '"logging.verbose" has been deprecated and will be removed ' +
-        'in 8.0. To log all events moving forward, ' +
-        'you can use "logging.root.level: all" in your logging configuration. For more details, see ' +
+      '"logging.quiet", "logging.silent" and "logging.verbose" have been deprecated and will be removed ' +
+        'in 8.0. Moving forward, you can use "logging.root.level" in your logging configuration. ' +
+        'Levels "error", "off" and "all" are equivalent to "quiet", "silent" and "verbose". For more details, see ' +
         'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
     );
   }
   return settings;
 };
 
-// logging.json -> adjust output format with [layouts](https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#layouts)
 const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'logging.json')) {
     log(
       '"logging.json" has been deprecated and will be removed ' +
         'in 8.0. To specify log message format moving forward, ' +
-        'you must configure the "appender.layout" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly. For more details, see ' +
+        'you can configure the "appender.layout" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly. For more details, see ' +
         'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
     );
   }
   return settings;
 };
-// logging.rotate ->
+
+const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (
+    has(settings, 'logging.rotate.enabled') ||
+    has(settings, 'logging.rotate.usePolling') ||
+    has(settings, 'logging.rotate.pollingInterval') ||
+    has(settings, 'logging.rotate.everyBytes') ||
+    has(settings, 'logging.rotate.keepFiles')
+  ) {
+    log(
+      '"logging.rotate" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled ' +
+        'log rotation using the "rolling-file" appender for a context in your logging confugration. ' +
+        'For more details, see ' +
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender'
+    );
+  }
+  return settings;
+};
 
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
@@ -239,8 +235,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   requestLoggingEventDeprecation,
   timezoneLoggingDeprecation,
   destLoggingDeprecation,
-  quietLoggingDeprecation,
-  silentLoggingDeprecation,
-  verboseLoggingDeprecation,
+  quietSilentVerboseLoggingDeprecation,
   jsonLoggingDeprecation,
+  logRotateDeprecation,
 ];
