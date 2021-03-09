@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Persistence via DirectoryService Plugin Modification",
   "query": "event.category:file and not event.type:deletion and file.path:/Library/DirectoryServices/PlugIns/*.dsplug",
   "references": [

@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { listAgents } from '../../services/agents';
@@ -57,7 +58,7 @@ export const getAgentPoliciesHandler: RequestHandler<
     await bluebird.map(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
-        listAgents(soClient, esClient, {
+        listAgents(esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
@@ -103,7 +104,6 @@ export const createAgentPolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
@@ -129,7 +129,7 @@ export const createAgentPolicyHandler: RequestHandler<
     if (withSysMonitoring && newSysPackagePolicy !== undefined && agentPolicy !== undefined) {
       newSysPackagePolicy.policy_id = agentPolicy.id;
       newSysPackagePolicy.namespace = agentPolicy.namespace;
-      await packagePolicyService.create(soClient, esClient, callCluster, newSysPackagePolicy, {
+      await packagePolicyService.create(soClient, esClient, newSysPackagePolicy, {
         user,
         bumpRevision: false,
       });

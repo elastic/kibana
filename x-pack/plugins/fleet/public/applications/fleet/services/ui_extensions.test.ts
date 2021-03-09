@@ -6,11 +6,13 @@
  */
 
 import { lazy } from 'react';
+
 import type {
   PackagePolicyEditExtensionComponent,
   UIExtensionRegistrationCallback,
   UIExtensionsStorage,
 } from '../types';
+
 import { createExtensionRegistrationCallback } from './ui_extensions';
 
 describe('UI Extension services', () => {

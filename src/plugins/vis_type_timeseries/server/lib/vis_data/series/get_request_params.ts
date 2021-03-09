@@ -10,12 +10,13 @@ import { PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { buildRequestBody } from './build_request_body';
 import { getIndexPatternObject } from '../../../lib/search_strategies/lib/get_index_pattern';
 import { VisTypeTimeseriesRequestServices, VisTypeTimeseriesVisDataRequest } from '../../../types';
+import { DefaultSearchCapabilities } from '../../search_strategies';
 
 export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
   panel: PanelSchema,
   series: SeriesItemsSchema,
-  capabilities: any,
+  capabilities: DefaultSearchCapabilities,
   {
     esQueryConfig,
     esShardTimeout,

@@ -13,7 +13,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "IPSEC NAT Traversal Port Activity",
   "query": "event.category:(network or network_traffic) and network.transport:udp and destination.port:4500",
   "risk_score": 21,
