@@ -13,5 +13,13 @@ export const DrilldownList: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const events = drilldowns.useEvents();
 
-  return <ListManageDrilldowns items={events} />;
+  return (
+    <ListManageDrilldowns
+      items={events}
+      onDelete={drilldowns.onDelete}
+      onEdit={(id) => {
+        drilldowns.setRoute(['edit', id]);
+      }}
+    />
+  );
 };

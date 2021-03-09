@@ -17,6 +17,8 @@ import {
   insufficientLicenseLevel,
   invalidDrilldownType,
   txtDefaultTitle,
+  toastDrilldownDeleted,
+  toastDrilldownsDeleted,
 } from './i18n';
 import { DrilldownListItem } from '../components/list_manage_drilldowns';
 
@@ -266,6 +268,28 @@ export class DrilldownManagerState {
           title: toastDrilldownsCRUDError,
         });
       }
+    })();
+  };
+
+  /**
+   * Deletes a list of drilldowns and shows toast notifications to the user.
+   *
+   * @param ids Drilldown IDs.
+   */
+  public readonly onDelete = (ids: string[]) => {
+    (async () => {
+      await this.deps.dynamicActionManager.deleteEvents(ids);
+      this.deps.toastService.addSuccess(
+        ids.length === 1
+          ? {
+              title: toastDrilldownDeleted.title,
+              text: toastDrilldownDeleted.text,
+            }
+          : {
+              title: toastDrilldownsDeleted.title(ids.length),
+              text: toastDrilldownsDeleted.text,
+            }
+      );
     })();
   };
 
