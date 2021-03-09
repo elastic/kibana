@@ -30,16 +30,11 @@ export function useTransactionLatencyChartsFetcher() {
     },
   } = useUrlParams();
 
-  const {
-    comparisonStart = undefined,
-    comparisonEnd = undefined,
-  } = comparisonType
-    ? getTimeRangeComparison({
-        start,
-        end,
-        comparisonType,
-      })
-    : {};
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
