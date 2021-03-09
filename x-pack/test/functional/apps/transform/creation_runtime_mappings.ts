@@ -388,7 +388,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('redirects to Discover page');
           await transform.wizard.redirectToDiscover();
 
-          if (testData.type === 'latest') {
+          if (isLatestTransformTestData(testData)) {
             const fromTime = 'Feb 7, 2016 @ 00:00:00.000';
             const toTime = 'Feb 11, 2016 @ 23:59:54.000';
             await transform.wizard.setDiscoverTimeRange(fromTime, toTime);
