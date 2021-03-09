@@ -28,7 +28,6 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       },
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
       readonlyEnabled: Boolean(hot?.actions?.readonly),
-      rollupEnabled: Boolean(hot?.actions.rollup),
     },
     warm: {
       enabled: Boolean(warm),
@@ -41,7 +40,6 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
-      rollupEnabled: Boolean(cold?.actions.rollup),
     },
     delete: {
       enabled: Boolean(deletePhase),

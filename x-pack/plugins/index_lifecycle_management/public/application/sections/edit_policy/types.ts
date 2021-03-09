@@ -29,7 +29,6 @@ interface HotPhaseMetaFields extends ForcemergeFields {
    */
   isUsingDefaultRollover: boolean;
   readonlyEnabled: boolean;
-  rollupEnabled: boolean;
   /**
    * If a policy has defined values other than the default rollover {@link defaultRolloverAction}, we store
    * them here.
@@ -50,7 +49,6 @@ interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, For
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   enabled: boolean;
   freezeEnabled: boolean;
-  rollupEnabled: boolean;
 }
 
 interface DeletePhaseMetaFields extends MinAgeField {

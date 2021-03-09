@@ -14,7 +14,7 @@ import { RollupWizard as RollupWizardView, Props as RollupWizardViewProps } from
 type Props = Omit<RollupWizardViewProps, 'value'> & { form: FormHook };
 
 export const RollupWizard: FunctionComponent<Props> = ({ phase, form, ...rest }) => {
-  const path = `phases.${phase}.actions.rollup`;
+  const path = `phases.${phase}.actions.rollup.config`;
   const [data] = useFormData({ form, watch: path });
   const value = get(data, path);
   return <RollupWizardView value={value} phase={phase} {...rest} />;

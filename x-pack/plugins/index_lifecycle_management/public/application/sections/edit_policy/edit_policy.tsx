@@ -142,8 +142,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   }, []);
 
   const currentViewPhase = currentView.id === 'rollupAction' ? currentView.phase : undefined;
-  const currentRollupFieldSwitch = form.getFields()[`_meta.${currentViewPhase}.rollupEnabled`];
-  const hasCurrentRollupField = Boolean(currentRollupFieldSwitch);
+  const currentRollupField = form.getFields()[`phases.${currentViewPhase}.actions.rollup.config`];
+  const hasCurrentRollupField = Boolean(currentRollupField);
 
   useEffect(() => {
     if (!hasCurrentRollupField) {
@@ -155,12 +155,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
       });
     }
   }, [hasCurrentRollupField, history]);
-
-  useEffect(() => {
-    if (currentViewPhase && currentRollupFieldSwitch && currentRollupFieldSwitch.value !== true) {
-      currentRollupFieldSwitch.setValue(true);
-    }
-  }, [currentViewPhase, currentRollupFieldSwitch]);
 
   return (
     <>
@@ -358,7 +352,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
           phase={currentView.phase}
           onDone={(rollupAction) => {
             const { phase } = currentView;
-            const fieldPath = `phases.${phase}.actions.rollup`;
+            const fieldPath = `phases.${phase}.actions.rollup.config`;
             const rollupField = form.getFields()[fieldPath];
             const newCurrentPolicy = cloneDeep({
               ...currentPolicy,

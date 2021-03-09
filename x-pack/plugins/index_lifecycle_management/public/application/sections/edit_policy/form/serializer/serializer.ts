@@ -127,12 +127,6 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
         delete hotPhaseActions.searchable_snapshot;
       }
-      /**
-       * HOT PHASE ROLLUP
-       */
-      if (!_meta.hot.rollupEnabled) {
-        delete hotPhaseActions.rollup;
-      }
     }
 
     /**
@@ -242,13 +236,6 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
        */
       if (!updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
         delete coldPhase.actions.searchable_snapshot;
-      }
-
-      /**
-       * COLD PHASE ROLLUP
-       */
-      if (!_meta.cold.rollupEnabled) {
-        delete coldPhase.actions.rollup;
       }
     } else {
       delete draft.phases.cold;

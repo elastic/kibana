@@ -94,7 +94,7 @@ export interface Props {
   value?: RollupAction;
   phase: 'hot' | 'cold';
   onCancel: () => void;
-  onDone: (value: RollupAction) => void;
+  onDone: (value: RollupAction['config']) => void;
 }
 
 export interface StepFields {
@@ -310,9 +310,7 @@ export class RollupWizard extends Component<Props, State> {
 
   save = () => {
     const rollupConfig = this.getAllFields();
-    this.props.onDone({
-      config: serializeRollup(rollupConfig),
-    });
+    this.props.onDone(serializeRollup(rollupConfig));
   };
 
   render() {
