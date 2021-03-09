@@ -95,17 +95,12 @@ export function indexDataProvider(
   }
 
   async function createIndexPattern(indexPatternName: string) {
-    try {
-      await indexPatternsService.createAndSave(
-        {
-          title: indexPatternName,
-        },
-        true
-      );
-    } catch (error) {
-      logger.error(`Error creating index pattern "${indexPatternName}". ${error.message}`);
-      return;
-    }
+    await indexPatternsService.createAndSave(
+      {
+        title: indexPatternName,
+      },
+      true
+    );
   }
 
   async function writeDataToIndex(index: string, data: InputData) {
