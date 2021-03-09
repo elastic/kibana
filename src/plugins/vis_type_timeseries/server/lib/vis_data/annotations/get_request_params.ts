@@ -14,10 +14,10 @@ import {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { AbstractSearchStrategy } from '../../search_strategies';
+import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
 
 export type AnnotationServices = VisTypeTimeseriesRequestServices & {
-  capabilities: any;
+  capabilities: DefaultSearchCapabilities;
   requestContext: VisTypeTimeseriesRequestHandlerContext;
   searchStrategy: AbstractSearchStrategy;
 };
