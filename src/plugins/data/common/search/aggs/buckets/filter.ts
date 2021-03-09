@@ -49,7 +49,6 @@ export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: st
           const input = cloneDeep(filter);
 
           if (!input) {
-            console.log('malformed filter agg params, missing query'); // eslint-disable-line no-console
             return;
           }
 

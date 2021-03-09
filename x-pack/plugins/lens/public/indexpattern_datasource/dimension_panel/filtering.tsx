@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'src/plugins/data/public';
 import { IndexPatternColumn, operationDefinitionMap } from '../operations';
-import { QueryInput } from '../operations/definitions/filters/filter_popover';
+import { QueryInput } from '../query_input';
 import { IndexPattern, IndexPatternLayer } from '../types';
 
 // to do: get the language from uiSettings
-const defaultFilter: Query = {
+export const defaultFilter: Query = {
   query: '',
   language: 'kuery',
 };
 
-export function setFilter(columnId: string, layer: IndexPatternLayer, query: Query) {
+export function setFilter(columnId: string, layer: IndexPatternLayer, query: Query | undefined) {
   return {
     ...layer,
     columns: {
       ...layer.columns,
       [columnId]: {
         ...layer.columns[columnId],
-        filter: query.query !== '' ? query : undefined,
+        filter: query,
       },
     },
   };
@@ -48,7 +47,7 @@ export function Filtering({
   updateLayer: (newLayer: IndexPatternLayer) => void;
 }) {
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
-  if (!selectedOperation.filterable) {
+  if (!selectedOperation.filterable || !selectedColumn.filter) {
     return null;
   }
 
@@ -56,21 +55,9 @@ export function Filtering({
     <EuiFormRow
       display="columnCompressed"
       fullWidth
-      label={
-        <EuiToolTip
-          content={i18n.translate('xpack.lens.indexPattern.timeScale.tooltip', {
-            defaultMessage:
-              'Normalize values to be always shown as rate per specified time unit, regardless of the underlying date interval.',
-          })}
-        >
-          <span>
-            {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
-              defaultMessage: 'Filter by',
-            })}{' '}
-            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      }
+      label={i18n.translate('xpack.lens.indexPattern.filterBy.label', {
+        defaultMessage: 'Filter by',
+      })}
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
@@ -83,6 +70,20 @@ export function Filtering({
             }}
             isInvalid={false}
             onSubmit={() => {}}
+            disableAutoFocus={true}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            data-test-subj="indexPattern-filter-by-remove"
+            color="danger"
+            aria-label={i18n.translate('xpack.lens.filterBy.removeLabel', {
+              defaultMessage: 'Remove filter',
+            })}
+            onClick={() => {
+              updateLayer(setFilter(columnId, layer, undefined));
+            }}
+            iconType="cross"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

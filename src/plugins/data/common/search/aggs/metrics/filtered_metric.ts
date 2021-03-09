@@ -36,7 +36,7 @@ export const getFilteredMetricAgg = () => {
     title: filteredMetricTitle,
     makeLabel: (agg) => makeNestedLabel(agg, filteredMetricLabel),
     subtype,
-    params: [...params(['filter'], false)],
+    params: [...params(['filter'])],
     hasNoDslParams: true,
     getSerializedFormat,
     getValue(agg, bucket) {

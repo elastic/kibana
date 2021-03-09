@@ -99,6 +99,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
+        filter: previousColumn?.filter,
         params: getFormatFromPreviousColumn(previousColumn),
       } as T),
     onFieldChange: (oldColumn, field) => {

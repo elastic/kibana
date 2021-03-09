@@ -32,6 +32,7 @@ import {
   resetIncomplete,
   FieldBasedIndexPatternColumn,
   canTransition,
+  DEFAULT_TIME_SCALE,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -41,8 +42,9 @@ import { IndexPattern, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { TimeScaling } from './time_scaling';
-import { Filtering } from './filtering';
+import { setTimeScaling, TimeScaling } from './time_scaling';
+import { defaultFilter, Filtering, setFilter } from './filtering';
+import { AdvancedOptions } from './advanced_options';
 
 const operationPanels = getOperationDisplay();
 
@@ -447,11 +449,59 @@ export function DimensionEditor(props: DimensionEditorProps) {
         )}
 
         {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
-          <Filtering
-            selectedColumn={selectedColumn}
-            columnId={columnId}
-            layer={state.layers[layerId]}
-            updateLayer={setStateWrapper}
+          <AdvancedOptions
+            options={[
+              {
+                title: i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
+                  defaultMessage: 'Normalize by unit',
+                }),
+                dataTestSubj: 'indexPattern-time-scaling-enable',
+                onClick: () => {
+                  setStateWrapper(
+                    setTimeScaling(columnId, state.layers[layerId], DEFAULT_TIME_SCALE)
+                  );
+                },
+                showInPopover: Boolean(
+                  operationDefinitionMap[selectedColumn.operationType].timeScalingMode &&
+                    operationDefinitionMap[selectedColumn.operationType].timeScalingMode !==
+                      'disabled' &&
+                    Object.values(state.layers[layerId].columns).some(
+                      (col) => col.operationType === 'date_histogram'
+                    ) &&
+                    !selectedColumn.timeScale
+                ),
+                inlineElement: (
+                  <TimeScaling
+                    selectedColumn={selectedColumn}
+                    columnId={columnId}
+                    layer={state.layers[layerId]}
+                    updateLayer={setStateWrapper}
+                  />
+                ),
+              },
+              {
+                title: i18n.translate('xpack.lens.indexPattern.filterBy.label', {
+                  defaultMessage: 'Filter by',
+                }),
+                dataTestSubj: 'indexPattern-filter-by-enable',
+                onClick: () => {
+                  setStateWrapper(setFilter(columnId, state.layers[layerId], defaultFilter));
+                },
+                showInPopover: Boolean(
+                  operationDefinitionMap[selectedColumn.operationType].filterable &&
+                    !selectedColumn.filter
+                ),
+                inlineElement: (
+                  <Filtering
+                    indexPattern={currentIndexPattern}
+                    selectedColumn={selectedColumn}
+                    columnId={columnId}
+                    layer={state.layers[layerId]}
+                    updateLayer={setStateWrapper}
+                  />
+                ),
+              },
+            ]}
           />
         )}
       </div>

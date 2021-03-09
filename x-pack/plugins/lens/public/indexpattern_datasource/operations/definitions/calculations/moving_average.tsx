@@ -89,6 +89,7 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
+      filter: previousColumn?.filter,
       params: {
         window: 5,
         ...getFormatFromPreviousColumn(previousColumn),

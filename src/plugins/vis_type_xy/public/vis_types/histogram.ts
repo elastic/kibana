@@ -137,7 +137,7 @@ export const getHistogramVisTypeDefinition = (
           defaultMessage: 'Y-axis',
         }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric'],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {

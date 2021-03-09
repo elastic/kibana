@@ -941,6 +941,48 @@ describe('state_helpers', () => {
         );
       });
 
+      it('should remove filter from the wrapped column if it gets wrapped (case new1)', () => {
+        const expectedColumn = {
+          label: 'Count',
+          customLabel: true,
+          dataType: 'number' as const,
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count' as const,
+        };
+
+        const testFilter = { language: 'kuery', query: '' };
+
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: { col1: { ...expectedColumn, filter: testFilter } },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'col1',
+          op: 'testReference' as OperationType,
+        });
+
+        expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            referenceIds: ['id1'],
+            previousColumn: expect.objectContaining({
+              // filter should be passed to the buildColumn function of the target operation
+              filter: testFilter,
+            }),
+          })
+        );
+        expect(result.columns).toEqual(
+          expect.objectContaining({
+            // filter should be stripped from the original column
+            id1: expectedColumn,
+            col1: expect.any(Object),
+          })
+        );
+      });
+
       it('should create a new no-input operation to use as reference (case new2)', () => {
         // @ts-expect-error this function is not valid
         operationDefinitionMap.testReference.requiredReferences = [

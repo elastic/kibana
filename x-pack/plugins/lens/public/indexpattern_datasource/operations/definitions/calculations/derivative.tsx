@@ -83,6 +83,7 @@ export const derivativeOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
+      filter: previousColumn?.filter,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

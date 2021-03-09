@@ -21,6 +21,7 @@ const metricAggFilter = [
   '!std_dev',
   '!geo_bounds',
   '!geo_centroid',
+  '!filtered_metric',
 ];
 
 export const parentPipelineType = i18n.translate(

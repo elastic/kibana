@@ -61,6 +61,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
+      filter: previousColumn?.filter,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&

@@ -62,7 +62,7 @@ export const aggFilter = (): FunctionDefinition => ({
     filter: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.filter.filter.help', {
-        defaultMessage: 'Filter results based on a kql query',
+        defaultMessage: 'Filter results based on a kql or lucene query',
       }),
     },
     json: {

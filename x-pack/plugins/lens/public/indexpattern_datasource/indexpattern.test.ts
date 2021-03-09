@@ -519,6 +519,123 @@ describe('IndexPattern Data Source', () => {
       ]);
     });
 
+    it('should wrap filtered metrics in filtered metric aggregation', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2', 'col3'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+                timeScale: 'h',
+                filter: {
+                  language: 'kuery',
+                  query: 'bytes > 5',
+                },
+              },
+              col2: {
+                label: 'Average of bytes',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'bytes',
+                operationType: 'avg',
+                timeScale: 'h',
+              },
+              col3: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      expect(ast.chain[0].arguments.aggs[0]).toMatchInlineSnapshot(`
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "customBucket": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "filter": Array [
+                            "{\\"language\\":\\"kuery\\",\\"query\\":\\"bytes > 5\\"}",
+                          ],
+                          "id": Array [
+                            "col1-filter",
+                          ],
+                          "schema": Array [
+                            "bucket",
+                          ],
+                        },
+                        "function": "aggFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+                "customMetric": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "id": Array [
+                            "col1-metric",
+                          ],
+                          "schema": Array [
+                            "metric",
+                          ],
+                        },
+                        "function": "aggCount",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+                "enabled": Array [
+                  true,
+                ],
+                "id": Array [
+                  "col1",
+                ],
+                "schema": Array [
+                  "metric",
+                ],
+              },
+              "function": "aggFilteredMetric",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
+    });
+
     it('should add time_scale and format function if time scale is set and supported', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',

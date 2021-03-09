@@ -27,6 +27,7 @@ const metricAggFilter: string[] = [
   '!cumulative_sum',
   '!geo_bounds',
   '!geo_centroid',
+  '!filtered_metric',
 ];
 const bucketAggFilter: string[] = [];
 
@@ -39,7 +40,7 @@ export const siblingPipelineType = i18n.translate(
 
 export const siblingPipelineAggHelper = {
   subtype: siblingPipelineType,
-  params(bucketFilter = bucketAggFilter, writeBucketsPath = true) {
+  params(bucketFilter = bucketAggFilter) {
     return [
       {
         name: 'customBucket',
@@ -70,7 +71,7 @@ export const siblingPipelineAggHelper = {
           'customMetric'
         ),
         write: (agg: IMetricAggConfig, output: Record<string, any>) =>
-          siblingPipelineAggWriter(agg, output, writeBucketsPath),
+          siblingPipelineAggWriter(agg, output),
       },
     ] as Array<MetricAggParam<IMetricAggConfig>>;
   },

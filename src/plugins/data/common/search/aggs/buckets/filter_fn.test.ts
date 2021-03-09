@@ -23,6 +23,7 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "customLabel": undefined,
+              "filter": undefined,
               "geo_bounding_box": undefined,
               "json": undefined,
             },
@@ -46,6 +47,7 @@ describe('agg_expression_functions', () => {
           "id": undefined,
           "params": Object {
             "customLabel": undefined,
+            "filter": undefined,
             "geo_bounding_box": Object {
               "wkt": "BBOX (-74.1, -71.12, 40.73, 40.01)",
             },
@@ -55,6 +57,14 @@ describe('agg_expression_functions', () => {
           "type": "filter",
         }
       `);
+    });
+
+    test('correctly parses filter string argument', () => {
+      const actual = fn({
+        filter: '{ "language": "kuery", "query": "a: b" }',
+      });
+
+      expect(actual.value.params.filter).toEqual({ language: 'kuery', query: 'a: b' });
     });
 
     test('correctly parses json string argument', () => {

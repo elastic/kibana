@@ -473,7 +473,18 @@ function applyReferenceTransition({
     if (!hasExactMatch && isColumnValidAsReference({ validation, column: previousColumn })) {
       hasExactMatch = true;
 
-      const newLayer = { ...layer, columns: { ...layer.columns, [newId]: { ...previousColumn } } };
+      const newLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          [newId]: {
+            ...previousColumn,
+            // drop the filter for the referenced column because the wrapping operation
+            // is filterable as well and will handle it one level higher.
+            filter: operationDefinition.filterable ? undefined : previousColumn.filter,
+          },
+        },
+      };
       layer = {
         ...layer,
         columnOrder: getColumnOrder(newLayer),
