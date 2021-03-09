@@ -129,6 +129,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
                 <EuiText size="xs">
                   <p role="status" aria-live="polite" aria-atomic="true">
                     <FormattedMessage
+                      data-test-subj="inspectorDataViewSelectorLabel"
                       id="data.inspector.table.tablesDescription"
                       defaultMessage="There are {tablesCount, plural, one {# table} other {# tables} } in total"
                       values={{
