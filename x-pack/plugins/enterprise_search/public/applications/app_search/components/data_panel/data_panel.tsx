@@ -48,21 +48,21 @@ export const DataPanel: React.FC<Props> = ({
     <EuiPanel {...props} color={filled ? 'subdued' : 'plain'} className={classes} hasShadow={false}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem>
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {iconType && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiIcon type={iconType} />
               </EuiFlexItem>
             )}
             <EuiFlexItem>
               <EuiTitle size="xs">{title}</EuiTitle>
-              {subtitle && (
-                <EuiText size="s" color="subdued">
-                  <p>{subtitle}</p>
-                </EuiText>
-              )}
             </EuiFlexItem>
           </EuiFlexGroup>
+          {subtitle && (
+            <EuiText size="s" color="subdued">
+              <p>{subtitle}</p>
+            </EuiText>
+          )}
         </EuiFlexItem>
         {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
       </EuiFlexGroup>
