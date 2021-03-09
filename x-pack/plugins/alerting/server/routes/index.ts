@@ -12,6 +12,8 @@ import { AlertingRequestHandlerContext } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { createRuleRoute } from './create_rule';
 import { getRuleRoute } from './get_rule';
+import { updateRuleRoute } from './update_rule';
+import { deleteRuleRoute } from './delete_rule';
 
 export function defineRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
@@ -21,4 +23,6 @@ export function defineRoutes(
   defineLegacyRoutes(router, licenseState, encryptedSavedObjects);
   createRuleRoute(router, licenseState);
   getRuleRoute(router, licenseState);
+  updateRuleRoute(router, licenseState);
+  deleteRuleRoute(router, licenseState);
 }
