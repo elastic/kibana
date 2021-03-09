@@ -145,7 +145,9 @@ describe('import_rules_route', () => {
     test('returns an error when cluster throws error', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+        elasticsearchClientMock.createErrorTransportRequestPromise({
+          body: new Error('Test error'),
+        })
       );
 
       const response = await server.inject(request, context);

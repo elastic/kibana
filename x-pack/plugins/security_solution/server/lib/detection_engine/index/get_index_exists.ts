@@ -20,10 +20,10 @@ export const getIndexExists = async (
     });
     return response._shards.total > 0;
   } catch (err) {
-    if (err.body.status === 404) {
+    if (err.body?.status === 404) {
       return false;
     } else {
-      throw err;
+      throw err.body ? err.body : err;
     }
   }
 };

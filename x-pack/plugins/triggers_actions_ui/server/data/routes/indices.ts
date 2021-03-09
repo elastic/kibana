@@ -115,8 +115,7 @@ async function getAliasesFromPattern(
 ): Promise<string[]> {
   const params = {
     index: pattern,
-    ignoreUnavailable: true,
-    ignore: [404],
+    ignore_unavailable: true,
   };
   const result: string[] = [];
 

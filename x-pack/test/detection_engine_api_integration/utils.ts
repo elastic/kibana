@@ -994,6 +994,7 @@ export const waitForRuleSuccessOrStatus = async (
       .set('kbn-xsrf', 'true')
       .send({ ids: [id] })
       .expect(200);
+      console.log(body[id]?.current_status?.status);
     return body[id]?.current_status?.status === status;
   }, 'waitForRuleSuccess');
 };

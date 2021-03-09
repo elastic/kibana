@@ -39,9 +39,9 @@ describe('get_index_exists', () => {
   test('it should return a false if it encounters a 404', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockReturnValue(
-      elasticsearchClientMock.createErrorTransportRequestPromise(
-        new StatusCode(404, 'I am a 404 error')
-      )
+      elasticsearchClientMock.createErrorTransportRequestPromise({
+        body: new StatusCode(404, 'I am a 404 error'),
+      })
     );
     const indexExists = await getIndexExists(esClient, 'some-index');
     expect(indexExists).toEqual(false);

@@ -97,9 +97,8 @@ async function getRawFields(esClient: ElasticsearchClient, indexes: string[]): P
   const params = {
     index: indexes,
     fields: ['*'],
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: 404,
+    ignore_unavailable: true,
+    allow_no_indices: true,
   };
   const result = await esClient.fieldCaps(params);
   return result.body as RawFields;
