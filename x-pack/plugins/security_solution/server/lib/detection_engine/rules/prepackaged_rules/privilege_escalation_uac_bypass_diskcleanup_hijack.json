@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "UAC Bypass via DiskCleanup Scheduled Task Hijack",
   "query": "process where event.type in (\"start\", \"process_started\") and\nprocess.args:\"/autoclean\" and process.args:\"/d\" and\nnot process.executable : (\"C:\\\\Windows\\\\System32\\\\cleanmgr.exe\", \"C:\\\\Windows\\\\SysWOW64\\\\cleanmgr.exe\")\n",
   "risk_score": 47,
