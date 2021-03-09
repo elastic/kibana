@@ -1,0 +1,121 @@
+[[tutorial-secure-access-to-kibana]]
+== How to: Secure access to {kib}
+
+
+{kib} is home to an ever-growing suite of powerful features, which help you get the most out of your data. We believe that all data is important, and should be protected. We not only allow you to secure access to your data, but also to control how users are able to interact with your data inside of {kib}.
+
+For example, some users might only need to view your stunning dashboards, while others may need to manage your fleet of Elastic agents and run machine learning jobs to detect anomalous behavior in your network.
+
+[float]
+=== Spaces
+
+Do you have multiple teams using {kib}? Do you want a “playground” to experiment with new visualizations or alerts? If so, then <<xpack-spaces,{kib} Spaces>> can help! Think of a Space as another instance of {kib} - it allows you to organize your <<dashboard, dashboards>>, <<alerting-getting-started, alerts>>, <<xpack-ml, machine learning jobs>>, and much more into their own categories. For example, you may have a Marketing space for your marketers to track the results of their campaigns, and an Engineering space for your developers to {apm-get-started-ref}/overview.html[monitor application performance].
+
+The assets you create in one Space are isolated from other Spaces, so when you enter a Space, you’ll only see the assets that belong to that space.
+
+Refer to the <<xpack-spaces, Spaces documentation>> for more information.
+
+[float]
+=== Users and roles
+
+The first step to securing access is to provision your users and roles. {kib}'s user management screen allows you to provision accounts for each of your users.
+
+TIP: Want Single Sign-on? {kib} supports a wide range of SSO implementations, including SAML, OIDC, LDAP/AD, and Kerberos. <<kibana-authentication, Learn more about {kib}'s SSO features>>.
+
+Each of your users should be assigned one or more roles. Roles are a collection of privileges that allow you to perform actions in {kib} and Elasticsearch.
+
+For example, you might create a `marketing_user` role, which you then assign to all users in your marketing department. This role would grant access to all of the necessary data and features for this team to be successful, without granting them access they don’t require.
+
+[float]
+=== Built-in Roles
+
+{kib} ships with a number of {ref}/built-in-roles.html[built-in roles]. Some of these roles are designed to be used by Elastic stack components (such as {kib} itself), while others are suitable for end-users.
+
+For example, granting the `kibana_admin` role will allow your users to access all features within {kib}. This includes the ability to manage Spaces.
+
+These roles are great for getting started with the stack, and for system administrators who do not need more restrictive access. With so many features, it’s not possible for us to ship more granular roles to accommodate everyone’s needs. This is where custom roles come in. As an administrator, you have the ability to create your own roles to describe exactly the kind of access your users should have.
+
+
+
+[float]
+[[tutorial-secure-kibana-dashboards-only]]
+=== Example: Dave should only see Dashboards
+
+Let’s work through an example together. Dave is a marketing analyst who wants to monitor the effectiveness of his campaigns. Dave should be able to see his team’s dashboards, but he should not be allowed to view or manage anything else in {kib}. All of his team’s dashboards are located in the `Marketing` space.
+
+[float]
+==== Prerequisites:
+
+* This example assumes you already created a Space named `Marketing`. Refer to the <<xpack-spaces, Spaces documentation>> for instructions on setting up Spaces.
+
+[float]
+==== Step 1: Create a role
+
+The first step in securing access is to create a role that describes the privileges we want to grant.
+
+To effectively use dashboards, Dave will need:
+
+* Access to **read** the data that powers the dashboards
+* Access to **read** the dashboards within the `Marketing` space.
+
+Let’s get started!
+
+. Navigate to {kib}’s **Stack Management** application, and select the **Roles** menu item under the **Security** section.
+. Click on **Create role** to start the role creation process.
+. Give this role a unique name. For example: `*marketing_dashboards_role*`
+. Granting access to the underlying data is governed by **Index privileges**. For this example, we’ll say that all marketing data is stored in the `acme-marketing-*` set of indices. To grant this access, locate the **Index privileges** section and enter:
+.. `acme-marketing-*` in the **Index** field.
+.. `read` and `view_index_metadata` in the **Privileges** field.
++
+TIP: You can add multiple patterns of indices, and grant different access levels to each. Click **Add index privilege** to grant additional access.
+. Granting access to dashboards within the `Marketing` space is governed by *{kib} Privileges*. To grant this access, locate the {kib} section, and click **Add {kib} privilege**:
+.. Select the `Marketing` space from the **Spaces** dropdown.
+.. Expand the **Analytics** section, and select the **Read** privilege for the **Dashboard** feature.
+.. Click **Add Kibana privilege** at the end of the form.
+. Click **Create role** to finish.
+
+If you’ve followed the example above, you should end up with a role that looks like this:
+
+[role="screenshot"]
+image::getting-started/images/tutorial-secure-access-example-1-role.png[Create role UI]
+
+
+[float]
+==== Step 2: Create a user
+
+Now that we have a role created, it’s time to create a user account for Dave.
+
+. Navigate to {kib}’s *Stack Management* application, and select the *Users* menu item under the *Security* section.
+. Click on *Create user* to start the user creation process.
+. Give this user a descriptive username, and choose a secure password.
+. Assign the *marketing_dashboards_role* that you created in step 1 to this new user.
+. Click *Create user* to finish
+
+[role="screenshot"]
+image::getting-started/images/tutorial-secure-access-example-1-user.png[Create user UI]
+
+[float]
+==== Step 3: Verify
+
+Now that we have a user and role created for Dave, it’s time to verify that everything is working correctly.
+
+. Logout of {kib} if you are already logged in
+. Once you are at the login screen, enter the username and password for the account you created in Step 2.
+
+Notice that you’re brought directly into the `Marketing` space, and the main navigation shows only the Dashboards application.
+
+[role="screenshot"]
+image::getting-started/images/tutorial-secure-access-example-1-test.png[Verifying access to dashboards]
+
+You did it!
+
+[float]
+=== What's next?
+
+This guide is an introduction to {kib}'s security features. Check out these additional resources to learn more about authenticating and authorizing your users.
+
+View our <<kibana-authentication, authentication guide>> to learn more about single-sign on and other login features.
+
+View our <<xpack-security-authorization, authorization guide>> to learn more about authorizing access to {kib}'s features.
+
+Still have questions? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or Elastic engineer will be glad to help you out.
