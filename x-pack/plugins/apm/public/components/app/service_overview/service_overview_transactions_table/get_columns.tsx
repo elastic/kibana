@@ -166,9 +166,11 @@ export function getColumns({
             <EuiFlexItem>
               <ImpactBar value={currentImpact} size="m" />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <ImpactBar value={previousImpact} size="s" color="subdued" />
-            </EuiFlexItem>
+            {comparisonEnabled && (
+              <EuiFlexItem>
+                <ImpactBar value={previousImpact} size="s" color="subdued" />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         );
       },
