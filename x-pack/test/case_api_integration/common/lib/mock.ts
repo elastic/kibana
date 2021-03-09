@@ -23,7 +23,7 @@ import {
   CommentType,
   CaseStatuses,
   CaseType,
-  CaseClientPostRequest,
+  CasesClientPostRequest,
   SubCaseResponse,
   AssociationType,
   SubCasesFindResponse,
@@ -57,7 +57,7 @@ export const postCollectionReq: CasePostRequest = {
 /**
  * This is needed because the post api does not allow specifying the case type. But the response will include the type.
  */
-export const userActionPostResp: CaseClientPostRequest = {
+export const userActionPostResp: CasesClientPostRequest = {
   ...postCaseReq,
   type: CaseType.individual,
 };

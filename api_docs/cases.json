@@ -21,9 +21,9 @@
         "children": [
           {
             "tags": [],
-            "id": "def-server.CaseRequestContext.getCaseClient",
+            "id": "def-server.CaseRequestContext.getCasesClient",
             "type": "Function",
-            "label": "getCaseClient",
+            "label": "getCasesClient",
             "description": [],
             "source": {
               "path": "x-pack/plugins/cases/server/types.ts",
@@ -35,8 +35,8 @@
                 "pluginId": "cases",
                 "scope": "server",
                 "docId": "kibCasePluginApi",
-                "section": "def-server.CaseClient",
-                "text": "CaseClient"
+                "section": "def-server.CasesClient",
+                "text": "CasesClient"
               }
             ]
           }
