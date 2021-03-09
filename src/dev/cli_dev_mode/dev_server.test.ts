@@ -120,9 +120,12 @@ describe('#run$', () => {
             "env": Object {
               "<inheritted process.env>": true,
               "ELASTIC_APM_SERVICE_NAME": "kibana",
+              "FORCE_COLOR": "true",
               "isDevCliChild": "true",
             },
-            "nodeOptions": Array [],
+            "nodeOptions": Array [
+              "--preserve-symlinks",
+            ],
             "stdio": "pipe",
           },
         ],
