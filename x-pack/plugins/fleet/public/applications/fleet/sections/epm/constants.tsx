@@ -32,7 +32,6 @@ export const AssetTitleMap: Record<AssetType, string> = {
   map: 'Map',
   data_stream_ilm_policy: 'Data Stream ILM Policy',
   lens: 'Lens',
-  ml_module: 'ML Module',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
@@ -47,7 +46,6 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   visualization: 'visualizeApp',
   map: 'emsApp',
   lens: 'lensApp',
-  ml_module: 'mlApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

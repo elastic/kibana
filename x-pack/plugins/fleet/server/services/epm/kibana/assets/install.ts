@@ -37,7 +37,6 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.search]: KibanaSavedObjectType.search,
   [KibanaAssetType.visualization]: KibanaSavedObjectType.visualization,
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
-  [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
 };
 
 // Define how each asset type will be installed
@@ -54,7 +53,6 @@ const AssetInstallers: Record<
   [KibanaAssetType.search]: installKibanaSavedObjects,
   [KibanaAssetType.visualization]: installKibanaSavedObjects,
   [KibanaAssetType.lens]: installKibanaSavedObjects,
-  [KibanaAssetType.mlModule]: installKibanaSavedObjects,
 };
 
 export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {
