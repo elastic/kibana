@@ -309,9 +309,9 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   note: '# test markdown',
   runsEvery,
   lookBack,
-  indicatorIndexPattern: ['threat-indicator-*'],
-  indicatorMapping: 'agent.id',
-  indicatorIndexField: 'agent.threat',
+  indicatorIndexPattern: ['filebeat-*'],
+  indicatorMapping: 'myhash.mysha256',
+  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
   timeline,
   maxSignals: 100,
 };
