@@ -96,8 +96,14 @@ export type ReindexSavedObject = SavedObject<ReindexOperation>;
 export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
 export interface ReindexWarning {
   warningType: ReindexWarningTypes;
-  // We may want to provide metadata for certain deprecations
-  // For example, for the customTypeName deprecation, we want to surface the typeName to the user
+  /**
+   * Optional metadata for deprecations
+   *
+   * @remark
+   * For example, for the "customTypeName" deprecation,
+   * we want to surface the typeName to the user.
+   * For "indexSetting" we want to surface the deprecated settings.
+   */
   meta?: {
     [key: string]: string | string[];
   };

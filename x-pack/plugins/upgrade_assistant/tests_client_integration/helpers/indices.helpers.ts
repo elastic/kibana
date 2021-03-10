@@ -45,7 +45,7 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setup = async (overrides?: any): Promise<IndicesTestBed> => {
+export const setup = async (overrides?: Record<string, unknown>): Promise<IndicesTestBed> => {
   const initTestBed = registerTestBed(WithAppDependencies(PageContent, overrides), testBedConfig);
   const testBed = await initTestBed();
 

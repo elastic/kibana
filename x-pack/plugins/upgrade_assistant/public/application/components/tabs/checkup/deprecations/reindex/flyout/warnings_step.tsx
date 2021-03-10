@@ -56,7 +56,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   closeFlyout,
   advanceNextStep,
 }) => {
-  const { docLinks, kibanaVersionInfo } = useAppContext();
+  const { docLinks } = useAppContext();
   const { links } = docLinks;
 
   const [checkedIds, setCheckedIds] = useState<CheckedIds>(
@@ -105,20 +105,19 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
         <EuiSpacer />
 
-        {kibanaVersionInfo.currentMajor === 7 &&
-          warnings.map((warning, index) => {
-            const WarningCheckbox = warningToComponentMap[warning.warningType];
-            return (
-              <WarningCheckbox
-                key={idForWarning(index)}
-                isChecked={checkedIds[idForWarning(index)]}
-                onChange={onChange}
-                docLinks={links}
-                id={idForWarning(index)}
-                meta={warning.meta}
-              />
-            );
-          })}
+        {warnings.map((warning, index) => {
+          const WarningCheckbox = warningToComponentMap[warning.warningType];
+          return (
+            <WarningCheckbox
+              key={idForWarning(index)}
+              isChecked={checkedIds[idForWarning(index)]}
+              onChange={onChange}
+              docLinks={links}
+              id={idForWarning(index)}
+              meta={warning.meta}
+            />
+          );
+        })}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

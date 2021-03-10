@@ -15,7 +15,12 @@ export interface ParsedIndexName {
   newIndexName: string;
   cleanBaseName: string;
 }
-
+/**
+ * An array of deprecated index settings specific to 7.0 --> 8.0 upgrade
+ * This excludes the deprecated translog retention settings
+ * as these are only marked as deprecated if soft deletes is enabled
+ * See logic in getDeprecatedSettingWarning() for more details
+ */
 const deprecatedSettings = [
   'index.force_memory_term_dictionary',
   'index.max_adjacency_matrix_filters',

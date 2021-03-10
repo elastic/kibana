@@ -12,7 +12,7 @@ import { useAppContext } from '../../../../../app_context';
 
 interface Props {
   children: (
-    removeIndexSettings: any,
+    removeSettingsPrompt: (index: string, settings: string[]) => void,
     successfulRequests: { [key: string]: boolean }
   ) => React.ReactNode;
 }
@@ -72,7 +72,6 @@ export const RemoveIndexSettingsProvider = ({ children }: Props) => {
       setIsLoading(false);
       setSuccessfulRequests({
         [indexName.current!]: true,
-        ...successfulRequests,
       });
       closeModal();
       notifications.toasts.addSuccess(i18nTexts.successNotificationText);
@@ -92,8 +91,7 @@ export const RemoveIndexSettingsProvider = ({ children }: Props) => {
   const removeSettingsPrompt = (index: string, settings: string[]) => {
     setIsModalOpen(true);
     setSuccessfulRequests({
-      index: false,
-      ...successfulRequests,
+      [index]: false,
     });
     indexName.current = index;
     deprecatedSettings.current = settings;

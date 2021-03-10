@@ -32,7 +32,10 @@ const contextValue = {
   notifications: notificationServiceMock.createStartContract(),
 };
 
-export const WithAppDependencies = (Comp: any, overrides: any = {}) => (props: any) => {
+export const WithAppDependencies = (
+  Comp: React.FunctionComponent<Record<string, unknown>>,
+  overrides: Record<string, unknown> = {}
+) => (props: Record<string, unknown>) => {
   return (
     <AppContextProvider value={{ ...contextValue, ...overrides }}>
       <Comp {...props} />
