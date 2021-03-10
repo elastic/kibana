@@ -13,15 +13,21 @@ import { useDrilldownManager } from '../context';
 export interface ActionFactoryViewProps {
   factory: ActionFactory;
   context: BaseActionFactoryContext;
+  constant?: boolean;
 }
 
-export const ActionFactoryView: React.FC<ActionFactoryViewProps> = ({ factory, context }) => {
+export const ActionFactoryView: React.FC<ActionFactoryViewProps> = ({
+  factory,
+  context,
+  constant,
+}) => {
   const drilldowns = useDrilldownManager();
   const name = React.useMemo(() => factory.getDisplayName(context), [factory, context]);
   const icon = React.useMemo(() => factory.getIconType(context), [factory, context]);
-  const handleChange = React.useCallback(() => {
-    drilldowns.setActionFactory(undefined);
-  }, [drilldowns]);
+  const handleChange = React.useMemo(() => {
+    if (constant) return undefined;
+    return () => drilldowns.setActionFactory(undefined);
+  }, [drilldowns, constant]);
 
   return <ActionFactoryUi name={name} icon={icon} beta={factory.isBeta} onChange={handleChange} />;
 };

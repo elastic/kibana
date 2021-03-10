@@ -11,7 +11,7 @@ import { EuiButton } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { useDrilldownManager } from '../context';
-import { ActionFactoryPicker } from '../action_factory_picker';
+import { ActionFactoryView } from '../action_factory_view';
 import { DrilldownManagerFooter } from '../drilldown_manager_footer';
 import { DrilldownStateForm } from '../drilldown_state_form';
 
@@ -55,7 +55,11 @@ export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId })
   return (
     <>
       <DrilldownManagerTitle>{txtEditDrilldown}</DrilldownManagerTitle>
-      <ActionFactoryPicker />
+      <ActionFactoryView
+        constant
+        factory={drilldownState.factory}
+        context={drilldownState.getFactoryContext()}
+      />
       {!!drilldownState && <DrilldownStateForm state={drilldownState} disabled={disabled} />}
       {!!drilldownState && (
         <DrilldownManagerFooter>

@@ -82,7 +82,7 @@ export interface ActionFactoryProps {
   showMoreLink?: boolean;
 
   /** On drilldown type change click. */
-  onChange: () => void;
+  onChange?: () => void;
 }
 
 export const ActionFactory: React.FC<ActionFactoryProps> = ({
