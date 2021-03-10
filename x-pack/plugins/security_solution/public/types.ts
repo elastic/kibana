@@ -22,7 +22,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
-import { CaseUiStart } from '../../case/public';
+import { CasesUiStart } from '../../cases/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
@@ -48,7 +48,7 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
-  case: CaseUiStart;
+  cases: CasesUiStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;

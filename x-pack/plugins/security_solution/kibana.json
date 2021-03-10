@@ -7,7 +7,7 @@
   "requiredPlugins": [
     "actions",
     "alerting",
-    "case",
+    "cases",
     "data",
     "dataEnhanced",
     "embeddable",

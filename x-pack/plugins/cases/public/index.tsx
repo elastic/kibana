@@ -7,13 +7,13 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import React from 'react';
-import { CaseUiPlugin } from './plugin';
+import { CasesUiPlugin } from './plugin';
 
 export const TestComponent = () => <div>{'Hello from cases plugin!'}</div>;
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new CaseUiPlugin(initializerContext);
+  return new CasesUiPlugin(initializerContext);
 }
 
-export { CaseUiPlugin };
+export { CasesUiPlugin };
 export * from './plugin';

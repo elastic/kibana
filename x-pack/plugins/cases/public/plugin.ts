@@ -8,27 +8,21 @@
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 import { TestComponent } from '.';
 
-export interface CaseUi {
-  caseComponent?: () => JSX.Element;
+export interface CasesUiStart {
+  casesComponent: () => JSX.Element;
 }
 
-// export interface CaseUiSetup {}
-
-export interface CaseUiStart {
-  caseComponent: () => JSX.Element;
-}
-
-export class CaseUiPlugin implements Plugin<void, CaseUiStart> {
-  private readonly caseUi: CaseUi = {};
+export class CasesUiPlugin implements Plugin<void, CasesUiStart> {
+  private readonly casesUi = {} as CasesUiStart;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): void {
-    this.caseUi.caseComponent = TestComponent;
+    this.casesUi.casesComponent = TestComponent;
   }
 
-  public start(core: CoreStart): CaseUiStart {
-    return this.caseUi as CaseUiStart;
+  public start(core: CoreStart): CasesUiStart {
+    return this.casesUi;
   }
 
   public stop() {}
