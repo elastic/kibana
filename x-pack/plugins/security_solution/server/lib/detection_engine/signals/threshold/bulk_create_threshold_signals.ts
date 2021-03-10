@@ -163,6 +163,15 @@ const getTransformedHits = (
 
       const source = {
         '@timestamp': timestamp,
+        ...bucket.terms.reduce<object>((termAcc, term) => {
+          if (!term.field.startsWith('signal.')) {
+            return {
+              ...termAcc,
+              [term.field]: term.value,
+            };
+          }
+          return termAcc;
+        }, {}),
         threshold_result: {
           terms: bucket.terms,
           cardinality: bucket.cardinality,
