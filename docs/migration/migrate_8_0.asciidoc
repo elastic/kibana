@@ -84,7 +84,7 @@ See https://github.com/elastic/kibana/pull/87939 for more details.
 ==== Logging destination is specified by the appender
 *Details:* Previously log destination would be `stdout` and could be changed to `file` using `logging.dest`. 
 
-*Impact:* To restore the previous behavior, in kibana.yml use the `console` appender to send logs to `stdout`.
+*Impact:* To restore the previous behavior, in `kibana.yml` use the `console` appender to send logs to `stdout`.
 [source,yaml]
 -------------------
 logging:
@@ -112,7 +112,7 @@ logging:
 ==== Specify log event output with root
 *Details:* Previously logging output would be specified by `logging.silent` (none), 'logging.quiet' (error messages only) and `logging.verbose` (all).
 
-*Impact:* To restore the previous behavior, in kibana.yml specify `logging.root.level` as one of `off`, `error`, `all`:
+*Impact:* To restore the previous behavior, in `kibana.yml` specify `logging.root.level` as one of `off`, `error`, `all`:
 [source,yaml]
 -------------------
 # suppress all logs
@@ -144,7 +144,7 @@ logging:
 ==== Suppress all log output with root
 *Details:* Previously all logging output would be suppressed if `logging.silent` was true.
 
-*Impact:* To restore the previous behavior, in kibana.yml turn `logging.root.level` to 'off'.
+*Impact:* To restore the previous behavior, in `kibana.yml` turn `logging.root.level` to 'off'.
 [source,yaml]
 -------------------
 logging:
@@ -157,7 +157,7 @@ logging:
 ==== Suppress log output with root
 *Details:* Previously all logging output other than error messages would be suppressed if `logging.quiet` was true.
 
-*Impact:* To restore the previous behavior, in kibana.yml turn `logging.root.level` to 'error'.
+*Impact:* To restore the previous behavior, in `kibana.yml` turn `logging.root.level` to 'error'.
 [source,yaml]
 -------------------
 logging:
@@ -170,7 +170,7 @@ logging:
 ==== Log all output with root
 *Details:* Previously all events would be logged if `logging.verbose` was true.
 
-*Impact:* To restore the previous behavior, in kibana.yml turn `logging.root.level` to 'all'.
+*Impact:* To restore the previous behavior, in `kibana.yml` turn `logging.root.level` to 'all'.
 [source,yaml]
 -------------------
 logging:
@@ -183,7 +183,7 @@ logging:
 ==== Declare log message format for each custom appender
 *Details:* Previously all events would be logged in `json` format when `logging.json` was true.
 
-*Impact:* To restore the previous behavior, in kibana.yml configure the logging format for each custom appender with the `appender.layout` property. There is no default for custom appenders and each one must be configured expilictly.
+*Impact:* To restore the previous behavior, in `kibana.yml` configure the logging format for each custom appender with the `appender.layout` property. There is no default for custom appenders and each one must be configured expilictly.
 
 [source,yaml]
 -------------------
@@ -203,6 +203,33 @@ logging:
       appenders: [custom_console]
     - name: plugins.myOtherPlugin
       appenders: [custom_json]
+-------------------
+
+[float]
+==== Configure log rotation with the rolling-file appender
+*Details:* Previously log rotation would be enabled when `logging.rotate.enabled` was true.
+
+*Impact:* To restore the previous behavior, in `kibana.yml` use the `rolling-file` appender.
+
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    rolling-file:
+      type: rolling-file
+      fileName: /var/logs/kibana.log
+      policy:
+        type: size-limit
+        size: 50mb
+      strategy:
+        type: numeric
+        pattern: '-%i'
+        max: 2
+      layout:
+        type: pattern
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [rolling-file]
 -------------------
 
 [float]
