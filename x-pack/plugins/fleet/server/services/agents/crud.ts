@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
@@ -94,12 +94,14 @@ export async function listAgents(
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
+    // @ts-expect-error @elastic/elasticsearch SearchRequest.sort defined as string[]
     sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
     body,
   });
 
   let agentResults: Agent[] = res.body.hits.hits.map(searchHitToAgent);
+  // @ts-expect-error value is number | TotalHits
   let total = res.body.hits.total.value;
 
   // filtering for a range on the version string will not work,
@@ -156,6 +158,7 @@ export async function countInactiveAgents(
     track_total_hits: true,
     body,
   });
+  // @ts-expect-error value is number | TotalHits
   return res.body.hits.total.value;
 }
 
@@ -194,7 +197,7 @@ export async function getAgentByAccessAPIKeyId(
   esClient: ElasticsearchClient,
   accessAPIKeyId: string
 ): Promise<Agent> {
-  const res = await esClient.search<SearchResponse<FleetServerAgent>>({
+  const res = await esClient.search<FleetServerAgent>({
     index: AGENTS_INDEX,
     q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
   });
@@ -256,10 +259,10 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item: { update: { _id: string; error?: Error } }) => ({
-      id: item.update._id,
-      success: !item.update.error,
-      error: item.update.error,
+    items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
+      id: item.update!._id as string,
+      success: !item.update!.error,
+      error: item.update!.error,
     })),
   };
 }

@@ -96,6 +96,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       // Query backing indices to extract data stream dataset, namespace, and type values
       const {
         body: {
+          // @ts-expect-error aggregations are not typed
           aggregations: { dataset, namespace, type },
         },
       } = await esClient.search({

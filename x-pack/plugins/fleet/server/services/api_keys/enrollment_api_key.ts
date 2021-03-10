@@ -8,7 +8,6 @@
 import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import type { GetResponse } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
@@ -37,15 +36,18 @@ export async function listEnrollmentApiKeys(
     index: ENROLLMENT_API_KEYS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
+    // @ts-expect-error @elastic/elasticsearch SearchRequest.sort defined as string[]
     sort: 'created_at:desc',
     track_total_hits: true,
     q: kuery,
   });
 
+  // @ts-expect-error @elastic/elasticsearch
   const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);
 
   return {
     items,
+    // @ts-expect-error value is number | TotalHits
     total: res.body.hits.total.value,
     page,
     perPage,
@@ -57,11 +59,12 @@ export async function getEnrollmentAPIKey(
   id: string
 ): Promise<EnrollmentAPIKey> {
   try {
-    const res = await esClient.get<GetResponse<FleetServerEnrollmentAPIKey>>({
+    const res = await esClient.get<FleetServerEnrollmentAPIKey>({
       index: ENROLLMENT_API_KEYS_INDEX,
       id,
     });
 
+    // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
     return esDocToEnrollmentApiKey(res.body);
   } catch (e) {
     if (e instanceof ResponseError && e.statusCode === 404) {
@@ -226,11 +229,12 @@ export async function generateEnrollmentAPIKey(
 }
 
 export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, apiKeyId: string) {
-  const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
+  const res = await esClient.search<FleetServerEnrollmentAPIKey>({
     index: ENROLLMENT_API_KEYS_INDEX,
     q: `api_key_id:${escapeSearchQueryPhrase(apiKeyId)}`,
   });
 
+  // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
   const [enrollmentAPIKey] = res.body.hits.hits.map(esDocToEnrollmentApiKey);
 
   if (enrollmentAPIKey?.api_key_id !== apiKeyId) {

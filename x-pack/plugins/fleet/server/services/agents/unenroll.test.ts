@@ -65,10 +65,8 @@ describe('unenrollAgents (plural)', () => {
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = calledWith?.body
-      // @ts-expect-error
       .filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    // @ts-expect-error
     const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
     expect(ids).toHaveLength(2);
     expect(ids).toEqual(idsToUnenroll);
@@ -90,10 +88,8 @@ describe('unenrollAgents (plural)', () => {
     const onlyUnmanaged = [agentInUnmanagedDoc._id, agentInUnmanagedDoc2._id];
     const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = calledWith?.body
-      // @ts-expect-error
       .filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    // @ts-expect-error
     const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
     expect(ids).toHaveLength(onlyUnmanaged.length);
     expect(ids).toEqual(onlyUnmanaged);
@@ -149,8 +145,8 @@ function createClientMock() {
         throw new Error('not found');
     }
   });
-  // @ts-expect-error
   esClientMock.bulk.mockResolvedValue({
+    // @ts-expect-error not full interface
     body: { items: [] },
   });
 

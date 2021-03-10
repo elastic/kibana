@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError } from '../../errors';
@@ -79,7 +80,7 @@ export async function reassignAgents(
         kuery: string;
       },
   newAgentPolicyId: string
-): Promise<{ items: Array<{ id: string; success: boolean; error?: Error }> }> {
+): Promise<{ items: Array<{ id: string; success: boolean; error?: estypes.ErrorCause }> }> {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!agentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
