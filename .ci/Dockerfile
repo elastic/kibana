@@ -27,12 +27,81 @@ RUN LATEST_VAULT_RELEASE=$(curl -s https://api.github.com/repos/hashicorp/vault/
   && chmod +x vault \
   && mv vault /usr/local/bin/vault
 
-RUN groupadd -r kibana && useradd -r -g kibana kibana && mkdir /home/kibana && chown kibana:kibana /home/kibana
+# RUN groupadd -r kibana && useradd -r -g kibana kibana && mkdir /home/kibana && chown kibana:kibana /home/kibana
 
-COPY ./bash_standard_lib.sh /usr/local/bin/bash_standard_lib.sh
-RUN chmod +x /usr/local/bin/bash_standard_lib.sh
+# # COPY ./bash_standard_lib.sh /usr/local/bin/bash_standard_lib.sh
+# # RUN chmod +x /usr/local/bin/bash_standard_lib.sh
 
-COPY ./runbld /usr/local/bin/runbld
-RUN chmod +x /usr/local/bin/runbld
+# RUN mkdir -p /home/kibana/workspace/kibana && chown -R kibana:kibana /home/kibana/workspace
+# # RUN mkdir -p /home/kibana/yarn-offline-cache && chown -R kibana:kibana /home/kibana/workspace
+# USER kibana
+# WORKDIR /home/kibana/workspace/kibana
+# COPY package.json yarn.lock preinstall_check.js ./
+# RUN yarn config set yarn-offline-mirror "/home/kibana/yarn-offline-cache"
+# RUN --mount=type=cache,uid=999,gid=999,target=/home/kibana/yarn-offline-cache ls -alh /home/kibana/yarn-offline-cache; # Need uid/guid of kibana user
+# RUN --mount=type=cache,uid=999,gid=999,target=/home/kibana/yarn-offline-cache yarn install
+# COPY --chown=kibana:kibana . .
+# RUN ls -alh .
+# RUN mkdir ~/.npm-global && npm config set prefix '~/.npm-global'
+# RUN ls -alh /home/kibana/workspace/kibana
+# RUN yarn kbn bootstrap
 
-USER kibana
+# ENTRYPOINT [ "yarn" ]
+
+RUN mkdir -p /var/lib/kibana/workspace/kibana
+WORKDIR /var/lib/kibana/workspace/kibana
+COPY package.json yarn.lock preinstall_check.js ./
+RUN yarn config set yarn-offline-mirror "/var/lib/kibana/yarn-offline-cache"
+RUN --mount=type=cache,target=/var/lib/kibana/yarn-offline-cache yarn install
+
+# TODO move all of this to a wrapper?
+
+ENV CI=true
+ENV HOME=/var/lib/kibana
+
+ENV KIBANA_DIR=/var/lib/kibana/workspace/kibana
+ENV XPACK_DIR=/var/lib/kibana/workspace/kibana/x-pack
+
+ENV CACHE_DIR=/var/lib/kibana/.cache
+ENV PARENT_DIR=/var/lib/kibana/workspace
+ENV WORKSPACE=/var/lib/kibana/workspace
+
+# TODO change to ARG?
+ENV KIBANA_PKG_BRANCH=master
+ENV KIBANA_BASE_BRANCH=naster
+
+ENV GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+ENV CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+ENV RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+ENV CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
+
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+ENV FORCE_COLOR=1
+ENV TEST_BROWSER_HEADLESS=1
+
+ENV ELASTIC_APM_ENVIRONMENT=ci
+ENV ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
+
+ENV ELASTIC_APM_ACTIVE=false
+ENV CHECKS_REPORTER_ACTIVE=false
+
+ENV FLEET_PACKAGE_REGISTRY_PORT=6104
+ENV TEST_CORS_SERVER_PORT=6105
+
+ENV DETECT_CHROMEDRIVER_VERSION=true
+ENV CHROMEDRIVER_FORCE_DOWNLOAD=true
+
+ENV GCS_UPLOAD_PREFIX=asihdauishd98u42589
+
+# TODO
+ENV NODE_VERSION=14.16.0
+
+COPY . .
+
+RUN node --version
+RUN yarn kbn bootstrap
+RUN yarn kbn run build -i @kbn/pm
+RUN node scripts/build_plugin_list_docs
+
+ENTRYPOINT [ "yarn" ]
