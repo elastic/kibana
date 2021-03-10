@@ -55,7 +55,7 @@ export function DimensionContainer({
         onOutsideClick={(e) => {
           let current = e.target as HTMLElement;
           while (current) {
-            if (current?.getAttribute('data-test-subj') === 'lnsFormulaWidget') {
+            if (current?.getAttribute?.('data-test-subj') === 'lnsFormulaWidget') {
               return;
             }
             current = current.parentNode as HTMLElement;

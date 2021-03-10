@@ -209,10 +209,10 @@ function FormulaEditor({
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const editorModel = React.useRef<monaco.editor.ITextModel | null>(null);
+  const editorModel = React.useRef<monaco.editor.ITextModel>(
+    monaco.editor.createModel(text ?? '', LANGUAGE_ID)
+  );
   const overflowDiv = React.useRef<HTMLElement>();
-  const editorModel2 = React.useRef<monaco.editor.ITextModel | null>(null);
-  const overflowDiv2 = React.useRef<HTMLElement>();
   useEffect(() => {
     const node = (overflowDiv.current = document.createElement('div'));
     node.setAttribute('data-test-subj', 'lnsFormulaWidget');
@@ -220,18 +220,10 @@ function FormulaEditor({
     // children
     node.classList.add('lnsFormulaOverflow', 'monaco-editor');
     document.body.appendChild(overflowDiv.current);
+    const model = editorModel.current;
     return () => {
-      node.parentNode?.removeChild(node);
-    };
-  }, []);
-  useEffect(() => {
-    const node = (overflowDiv2.current = document.createElement('div'));
-    node.setAttribute('data-test-subj', 'lnsFormulaWidget');
-    // Add the monaco-editor class because the monaco css depends on it to target
-    // children
-    node.classList.add('lnsFormulaOverflow', 'monaco-editor');
-    document.body.appendChild(overflowDiv2.current);
-    return () => {
+      // Clean up the manually-created model
+      model.dispose();
       node.parentNode?.removeChild(node);
     };
   }, []);
@@ -281,60 +273,6 @@ function FormulaEditor({
         );
       } else {
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
-      }
-    },
-    // Make it validate on flyout open in case of a broken formula left over
-    // from a previous edit
-    { skipFirstRender: false },
-    256,
-    [text]
-  );
-
-  useDebounceWithOptions(
-    () => {
-      if (!editorModel2.current) return;
-
-      if (!text) {
-        monaco.editor.setModelMarkers(editorModel2.current, 'LENS', []);
-        return;
-      }
-
-      let errors: ErrorWrapper[] = [];
-
-      const { root, error } = tryToParse(text);
-      if (!root) return;
-      if (error) {
-        errors = [error];
-      } else {
-        const validationErrors = runASTValidation(
-          root,
-          layer,
-          indexPattern,
-          operationDefinitionMap
-        );
-        if (validationErrors.length) {
-          errors = validationErrors;
-        }
-      }
-
-      if (errors.length) {
-        monaco.editor.setModelMarkers(
-          editorModel2.current,
-          'LENS',
-          errors.flatMap((innerError) =>
-            innerError.locations.map((location) => ({
-              message: innerError.message,
-              startColumn: location.min + 1,
-              endColumn: location.max + 1,
-              // Fake, assumes single line
-              startLineNumber: 1,
-              endLineNumber: 1,
-              severity: monaco.MarkerSeverity.Error,
-            }))
-          )
-        );
-      } else {
-        monaco.editor.setModelMarkers(editorModel2.current, 'LENS', []);
       }
     },
     // Make it validate on flyout open in case of a broken formula left over
@@ -416,22 +354,16 @@ function FormulaEditor({
 
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
-    value: text || '',
+    value: text ?? '',
     onChange: setText,
-    suggestionProvider: {
-      triggerCharacters: ['.', ',', '(', '='],
-      provideCompletionItems,
-    },
     // signatureProvider: provideSignature,
     options: {
-      automaticLayout: true,
+      automaticLayout: false,
       fontSize: 14,
       folding: false,
       lineNumbers: 'off',
       scrollBeyondLastLine: false,
-      minimap: {
-        enabled: false,
-      },
+      minimap: { enabled: false },
       wordWrap: 'on',
       // Disable suggestions that appear when we don't provide a default suggestion
       wordBasedSuggestions: false,
@@ -441,7 +373,15 @@ function FormulaEditor({
     },
   };
 
-  return !isOpen ? (
+  useEffect(() => {
+    // Because the monaco model is owned by Lens, we need to manually attach handlers
+    monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+      triggerCharacters: ['.', ',', '(', '='],
+      provideCompletionItems,
+    });
+  }, [provideCompletionItems]);
+
+  return (
     <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
       <CodeEditor
         {...codeEditorOptions}
@@ -449,17 +389,9 @@ function FormulaEditor({
         width={'100%'}
         options={{
           ...codeEditorOptions.options,
+          // Shared model and overflow node
           overflowWidgetsDomNode: overflowDiv?.current ?? undefined,
-        }}
-        editorDidMount={(editor) => {
-          const model = editor.getModel();
-          if (model) {
-            editorModel.current = model;
-          }
-          editor.onDidDispose(() => {
-            editorModel.current = null;
-            // overflowDiv?.current?.parentNode?.removeChild(overflowDiv?.current);
-          });
+          model: editorModel.current,
         }}
       />
       <EuiSpacer />
@@ -497,59 +429,50 @@ function FormulaEditor({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
-  ) : (
-    <EuiModal
-      onClose={() => {
-        setIsOpen(false);
-        setText(currentColumn.params.formula);
-      }}
-    >
-      <EuiModalHeader>
-        <h1>
-          {i18n.translate('xpack.lens.formula.formulaEditorLabel', {
-            defaultMessage: 'Formula editor',
-          })}
-        </h1>
-      </EuiModalHeader>
-      {/* <EuiModalBody> */}
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-            <CodeEditor
-              {...codeEditorOptions}
-              height={280}
-              width={300}
-              options={{
-                ...codeEditorOptions.options,
-                overflowWidgetsDomNode: overflowDiv2?.current ?? undefined,
-              }}
-              editorDidMount={(editor) => {
-                const model = editor.getModel();
-                if (model) {
-                  editorModel2.current = model;
-                }
-                editor.onDidDispose(() => {
-                  editorModel2.current = null;
-                  // overflowDiv2?.current?.parentNode?.removeChild(overflowDiv2?.current);
-                });
-              }}
-            />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
-            <EuiText>
-              {i18n.translate('xpack.lens.formula.functionReferenceLabel', {
-                defaultMessage: 'Function reference',
+
+      {isOpen ? (
+        <EuiModal
+          onClose={() => {
+            setIsOpen(false);
+            setText(currentColumn.params.formula);
+          }}
+        >
+          <EuiModalHeader>
+            <h1>
+              {i18n.translate('xpack.lens.formula.formulaEditorLabel', {
+                defaultMessage: 'Formula editor',
               })}
-            </EuiText>
-            <EuiSpacer size="s" />
-            <div style={{ height: 250, overflow: 'auto' }}>
-              <EuiText size="s">
-                <Markdown
-                  markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-                    defaultMessage: `
+            </h1>
+          </EuiModalHeader>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+                <CodeEditor
+                  {...codeEditorOptions}
+                  height={280}
+                  width={300}
+                  options={{
+                    ...codeEditorOptions.options,
+                    // Shared model and overflow node
+                    overflowWidgetsDomNode: overflowDiv?.current ?? undefined,
+                    model: editorModel?.current,
+                  }}
+                />
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
+                <EuiText>
+                  {i18n.translate('xpack.lens.formula.functionReferenceLabel', {
+                    defaultMessage: 'Function reference',
+                  })}
+                </EuiText>
+                <EuiSpacer size="s" />
+                <div style={{ height: 250, overflow: 'auto' }}>
+                  <EuiText size="s">
+                    <Markdown
+                      markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                        defaultMessage: `
 ## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
@@ -574,81 +497,82 @@ Math functions can take positional arguments, like pow(count(), 3) is the same a
 
 Use the symbols +, -, /, and * to perform basic math.
                   `,
-                    description:
-                      'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-                  })}
-                />
+                        description:
+                          'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+                      })}
+                    />
 
-                <EuiDescriptionList
-                  compressed
-                  listItems={getPossibleFunctions(indexPattern)
-                    .filter((key) => key in tinymathFunctions)
-                    .map((key) => ({
-                      title: `${key}`,
-                      description: <Markdown markdown={tinymathFunctions[key].help} />,
-                    }))}
-                />
-              </EuiText>
+                    <EuiDescriptionList
+                      compressed
+                      listItems={getPossibleFunctions(indexPattern)
+                        .filter((key) => key in tinymathFunctions)
+                        .map((key) => ({
+                          title: `${key}`,
+                          description: <Markdown markdown={tinymathFunctions[key].help} />,
+                        }))}
+                    />
+                  </EuiText>
 
-              <EuiSpacer />
+                  <EuiSpacer />
 
-              <EuiText>
-                {i18n.translate('xpack.lens.formula.elasticsearchFunctions', {
-                  defaultMessage: 'Elasticsearch aggregations',
-                  description: 'Do not translate Elasticsearch',
-                })}
-              </EuiText>
-              <EuiDescriptionList
-                compressed
-                listItems={getPossibleFunctions(indexPattern)
-                  .filter((key) => key in operationDefinitionMap)
-                  .map((key) => ({
-                    title: `${key}: ${operationDefinitionMap[key].displayName}`,
-                    description: getHelpText(key, operationDefinitionMap),
-                  }))}
-              />
-            </div>
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {/* </EuiModalBody> */}
-      <EuiModalFooter>
-        <EuiButton
-          color="text"
-          onClick={() => {
-            setIsOpen(false);
-            setText(currentColumn.params.formula);
-          }}
-          iconType="cross"
-        >
-          {i18n.translate('xpack.lens.indexPattern.formulaCancelLabel', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButton>
-        <EuiButton
-          disabled={currentColumn.params.formula === text}
-          color={currentColumn.params.formula !== text ? 'primary' : 'text'}
-          fill={currentColumn.params.formula !== text}
-          onClick={() => {
-            updateLayer(
-              regenerateLayerFromAst(
-                text || '',
-                layer,
-                columnId,
-                currentColumn,
-                indexPattern,
-                operationDefinitionMap
-              )
-            );
-          }}
-          iconType="play"
-        >
-          {i18n.translate('xpack.lens.indexPattern.formulaSubmitLabel', {
-            defaultMessage: 'Submit',
-          })}
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+                  <EuiText>
+                    {i18n.translate('xpack.lens.formula.elasticsearchFunctions', {
+                      defaultMessage: 'Elasticsearch aggregations',
+                      description: 'Do not translate Elasticsearch',
+                    })}
+                  </EuiText>
+                  <EuiDescriptionList
+                    compressed
+                    listItems={getPossibleFunctions(indexPattern)
+                      .filter((key) => key in operationDefinitionMap)
+                      .map((key) => ({
+                        title: `${key}: ${operationDefinitionMap[key].displayName}`,
+                        description: getHelpText(key, operationDefinitionMap),
+                      }))}
+                  />
+                </div>
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiModalFooter>
+            <EuiButton
+              color="text"
+              onClick={() => {
+                setIsOpen(false);
+                setText(currentColumn.params.formula);
+              }}
+              iconType="cross"
+            >
+              {i18n.translate('xpack.lens.indexPattern.formulaCancelLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButton>
+            <EuiButton
+              disabled={currentColumn.params.formula === text}
+              color={currentColumn.params.formula !== text ? 'primary' : 'text'}
+              fill={currentColumn.params.formula !== text}
+              onClick={() => {
+                updateLayer(
+                  regenerateLayerFromAst(
+                    text || '',
+                    layer,
+                    columnId,
+                    currentColumn,
+                    indexPattern,
+                    operationDefinitionMap
+                  )
+                );
+              }}
+              iconType="play"
+            >
+              {i18n.translate('xpack.lens.indexPattern.formulaSubmitLabel', {
+                defaultMessage: 'Submit',
+              })}
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      ) : null}
+    </div>
   );
 }
 
