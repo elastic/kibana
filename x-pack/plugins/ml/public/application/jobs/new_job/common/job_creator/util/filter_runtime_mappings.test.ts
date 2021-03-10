@@ -9,6 +9,7 @@ import { Job, Datafeed } from '../../../../../../../common/types/anomaly_detecti
 import { filterRuntimeMappings } from './filter_runtime_mappings';
 
 function getJob(): Job {
+  // @ts-expect-error
   return {
     job_id: 'test',
     description: '',
@@ -53,12 +54,14 @@ function getDatafeed(): Datafeed {
     runtime_mappings: {
       responsetime_big: {
         type: 'double',
+        // @ts-expect-error
         script: {
           source: "emit(doc['responsetime'].value * 100.0)",
         },
       },
       airline_lower: {
         type: 'keyword',
+        // @ts-expect-error
         script: {
           source: "emit(doc['airline'].value.toLowerCase())",
         },

@@ -151,6 +151,7 @@ async function getValidationCheckMessages(
       },
     });
 
+    // @ts-expect-error
     const totalDocs = body.hits.total.value;
 
     if (trainingPercent) {
@@ -166,6 +167,7 @@ async function getValidationCheckMessages(
     }
 
     if (body.aggregations) {
+      // @ts-expect-error
       Object.entries(body.aggregations).forEach(([aggName, { doc_count: docCount, value }]) => {
         const empty = docCount / totalDocs;
 

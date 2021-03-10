@@ -11,7 +11,7 @@ import { estypes } from '@elastic/elasticsearch';
 // import { JobId } from './job';
 export type DatafeedId = string;
 
-export type Datafeed = estypes.DatafeedConfig;
+export type Datafeed = estypes.Datafeed;
 // export interface Datafeed extends estypes.DatafeedConfig {
 //   runtime_mappings?: RuntimeMappings;
 //   aggs?: Aggregation;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
@@ -120,4 +121,4 @@ export interface RuntimeField {
       };
 }
 
-export type RuntimeMappings = Record<string, RuntimeField>;
+export type RuntimeMappings = estypes.RuntimeFields;

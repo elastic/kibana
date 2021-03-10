@@ -126,10 +126,6 @@ export function getMlClient(
 
   // @ts-expect-error promise and TransportRequestPromise are incompatible. missing abort
   return {
-    // REMOVE WHEN CLIENT IS CORRECT
-    async findFileStructure(...p: Parameters<MlClient['findFileStructure']>) {
-      return mlClient.findFileStructure(...p);
-    },
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.closeJob(...p);
