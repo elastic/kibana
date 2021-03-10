@@ -146,46 +146,6 @@ describe('http auth', () => {
         await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
       });
 
-      it('blocks access when auth returns `unauthorized`', async () => {
-        const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
-
-        registerAuth((req, res, toolkit) => res.unauthorized());
-
-        const router = createRouter('');
-        registerRoute(router, auth, 'optional');
-
-        await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(401);
-      });
-    });
-    describe('when authRequired is `try`', () => {
-      it('allows authenticated access when auth returns `authenticated`', async () => {
-        const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
-
-        registerAuth((req, res, toolkit) => toolkit.authenticated());
-
-        const router = createRouter('');
-        registerRoute(router, auth, 'try');
-
-        await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: true });
-      });
-
-      it('allows anonymous access when auth returns `notHandled`', async () => {
-        const { http } = await root.setup();
-        const { registerAuth, createRouter, auth } = http;
-
-        registerAuth((req, res, toolkit) => toolkit.notHandled());
-
-        const router = createRouter('');
-        registerRoute(router, auth, 'try');
-
-        await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
-      });
-
       it('allows anonymous access when auth returns `unauthorized`', async () => {
         const { http } = await root.setup();
         const { registerAuth, createRouter, auth } = http;
@@ -193,7 +153,7 @@ describe('http auth', () => {
         registerAuth((req, res, toolkit) => res.unauthorized());
 
         const router = createRouter('');
-        registerRoute(router, auth, 'try');
+        registerRoute(router, auth, 'optional');
 
         await root.start();
         await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
@@ -230,17 +190,6 @@ describe('http auth', () => {
 
       const router = createRouter('');
       registerRoute(router, auth, 'optional');
-
-      await root.start();
-      await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
-    });
-
-    it('allow access to resources when `authRequired` is `try`', async () => {
-      const { http } = await root.setup();
-      const { createRouter, auth } = http;
-
-      const router = createRouter('');
-      registerRoute(router, auth, 'try');
 
       await root.start();
       await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
