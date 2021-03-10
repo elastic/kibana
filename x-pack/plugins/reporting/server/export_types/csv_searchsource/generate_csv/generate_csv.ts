@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
-import { Datatable } from 'src/plugins/expressions/server';
+import { Datatable, DatatableColumn, DatatableRow } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
   ES_SEARCH_STRATEGY,
@@ -134,6 +134,53 @@ export class CsvGenerator {
     return this._formatters;
   }
 
+  private checkForFormulas(settings: CsvExportSettings) {
+    return (value: string) => {
+      if (settings.checkForFormulas && cellHasFormulas(value)) {
+        this.csvContainsFormulas = true; // set warning if cell value has a formula
+      }
+      return settings.escapeValue(value);
+    };
+  }
+
+  private getColumnName(fields: SearchFieldValue[] | undefined, table: Datatable) {
+    return (columnIndex: number, position: number) => {
+      let cell: string;
+      if (columnIndex > -1) {
+        cell = table.columns[columnIndex].name;
+      } else {
+        cell = fields && fields[position] ? (fields[position] as string) : 'unknown';
+      }
+      return cell;
+    };
+  }
+
+  private tryToParseCellValues(
+    formatters: Record<string, FieldFormat>,
+    dataTableRow: DatatableRow
+  ) {
+    return (tableColumn: DatatableColumn) => {
+      let cell: string[] | string = formatters[tableColumn.id].convert(
+        dataTableRow[tableColumn.id]
+      );
+
+      try {
+        // expected values are a string of JSON where the value(s) is in an array
+        cell = JSON.parse(cell);
+      } catch (e) {
+        // ignore
+      }
+
+      // We have to strip singular array values out of their array wrapper,
+      // So that the value appears the visually the same as seen in Discover
+      if (Array.isArray(cell)) {
+        cell = cell.join(', '); // mimic Discover behavior
+      }
+
+      return cell;
+    };
+  }
+
   /*
    * Use the list of fields to generate the header row
    */
@@ -143,27 +190,14 @@ export class CsvGenerator {
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
-    const { checkForFormulas, escapeValue, separator } = settings;
+    this.logger.debug(`Building CSV header row...`);
     const columnMap = this.getColumnMap(fields, table);
 
-    this.logger.debug(`Building CSV header row...`);
     const header =
       columnMap
-        .map((columnIndex, position) => {
-          let value: string;
-          if (columnIndex > -1) {
-            value = table.columns[columnIndex].name;
-          } else {
-            value = fields && fields[position] ? (fields[position] as string) : 'unknown';
-          }
-
-          if (checkForFormulas && cellHasFormulas(value)) {
-            this.csvContainsFormulas = true; // set warning if heading value has a formula
-          }
-
-          return escapeValue(value);
-        })
-        .join(separator) + `\n`;
+        .map(this.getColumnName(fields, table))
+        .map(this.checkForFormulas(settings))
+        .join(settings.separator) + `\n`;
 
     if (!builder.tryAppend(header)) {
       return {
@@ -185,51 +219,20 @@ export class CsvGenerator {
     formatters: Record<string, FieldFormat>,
     settings: CsvExportSettings
   ) {
-    // write the rows
     this.logger.debug(`Building ${table.rows.length} CSV data rows...`);
-    const { checkForFormulas, escapeValue, separator } = settings;
+    const columnMap = this.getColumnMap(fields, table);
 
     for (const dataTableRow of table.rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
       }
 
-      const columnMap = this.getColumnMap(fields, table);
       const row =
         columnMap
-          .map((columnIndex, position) => {
-            const tableColumn = table.columns[columnIndex];
-            let cell: string[] | string = '-';
-
-            if (tableColumn != null) {
-              cell = formatters[tableColumn.id].convert(dataTableRow[tableColumn.id]);
-
-              try {
-                // expected values are a string of JSON where the value(s) is in an array
-                cell = JSON.parse(cell);
-              } catch (e) {
-                // ignore
-              }
-
-              // We have to strip singular array values out of their array wrapper,
-              // So that the value appears the visually the same as seen in Discover
-              if (Array.isArray(cell)) {
-                cell = cell.join(', '); // mimic Discover behavior
-              }
-            } else {
-              this.logger.warn(`Unrecognized field: ${(fields && fields[position]) || 'unknown'}`);
-            }
-
-            return cell;
-          })
-          .map((value) => {
-            if (checkForFormulas && cellHasFormulas(value)) {
-              this.csvContainsFormulas = true; // set warning if cell value has a formula
-            }
-            // Escape the values in Data
-            return escapeValue(value);
-          })
-          .join(separator) + '\n';
+          .map((columnIndex) => table.columns[columnIndex])
+          .map(this.tryToParseCellValues(formatters, dataTableRow))
+          .map(this.checkForFormulas(settings))
+          .join(settings.separator) + '\n';
 
       if (!builder.tryAppend(row)) {
         this.logger.warn('max Size Reached');
