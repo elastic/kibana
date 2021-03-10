@@ -7,13 +7,13 @@
 
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownManagerTitle } from '../drilldown_manager_title';
 import { useDrilldownManager } from '../context';
 import { ActionFactoryView } from '../action_factory_view';
 import { DrilldownManagerFooter } from '../drilldown_manager_footer';
 import { DrilldownStateForm } from '../drilldown_state_form';
+import { ButtonSubmit } from '../../components/button_submit';
 
 const txtEditDrilldown = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.containers.editDrilldownForm.title',
@@ -63,14 +63,9 @@ export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId })
       {!!drilldownState && <DrilldownStateForm state={drilldownState} disabled={disabled} />}
       {!!drilldownState && (
         <DrilldownManagerFooter>
-          <EuiButton
-            onClick={handleSave}
-            fill
-            isDisabled={disabled}
-            data-test-subj={'drilldownWizardSubmit'}
-          >
+          <ButtonSubmit disabled={disabled} onClick={handleSave}>
             {txtEditDrilldownButton}
-          </EuiButton>
+          </ButtonSubmit>
         </DrilldownManagerFooter>
       )}
     </>
