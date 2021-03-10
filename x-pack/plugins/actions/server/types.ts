@@ -11,8 +11,6 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { LicenseType } from '../../licensing/common/types';
 import {
-  ILegacyClusterClient,
-  ILegacyScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
@@ -34,13 +32,8 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
-  /**
-   * @deprecated Use `scopedClusterClient` instead.
-   */
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
-  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
 export interface ActionsApiRequestHandlerContext {

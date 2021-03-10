@@ -17,12 +17,13 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
+import { isPopulatedObject } from '../../../common/utils/object_utils';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
+import { isIndexPattern } from '../../../common/types/index_pattern';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
-import { isPopulatedObject } from './utils/object_utils';
 
 import {
   getEsAggFromAggConfig,
@@ -83,9 +84,14 @@ export function getCombinedRuntimeMappings(
   }
 
   // And runtime field mappings defined by index pattern
-  if (indexPattern !== undefined) {
-    const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+  if (isIndexPattern(indexPattern)) {
+    const computedFields = indexPattern.getComputedFields();
+    if (computedFields?.runtimeFields !== undefined) {
+      const ipRuntimeMappings = computedFields.runtimeFields;
+      if (isPopulatedObject(ipRuntimeMappings)) {
+        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+      }
+    }
   }
 
   if (isPopulatedObject(combinedRuntimeMappings)) {

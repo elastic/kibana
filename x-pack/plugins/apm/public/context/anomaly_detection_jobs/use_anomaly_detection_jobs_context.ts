@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export const isPopulatedObject = <T = Record<string, any>>(arg: any): arg is T => {
-  return typeof arg === 'object' && arg !== null && Object.keys(arg).length > 0;
-};
+import { useContext } from 'react';
+import { AnomalyDetectionJobsContext } from './anomaly_detection_jobs_context';
+
+export function useAnomalyDetectionJobsContext() {
+  return useContext(AnomalyDetectionJobsContext);
+}
