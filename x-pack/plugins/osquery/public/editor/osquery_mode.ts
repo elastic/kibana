@@ -1,38 +1,116 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { osqueryTableNames } from './osquery_tables';
 
+const keywords = [
+  'select',
+  'insert',
+  'update',
+  'delete',
+  'from',
+  'where',
+  'and',
+  'or',
+  'group',
+  'by',
+  'order',
+  'limit',
+  'offset',
+  'having',
+  'as',
+  'case',
+  'when',
+  'else',
+  'end',
+  'type',
+  'left',
+  'right',
+  'join',
+  'on',
+  'outer',
+  'desc',
+  'asc',
+  'union',
+  'create',
+  'table',
+  'primary',
+  'key',
+  'if',
+  'foreign',
+  'not',
+  'references',
+  'default',
+  'null',
+  'inner',
+  'cross',
+  'natural',
+  'database',
+  'drop',
+  'grant',
+].join('|');
+
+const builtinConstants = ['true', 'false'].join('|');
+
+const builtinFunctions = [
+  'avg',
+  'count',
+  'first',
+  'last',
+  'max',
+  'min',
+  'sum',
+  'ucase',
+  'lcase',
+  'mid',
+  'len',
+  'round',
+  'rank',
+  'now',
+  'format',
+  'coalesce',
+  'ifnull',
+  'isnull',
+  'nvl',
+].join('|');
+
+const dataTypes = [
+  'int',
+  'numeric',
+  'decimal',
+  'date',
+  'varchar',
+  'char',
+  'bigint',
+  'float',
+  'double',
+  'bit',
+  'binary',
+  'text',
+  'set',
+  'timestamp',
+  'money',
+  'real',
+  'number',
+  'integer',
+].join('|');
+
+const osqueryTables = osqueryTableNames.join('|');
+
 ace.define(
   'ace/mode/osquery_highlight_rules',
-  ['require', 'exports', 'module', 'ace/lib/oop', 'ace/mode/sql_highlight_rules'],
-  function (acequire, exports, module) {
+  ['require', 'exports', 'ace/lib/oop', 'ace/mode/sql_highlight_rules'],
+  function (acequire, exports) {
     'use strict';
 
     const oop = acequire('../lib/oop');
     const SqlHighlightRules = acequire('./sql_highlight_rules').SqlHighlightRules;
 
     const OsqueryHighlightRules = function () {
-      const keywords =
-        'select|insert|update|delete|from|where|and|or|group|by|order|limit|offset|having|as|case|' +
-        'when|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|' +
-        'foreign|not|references|default|null|inner|cross|natural|database|drop|grant';
-
-      const builtinConstants = 'true|false';
-
-      const builtinFunctions =
-        'avg|count|first|last|max|min|sum|ucase|lcase|mid|len|round|rank|now|format|' +
-        'coalesce|ifnull|isnull|nvl';
-
-      const dataTypes =
-        'int|numeric|decimal|date|varchar|char|bigint|float|double|bit|binary|text|set|timestamp|' +
-        'money|real|number|integer';
-
-      const osqueryTables = osqueryTableNames.join('|');
-
       const keywordMapper = this.createKeywordMapper(
         {
           'osquery-token': osqueryTables,
@@ -102,33 +180,21 @@ ace.define(
 
 ace.define(
   'ace/mode/osquery',
-  [
-    'require',
-    'exports',
-    'module',
-    'ace/lib/oop',
-    'ace/mode/sql',
-    'ace/mode/osquery_highlight_rules',
-    'ace/range',
-  ],
-  function (acequire, exports, module) {
+  ['require', 'exports', 'ace/lib/oop', 'ace/mode/sql', 'ace/mode/osquery_highlight_rules'],
+  function (acequire, exports) {
     'use strict';
 
     const oop = acequire('../lib/oop');
     const TextMode = acequire('./sql').Mode;
     const OsqueryHighlightRules = acequire('./osquery_highlight_rules').OsqueryHighlightRules;
-    const Range = acequire('../range').Range;
 
     const Mode = function () {
       this.HighlightRules = OsqueryHighlightRules;
     };
     oop.inherits(Mode, TextMode);
 
-    (function () {
-      this.lineCommentStart = '--';
-
-      this.$id = 'ace/mode/osquery';
-    }.call(Mode.prototype));
+    Mode.prototype.lineCommentStart = '--';
+    Mode.prototype.$id = 'ace/mode/osquery';
 
     exports.Mode = Mode;
   }
