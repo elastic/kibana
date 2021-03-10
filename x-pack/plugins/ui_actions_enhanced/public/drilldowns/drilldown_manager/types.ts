@@ -48,7 +48,7 @@ export interface PublicDrilldownManagerProps {
    * - `/create` --- opens with "Create new" tab selected.
    * - `/new` --- opens with the "Create new" tab selected showing new drilldown form.
    * - `/manage` --- opens with selected "Manage" tab.
-   * - `/edit/yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` --- opens in edit mode where
+   * - `/manage/yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` --- opens in edit mode where
    *   drilldown with ID `yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` is being edited.
    */
   initialRoute?: string;

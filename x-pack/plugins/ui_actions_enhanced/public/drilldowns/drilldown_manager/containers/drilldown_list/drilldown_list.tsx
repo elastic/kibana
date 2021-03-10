@@ -18,7 +18,7 @@ export const DrilldownList: React.FC = ({}) => {
       items={events}
       onDelete={drilldowns.onDelete}
       onEdit={(id) => {
-        drilldowns.setRoute(['edit', id]);
+        drilldowns.setRoute(['manage', id]);
       }}
     />
   );

@@ -58,7 +58,7 @@ export class DrilldownManagerState {
    * - `['new']`
    * - `['new', 'DASHBOARD_TO_DASHBOARD_DRILLDOWN']`
    * - `['manage']`
-   * - `['edit', 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy']`
+   * - `['manage', 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy']`
    */
   public readonly route$: BehaviorSubject<string[]>;
 
