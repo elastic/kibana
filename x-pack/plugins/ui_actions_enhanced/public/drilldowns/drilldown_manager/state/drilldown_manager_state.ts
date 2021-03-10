@@ -19,6 +19,7 @@ import {
   txtDefaultTitle,
   toastDrilldownDeleted,
   toastDrilldownsDeleted,
+  toastDrilldownEdited,
 } from './i18n';
 import { DrilldownListItem } from '../components/list_manage_drilldowns';
 
@@ -314,6 +315,26 @@ export class DrilldownManagerState {
       triggers,
     });
     return state;
+  }
+
+  /**
+   * Save edits to an existing drilldown.
+   *
+   * @param eventId ID of the saved dynamic action event.
+   * @param drilldownState Latest state of the drilldown as edited by the user.
+   */
+  public async updateEvent(eventId: string, drilldownState: DrilldownState): Promise<void> {
+    const { dynamicActionManager, toastService } = this.deps;
+    const action = drilldownState.serialize();
+
+    await dynamicActionManager.updateEvent(eventId, action, drilldownState.triggers$.getValue());
+
+    toastService.addSuccess({
+      title: toastDrilldownEdited.title(action.name),
+      text: toastDrilldownEdited.text,
+    });
+
+    this.setRoute(['manage']);
   }
 
   // Below are convenience React hooks for consuming observables in connected

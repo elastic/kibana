@@ -48,8 +48,10 @@ export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId })
 
   const handleSave = () => {
     setDisabled(true);
-    // ...
-    if (!isMounted()) return;
+    drilldowns.updateEvent(eventId, drilldownState).finally(() => {
+      if (!isMounted()) return;
+      setDisabled(false);
+    });
   };
 
   return (
