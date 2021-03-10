@@ -80,7 +80,7 @@ export const useWaffleViewState = () => {
       });
       // if this is the "Default View" view, don't update the time range to the view's time range,
       // this way it will use the global Kibana time or the default time already set
-      if (newState.time && newState.id !== '0') {
+      if (newState.time) {
         setWaffleTimeState({
           currentTime: newState.time,
           isAutoReloading: newState.autoReload,
@@ -102,5 +102,4 @@ export type WaffleViewState = WaffleOptionsState & {
   time: number;
   autoReload: boolean;
   filterQuery: WaffleFiltersState;
-  id?: string;
 };
