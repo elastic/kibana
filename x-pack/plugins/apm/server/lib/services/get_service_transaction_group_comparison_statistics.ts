@@ -20,6 +20,7 @@ import {
   kqlQuery,
 } from '../../../server/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
+import { offsetPreviousPeriodCoordinates } from '../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -44,31 +45,35 @@ export async function getServiceTransactionGroupComparisonStatistics({
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
+  start,
+  end,
+  getOffsetXCoordinate,
 }: {
   environment?: string;
   kuery?: string;
   serviceName: string;
   transactionNames: string[];
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
+  start: number;
+  end: number;
+  getOffsetXCoordinate?: (timeseries: Coordinate[]) => Coordinate[];
 }): Promise<
-  Record<
-    string,
-    {
-      latency: Coordinate[];
-      throughput: Coordinate[];
-      errorRate: Coordinate[];
-      impact: number;
-    }
-  >
+  Array<{
+    transactionName: string;
+    latency: Coordinate[];
+    throughput: Coordinate[];
+    errorRate: Coordinate[];
+    impact: number;
+  }>
 > {
   return withApmSpan(
     'get_service_transaction_group_comparison_statistics',
     async () => {
-      const { apmEventClient, start, end } = setup;
+      const { apmEventClient } = setup;
       const { intervalString } = getBucketSize({ start, end, numBuckets });
 
       const field = getTransactionDurationFieldForAggregatedTransactions(
@@ -145,44 +150,116 @@ export async function getServiceTransactionGroupComparisonStatistics({
       const buckets = response.aggregations?.transaction_groups.buckets ?? [];
 
       const totalDuration = response.aggregations?.total_duration.value;
-      return keyBy(
-        buckets.map((bucket) => {
-          const transactionName = bucket.key;
-          const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+      return buckets.map((bucket) => {
+        const transactionName = bucket.key as string;
+        const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+          x: timeseriesBucket.key,
+          y: getLatencyValue({
+            latencyAggregationType,
+            aggregation: timeseriesBucket.latency,
+          }),
+        }));
+        const throughput = bucket.timeseries.buckets.map(
+          (timeseriesBucket) => ({
             x: timeseriesBucket.key,
-            y: getLatencyValue({
-              latencyAggregationType,
-              aggregation: timeseriesBucket.latency,
-            }),
-          }));
-          const throughput = bucket.timeseries.buckets.map(
-            (timeseriesBucket) => ({
-              x: timeseriesBucket.key,
-              y: timeseriesBucket.throughput_rate.value,
-            })
-          );
-          const errorRate = bucket.timeseries.buckets.map(
-            (timeseriesBucket) => ({
-              x: timeseriesBucket.key,
-              y: calculateTransactionErrorPercentage(
-                timeseriesBucket[EVENT_OUTCOME]
-              ),
-            })
-          );
-          const transactionGroupTotalDuration =
-            bucket.transaction_group_total_duration.value || 0;
-          return {
-            transactionName,
-            latency,
-            throughput,
-            errorRate,
-            impact: totalDuration
-              ? (transactionGroupTotalDuration * 100) / totalDuration
-              : 0,
-          };
-        }),
-        'transactionName'
-      );
+            y: timeseriesBucket.throughput_rate.value,
+          })
+        );
+        const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+          x: timeseriesBucket.key,
+          y: calculateTransactionErrorPercentage(
+            timeseriesBucket[EVENT_OUTCOME]
+          ),
+        }));
+        const transactionGroupTotalDuration =
+          bucket.transaction_group_total_duration.value || 0;
+        return {
+          transactionName,
+          latency: getOffsetXCoordinate
+            ? getOffsetXCoordinate(latency)
+            : latency,
+          throughput: getOffsetXCoordinate
+            ? getOffsetXCoordinate(throughput)
+            : throughput,
+          errorRate: getOffsetXCoordinate
+            ? getOffsetXCoordinate(errorRate)
+            : errorRate,
+          impact: totalDuration
+            ? (transactionGroupTotalDuration * 100) / totalDuration
+            : 0,
+        };
+      });
     }
   );
+}
+
+export async function getServiceTransactionGroupComparisonStatisticsPeriods({
+  serviceName,
+  transactionNames,
+  setup,
+  numBuckets,
+  searchAggregatedTransactions,
+  transactionType,
+  latencyAggregationType,
+  comparisonStart,
+  comparisonEnd,
+  environment,
+  kuery,
+}: {
+  serviceName: string;
+  transactionNames: string[];
+  setup: Setup & SetupTimeRange;
+  numBuckets: number;
+  searchAggregatedTransactions: boolean;
+  transactionType: string;
+  latencyAggregationType: LatencyAggregationType;
+  comparisonStart?: number;
+  comparisonEnd?: number;
+  environment?: string;
+  kuery?: string;
+}) {
+  const { start, end } = setup;
+
+  const commonProps = {
+    setup,
+    serviceName,
+    transactionNames,
+    searchAggregatedTransactions,
+    transactionType,
+    numBuckets,
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    environment,
+    kuery,
+  };
+
+  const currentPeriodPromise = getServiceTransactionGroupComparisonStatistics({
+    ...commonProps,
+    start,
+    end,
+  });
+
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getServiceTransactionGroupComparisonStatistics({
+          ...commonProps,
+          start: comparisonStart,
+          end: comparisonEnd,
+          getOffsetXCoordinate: (timeseries: Coordinate[]) =>
+            offsetPreviousPeriodCoordinates({
+              currentPeriodStart: start,
+              previousPeriodStart: comparisonStart,
+              previousPeriodTimeseries: timeseries,
+            }),
+        })
+      : [];
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
+  return {
+    currentPeriod: keyBy(currentPeriod, 'transactionName'),
+    previousPeriod: keyBy(previousPeriod, 'transactionName'),
+  };
 }
