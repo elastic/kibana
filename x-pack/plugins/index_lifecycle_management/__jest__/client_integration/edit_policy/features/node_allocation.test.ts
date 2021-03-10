@@ -168,148 +168,138 @@ describe('<EditPolicy /> node allocation', () => {
     });
   });
 
-  (['cold', 'frozen'] as const).forEach((currentPhase) => {
-    describe(`${currentPhase} phase`, () => {
-      test('shows spinner for node attributes input when loading', async () => {
-        server.respondImmediately = false;
+  describe('cold phase', () => {
+    test('shows spinner for node attributes input when loading', async () => {
+      server.respondImmediately = false;
 
-        const { actions, component } = testBed;
-        await actions[currentPhase].enable(true);
+      const { actions, component } = testBed;
+      await actions.cold.enable(true);
 
-        expect(component.find('.euiLoadingSpinner').exists()).toBeTruthy();
-        expect(actions[currentPhase].hasDataTierAllocationControls()).toBeTruthy();
+      expect(component.find('.euiLoadingSpinner').exists()).toBeTruthy();
+      expect(actions.cold.hasDataTierAllocationControls()).toBeTruthy();
 
-        expect(component.find('.euiCallOut--warning').exists()).toBeFalsy();
-        expect(actions[currentPhase].hasNodeAttributesSelect()).toBeFalsy();
+      expect(component.find('.euiCallOut--warning').exists()).toBeFalsy();
+      expect(actions.cold.hasNodeAttributesSelect()).toBeFalsy();
+    });
+
+    test('shows warning instead of node attributes input when none exist', async () => {
+      httpRequestsMockHelpers.setListNodes({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['node1'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
 
-      test('shows warning instead of node attributes input when none exist', async () => {
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { actions, component } = testBed;
+
+      component.update();
+      await actions.cold.enable(true);
+
+      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      await actions.cold.setDataAllocation('node_attrs');
+      expect(actions.cold.hasNoNodeAttrsWarning()).toBeTruthy();
+      expect(actions.cold.hasNodeAttributesSelect()).toBeFalsy();
+    });
+
+    test('shows node attributes input when attributes exist', async () => {
+      const { actions, component } = testBed;
+      await actions.cold.enable(true);
+
+      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      await actions.cold.setDataAllocation('node_attrs');
+      expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
+      expect(actions.cold.hasNodeAttributesSelect()).toBeTruthy();
+      expect(actions.cold.getNodeAttributesSelectOptions().length).toBe(2);
+    });
+
+    test('shows view node attributes link when attribute selected and shows flyout when clicked', async () => {
+      const { actions, component } = testBed;
+
+      await actions.cold.enable(true);
+
+      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      await actions.cold.setDataAllocation('node_attrs');
+      expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
+      expect(actions.cold.hasNodeAttributesSelect()).toBeTruthy();
+
+      expect(actions.cold.hasNodeDetailsFlyout()).toBeFalsy();
+      expect(actions.cold.getNodeAttributesSelectOptions().length).toBe(2);
+      await actions.cold.setSelectedNodeAttribute('attribute:true');
+
+      await actions.cold.openNodeDetailsFlyout();
+      expect(actions.cold.hasNodeDetailsFlyout()).toBeTruthy();
+    });
+
+    test('shows default allocation warning when no node roles are found', async () => {
+      httpRequestsMockHelpers.setListNodes({
+        nodesByAttributes: {},
+        nodesByRoles: {},
+        isUsingDeprecatedDataRoleConfig: false,
+      });
+
+      await act(async () => {
+        testBed = await setup();
+      });
+      const { actions, component } = testBed;
+
+      component.update();
+      await actions.cold.enable(true);
+
+      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(actions.cold.hasDefaultAllocationWarning()).toBeTruthy();
+    });
+
+    [
+      {
+        nodesByRoles: { data_hot: ['test'] },
+        previousActiveRole: 'hot',
+      },
+      {
+        nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
+        previousActiveRole: 'warm',
+      },
+    ].forEach(({ nodesByRoles, previousActiveRole }) => {
+      test(`shows default allocation notice when ${previousActiveRole} tiers exists, but not cold tier`, async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: {},
-          nodesByRoles: { data: ['node1'] },
+          nodesByRoles,
           isUsingDeprecatedDataRoleConfig: false,
         });
 
         await act(async () => {
           testBed = await setup();
         });
-        const { actions, component } = testBed;
+        const { actions, component, find } = testBed;
 
         component.update();
-        await actions[currentPhase].enable(true);
+        await actions.cold.enable(true);
 
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-        await actions[currentPhase].setDataAllocation('node_attrs');
-        expect(actions[currentPhase].hasNoNodeAttrsWarning()).toBeTruthy();
-        expect(actions[currentPhase].hasNodeAttributesSelect()).toBeFalsy();
+        expect(actions.cold.hasDefaultAllocationNotice()).toBeTruthy();
+        expect(find('defaultAllocationNotice').text()).toContain(
+          `This policy will move data in the cold phase to ${previousActiveRole} tier nodes`
+        );
       });
+    });
 
-      test('shows node attributes input when attributes exist', async () => {
-        const { actions, component } = testBed;
-        await actions[currentPhase].enable(true);
-
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-        await actions[currentPhase].setDataAllocation('node_attrs');
-        expect(actions[currentPhase].hasNoNodeAttrsWarning()).toBeFalsy();
-        expect(actions[currentPhase].hasNodeAttributesSelect()).toBeTruthy();
-        expect(actions[currentPhase].getNodeAttributesSelectOptions().length).toBe(2);
+    test(`doesn't show default allocation notice when node with "data" role exists`, async () => {
+      httpRequestsMockHelpers.setListNodes({
+        nodesByAttributes: {},
+        nodesByRoles: { data: ['test'] },
+        isUsingDeprecatedDataRoleConfig: false,
       });
-
-      test('shows view node attributes link when attribute selected and shows flyout when clicked', async () => {
-        const { actions, component } = testBed;
-
-        await actions[currentPhase].enable(true);
-
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-        await actions[currentPhase].setDataAllocation('node_attrs');
-        expect(actions[currentPhase].hasNoNodeAttrsWarning()).toBeFalsy();
-        expect(actions[currentPhase].hasNodeAttributesSelect()).toBeTruthy();
-
-        expect(actions[currentPhase].hasNodeDetailsFlyout()).toBeFalsy();
-        expect(actions[currentPhase].getNodeAttributesSelectOptions().length).toBe(2);
-        await actions[currentPhase].setSelectedNodeAttribute('attribute:true');
-
-        await actions[currentPhase].openNodeDetailsFlyout();
-        expect(actions[currentPhase].hasNodeDetailsFlyout()).toBeTruthy();
+      await act(async () => {
+        testBed = await setup();
       });
+      const { actions, component } = testBed;
 
-      test('shows default allocation warning when no node roles are found', async () => {
-        httpRequestsMockHelpers.setListNodes({
-          nodesByAttributes: {},
-          nodesByRoles: {},
-          isUsingDeprecatedDataRoleConfig: false,
-        });
+      component.update();
+      await actions.cold.enable(true);
 
-        await act(async () => {
-          testBed = await setup();
-        });
-        const { actions, component } = testBed;
-
-        component.update();
-        await actions[currentPhase].enable(true);
-
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-        expect(actions[currentPhase].hasDefaultAllocationWarning()).toBeTruthy();
-      });
-
-      [
-        {
-          nodesByRoles: { data_hot: ['test'] },
-          previousActiveRole: 'hot',
-        },
-        {
-          nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
-          previousActiveRole: 'warm',
-        },
-        {
-          nodesByRoles: { data_hot: ['test'], data_warm: ['test'], data_cold: ['test'] },
-          previousActiveRole: 'cold',
-        },
-      ].forEach(({ nodesByRoles, previousActiveRole }, i) => {
-        if (currentPhase === 'cold' && i === 2) {
-          return;
-        }
-
-        test(`shows default allocation notice when ${previousActiveRole} tiers exists, but not ${currentPhase} tier`, async () => {
-          httpRequestsMockHelpers.setListNodes({
-            nodesByAttributes: {},
-            nodesByRoles,
-            isUsingDeprecatedDataRoleConfig: false,
-          });
-
-          await act(async () => {
-            testBed = await setup();
-          });
-          const { actions, component, find } = testBed;
-
-          component.update();
-          await actions[currentPhase].enable(true);
-
-          expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-          expect(actions[currentPhase].hasDefaultAllocationNotice()).toBeTruthy();
-          expect(find('defaultAllocationNotice').text()).toContain(
-            `This policy will move data in the ${currentPhase} phase to ${previousActiveRole} tier nodes`
-          );
-        });
-      });
-
-      test(`doesn't show default allocation notice when node with "data" role exists`, async () => {
-        httpRequestsMockHelpers.setListNodes({
-          nodesByAttributes: {},
-          nodesByRoles: { data: ['test'] },
-          isUsingDeprecatedDataRoleConfig: false,
-        });
-        await act(async () => {
-          testBed = await setup();
-        });
-        const { actions, component } = testBed;
-
-        component.update();
-        await actions[currentPhase].enable(true);
-
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-        expect(actions[currentPhase].hasDefaultAllocationNotice()).toBeFalsy();
-      });
+      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(actions.cold.hasDefaultAllocationNotice()).toBeFalsy();
     });
   });
 
@@ -391,31 +381,29 @@ describe('<EditPolicy /> node allocation', () => {
         expect(find('cloudDataTierCallout').exists()).toBeFalsy();
       });
 
-      (['cold', 'frozen'] as const).forEach((currentPhase) => {
-        test(`shows cloud notice when ${currentPhase} tier nodes do not exist`, async () => {
-          httpRequestsMockHelpers.setListNodes({
-            nodesByAttributes: {},
-            nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
-            isUsingDeprecatedDataRoleConfig: false,
-          });
-          await act(async () => {
-            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-          });
-          const { actions, component, exists, find } = testBed;
-
-          component.update();
-          await actions[currentPhase].enable(true);
-          expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-
-          expect(exists('cloudMissingTierCallout')).toBeTruthy();
-          expect(find('cloudMissingTierCallout').text()).toContain(
-            `Edit your Elastic Cloud deployment to set up a ${currentPhase} tier`
-          );
-
-          // Assert that other notices are not showing
-          expect(actions[currentPhase].hasDefaultAllocationNotice()).toBeFalsy();
-          expect(actions[currentPhase].hasNoNodeAttrsWarning()).toBeFalsy();
+      test(`shows cloud notice when cold tier nodes do not exist`, async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: {},
+          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          isUsingDeprecatedDataRoleConfig: false,
         });
+        await act(async () => {
+          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+        });
+        const { actions, component, exists, find } = testBed;
+
+        component.update();
+        await actions.cold.enable(true);
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+        expect(exists('cloudMissingTierCallout')).toBeTruthy();
+        expect(find('cloudMissingTierCallout').text()).toContain(
+          `Edit your Elastic Cloud deployment to set up a cold tier`
+        );
+
+        // Assert that other notices are not showing
+        expect(actions.cold.hasDefaultAllocationNotice()).toBeFalsy();
+        expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
       });
     });
   });
