@@ -44,6 +44,7 @@ export const getColorPicker = (
   const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
   const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
   const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
+  let keyDownEventOn = false;
 
   const handleChange = (newColor: string | null) => {
     if (!seriesName) {
@@ -53,16 +54,17 @@ export const getColorPicker = (
       onChange(newColor);
     }
     setColor(newColor, seriesName);
-    // close the popover if no color is applied
-    if (!newColor) {
+    // close the popover if no color is applied or the user has clicked a color
+    if (!newColor || !keyDownEventOn) {
       onClose();
     }
   };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.keyCode === KEY_CODE_ENTER) {
       onClose?.();
     }
+    keyDownEventOn = true;
   };
 
   const handleOutsideClick = useCallback(() => {

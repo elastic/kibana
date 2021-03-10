@@ -104,7 +104,7 @@ interface ColorPickerProps {
   /**
    * Callback for onKeyPress event
    */
-  onKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 const euiColors = euiPaletteColorBlind({ rotations: 4, order: 'group' });
 
