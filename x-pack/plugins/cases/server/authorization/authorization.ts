@@ -26,6 +26,10 @@ export enum WriteOperations {
 
 type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
+/**
+ * This class handles ensuring that the user making a request has the correct permissions
+ * for the API request.
+ */
 export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
@@ -47,6 +51,9 @@ export class Authorization {
     this.featureCaseClasses = caseClasses;
   }
 
+  /**
+   * Creates an Authorization object.
+   */
   static async create({
     request,
     securityAuth,
@@ -58,6 +65,7 @@ export class Authorization {
     getSpace: GetSpaceFn;
     features: FeaturesPluginStart;
   }): Promise<Authorization> {
+    // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseClasses: Set<string>;
     try {
       const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
