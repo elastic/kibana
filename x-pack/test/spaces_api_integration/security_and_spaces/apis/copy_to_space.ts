@@ -15,6 +15,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
+  const kbnClient = getService('kibanaServer');
 
   const {
     copyToSpaceTest,
@@ -27,7 +28,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     expectRouteForbiddenResponse,
     createMultiNamespaceTestCases,
-  } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
+  } = copyToSpaceTestSuiteFactory(es, esArchiver, kbnClient, supertestWithoutAuth);
 
   describe('copy to spaces', () => {
     [

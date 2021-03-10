@@ -13,6 +13,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
+  const kbnClient = getService('kibanaServer');
 
   const {
     copyToSpaceTest,
@@ -23,7 +24,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
     createExpectWithConflictsWithoutOverwritingResult,
     createMultiNamespaceTestCases,
     originSpaces,
-  } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
+  } = copyToSpaceTestSuiteFactory(es, esArchiver, kbnClient, supertestWithoutAuth);
 
   describe('copy to spaces', () => {
     originSpaces.forEach((spaceId) => {

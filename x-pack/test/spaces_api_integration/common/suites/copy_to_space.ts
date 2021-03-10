@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { Payload } from '@hapi/boom';
+import type { EsArchiver } from '@kbn/es-archiver';
 import expect from '@kbn/expect';
+import type { KbnClient } from '@kbn/test';
 import { SuperTest } from 'supertest';
-import { EsArchiver } from '@kbn/es-archiver';
+import type { SavedObjectsImportFailure, SavedObjectsImportError } from 'kibana/server';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
@@ -72,6 +75,7 @@ const getDestinationWithConflicts = (originSpaceId?: string) =>
 export function copyToSpaceTestSuiteFactory(
   es: any,
   esArchiver: EsArchiver,
+  kbnClient: KbnClient,
   supertest: SuperTest<any>
 ) {
   const collectSpaceContents = async () => {
@@ -417,6 +421,20 @@ export function copyToSpaceTestSuiteFactory(
     await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
   };
 
+  function isSavedObjectsImportFailure(
+    error: SavedObjectsImportFailure | SavedObjectsImportError | Payload
+  ): error is SavedObjectsImportFailure {
+    return error.hasOwnProperty('meta');
+  }
+
+  const loadTestData = async () =>
+    Promise.all([
+      kbnClient.importExport.bulkCreate('spaces_default.ndjson', { space: 'default' }),
+      kbnClient.importExport.bulkCreate('spaces_space_1.ndjson', { space: 'space_1' }),
+      kbnClient.importExport.bulkCreate('spaces_space_2.ndjson', { space: 'space_2' }),
+    ]);
+  const unloadTestData = async () => esArchiver.emptyKibanaIndex();
+
   /**
    * Creates test cases for multi-namespace saved object types.
    * Note: these are written with the assumption that test data will only be reloaded between each group of test cases, *not* before every
@@ -548,11 +566,25 @@ export function copyToSpaceTestSuiteFactory(
         response: async (response: TestResponse) => {
           if (outcome === 'authorized') {
             const { success, successCount, successResults, errors } = getResult(response);
-            const updatedAt = '2017-09-21T18:59:16.270Z';
+            const getUpdatedAt = (i: number) =>
+              errors &&
+              isSavedObjectsImportFailure(errors[0]) &&
+              errors[0].error.type === 'ambiguous_conflict'
+                ? errors[0].error.destinations[i].updatedAt
+                : undefined;
+
             const destinations = [
               // response should be sorted by updatedAt in descending order
-              { id: 'conflict_2_space_2', title: 'A shared saved-object in one space', updatedAt },
-              { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
+              {
+                id: 'conflict_2_space_2',
+                title: 'A shared saved-object in one space',
+                updatedAt: getUpdatedAt(0),
+              },
+              {
+                id: 'conflict_2_all',
+                title: 'A shared saved-object in all spaces',
+                updatedAt: getUpdatedAt(1),
+              },
             ];
             expect(success).to.eql(false);
             expect(successCount).to.eql(0);
@@ -591,8 +623,8 @@ export function copyToSpaceTestSuiteFactory(
       });
 
       describe('single-namespace types', () => {
-        beforeEach(() => esArchiver.load('saved_objects/spaces'));
-        afterEach(() => esArchiver.unload('saved_objects/spaces'));
+        beforeEach(() => loadTestData());
+        afterEach(() => unloadTestData());
 
         const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
 
@@ -729,8 +761,8 @@ export function copyToSpaceTestSuiteFactory(
         const includeReferences = false;
         const createNewCopies = false;
         describe(`multi-namespace types with overwrite=${overwrite}`, () => {
-          before(() => esArchiver.load('saved_objects/spaces'));
-          after(() => esArchiver.unload('saved_objects/spaces'));
+          before(() => loadTestData());
+          after(() => unloadTestData());
 
           const testCases = tests.multiNamespaceTestCases(overwrite);
           testCases.forEach(({ testTitle, objects, statusCode, response }) => {

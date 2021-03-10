@@ -1,0 +1,8 @@
+{
+  "id": "my_dashboard",
+  "attributes": {
+    "description": "Space 2",
+    "title": "This is the second test space"
+  },
+  "type": "dashboard"
+}

@@ -1,0 +1,245 @@
+{
+  "id": "my_dashboard",
+  "attributes": {
+    "description": "Default Space",
+    "title": "This is the default test space"
+  },
+  "type": "dashboard"
+}
+
+{
+  "id": "cts_dashboard",
+  "attributes": {
+    "description": "Copy to Space Dashboard from the default space",
+    "title": "This is the default test space CTS dashboard"
+  },
+  "references": [
+    {
+      "type": "visualization",
+      "id": "cts_vis_1_default",
+      "name": "CTS Vis 1"
+    },
+    {
+      "type": "visualization",
+      "id": "cts_vis_2_default",
+      "name": "CTS Vis 2"
+    },
+    {
+      "type": "visualization",
+      "id": "cts_vis_3",
+      "name": "CTS Vis 3"
+    }
+  ],
+  "type": "dashboard"
+}
+
+{
+  "id": "cts_vis_1_default",
+  "attributes": {
+    "title": "CTS vis 1 from default space",
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "references": [
+    {
+      "type": "index-pattern",
+      "id": "cts_ip_1",
+      "name": "CTS IP 1"
+    }
+  ],
+  "type": "visualization"
+}
+
+{
+  "id": "cts_vis_2_default",
+  "attributes": {
+    "title": "CTS vis 2 from default space",
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "references": [
+    {
+      "type": "index-pattern",
+      "id": "cts_ip_1",
+      "name": "CTS IP 1"
+    }
+  ],
+  "type": "visualization"
+}
+
+{
+  "id": "cts_vis_3",
+  "attributes": {
+    "title": "CTS vis 3 from default space",
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "references": [
+    {
+      "type": "index-pattern",
+      "id": "cts_ip_1",
+      "name": "CTS IP 1"
+    }
+  ],
+  "type": "visualization"
+}
+
+{
+  "id": "cts_ip_1",
+  "attributes": {
+    "title": "Copy to Space index pattern 1 from default space"
+  },
+  "references": [],
+  "type": "index-pattern"
+}
+
+{
+  "id": "default_only",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["default"]
+}
+
+{
+  "id": "space_1_only",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["space_1"]
+}
+
+{
+  "id": "space_2_only",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["space_2"]
+}
+
+{
+  "id": "default_and_space_1",
+  "attributes": {
+    "title": "A shared saved-object in the default and space_1 spaces"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["default", "space_1"]
+}
+
+{
+  "id": "default_and_space_2",
+  "attributes": {
+    "title": "A shared saved-object in the default and space_2 spaces"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["default", "space_2"]
+}
+
+{
+  "id": "space_1_and_space_2",
+  "attributes": {
+    "title": "A shared saved-object in the space_1 and space_2 spaces"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["space_1", "space_2"]
+}
+
+{
+  "id": "each_space",
+  "attributes": {
+    "title": "A shared saved-object in the default, space_1, and space_2 spaces"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["default", "space_1", "space_2"]
+}
+
+{
+  "id": "all_spaces",
+  "attributes": {
+    "title": "A shared saved-object in all spaces"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["*"]
+}
+
+{
+  "id": "conflict_1_default",
+  "originId": "conflict_1",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["default"]
+}
+
+{
+  "id": "conflict_1_space_1",
+  "originId": "conflict_1",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["space_1"]
+}
+
+{
+  "id": "conflict_1_space_2",
+  "originId": "conflict_1",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["space_2"]
+}
+
+{
+  "id": "conflict_2_default",
+  "originId": "conflict_2",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["default"]
+}
+
+{
+  "id": "conflict_2_space_1",
+  "originId": "conflict_2",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["space_1"]
+}
+
+{
+  "id": "conflict_2_space_2",
+  "originId": "conflict_2",
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["space_2"]
+}
+
+{
+  "id": "conflict_2_all",
+  "originId": "conflict_2",
+  "attributes": {
+    "title": "A shared saved-object in all spaces"
+  },
+  "type": "sharedtype",
+  "initialNamespaces": ["default", "space_1", "space_2"]
+}

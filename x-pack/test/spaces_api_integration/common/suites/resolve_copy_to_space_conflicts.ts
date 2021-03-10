@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { EsArchiver } from '@kbn/es-archiver';
 import expect from '@kbn/expect';
+import type { KbnClient } from '@kbn/test';
 import { SuperTest } from 'supertest';
-import { EsArchiver } from '@kbn/es-archiver';
 import { SavedObject } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
@@ -53,6 +54,7 @@ const getDestinationSpace = (originSpaceId?: string) => {
 
 export function resolveCopyToSpaceConflictsSuite(
   esArchiver: EsArchiver,
+  kbnClient: KbnClient,
   supertestWithAuth: SuperTest<any>,
   supertestWithoutAuth: SuperTest<any>
 ) {
@@ -306,6 +308,14 @@ export function resolveCopyToSpaceConflictsSuite(
     }
   };
 
+  const loadTestData = async () =>
+    Promise.all([
+      kbnClient.importExport.bulkCreate('spaces_default.ndjson', { space: 'default' }),
+      kbnClient.importExport.bulkCreate('spaces_space_1.ndjson', { space: 'space_1' }),
+      kbnClient.importExport.bulkCreate('spaces_space_2.ndjson', { space: 'space_2' }),
+    ]);
+  const unloadTestData = async () => esArchiver.emptyKibanaIndex();
+
   /**
    * Creates test cases for multi-namespace saved object types.
    * Note: these are written with the assumption that test data will only be reloaded between each group of test cases, *not* before every
@@ -428,8 +438,8 @@ export function resolveCopyToSpaceConflictsSuite(
       });
 
       describe('single-namespace types', () => {
-        beforeEach(() => esArchiver.load('saved_objects/spaces'));
-        afterEach(() => esArchiver.unload('saved_objects/spaces'));
+        beforeEach(() => loadTestData());
+        afterEach(() => unloadTestData());
 
         const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
         const visualizationObject = { type: 'visualization', id: 'cts_vis_3' };
@@ -518,8 +528,8 @@ export function resolveCopyToSpaceConflictsSuite(
       const includeReferences = false;
       const createNewCopies = false;
       describe(`multi-namespace types with "overwrite" retry`, () => {
-        before(() => esArchiver.load('saved_objects/spaces'));
-        after(() => esArchiver.unload('saved_objects/spaces'));
+        before(() => loadTestData());
+        after(() => unloadTestData());
 
         const testCases = tests.multiNamespaceTestCases();
         testCases.forEach(({ testTitle, objects, retries, statusCode, response }) => {

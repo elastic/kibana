@@ -63,8 +63,13 @@ const createTestCases = (spaceId: string) => {
 export default function ({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const kbnClient = getService('kibanaServer');
 
-  const { addTests, createTestDefinitions } = shareRemoveTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = shareRemoveTestSuiteFactory(
+    esArchiver,
+    kbnClient,
+    supertest
+  );
   const createTests = (spaceId: string) => {
     const { singleSpace, multipleSpaces, allCases } = createTestCases(spaceId);
     return {

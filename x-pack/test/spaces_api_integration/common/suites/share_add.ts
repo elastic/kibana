@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { EsArchiver } from '@kbn/es-archiver';
 import expect from '@kbn/expect';
+import type { KbnClient } from '@kbn/test';
 import { SuperTest } from 'supertest';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SPACES } from '../lib/spaces';
@@ -37,7 +39,11 @@ const createRequest = ({ id, namespaces }: ShareAddTestCase) => ({
 const getTestTitle = ({ id, namespaces }: ShareAddTestCase) =>
   `{id: ${id}, namespaces: [${namespaces.join(',')}]}`;
 
-export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function shareAddTestSuiteFactory(
+  esArchiver: EsArchiver,
+  kbnClient: KbnClient,
+  supertest: SuperTest<any>
+) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody = (testCase: ShareAddTestCase): ExpectResponseBody => async (
     response: Record<string, any>
@@ -75,6 +81,14 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
     }));
   };
 
+  const loadTestData = async () =>
+    Promise.all([
+      kbnClient.importExport.bulkCreate('spaces_default.ndjson', { space: 'default' }),
+      kbnClient.importExport.bulkCreate('spaces_space_1.ndjson', { space: 'space_1' }),
+      kbnClient.importExport.bulkCreate('spaces_space_2.ndjson', { space: 'space_2' }),
+    ]);
+  const unloadTestData = async () => esArchiver.emptyKibanaIndex();
+
   const makeShareAddTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: ShareAddTestSuite
@@ -82,8 +96,8 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
     const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      before(() => loadTestData());
+      after(() => unloadTestData());
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

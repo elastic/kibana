@@ -56,6 +56,31 @@ export class KbnClientImportExport {
     return this.dir ? Path.resolve(this.dir, path) : path;
   }
 
+  async bulkCreate(name: string, options?: { space?: string }) {
+    const src = this.resolvePath(name);
+    this.log.debug('resolved bulkCreate for', name, 'to', src);
+
+    const objects = await parseArchive(src);
+    this.log.info('starting to bulkCreate', objects.length, 'saved objects', {
+      space: options?.space,
+    });
+
+    const resp = await this.req(options?.space, {
+      method: 'POST',
+      path: '/api/saved_objects/_bulk_create',
+      query: {
+        overwrite: true,
+      },
+      body: objects,
+    });
+
+    if (resp.status === 200) {
+      this.log.success('bulkCreate success');
+    } else {
+      throw createFailError(`failed to bulkCreate all saved objects: ${inspect(resp.data)}`);
+    }
+  }
+
   async load(name: string, options?: { space?: string }) {
     const src = this.resolvePath(name);
     this.log.debug('resolved import for', name, 'to', src);

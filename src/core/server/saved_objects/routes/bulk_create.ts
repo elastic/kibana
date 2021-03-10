@@ -40,6 +40,7 @@ export const registerBulkCreateRoute = (router: IRouter, { coreUsageData }: Rout
                 })
               )
             ),
+            originId: schema.maybe(schema.string()), // TODO: enable only in dev mode? we don't want external consumers to use this
             initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           })
         ),

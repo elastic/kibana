@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { EsArchiver } from '@kbn/es-archiver';
 import expect from '@kbn/expect';
+import type { KbnClient } from '@kbn/test';
 import { SuperTest } from 'supertest';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SPACES } from '../lib/spaces';
@@ -36,7 +38,11 @@ const createRequest = ({ id, namespaces }: ShareRemoveTestCase) => ({
   object: { type: TYPE, id },
 });
 
-export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function shareRemoveTestSuiteFactory(
+  esArchiver: EsArchiver,
+  kbnClient: KbnClient,
+  supertest: SuperTest<any>
+) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody = (testCase: ShareRemoveTestCase): ExpectResponseBody => async (
     response: Record<string, any>
@@ -74,6 +80,14 @@ export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTes
     }));
   };
 
+  const loadTestData = async () =>
+    Promise.all([
+      kbnClient.importExport.bulkCreate('spaces_default.ndjson', { space: 'default' }),
+      kbnClient.importExport.bulkCreate('spaces_space_1.ndjson', { space: 'space_1' }),
+      kbnClient.importExport.bulkCreate('spaces_space_2.ndjson', { space: 'space_2' }),
+    ]);
+  const unloadTestData = async () => esArchiver.emptyKibanaIndex();
+
   const makeShareRemoveTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: ShareRemoveTestSuite
@@ -81,8 +95,8 @@ export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTes
     const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      before(() => loadTestData());
+      after(() => unloadTestData());
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

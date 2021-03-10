@@ -15,6 +15,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertestWithAuth = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kbnClient = getService('kibanaServer');
 
   const {
     resolveCopyToSpaceConflictsTest,
@@ -28,7 +29,12 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     createMultiNamespaceTestCases,
     NON_EXISTENT_SPACE_ID,
-  } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
+  } = resolveCopyToSpaceConflictsSuite(
+    esArchiver,
+    kbnClient,
+    supertestWithAuth,
+    supertestWithoutAuth
+  );
 
   describe('resolve copy to spaces conflicts', () => {
     [

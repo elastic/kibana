@@ -50,6 +50,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       esArchiver: {
         directory: path.join(__dirname, 'fixtures', 'es_archiver'),
       },
+
       kbnArchiver: {
         directory: path.join(__dirname, 'fixtures', 'kbn_archiver'),
       },

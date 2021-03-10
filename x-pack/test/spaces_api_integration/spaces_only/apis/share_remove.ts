@@ -80,8 +80,13 @@ const createMultiTestCases = () => {
 export default function ({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kbnClient = getService('kibanaServer');
 
-  const { addTests, createTestDefinitions } = shareRemoveTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = shareRemoveTestSuiteFactory(
+    esArchiver,
+    kbnClient,
+    supertest
+  );
   const createSingleTests = (spaceId: string) => {
     const testCases = createSingleTestCases(spaceId);
     return createTestDefinitions(testCases, false);

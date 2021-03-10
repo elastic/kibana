@@ -87,8 +87,13 @@ const calculateSingleSpaceAuthZ = (
 export default function ({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const kbnClient = getService('kibanaServer');
 
-  const { addTests, createTestDefinitions } = shareAddTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = shareAddTestSuiteFactory(
+    esArchiver,
+    kbnClient,
+    supertest
+  );
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
     const thisSpace = calculateSingleSpaceAuthZ(testCases, spaceId);

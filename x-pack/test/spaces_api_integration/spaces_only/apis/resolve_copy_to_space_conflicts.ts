@@ -13,6 +13,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertestWithAuth = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kbnClient = getService('kibanaServer');
 
   const {
     resolveCopyToSpaceConflictsTest,
@@ -23,7 +24,12 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
     createMultiNamespaceTestCases,
     NON_EXISTENT_SPACE_ID,
     originSpaces,
-  } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
+  } = resolveCopyToSpaceConflictsSuite(
+    esArchiver,
+    kbnClient,
+    supertestWithAuth,
+    supertestWithoutAuth
+  );
 
   describe('resolve copy to spaces conflicts', () => {
     originSpaces.forEach((spaceId) => {

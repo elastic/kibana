@@ -14,7 +14,6 @@ import { createTestSuiteFactory } from '../../common/suites/create';
 export default function createSpacesOnlySuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   const {
     createTest,
@@ -22,9 +21,9 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
     expectReservedSpecifiedResult,
     expectConflictResponse,
     expectRbacForbiddenResponse,
-  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth, kibanaServer);
+  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  describe.only('create', () => {
+  describe('create', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
