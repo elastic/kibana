@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import qs from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useMemo, useState, useEffect } from 'react';
 import { get, set, cloneDeep } from 'lodash';
