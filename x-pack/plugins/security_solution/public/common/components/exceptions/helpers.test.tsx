@@ -723,15 +723,16 @@ describe('Exception helpers', () => {
       expect(prepopulatedItem.entries).toEqual([
         {
           entries: [
-            { field: 'subject_name', operator: 'included', type: 'match', value: '' },
-            { field: 'trusted', operator: 'included', type: 'match', value: '' },
+            { id: '123', field: 'subject_name', operator: 'included', type: 'match', value: '' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: '' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
-        { field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
-        { field: 'event.code', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'file.path.caseless', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
+        { id: '123', field: 'event.code', operator: 'included', type: 'match', value: '' },
       ]);
     });
 
@@ -748,24 +749,39 @@ describe('Exception helpers', () => {
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'someSubjectName',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some-file-path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some-hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some-event-code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some-hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some-event-code',
+        },
       ]);
     });
   });
@@ -943,47 +959,77 @@ describe('Exception helpers', () => {
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some event code',
+        },
       ]);
       expect(defaultItems[1].entries).toEqual([
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject_2',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'true' },
           ],
           field: 'file.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'file.path.caseless',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+        {
+          id: '123',
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'some event code',
+        },
       ]);
     });
 
@@ -1014,59 +1060,91 @@ describe('Exception helpers', () => {
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'false' },
           ],
           field: 'process.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'process.executable',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'process.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
         {
+          id: '123',
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
           field: 'Ransomware.feature',
           operator: 'included',
           type: 'match',
           value: 'some ransomware feature',
         },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'ransomware' },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'ransomware',
+        },
       ]);
       expect(defaultItems[1].entries).toEqual([
         {
           entries: [
             {
+              id: '123',
               field: 'subject_name',
               operator: 'included',
               type: 'match',
               value: 'some_subject_2',
             },
-            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+            { id: '123', field: 'trusted', operator: 'included', type: 'match', value: 'true' },
           ],
           field: 'process.Ext.code_signature',
           type: 'nested',
+          id: '123',
         },
         {
+          id: '123',
           field: 'process.executable',
           operator: 'included',
           type: 'match',
           value: 'some file path',
         },
-        { field: 'process.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
         {
+          id: '123',
+          field: 'process.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: 'some hash',
+        },
+        {
+          id: '123',
           field: 'Ransomware.feature',
           operator: 'included',
           type: 'match',
           value: 'some ransomware feature',
         },
-        { field: 'event.code', operator: 'included', type: 'match', value: 'ransomware' },
+        {
+          id: '123',
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: 'ransomware',
+        },
       ]);
     });
   });
