@@ -118,8 +118,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'background-color': theme.eui.euiColorGhost,
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
-        'background-image': (el: cytoscape.NodeSingular) =>
-          iconForNode(el, theme.darkMode),
+        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
         'background-height': (el: cytoscape.NodeSingular) =>
           isService(el) ? '60%' : '40%',
         'background-width': (el: cytoscape.NodeSingular) =>
