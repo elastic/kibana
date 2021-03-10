@@ -8,7 +8,7 @@
 import { deflate } from 'zlib';
 import { promisify } from 'util';
 
-import { createHash } from 'crypto';
+import { createHash, BinaryLike } from 'crypto';
 
 import uuid from 'uuid';
 import { ElasticsearchClient } from 'kibana/server';
@@ -117,7 +117,7 @@ export const listArtifacts = async (
   }
 };
 
-export const generateArtifactContentHash = (content: string): string => {
+export const generateArtifactContentHash = (content: BinaryLike): string => {
   return createHash('sha256').update(content).digest('hex');
 };
 
@@ -125,15 +125,15 @@ export const encodeArtifactContent = async (
   content: ArtifactsClientCreateOptions['content']
 ): Promise<ArtifactEncodedMetadata> => {
   const decodedContentBuffer = Buffer.from(content);
-  const encodedContentButter = await deflateAsync(decodedContentBuffer);
+  const encodedContentBuffer = await deflateAsync(decodedContentBuffer);
 
   const encodedArtifact: ArtifactEncodedMetadata = {
     compressionAlgorithm: 'zlib',
     decodedSha256: generateArtifactContentHash(decodedContentBuffer.toString()),
     decodedSize: decodedContentBuffer.byteLength,
-    encodedSha256: generateArtifactContentHash(encodedContentButter.toString()),
-    encodedSize: encodedContentButter.byteLength,
-    body: encodedContentButter.toString('base64'),
+    encodedSha256: generateArtifactContentHash(encodedContentBuffer),
+    encodedSize: encodedContentBuffer.byteLength,
+    body: encodedContentBuffer.toString('base64'),
   };
 
   return encodedArtifact;
