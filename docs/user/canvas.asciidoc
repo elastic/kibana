@@ -143,7 +143,7 @@ To access your saved elements, click *Add element > My elements*.
 
 [float]
 [[add-kibana-visualizations]]
-=== Add {kib} elements
+=== Add panels from the Visualize Library
 
 Add a panel that you saved in *Visualize Library* to your workpad. 
 
