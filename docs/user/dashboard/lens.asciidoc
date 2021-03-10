@@ -33,7 +33,7 @@ image::images/lens_drag_drop_1.png[Presented Lens drag and drop]
 
 Follow the instructions below to take advantage of drag and drop keyboard navigation:
 
-. Set a focus on the chosen item. Most of draggable elements have two focus states. One serves to open a panel with more detailed information or options and another one to drag an element. To drag an element, tab through the page until the focus state looks like on the picture:
+. Set a focus on the chosen item. Most of the draggable elements have two focus states. The inner focus state opens a panel with more detailed information or options. The outer one allows dragging an element. Tab through the page until you get the outer focus state on the chosen element:
 +
 [role="screenshot"]
 image::images/lens_drag_drop_2.png[Lens drag and drop focus state]
