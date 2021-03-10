@@ -51,13 +51,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function refreshAlertsList() {
-    await testSubjects.click('alertsTab');
+    await testSubjects.click('rulesTab');
   }
 
   describe('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('alertsTab');
+      await testSubjects.click('rulesTab');
     });
 
     afterEach(async () => {

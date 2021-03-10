@@ -11,6 +11,6 @@ describe('getCurrentDocTitle', () => {
   test('if change calls return the proper doc title ', async () => {
     expect(getCurrentDocTitle('home') === 'Alerts and Actions').toBeTruthy();
     expect(getCurrentDocTitle('connectors') === 'Connectors').toBeTruthy();
-    expect(getCurrentDocTitle('alerts') === 'Alerts').toBeTruthy();
+    expect(getCurrentDocTitle('rules') === 'Alerts').toBeTruthy();
   });
 });

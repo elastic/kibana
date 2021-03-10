@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('alertsTab');
+      await testSubjects.click('rulesTab');
     });
 
     it('should create an alert', async () => {

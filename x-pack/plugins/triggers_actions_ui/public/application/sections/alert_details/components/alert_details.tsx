@@ -39,7 +39,7 @@ import {
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
 import { AlertEdit } from '../../alert_form';
-import { routeToAlertDetails } from '../../../constants';
+import { routeToRuleDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
@@ -108,7 +108,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
 
   const setAlert = async () => {
-    history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+    history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
   };
 
   const getAlertStatusErrorReasonText = () => {

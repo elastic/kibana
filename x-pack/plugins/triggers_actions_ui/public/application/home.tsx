@@ -21,7 +21,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToAlerts } from './constants';
+import { Section, routeToConnectors, routeToRules } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
@@ -56,7 +56,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }> = [];
 
   tabs.push({
-    id: 'alerts',
+    id: 'rules',
     name: (
       <FormattedMessage id="xpack.triggersActionsUI.home.alertsTabTitle" defaultMessage="Alerts" />
     ),
@@ -153,7 +153,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           )}
           <Route
             exact
-            path={routeToAlerts}
+            path={routeToRules}
             component={() => (
               <HealthContextProvider>
                 <HealthCheck inFlyout={true} waitForCheck={true}>
