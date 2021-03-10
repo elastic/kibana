@@ -7,7 +7,7 @@
 
 import './expression.scss';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
@@ -24,6 +24,7 @@ import {
   HorizontalAlignment,
   ElementClickListener,
   BrushEndListener,
+  TooltipProps,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -60,6 +61,7 @@ import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
+import { CoreStart } from '../../../../../src/core/public';
 
 declare global {
   interface Window {
@@ -89,6 +91,7 @@ export interface XYRender {
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
+  chromeIsVisible$: ReturnType<CoreStart['chrome']['getIsVisible$']>;
   formatFactory: FormatFactory;
   timeZone: string;
   minInterval: number | undefined;
@@ -223,6 +226,7 @@ export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
+  chromeIsVisible$: ReturnType<CoreStart['chrome']['getIsVisible$']>;
   getIntervalByColumn: DataPublicPluginStart['search']['aggs']['getDateMetaByDatatableColumn'];
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -252,6 +256,7 @@ export const getXyChartRenderer = (dependencies: {
           {...config}
           formatFactory={formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          chromeIsVisible$={dependencies.chromeIsVisible$}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
           minInterval={await calculateMinInterval(config, dependencies.getIntervalByColumn)}
@@ -324,6 +329,7 @@ export function XYChart({
   timeZone,
   chartsThemeService,
   paletteService,
+  chromeIsVisible$,
   minInterval,
   onClickValue,
   onSelectRange,
@@ -333,6 +339,14 @@ export function XYChart({
   const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+  const [headerOffset, setHeaderOffset] = useState(0);
+
+  useEffect(() => {
+    const subscription = chromeIsVisible$.subscribe((value: boolean) => {
+      setHeaderOffset(value ? KBN_HEADER_OFFSET : 0);
+    });
+    return () => subscription.unsubscribe();
+  }, [chromeIsVisible$]);
 
   const filteredLayers = getFilteredLayers(layers, data);
 
@@ -524,6 +538,15 @@ export function XYChart({
     onSelectRange(context);
   };
 
+  const boundary = headerOffset ? document.getElementById('app-fixed-viewport') : null;
+  const tooltipProps: TooltipProps = {
+    ...(boundary && {
+      boundary,
+      boundaryPadding: { top: headerOffset },
+    }),
+    headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
+  };
+
   return (
     <Chart>
       <Settings
@@ -546,11 +569,7 @@ export function XYChart({
           },
         }}
         baseTheme={chartBaseTheme}
-        tooltip={{
-          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
-          boundary: document.body,
-          boundaryPadding: { top: KBN_HEADER_OFFSET },
-        }}
+        tooltip={tooltipProps}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={renderMode !== 'noInteractivity' ? brushHandler : undefined}

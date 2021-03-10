@@ -7,10 +7,14 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { CoreSetup, DocLinksStart } from '../../../core/public';
+import { CoreSetup, CoreStart, DocLinksStart } from '../../../core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
+
+export const [getIsVisible, setIsVisible] = createGetterSetter<
+  ReturnType<CoreStart['chrome']['getIsVisible$']>
+>('xy core.chrome.getIsVisible');
 
 export const [getUISettings, setUISettings] = createGetterSetter<CoreSetup['uiSettings']>(
   'xy core.uiSettings'

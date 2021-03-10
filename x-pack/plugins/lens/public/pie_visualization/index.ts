@@ -32,6 +32,7 @@ export class PieVisualization {
     editorFrame.registerVisualization(async () => {
       const { getPieVisualization, pie, getPieRenderer } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
+      const [{ chrome }] = await core.getStartServices();
 
       expressions.registerFunction(() => pie);
 
@@ -40,6 +41,7 @@ export class PieVisualization {
           formatFactory,
           chartsThemeService: charts.theme,
           paletteService: palettes,
+          chromeIsVisible$: chrome.getIsVisible$(),
         })
       );
       return getPieVisualization({ paletteService: palettes });

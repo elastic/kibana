@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import {
   Direction,
@@ -28,7 +28,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { renderEndzoneTooltip } from '../../../charts/public';
 
-import { getThemeService, getUISettings } from '../services';
+import { getIsVisible, getThemeService, getUISettings } from '../services';
 import { VisConfig } from '../types';
 import { fillEmptyValue } from '../utils/get_series_name_fn';
 
@@ -108,6 +108,15 @@ export const XYSettings: FC<XYSettingsProps> = ({
   const baseTheme = themeService.useChartsBaseTheme();
   const dimmingOpacity = getUISettings().get<number | undefined>('visualization:dimmingOpacity');
   const valueLabelsStyling = getValueLabelsStyling(rotation === 90 || rotation === -90);
+  const [headerOffset, setHeaderOffset] = useState(0);
+
+  useEffect(() => {
+    const subscription = getIsVisible().subscribe((value: boolean) => {
+      setHeaderOffset(value ? KBN_HEADER_OFFSET : 0);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const themeOverrides: PartialTheme = {
     markSizeRatio,
@@ -151,10 +160,15 @@ export const XYSettings: FC<XYSettingsProps> = ({
       : headerValueFormatter &&
         (tooltip.detailedTooltip ? undefined : ({ value }: any) => headerValueFormatter(value));
 
-  const boudaryProps = {
-    boundary: document.body,
-    boundaryPadding: { top: KBN_HEADER_OFFSET },
-  };
+  const boudaryProps = useMemo(() => {
+    const boundary = headerOffset ? document.getElementById('app-fixed-viewport') : null;
+    return boundary
+      ? {
+          boundary,
+          boundaryPadding: { top: headerOffset },
+        }
+      : undefined;
+  }, [headerOffset]);
 
   const tooltipProps: TooltipProps = tooltip.detailedTooltip
     ? {

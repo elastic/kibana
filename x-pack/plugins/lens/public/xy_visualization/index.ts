@@ -47,7 +47,7 @@ export class XyVisualization {
         getXyChartRenderer,
         getXyVisualization,
       } = await import('../async_services');
-      const [, { data }] = await core.getStartServices();
+      const [{ chrome }, { data }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
@@ -62,6 +62,7 @@ export class XyVisualization {
           formatFactory,
           chartsThemeService: charts.theme,
           paletteService: palettes,
+          chromeIsVisible$: chrome.getIsVisible$(),
           timeZone: getTimeZone(core.uiSettings),
           getIntervalByColumn: data.search.aggs.getDateMetaByDatatableColumn,
         })
