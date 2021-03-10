@@ -148,7 +148,7 @@ const getSummary = ({
             const thresholdTerms = (parsedValue ?? []).map(
               (entry: { field: string; value: string }) => {
                 return {
-                  title: entry.field,
+                  title: `${entry.field} [threshold]`,
                   description: {
                     ...description,
                     value: entry.value,
