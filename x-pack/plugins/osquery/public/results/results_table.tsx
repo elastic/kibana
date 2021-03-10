@@ -39,14 +39,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  const onSort = useCallback(
-    (newSortingColumns) => {
-      setSortingColumns(newSortingColumns);
-    },
-    [setSortingColumns]
-  );
 
   const { data: allResultsData = [] } = useAllResults({
     actionId,
@@ -68,10 +61,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
-      const value = data[rowIndex].fields[columnId];
+      const value = data[rowIndex % pagination.pageSize]?.fields[columnId];
 
       if (columnId === 'agent.name') {
-        const agentIdValue = data[rowIndex].fields['agent.id'];
+        const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const linkProps = useRouterNavigate(`/live_query/${actionId}/results/${agentIdValue}`);
         return <EuiLink {...linkProps}>{value}</EuiLink>;
@@ -79,11 +72,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
 
       return !isEmpty(value) ? value : '-';
     },
-    [actionId]
+    [actionId, pagination.pageSize]
   );
 
-  const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort }), [
-    onSort,
+  const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort: setSortingColumns }), [
     sortingColumns,
   ]);
 
@@ -150,7 +142,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}
-        height="300px"
+        height="500px"
       />
     </DataContext.Provider>
   );

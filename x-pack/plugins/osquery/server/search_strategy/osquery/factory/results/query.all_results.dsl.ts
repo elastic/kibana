@@ -13,7 +13,7 @@ export const buildResultsQuery = ({
   actionId,
   agentId,
   filterQuery,
-  // sort,
+  sort,
   pagination: { activePage, querySize },
 }: ResultsRequestOptions): ISearchRequestParams => {
   const filter = [
@@ -44,13 +44,13 @@ export const buildResultsQuery = ({
       size: querySize,
       track_total_hits: true,
       fields: agentId ? ['osquery.*'] : ['agent.*', 'osquery.*'],
-      // sort: [
-      //   {
-      //     [sort.field]: {
-      //       order: [sort.direction],
-      //     },
-      //   },
-      // ],
+      sort: [
+        {
+          [sort.field]: {
+            order: sort.direction,
+          },
+        },
+      ],
     },
   };
 

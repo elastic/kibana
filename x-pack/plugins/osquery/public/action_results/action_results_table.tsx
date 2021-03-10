@@ -102,7 +102,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     () => ({ rowIndex, columnId }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
-      const value = data[rowIndex];
+      const value = data[rowIndex % pagination.pageSize];
 
       if (columnId === 'status') {
         // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -192,7 +192,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}
-        height="300px"
+        height="500px"
       />
     </DataContext.Provider>
   );
