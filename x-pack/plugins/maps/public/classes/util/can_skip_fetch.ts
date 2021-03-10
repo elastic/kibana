@@ -55,16 +55,15 @@ export async function canSkipSourceUpdate({
   source,
   prevDataRequest,
   nextMeta,
-  considerSpatialParameters,
+  extentAware,
 }: {
   source: ISource;
   prevDataRequest: DataRequest | undefined;
   nextMeta: DataMeta;
-  considerSpatialParameters: boolean;
+  extentAware: boolean;
 }): Promise<boolean> {
   const timeAware = await source.isTimeAware();
   const refreshTimerAware = await source.isRefreshTimerAware();
-  const extentAware = source.isFilterByMapBounds();
   const isFieldAware = source.isFieldAware();
   const isQueryAware = source.isQueryAware();
   const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
@@ -72,10 +71,10 @@ export async function canSkipSourceUpdate({
   if (
     !timeAware &&
     !refreshTimerAware &&
-    !(extentAware && considerSpatialParameters) &&
+    !extentAware &&
     !isFieldAware &&
     !isQueryAware &&
-    !(isGeoGridPrecisionAware && considerSpatialParameters)
+    !isGeoGridPrecisionAware
   ) {
     return !!prevDataRequest && prevDataRequest.hasDataOrRequestInProgress();
   }
@@ -136,14 +135,12 @@ export async function canSkipSourceUpdate({
   let updateDueToPrecisionChange = false;
   let updateDueToExtentChange = false;
 
-  if (considerSpatialParameters) {
-    if (isGeoGridPrecisionAware) {
-      updateDueToPrecisionChange = !_.isEqual(prevMeta.geogridPrecision, nextMeta.geogridPrecision);
-    }
+  if (isGeoGridPrecisionAware) {
+    updateDueToPrecisionChange = !_.isEqual(prevMeta.geogridPrecision, nextMeta.geogridPrecision);
+  }
 
-    if (extentAware) {
-      updateDueToExtentChange = updateDueToExtent(prevMeta, nextMeta);
-    }
+  if (extentAware) {
+    updateDueToExtentChange = updateDueToExtent(prevMeta, nextMeta);
   }
 
   const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextMeta.sourceMeta);

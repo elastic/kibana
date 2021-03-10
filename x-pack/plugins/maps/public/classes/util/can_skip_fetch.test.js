@@ -135,7 +135,7 @@ describe('canSkipSourceUpdate', () => {
           source: queryAwareSourceMock,
           prevDataRequest,
           nextMeta,
-          considerSpatialParameters: true,
+          extentAware: queryAwareSourceMock.isFilterByMapBounds(),
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -155,7 +155,7 @@ describe('canSkipSourceUpdate', () => {
           source: queryAwareSourceMock,
           prevDataRequest,
           nextMeta,
-          considerSpatialParameters: true,
+          extentAware: queryAwareSourceMock.isFilterByMapBounds(),
         });
 
         expect(canSkipUpdate).toBe(true);
@@ -175,7 +175,7 @@ describe('canSkipSourceUpdate', () => {
           source: queryAwareSourceMock,
           prevDataRequest,
           nextMeta,
-          considerSpatialParameters: true,
+          extentAware: queryAwareSourceMock.isFilterByMapBounds(),
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -192,7 +192,7 @@ describe('canSkipSourceUpdate', () => {
           source: queryAwareSourceMock,
           prevDataRequest,
           nextMeta,
-          considerSpatialParameters: true,
+          extentAware: queryAwareSourceMock.isFilterByMapBounds(),
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -223,7 +223,7 @@ describe('canSkipSourceUpdate', () => {
           source: queryAwareSourceMock,
           prevDataRequest,
           nextMeta,
-          considerSpatialParameters: true,
+          extentAware: queryAwareSourceMock.isFilterByMapBounds(),
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -243,7 +243,7 @@ describe('canSkipSourceUpdate', () => {
           source: queryAwareSourceMock,
           prevDataRequest,
           nextMeta,
-          considerSpatialParameters: true,
+          extentAware: queryAwareSourceMock.isFilterByMapBounds(),
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -263,7 +263,7 @@ describe('canSkipSourceUpdate', () => {
           source: queryAwareSourceMock,
           prevDataRequest,
           nextMeta,
-          considerSpatialParameters: true,
+          extentAware: queryAwareSourceMock.isFilterByMapBounds(),
         });
 
         expect(canSkipUpdate).toBe(false);
@@ -280,7 +280,7 @@ describe('canSkipSourceUpdate', () => {
           source: queryAwareSourceMock,
           prevDataRequest,
           nextMeta,
-          considerSpatialParameters: true,
+          extentAware: queryAwareSourceMock.isFilterByMapBounds(),
         });
 
         expect(canSkipUpdate).toBe(false);

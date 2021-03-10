@@ -73,7 +73,7 @@ export async function syncVectorSource({
     source,
     prevDataRequest,
     nextMeta: requestMeta,
-    considerSpatialParameters: true,
+    extentAware: source.isFilterByMapBounds(),
   });
   if (canSkipFetch) {
     return {

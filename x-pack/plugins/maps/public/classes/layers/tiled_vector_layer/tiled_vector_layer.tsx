@@ -78,7 +78,7 @@ export class TiledVectorLayer extends VectorLayer {
           data.minSourceZoom === this._source.getMinZoom() &&
           data.maxSourceZoom === this._source.getMaxZoom();
         const noChangesInSearchState: boolean = await canSkipSourceUpdate({
-          considerSpatialParameters: false,
+          extentAware: false, // spatial extent knowledge is already fully automated by tile-loading based on pan-zooming
           source: this.getSource(),
           prevDataRequest,
           nextMeta: searchFilters,
