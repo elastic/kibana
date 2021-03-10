@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+export enum OpenModal {
+  None = 'None',
+  ConfirmModifyModal = 'Confirm Modify',
+  ConfirmResetModal = 'Confirm Reset',
+  ConfirmSaveModal = 'Confirm Save',
+}
 export interface ServerFieldResultSetting {
   raw?:
     | {

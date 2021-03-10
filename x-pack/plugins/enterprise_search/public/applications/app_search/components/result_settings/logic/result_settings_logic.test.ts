@@ -7,12 +7,15 @@
 
 import { LogicMounter } from '../../../../__mocks__';
 
+import { OpenModal } from '../types';
+
 import { ResultSettingsLogic } from '.';
 
 describe('ResultSettingsLogic', () => {
   const { mount } = new LogicMounter(ResultSettingsLogic);
 
   const DEFAULT_VALUES = {
+    openModal: OpenModal.None,
     nonTextResultFields: {},
     resultFields: {},
     serverResultFields: {},
@@ -70,6 +73,64 @@ describe('ResultSettingsLogic', () => {
             grault: {},
             garply: {},
           },
+        });
+      });
+    });
+
+    describe('resetAllFields', () => {
+      it('should reset all settings to their default values per field', () => {
+        mount({
+          nonTextResultFields: {
+            foo: { raw: true, snippet: true, snippetFallback: true },
+            bar: { raw: true, snippet: true, snippetFallback: true },
+          },
+          textResultFields: {
+            qux: { raw: true, snippet: true, snippetFallback: true },
+            quux: { raw: true, snippet: true, snippetFallback: true },
+          },
+          resultFields: {
+            quuz: { raw: true, snippet: true, snippetFallback: true },
+            corge: { raw: true, snippet: true, snippetFallback: true },
+          },
+          serverResultFields: {
+            grault: { raw: { size: 5 } },
+            garply: { raw: true },
+          },
+        });
+
+        ResultSettingsLogic.actions.resetAllFields();
+
+        expect(ResultSettingsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          nonTextResultFields: {
+            bar: { raw: true, snippet: false, snippetFallback: false },
+            foo: { raw: true, snippet: false, snippetFallback: false },
+          },
+          textResultFields: {
+            qux: { raw: true, snippet: false, snippetFallback: false },
+            quux: { raw: true, snippet: false, snippetFallback: false },
+          },
+          resultFields: {
+            quuz: { raw: true, snippet: false, snippetFallback: false },
+            corge: { raw: true, snippet: false, snippetFallback: false },
+          },
+          serverResultFields: {
+            grault: { raw: {} },
+            garply: { raw: {} },
+          },
+        });
+      });
+
+      it('should close any open modal', () => {
+        mount({
+          openModal: OpenModal.ConfirmSaveModal,
+        });
+
+        ResultSettingsLogic.actions.resetAllFields();
+
+        expect(ResultSettingsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          openModal: OpenModal.None,
         });
       });
     });

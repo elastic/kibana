@@ -7,15 +7,22 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { FieldResultSettingObject, ServerFieldResultSettingObject } from '../types';
+import { FieldResultSettingObject, OpenModal, ServerFieldResultSettingObject } from '../types';
 
-import { clearAllFields, clearAllServerFields } from './helpers';
+import {
+  clearAllFields,
+  clearAllServerFields,
+  resetAllFields,
+  resetAllServerFields,
+} from './helpers';
 
 interface ResultSettingsActions {
   clearAllFields(): void;
+  resetAllFields(): void;
 }
 
 interface ResultSettingsValues {
+  openModal: OpenModal;
   nonTextResultFields: FieldResultSettingObject;
   textResultFields: FieldResultSettingObject;
   resultFields: FieldResultSettingObject;
@@ -26,30 +33,41 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
   path: ['enterprise_search', 'app_search', 'result_settings_logic'],
   actions: () => ({
     clearAllFields: () => true,
+    resetAllFields: () => true,
   }),
   reducers: () => ({
+    openModal: [
+      OpenModal.None,
+      {
+        resetAllFields: () => OpenModal.None,
+      },
+    ],
     nonTextResultFields: [
       {},
       {
         clearAllFields: (nonTextResultFields) => clearAllFields(nonTextResultFields),
+        resetAllFields: (nonTextResultFields) => resetAllFields(nonTextResultFields),
       },
     ],
     textResultFields: [
       {},
       {
         clearAllFields: (textResultFields) => clearAllFields(textResultFields),
+        resetAllFields: (textResultFields) => resetAllFields(textResultFields),
       },
     ],
     resultFields: [
       {},
       {
         clearAllFields: (resultFields) => clearAllFields(resultFields),
+        resetAllFields: (resultFields) => resetAllFields(resultFields),
       },
     ],
     serverResultFields: [
       {},
       {
         clearAllFields: (serverResultFields) => clearAllServerFields(serverResultFields),
+        resetAllFields: (serverResultFields) => resetAllServerFields(serverResultFields),
       },
     ],
   }),
