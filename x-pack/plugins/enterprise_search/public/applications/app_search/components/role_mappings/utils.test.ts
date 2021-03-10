@@ -11,6 +11,6 @@ describe('generateRoleMappingPath', () => {
   it('generates paths with roleId filled', () => {
     const roleId = 'role123';
 
-    expect(generateRoleMappingPath(roleId)).toEqual(`/role-mappings/${roleId}/edit`);
+    expect(generateRoleMappingPath(roleId)).toEqual(`/role_mappings/${roleId}`);
   });
 });
