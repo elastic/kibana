@@ -2395,7 +2395,7 @@
     "home.tutorials.gcpLogs.nameTitle": "Google Cloud ログ",
     "home.tutorials.gcpLogs.shortDescription": "Google Cloud 監査、ファイアウォール、VPC フローログを収集します。",
     "home.tutorials.gcpMetrics.artifacts.dashboards.linkLabel": "Google Cloudメトリックダッシュボード",
-    "home.tutorials.gcpMetrics.longDescription": "「googlecloud」Metricbeatモジュールは、Stackdriver Monitoring APIを使用して、Google Cloud Platformから監視メトリックを取得します。[詳細]（{learnMoreLink}）。",
+    "home.tutorials.gcpMetrics.longDescription": "「gcp」Metricbeatモジュールは、Stackdriver Monitoring APIを使用して、Google Cloud Platformから監視メトリックを取得します。[詳細]（{learnMoreLink}）。",
     "home.tutorials.gcpMetrics.nameTitle": "Google Cloudメトリック",
     "home.tutorials.gcpMetrics.shortDescription": "Stackdriver Monitoring API を使用して、Google Cloud Platform から監視メトリックを取得します。",
     "home.tutorials.gsuiteLogs.artifacts.dashboards.linkLabel": "セキュリティアプリ",

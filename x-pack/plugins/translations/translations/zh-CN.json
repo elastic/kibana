@@ -2406,7 +2406,7 @@
     "home.tutorials.gcpLogs.nameTitle": "Google Cloud 日志",
     "home.tutorials.gcpLogs.shortDescription": "收集 Google Cloud 审计、防火墙、VPC 流日志。",
     "home.tutorials.gcpMetrics.artifacts.dashboards.linkLabel": "Google Cloud 指标仪表板",
-    "home.tutorials.gcpMetrics.longDescription": "Metricbeat 模块 `googlecloud` 使用 Stackdriver 监测 API 从 Google Cloud Platform 提取监测指标。[了解详情]({learnMoreLink})。",
+    "home.tutorials.gcpMetrics.longDescription": "Metricbeat 模块 `gcp` 使用 Stackdriver 监测 API 从 Google Cloud Platform 提取监测指标。[了解详情]({learnMoreLink})。",
     "home.tutorials.gcpMetrics.nameTitle": "Google Cloud 指标",
     "home.tutorials.gcpMetrics.shortDescription": "使用 Stackdriver 监测 API 从 Google Cloud Platform 提取监测指标。",
     "home.tutorials.gsuiteLogs.artifacts.dashboards.linkLabel": "Security 应用",
