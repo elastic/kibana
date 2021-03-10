@@ -7,7 +7,6 @@
 
 import React, { PureComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
 
 import {
   EuiButtonEmpty,
@@ -21,15 +20,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { serializeCluster } from '../../../../../common/lib';
+import { Cluster, serializeCluster } from '../../../../../common/lib';
 
-export class RequestFlyout extends PureComponent {
-  static propTypes = {
-    close: PropTypes.func.isRequired,
-    name: PropTypes.string.isRequired,
-    cluster: PropTypes.object.isRequired,
-  };
+interface Props {
+  close: () => void;
+  name: string;
+  cluster: Cluster;
+}
 
+export class RequestFlyout extends PureComponent<Props> {
   render() {
     const { name, close, cluster } = this.props;
     const endpoint = 'PUT _cluster/settings';
