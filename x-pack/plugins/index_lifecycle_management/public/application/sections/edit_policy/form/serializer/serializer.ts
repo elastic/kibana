@@ -242,6 +242,23 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     }
 
     /**
+     * FROZEN PHASE SERIALIZATION
+     */
+    if (_meta.frozen.enabled) {
+      draft.phases.frozen!.actions = draft.phases.frozen?.actions ?? {};
+      const frozenPhase = draft.phases.frozen!;
+
+      /**
+       * FROZEN PHASE SEARCHABLE SNAPSHOT
+       */
+      if (!updatedPolicy.phases.frozen?.actions?.searchable_snapshot) {
+        delete frozenPhase.actions.searchable_snapshot;
+      }
+    } else {
+      delete draft.phases.frozen;
+    }
+
+    /**
      * DELETE PHASE SERIALIZATION
      */
     if (_meta.delete.enabled) {
