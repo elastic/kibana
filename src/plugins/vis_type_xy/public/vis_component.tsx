@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  BaseSyntheticEvent,
-  KeyboardEvent,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Chart,
@@ -28,7 +20,6 @@ import {
   AccessorFn,
   Accessor,
 } from '@elastic/charts';
-import { keys } from '@elastic/eui';
 
 import { compact } from 'lodash';
 import {
@@ -86,16 +77,6 @@ const VisComponent = (props: VisComponentProps) => {
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
-  useEffect(() => {
-    const fn = () => {
-      props?.uiState?.emit?.('reload');
-    };
-    props?.uiState?.on?.('change', fn);
-
-    return () => {
-      props?.uiState?.off?.('change', fn);
-    };
-  }, [props?.uiState]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -203,11 +184,7 @@ const VisComponent = (props: VisComponentProps) => {
   }, [props.uiState]);
 
   const setColor = useCallback(
-    (newColor: string | null, seriesLabel: string | number, event: BaseSyntheticEvent) => {
-      if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
-        return;
-      }
-
+    (newColor: string | null, seriesLabel: string | number) => {
       const colors = props.uiState?.get('vis.colors') || {};
       if (colors[seriesLabel] === newColor || !newColor) {
         delete colors[seriesLabel];

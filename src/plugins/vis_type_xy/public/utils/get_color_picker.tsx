@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { BaseSyntheticEvent, useCallback } from 'react';
+import React, { useCallback } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
@@ -26,13 +26,11 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   }
 }
 
+const KEY_CODE_ENTER = 13;
+
 export const getColorPicker = (
   legendPosition: Position,
-  setColor: (
-    newColor: string | null,
-    seriesKey: string | number,
-    event: BaseSyntheticEvent
-  ) => void,
+  setColor: (newColor: string | null, seriesKey: string | number) => void,
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
   paletteName: string,
   uiState: PersistedState
@@ -47,16 +45,24 @@ export const getColorPicker = (
   const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
   const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
 
-  const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
+  const handleChange = (newColor: string | null) => {
     if (!seriesName) {
       return;
     }
     if (newColor) {
       onChange(newColor);
     }
-    setColor(newColor, seriesName, event);
-    // must be called after onChange
-    onClose();
+    setColor(newColor, seriesName);
+    // close the popover if no color is applied
+    if (!newColor) {
+      onClose();
+    }
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.keyCode === KEY_CODE_ENTER) {
+      onClose?.();
+    }
   };
 
   const handleOutsideClick = useCallback(() => {
@@ -76,10 +82,11 @@ export const getColorPicker = (
       >
         <ColorPicker
           color={paletteName === 'kibana_palette' ? color : color.toLowerCase()}
-          onChange={handlChange}
+          onChange={handleChange}
           label={seriesName}
           useLegacyColors={paletteName === 'kibana_palette'}
           colorIsOverwritten={colorIsOverwritten}
+          onKeyDown={onKeyDown}
         />
       </EuiWrappingPopover>
     </EuiOutsideClickDetector>

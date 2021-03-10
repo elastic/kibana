@@ -7,7 +7,7 @@
  */
 
 import classNames from 'classnames';
-import React, { BaseSyntheticEvent } from 'react';
+import React from 'react';
 
 import {
   EuiButtonEmpty,
@@ -88,7 +88,7 @@ interface ColorPickerProps {
   /**
    * Callback on the color change
    */
-  onChange: (color: string | null, event: BaseSyntheticEvent) => void;
+  onChange: (color: string | null) => void;
   /**
    * Initial color.
    */
@@ -101,8 +101,11 @@ interface ColorPickerProps {
    * Defines if the default color is overwritten. Defaults to true.
    */
   colorIsOverwritten?: boolean;
+  /**
+   * Callback for onKeyPress event
+   */
+  onKeyDown?: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }
-
 const euiColors = euiPaletteColorBlind({ rotations: 4, order: 'group' });
 
 export const ColorPicker = ({
@@ -111,12 +114,13 @@ export const ColorPicker = ({
   label,
   useLegacyColors = true,
   colorIsOverwritten = true,
+  onKeyDown,
 }: ColorPickerProps) => {
   const legendColors = useLegacyColors ? legacyColors : euiColors;
 
   return (
     <div className="visColorPicker">
-      <EuiFlexGroup wrap={true} gutterSize="none" className="visColorPicker__value">
+      <fieldset>
         <EuiScreenReaderOnly>
           <legend>
             <FormattedMessage
@@ -126,35 +130,38 @@ export const ColorPicker = ({
             />
           </legend>
         </EuiScreenReaderOnly>
-        {legendColors.map((color) => (
-          <label key={color} className="visColorPicker__colorBtn">
-            <input
-              type="radio"
-              onChange={(e) => onChange(color, e)}
-              value={selectedColor}
-              name="visColorPicker__radio"
-              checked={color === selectedColor}
-            />
-            <EuiIcon
-              type="dot"
-              size="l"
-              color={selectedColor}
-              className={classNames('visColorPicker__valueDot', {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                'visColorPicker__valueDot-isSelected': color === selectedColor,
-              })}
-              style={{ color }}
-              data-test-subj={`visColorPickerColor-${color}`}
-            />
-            <EuiScreenReaderOnly>
-              <span>{color}</span>
-            </EuiScreenReaderOnly>
-          </label>
-        ))}
-      </EuiFlexGroup>
+        <EuiFlexGroup wrap={true} gutterSize="none" className="visColorPicker__value">
+          {legendColors.map((color) => (
+            <label key={color} className="visColorPicker__colorBtn">
+              <input
+                type="radio"
+                onChange={() => onChange(color)}
+                value={selectedColor}
+                name="visColorPicker__radio"
+                checked={color === selectedColor}
+                onKeyDown={onKeyDown}
+              />
+              <EuiIcon
+                type="dot"
+                size="l"
+                color={selectedColor}
+                className={classNames('visColorPicker__valueDot', {
+                  // eslint-disable-next-line @typescript-eslint/naming-convention
+                  'visColorPicker__valueDot-isSelected': color === selectedColor,
+                })}
+                style={{ color }}
+                data-test-subj={`visColorPickerColor-${color}`}
+              />
+              <EuiScreenReaderOnly>
+                <span>{color}</span>
+              </EuiScreenReaderOnly>
+            </label>
+          ))}
+        </EuiFlexGroup>
+      </fieldset>
       {legendColors.some((c) => c === selectedColor) && colorIsOverwritten && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={(e: any) => onChange(null, e)}>
+          <EuiButtonEmpty size="s" onClick={(e: any) => onChange(null)}>
             <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Reset color" />
           </EuiButtonEmpty>
         </EuiFlexItem>
