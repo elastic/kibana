@@ -12739,7 +12739,6 @@
     "xpack.maps.setViewControl.submitButtonLabel": "Go",
     "xpack.maps.setViewControl.zoomLabel": "ズーム",
     "xpack.maps.source.dataSourceLabel": "データソース",
-    "xpack.maps.source.ems_xyzDescription": "XYZ 座標を含む URL からのマップタイルです",
     "xpack.maps.source.ems_xyzTitle": "URL からのタイルマップサービス",
     "xpack.maps.source.ems.disabledDescription": "Elastic Maps Service へのアクセスが無効になっています。システム管理者に問い合わせるか、kibana.yml で「map.includeElasticMapsService」を設定してください。",
     "xpack.maps.source.ems.noAccessDescription": "Kibana が Elastic Maps Service にアクセスできません。システム管理者にお問い合わせください。",
