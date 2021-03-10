@@ -73,7 +73,6 @@ const fillForm = (wrapper: ReactWrapper) => {
 describe('CreateCase case', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
@@ -105,7 +104,6 @@ describe('CreateCase case', () => {
     );
 
     wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
-    await waitFor(() => expect(mockHistory.push).toHaveBeenCalledWith('/'));
   });
 
   it('should redirect to new case when posting the case', async () => {

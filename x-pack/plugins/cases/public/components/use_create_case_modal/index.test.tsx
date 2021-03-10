@@ -13,8 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { useKibana } from '../../common/kibana';
 import '../../../common/mock/match_media';
 import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
-import { mockTimelineModel, TestProviders } from '../../common/mock';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/kibana');
 jest.mock('../create/form_context', () => {
@@ -71,7 +70,6 @@ describe('useCreateCaseModal', () => {
   beforeEach(() => {
     navigateToApp = jest.fn();
     useKibanaMock().services.application.navigateToApp = navigateToApp;
-    (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
   it('init', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaServices } from '../../../common/lib/kibana';
+import { KibanaServices } from '../../common/kibana';
 import {
   fetchConnectors,
   getCaseConfigure,
