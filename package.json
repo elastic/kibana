@@ -629,7 +629,7 @@
     "enzyme-adapter-utils": "^1.13.0",
     "enzyme-to-json": "^3.4.4",
     "eslint": "^7.21.0",
-    "eslint-config-prettier": "^8.1.0",
+    "eslint-config-prettier": "^7.2.0",
     "eslint-import-resolver-node": "0.3.4",
     "eslint-import-resolver-webpack": "0.13.0",
     "eslint-module-utils": "2.6.0",
