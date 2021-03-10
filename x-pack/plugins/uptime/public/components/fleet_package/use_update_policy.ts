@@ -25,9 +25,8 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
   const currentConfig = useRef<Config>(defaultConfig);
 
   useEffect(() => {
-    const { type, ...configWithoutType } = config;
+    const { type } = config;
     const configKeys = Object.keys(config) as ConfigKeys[]; // all keys for determining if the form has been changed
-    const policyKeys = Object.keys(configWithoutType) as ConfigKeys[]; // only keys needed for data stream variables
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
     // TO DO: Update validation
     const isValid =
@@ -43,18 +42,25 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
       // enable only the input type and data stream that matches the monitor type.
       currentInput.enabled = true;
       dataStream.enabled = true;
-      policyKeys.forEach((key) => {
+      configKeys.forEach((key) => {
         const configItem = dataStream.vars?.[key];
         if (configItem) {
           switch (key) {
             case ConfigKeys.SCHEDULE:
               configItem.value = `@every ${config[key]}s`; // convert to cron
               break;
+            case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
+            case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
+            case ConfigKeys.RESPONSE_STATUS_CHECK:
+            case ConfigKeys.REQUEST_HEADERS_CHECK:
             case ConfigKeys.TAGS:
               configItem.value = JSON.stringify(config[key]); // convert to yaml string
               break;
             case ConfigKeys.WAIT:
               configItem.value = `${config[key]}s`; // convert to cron
+              break;
+            case ConfigKeys.REQUEST_BODY_CHECK:
+              configItem.value = config[key].value; // only need value of REEQUEST_BODY_CHECK for outputted policy
               break;
             default:
               configItem.value =

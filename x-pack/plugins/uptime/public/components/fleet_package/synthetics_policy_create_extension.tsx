@@ -7,7 +7,15 @@
 
 import React, { memo, useCallback, useEffect } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
-import { Config, ConfigKeys, DataStream, ICustomFields } from './types';
+import {
+  Config,
+  ConfigKeys,
+  ContentType,
+  DataStream,
+  ICustomFields,
+  HTTPMethod,
+  ResponseBodyIndexPolicy,
+} from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 
@@ -52,6 +60,20 @@ const defaultValues = {
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKeys.PROXY_URL]: '',
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
+  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
+  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
+  [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
+  [ConfigKeys.RESPONSE_HEADERS_CHECK]: {},
+  [ConfigKeys.RESPONSE_HEADERS_INDEX]: true,
+  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: [],
+  [ConfigKeys.RESPONSE_STATUS_CHECK]: [], // may need to make sure that this field is not applied when length is 0
+  [ConfigKeys.REQUEST_BODY_CHECK]: {
+    value: '',
+    type: ContentType.TEXT,
+  },
+  [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
+  [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
+  [ConfigKeys.REQUEST_SEND_CHECK]: '',
   [ConfigKeys.SCHEDULE]: 5,
   [ConfigKeys.SERVICE_NAME]: '',
   [ConfigKeys.TAGS]: [],
