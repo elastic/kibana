@@ -76,15 +76,15 @@ class MyPlugin {
 ```
 
 ### 3.1.2 Schema
-Saved object ownership will be recorded as metadata within each `private` saved object. We do so by adding a top-level `acl` property ("access control list") with a singular `owner` property:
+Saved object ownership will be recorded as metadata within each `private` saved object. We do so by adding a top-level `accessControl` object with a singular `owner` property:
 
 ```ts
 /**
- * The "Access Control List" describing which users should be authorized to access this SavedObject.
+ * Describes which users should be authorized to access this SavedObject.
  *
  * @public
  */
-export interface SavedObjectACL {
+export interface SavedObjectAccessControl {
   /** The owner of this SavedObject. */
   owner: string;
 }
@@ -96,8 +96,8 @@ export interface SavedObject<T = unknown> {
   attributes: T;
   references: SavedObjectReference[];
   namespaces?: string[];
-  /** The "Access Control List" describing which users should be authorized to access this SavedObject. */
-  acl?: SavedObjectACL;
+  /** Describes which users should be authorized to access this SavedObject. */
+  accessControl?: SavedObjectAccessControl;
 }
 ```
 
@@ -107,18 +107,18 @@ The [security wrapper](https://github.com/elastic/kibana/blob/701697cc4a34d07c05
 
 There are two primary changes to this wrapper:
 
-#### Attaching ACLs
+#### Attaching Access Controls
 
-This wrapper will be responsible for attaching an ACL to all private objects before they are created.
-It will also allow users to provide their own ACL in order to support the import/export use cases.
+This wrapper will be responsible for attaching an access control specification to all private objects before they are created.
+It will also allow users to provide their own access control specification in order to support the import/export use cases.
 
-Similar to the way we treat `namespaces`, it will not be possible to change an ACL via the `update`/`bulk_update` functions in this first phase. We may consider adding a dedicated function to update the ACL, similar to what we've done for sharing to spaces.
+Similar to the way we treat `namespaces`, it will not be possible to change an access control specification via the `update`/`bulk_update` functions in this first phase. We may consider adding a dedicated function to update the access control specification, similar to what we've done for sharing to spaces.
 
 #### Authorization changes
 
 This wrapper will be updated to ensure that access to private objects is only granted to authorized users. A user is authorized to operate on a private saved object if **all of the following** are true:
 Step 1) The user is authorized to perform the operation on saved objects of the requested type, within the requested space. (Example: `update` a `user-settings` saved object in the `marketing` space)
-Step 2) The user is authorized to access this specific instance of the saved object, as described by that object's ACL. For this first phase, the `acl.owner` is allowed to perform all operations. The only other users who are allowed to access this object are administrators (see [unresolved question 2](#82-authorization-for-private-objects))
+Step 2) The user is authorized to access this specific instance of the saved object, as described by that object's access control specification. For this first phase, the `accessControl.owner` is allowed to perform all operations. The only other users who are allowed to access this object are administrators (see [unresolved question 2](#82-authorization-for-private-objects))
 
 Step 1 of this authorization check is the same check we perform today for all existing saved object types. Step 2 is a new authorization check, and **introduces additional overhead and complexity**. We explore the logic for this step in more detail later in this RFC.
 
@@ -128,9 +128,9 @@ Step 1 of this authorization check is the same check we perform today for all ex
 
 OLS Phase 1 does not introduce any new APIs, but rather augments the existing Saved Object APIs.
 
-APIs which return saved objects are augmented to include the top-level `acl` property when it exists. This includes the `export` API.
+APIs which return saved objects are augmented to include the top-level `accessControl` property when it exists. This includes the `export` API.
 
-APIs that create saved objects are augmented to accept an `acl` property. This includes the `import` API.
+APIs that create saved objects are augmented to accept an `accessControl` property. This includes the `import` API.
 
 ### `get` / `bulk_get`
 
@@ -141,7 +141,7 @@ None. The retrieved object contains all of the necessary information to authoriz
 
 ### `create` / `bulk_create`
 
-The security wrapper will ensure that an ACL is attached to all private objects.
+The security wrapper will ensure that an access control specification is attached to all private objects.
 
 If the caller has requested to overwrite existing `private` objects, then the security wrapper must ensure that the user is authorized to do so.
 
@@ -152,7 +152,7 @@ This overhead does not impact overwriting "public" objects. We only need to retr
 
 ### `update` / `bulk_update`
 
-The security wrapper will ensure that the user is authorized to update all existing `private` objects. It will also ensure that an ACL is not provided, as updates to the ACL are not permitted via `update`/`bulk_update`.
+The security wrapper will ensure that the user is authorized to update all existing `private` objects. It will also ensure that an access control specification is not provided, as updates to the access control specification are not permitted via `update`/`bulk_update`.
 
 #### Performance considerations
 Similar to the "create / override" scenario above, the security wrapper must first retrieve all of the existing `private` objects to ensure that the user is authorized. This requires another round-trip to `get`/`bulk-get` all `private` objects so we can authorize the operation.
@@ -185,10 +185,10 @@ const filterClauses = typesToFind.reduce((acc, type) => {
 
       // This is equivalent to writing the following, if this syntax was allowed by the SO `filter` option:
       // esKuery.nodeTypes.function.buildNode('and', [
-      //   esKuery.nodeTypes.function.buildNode('is', `acl.owner`, this.getOwner()),
+      //   esKuery.nodeTypes.function.buildNode('is', `accessControl.owner`, this.getOwner()),
       //   esKuery.nodeTypes.function.buildNode('is', `type`, type),
       // ])
-      esKuery.nodeTypes.function.buildNode('is', `${type}.acl.owner`, this.getOwner()),
+      esKuery.nodeTypes.function.buildNode('is', `${type}.accessControl.owner`, this.getOwner()),
     ];
   }
   return acc;
@@ -239,13 +239,13 @@ Updates to the saved object service's documentation to describe the different `c
 
 # 8. Unresolved questions
 
-## 8.1 `acl.owner`
+## 8.1 `accessControl.owner`
 
-The `acl.owner` property will uniquely identify the owner of each `private` saved object. We are still iterating with the Elasticsearch security team on what this value will ultimately look like. It is highly likely that this will not be a human-readable piece of text, but rather a GUID-style identifier.
+The `accessControl.owner` property will uniquely identify the owner of each `private` saved object. We are still iterating with the Elasticsearch security team on what this value will ultimately look like. It is highly likely that this will not be a human-readable piece of text, but rather a GUID-style identifier.
 
 ## 8.2 Authorization for private objects
 
-The user identified by `acl.owner` will be authorized for all operations against that instance, provided they pass the existing type/space/action authorization checks.
+The user identified by `accessControl.owner` will be authorized for all operations against that instance, provided they pass the existing type/space/action authorization checks.
 
 In addition to the object owner, we also need to allow administrators to manage these saved objects. This is beneficial if they need to perform a bulk import/export of private objects, or if they wish to remove private objects from users that no longer exist. The open question is: **who counts as an administrator?**
 
