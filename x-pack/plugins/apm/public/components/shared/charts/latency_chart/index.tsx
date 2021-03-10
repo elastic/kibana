@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { APMChartSpec, Coordinate } from '../../../../../typings/timeseries';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
@@ -35,6 +34,10 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: LatencyAggregationType.p99, text: '99th percentile' },
 ];
 
+function filterNil<T>(value: T | null | undefined): value is T {
+  return value != null;
+}
+
 export function LatencyChart({ height }: Props) {
   const history = useHistory();
   const theme = useTheme();
@@ -58,7 +61,7 @@ export function LatencyChart({ height }: Props) {
   const timeseries = [
     currentPeriod,
     comparisonEnabled ? previousPeriod : undefined,
-  ].filter((data) => data) as Array<APMChartSpec<Coordinate>>;
+  ].filter(filterNil);
 
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
