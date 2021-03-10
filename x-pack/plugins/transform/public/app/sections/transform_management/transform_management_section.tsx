@@ -7,12 +7,15 @@
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingContent,
   EuiModal,
   EuiPageContent,
   EuiPageContentBody,
@@ -113,15 +116,31 @@ export const TransformManagement: FC = () => {
         </EuiTitle>
         <EuiPageContentBody>
           <EuiSpacer size="l" />
-          <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
-          <EuiSpacer size="s" />
-          <TransformList
-            errorMessage={errorMessage}
-            isInitialized={isInitialized}
-            onCreateTransform={onOpenModal}
-            transforms={transforms}
-            transformsLoading={transformsLoading}
-          />
+          {!isInitialized && <EuiLoadingContent lines={2} />}
+          {isInitialized && (
+            <>
+              <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
+              <EuiSpacer size="s" />
+              {typeof errorMessage !== 'undefined' && (
+                <EuiCallOut
+                  title={i18n.translate('xpack.transform.list.errorPromptTitle', {
+                    defaultMessage: 'An error occurred getting the transform list.',
+                  })}
+                  color="danger"
+                  iconType="alert"
+                >
+                  <pre>{JSON.stringify(errorMessage)}</pre>
+                </EuiCallOut>
+              )}
+              {typeof errorMessage === 'undefined' && (
+                <TransformList
+                  onCreateTransform={onOpenModal}
+                  transforms={transforms}
+                  transformsLoading={transformsLoading}
+                />
+              )}
+            </>
+          )}
         </EuiPageContentBody>
       </EuiPageContent>
       {isSearchSelectionVisible && (

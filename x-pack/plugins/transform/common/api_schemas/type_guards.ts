@@ -40,7 +40,7 @@ export const isGetTransformNodesResponseSchema = (
   arg: any
 ): arg is GetTransformNodesResponseSchema => {
   return (
-    isBasicObject(arg) && {}.hasOwnProperty.call(arg, 'count') && typeof arg.count === 'number'
+    isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'count') && typeof arg.count === 'number'
   );
 };
 

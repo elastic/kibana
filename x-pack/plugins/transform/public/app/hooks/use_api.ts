@@ -29,6 +29,7 @@ import type {
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
 import type {
+  GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
@@ -66,7 +67,7 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async getTransformNodes(): Promise<GetTransformsResponseSchema | HttpFetchError> {
+      async getTransformNodes(): Promise<GetTransformNodesResponseSchema | HttpFetchError> {
         try {
           return await http.get(`${API_BASE_PATH}transforms/nodes`);
         } catch (e) {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '../../../common/utils/object_utils';
+
 import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
@@ -31,15 +33,12 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
         });
 
         let count = 0;
-        if (typeof body.nodes === 'object') {
-          Object.keys(body.nodes).forEach((k) => {
-            if (body.nodes[k].attributes !== undefined) {
-              const transformNode = body.nodes[k].attributes['transform.node'];
-              if (transformNode === 'true') {
-                count++;
-              }
+        if (isPopulatedObject(body.nodes)) {
+          for (const { attributes } of Object.values(body.nodes)) {
+            if (attributes['transform.node'] === 'true') {
+              count++;
             }
-          });
+          }
         }
 
         return res.ok({ body: { count } });

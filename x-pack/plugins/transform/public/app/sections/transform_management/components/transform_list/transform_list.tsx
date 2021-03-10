@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -62,17 +61,13 @@ function getItemIdToExpandedRowMap(
   }, {} as ItemIdToExpandedRowMap);
 }
 
-interface Props {
-  errorMessage: any;
-  isInitialized: boolean;
+interface TransformListProps {
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
   transforms: TransformListRow[];
   transformsLoading: boolean;
 }
 
-export const TransformList: FC<Props> = ({
-  errorMessage,
-  isInitialized,
+export const TransformList: FC<TransformListProps> = ({
   onCreateTransform,
   transforms,
   transformsLoading,
@@ -130,26 +125,6 @@ export const TransformList: FC<Props> = ({
       setSearchError(undefined);
     }
   };
-
-  // Before the transforms have been loaded for the first time, display the loading indicator only.
-  // Otherwise a user would see 'No transforms found' during the initial loading.
-  if (!isInitialized) {
-    return null;
-  }
-
-  if (typeof errorMessage !== 'undefined') {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.transform.list.errorPromptTitle', {
-          defaultMessage: 'An error occurred getting the transform list.',
-        })}
-        color="danger"
-        iconType="alert"
-      >
-        <pre>{JSON.stringify(errorMessage)}</pre>
-      </EuiCallOut>
-    );
-  }
 
   if (transforms.length === 0) {
     return (
