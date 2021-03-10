@@ -2751,7 +2751,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 263
+              "lineNumber": 265
             }
           },
           {
@@ -2777,7 +2777,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 294
+              "lineNumber": 296
             }
           },
           {
@@ -2797,7 +2797,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 305
+              "lineNumber": 307
             }
           },
           {
@@ -2823,7 +2823,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 314
+              "lineNumber": 316
             }
           },
           {
@@ -2855,7 +2855,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 369
+              "lineNumber": 371
             }
           },
           {
@@ -2879,7 +2879,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 373
+              "lineNumber": 375
             }
           },
           {
@@ -2903,7 +2903,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 377
+              "lineNumber": 379
             }
           },
           {
@@ -2925,7 +2925,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 381
+                  "lineNumber": 383
                 }
               }
             ],
@@ -2933,7 +2933,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 381
+              "lineNumber": 383
             }
           },
           {
@@ -2955,7 +2955,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 385
+                  "lineNumber": 387
                 }
               },
               {
@@ -2968,7 +2968,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 385
+                  "lineNumber": 387
                 }
               }
             ],
@@ -2976,7 +2976,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 385
+              "lineNumber": 387
             }
           },
           {
@@ -2992,7 +2992,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 393
+              "lineNumber": 395
             }
           },
           {
@@ -3008,7 +3008,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 399
+              "lineNumber": 401
             }
           },
           {
@@ -3026,7 +3026,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 408
+              "lineNumber": 410
             }
           },
           {
@@ -3048,7 +3048,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 412
+                  "lineNumber": 414
                 }
               }
             ],
@@ -3056,7 +3056,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 412
+              "lineNumber": 414
             }
           },
           {
@@ -3079,7 +3079,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 426
+              "lineNumber": 428
             }
           },
           {
@@ -3103,7 +3103,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 430
+              "lineNumber": 432
             }
           },
           {
@@ -3119,7 +3119,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 434
+              "lineNumber": 436
             }
           },
           {
@@ -3135,7 +3135,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 439
+              "lineNumber": 441
             }
           },
           {
@@ -3146,7 +3146,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 446
+              "lineNumber": 448
             },
             "signature": [
               {
@@ -3166,7 +3166,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 450
+              "lineNumber": 452
             },
             "signature": [
               {
@@ -3211,7 +3211,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-                  "lineNumber": 480
+                  "lineNumber": 482
                 }
               }
             ],
@@ -3219,7 +3219,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_config.ts",
-              "lineNumber": 480
+              "lineNumber": 482
             }
           }
         ],
@@ -3677,7 +3677,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 227
+              "lineNumber": 229
             }
           },
           {
@@ -3706,7 +3706,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 231
+                  "lineNumber": 233
                 }
               }
             ],
@@ -3714,7 +3714,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 231
+              "lineNumber": 233
             }
           },
           {
@@ -3744,7 +3744,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 235
+                  "lineNumber": 237
                 }
               }
             ],
@@ -3752,7 +3752,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 235
+              "lineNumber": 237
             }
           },
           {
@@ -3782,7 +3782,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 239
+                  "lineNumber": 241
                 }
               }
             ],
@@ -3790,7 +3790,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 239
+              "lineNumber": 241
             }
           },
           {
@@ -3820,7 +3820,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 243
+                  "lineNumber": 245
                 }
               }
             ],
@@ -3828,7 +3828,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 243
+              "lineNumber": 245
             }
           },
           {
@@ -3858,7 +3858,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 247
+                  "lineNumber": 249
                 }
               }
             ],
@@ -3866,7 +3866,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 247
+              "lineNumber": 249
             }
           },
           {
@@ -3896,7 +3896,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 251
+                  "lineNumber": 253
                 }
               }
             ],
@@ -3904,7 +3904,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 251
+              "lineNumber": 253
             }
           },
           {
@@ -3928,7 +3928,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 255
+              "lineNumber": 257
             }
           },
           {
@@ -3958,7 +3958,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 269
+                  "lineNumber": 271
                 }
               }
             ],
@@ -3966,7 +3966,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 269
+              "lineNumber": 271
             }
           },
           {
@@ -3994,7 +3994,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 284
+              "lineNumber": 286
             }
           },
           {
@@ -4028,7 +4028,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 298
+                  "lineNumber": 300
                 }
               }
             ],
@@ -4038,7 +4038,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 298
+              "lineNumber": 300
             }
           },
           {
@@ -4084,7 +4084,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 307
+                  "lineNumber": 309
                 }
               },
               {
@@ -4104,7 +4104,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 307
+                  "lineNumber": 309
                 }
               }
             ],
@@ -4112,7 +4112,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 307
+              "lineNumber": 309
             }
           }
         ],
@@ -4368,7 +4368,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 70
+              "lineNumber": 71
             }
           },
           {
@@ -4379,7 +4379,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 72
+              "lineNumber": 73
             }
           },
           {
@@ -4390,7 +4390,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 73
+              "lineNumber": 74
             },
             "signature": [
               "string | undefined"
@@ -4409,7 +4409,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             }
           },
           {
@@ -4425,7 +4425,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 87
+              "lineNumber": 88
             }
           },
           {
@@ -4441,7 +4441,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 94
+              "lineNumber": 95
             }
           },
           {
@@ -4454,7 +4454,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 99
+              "lineNumber": 100
             },
             "signature": [
               "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
@@ -4472,7 +4472,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 108
+              "lineNumber": 109
             },
             "signature": [
               "((aggConfig: TAggConfig) => string) | (() => string)"
@@ -4491,7 +4491,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 123
+              "lineNumber": 124
             },
             "signature": [
               "any"
@@ -4509,7 +4509,22 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 131
+              "lineNumber": 132
+            }
+          },
+          {
+            "tags": [
+              "type"
+            ],
+            "id": "def-common.AggType.hasNoDslParams",
+            "type": "boolean",
+            "label": "hasNoDslParams",
+            "description": [
+              "\nFlag that prevents params from this aggregation from being included in the dsl. Sibling and parent aggs are still written.\n"
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+              "lineNumber": 138
             }
           },
           {
@@ -4522,7 +4537,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 138
+              "lineNumber": 145
             },
             "signature": [
               "((aggConfig: TAggConfig, key: any, params?: any) => any) | undefined"
@@ -4541,7 +4556,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 145
+              "lineNumber": 152
             },
             "signature": [
               "TParam[]"
@@ -4559,7 +4574,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 155
+              "lineNumber": 162
             },
             "signature": [
               "((aggConfig: TAggConfig) => TAggConfig[]) | (() => void | TAggConfig[])"
@@ -4577,7 +4592,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 166
+              "lineNumber": 173
             },
             "signature": [
               "((aggConfig: TAggConfig) => TAggConfig[]) | (() => void | TAggConfig[])"
@@ -4593,7 +4608,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 171
+              "lineNumber": 178
             },
             "signature": [
               "() => any"
@@ -4611,7 +4626,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 184
+              "lineNumber": 191
             },
             "signature": [
               "(resp: any, aggConfigs: ",
@@ -4653,7 +4668,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 202
+              "lineNumber": 209
             },
             "signature": [
               "(agg: TAggConfig) => ",
@@ -4675,7 +4690,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 204
+              "lineNumber": 211
             },
             "signature": [
               "(agg: TAggConfig, bucket: any) => any"
@@ -4689,7 +4704,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 206
+              "lineNumber": 213
             },
             "signature": [
               "((bucket: any, key: any, agg: TAggConfig) => any) | undefined"
@@ -4709,7 +4724,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 208
+                  "lineNumber": 215
                 }
               }
             ],
@@ -4720,7 +4735,7 @@
             "label": "paramByName",
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 208
+              "lineNumber": 215
             },
             "tags": [],
             "returnComment": []
@@ -4739,7 +4754,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 212
+                  "lineNumber": 219
                 }
               }
             ],
@@ -4750,7 +4765,7 @@
             "label": "getValueBucketPath",
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 212
+              "lineNumber": 219
             },
             "tags": [],
             "returnComment": []
@@ -4793,7 +4808,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-                  "lineNumber": 225
+                  "lineNumber": 232
                 }
               }
             ],
@@ -4804,13 +4819,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 225
+              "lineNumber": 232
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-          "lineNumber": 60
+          "lineNumber": 61
         },
         "initialIsOpen": false
       },
@@ -6246,7 +6261,7 @@
             "type": "Function",
             "label": "setField",
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
+              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"size\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, value: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6310,7 +6325,7 @@
             "type": "Function",
             "label": "removeField",
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => this"
+              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"size\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => this"
             ],
             "description": [
               "\nremove field"
@@ -6437,7 +6452,7 @@
             "type": "Function",
             "label": "getField",
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
+              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"size\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K, recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -6490,7 +6505,7 @@
             "type": "Function",
             "label": "getOwnField",
             "signature": [
-              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"size\" | \"filter\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
+              "<K extends \"type\" | \"from\" | \"query\" | \"source\" | \"sort\" | \"version\" | \"filter\" | \"size\" | \"highlight\" | \"highlightAll\" | \"trackTotalHits\" | \"aggs\" | \"fields\" | \"fieldsFromSource\" | \"index\" | \"searchAfter\" | \"timeout\" | \"terminate_after\" | \"parent\">(field: K) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -7415,6 +7430,23 @@
         "label": "aggFilter",
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/filter_fn.ts",
+          "lineNumber": 30
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.aggFilteredMetric",
+        "type": "Function",
+        "children": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "description": [],
+        "label": "aggFilteredMetric",
+        "source": {
+          "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric_fn.ts",
           "lineNumber": 30
         },
         "tags": [],
@@ -8779,9 +8811,37 @@
       {
         "id": "def-common.getFilterBucketAgg",
         "type": "Function",
-        "children": [],
+        "children": [
+          {
+            "id": "def-common.getFilterBucketAgg.{-getConfig }",
+            "type": "Object",
+            "label": "{ getConfig }",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-common.getFilterBucketAgg.{-getConfig }.getConfig",
+                "type": "Function",
+                "label": "getConfig",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
+                  "lineNumber": 27
+                },
+                "signature": [
+                  "<T = any>(key: string) => any"
+                ]
+              }
+            ],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
+              "lineNumber": 27
+            }
+          }
+        ],
         "signature": [
-          "() => ",
+          "({ getConfig }: { getConfig: <T = any>(key: string) => any; }) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -8803,7 +8863,40 @@
         "label": "getFilterBucketAgg",
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
-          "lineNumber": 24
+          "lineNumber": 27
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.getFilteredMetricAgg",
+        "type": "Function",
+        "children": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IMetricAggConfig",
+            "text": "IMetricAggConfig"
+          },
+          ">"
+        ],
+        "description": [],
+        "label": "getFilteredMetricAgg",
+        "source": {
+          "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+          "lineNumber": 30
         },
         "tags": [],
         "returnComment": [],
@@ -11194,7 +11287,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 204
+              "lineNumber": 207
             },
             "signature": [
               "FunctionDefinition"
@@ -11208,7 +11301,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 205
+              "lineNumber": 208
             },
             "signature": [
               "FunctionDefinition"
@@ -11222,7 +11315,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 206
+              "lineNumber": 209
             },
             "signature": [
               "FunctionDefinition"
@@ -11236,7 +11329,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 207
+              "lineNumber": 210
             },
             "signature": [
               "FunctionDefinition"
@@ -11250,7 +11343,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 208
+              "lineNumber": 211
             },
             "signature": [
               "FunctionDefinition"
@@ -11264,7 +11357,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 209
+              "lineNumber": 212
             },
             "signature": [
               "FunctionDefinition"
@@ -11278,7 +11371,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 210
+              "lineNumber": 213
             },
             "signature": [
               "FunctionDefinition"
@@ -11292,7 +11385,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 211
+              "lineNumber": 214
             },
             "signature": [
               "FunctionDefinition"
@@ -11306,7 +11399,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 212
+              "lineNumber": 215
             },
             "signature": [
               "FunctionDefinition"
@@ -11320,7 +11413,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 213
+              "lineNumber": 216
             },
             "signature": [
               "FunctionDefinition"
@@ -11334,7 +11427,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 214
+              "lineNumber": 217
             },
             "signature": [
               "FunctionDefinition"
@@ -11348,7 +11441,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 215
+              "lineNumber": 218
             },
             "signature": [
               "FunctionDefinition"
@@ -11362,7 +11455,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 216
+              "lineNumber": 219
             },
             "signature": [
               "FunctionDefinition"
@@ -11376,7 +11469,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 217
+              "lineNumber": 220
             },
             "signature": [
               "FunctionDefinition"
@@ -11390,7 +11483,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 218
+              "lineNumber": 221
             },
             "signature": [
               "FunctionDefinition"
@@ -11404,7 +11497,21 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 219
+              "lineNumber": 222
+            },
+            "signature": [
+              "FunctionDefinition"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.AggFunctionsMapping.aggFilteredMetric",
+            "type": "Object",
+            "label": "aggFilteredMetric",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/types.ts",
+              "lineNumber": 223
             },
             "signature": [
               "FunctionDefinition"
@@ -11418,7 +11525,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 220
+              "lineNumber": 224
             },
             "signature": [
               "FunctionDefinition"
@@ -11432,7 +11539,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 221
+              "lineNumber": 225
             },
             "signature": [
               "FunctionDefinition"
@@ -11446,7 +11553,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 222
+              "lineNumber": 226
             },
             "signature": [
               "FunctionDefinition"
@@ -11460,7 +11567,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 223
+              "lineNumber": 227
             },
             "signature": [
               "FunctionDefinition"
@@ -11474,7 +11581,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 224
+              "lineNumber": 228
             },
             "signature": [
               "FunctionDefinition"
@@ -11488,7 +11595,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 225
+              "lineNumber": 229
             },
             "signature": [
               "FunctionDefinition"
@@ -11502,7 +11609,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 226
+              "lineNumber": 230
             },
             "signature": [
               "FunctionDefinition"
@@ -11516,7 +11623,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 227
+              "lineNumber": 231
             },
             "signature": [
               "FunctionDefinition"
@@ -11530,7 +11637,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 228
+              "lineNumber": 232
             },
             "signature": [
               "FunctionDefinition"
@@ -11544,7 +11651,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 229
+              "lineNumber": 233
             },
             "signature": [
               "FunctionDefinition"
@@ -11558,7 +11665,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 230
+              "lineNumber": 234
             },
             "signature": [
               "FunctionDefinition"
@@ -11572,7 +11679,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 231
+              "lineNumber": 235
             },
             "signature": [
               "FunctionDefinition"
@@ -11586,7 +11693,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 232
+              "lineNumber": 236
             },
             "signature": [
               "FunctionDefinition"
@@ -11600,7 +11707,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 233
+              "lineNumber": 237
             },
             "signature": [
               "FunctionDefinition"
@@ -11614,7 +11721,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 234
+              "lineNumber": 238
             },
             "signature": [
               "FunctionDefinition"
@@ -11628,7 +11735,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/types.ts",
-              "lineNumber": 235
+              "lineNumber": 239
             },
             "signature": [
               "FunctionDefinition"
@@ -11637,7 +11744,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/types.ts",
-          "lineNumber": 203
+          "lineNumber": 206
         },
         "initialIsOpen": false
       },
@@ -12506,7 +12613,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
-              "lineNumber": 21
+              "lineNumber": 24
             },
             "signature": [
               "Partial<{ top_left: GeoPoint; top_right: GeoPoint; bottom_right: GeoPoint; bottom_left: GeoPoint; }> | { wkt: string; } | GeoBox | undefined"
@@ -12515,7 +12622,76 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/buckets/filter.ts",
-          "lineNumber": 20
+          "lineNumber": 23
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.AggParamsFilteredMetric",
+        "type": "Interface",
+        "label": "AggParamsFilteredMetric",
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsFilteredMetric",
+            "text": "AggParamsFilteredMetric"
+          },
+          " extends ",
+          "BaseAggParams"
+        ],
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.AggParamsFilteredMetric.customMetric",
+            "type": "Object",
+            "label": "customMetric",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+              "lineNumber": 18
+            },
+            "signature": [
+              "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              " | undefined; schema?: string | undefined; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.AggParamsFilteredMetric.customBucket",
+            "type": "Object",
+            "label": "customBucket",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+              "lineNumber": 19
+            },
+            "signature": [
+              "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              " | undefined; schema?: string | undefined; } | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+          "lineNumber": 17
         },
         "initialIsOpen": false
       },
@@ -14032,13 +14208,27 @@
           },
           {
             "tags": [],
+            "id": "def-common.AggTypeConfig.hasNoDslParams",
+            "type": "CompoundType",
+            "label": "hasNoDslParams",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+              "lineNumber": 35
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-common.AggTypeConfig.params",
             "type": "Array",
             "label": "params",
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "signature": [
               "Partial<TParam>[] | undefined"
@@ -14052,7 +14242,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             },
             "signature": [
               "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
@@ -14066,7 +14256,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             },
             "signature": [
               "((aggConfig: TAggConfig) => TAggConfig[]) | (() => void | TAggConfig[]) | undefined"
@@ -14080,7 +14270,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "signature": [
               "((aggConfig: TAggConfig) => TAggConfig[]) | (() => void | TAggConfig[]) | undefined"
@@ -14094,7 +14284,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             },
             "signature": [
               "boolean | undefined"
@@ -14108,7 +14298,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "signature": [
               "boolean | undefined"
@@ -14122,7 +14312,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             },
             "signature": [
               "(() => any) | undefined"
@@ -14136,7 +14326,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 42
+              "lineNumber": 43
             },
             "signature": [
               "((resp: any, aggConfigs: ",
@@ -14174,7 +14364,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 51
+              "lineNumber": 52
             },
             "signature": [
               "((agg: TAggConfig) => ",
@@ -14196,7 +14386,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 52
+              "lineNumber": 53
             },
             "signature": [
               "((agg: TAggConfig, bucket: any) => any) | undefined"
@@ -14210,7 +14400,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 53
+              "lineNumber": 54
             },
             "signature": [
               "((bucket: any, key: any, agg: TAggConfig) => any) | undefined"
@@ -14224,7 +14414,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-              "lineNumber": 54
+              "lineNumber": 55
             },
             "signature": [
               "((agg: TAggConfig) => string) | undefined"
@@ -17199,6 +17389,21 @@
       },
       {
         "tags": [],
+        "id": "def-common.aggFilteredMetricFnName",
+        "type": "string",
+        "label": "aggFilteredMetricFnName",
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric_fn.ts",
+          "lineNumber": 14
+        },
+        "signature": [
+          "\"aggFilteredMetric\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
         "id": "def-common.aggFilterFnName",
         "type": "string",
         "label": "aggFilterFnName",
@@ -17494,7 +17699,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/types.ts",
-          "lineNumber": 139
+          "lineNumber": 141
         },
         "signature": [
           "{ calculateAutoTimeExpression: (range: TimeRange) => string | undefined; getDateMetaByDatatableColumn: (column: DatatableColumn) => Promise<{ timeZone: string; timeRange?: TimeRange | undefined; interval: string; } | undefined>; datatableUtilities: { getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>; getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>; isFilterable: (column: DatatableColumn) => boolean; }; createAggConfigs: (indexPattern: IndexPattern, configStates?: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
@@ -17894,7 +18099,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_type.ts",
-          "lineNumber": 58
+          "lineNumber": 59
         },
         "signature": [
           "AggType<AggConfig, AggParamType<AggConfig>>"
@@ -18209,7 +18414,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/lib/parent_pipeline_agg_helper.ts",
-          "lineNumber": 26
+          "lineNumber": 27
         },
         "initialIsOpen": false
       },
@@ -18251,7 +18456,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
-          "lineNumber": 33
+          "lineNumber": 34
         },
         "initialIsOpen": false
       },
@@ -19075,7 +19280,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/lib/parent_pipeline_agg_helper.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             }
           },
           {
@@ -19107,7 +19312,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/lib/parent_pipeline_agg_helper.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             }
           },
           {
@@ -19143,7 +19348,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/metrics/lib/parent_pipeline_agg_helper.ts",
-                  "lineNumber": 63
+                  "lineNumber": 64
                 }
               }
             ],
@@ -19151,7 +19356,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/lib/parent_pipeline_agg_helper.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             }
           }
         ],
@@ -19159,7 +19364,7 @@
         "label": "parentPipelineAggHelper",
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/lib/parent_pipeline_agg_helper.ts",
-          "lineNumber": 33
+          "lineNumber": 34
         },
         "initialIsOpen": false
       },
@@ -19176,7 +19381,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             }
           },
           {
@@ -19184,7 +19389,7 @@
             "type": "Function",
             "label": "params",
             "signature": [
-              "() => ",
+              "(bucketFilter?: string[]) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -19203,12 +19408,26 @@
               ">[]"
             ],
             "description": [],
-            "children": [],
+            "children": [
+              {
+                "type": "Array",
+                "label": "bucketFilter",
+                "isRequired": true,
+                "signature": [
+                  "string[]"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
+                  "lineNumber": 43
+                }
+              }
+            ],
             "tags": [],
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
-              "lineNumber": 42
+              "lineNumber": 43
             }
           },
           {
@@ -19244,7 +19463,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
-                  "lineNumber": 77
+                  "lineNumber": 79
                 }
               }
             ],
@@ -19252,7 +19471,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
-              "lineNumber": 77
+              "lineNumber": 79
             }
           }
         ],
@@ -19260,7 +19479,7 @@
         "label": "siblingPipelineAggHelper",
         "source": {
           "path": "src/plugins/data/common/search/aggs/metrics/lib/sibling_pipeline_agg_helper.ts",
-          "lineNumber": 40
+          "lineNumber": 41
         },
         "initialIsOpen": false
       }
