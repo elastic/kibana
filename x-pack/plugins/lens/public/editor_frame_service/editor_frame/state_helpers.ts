@@ -147,10 +147,10 @@ export function getMissingIndexPattern(
     return [];
   }
   const datasourceState = currentDatasourceState.state as {
-    layers: Record<string, unknown>;
+    layers: Record<string, { indexPatternId: string }>;
     indexPatterns: Record<string, unknown>;
   };
-  const ids = Object.keys(datasourceState.layers);
+  const ids = Object.values(datasourceState.layers).map(({ indexPatternId }) => indexPatternId);
   return ids.filter((id) => !datasourceState.indexPatterns[id]);
 }
 
