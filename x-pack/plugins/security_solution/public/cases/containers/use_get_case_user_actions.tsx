@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-import { CaseFullExternalService } from '../../../../case/common/api/cases';
+import { CaseFullExternalService } from '../../../../cases/common/api/cases';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';

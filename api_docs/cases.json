@@ -1,0 +1,63 @@
+{
+  "id": "cases",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "id": "def-server.CaseRequestContext",
+        "type": "Interface",
+        "label": "CaseRequestContext",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.CaseRequestContext.getCasesClient",
+            "type": "Function",
+            "label": "getCasesClient",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/cases/server/types.ts",
+              "lineNumber": 14
+            },
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "cases",
+                "scope": "server",
+                "docId": "kibCasesPluginApi",
+                "section": "def-server.CasesClient",
+                "text": "CasesClient"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/cases/server/types.ts",
+          "lineNumber": 13
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
