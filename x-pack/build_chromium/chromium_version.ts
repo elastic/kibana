@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import { run, REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import cheerio from 'cheerio';
 import dedent from 'dedent';
@@ -19,11 +19,6 @@ type ChromiumVersion = string;
 type ChromiumRevision = string;
 type ChromiumCommit = string;
 
-const log = new ToolingLog({
-  level: 'info',
-  writeTo: process.stdout,
-});
-
 // We forked the Puppeteer node module for Kibana,
 // So we need to translate OUR version to the official Puppeteer Release
 const forkCompatibilityMap: Record<PuppeteerRelease, PuppeteerRelease> = {
@@ -34,7 +29,7 @@ const forkCompatibilityMap: Record<PuppeteerRelease, PuppeteerRelease> = {
  * Look at Puppeteer source code in Github for Kibana's version
  * The src/revisions.ts file contains a revision string
  */
-async function getPuppeteerRelease(): Promise<PuppeteerRelease> {
+async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json
   const puppeteerPackageJson: PackageJson = JSON.parse(
     fs.readFileSync(path.resolve(REPO_ROOT, 'node_modules', 'puppeteer', 'package.json'), 'utf8')
@@ -48,7 +43,10 @@ async function getPuppeteerRelease(): Promise<PuppeteerRelease> {
  * Look at Puppeteer source code in Github for Kibana's version
  * The src/revisions.ts file contains a revision string
  */
-async function getChromiumRevision(kibanaPuppeteerVersion): Promise<ChromiumRevision> {
+async function getChromiumRevision(
+  kibanaPuppeteerVersion,
+  log: ToolingLog
+): Promise<ChromiumRevision> {
   const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/v${kibanaPuppeteerVersion}/src/revisions.ts`;
   let body: string;
   try {
@@ -67,6 +65,7 @@ async function getChromiumRevision(kibanaPuppeteerVersion): Promise<ChromiumRevi
     // look for the line of code matching `  chromium: '0123456',`
     const test = lines[cursor].match(/^\s+chromium: '(\S+)',$/);
     if (test != null) {
+      log.debug(`Parsed revision from source text: \`${lines[cursor]}\``);
       [, revision] = test;
       break;
     }
@@ -82,12 +81,14 @@ async function getChromiumRevision(kibanaPuppeteerVersion): Promise<ChromiumRevi
   return revision;
 }
 
-async function getChromiumCommit(revision: ChromiumRevision): Promise<ChromiumCommit> {
+async function getChromiumCommit(
+  revision: ChromiumRevision,
+  log: ToolingLog
+): Promise<ChromiumCommit> {
   const url = `https://crrev.com/${revision}`;
   log.info(`Fetching ${url}`);
   const pageText = await fetch(url);
   const $ = cheerio.load(await pageText.text());
-  log.debug(`Page title: ${$('title').text()}`);
 
   // get the commit from the page title
   let commit: ChromiumCommit | null = null;
@@ -95,6 +96,7 @@ async function getChromiumCommit(revision: ChromiumRevision): Promise<ChromiumCo
     .text()
     .match(/\S{40}/);
   if (matches != null) {
+    log.debug(`Parsed commit hash from page title: \`${$('title').text()}\``);
     [commit] = matches;
   }
 
@@ -106,43 +108,35 @@ async function getChromiumCommit(revision: ChromiumRevision): Promise<ChromiumCo
   return commit;
 }
 
-function showHelp() {
-  log.write(
-    dedent(chalk`
-      Display the Chromium git commit hash that correlates to a Puppeteer release.
+run(
+  async ({
+    log,
+    flags: {
+      _: [puppeteerVersionArg],
+    },
+  }) => {
+    try {
+      let puppeteerVersion: PuppeteerRelease;
+      if (puppeteerVersionArg) {
+        puppeteerVersion = puppeteerVersionArg;
+      } else {
+        puppeteerVersion = await getPuppeteerRelease(log);
+      }
 
-        - {dim Get Chromium commit for the current Puppeteer installation in Kibana:}
-          node x-pack/dev-tools/chromium_version
+      const chromiumRevision = await getChromiumRevision(puppeteerVersion, log);
+      await getChromiumCommit(chromiumRevision, log);
+    } catch (err) {
+      log.error(err);
+    }
+  },
+  {
+    description: dedent(chalk`
+      Display the Chromium git commit that correlates to a given Puppeteer release.
 
-        - {dim Get Chromium commit for Puppeteer v5.5.0:}
-          node x-pack/dev-tools/chromium_version 5.5.0
+       -  node x-pack/dev-tools/chromium_version 5.5.0  {dim # gets the Chromium commit for Puppeteer v5.5.0}
+       -  node x-pack/dev-tools/chromium_version       {dim  # gets the Chromium commit for the Kibana dependency version of Puppeteer}
 
       You can use https://omahaproxy.appspot.com/ to look up the Chromium release that first shipped with that commit.
-    `) + '\n'
-  );
-}
-
-async function chromiumVersion() {
-  const argument = process.argv[2];
-  if (argument === '--help') {
-    showHelp();
-    return;
+    `),
   }
-
-  try {
-    let puppeteerVersion: PuppeteerRelease;
-    if (argument) {
-      puppeteerVersion = argument;
-    } else {
-      puppeteerVersion = await getPuppeteerRelease();
-    }
-
-    const chromiumRevision = await getChromiumRevision(puppeteerVersion);
-    const chromiumCommit = await getChromiumCommit(chromiumRevision);
-    return chromiumCommit;
-  } catch (err) {
-    log.error(err);
-  }
-}
-
-chromiumVersion();
+);
