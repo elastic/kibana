@@ -9,8 +9,6 @@
 import _ from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import moment from 'moment';
-import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
 import { RequestAdapter } from '../../../../inspector/public';
@@ -55,7 +53,7 @@ import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { getDefaultSort } from './doc_table/lib/get_default_sort';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { applyAggsToSearchSource } from '../components/histogram/apply_aggs_to_search_source';
+import { applyAggsToSearchSource, getDimensions } from '../components/histogram';
 
 const services = getServices();
 
@@ -309,21 +307,6 @@ function discoverController($route, $scope) {
     }
   );
 
-  // update data source when filters update
-  subscriptions.add(
-    subscribeWithScope(
-      $scope,
-      filterManager.getUpdates$(),
-      {
-        next: () => {
-          $scope.state.filters = filterManager.getAppFilters();
-          updateSearchSourceHelper();
-        },
-      },
-      (error) => addFatalError(core.fatalErrors, error)
-    )
-  );
-
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get(SAMPLE_SIZE_SETTING),
@@ -473,28 +456,6 @@ function discoverController($route, $scope) {
     else return status.NO_RESULTS;
   };
 
-  const init = () => {
-    const fetch$ = merge(
-      refetch$,
-      filterManager.getFetches$(),
-      timefilter.getFetch$(),
-      timefilter.getAutoRefreshFetch$(),
-      data.query.queryString.getUpdates$(),
-      searchSessionManager.newSearchSessionIdFromURL$
-    ).pipe(debounceTime(100));
-
-    subscriptions.add(
-      subscribeWithScope(
-        $scope,
-        fetch$,
-        {
-          next: $scope.fetch,
-        },
-        (error) => addFatalError(core.fatalErrors, error)
-      )
-    );
-  };
-
   $scope.opts.fetch = $scope.fetch = function () {
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
@@ -542,51 +503,17 @@ function discoverController($route, $scope) {
       });
   };
 
-  function getDimensions(aggs, timeRange) {
-    const [metric, agg] = aggs;
-    agg.params.timeRange = timeRange;
-    const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
-    agg.buckets.setBounds(bounds);
-
-    const { esUnit, esValue } = agg.buckets.getInterval();
-    return {
-      x: {
-        accessor: 0,
-        label: agg.makeLabel(),
-        format: agg.toSerializedFieldFormat(),
-        params: {
-          date: true,
-          interval: moment.duration(esValue, esUnit),
-          intervalESValue: esValue,
-          intervalESUnit: esUnit,
-          format: agg.buckets.getScaledDateFormat(),
-          bounds: agg.buckets.getBounds(),
-        },
-      },
-      y: {
-        accessor: 1,
-        format: metric.toSerializedFieldFormat(),
-        label: metric.makeLabel(),
-      },
-    };
-  }
-
   function onResults(resp) {
     inspectorRequest
       .stats(getResponseInspectorStats(resp, $scope.volatileSearchSource))
       .ok({ json: resp });
 
     if (getTimeField() && !$scope.state.hideChart) {
-      const { from, to } = timefilter.getTime();
-      const timeRange = {
-        from: dateMath.parse(from),
-        to: dateMath.parse(to, { roundUp: true }),
-      };
       const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.volatileSearchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
-        getDimensions($scope.opts.chartAggConfigs.aggs, timeRange)
+        getDimensions($scope.opts.chartAggConfigs, data)
       );
     }
 
@@ -649,7 +576,26 @@ function discoverController($route, $scope) {
 
   addHelpMenuToAppChrome(chrome);
 
-  init();
+  const fetch$ = merge(
+    refetch$,
+    filterManager.getFetches$(),
+    timefilter.getFetch$(),
+    timefilter.getAutoRefreshFetch$(),
+    data.query.queryString.getUpdates$(),
+    searchSessionManager.newSearchSessionIdFromURL$
+  ).pipe(debounceTime(100));
+
+  subscriptions.add(
+    subscribeWithScope(
+      $scope,
+      fetch$,
+      {
+        next: $scope.fetch,
+      },
+      (error) => addFatalError(core.fatalErrors, error)
+    )
+  );
+
   // Propagate current app state to url, then start syncing and fetching
   replaceUrlAppState().then(() => {
     startStateSync();
