@@ -8,7 +8,7 @@
 
 import { UiPlugins } from '../../plugins';
 
-interface PluginInfo {
+export interface PluginInfo {
   publicPath: string;
   bundlePath: string;
 }

@@ -7,12 +7,12 @@
  */
 
 import { createHash } from 'crypto';
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { PackageInfo } from '@kbn/config';
 import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
 import { HttpAuth, KibanaRequest } from '../../http';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
+import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
 
@@ -72,14 +72,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       regularBundlePath,
     });
 
-    const jsDependencyPaths = [
-      ...UiSharedDeps.jsDepFilenames.map(
-        (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
-      ),
-      `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
-      `${regularBundlePath}/core/core.entry.js`,
-      ...[...bundlePaths.values()].map((plugin) => plugin.bundlePath),
-    ];
+    const jsDependencyPaths = getJsDependencyPaths(regularBundlePath, bundlePaths);
 
     // These paths should align with the bundle routes configured in
     // src/optimize/bundles_route/bundles_route.ts
