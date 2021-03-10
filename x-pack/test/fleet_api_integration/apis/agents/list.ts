@@ -100,9 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return a 400 when given an invalid "kuery" value', async () => {
-      await supertest
-        .get(`/api/fleet/agents?kuery=m`) // missing saved object type
-        .expect(400);
+      await supertest.get(`/api/fleet/agents?kuery=.test%3A`).expect(400);
     });
 
     it('should return a 200 and an empty list when given a "kuery" value with a missing saved object type', async () => {
