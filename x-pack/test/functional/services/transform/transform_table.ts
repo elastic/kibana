@@ -221,8 +221,8 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('~transformMessagesTabContent');
       await retry.tryForTime(30 * 1000, async () => {
         const actualText = await testSubjects.getVisibleText('~transformMessagesTabContent');
-        expect(actualText.includes(expectedText)).to.eql(
-          true,
+        expect(actualText.toLowerCase()).to.contain(
+          expectedText.toLowerCase(),
           `Expected transform messages text to include '${expectedText}'`
         );
       });
