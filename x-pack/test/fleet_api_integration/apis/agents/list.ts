@@ -99,10 +99,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.total).to.eql(4);
     });
 
-    it('should return a 400 when given an invalid "kuery" value', async () => {
-      await supertest.get(`/api/fleet/agents?kuery=.test%3A`).expect(400);
-    });
-
     it('should return a 200 and an empty list when given a "kuery" value with a missing saved object type', async () => {
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/agents?kuery=m`) // missing saved object type
