@@ -9,9 +9,4 @@
 export { SearchStrategyRegistry } from './search_strategy_registry';
 export { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
 
-export {
-  AbstractSearchStrategy,
-  ReqFacade,
-  RollupSearchStrategy,
-  DefaultSearchStrategy,
-} from './strategies';
+export { AbstractSearchStrategy, RollupSearchStrategy, DefaultSearchStrategy } from './strategies';
