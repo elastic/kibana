@@ -36,7 +36,6 @@ const mappings: Mappings = {
   dynamic_templates: [
     {
       // force string to keyword (instead of default of text + keyword)
-      // @ts-expect-error all properties DynamicTemplate are required
       strings: {
         match_mapping_type: 'string',
         mapping: {
@@ -54,19 +53,16 @@ const mappings: Mappings = {
       properties: {
         name: {
           type: 'keyword',
-          // @ts-expect-error PropertyBase.ignore_above is missing
           ignore_above: 1024,
         },
         environment: {
           type: 'keyword',
-          // @ts-expect-error PropertyBase.ignore_above is missing
           ignore_above: 1024,
         },
       },
     },
     settings: {
       // allowing dynamic fields without specifying anything specific
-      // @ts-expect-error PropertyBase.dynamic is missing
       dynamic: true,
       properties: {},
     },
@@ -75,12 +71,10 @@ const mappings: Mappings = {
     },
     agent_name: {
       type: 'keyword',
-      // @ts-expect-error PropertyBase.ignore_above is missing
       ignore_above: 1024,
     },
     etag: {
       type: 'keyword',
-      // @ts-expect-error PropertyBase.ignore_above is missing
       ignore_above: 1024,
     },
   },
