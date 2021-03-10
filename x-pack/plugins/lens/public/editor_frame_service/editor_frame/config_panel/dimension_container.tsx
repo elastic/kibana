@@ -51,7 +51,19 @@ export function DimensionContainer({
 
   return isOpen ? (
     <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
-      <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
+      <EuiOutsideClickDetector
+        onOutsideClick={(e) => {
+          let current = e.target as HTMLElement;
+          while (current) {
+            if (current?.getAttribute('data-test-subj') === 'lnsFormulaWidget') {
+              return;
+            }
+            current = current.parentNode as HTMLElement;
+          }
+          closeFlyout();
+        }}
+        isDisabled={!isOpen}
+      >
         <div
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"

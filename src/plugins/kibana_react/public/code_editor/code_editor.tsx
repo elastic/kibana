@@ -162,7 +162,7 @@ export class CodeEditor extends React.Component<Props, {}> {
           editorDidMount={this._editorDidMount}
           width={width}
           height={height}
-          options={{ ...options, wordBasedSuggestions: false }}
+          options={options}
         />
         <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
       </React.Fragment>

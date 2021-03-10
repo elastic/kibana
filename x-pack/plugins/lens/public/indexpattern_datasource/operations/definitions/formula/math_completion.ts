@@ -20,7 +20,13 @@ export enum SUGGESTION_TYPE {
   FUNCTIONS = 'functions',
 }
 
-export type LensMathSuggestion = GenericOperationDefinition | string;
+export type LensMathSuggestion =
+  | string
+  | {
+      label: string;
+      type: 'operation' | 'math';
+    };
+
 export interface LensMathSuggestions {
   list: LensMathSuggestion[];
   type: SUGGESTION_TYPE;
@@ -104,7 +110,9 @@ export function getPossibleFunctions(indexPattern: IndexPattern) {
 
 function getFunctionSuggestions(word: monaco.editor.IWordAtPosition, indexPattern: IndexPattern) {
   return {
-    list: uniq(getPossibleFunctions(indexPattern).filter((func) => startsWith(func, word.word))),
+    list: uniq(
+      getPossibleFunctions(indexPattern).filter((func) => startsWith(func, word.word))
+    ).map((func) => ({ label: func, type: 'operation' as const })),
     type: SUGGESTION_TYPE.FUNCTIONS,
   };
 }
@@ -122,12 +130,12 @@ function getArgumentSuggestions(
 
   const tinymathFunction = tinymathFunctions[name];
   if (tinymathFunction) {
-    if (
-      tinymathFunction.positionalArguments[position].type === 'function' ||
-      tinymathFunction.positionalArguments[position].type === 'any'
-    ) {
+    if (tinymathFunction.positionalArguments[position]) {
       return {
-        list: uniq(getPossibleFunctions(indexPattern)),
+        list: uniq(getPossibleFunctions(indexPattern)).map((f) => ({
+          type: 'math' as const,
+          label: f,
+        })),
         type: SUGGESTION_TYPE.FUNCTIONS,
       };
     }
@@ -170,7 +178,10 @@ function getArgumentSuggestions(
         );
       }
     });
-    return { list: uniq(possibleOperationNames), type: SUGGESTION_TYPE.FUNCTIONS };
+    return {
+      list: uniq(possibleOperationNames).map((n) => ({ label: n, type: 'operation' as const })),
+      type: SUGGESTION_TYPE.FUNCTIONS,
+    };
   }
 
   return { list: [], type: SUGGESTION_TYPE.FIELD };
@@ -179,14 +190,15 @@ function getArgumentSuggestions(
 export function getSuggestion(
   suggestion: LensMathSuggestion,
   type: SUGGESTION_TYPE,
-  range: monaco.Range
+  range: monaco.Range,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
 ): monaco.languages.CompletionItem {
   let kind: monaco.languages.CompletionItemKind = monaco.languages.CompletionItemKind.Method;
-  let insertText: string = typeof suggestion === 'string' ? suggestion : suggestion.type;
+  let label: string = typeof suggestion === 'string' ? suggestion : suggestion.label;
+  let insertText: string | undefined;
   let insertTextRules: monaco.languages.CompletionItem['insertTextRules'];
   let detail: string = '';
   let command: monaco.languages.CompletionItem['command'];
-  let documentation: string | monaco.IMarkdownString = '';
 
   switch (type) {
     case SUGGESTION_TYPE.FIELD:
@@ -195,8 +207,6 @@ export function getSuggestion(
         id: 'editor.action.triggerSuggest',
       };
       kind = monaco.languages.CompletionItemKind.Value;
-      insertText = `${insertText}`;
-
       break;
     case SUGGESTION_TYPE.FUNCTIONS:
       command = {
@@ -204,18 +214,28 @@ export function getSuggestion(
         id: 'editor.action.triggerSuggest',
       };
       kind = monaco.languages.CompletionItemKind.Function;
-      insertText = `${insertText}($0)`;
       insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
-      detail =
-        typeof suggestion === 'string'
-          ? tinymathFunctions[suggestion]
-            ? 'TinyMath'
-            : 'Elasticsearch'
-          : `(${suggestion.displayName})`;
-      if (typeof suggestion === 'string' && tinymathFunctions[suggestion]) {
-        documentation = { value: tinymathFunctions[suggestion].help };
+      if (typeof suggestion !== 'string') {
+        const tinymathFunction = tinymathFunctions[suggestion.label];
+        if (tinymathFunction) {
+          insertText = `${label}($0)`;
+          label = `${label}(${tinymathFunction.positionalArguments
+            .map(({ name }) => name)
+            .join(', ')})`;
+          detail = 'TinyMath';
+        } else {
+          const def = operationDefinitionMap[suggestion.label];
+          insertText = `${label}($0)`;
+          if ('operationParams' in def) {
+            label = `${label}(expression, ${def
+              .operationParams!.map((p) => `${p.name}=${p.type}`)
+              .join(', ')}`;
+          } else {
+            label = `${label}(expression)`;
+          }
+          detail = 'Elasticsearch';
+        }
       }
-
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
       command = {
@@ -232,11 +252,10 @@ export function getSuggestion(
 
   return {
     detail,
-    insertText,
-    insertTextRules,
     kind,
-    label: insertText,
-    documentation,
+    label,
+    insertText: insertText ?? label,
+    insertTextRules,
     command,
     range,
   };

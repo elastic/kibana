@@ -1,5 +1,4 @@
-.monaco-editor .suggest-widget {
-  left: auto !important;
-  // Interior flyout width
-  width: 280px !important;
+.lnsFormulaOverflow {
+  // Needs to be higher than the modal and all flyouts
+  z-index: $euiZLevel9 + 1;
 }

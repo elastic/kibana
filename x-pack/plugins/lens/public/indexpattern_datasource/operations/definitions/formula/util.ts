@@ -6,6 +6,7 @@
  */
 
 import { groupBy, isObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type {
   TinymathAST,
   TinymathFunction,
@@ -108,8 +109,8 @@ export const tinymathFunctions: Record<
   string,
   {
     positionalArguments: Array<{
-      type: 'any' | 'function' | 'number';
-      required?: boolean;
+      name: string;
+      optional?: boolean;
     }>;
     // help: React.ReactElement;
     // Help is in Markdown format
@@ -117,7 +118,10 @@ export const tinymathFunctions: Record<
   }
 > = {
   add: {
-    positionalArguments: [{ type: 'any' }, { type: 'any', required: true }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }) },
+      { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
+    ],
     help: `
 Also works with + symbol
 Example: ${'`count() + sum(bytes)`'}
@@ -125,84 +129,117 @@ Example: ${'`add(count(), 5)`'}
     `,
   },
   subtract: {
-    positionalArguments: [{ type: 'any' }, { type: 'any', required: true }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }) },
+      { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
+    ],
     help: `
 Also works with ${'`-`'} symbol
 Example: ${'`subtract(sum(bytes), avg(bytes))`'}
     `,
   },
   multiply: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }) },
+      { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
+    ],
     help: `
 Also works with ${'`*`'} symbol
 Example: ${'`multiply(sum(bytes), 2)`'}
     `,
   },
   divide: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }) },
+      { name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }) },
+    ],
     help: `
 Also works with ${'`/`'} symbol
 Example: ${'`ceil(sum(bytes))`'}
     `,
   },
   abs: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Absolute value
 Example: ${'`abs(sum(bytes))`'}
     `,
   },
   cbrt: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Cube root of value
 Example: ${'`cbrt(sum(bytes))`'}
     `,
   },
   ceil: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Ceiling of value, rounds up
 Example: ${'`ceil(sum(bytes))`'}
     `,
   },
   clamp: {
-    positionalArguments: [{ type: 'function' }, { type: 'number' }, { type: 'number' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      { name: i18n.translate('xpack.lens.formula.min', { defaultMessage: 'min' }) },
+      { name: i18n.translate('xpack.lens.formula.max', { defaultMessage: 'max' }) },
+    ],
     help: `
 Limits the value from a minimum to maximum
 Example: ${'`ceil(sum(bytes))`'}
     `,
   },
   cube: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Limits the value from a minimum to maximum
 Example: ${'`ceil(sum(bytes))`'}
     `,
   },
   exp: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Raises <em>e</em> to the nth power.
 Example: ${'`exp(sum(bytes))`'}
     `,
   },
   fix: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 For positive values, takes the floor. For negative values, takes the ceiling.
 Example: ${'`fix(sum(bytes))`'}
     `,
   },
   floor: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Round down to nearest integer value
 Example: ${'`floor(sum(bytes))`'}
     `,
   },
   log: {
-    positionalArguments: [{ type: 'function' }, { type: 'number', required: false }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
+        optional: true,
+      },
+    ],
     help: `
 Logarithm with optional base. The natural base <em>e</em> is used as default.
 Example: ${'`log(sum(bytes))`'}
@@ -210,28 +247,48 @@ Example: ${'`log(sum(bytes), 2)`'}
     `,
   },
   log10: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Base 10 logarithm.
 Example: ${'`log10(sum(bytes))`'}
     `,
   },
   mod: {
-    positionalArguments: [{ type: 'function' }, { type: 'number', required: true }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
+        optional: true,
+      },
+    ],
     help: `
 Remainder after dividing the function by a number
 Example: ${'`mod(sum(bytes), 2)`'}
     `,
   },
   pow: {
-    positionalArguments: [{ type: 'function' }, { type: 'number', required: true }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
+        optional: true,
+      },
+    ],
     help: `
 Raises the value to a certain power. The second argument is required
 Example: ${'`pow(sum(bytes), 3)`'}
     `,
   },
   round: {
-    positionalArguments: [{ type: 'function' }, { type: 'number' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+      {
+        name: i18n.translate('xpack.lens.formula.decimals', { defaultMessage: 'decimals' }),
+        optional: true,
+      },
+    ],
     help: `
 Rounds to a specific number of decimal places, default of 0
 Example: ${'`round(sum(bytes))`'}
@@ -239,14 +296,18 @@ Example: ${'`round(sum(bytes), 2)`'}
     `,
   },
   sqrt: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Square root of a positive value only
 Example: ${'`sqrt(sum(bytes))`'}
     `,
   },
   square: {
-    positionalArguments: [{ type: 'function' }],
+    positionalArguments: [
+      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+    ],
     help: `
 Raise the value to the 2nd power
 Example: ${'`square(sum(bytes))`'}
