@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { SubCaseResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenSubCaseSavedObject, wrapError } from '../../utils';
-import { SUB_CASE_DETAILS_URL } from '../../../../../common/constants';
+import { SUB_CASE_DETAILS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import { countAlertsForID } from '../../../../common';
 
 export function initGetSubCaseApi({ caseService, router, logger }: RouteDeps) {
@@ -29,7 +29,9 @@ export function initGetSubCaseApi({ caseService, router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         const includeComments = request.query.includeComments;
 
         const subCase = await caseService.getSubCase({

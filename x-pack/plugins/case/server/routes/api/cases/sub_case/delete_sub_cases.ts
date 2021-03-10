@@ -10,8 +10,11 @@ import { schema } from '@kbn/config-schema';
 import { buildCaseUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
-import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import {
+  SUB_CASES_PATCH_DEL_URL,
+  SAVED_OBJECT_TYPES,
+  CASE_SAVED_OBJECT,
+} from '../../../../../common/constants';
 
 export function initDeleteSubCasesApi({
   caseService,
@@ -30,7 +33,9 @@ export function initDeleteSubCasesApi({
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
 
         const [comments, subCases] = await Promise.all([
           caseService.getAllSubCaseComments({ client, id: request.query.ids }),

@@ -18,7 +18,7 @@ import {
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
-import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { CASE_CONFIGURE_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
@@ -48,7 +48,9 @@ export function initPostCaseConfigure({
         if (actionsClient == null) {
           throw Boom.notFound('Action client not found');
         }
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         const query = pipe(
           CasesConfigureRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)

@@ -6,9 +6,8 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
 import { commentsMigrations } from './migrations';
-
-export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 
 export const caseCommentSavedObjectType: SavedObjectsType = {
   name: CASE_COMMENT_SAVED_OBJECT,

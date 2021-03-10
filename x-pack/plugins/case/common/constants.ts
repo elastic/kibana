@@ -12,6 +12,22 @@ import {
 
 export const APP_ID = 'case';
 
+export const CASE_SAVED_OBJECT = 'cases';
+export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
+export const SUB_CASE_SAVED_OBJECT = 'cases-sub-case';
+export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
+export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
+export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
+
+export const SAVED_OBJECT_TYPES = [
+  CASE_SAVED_OBJECT,
+  CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+];
+
 /**
  * Case routes
  */

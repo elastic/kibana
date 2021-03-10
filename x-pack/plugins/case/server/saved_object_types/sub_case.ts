@@ -6,9 +6,8 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { SUB_CASE_SAVED_OBJECT } from '../../common/constants';
 import { subCasesMigrations } from './migrations';
-
-export const SUB_CASE_SAVED_OBJECT = 'cases-sub-case';
 
 export const subCaseSavedObjectType: SavedObjectsType = {
   name: SUB_CASE_SAVED_OBJECT,

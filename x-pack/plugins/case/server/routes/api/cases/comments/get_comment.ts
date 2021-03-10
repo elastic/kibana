@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { CommentResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObject, wrapError } from '../../utils';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
+import { CASE_COMMENT_DETAILS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 
 export function initGetCommentApi({ caseService, router, logger }: RouteDeps) {
   router.get(
@@ -25,7 +25,9 @@ export function initGetCommentApi({ caseService, router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
 
         const comment = await caseService.getComment({
           client,

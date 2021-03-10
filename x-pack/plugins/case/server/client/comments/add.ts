@@ -35,8 +35,10 @@ import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CommentableCase, createAlertUpdateRequest } from '../../common';
 import { CaseClientHandler } from '..';
 import { createCaseError } from '../../common/error';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
-import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
+import {
+  MAX_GENERATED_ALERTS_PER_SUB_CASE,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '../../../common/constants';
 
 async function getSubCase({
   caseService,

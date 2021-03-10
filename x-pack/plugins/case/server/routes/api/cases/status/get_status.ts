@@ -9,7 +9,7 @@ import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
 import { CasesStatusResponseRt, caseStatuses } from '../../../../../common/api';
-import { CASE_STATUS_URL } from '../../../../../common/constants';
+import { CASE_STATUS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import { constructQueryOptions } from '../helpers';
 
 export function initGetCasesStatusApi({ caseService, router, logger }: RouteDeps) {
@@ -20,7 +20,9 @@ export function initGetCasesStatusApi({ caseService, router, logger }: RouteDeps
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
 
         const [openCases, inProgressCases, closedCases] = await Promise.all([
           ...caseStatuses.map((status) => {

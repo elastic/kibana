@@ -6,9 +6,8 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
 import { userActionsMigrations } from './migrations';
-
-export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 
 export const caseUserActionSavedObjectType: SavedObjectsType = {
   name: CASE_USER_ACTION_SAVED_OBJECT,

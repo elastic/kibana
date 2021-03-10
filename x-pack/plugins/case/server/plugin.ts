@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
-import { APP_ID } from '../common/constants';
+import { APP_ID, SAVED_OBJECT_TYPES } from '../common/constants';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
@@ -112,7 +112,7 @@ export class CasePlugin {
     });
 
     registerConnectors({
-      actionsRegisterType: plugins.actions.registerType,
+      registerActionType: plugins.actions.registerType,
       logger: this.log,
       caseService: this.caseService,
       caseConfigureService: this.caseConfigureService,
@@ -132,7 +132,9 @@ export class CasePlugin {
       const user = await this.caseService!.getUser({ request });
       return createExternalCaseClient({
         scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
-        savedObjectsClient: core.savedObjects.getScopedClient(request),
+        savedObjectsClient: core.savedObjects.getScopedClient(request, {
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        }),
         user,
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
@@ -176,7 +178,9 @@ export class CasePlugin {
         getCaseClient: () => {
           return new CaseClientHandler({
             scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
-            savedObjectsClient: savedObjects.getScopedClient(request),
+            savedObjectsClient: savedObjects.getScopedClient(request, {
+              includedHiddenTypes: SAVED_OBJECT_TYPES,
+            }),
             caseService,
             caseConfigureService,
             connectorMappingsService,

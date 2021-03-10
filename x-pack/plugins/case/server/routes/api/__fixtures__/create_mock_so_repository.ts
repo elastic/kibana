@@ -20,7 +20,7 @@ import {
   CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-} from '../../../saved_object_types';
+} from '../../../../common/constants';
 
 export const createMockSavedObjectsRepository = ({
   caseSavedObject = [],

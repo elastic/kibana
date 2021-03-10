@@ -6,9 +6,8 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
 import { configureMigrations } from './migrations';
-
-export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
 
 export const caseConfigureSavedObjectType: SavedObjectsType = {
   name: CASE_CONFIGURE_SAVED_OBJECT,

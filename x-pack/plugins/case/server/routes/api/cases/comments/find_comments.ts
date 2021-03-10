@@ -22,7 +22,7 @@ import {
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import { defaultPage, defaultPerPage } from '../..';
 
 const FindQueryParamsRt = rt.partial({
@@ -43,7 +43,9 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         const query = pipe(
           FindQueryParamsRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)

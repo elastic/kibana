@@ -8,11 +8,15 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
+import {
+  CASE_COMMENT_DETAILS_URL,
+  SAVED_OBJECT_TYPES,
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../../../common/constants';
 
 export function initDeleteCommentApi({
   caseService,
@@ -37,7 +41,9 @@ export function initDeleteCommentApi({
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();

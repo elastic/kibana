@@ -19,7 +19,7 @@ import {
   SavedObjectFindOptions,
 } from '../../../../common/api';
 import { ESConnectorFields, ConnectorTypeFields } from '../../../../common/api/connectors';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../saved_object_types';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { sortToSnake } from '../utils';
 import { combineFilters } from '../../../common';
 

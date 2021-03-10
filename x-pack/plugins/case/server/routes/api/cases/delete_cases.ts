@@ -11,7 +11,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_URL, SAVED_OBJECT_TYPES } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
 
 async function deleteSubCases({
@@ -58,7 +58,9 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         await Promise.all(
           request.query.ids.map((id) =>
             caseService.deleteCase({

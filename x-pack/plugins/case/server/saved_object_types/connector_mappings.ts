@@ -6,9 +6,8 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../common/constants';
 import { connectorMappingsMigrations } from './migrations';
-
-export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
 
 export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   name: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,

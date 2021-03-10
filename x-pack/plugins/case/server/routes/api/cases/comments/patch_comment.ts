@@ -15,11 +15,15 @@ import Boom from '@hapi/boom';
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { CommentableCase } from '../../../../common';
 import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import {
+  CASE_COMMENTS_URL,
+  SAVED_OBJECT_TYPES,
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../../../common/constants';
 import { CaseServiceSetup } from '../../../../services';
 
 interface CombinedCaseParams {
@@ -82,7 +86,9 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         const query = pipe(
           CommentPatchRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)

@@ -34,7 +34,7 @@ import {
   flattenSubCaseSavedObject,
   transformNewComment,
 } from '../../routes/api/utils';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CaseServiceSetup } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';

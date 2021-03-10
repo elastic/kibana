@@ -18,7 +18,6 @@ import {
 } from 'kibana/server';
 
 import { CaseClient } from '../../../../client';
-import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../../../services';
 import {
   CaseStatuses,
@@ -36,7 +35,11 @@ import {
   User,
   CommentAttributes,
 } from '../../../../../common/api';
-import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
+import {
+  SUB_CASES_PATCH_DEL_URL,
+  CASE_COMMENT_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import {
   escapeHatch,

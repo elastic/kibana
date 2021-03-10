@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { CaseConfigureResponseRt, ConnectorMappingsAttributes } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { CASE_CONFIGURE_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import { transformESConnectorToCaseConnector } from '../helpers';
 
 export function initGetCaseConfigure({ caseConfigureService, router, logger }: RouteDeps) {
@@ -21,7 +21,9 @@ export function initGetCaseConfigure({ caseConfigureService, router, logger }: R
     async (context, request, response) => {
       try {
         let error = null;
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
 
         const myCaseConfigure = await caseConfigureService.find({ client });
 

@@ -29,7 +29,7 @@ export { transformConnectorComment } from './case';
 export const separator = '__SEPARATOR__';
 
 export const registerConnectors = ({
-  actionsRegisterType,
+  registerActionType,
   logger,
   caseService,
   caseConfigureService,
@@ -37,7 +37,7 @@ export const registerConnectors = ({
   userActionService,
   alertsService,
 }: RegisterConnectorsArgs) => {
-  actionsRegisterType(
+  registerActionType(
     getCaseConnector({
       logger,
       caseService,

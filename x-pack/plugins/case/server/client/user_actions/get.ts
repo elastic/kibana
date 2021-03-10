@@ -10,7 +10,7 @@ import {
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
-} from '../../saved_object_types';
+} from '../../../common/constants';
 import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common/api';
 import { CaseUserActionServiceSetup } from '../../services';
 

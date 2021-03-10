@@ -14,7 +14,7 @@ import {
 } from 'kibana/server';
 
 import { ConnectorMappings, SavedObjectFindOptions } from '../../../common/api';
-import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../saved_object_types';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
 
 interface ClientArgs {
   client: SavedObjectsClientContract;

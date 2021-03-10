@@ -8,7 +8,7 @@
 import { UsersRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_REPORTERS_URL } from '../../../../../common/constants';
+import { CASE_REPORTERS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 
 export function initGetReportersApi({ caseService, router, logger }: RouteDeps) {
   router.get(
@@ -18,7 +18,9 @@ export function initGetReportersApi({ caseService, router, logger }: RouteDeps) 
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         const reporters = await caseService.getReporters({
           client,
         });

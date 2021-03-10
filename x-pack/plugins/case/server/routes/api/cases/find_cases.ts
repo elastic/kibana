@@ -19,7 +19,7 @@ import {
 } from '../../../../common/api';
 import { transformCases, wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_URL, SAVED_OBJECT_TYPES } from '../../../../common/constants';
 import { constructQueryOptions } from './helpers';
 
 export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
@@ -32,7 +32,9 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         const queryParams = pipe(
           CasesFindRequestRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)

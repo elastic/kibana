@@ -20,7 +20,7 @@ import {
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformSubCases, wrapError } from '../../utils';
-import { SUB_CASES_URL } from '../../../../../common/constants';
+import { SUB_CASES_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import { constructQueryOptions } from '../helpers';
 import { defaultPage, defaultPerPage } from '../..';
 
@@ -37,7 +37,9 @@ export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) 
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        const client = context.core.savedObjects.getClient({
+          includedHiddenTypes: SAVED_OBJECT_TYPES,
+        });
         const queryParams = pipe(
           SubCasesFindRequestRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
