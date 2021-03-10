@@ -37,6 +37,32 @@ export interface Props {
  */
 const CLOUD_DEFAULT_REPO = 'found-snapshots';
 
+const geti18nTexts = (phase: Props['phase']) => ({
+  title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
+    defaultMessage: 'Searchable snapshot',
+  }),
+  description:
+    phase === 'frozen' ? (
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.searchableSnapshotFieldDescription"
+        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. To reduce costs, only a cache of the snapshot is mounted in the frozen tier. {learnMoreLink}"
+        values={{
+          learnMoreLink: (
+            <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
+        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. {learnMoreLink}"
+        values={{
+          learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
+        }}
+      />
+    ),
+});
+
 export const SearchableSnapshotField: FunctionComponent<Props> = ({
   phase,
   canBeDisabled = true,
@@ -64,6 +90,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
         policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
     )
   );
+
+  const i18nTexts = geti18nTexts(phase);
 
   useEffect(() => {
     if (isDisabledDueToLicense) {
@@ -291,24 +319,10 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
             }
           : undefined
       }
-      title={
-        <h3>
-          {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
-            defaultMessage: 'Searchable snapshot',
-          })}
-        </h3>
-      }
+      title={<h3>{i18nTexts.title}</h3>}
       description={
         <>
-          <EuiTextColor color="subdued">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
-              defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}"
-              values={{
-                learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
-              }}
-            />
-          </EuiTextColor>
+          <EuiTextColor color="subdued">{i18nTexts.description}</EuiTextColor>
         </>
       }
       fieldNotices={renderInfoCallout()}
