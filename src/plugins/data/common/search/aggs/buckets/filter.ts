@@ -13,7 +13,6 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { GeoBoundingBox } from './lib/geo_point';
 import { aggFilterFnName } from './filter_fn';
 import { BaseAggParams } from '../types';
-import { UI_SETTINGS } from '../../../constants';
 import { Query } from '../../../types';
 import { buildEsQuery, getEsQueryConfig } from '../../../es_query';
 
@@ -37,12 +36,6 @@ export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: st
       },
       {
         name: 'filter',
-        default: () => [
-          {
-            input: { query: '', language: getConfig(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) },
-            label: '',
-          },
-        ],
         write(aggConfig, output) {
           const filter: Query = aggConfig.params.filter;
 

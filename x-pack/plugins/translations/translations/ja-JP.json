@@ -12127,7 +12127,6 @@
     "xpack.lens.indexPattern.terms.otherLabel": "その他",
     "xpack.lens.indexPattern.terms.size": "値の数",
     "xpack.lens.indexPattern.termsOf": "{name} のトップの値",
-    "xpack.lens.indexPattern.timeScale.advancedSettings": "高度なオプションを追加",
     "xpack.lens.indexPattern.timeScale.enableTimeScale": "単位で正規化",
     "xpack.lens.indexPattern.timeScale.label": "単位で正規化",
     "xpack.lens.indexPattern.timeScale.tooltip": "基本の日付間隔に関係なく、常に指定された時間単位のレートとして表示されるように値を正規化します。",

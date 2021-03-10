@@ -12285,7 +12285,6 @@
     "xpack.lens.indexPattern.terms.otherLabel": "其他",
     "xpack.lens.indexPattern.terms.size": "值数目",
     "xpack.lens.indexPattern.termsOf": "{name} 排名最前值",
-    "xpack.lens.indexPattern.timeScale.advancedSettings": "添加高级选项",
     "xpack.lens.indexPattern.timeScale.enableTimeScale": "按单位标准化",
     "xpack.lens.indexPattern.timeScale.label": "按单位标准化",
     "xpack.lens.indexPattern.timeScale.tooltip": "将值标准化为始终显示为每指定时间单位速率，无论基础日期时间间隔是多少。",

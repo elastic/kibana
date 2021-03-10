@@ -62,7 +62,8 @@ export const aggFilter = (): FunctionDefinition => ({
     filter: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.filter.filter.help', {
-        defaultMessage: 'Filter results based on a kql or lucene query',
+        defaultMessage:
+          'Filter results based on a kql or lucene query. Do not use together with geo_bounding_box',
       }),
     },
     json: {
@@ -81,6 +82,13 @@ export const aggFilter = (): FunctionDefinition => ({
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
 
+    const geoBoundingBox = getParsedValue(args, 'geo_bounding_box');
+    const filter = getParsedValue(args, 'filter');
+
+    if (geoBoundingBox && filter) {
+      throw new Error("filter and geo_bounding_box can't be used together");
+    }
+
     return {
       type: 'agg_type',
       value: {
@@ -90,8 +98,8 @@ export const aggFilter = (): FunctionDefinition => ({
         type: BUCKET_TYPES.FILTER,
         params: {
           ...rest,
-          geo_bounding_box: getParsedValue(args, 'geo_bounding_box'),
-          filter: getParsedValue(args, 'filter'),
+          geo_bounding_box: geoBoundingBox,
+          filter,
         },
       },
     };
