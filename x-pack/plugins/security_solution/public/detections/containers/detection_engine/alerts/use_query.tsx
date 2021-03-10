@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import React, { SetStateAction, useEffect, useState } from 'react';
 
 import { fetchQueryAlerts } from './api';
 import { AlertSearchResponse } from './types';
 
-type Func = () => void;
+type Func = () => Promise<void>;
 
 export interface ReturnQueryAlerts<Hit, Aggs> {
   loading: boolean;
@@ -40,13 +42,13 @@ export const useQueryAlerts = <Hit, Aggs>(
     setQuery,
     refetch: null,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         setLoading(true);
         const alertResponse = await fetchQueryAlerts<Hit, Aggs>({
@@ -77,9 +79,11 @@ export const useQueryAlerts = <Hit, Aggs>(
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
-    fetchData();
+    if (!isEmpty(query)) {
+      fetchData();
+    }
     return () => {
       isSubscribed = false;
       abortCtrl.abort();

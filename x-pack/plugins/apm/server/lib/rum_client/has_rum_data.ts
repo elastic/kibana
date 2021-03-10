@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../server/utils/queries';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
@@ -29,9 +31,7 @@ export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
         },
         aggs: {
           services: {
-            filter: {
-              range: rangeFilter(start, end),
-            },
+            filter: rangeQuery(start, end)[0],
             aggs: {
               mostTraffic: {
                 terms: {

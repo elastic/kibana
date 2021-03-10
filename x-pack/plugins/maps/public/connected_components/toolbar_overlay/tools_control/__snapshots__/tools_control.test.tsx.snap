@@ -110,6 +110,7 @@ exports[`Should render cancel button when drawing 1`] = `
             },
           ]
         }
+        size="m"
       />
     </EuiPopover>
   </EuiFlexItem>
@@ -235,6 +236,7 @@ exports[`renders 1`] = `
         },
       ]
     }
+    size="m"
   />
 </EuiPopover>
 `;

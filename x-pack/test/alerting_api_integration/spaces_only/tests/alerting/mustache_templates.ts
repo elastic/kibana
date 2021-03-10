@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -214,6 +215,107 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       );
       expect(body).to.be(
         '{"objectA":{"stringB":"B","arrayC":[{"stringD":"D1","numberE":42},{"stringD":"D2","numberE":43}],"objectF":{"stringG":"G","nullG":null}},"stringH":"H","arrayI":[44,45],"nullJ":null}'
+      );
+    });
+
+    it('should render kibanaBaseUrl as empty string since not configured', async () => {
+      const actionResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'testing context variable expansion',
+          actionTypeId: '.slack',
+          secrets: {
+            webhookUrl: slackSimulatorURL,
+          },
+        });
+      expect(actionResponse.status).to.eql(200);
+      const createdAction = actionResponse.body;
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+      const varsTemplate = 'kibanaBaseUrl: "{{kibanaBaseUrl}}"';
+
+      const alertResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            name: 'testing context variable kibanaBaseUrl',
+            alertTypeId: 'test.patternFiring',
+            params: {
+              pattern: { instance: [true, true] },
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {
+                  message: `message {{alertId}} - ${varsTemplate}`,
+                },
+              },
+            ],
+          })
+        );
+      expect(alertResponse.status).to.eql(200);
+      const createdAlert = alertResponse.body;
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+
+      const body = await retry.try(async () =>
+        waitForActionBody(slackSimulatorURL, createdAlert.id)
+      );
+      expect(body).to.be('kibanaBaseUrl: ""');
+    });
+
+    it('should render action variables in rule action', async () => {
+      const url = formatUrl(new URL(webhookSimulatorURL), { auth: false });
+      const actionResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'testing action variable rendering',
+          actionTypeId: '.webhook',
+          secrets: {},
+          config: {
+            headers: {
+              'Content-Type': 'text/plain',
+            },
+            url,
+          },
+        });
+      expect(actionResponse.status).to.eql(200);
+      const createdAction = actionResponse.body;
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+
+      const alertResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            name: 'testing variable escapes for webhook',
+            alertTypeId: 'test.patternFiring',
+            params: {
+              pattern: { instance: [true] },
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {
+                  body: `payload {{rule.id}} - old id variable: {{alertId}}, new id variable: {{rule.id}}, old name variable: {{alertName}}, new name variable: {{rule.name}}`,
+                },
+              },
+            ],
+          })
+        );
+      expect(alertResponse.status).to.eql(200);
+      const createdAlert = alertResponse.body;
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+
+      const body = await retry.try(async () =>
+        waitForActionBody(webhookSimulatorURL, createdAlert.id)
+      );
+      expect(body).to.be(
+        `old id variable: ${createdAlert.id}, new id variable: ${createdAlert.id}, old name variable: ${createdAlert.name}, new name variable: ${createdAlert.name}`
       );
     });
   });

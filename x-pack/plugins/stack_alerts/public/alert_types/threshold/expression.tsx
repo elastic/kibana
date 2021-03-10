@@ -1,39 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiExpression,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelect,
-  EuiSpacer,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiEmptyPrompt, EuiText, EuiTitle } from '@elastic/eui';
 import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
-  firstFieldOption,
-  getIndexPatterns,
-  getIndexOptions,
   getFields,
   COMPARATORS,
   builtInComparators,
-  getTimeFieldOptions,
   OfExpression,
   ThresholdExpression,
   ForLastExpression,
@@ -45,8 +26,9 @@ import {
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
 import './expression.scss';
+import { IndexSelectPopover } from '../components/index_select_popover';
 
-const DEFAULT_VALUES = {
+export const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
   TERM_SIZE: 5,
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
@@ -75,6 +57,12 @@ function isString(value: unknown): value is string {
   return typeof value === 'string';
 }
 
+// normalize the `index` parameter to be a string array
+function indexParamToArray(index: string | string[]): string[] {
+  if (!index) return [];
+  return isString(index) ? [index] : index;
+}
+
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
@@ -92,14 +80,18 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     timeWindowUnit,
   } = alertParams;
 
+  const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
 
-  const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
-  const [indexPatterns, setIndexPatterns] = useState([]);
-  const [esFields, setEsFields] = useState<unknown[]>([]);
-  const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
-  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
-  const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
+  const [esFields, setEsFields] = useState<
+    Array<{
+      name: string;
+      type: string;
+      normalizedType: string;
+      searchable: boolean;
+      aggregatable: boolean;
+    }>
+  >([]);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
@@ -108,7 +100,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       alertParams[errorKey as keyof IndexThresholdAlertParams] !== undefined
   );
 
-  const canShowVizualization = !!Object.keys(errors).find(
+  const cannotShowVisualization = !!Object.keys(errors).find(
     (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
@@ -131,153 +123,20 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
 
-    if (index && index.length > 0) {
-      const currentEsFields = await getFields(http, index);
-      const timeFields = getTimeFieldOptions(currentEsFields);
-
-      setEsFields(currentEsFields);
-      setTimeFieldOptions([firstFieldOption, ...timeFields]);
+    if (indexArray.length > 0) {
+      await refreshEsFields(indexArray);
     }
   };
 
-  const closeIndexPopover = () => {
-    setIndexPopoverOpen(false);
-    if (timeField === undefined) {
-      setAlertParams('timeField', '');
-    }
+  const refreshEsFields = async (indices: string[]) => {
+    const currentEsFields = await getFields(http, indices);
+    setEsFields(currentEsFields);
   };
-
-  useEffect(() => {
-    const indexPatternsFunction = async () => {
-      setIndexPatterns(await getIndexPatterns());
-    };
-    indexPatternsFunction();
-  }, []);
 
   useEffect(() => {
     setDefaultExpressionValues();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const indexPopover = (
-    <Fragment>
-      <EuiFormRow
-        id="indexSelectSearchBox"
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.alertParams.indicesToQueryLabel"
-            defaultMessage="Indices to query"
-          />
-        }
-        isInvalid={errors.index.length > 0 && index !== undefined}
-        error={errors.index}
-        helpText={
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.alertParams.howToBroadenSearchQueryDescription"
-            defaultMessage="Use * to broaden your query."
-          />
-        }
-      >
-        <EuiComboBox
-          fullWidth
-          async
-          isLoading={isIndiciesLoading}
-          isInvalid={errors.index.length > 0 && index !== undefined}
-          noSuggestions={!indexOptions.length}
-          options={indexOptions}
-          data-test-subj="thresholdIndexesComboBox"
-          selectedOptions={(index || []).map((anIndex: string) => {
-            return {
-              label: anIndex,
-              value: anIndex,
-            };
-          })}
-          onChange={async (selected: EuiComboBoxOptionOption[]) => {
-            const indicies: string[] = selected
-              .map((aSelected) => aSelected.value)
-              .filter<string>(isString);
-            setAlertParams('index', indicies);
-            const indices = selected.map((s) => s.value as string);
-
-            // reset time field and expression fields if indices are deleted
-            if (indices.length === 0) {
-              setTimeFieldOptions([firstFieldOption]);
-              setAlertProperty('params', {
-                ...alertParams,
-                index: indices,
-                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-                termSize: DEFAULT_VALUES.TERM_SIZE,
-                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-                groupBy: DEFAULT_VALUES.GROUP_BY,
-                threshold: DEFAULT_VALUES.THRESHOLD,
-                timeField: '',
-              });
-              return;
-            }
-            const currentEsFields = await getFields(http!, indices);
-            const timeFields = getTimeFieldOptions(currentEsFields);
-
-            setEsFields(currentEsFields);
-            setTimeFieldOptions([firstFieldOption, ...timeFields]);
-          }}
-          onSearchChange={async (search) => {
-            setIsIndiciesLoading(true);
-            setIndexOptions(await getIndexOptions(http!, search, indexPatterns));
-            setIsIndiciesLoading(false);
-          }}
-          onBlur={() => {
-            if (!index) {
-              setAlertParams('index', []);
-            }
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        id="thresholdTimeField"
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.alertParams.timeFieldLabel"
-            defaultMessage="Time field"
-          />
-        }
-        isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-        error={errors.timeField}
-      >
-        <EuiSelect
-          options={timeFieldOptions}
-          isInvalid={errors.timeField.length > 0 && timeField !== undefined}
-          fullWidth
-          name="thresholdTimeField"
-          data-test-subj="thresholdAlertTimeFieldSelect"
-          value={timeField || ''}
-          onChange={(e) => {
-            setAlertParams('timeField', e.target.value);
-          }}
-          onBlur={() => {
-            if (timeField === undefined) {
-              setAlertParams('timeField', '');
-            }
-          }}
-        />
-      </EuiFormRow>
-    </Fragment>
-  );
-
-  const renderIndices = (indices: string[]) => {
-    const rows = indices.map((s: string, i: number) => {
-      return (
-        <p key={i}>
-          {s}
-          {i < indices.length - 1 ? ',' : null}
-        </p>
-      );
-    });
-    return <div>{rows}</div>;
-  };
 
   return (
     <Fragment>
@@ -297,60 +156,40 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiPopover
-        id="indexPopover"
-        button={
-          <EuiExpression
-            display="columns"
-            data-test-subj="selectIndexExpression"
-            description={i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexLabel', {
-              defaultMessage: 'index',
-            })}
-            value={index && index.length > 0 ? renderIndices(index) : firstFieldOption.text}
-            isActive={indexPopoverOpen}
-            onClick={() => {
-              setIndexPopoverOpen(true);
-            }}
-            isInvalid={!(index && index.length > 0 && timeField !== '')}
-          />
-        }
-        isOpen={indexPopoverOpen}
-        closePopover={closeIndexPopover}
-        ownFocus
-        anchorPosition="downLeft"
-        zIndex={8000}
-        display="block"
-      >
-        <div style={{ width: '450px' }}>
-          <EuiPopoverTitle>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                {i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexButtonLabel', {
-                  defaultMessage: 'index',
-                })}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="closePopover"
-                  iconType="cross"
-                  color="danger"
-                  aria-label={i18n.translate(
-                    'xpack.stackAlerts.threshold.ui.alertParams.closeIndexPopoverLabel',
-                    {
-                      defaultMessage: 'Close',
-                    }
-                  )}
-                  onClick={closeIndexPopover}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopoverTitle>
+      <IndexSelectPopover
+        index={indexArray}
+        data-test-subj="indexSelectPopover"
+        esFields={esFields}
+        timeField={timeField}
+        errors={errors}
+        onIndexChange={async (indices: string[]) => {
+          setAlertParams('index', indices);
 
-          {indexPopover}
-        </div>
-      </EuiPopover>
+          // reset expression fields if indices are deleted
+          if (indices.length === 0) {
+            setAlertProperty('params', {
+              ...alertParams,
+              index: indices,
+              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+              termSize: DEFAULT_VALUES.TERM_SIZE,
+              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+              groupBy: DEFAULT_VALUES.GROUP_BY,
+              threshold: DEFAULT_VALUES.THRESHOLD,
+              timeField: '',
+            });
+          } else {
+            await refreshEsFields(indices);
+          }
+        }}
+        onTimeFieldChange={(updatedTimeField: string) =>
+          setAlertParams('timeField', updatedTimeField)
+        }
+      />
       <WhenExpression
         display="fullWidth"
+        data-test-subj="whenExpression"
         aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
         onChangeSelectedAggType={(selectedAggType: string) =>
           setAlertParams('aggType', selectedAggType)
@@ -359,6 +198,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
         <OfExpression
           aggField={aggField}
+          data-test-subj="aggTypeExpression"
           fields={esFields}
           aggType={aggType}
           errors={errors}
@@ -370,6 +210,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       ) : null}
       <GroupByExpression
         groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
+        data-test-subj="groupByExpression"
         termField={termField}
         termSize={termSize}
         errors={errors}
@@ -396,6 +237,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       <ThresholdExpression
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         threshold={threshold}
+        data-test-subj="thresholdExpression"
         errors={errors}
         display="fullWidth"
         popupPosition={'upLeft'}
@@ -407,9 +249,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         }
       />
       <ForLastExpression
+        data-test-subj="forLastExpression"
         popupPosition={'upLeft'}
-        timeWindowSize={timeWindowSize}
-        timeWindowUnit={timeWindowUnit}
+        timeWindowSize={timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE}
+        timeWindowUnit={timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT}
         display="fullWidth"
         errors={errors}
         onChangeWindowSize={(selectedWindowSize: number | undefined) =>
@@ -421,9 +264,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       />
       <EuiSpacer />
       <div className="actAlertVisualization__chart">
-        {canShowVizualization ? (
+        {cannotShowVisualization ? (
           <Fragment>
             <EuiEmptyPrompt
+              data-test-subj="visualizationPlaceholder"
               iconType="visBarVertical"
               body={
                 <EuiText color="subdued">
@@ -438,6 +282,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         ) : (
           <Fragment>
             <ThresholdVisualization
+              data-test-subj="thresholdVisualization"
               alertParams={alertParams}
               alertInterval={alertInterval}
               aggregationTypes={builtInAggregationTypes}

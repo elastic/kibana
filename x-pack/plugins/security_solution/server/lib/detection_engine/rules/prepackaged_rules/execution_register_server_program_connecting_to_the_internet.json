@@ -9,10 +9,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Network Connection via Registration Utility",
   "query": "sequence by process.entity_id\n  [process where (process.name : \"regsvr32.exe\" or process.name : \"regsvr64.exe\" or\n                  process.name : \"RegAsm.exe\" or process.name : \"RegSvcs.exe\") and\n     event.type == \"start\"]\n  [network where (process.name : \"regsvr32.exe\" or process.name : \"regsvr64.exe\" or\n                  process.name : \"RegAsm.exe\" or process.name : \"RegSvcs.exe\") and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\", \"169.254.169.254\", \"172.16.0.0/12\", \"192.168.0.0/16\")]\n",
   "risk_score": 21,
@@ -33,13 +34,7 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "technique": [
-        {
-          "id": "T1117",
-          "name": "Regsvr32",
-          "reference": "https://attack.mitre.org/techniques/T1117/"
-        }
-      ]
+      "technique": []
     },
     {
       "framework": "MITRE ATT&CK",
@@ -52,11 +47,18 @@
         {
           "id": "T1218",
           "name": "Signed Binary Proxy Execution",
-          "reference": "https://attack.mitre.org/techniques/T1218/"
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.010",
+              "name": "Regsvr32",
+              "reference": "https://attack.mitre.org/techniques/T1218/010/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 7
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -51,15 +52,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'Rashmi',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'RashmiFirst RashmiLast',
+        confirm_password: 'changeme',
+        full_name: 'RashmiFirst RashmiLast',
         email: 'rashmi@myEmail.com',
-        save: true,
         roles: ['logstash_reader', 'kibana_admin'],
       });
       log.debug('After Add user: , userObj.userName');

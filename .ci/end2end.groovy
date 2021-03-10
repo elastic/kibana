@@ -121,9 +121,9 @@ pipeline {
 }
 
 def notifyStatus(String description, String status) {
-  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('pipeline'))
+  withGithubStatus.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('pipeline'))
 }
 
 def notifyTestStatus(String description, String status) {
-  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('tests'))
+  withGithubStatus.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('tests'))
 }

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
 import { EsQueryConfig } from 'src/plugins/data/server';
 import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/server';
+import { LevelLogger } from '../../../lib';
 import { TimeRangeParams } from '../../common';
 import { GenerateCsvParams } from '../../csv/generate_csv';
 import {
@@ -43,7 +45,8 @@ export const getGenerateCsvParams = async (
   jobParams: JobParamsPanelCsv,
   panel: SearchPanel,
   savedObjectsClient: SavedObjectsClientContract,
-  uiConfig: IUiSettingsClient
+  uiConfig: IUiSettingsClient,
+  logger: LevelLogger
 ): Promise<GenerateCsvParams> => {
   let timerange: TimeRangeParams | null;
   if (jobParams.post?.timerange) {
@@ -73,6 +76,14 @@ export const getGenerateCsvParams = async (
     title: esIndex,
     fields: indexPatternFields,
   } = indexPatternSavedObject;
+
+  if (!indexPatternFields || indexPatternFields.length === 0) {
+    logger.error(
+      new Error(
+        `No fields are selected in the saved search! Please select fields as columns in the saved search and try again.`
+      )
+    );
+  }
 
   let payloadQuery: QueryFilter | undefined;
   let payloadSort: any[] = [];

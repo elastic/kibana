@@ -1,3 +1,4 @@
+// stylelint-disable selector-no-qualifying-type
 .vgaVis__wrapper {
   @include euiScrollBar;
 
@@ -108,7 +109,6 @@
   background-color: $calculateBackgroundColor;
   color: makeHighContrastColor($euiColorDanger, $calculateBackgroundColor);
 }
-
 
 // Style tooltip popup (gets created dynamically at the top level if dashboard has a Vega vis)
 // Adapted from https://github.com/vega/vega-tooltip

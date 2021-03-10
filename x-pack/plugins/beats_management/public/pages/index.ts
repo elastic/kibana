@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BeatDetailPage } from './beat/details';
@@ -19,8 +20,9 @@ import { BeatsInitialEnrollmentPage } from './walkthrough/initial/beat';
 import { FinishWalkthroughPage } from './walkthrough/initial/finish';
 import { InitialWalkthroughPage } from './walkthrough/initial/index';
 import { InitialTagPage } from './walkthrough/initial/tag';
+import type { RouteConfig } from '../components/navigation/child_routes';
 
-export const routeMap = [
+export const routeMap: RouteConfig[] = [
   { path: '/tag/create/:tagid?', component: TagCreatePage },
   { path: '/tag/edit/:tagid?', component: TagEditPage },
   {

@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './copy_status_summary_indicator.scss';
+
+import { EuiBadge, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { EuiLoadingSpinner, EuiIconTip, EuiBadge } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Space } from '../../../common/model/space';
-import { ImportRetry } from '../types';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SummarizedCopyToSpaceResult } from '../lib';
+import type { ImportRetry } from '../types';
 import { ResolveAllConflicts } from './resolve_all_conflicts';
-import { SummarizedCopyToSpaceResult } from '..';
 
 interface Props {
   space: Space;

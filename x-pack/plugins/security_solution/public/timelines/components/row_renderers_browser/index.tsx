@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -9,7 +10,6 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiToolTip,
-  EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -17,28 +17,27 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { State } from '../../../common/store';
+import { RowRendererId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/timeline/actions';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { renderers } from './catalog';
 import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 
 const StyledEuiModal = styled(EuiModal)`
-  margin: 0 auto;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
   max-width: 95vw;
-  min-height: 95vh;
+  min-height: 90vh;
 
   > .euiModal__flex {
-    max-height: 95vh;
+    max-height: 90vh;
   }
 `;
 
@@ -65,15 +64,6 @@ const StyledEuiModalBody = styled(EuiModalBody)`
   }
 `;
 
-const StyledEuiOverlayMask = styled(EuiOverlayMask)`
-  z-index: 8001;
-  padding-bottom: 0;
-
-  > div {
-    width: 100%;
-  }
-`;
-
 interface StatefulRowRenderersBrowserProps {
   timelineId: string;
 }
@@ -81,7 +71,6 @@ interface StatefulRowRenderersBrowserProps {
 const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowserProps> = ({
   timelineId,
 }) => {
-  const tableRef = useRef<EuiInMemoryTable<{}>>();
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const excludedRowRendererIds = useDeepEqualSelector(
@@ -105,12 +94,12 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
   const handleDisableAll = useCallback(() => {
-    tableRef?.current?.setSelection([]);
-  }, [tableRef]);
+    setExcludedRowRendererIds(Object.values(RowRendererId));
+  }, [setExcludedRowRendererIds]);
 
   const handleEnableAll = useCallback(() => {
-    tableRef?.current?.setSelection(renderers);
-  }, [tableRef]);
+    setExcludedRowRendererIds([]);
+  }, [setExcludedRowRendererIds]);
 
   return (
     <>
@@ -126,55 +115,47 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
       </EuiToolTip>
 
       {show && (
-        <StyledEuiOverlayMask>
-          <StyledEuiModal onClose={hideFieldBrowser}>
-            <EuiModalHeader>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                direction="row"
-                gutterSize="none"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiModalHeaderTitle>{i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}</EuiModalHeaderTitle>
-                  <EuiText size="s">{i18n.CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="s"
-                        data-test-subj="disable-all"
-                        onClick={handleDisableAll}
-                      >
-                        {i18n.DISABLE_ALL}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
+        <StyledEuiModal onClose={hideFieldBrowser}>
+          <EuiModalHeader>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              direction="row"
+              gutterSize="none"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiModalHeaderTitle>{i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}</EuiModalHeaderTitle>
+                <EuiText size="s">{i18n.CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      data-test-subj="disable-all"
+                      onClick={handleDisableAll}
+                    >
+                      {i18n.DISABLE_ALL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
 
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        fill
-                        size="s"
-                        data-test-subj="enable-all"
-                        onClick={handleEnableAll}
-                      >
-                        {i18n.ENABLE_ALL}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiModalHeader>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill size="s" data-test-subj="enable-all" onClick={handleEnableAll}>
+                      {i18n.ENABLE_ALL}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalHeader>
 
-            <StyledEuiModalBody>
-              <RowRenderersBrowser
-                ref={tableRef}
-                excludedRowRendererIds={excludedRowRendererIds}
-                setExcludedRowRendererIds={setExcludedRowRendererIds}
-              />
-            </StyledEuiModalBody>
-          </StyledEuiModal>
-        </StyledEuiOverlayMask>
+          <StyledEuiModalBody>
+            <RowRenderersBrowser
+              excludedRowRendererIds={excludedRowRendererIds}
+              setExcludedRowRendererIds={setExcludedRowRendererIds}
+            />
+          </StyledEuiModalBody>
+        </StyledEuiModal>
       )}
     </>
   );

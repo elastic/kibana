@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -57,9 +58,17 @@ export const internalArtifactCreateSchema = t.intersection([
 ]);
 export type InternalArtifactCreateSchema = t.TypeOf<typeof internalArtifactCreateSchema>;
 
+export const internalManifestEntrySchema = t.exact(
+  t.type({
+    policyId: t.union([identifier, t.undefined]),
+    artifactId: identifier,
+  })
+);
+export type InternalManifestEntrySchema = t.TypeOf<typeof internalManifestEntrySchema>;
+
 export const internalManifestSchema = t.exact(
   t.type({
-    ids: t.array(identifier),
+    artifacts: t.array(internalManifestEntrySchema),
     schemaVersion: manifestSchemaVersion,
     semanticVersion,
   })

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,57 +18,54 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
+import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, {
-  ChangeEvent,
-  Fragment,
-  FunctionComponent,
-  HTMLProps,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   Capabilities,
+  DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
   IHttpFetchError,
   NotificationsStart,
+  ScopedHistory,
 } from 'src/core/public';
-import { ScopedHistory } from 'kibana/public';
-import { FeaturesPluginStart } from '../../../../../features/public';
-import { KibanaFeature } from '../../../../../features/common';
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
-import { Space } from '../../../../../spaces/public';
-import {
+import type { IndexPatternsContract } from 'src/plugins/data/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { KibanaFeature } from '../../../../../features/common';
+import type { FeaturesPluginStart } from '../../../../../features/public';
+import type { Space } from '../../../../../spaces/public';
+import type { SecurityLicense } from '../../../../common/licensing';
+import type {
+  BuiltinESPrivileges,
   RawKibanaPrivileges,
   Role,
-  BuiltinESPrivileges,
+  RoleIndexPrivilege,
+} from '../../../../common/model';
+import {
+  isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,
   isRoleReserved as checkIfRoleReserved,
-  isRoleDeprecated as checkIfRoleDeprecated,
   copyRole,
-  prepareRoleClone,
-  RoleIndexPrivilege,
   getExtendedRoleDeprecationNotice,
+  prepareRoleClone,
 } from '../../../../common/model';
-import { RoleValidationResult, RoleValidator } from './validate_role';
+import type { UserAPIClient } from '../../users';
+import type { IndicesAPIClient } from '../indices_api_client';
+import { KibanaPrivileges } from '../model';
+import type { PrivilegesAPIClient } from '../privileges_api_client';
+import type { RolesAPIClient } from '../roles_api_client';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
-import { SecurityLicense } from '../../../../common/licensing';
-import { UserAPIClient } from '../../users';
-import { DocumentationLinksService } from '../documentation_links';
-import { IndicesAPIClient } from '../indices_api_client';
-import { RolesAPIClient } from '../roles_api_client';
-import { PrivilegesAPIClient } from '../privileges_api_client';
-import { KibanaPrivileges } from '../model';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { RoleValidationResult } from './validate_role';
+import { RoleValidator } from './validate_role';
 
 interface Props {
   action: 'edit' | 'clone';
@@ -77,13 +76,14 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   privilegesAPIClient: PublicMethodsOf<PrivilegesAPIClient>;
   getFeatures: FeaturesPluginStart['getFeatures'];
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   http: HttpStart;
   license: SecurityLicense;
   uiCapabilities: Capabilities;
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
+  spacesApiUi?: SpacesApiUi;
 }
 
 function useRunAsUsers(
@@ -289,6 +289,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   uiCapabilities,
   notifications,
   history,
+  spacesApiUi,
 }) => {
   const backToRoleList = useCallback(() => history.push('/'), [history]);
 
@@ -408,7 +409,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) =>
     setRole({
       ...role,
-      name: e.target.value.replace(/\s/g, '_'),
+      name: e.target.value,
     });
 
   const getElasticsearchPrivileges = () => {
@@ -447,6 +448,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           role={role}
           onChange={onRoleChange}
           validator={validator}
+          spacesApiUi={spacesApiUi}
         />
       </div>
     );

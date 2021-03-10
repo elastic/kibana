@@ -1,24 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
-
-import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
-
-import { spacesClientMock } from '../../../spaces/server/mocks';
-import { auditServiceMock } from '../audit/index.mock';
 import { deepFreeze } from '@kbn/std';
-import { Space } from '../../../spaces/server';
-import { authorizationMock } from '../authorization/index.mock';
-import { AuthorizationServiceSetup } from '../authorization';
-import { GetAllSpacesPurpose } from '../../../spaces/common/model/types';
-import { CheckPrivilegesResponse } from '../authorization/types';
-import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { AuditLogger, AuditEvent, EventOutcome, SpaceAuditAction } from '../audit';
+import { httpServerMock } from 'src/core/server/mocks';
+
+import type { GetAllSpacesPurpose, Space } from '../../../spaces/server';
+import { spacesClientMock } from '../../../spaces/server/mocks';
+import type { AuditEvent, AuditLogger } from '../audit';
+import { EventOutcome, SpaceAuditAction } from '../audit';
+import { auditServiceMock } from '../audit/index.mock';
+import type { AuthorizationServiceSetup } from '../authorization';
+import { authorizationMock } from '../authorization/index.mock';
+import type { CheckPrivilegesResponse } from '../authorization/types';
+import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
+import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Opts {
   securityEnabled?: boolean;

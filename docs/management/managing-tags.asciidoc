@@ -37,8 +37,7 @@ Create a tag to assign to your saved objects.
 image::images/tags/create-tag.png[Tag creation popin]
 . Enter a name and select a color for the new tag.
 +
-The name can include alphanumeric characters (English letters and digits), `:`, `-`, `_` and the space character,
-and cannot be longer than 50 characters.
+The name cannot be longer than 50 characters.
 . Click *Create tag*.
 
 [float]

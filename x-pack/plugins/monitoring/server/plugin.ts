@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
-import { combineLatest } from 'rxjs';
-import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
 import {
   Logger,
   PluginInitializerContext,
-  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
@@ -20,6 +19,7 @@ import {
   CoreStart,
   CustomHttpResponseOptions,
   ResponseError,
+  Plugin,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
@@ -42,11 +42,13 @@ import { AlertsFactory } from './alerts';
 import {
   MonitoringCore,
   MonitoringLicenseService,
+  MonitoringPluginSetup,
   LegacyShimDependencies,
   IBulkUploader,
   PluginsSetup,
   PluginsStart,
   LegacyRequest,
+  RequestHandlerContextMonitoringPlugin,
 } from './types';
 
 import { Globals } from './static_globals';
@@ -64,7 +66,8 @@ const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
   };
 };
 
-export class Plugin {
+export class MonitoringPlugin
+  implements Plugin<MonitoringPluginSetup, void, PluginsSetup, PluginsStart> {
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
@@ -80,17 +83,11 @@ export class Plugin {
     this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
   }
 
-  async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const [config, legacyConfig] = await combineLatest([
-      this.initializerContext.config
-        .create<TypeOf<typeof configSchema>>()
-        .pipe(map((rawConfig) => createConfig(rawConfig))),
-      this.initializerContext.config.legacy.globalConfig$,
-    ])
-      .pipe(first())
-      .toPromise();
+  setup(core: CoreSetup, plugins: PluginsSetup) {
+    const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
+    const legacyConfig = this.initializerContext.config.legacy.get();
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<RequestHandlerContextMonitoringPlugin>();
     this.legacyShimDependencies = {
       router,
       instanceUuid: this.initializerContext.env.instanceUuid,
@@ -121,7 +118,7 @@ export class Plugin {
     const serverInfo = core.http.getServerInfo();
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      plugins.alerts?.registerType(alert.getAlertType());
+      plugins.alerting?.registerType(alert.getAlertType());
     }
 
     // Register collector objects for stats to show up in the APIs
@@ -211,9 +208,11 @@ export class Plugin {
 
       this.registerPluginInUI(plugins);
       requireUIRoutes(this.monitoringCore, {
+        cluster,
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        logger: this.log,
       });
       initInfraSource(config, plugins.infra);
     }
@@ -305,7 +304,7 @@ export class Plugin {
       route: (options: any) => {
         const method = options.method;
         const handler = async (
-          context: RequestHandlerContext,
+          context: RequestHandlerContextMonitoringPlugin,
           req: KibanaRequest<any, any, any, any>,
           res: KibanaResponseFactory
         ) => {
@@ -320,7 +319,7 @@ export class Plugin {
             getActionTypeRegistry: () => context.actions?.listTypes(),
             getAlertsClient: () => {
               try {
-                return plugins.alerts.getAlertsClientWithRequest(req);
+                return plugins.alerting.getAlertsClientWithRequest(req);
               } catch (err) {
                 // If security is disabled, this call will throw an error unless a certain config is set for dist builds
                 return null;
@@ -369,7 +368,7 @@ export class Plugin {
             if (Boom.isBoom(err) || statusCode !== 500) {
               return res.customError({ statusCode, body: err });
             }
-            return res.internalError(wrapError(err));
+            throw wrapError(err).body;
           }
         };
 

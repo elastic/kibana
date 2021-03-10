@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 interface Cluster {
@@ -49,6 +50,7 @@ interface Index {
     create: boolean;
     manage_follow_index: boolean;
     manage_leader_index: boolean;
+    maintenance: boolean;
     write: boolean;
   };
 }
@@ -113,6 +115,7 @@ export const getReadPrivilegeMock = (
         delete: booleanValues,
         delete_index: booleanValues,
         index: booleanValues,
+        maintenance: booleanValues,
         manage: booleanValues,
         manage_follow_index: booleanValues,
         manage_ilm: booleanValues,
@@ -165,6 +168,7 @@ export const getReadPrivilegeMock = (
         delete: booleanValues,
         delete_index: booleanValues,
         index: booleanValues,
+        maintenance: booleanValues,
         manage: booleanValues,
         manage_follow_index: booleanValues,
         manage_ilm: booleanValues,

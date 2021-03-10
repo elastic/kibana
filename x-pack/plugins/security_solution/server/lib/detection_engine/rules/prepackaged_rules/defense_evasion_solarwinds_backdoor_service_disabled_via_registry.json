@@ -1,0 +1,78 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a SolarWinds binary modifying the start type of a service to be disabled. An adversary may abuse this technique to manipulate relevant security services.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "SolarWinds Process Disabling Services via Registry",
+  "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\Start\" and registry.data.strings == \"4\" and\n process.name : (\n     \"SolarWinds.BusinessLayerHost*.exe\", \n     \"ConfigurationWizard*.exe\", \n     \"NetflowDatabaseMaintenance*.exe\", \n     \"NetFlowService*.exe\", \n     \"SolarWinds.Administration*.exe\", \n     \"SolarWinds.Collector.Service*.exe\" , \n     \"SolarwindsDiagnostics*.exe\")\n",
+  "references": [
+    "https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "b9960fef-82c6-4816-befa-44745030e917",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1195",
+          "name": "Supply Chain Compromise",
+          "reference": "https://attack.mitre.org/techniques/T1195/",
+          "subtechnique": [
+            {
+              "id": "T1195.002",
+              "name": "Compromise Software Supply Chain",
+              "reference": "https://attack.mitre.org/techniques/T1195/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

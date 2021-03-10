@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createMemoryHistory, History, createHashHistory } from 'history';
 import React, { memo } from 'react';
 import { render as reactRender, RenderOptions, RenderResult, act } from '@testing-library/react';
+
 import { ScopedHistory } from '../../../../../../../src/core/public';
 import { FleetAppContext } from '../app';
 import { FleetConfigType } from '../../../plugin';
-import { createConfigurationMock } from './plugin_configuration';
 import { UIExtensionsStorage } from '../types';
+
+import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
 import { createStartServices } from './fleet_start_services';
 import { MockedFleetStart, MockedFleetStartServices } from './types';

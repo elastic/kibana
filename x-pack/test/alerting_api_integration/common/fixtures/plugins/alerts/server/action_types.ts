@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'src/core/server';
@@ -63,7 +64,7 @@ function getIndexRecordActionType() {
       secrets: secretsSchema,
     },
     async executor({ config, secrets, params, services, actionId }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -94,7 +95,7 @@ function getFailingActionType() {
       params: paramsSchema,
     },
     async executor({ config, secrets, params, services }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -127,7 +128,7 @@ function getRateLimitedActionType() {
       params: paramsSchema,
     },
     async executor({ config, params, services }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -148,7 +149,6 @@ function getRateLimitedActionType() {
 }
 
 function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
-  const clusterClient = core.elasticsearch.legacy.client;
   const paramsSchema = schema.object({
     callClusterAuthorizationIndex: schema.string(),
     savedObjectsClientType: schema.string(),
@@ -169,7 +169,7 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
       let callClusterSuccess = false;
       let callClusterError;
       try {
-        await services.callCluster('index', {
+        await services.scopedClusterClient.index({
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -181,11 +181,11 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
         callClusterError = e;
       }
       // Call scoped cluster
-      const scopedClusterClient = services.getLegacyScopedClusterClient(clusterClient);
+      const scopedClusterClient = services.scopedClusterClient;
       let callScopedClusterSuccess = false;
       let callScopedClusterError;
       try {
-        await scopedClusterClient.callAsCurrentUser('index', {
+        await scopedClusterClient.index({
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -209,7 +209,7 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
         savedObjectsClientError = e;
       }
       // Save the result
-      await services.callCluster('index', {
+      await services.scopedClusterClient.index({
         index: params.index,
         refresh: 'wait_for',
         body: {

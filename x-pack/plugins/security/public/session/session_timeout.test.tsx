@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
 import BroadcastChannel from 'broadcast-channel';
-import { SessionTimeout } from './session_timeout';
-import { createSessionExpiredMock } from './session_expired.mock';
+
 import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { createSessionExpiredMock } from './session_expired.mock';
+import { SessionTimeout } from './session_timeout';
 
 jest.useFakeTimers();
 

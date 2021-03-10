@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type {
   HttpInterceptor,
   HttpInterceptorResponseError,
   HttpResponse,
   IAnonymousPaths,
 } from 'src/core/public';
 
-import { ISessionTimeout } from './session_timeout';
+import type { ISessionTimeout } from './session_timeout';
 
 export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
   constructor(private sessionTimeout: ISessionTimeout, private anonymousPaths: IAnonymousPaths) {}

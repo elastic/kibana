@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
 import { CommentType } from '../../../common/api';
+import { isCaseError } from '../../common/error';
 import {
   createMockSavedObjectsRepository,
   mockCaseComments,
   mockCases,
 } from '../../routes/api/__fixtures__';
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
+
+type AlertComment = CommentType.alert | CommentType.generatedAlert;
 
 describe('addComment', () => {
   beforeEach(async () => {
@@ -29,9 +33,8 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -41,22 +44,25 @@ describe('addComment', () => {
 
       expect(res.id).toEqual('mock-id-1');
       expect(res.totalComment).toEqual(res.comments!.length);
-      expect(res.comments![res.comments!.length - 1]).toEqual({
-        comment: 'Wow, good luck catching that bad meanie!',
-        type: CommentType.user,
-        created_at: '2020-10-23T21:54:48.952Z',
-        created_by: {
-          email: 'd00d@awesome.com',
-          full_name: 'Awesome D00d',
-          username: 'awesome',
-        },
-        id: 'mock-comment',
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
-      });
+      expect(res.comments![res.comments!.length - 1]).toMatchInlineSnapshot(`
+        Object {
+          "associationType": "case",
+          "comment": "Wow, good luck catching that bad meanie!",
+          "created_at": "2020-10-23T21:54:48.952Z",
+          "created_by": Object {
+            "email": "d00d@awesome.com",
+            "full_name": "Awesome D00d",
+            "username": "awesome",
+          },
+          "id": "mock-comment",
+          "pushed_at": null,
+          "pushed_by": null,
+          "type": "user",
+          "updated_at": null,
+          "updated_by": null,
+          "version": "WzksMV0=",
+        }
+      `);
     });
 
     test('it adds a comment of type alert correctly', async () => {
@@ -65,36 +71,46 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           type: CommentType.alert,
           alertId: 'test-id',
           index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
         },
       });
 
       expect(res.id).toEqual('mock-id-1');
       expect(res.totalComment).toEqual(res.comments!.length);
-      expect(res.comments![res.comments!.length - 1]).toEqual({
-        type: CommentType.alert,
-        alertId: 'test-id',
-        index: 'test-index',
-        created_at: '2020-10-23T21:54:48.952Z',
-        created_by: {
-          email: 'd00d@awesome.com',
-          full_name: 'Awesome D00d',
-          username: 'awesome',
-        },
-        id: 'mock-comment',
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
-      });
+      expect(res.comments![res.comments!.length - 1]).toMatchInlineSnapshot(`
+        Object {
+          "alertId": "test-id",
+          "associationType": "case",
+          "created_at": "2020-10-23T21:54:48.952Z",
+          "created_by": Object {
+            "email": "d00d@awesome.com",
+            "full_name": "Awesome D00d",
+            "username": "awesome",
+          },
+          "id": "mock-comment",
+          "index": "test-index",
+          "pushed_at": null,
+          "pushed_by": null,
+          "rule": Object {
+            "id": "test-rule1",
+            "name": "test-rule",
+          },
+          "type": "alert",
+          "updated_at": null,
+          "updated_by": null,
+          "version": "WzksMV0=",
+        }
+      `);
     });
 
     test('it updates the case correctly after adding a comment', async () => {
@@ -103,9 +119,8 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -127,9 +142,8 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -175,9 +189,11 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient, true);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+        savedObjectsClient,
+        badAuth: true,
+      });
       const res = await caseClient.client.addComment({
-        caseClient: caseClient.client,
         caseId: 'mock-id-1',
         comment: {
           comment: 'Wow, good luck catching that bad meanie!',
@@ -186,22 +202,90 @@ describe('addComment', () => {
       });
 
       expect(res.id).toEqual('mock-id-1');
-      expect(res.comments![res.comments!.length - 1]).toEqual({
-        comment: 'Wow, good luck catching that bad meanie!',
-        type: CommentType.user,
-        created_at: '2020-10-23T21:54:48.952Z',
-        created_by: {
-          email: null,
-          full_name: null,
-          username: null,
-        },
-        id: 'mock-comment',
-        pushed_at: null,
-        pushed_by: null,
-        updated_at: null,
-        updated_by: null,
-        version: 'WzksMV0=',
+      expect(res.comments![res.comments!.length - 1]).toMatchInlineSnapshot(`
+        Object {
+          "associationType": "case",
+          "comment": "Wow, good luck catching that bad meanie!",
+          "created_at": "2020-10-23T21:54:48.952Z",
+          "created_by": Object {
+            "email": null,
+            "full_name": null,
+            "username": null,
+          },
+          "id": "mock-comment",
+          "pushed_at": null,
+          "pushed_by": null,
+          "type": "user",
+          "updated_at": null,
+          "updated_by": null,
+          "version": "WzksMV0=",
+        }
+      `);
+    });
+
+    test('it update the status of the alert if the case is synced with alerts', async () => {
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
       });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+        savedObjectsClient,
+        badAuth: true,
+      });
+
+      caseClient.client.updateAlertsStatus = jest.fn();
+
+      await caseClient.client.addComment({
+        caseId: 'mock-id-1',
+        comment: {
+          type: CommentType.alert,
+          alertId: 'test-alert',
+          index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
+        },
+      });
+
+      expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
+        alerts: [{ id: 'test-alert', index: 'test-index', status: 'open' }],
+      });
+    });
+
+    test('it should NOT update the status of the alert if the case is NOT synced with alerts', async () => {
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: [
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, settings: { syncAlerts: false } },
+          },
+        ],
+        caseCommentSavedObject: mockCaseComments,
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+        savedObjectsClient,
+        badAuth: true,
+      });
+
+      caseClient.client.updateAlertsStatus = jest.fn();
+
+      await caseClient.client.addComment({
+        caseId: 'mock-id-1',
+        comment: {
+          type: CommentType.alert,
+          alertId: 'test-alert',
+          index: 'test-index',
+          rule: {
+            id: 'test-rule1',
+            name: 'test-rule',
+          },
+        },
+      });
+
+      expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
     });
   });
 
@@ -213,8 +297,8 @@ describe('addComment', () => {
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return caseClient.client
         .addComment({
           caseId: 'mock-id-1',
           // @ts-expect-error
@@ -235,7 +319,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const allRequestAttributes = {
         type: CommentType.user,
         comment: 'a comment',
@@ -243,7 +327,7 @@ describe('addComment', () => {
 
       ['comment'].forEach((attribute) => {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        caseClient.client
+        return caseClient.client
           .addComment({
             caseId: 'mock-id-1',
             // @ts-expect-error
@@ -267,12 +351,11 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       ['alertId', 'index'].forEach((attribute) => {
-        caseClient.client
+        return caseClient.client
           .addComment({
-            caseClient: caseClient.client,
             caseId: 'mock-id-1',
             comment: {
               [attribute]: attribute,
@@ -296,7 +379,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const allRequestAttributes = {
         type: CommentType.alert,
         index: 'test-index',
@@ -305,7 +388,7 @@ describe('addComment', () => {
 
       ['alertId', 'index'].forEach((attribute) => {
         const requestAttributes = omit(attribute, allRequestAttributes);
-        caseClient.client
+        return caseClient.client
           .addComment({
             caseId: 'mock-id-1',
             // @ts-expect-error
@@ -329,18 +412,21 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       ['comment'].forEach((attribute) => {
-        caseClient.client
+        return caseClient.client
           .addComment({
-            caseClient: caseClient.client,
             caseId: 'mock-id-1',
             comment: {
               [attribute]: attribute,
               type: CommentType.alert,
               index: 'test-index',
               alertId: 'test-id',
+              rule: {
+                id: 'test-rule1',
+                name: 'test-rule',
+              },
             },
           })
           .catch((e) => {
@@ -352,16 +438,15 @@ describe('addComment', () => {
     });
 
     test('it throws when the case does not exists', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return caseClient.client
         .addComment({
-          caseClient: caseClient.client,
           caseId: 'not-exists',
           comment: {
             comment: 'Wow, good luck catching that bad meanie!',
@@ -370,22 +455,23 @@ describe('addComment', () => {
         })
         .catch((e) => {
           expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(404);
+          expect(isCaseError(e)).toBeTruthy();
+          const boomErr = e.boomify();
+          expect(boomErr.isBoom).toBe(true);
+          expect(boomErr.output.statusCode).toBe(404);
         });
     });
 
     test('it throws when postNewCase throws', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
-      caseClient.client
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return caseClient.client
         .addComment({
-          caseClient: caseClient.client,
           caseId: 'mock-id-1',
           comment: {
             comment: 'Throw an error',
@@ -394,9 +480,114 @@ describe('addComment', () => {
         })
         .catch((e) => {
           expect(e).not.toBeNull();
-          expect(e.isBoom).toBe(true);
-          expect(e.output.statusCode).toBe(400);
+          expect(isCaseError(e)).toBeTruthy();
+          const boomErr = e.boomify();
+          expect(boomErr.isBoom).toBe(true);
+          expect(boomErr.output.statusCode).toBe(400);
         });
+    });
+
+    test('it throws when the case is closed and the comment is of type alert', async () => {
+      expect.assertions(4);
+
+      const savedObjectsClient = createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      });
+
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
+      return caseClient.client
+        .addComment({
+          caseId: 'mock-id-4',
+          comment: {
+            type: CommentType.alert,
+            alertId: 'test-alert',
+            index: 'test-index',
+            rule: {
+              id: 'test-rule1',
+              name: 'test-rule',
+            },
+          },
+        })
+        .catch((e) => {
+          expect(e).not.toBeNull();
+          expect(isCaseError(e)).toBeTruthy();
+          const boomErr = e.boomify();
+          expect(boomErr.isBoom).toBe(true);
+          expect(boomErr.output.statusCode).toBe(400);
+        });
+    });
+
+    describe('alert format', () => {
+      it.each([
+        ['1', ['index1', 'index2'], CommentType.alert],
+        [['1', '2'], 'index', CommentType.alert],
+        ['1', ['index1', 'index2'], CommentType.generatedAlert],
+        [['1', '2'], 'index', CommentType.generatedAlert],
+      ])(
+        'throws an error with an alert comment with contents id: %p indices: %p type: %s',
+        async (alertId, index, type) => {
+          expect.assertions(1);
+
+          const savedObjectsClient = createMockSavedObjectsRepository({
+            caseSavedObject: mockCases,
+            caseCommentSavedObject: mockCaseComments,
+          });
+
+          const caseClient = await createCaseClientWithMockSavedObjectsClient({
+            savedObjectsClient,
+          });
+          await expect(
+            caseClient.client.addComment({
+              caseId: 'mock-id-4',
+              comment: {
+                // casting because type must be either alert or generatedAlert but type is CommentType
+                type: type as AlertComment,
+                alertId,
+                index,
+                rule: {
+                  id: 'test-rule1',
+                  name: 'test-rule',
+                },
+              },
+            })
+          ).rejects.toThrow();
+        }
+      );
+
+      it.each([
+        ['1', ['index1'], CommentType.alert],
+        [['1', '2'], ['index', 'other-index'], CommentType.alert],
+      ])(
+        'does not throw an error with an alert comment with contents id: %p indices: %p type: %s',
+        async (alertId, index, type) => {
+          expect.assertions(1);
+
+          const savedObjectsClient = createMockSavedObjectsRepository({
+            caseSavedObject: mockCases,
+            caseCommentSavedObject: mockCaseComments,
+          });
+
+          const caseClient = await createCaseClientWithMockSavedObjectsClient({
+            savedObjectsClient,
+          });
+          await expect(
+            caseClient.client.addComment({
+              caseId: 'mock-id-1',
+              comment: {
+                // casting because type must be either alert or generatedAlert but type is CommentType
+                type: type as AlertComment,
+                alertId,
+                index,
+                rule: {
+                  id: 'test-rule1',
+                  name: 'test-rule',
+                },
+              },
+            })
+          ).resolves.not.toBeUndefined();
+        }
+      );
     });
   });
 });

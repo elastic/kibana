@@ -21,9 +21,10 @@ exports[`ConditionalToolTip should just work 1`] = `
     host-01
   </div>
   <EuiFlexGroup
-    gutterSize="none"
+    gutterSize="s"
   >
     <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
       grow={1}
     >
       CPU usage
@@ -35,9 +36,10 @@ exports[`ConditionalToolTip should just work 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
-    gutterSize="none"
+    gutterSize="s"
   >
     <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
       grow={1}
     >
       Memory usage
@@ -49,9 +51,10 @@ exports[`ConditionalToolTip should just work 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
-    gutterSize="none"
+    gutterSize="s"
   >
     <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
       grow={1}
     >
       Outbound traffic
@@ -63,9 +66,10 @@ exports[`ConditionalToolTip should just work 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
-    gutterSize="none"
+    gutterSize="s"
   >
     <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
       grow={1}
     >
       Inbound traffic
@@ -74,6 +78,36 @@ exports[`ConditionalToolTip should just work 1`] = `
       grow={false}
     >
       8Mbit/s
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
+      grow={1}
+    >
+      My Custom Label
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      34.1%
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="eui-textTruncate eui-displayBlock"
+      grow={1}
+    >
+      Avg of host.network.out.packets
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      4,392.2
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>

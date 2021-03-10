@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import { SeriesType, visualizationTypes, LayerConfig, YConfig, ValidLayer } from './types';
+import { SeriesType, visualizationTypes, XYLayerConfig, YConfig, ValidLayer } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -30,7 +31,7 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
   return (definition.icon as EuiIconType) || 'empty';
 }
 
-export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
+export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (layer.splitAccessor) {
     return null;
   }
@@ -39,7 +40,7 @@ export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
   );
 };
 
-export const getColumnToLabelMap = (layer: LayerConfig, datasource: DatasourcePublicAPI) => {
+export const getColumnToLabelMap = (layer: XYLayerConfig, datasource: DatasourcePublicAPI) => {
   const columnToLabel: Record<string, string> = {};
 
   layer.accessors.concat(layer.splitAccessor ? [layer.splitAccessor] : []).forEach((accessor) => {

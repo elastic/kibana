@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { stringifyUrlParams } from './stringify_url_params';
@@ -9,6 +10,8 @@ import { stringifyUrlParams } from './stringify_url_params';
 describe('stringifyUrlParams', () => {
   it('creates expected string value', () => {
     const result = stringifyUrlParams({
+      absoluteDateRangeStart: 1000,
+      absoluteDateRangeEnd: 2000,
       autorefreshInterval: 50000,
       autorefreshIsPaused: false,
       dateRangeStart: 'now-15m',
@@ -19,13 +22,15 @@ describe('stringifyUrlParams', () => {
       statusFilter: 'up',
     });
     expect(result).toMatchInlineSnapshot(
-      `"?autorefreshInterval=50000&autorefreshIsPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%20bar&focusConnectorField=true&search=monitor.id%3A%20foo&statusFilter=up"`
+      `"?absoluteDateRangeStart=1000&absoluteDateRangeEnd=2000&autorefreshInterval=50000&autorefreshIsPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%20bar&focusConnectorField=true&search=monitor.id%3A%20foo&statusFilter=up"`
     );
   });
 
   it('creates expected string value when ignore empty is true', () => {
     const result = stringifyUrlParams(
       {
+        absoluteDateRangeStart: 1000,
+        absoluteDateRangeEnd: 2000,
         autorefreshInterval: 50000,
         autorefreshIsPaused: false,
         dateRangeStart: 'now-15m',

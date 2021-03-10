@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import {
-  LogEntry,
-  LogEntryField,
-} from '../../../../common/search_strategies/log_entries/log_entry';
+import { LogEntryField } from '../../../../common/log_entry';
+import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { FieldValue } from '../log_text_stream/field_value';
 
@@ -22,7 +21,7 @@ export const LogEntryFieldsTable: React.FC<{
     () =>
       onSetFieldFilter
         ? (field: LogEntryField) => () => {
-            onSetFieldFilter?.(`${field.field}:"${field.value}"`, logEntry.id, logEntry.key);
+            onSetFieldFilter?.(`${field.field}:"${field.value}"`, logEntry.id, logEntry.cursor);
           }
         : undefined,
     [logEntry, onSetFieldFilter]

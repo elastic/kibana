@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Disabling of SELinux",
   "query": "event.category:process and event.type:(start or process_started) and process.name:setenforce and process.args:0",
   "risk_score": 47,
@@ -32,13 +32,21 @@
       },
       "technique": [
         {
-          "id": "T1089",
-          "name": "Disabling Security Tools",
-          "reference": "https://attack.mitre.org/techniques/T1089/"
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

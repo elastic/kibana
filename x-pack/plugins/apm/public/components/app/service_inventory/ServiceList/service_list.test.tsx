@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
@@ -76,13 +77,13 @@ describe('ServiceList', () => {
       expect(healthHeading).toBeNull();
     });
 
-    it('sorts by transactions per minute', async () => {
+    it('sorts by throughput', async () => {
       const { findByTitle } = renderWithTheme(<ServiceList items={items} />, {
         wrapper: Wrapper,
       });
 
       expect(
-        await findByTitle('Trans. per minute; Sorted in descending order')
+        await findByTitle('Throughput; Sorted in descending order')
       ).toBeInTheDocument();
     });
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -11,7 +12,7 @@ import { wrapError } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 import { transformESConnectorToCaseConnector } from '../helpers';
 
-export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps) {
+export function initGetCaseConfigure({ caseConfigureService, router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_CONFIGURE_URL,
@@ -32,14 +33,13 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
             throw Boom.badRequest('RouteHandlerContext is not registered for cases');
           }
           const caseClient = context.case.getCaseClient();
-          const actionsClient = await context.actions?.getActionsClient();
+          const actionsClient = context.actions?.getActionsClient();
           if (actionsClient == null) {
-            throw Boom.notFound('Action client have not been found');
+            throw Boom.notFound('Action client not found');
           }
           try {
             mappings = await caseClient.getMappings({
               actionsClient,
-              caseClient,
               connectorId: connector.id,
               connectorType: connector.type,
             });
@@ -63,6 +63,7 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
               : {},
         });
       } catch (error) {
+        logger.error(`Failed to get case configure in route: ${error}`);
         return response.customError(wrapError(error));
       }
     }

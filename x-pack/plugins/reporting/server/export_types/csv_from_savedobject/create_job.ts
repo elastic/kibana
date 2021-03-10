@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { notFound, notImplemented } from '@hapi/boom';
 import { get } from 'lodash';
-import { RequestHandlerContext } from 'src/core/server';
-import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { CsvFromSavedObjectRequest } from '../../routes/generate_from_savedobject_immediate';
+import type { ReportingRequestHandlerContext } from '../../types';
 import { CreateJobFnFactory } from '../../types';
 import {
   JobParamsPanelCsv,
@@ -21,7 +21,7 @@ import {
 
 export type ImmediateCreateJobFn = (
   jobParams: JobParamsPanelCsv,
-  context: RequestHandlerContext,
+  context: ReportingRequestHandlerContext,
   req: CsvFromSavedObjectRequest
 ) => Promise<JobPayloadPanelCsv>;
 
@@ -29,7 +29,7 @@ export const createJobFnFactory: CreateJobFnFactory<ImmediateCreateJobFn> = func
   reporting,
   parentLogger
 ) {
-  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
+  const logger = parentLogger.clone(['create-job']);
 
   return async function createJob(jobParams, context, req) {
     const { savedObjectType, savedObjectId } = jobParams;

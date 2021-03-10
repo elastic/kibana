@@ -2,16 +2,17 @@
   display: flex;
   flex-direction: column;
   flex: 1 1 100%;
+  overflow: auto;
 
   .tvbVisTimeSeries {
     overflow: hidden;
   }
   .tvbVisTimeSeriesDark {
     .echReactiveChart_unavailable {
-      color: #dfe5ef;
+      color: #DFE5EF;
     }
     .echLegendItem {
-      color: #dfe5ef;
+      color: #DFE5EF;
     }
   }
   .tvbVisTimeSeriesLight {

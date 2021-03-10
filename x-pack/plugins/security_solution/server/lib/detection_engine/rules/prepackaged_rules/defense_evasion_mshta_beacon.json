@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Mshta Making Network Connections",
   "query": "sequence by process.entity_id with maxspan=2h\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"mshta.exe\" and\n     not process.parent.name : \"Microsoft.ConfigurationManagement.exe\" and\n     not (process.parent.executable : \"C:\\\\Amazon\\\\Amazon Assistant\\\\amazonAssistantService.exe\" or\n          process.parent.executable : \"C:\\\\TeamViewer\\\\TeamViewer.exe\") and\n     not process.args : \"ADSelfService_Enroll.hta\"]\n  [network where process.name : \"mshta.exe\"]\n",
   "risk_score": 21,
@@ -32,13 +33,20 @@
       },
       "technique": [
         {
-          "id": "T1170",
-          "name": "Mshta",
-          "reference": "https://attack.mitre.org/techniques/T1170/"
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.005",
+              "name": "Mshta",
+              "reference": "https://attack.mitre.org/techniques/T1218/005/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 3
 }

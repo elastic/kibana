@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import './discover_grid.scss';
@@ -45,6 +35,7 @@ import {
 } from './discover_grid_columns';
 import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
 import { DiscoverServices } from '../../../build_services';
+import { getDisplayedColumns } from '../../helpers/columns';
 
 interface SortObj {
   id: string;
@@ -61,11 +52,9 @@ export interface DiscoverGridProps {
    */
   columns: string[];
   /**
-   * Determines whether the given columns are the default ones, so parts of the document
-   * are displayed (_source) with limited actions (cannor move, remove columns)
-   * Implemented for matching with legacy behavior
+   * If set, the given document is displayed in a flyout
    */
-  defaultColumns: boolean;
+  expandedDoc?: ElasticSearchHit;
   /**
    * The used index pattern
    */
@@ -104,6 +93,10 @@ export interface DiscoverGridProps {
    */
   sampleSize: number;
   /**
+   * Function to set the expanded document, which is displayed in a flyout
+   */
+  setExpandedDoc: (doc: ElasticSearchHit | undefined) => void;
+  /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
   settings?: DiscoverGridSettings;
@@ -127,6 +120,10 @@ export interface DiscoverGridProps {
    * Current sort setting
    */
   sort: SortPairArr[];
+  /**
+   * How the data is fetched
+   */
+  useNewFieldsApi: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -136,8 +133,8 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
-  defaultColumns,
   indexPattern,
+  expandedDoc,
   onAddColumn,
   onFilter,
   onRemoveColumn,
@@ -149,11 +146,14 @@ export const DiscoverGrid = ({
   searchDescription,
   searchTitle,
   services,
+  setExpandedDoc,
   settings,
   showTimeCol,
   sort,
+  useNewFieldsApi,
 }: DiscoverGridProps) => {
-  const [expanded, setExpanded] = useState<ElasticSearchHit | undefined>(undefined);
+  const displayedColumns = getDisplayedColumns(columns, indexPattern);
+  const defaultColumns = displayedColumns.includes('_source');
 
   /**
    * Pagination
@@ -202,9 +202,10 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         rows,
-        rows ? rows.map((hit) => indexPattern.flattenHit(hit)) : []
+        rows ? rows.map((hit) => indexPattern.flattenHit(hit)) : [],
+        useNewFieldsApi
       ),
-    [rows, indexPattern]
+    [rows, indexPattern, useNewFieldsApi]
   );
 
   /**
@@ -214,19 +215,19 @@ export const DiscoverGrid = ({
   const randomId = useMemo(() => htmlIdGenerator()(), []);
 
   const euiGridColumns = useMemo(
-    () => getEuiGridColumns(columns, settings, indexPattern, showTimeCol, defaultColumns),
-    [columns, indexPattern, showTimeCol, settings, defaultColumns]
+    () => getEuiGridColumns(displayedColumns, settings, indexPattern, showTimeCol, defaultColumns),
+    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns]
   );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const popoverContents = useMemo(() => getPopoverContents(), []);
   const columnsVisibility = useMemo(
     () => ({
-      visibleColumns: getVisibleColumns(columns, indexPattern, showTimeCol) as string[],
+      visibleColumns: getVisibleColumns(displayedColumns, indexPattern, showTimeCol) as string[],
       setVisibleColumns: (newColumns: string[]) => {
         onSetColumns(newColumns);
       },
     }),
-    [columns, indexPattern, showTimeCol, onSetColumns]
+    [displayedColumns, indexPattern, showTimeCol, onSetColumns]
   );
   const sorting = useMemo(() => ({ columns: sortingColumns, onSort: onTableSort }), [
     sortingColumns,
@@ -249,8 +250,8 @@ export const DiscoverGrid = ({
   return (
     <DiscoverGridContext.Provider
       value={{
-        expanded,
-        setExpanded,
+        expanded: expandedDoc,
+        setExpanded: setExpandedDoc,
         rows: rows || [],
         onFilter,
         indexPattern,
@@ -318,15 +319,16 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {expanded && (
+        {expandedDoc && (
           <DiscoverGridFlyout
             indexPattern={indexPattern}
-            hit={expanded}
-            columns={columns}
+            hit={expandedDoc}
+            // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
+            columns={defaultColumns ? [] : displayedColumns}
             onFilter={onFilter}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
-            onClose={() => setExpanded(undefined)}
+            onClose={() => setExpandedDoc(undefined)}
             services={services}
           />
         )}

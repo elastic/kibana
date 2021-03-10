@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
@@ -38,7 +39,7 @@ import {
 } from './index_threshold_api';
 import { AggregationType, Comparator } from '../../../../triggers_actions_ui/public';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../alerts/common/parse_duration';
+import { parseDuration } from '../../../../alerting/common/parse_duration';
 
 const customTheme = () => {
   return {
@@ -201,6 +202,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   if (loadingState === LoadingStateType.FirstLoad) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="firstLoad"
         title={<EuiLoadingChart size="xl" />}
         body={
           <EuiText color="subdued">
@@ -219,6 +221,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="l" />
         <EuiCallOut
+          data-test-subj="errorCallout"
           title={
             <FormattedMessage
               id="xpack.stackAlerts.threshold.ui.visualization.errorLoadingAlertVisualizationTitle"
@@ -308,6 +311,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           </Chart>
         ) : (
           <EuiCallOut
+            data-test-subj="noDataCallout"
             size="s"
             title={
               <FormattedMessage

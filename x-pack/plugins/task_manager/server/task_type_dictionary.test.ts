@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
 import { RunContext, TaskDefinition } from './task';
-import { sanitizeTaskDefinitions } from './task_type_dictionary';
+import { sanitizeTaskDefinitions, TaskDefinitionRegistry } from './task_type_dictionary';
 
 interface Opts {
   numTasks: number;
@@ -73,8 +74,9 @@ describe('taskTypeDictionary', () => {
 
   it('throws a validation exception for invalid task definition', () => {
     const runsanitize = () => {
-      const taskDefinitions = {
+      const taskDefinitions: TaskDefinitionRegistry = {
         some_kind_of_task: {
+          // @ts-ignore
           fail: 'extremely', // cause a validation failure
           type: 'breaky_task',
           title: 'Test XYZ',
@@ -94,6 +96,62 @@ describe('taskTypeDictionary', () => {
       return sanitizeTaskDefinitions(taskDefinitions);
     };
 
-    expect(runsanitize).toThrowError();
+    expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
+      `"[fail]: definition for this key is missing"`
+    );
+  });
+
+  it('throws a validation exception for invalid timeout on task definition', () => {
+    const runsanitize = () => {
+      const taskDefinitions: TaskDefinitionRegistry = {
+        some_kind_of_task: {
+          title: 'Test XYZ',
+          timeout: '15 days',
+          description: `Actually this won't work`,
+          createTaskRunner() {
+            return {
+              async run() {
+                return {
+                  state: {},
+                };
+              },
+            };
+          },
+        },
+      };
+
+      return sanitizeTaskDefinitions(taskDefinitions);
+    };
+
+    expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
+    );
+  });
+
+  it('throws a validation exception for invalid floating point timeout on task definition', () => {
+    const runsanitize = () => {
+      const taskDefinitions: TaskDefinitionRegistry = {
+        some_kind_of_task: {
+          title: 'Test XYZ',
+          timeout: '1.5h',
+          description: `Actually this won't work`,
+          createTaskRunner() {
+            return {
+              async run() {
+                return {
+                  state: {},
+                };
+              },
+            };
+          },
+        },
+      };
+
+      return sanitizeTaskDefinitions(taskDefinitions);
+    };
+
+    expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
+    );
   });
 });

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useReducer, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -317,10 +319,7 @@ export const ConnectorEditFlyout = ({
                   }
                 )}
               </EuiText>
-              <EuiLink
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`}
-                target="_blank"
-              >
+              <EuiLink href={docLinks.links.alerting.preconfiguredConnectors} target="_blank">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
                   defaultMessage="Learn more about preconfigured connectors."
@@ -385,7 +384,7 @@ export const ConnectorEditFlyout = ({
                     >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.editConnectorForm.saveAndCloseButtonLabel"
-                        defaultMessage="Save & Close"
+                        defaultMessage="Save & close"
                       />
                     </EuiButton>
                   </EuiFlexItem>

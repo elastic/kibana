@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { bisector } from 'd3-array';
-
 import { compareToTimeKey, TimeKey } from '../../../../common/time';
-import { LogEntry } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 
 export type StreamItem = LogEntryStreamItem;
 

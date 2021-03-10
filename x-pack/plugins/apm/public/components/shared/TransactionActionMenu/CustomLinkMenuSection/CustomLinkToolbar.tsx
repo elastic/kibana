@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import {
   EuiFlexGroup,
@@ -12,6 +14,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMLink } from '../../Links/apm/APMLink';
 
 export function CustomLinkToolbar({
@@ -21,6 +25,9 @@ export function CustomLinkToolbar({
   onClickCreate: () => void;
   showCreateButton?: boolean;
 }) {
+  const { core } = useApmPluginContext();
+  const canSave = !!core.application.capabilities.apm.save;
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -42,17 +49,20 @@ export function CustomLinkToolbar({
             </EuiToolTip>
           </EuiFlexItem>
           {showCreateButton && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="plusInCircle"
-                size="xs"
-                onClick={onClickCreate}
-              >
-                {i18n.translate('xpack.apm.customLink.buttom.create.title', {
-                  defaultMessage: 'Create',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  isDisabled={!canSave}
+                  iconType="plusInCircle"
+                  size="xs"
+                  onClick={onClickCreate}
+                >
+                  {i18n.translate('xpack.apm.customLink.buttom.create.title', {
+                    defaultMessage: 'Create',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiToolTip>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>

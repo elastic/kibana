@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -114,7 +115,7 @@ export const createRequest = ({ type, id }: TestCase) => ({ type, id });
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 const isNamespaceAgnostic = (type: string) => type === 'globaltype';
-const isMultiNamespace = (type: string) => type === 'sharedtype';
+const isMultiNamespace = (type: string) => type === 'sharedtype' || type === 'sharecapabletype';
 export const expectResponses = {
   forbiddenTypes: (action: string) => (
     typeOrTypes: string | string[]

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiToolTip } from '@elastic/eui';
@@ -21,6 +22,7 @@ interface HeaderContentProps {
   isLoading: boolean;
   isResizing: boolean;
   onClick: () => void;
+  showSortingCapability: boolean;
   sort: Sort[];
 }
 
@@ -30,10 +32,11 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
   isLoading,
   isResizing,
   onClick,
+  showSortingCapability,
   sort,
 }) => (
   <EventsHeading data-test-subj={`header-${header.id}`} isLoading={isLoading}>
-    {header.aggregatable ? (
+    {header.aggregatable && showSortingCapability ? (
       <EventsHeadingTitleButton
         data-test-subj="header-sort-button"
         onClick={!isResizing && !isLoading ? onClick : noop}

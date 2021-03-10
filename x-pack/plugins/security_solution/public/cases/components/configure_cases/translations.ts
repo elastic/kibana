@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -49,6 +50,13 @@ export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
   {
     defaultMessage:
       'Define how you wish Security cases to be closed. Automated case closures require an established connection to an external incident management system.',
+  }
+);
+
+export const CASE_COLSURE_OPTIONS_SUB_CASES = i18n.translate(
+  'xpack.securitySolution.case.configureCases.caseClosureOptionsSubCases',
+  {
+    defaultMessage: 'Automated closures of sub-cases is not currently supported.',
   }
 );
 
@@ -162,7 +170,7 @@ export const SAVE = i18n.translate('xpack.securitySolution.case.configureCases.s
 export const SAVE_CLOSE = i18n.translate(
   'xpack.securitySolution.case.configureCases.saveAndCloseButton',
   {
-    defaultMessage: 'Save & Close',
+    defaultMessage: 'Save & close',
   }
 );
 

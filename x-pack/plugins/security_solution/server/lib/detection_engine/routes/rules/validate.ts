@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
@@ -21,7 +22,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { formatErrors } from '../../../../../common/format_errors';
 import { exactCheck } from '../../../../../common/exact_check';
-import { PartialAlert, FindResult } from '../../../../../../alerts/server';
+import { PartialAlert, FindResult } from '../../../../../../alerting/server';
 import {
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,

@@ -264,7 +264,7 @@ export const visualizeGeoFieldTrigger: Trigger;
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/ui_actions/public/triggers/row_click_trigger.ts:46:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
+// src/plugins/ui_actions/public/triggers/row_click_trigger.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

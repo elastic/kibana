@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { WatchStatus } from './watch_status';
@@ -60,8 +61,7 @@ describe('watch_status', () => {
       });
     });
 
-    // TODO: the test was not running before and is not up to date
-    describe.skip('lastFired getter method', () => {
+    describe('lastFired getter method', () => {
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {

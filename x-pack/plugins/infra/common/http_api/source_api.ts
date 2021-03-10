@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
@@ -39,17 +40,29 @@ const SavedSourceConfigurationFieldsRuntimeType = rt.partial({
   timestamp: rt.string,
 });
 
+export type InfraSavedSourceConfigurationFields = rt.TypeOf<
+  typeof SavedSourceConfigurationFieldColumnRuntimeType
+>;
+
 export const SavedSourceConfigurationTimestampColumnRuntimeType = rt.type({
   timestampColumn: rt.type({
     id: rt.string,
   }),
 });
 
+export type InfraSourceConfigurationTimestampColumn = rt.TypeOf<
+  typeof SavedSourceConfigurationTimestampColumnRuntimeType
+>;
+
 export const SavedSourceConfigurationMessageColumnRuntimeType = rt.type({
   messageColumn: rt.type({
     id: rt.string,
   }),
 });
+
+export type InfraSourceConfigurationMessageColumn = rt.TypeOf<
+  typeof SavedSourceConfigurationMessageColumnRuntimeType
+>;
 
 export const SavedSourceConfigurationFieldColumnRuntimeType = rt.type({
   fieldColumn: rt.type({
@@ -64,6 +77,10 @@ export const SavedSourceConfigurationColumnRuntimeType = rt.union([
   SavedSourceConfigurationFieldColumnRuntimeType,
 ]);
 
+export type InfraSavedSourceConfigurationColumn = rt.TypeOf<
+  typeof SavedSourceConfigurationColumnRuntimeType
+>;
+
 export const SavedSourceConfigurationRuntimeType = rt.partial({
   name: rt.string,
   description: rt.string,
@@ -73,6 +90,7 @@ export const SavedSourceConfigurationRuntimeType = rt.partial({
   metricsExplorerDefaultView: rt.string,
   fields: SavedSourceConfigurationFieldsRuntimeType,
   logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
+  anomalyThreshold: rt.number,
 });
 
 export interface InfraSavedSourceConfiguration
@@ -90,6 +108,7 @@ export const pickSavedSourceConfiguration = (
     inventoryDefaultView,
     metricsExplorerDefaultView,
     logColumns,
+    anomalyThreshold,
   } = value;
   const { container, host, pod, tiebreaker, timestamp } = fields;
 
@@ -102,6 +121,7 @@ export const pickSavedSourceConfiguration = (
     metricsExplorerDefaultView,
     fields: { container, host, pod, tiebreaker, timestamp },
     logColumns,
+    anomalyThreshold,
   };
 };
 
@@ -123,6 +143,7 @@ export const StaticSourceConfigurationRuntimeType = rt.partial({
   metricsExplorerDefaultView: rt.string,
   fields: StaticSourceConfigurationFieldsRuntimeType,
   logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
+  anomalyThreshold: rt.number,
 });
 
 export interface InfraStaticSourceConfiguration
@@ -136,10 +157,28 @@ const SourceConfigurationFieldsRuntimeType = rt.type({
   ...StaticSourceConfigurationFieldsRuntimeType.props,
 });
 
+export type InfraSourceConfigurationFields = rt.TypeOf<typeof SourceConfigurationFieldsRuntimeType>;
+
 export const SourceConfigurationRuntimeType = rt.type({
   ...SavedSourceConfigurationRuntimeType.props,
   fields: SourceConfigurationFieldsRuntimeType,
   logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
+});
+
+const SourceStatusFieldRuntimeType = rt.type({
+  name: rt.string,
+  type: rt.string,
+  searchable: rt.boolean,
+  aggregatable: rt.boolean,
+  displayable: rt.boolean,
+});
+
+export type InfraSourceIndexField = rt.TypeOf<typeof SourceStatusFieldRuntimeType>;
+
+const SourceStatusRuntimeType = rt.type({
+  logIndicesExist: rt.boolean,
+  metricIndicesExist: rt.boolean,
+  indexFields: rt.array(SourceStatusFieldRuntimeType),
 });
 
 export const SourceRuntimeType = rt.intersection([
@@ -155,31 +194,19 @@ export const SourceRuntimeType = rt.intersection([
   rt.partial({
     version: rt.string,
     updatedAt: rt.number,
+    status: SourceStatusRuntimeType,
   }),
 ]);
+
+export interface InfraSourceStatus extends rt.TypeOf<typeof SourceStatusRuntimeType> {}
 
 export interface InfraSourceConfiguration
   extends rt.TypeOf<typeof SourceConfigurationRuntimeType> {}
 
 export interface InfraSource extends rt.TypeOf<typeof SourceRuntimeType> {}
 
-const SourceStatusFieldRuntimeType = rt.type({
-  name: rt.string,
-  type: rt.string,
-  searchable: rt.boolean,
-  aggregatable: rt.boolean,
-  displayable: rt.boolean,
-});
-
-const SourceStatusRuntimeType = rt.type({
-  logIndicesExist: rt.boolean,
-  metricIndicesExist: rt.boolean,
-  indexFields: rt.array(SourceStatusFieldRuntimeType),
-});
-
 export const SourceResponseRuntimeType = rt.type({
   source: SourceRuntimeType,
-  status: SourceStatusRuntimeType,
 });
 
 export type SourceResponse = rt.TypeOf<typeof SourceResponseRuntimeType>;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -17,15 +18,16 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
-
+  const supertestWithAuth = getService('supertest');
   const supertest = getSupertestWithoutAuth(providerContext);
+
   let apiKey: { id: string; api_key: string };
   let kibanaVersion: string;
 
   describe('fleet_agents_enroll', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.load('fleet/agents');
 
       const { body: apiKeyBody } = await esClient.security.createApiKey<typeof apiKey>({
         body: {
@@ -36,14 +38,14 @@ export default function (providerContext: FtrProviderContext) {
       const {
         body: { _source: enrollmentApiKeyDoc },
       } = await esClient.get({
-        index: '.kibana',
-        id: 'fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        index: '.fleet-enrollment-api-keys',
+        id: 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
       });
       // @ts-ignore
-      enrollmentApiKeyDoc['fleet-enrollment-api-keys'].api_key_id = apiKey.id;
+      enrollmentApiKeyDoc.api_key_id = apiKey.id;
       await esClient.update({
-        index: '.kibana',
-        id: 'fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        index: '.fleet-enrollment-api-keys',
+        id: 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
         refresh: true,
         body: {
           doc: enrollmentApiKeyDoc,
@@ -55,6 +57,51 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
     after(async () => {
       await esArchiver.unload('fleet/agents');
+    });
+
+    it('should not allow enrolling in a managed policy', async () => {
+      // update existing policy to managed
+      await supertestWithAuth
+        .put(`/api/fleet/agent_policies/policy1`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy',
+          namespace: 'default',
+          is_managed: true,
+        })
+        .expect(200);
+
+      // try to enroll in managed policy
+      const { body } = await supertest
+        .post(`/api/fleet/agents/enroll`)
+        .set('kbn-xsrf', 'xxx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          type: 'PERMANENT',
+          metadata: {
+            local: {
+              elastic: { agent: { version: kibanaVersion } },
+            },
+            user_provided: {},
+          },
+        })
+        .expect(400);
+
+      expect(body.message).to.contain('Cannot enroll in managed policy');
+
+      // restore to original (unmanaged)
+      await supertestWithAuth
+        .put(`/api/fleet/agent_policies/policy1`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy',
+          namespace: 'default',
+          is_managed: false,
+        })
+        .expect(200);
     });
 
     it('should not allow to enroll an agent with a invalid enrollment', async () => {
@@ -72,28 +119,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(401);
-    });
-
-    it('should not allow to enroll an agent with a shared id if it already exists ', async () => {
-      const { body: apiResponse } = await supertest
-        .post(`/api/fleet/agents/enroll`)
-        .set('kbn-xsrf', 'xxx')
-        .set(
-          'authorization',
-          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-        )
-        .send({
-          shared_id: 'agent2_filebeat',
-          type: 'PERMANENT',
-          metadata: {
-            local: {
-              elastic: { agent: { version: kibanaVersion } },
-            },
-            user_provided: {},
-          },
-        })
-        .expect(400);
-      expect(apiResponse.message).to.match(/Impossible to enroll an already active agent/);
     });
 
     it('should not allow to enroll an agent with a version > kibana', async () => {

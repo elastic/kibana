@@ -20,7 +20,7 @@ cd kibana
 
 Install the version of Node.js listed in the `.node-version` file. This
 can be automated with tools such as
-https://github.com/creationix/nvm[nvm],
+https://github.com/nvm-sh/nvm[nvm],
 https://github.com/coreybutler/nvm-windows[nvm-windows] or
 https://github.com/wbyoung/avn[avn]. As we also include a `.nvmrc` file
 you can switch to the correct version when using nvm by running:
@@ -46,6 +46,23 @@ versions you need to be using. Please see
 https://github.com/nodejs/node-gyp#installation[https://github.com/nodejs/node-gyp#installation]
 and follow the guide according your platform.
 ____
+
+In case you don't have an internet connection, the `yarn kbn bootstrap` command will 
+fail. As it is likely you have the required node_modules in the 
+offline mirror, you can try to run the step in offline mode by using:
+
+[source,bash]
+----
+yarn kbn bootstrap --offline
+----
+
+In any other circumstance where you want to force the node_modules install step 
+you can use:
+
+[source,bash]
+----
+yarn kbn bootstrap --force-install
+----
 
 (You can also run `yarn kbn` to see the other available commands. For
 more info about this tool, see

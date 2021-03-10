@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DeepPartial } from '../../../../plugins/ml/common/types/common';
@@ -56,6 +57,30 @@ const FQ_DATAFEED_CONFIG: Datafeed = {
   query: { bool: { must: [{ match_all: {} }] } },
 };
 
+const BM_CLASSIFICATION_CONFIG: DeepPartial<DataFrameAnalyticsConfig> = {
+  id: '',
+  description: 'Classification job based on the bank marketing dataset',
+  source: {
+    index: ['ft_bank_marketing'],
+    query: {
+      match_all: {},
+    },
+  },
+  analysis: {
+    classification: {
+      dependent_variable: 'y',
+      training_percent: 80,
+    },
+  },
+  analyzed_fields: {
+    includes: [],
+    excludes: [],
+  },
+  model_memory_limit: '80mb',
+  allow_lazy_start: false,
+  max_num_threads: 1,
+};
+
 const IHP_OUTLIER_DETECTION_CONFIG: DeepPartial<DataFrameAnalyticsConfig> = {
   id: '',
   description: 'Outlier detection job based on the Iowa house prices dataset',
@@ -105,6 +130,15 @@ export function MachineLearningCommonConfigsProvider({}: FtrProviderContext) {
         ...IHP_OUTLIER_DETECTION_CONFIG,
         id: dfaId,
         dest: { ...IHP_OUTLIER_DETECTION_CONFIG.dest, index: `user-${dfaId}` },
+      };
+      return dfaConfig as DataFrameAnalyticsConfig;
+    },
+
+    getDFABmClassificationJobConfig(dfaId: string): DataFrameAnalyticsConfig {
+      const dfaConfig = {
+        ...BM_CLASSIFICATION_CONFIG,
+        id: dfaId,
+        dest: { ...BM_CLASSIFICATION_CONFIG.dest, index: `user-${dfaId}` },
       };
       return dfaConfig as DataFrameAnalyticsConfig;
     },

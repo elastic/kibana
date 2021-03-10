@@ -63,10 +63,6 @@ Generated plugins receive a handful of scripts that can be used during developme
 
     Build a distributable archive of your plugin.
 
-  - `yarn test:mocha`
-
-    Run the server tests using mocha.
-
 
 To start kibana run the following command from Kibana root.
 

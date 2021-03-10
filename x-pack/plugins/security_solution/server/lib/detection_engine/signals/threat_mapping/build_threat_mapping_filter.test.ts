@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -131,13 +132,19 @@ describe('build_threat_mapping_filter', () => {
             ],
           },
         ],
-        threatListItem: {
-          '@timestamp': '2020-09-09T21:59:13Z',
-          host: {
-            name: 'host-1',
-            // since ip is missing this entire AND clause should be dropped
+        threatListItem: getThreatListItemMock({
+          _source: {
+            '@timestamp': '2020-09-09T21:59:13Z',
+            host: {
+              name: 'host-1',
+              // since ip is missing this entire AND clause should be dropped
+            },
           },
-        },
+          fields: {
+            '@timestamp': ['2020-09-09T21:59:13Z'],
+            'host.name': ['host-1'],
+          },
+        }),
       });
       expect(item).toEqual([]);
     });
@@ -169,14 +176,18 @@ describe('build_threat_mapping_filter', () => {
             ],
           },
         ],
-        threatListItem: {
+        threatListItem: getThreatListItemMock({
           _source: {
             '@timestamp': '2020-09-09T21:59:13Z',
             host: {
               name: 'host-1',
             },
           },
-        },
+          fields: {
+            '@timestamp': ['2020-09-09T21:59:13Z'],
+            'host.name': ['host-1'],
+          },
+        }),
       });
       expect(item).toEqual([
         {
@@ -314,7 +325,10 @@ describe('build_threat_mapping_filter', () => {
 
     test('it should return an empty boolean clause given an empty object for a threat list item', () => {
       const threatMapping = getThreatMappingMock();
-      const innerClause = createAndOrClauses({ threatMapping, threatListItem: { _source: {} } });
+      const innerClause = createAndOrClauses({
+        threatMapping,
+        threatListItem: getThreatListItemMock({ _source: {}, fields: {} }),
+      });
       expect(innerClause).toEqual({ bool: { minimum_should_match: 1, should: [] } });
     });
   });

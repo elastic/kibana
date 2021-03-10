@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, fireEvent, render } from '@testing-library/react';
@@ -9,7 +10,11 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { License } from '../../../../../licensing/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import {
+  mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
 import * as apmApi from '../../../services/rest/createCallApmApi';
@@ -20,10 +25,22 @@ import {
 import { TransactionActionMenu } from './TransactionActionMenu';
 import * as Transactions from './__fixtures__/mockData';
 
+function getMockAPMContext({ canSave }: { canSave: boolean }) {
+  return ({
+    ...mockApmPluginContextValue,
+    core: {
+      ...mockApmPluginContextValue.core,
+      application: { capabilities: { apm: { save: canSave }, ml: {} } },
+    },
+  } as unknown) as ApmPluginContextValue;
+}
+
 function Wrapper({ children }: { children?: React.ReactNode }) {
   return (
     <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+      <MockApmPluginContextWrapper value={getMockAPMContext({ canSave: true })}>
+        {children}
+      </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
 }
@@ -36,7 +53,7 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     }
   );
 
-  fireEvent.click(rendered.getByText('Actions'));
+  fireEvent.click(rendered.getByText('Investigate'));
 
   return rendered;
 };
@@ -273,7 +290,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
@@ -297,7 +314,7 @@ describe('TransactionActionMenu component', () => {
         { wrapper: Wrapper }
       );
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
@@ -314,7 +331,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
@@ -331,7 +348,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
@@ -348,7 +365,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
       act(() => {

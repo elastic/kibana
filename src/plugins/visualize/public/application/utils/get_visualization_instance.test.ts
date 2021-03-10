@@ -1,24 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createSavedSearchesLoader } from '../../../../discover/public';
-import { getVisualizationInstance } from './get_visualization_instance';
+import type {
+  VisualizeInput,
+  VisSavedObject,
+  Vis,
+  VisParams,
+} from 'src/plugins/visualizations/public';
+import {
+  getVisualizationInstance,
+  getVisualizationInstanceFromInput,
+} from './get_visualization_instance';
 import { createVisualizeServicesMock } from './mocks';
 import { VisualizeServices } from '../types';
 import { BehaviorSubject } from 'rxjs';
@@ -36,8 +34,8 @@ describe('getVisualizationInstance', () => {
   const serializedVisMock = {
     type: 'area',
   };
-  let savedVisMock: any;
-  let visMock: any;
+  let savedVisMock: VisSavedObject;
+  let visMock: Vis<VisParams>;
   let mockServices: jest.Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
 
@@ -47,8 +45,8 @@ describe('getVisualizationInstance', () => {
     visMock = {
       type: {},
       data: {},
-    };
-    savedVisMock = {};
+    } as Vis<VisParams>;
+    savedVisMock = {} as VisSavedObject;
     // @ts-expect-error
     mockServices.data.search.showError.mockImplementation(() => {});
     // @ts-expect-error
@@ -96,6 +94,7 @@ describe('getVisualizationInstance', () => {
 
   test('should load existing vis by id and call vis type setup if exists', async () => {
     const newVisObj = { data: {} };
+    // @ts-expect-error
     visMock.type.setup = jest.fn(() => newVisObj);
     const { vis } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
@@ -122,5 +121,87 @@ describe('getVisualizationInstance', () => {
     });
 
     expect(mockServices.data.search.showError).toHaveBeenCalled();
+  });
+});
+
+describe('getVisualizationInstanceInput', () => {
+  const serializedVisMock = {
+    type: 'pie',
+  };
+  let savedVisMock: VisSavedObject;
+  let visMock: Vis<VisParams>;
+  let mockServices: jest.Mocked<VisualizeServices>;
+  let subj: BehaviorSubject<any>;
+
+  beforeEach(() => {
+    mockServices = createVisualizeServicesMock();
+    subj = new BehaviorSubject({});
+    visMock = {
+      type: {},
+      data: {},
+    } as Vis<VisParams>;
+    savedVisMock = {} as VisSavedObject;
+    // @ts-expect-error
+    mockServices.savedVisualizations.get.mockImplementation(() => savedVisMock);
+    // @ts-expect-error
+    mockServices.visualizations.createVis.mockImplementation(() => visMock);
+    // @ts-expect-error
+    mockServices.createVisEmbeddableFromObject.mockImplementation(() => ({
+      getOutput$: jest.fn(() => subj.asObservable()),
+    }));
+  });
+
+  test('should create new instances of savedVis, vis and embeddableHandler', async () => {
+    const input = ({
+      id: 'test-id',
+      savedVis: {
+        title: '',
+        description: '',
+        type: 'pie',
+        params: {
+          type: 'pie',
+          addTooltip: true,
+          addLegend: true,
+          legendPosition: 'right',
+          isDonut: true,
+          labels: {
+            show: false,
+            values: true,
+            last_level: true,
+            truncate: 100,
+          },
+        },
+        uiState: {
+          vis: {
+            colors: {
+              Count: '#1F78C1',
+            },
+          },
+        },
+      },
+    } as unknown) as VisualizeInput;
+    const {
+      savedVis,
+      savedSearch,
+      vis,
+      embeddableHandler,
+    } = await getVisualizationInstanceFromInput(mockServices, input);
+
+    expect(mockServices.savedVisualizations.get).toHaveBeenCalled();
+    expect(mockServices.visualizations.createVis).toHaveBeenCalledWith(
+      serializedVisMock.type,
+      input.savedVis
+    );
+    expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
+      timeRange: undefined,
+      filters: undefined,
+      id: '',
+    });
+
+    expect(vis).toBe(visMock);
+    expect(savedVis).toBe(savedVisMock);
+    expect(savedVis.uiStateJSON).toBe(JSON.stringify(input.savedVis?.uiState));
+    expect(embeddableHandler).toBeDefined();
+    expect(savedSearch).toBeUndefined();
   });
 });

@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Route, Switch, useParams } from 'react-router-dom';
+import { Route, Router, Switch, useParams } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
-import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
-import { SecurityLicense } from '../../../common/licensing';
-import { PluginStartDependencies } from '../../plugin';
-import { DocumentationLinksService } from './documentation_links';
+import type { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
+
+import type { SecurityLicense } from '../../../common/licensing';
+import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -24,20 +26,26 @@ interface CreateParams {
 export const rolesManagementApp = Object.freeze({
   id: 'roles',
   create({ license, fatalErrors, getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.rolesTitle', {
+      defaultMessage: 'Roles',
+    });
     return {
       id: this.id,
       order: 20,
-      title: i18n.translate('xpack.security.management.rolesTitle', { defaultMessage: 'Roles' }),
+      title,
       async mount({ element, setBreadcrumbs, history }) {
         const rolesBreadcrumbs = [
           {
-            text: i18n.translate('xpack.security.roles.breadcrumb', { defaultMessage: 'Roles' }),
+            text: title,
             href: `/`,
           },
         ];
 
         const [
-          [{ application, docLinks, http, i18n: i18nStart, notifications }, { data, features }],
+          [
+            { application, docLinks, http, i18n: i18nStart, notifications, chrome },
+            { data, features, spaces },
+          ],
           { RolesGridPage },
           { EditRolePage },
           { RolesAPIClient },
@@ -53,6 +61,8 @@ export const rolesManagementApp = Object.freeze({
           import('./privileges_api_client'),
           import('../users'),
         ]);
+
+        chrome.docTitle.change(title);
 
         const rolesAPIClient = new RolesAPIClient(http);
         const RolesGridPageWithBreadcrumbs = () => {
@@ -84,6 +94,8 @@ export const rolesManagementApp = Object.freeze({
                 },
           ]);
 
+          const spacesApiUi = spaces?.ui;
+
           return (
             <EditRolePage
               action={action}
@@ -97,10 +109,11 @@ export const rolesManagementApp = Object.freeze({
               notifications={notifications}
               fatalErrors={fatalErrors}
               license={license}
-              docLinks={new DocumentationLinksService(docLinks)}
+              docLinks={docLinks}
               uiCapabilities={application.capabilities}
               indexPatterns={data.indexPatterns}
               history={history}
+              spacesApiUi={spacesApiUi}
             />
           );
         };
@@ -125,6 +138,7 @@ export const rolesManagementApp = Object.freeze({
         );
 
         return () => {
+          chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

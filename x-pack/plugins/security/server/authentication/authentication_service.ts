@@ -1,53 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
-  LoggerFactory,
+  HttpServiceSetup,
+  HttpServiceStart,
+  IClusterClient,
   KibanaRequest,
   Logger,
-  HttpServiceSetup,
-  IClusterClient,
-  ILegacyClusterClient,
-  HttpServiceStart,
-} from '../../../../../src/core/server';
+  LoggerFactory,
+} from 'src/core/server';
+
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import type { ConfigType } from '../config';
+import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
-import type { DeauthenticationResult } from './deauthentication_result';
-import type { AuthenticationResult } from './authentication_result';
-import { getErrorStatusCode } from '../errors';
 import { APIKeys } from './api_keys';
-import { Authenticator, ProviderLoginAttempt } from './authenticator';
+import type { AuthenticationResult } from './authentication_result';
+import type { ProviderLoginAttempt } from './authenticator';
+import { Authenticator } from './authenticator';
+import type { DeauthenticationResult } from './deauthentication_result';
 
 interface AuthenticationServiceSetupParams {
-  legacyAuditLogger: SecurityAuditLogger;
-  audit: AuditServiceSetup;
-  getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
-  http: HttpServiceSetup;
-  clusterClient: ILegacyClusterClient;
-  config: ConfigType;
+  http: Pick<HttpServiceSetup, 'registerAuth'>;
   license: SecurityLicense;
-  loggers: LoggerFactory;
-  session: PublicMethodsOf<Session>;
 }
 
 interface AuthenticationServiceStartParams {
-  http: HttpServiceStart;
+  http: Pick<HttpServiceStart, 'auth' | 'basePath'>;
+  config: ConfigType;
   clusterClient: IClusterClient;
-}
-
-export interface AuthenticationServiceSetup {
-  /**
-   * @deprecated use `getCurrentUser` from the start contract instead
-   */
-  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  legacyAuditLogger: SecurityAuditLogger;
+  audit: AuditServiceSetup;
+  featureUsageService: SecurityFeatureUsageServiceStart;
+  session: PublicMethodsOf<Session>;
+  loggers: LoggerFactory;
 }
 
 export interface AuthenticationServiceStart {
@@ -67,57 +61,41 @@ export interface AuthenticationServiceStart {
 
 export class AuthenticationService {
   private license!: SecurityLicense;
-  private authenticator!: Authenticator;
+  private authenticator?: Authenticator;
 
   constructor(private readonly logger: Logger) {}
 
-  setup({
-    legacyAuditLogger: auditLogger,
-    audit,
-    getFeatureUsageService,
-    http,
-    clusterClient,
-    config,
-    license,
-    loggers,
-    session,
-  }: AuthenticationServiceSetupParams): AuthenticationServiceSetup {
+  setup({ http, license }: AuthenticationServiceSetupParams) {
     this.license = license;
 
-    const getCurrentUser = (request: KibanaRequest) => {
-      if (!license.isEnabled()) {
-        return null;
+    http.registerAuth(async (request, response, t) => {
+      if (!license.isLicenseAvailable()) {
+        this.logger.error('License is not available, authentication is not possible.');
+        return response.customError({
+          body: 'License is not available.',
+          statusCode: 503,
+          headers: { 'Retry-After': '30' },
+        });
       }
 
-      return http.auth.get<AuthenticatedUser>(request).state ?? null;
-    };
-
-    this.authenticator = new Authenticator({
-      legacyAuditLogger: auditLogger,
-      audit,
-      loggers,
-      clusterClient,
-      basePath: http.basePath,
-      config: { authc: config.authc },
-      getCurrentUser,
-      getFeatureUsageService,
-      license,
-      session,
-    });
-
-    http.registerAuth(async (request, response, t) => {
-      // If security is disabled continue with no user credentials and delete the client cookie as well.
+      // If security is disabled, then continue with no user credentials.
       if (!license.isEnabled()) {
+        this.logger.debug(
+          'Current license does not support any security features, authentication is not needed.'
+        );
         return t.authenticated();
       }
 
-      let authenticationResult;
-      try {
-        authenticationResult = await this.authenticator.authenticate(request);
-      } catch (err) {
-        this.logger.error(err);
-        return response.internalError();
+      if (!this.authenticator) {
+        this.logger.error('Authentication sub-system is not fully initialized yet.');
+        return response.customError({
+          body: 'Authentication sub-system is not fully initialized yet.',
+          statusCode: 503,
+          headers: { 'Retry-After': '30' },
+        });
       }
+
+      const authenticationResult = await this.authenticator.authenticate(request);
 
       if (authenticationResult.succeeded()) {
         return t.authenticated({
@@ -162,17 +140,38 @@ export class AuthenticationService {
     });
 
     this.logger.debug('Successfully registered core authentication handler.');
-
-    return {
-      getCurrentUser,
-    };
   }
 
-  start({ clusterClient, http }: AuthenticationServiceStartParams): AuthenticationServiceStart {
+  start({
+    audit,
+    config,
+    clusterClient,
+    featureUsageService,
+    http,
+    legacyAuditLogger,
+    loggers,
+    session,
+  }: AuthenticationServiceStartParams): AuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
+    });
+
+    const getCurrentUser = (request: KibanaRequest) =>
+      http.auth.get<AuthenticatedUser>(request).state ?? null;
+
+    this.authenticator = new Authenticator({
+      legacyAuditLogger,
+      audit,
+      loggers,
+      clusterClient,
+      basePath: http.basePath,
+      config: { authc: config.authc },
+      getCurrentUser,
+      featureUsageService,
+      license: this.license,
+      session,
     });
 
     return {
@@ -194,12 +193,7 @@ export class AuthenticationService {
        * Retrieves currently authenticated user associated with the specified request.
        * @param request
        */
-      getCurrentUser: (request: KibanaRequest) => {
-        if (!this.license.isEnabled()) {
-          return null;
-        }
-        return http.auth.get<AuthenticatedUser>(request).state ?? null;
-      },
+      getCurrentUser,
     };
   }
 }

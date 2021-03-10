@@ -9,28 +9,40 @@
 [partintro]
 --
 
-Maps enables you to parse through your geographical data at scale, with speed, and in real time. With features like multiple layers and indices in a map, plotting of raw documents, dynamic client-side styling, and global search across multiple layers, you can understand and monitor your data with ease.
+Create beautiful maps from your geographical data. With **Maps**, you can:
 
-With Maps, you can:
-
-* Create maps with multiple layers and indices.
-* Upload GeoJSON files into Elasticsearch.
+* Build maps with multiple layers and indices.
+* Upload GeoJSON.
 * Embed your map in dashboards.
 * Symbolize features using data values.
-* Focus in on just the data you want.
+* Focus on only the data that’s important to you.
 
-*Ready to get started?* Start your tour of Maps with the <<maps-getting-started, getting started tutorial>>.
+*Ready to get started?* Watch the https://videos.elastic.co/watch/BYzRDtH4u7RSD8wKhuEW1b[video], and then start your tour of **Maps** with the <<maps-getting-started, getting started tutorial>>.
+
+++++
+<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
+</script>
+<img
+style="width: 100%; margin: auto; display: block;"
+class="vidyard-player-embed"
+src="https://play.vidyard.com/BYzRDtH4u7RSD8wKhuEW1b.jpg"
+data-uuid="BYzRDtH4u7RSD8wKhuEW1b"
+data-v="4"
+data-type="inline"
+/>
+</br>
+++++
 
 [float]
-=== Create maps with multiple layers and indices
-You can use multiple layers and indices to show all your data in a single map. This enables your map to show how data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions. You can plot individual documents or use aggregations to plot any data set, no matter how large.
+=== Build maps with multiple layers and indices
+Use multiple layers and indices to show all your data in a single map. Show how data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions. Plot individual documents or use aggregations to plot any data set, no matter how large.
 
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
 
 [float]
-=== Upload GeoJSON files into Elasticsearch
-Maps makes it easy to import geospatial data into the Elastic Stack. Using the GeoJSON Upload feature, you can drag and drop your point and shape data files directly into Elasticsearch, and then use them as layers in the map.
+=== Upload GeoJSON
+Use **Maps** to drag and drop your GeoJSON points, lines, and polygons into Elasticsearch, and then use them as layers in your map.
 
 [float]
 === Embed your map in dashboards
@@ -43,11 +55,11 @@ image::maps/images/embed_in_dashboard.jpeg[]
 
 [float]
 === Symbolize features using data values
-You can customize each layer to highlight meaningful dimensions in your data. For example, you can use dark colors to symbolize areas with more web log traffic, and lighter colors to symbolize areas with less traffic.
+Customize each layer to highlight meaningful dimensions in your data. For example, use dark colors to symbolize areas with more web log traffic, and lighter colors to symbolize areas with less traffic.
 
 [float]
-=== Focus in on just the data you want
-You can search across your Elasticsearch layers to focus in on just the data you want. Draw a polygon on the map or use the shape from features to create spatial filters to narrow search results to documents that either intersect with, are within, or do not intersect with the specified geometry. Filter individual layers to compares facets.
+=== Focus on only the data that’s important to you
+Search across your Elasticsearch layers to focus in on just the data you want. Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>. Set the time filter to restrict layers by time. Draw a polygon on the map or use the shape from features to create spatial filters. Filter individual layers to compares facets.
 
 
 --

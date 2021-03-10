@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash';
@@ -50,6 +51,7 @@ describe('filterByAgent', () => {
         'sanitize_field_names',
         'span_frames_min_duration',
         'stack_trace_limit',
+        'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
       ]);
@@ -87,14 +89,12 @@ describe('filterByAgent', () => {
 
     it('js-base', () => {
       expect(getSettingKeysForAgent('js-base')).toEqual([
-        'recording',
         'transaction_sample_rate',
       ]);
     });
 
     it('rum-js', () => {
       expect(getSettingKeysForAgent('rum-js')).toEqual([
-        'recording',
         'transaction_sample_rate',
       ]);
     });

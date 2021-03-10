@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, useContext, useRef } from 'react';
@@ -83,10 +84,12 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       lat: 20,
       zoom: 0,
     },
-    disableInteractive: true,
-    hideToolbarOverlay: true,
-    hideLayerControl: true,
-    hideViewControl: true,
+    mapSettings: {
+      disableInteractive: true,
+      hideToolbarOverlay: true,
+      hideLayerControl: true,
+      hideViewControl: true,
+    },
   };
 
   const renderTooltipContent = ({

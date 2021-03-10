@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IconType } from '@elastic/eui/src/components/icon/icon';
@@ -16,16 +17,22 @@ import {
   Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
-import { DragContextState } from './drag_drop';
+import { DragContextState, DragDropIdentifier } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
+import {
+  LENS_EDIT_SORT_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
+  LENS_TOGGLE_ACTION,
+} from './datatable_visualization/components/constants';
 import type {
   LensSortActionData,
-  LENS_EDIT_SORT_ACTION,
-} from './datatable_visualization/expression';
+  LensResizeActionData,
+  LensToggleActionData,
+} from './datatable_visualization/components/types';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -131,6 +138,16 @@ export type TableChangeType =
   | 'reorder'
   | 'layers';
 
+export type DropType =
+  | 'field_add'
+  | 'field_replace'
+  | 'reorder'
+  | 'duplicate_in_group'
+  | 'move_compatible'
+  | 'replace_compatible'
+  | 'move_incompatible'
+  | 'replace_incompatible';
+
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
@@ -138,6 +155,10 @@ export interface DatasourceSuggestion<T = unknown> {
 }
 
 export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
+
+export interface InitializationOptions {
+  isFullEditor?: boolean;
+}
 
 /**
  * Interface for the datasource registry
@@ -151,7 +172,8 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext
+    initialContext?: VisualizeFieldContext,
+    options?: InitializationOptions
   ) => Promise<T>;
 
   // Given the current state, which parts should be saved?
@@ -167,7 +189,12 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
-  canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
+  getDropProps: (
+    props: DatasourceDimensionDropProps<T> & {
+      groupId: string;
+      dragging: DragContextState['dragging'];
+    }
+  ) => { dropType: DropType; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   updateStateOnCloseDimension?: (props: {
     layerId: string;
@@ -217,6 +244,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
+  dropOntoWorkspace: (field: DragDropIdentifier) => void;
+  hasSuggestionForField: (field: DragDropIdentifier) => boolean;
 }
 
 interface SharedDimensionProps {
@@ -243,15 +272,16 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
-  setState: (newState: Parameters<StateSetter<T>>[0], publishToVisualization?: boolean) => void;
+  setState: (
+    newState: Parameters<StateSetter<T>>[0],
+    publishToVisualization?: { shouldReplaceDimension?: boolean; shouldRemoveDimension?: boolean }
+  ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
-export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
-  dragDropContext: DragContextState;
-};
+export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
 
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
@@ -281,15 +311,15 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   columnId: string;
   state: T;
   setState: StateSetter<T>;
-  dragDropContext: DragContextState;
-  isReorder?: boolean;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
   droppedItem: unknown;
+  dropType: DropType;
 };
 
-export type DataType = 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip';
+export type FieldOnlyDataType = 'document' | 'ip' | 'histogram';
+export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 // An operation represents a column in a table, not any information
 // about how the column was created such as whether it is a sum or average.
@@ -329,7 +359,7 @@ export interface LensMultiTable {
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   state: T;
 }
 
@@ -351,7 +381,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none';
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
   color?: string;
   palette?: string[];
 }
@@ -486,6 +516,10 @@ export interface VisualizationType {
    * Optional label used in chart type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
+  /**
+   * The group the visualization belongs to
+   */
+  groupLabel: string;
 }
 
 export interface Visualization<T = unknown> {
@@ -604,7 +638,7 @@ export interface Visualization<T = unknown> {
    */
   getErrorMessages: (
     state: T,
-    frame: FramePublicAPI
+    datasourceLayers?: Record<string, DatasourcePublicAPI>
   ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
 
   /**
@@ -631,6 +665,8 @@ export interface LensBrushEvent {
 // Use same technique as TriggerContext
 interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
+  [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
+  [LENS_TOGGLE_ACTION]: LensToggleActionData;
 }
 type LensEditSupportedActions = keyof LensEditContextMapping;
 

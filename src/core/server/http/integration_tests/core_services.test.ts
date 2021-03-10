@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -76,7 +65,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth, createRouter, auth } = http;
 
-        await registerAuth((req, res, toolkit) => toolkit.authenticated());
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
 
         const router = createRouter('');
         router.get({ path: '/is-auth', validate: false }, (context, req, res) =>
@@ -147,6 +136,37 @@ describe('http service', () => {
         await root.start();
         await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
+
+      it('returns true if authenticated on a route with "try" auth', async () => {
+        const { http } = await root.setup();
+        const { createRouter, auth, registerAuth } = http;
+
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
+        const router = createRouter('');
+        router.get(
+          { path: '/is-auth', validate: false, options: { authRequired: 'try' } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
+      });
+
+      it('returns false if not authenticated on a route with "try" auth', async () => {
+        const { http } = await root.setup();
+        const { createRouter, auth, registerAuth } = http;
+
+        registerAuth((req, res, toolkit) => toolkit.notHandled());
+
+        const router = createRouter('');
+        router.get(
+          { path: '/is-auth', validate: false, options: { authRequired: 'try' } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        );
+
+        await root.start();
+        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
+      });
     });
     describe('#get()', () => {
       it('returns authenticated status and allow associate auth state with request', async () => {
@@ -190,7 +210,7 @@ describe('http service', () => {
 
         const { http } = await root.setup();
         const { createRouter, registerAuth, auth } = http;
-        await registerAuth(authenticate);
+        registerAuth(authenticate);
         const router = createRouter('');
         router.get(
           { path: '/get-auth', validate: false, options: { authRequired: false } },

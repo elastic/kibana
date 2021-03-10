@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
@@ -94,7 +96,7 @@ export function getActionType({
       params: ParamsSchema,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
@@ -112,9 +114,9 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
-  let url: URL;
+  const configuredUrl = configObject.url;
   try {
-    url = new URL(configObject.url);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
@@ -125,7 +127,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureUriAllowed(url.toString());
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
@@ -138,7 +140,10 @@ function validateActionTypeConfig(
 
 // action executor
 export async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: WebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -162,7 +167,7 @@ export async function executor(
       ...basicAuth,
       headers,
       data,
-      proxySettings: execOptions.proxySettings,
+      configurationUtilities,
     })
   );
 
@@ -202,7 +207,7 @@ export async function executor(
         );
       }
       return errorResultInvalid(actionId, message);
-    } else if (error.isAxiosError) {
+    } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
       return errorResultRequestFailed(actionId, message);

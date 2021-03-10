@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import { LegacyAPICaller, IRouter } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { checkLicense } from '../../lib/check_license';
+import type { LogstashPluginRouter } from '../../types';
 
 async function deletePipelines(callWithRequest: LegacyAPICaller, pipelineIds: string[]) {
   const deletePromises = pipelineIds.map((pipelineId) => {
@@ -29,7 +32,7 @@ async function deletePipelines(callWithRequest: LegacyAPICaller, pipelineIds: st
   };
 }
 
-export function registerPipelinesDeleteRoute(router: IRouter) {
+export function registerPipelinesDeleteRoute(router: LogstashPluginRouter) {
   router.post(
     {
       path: '/api/logstash/pipelines/delete',
@@ -42,7 +45,7 @@ export function registerPipelinesDeleteRoute(router: IRouter) {
     wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
-        const client = context.logstash!.esClient;
+        const client = context.logstash.esClient;
         const results = await deletePipelines(client.callAsCurrentUser, request.body.pipelineIds);
 
         return response.ok({ body: { results } });

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -27,11 +16,17 @@ import { fetchContextProvider } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './index';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 
 export function QueryActionsProvider(Promise) {
-  const { filterManager, indexPatterns, data } = getServices();
-  const fetchAnchor = fetchAnchorProvider(indexPatterns, data.search.searchSource.createEmpty());
-  const { fetchSurroundingDocs } = fetchContextProvider(indexPatterns);
+  const { filterManager, indexPatterns, data, uiSettings } = getServices();
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const fetchAnchor = fetchAnchorProvider(
+    indexPatterns,
+    data.search.searchSource.createEmpty(),
+    useNewFieldsApi
+  );
+  const { fetchSurroundingDocs } = fetchContextProvider(indexPatterns, useNewFieldsApi);
   const { setPredecessorCount, setQueryParameters, setSuccessorCount } = getQueryParameterActions(
     filterManager,
     indexPatterns

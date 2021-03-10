@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiToolTip, EuiSwitch } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -34,16 +35,11 @@ const TimelineDatePickerLockComponent = () => {
           : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
       }
     >
-      <EuiSwitch
+      <EuiButtonIcon
         data-test-subj={`timeline-date-picker-${isDatePickerLocked ? 'lock' : 'unlock'}-button`}
-        label={
-          isDatePickerLocked
-            ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_LABEL
-            : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_LABEL
-        }
-        checked={isDatePickerLocked}
-        onChange={onToggleLock}
-        compressed
+        color="primary"
+        onClick={onToggleLock}
+        iconType={isDatePickerLocked ? 'lock' : 'lockOpen'}
         aria-label={
           isDatePickerLocked
             ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA

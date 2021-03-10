@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { ILicense } from '../../../licensing/public';
-import { SecurityNavControlService } from '.';
-import { SecurityLicenseService } from '../../common/licensing';
+
 import { nextTick } from '@kbn/test/jest';
-import { securityMock } from '../mocks';
+import { coreMock } from 'src/core/public/mocks';
+
+import type { ILicense } from '../../../licensing/public';
+import { SecurityLicenseService } from '../../common/licensing';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { securityMock } from '../mocks';
+import { SecurityNavControlService } from './nav_control_service';
 
 const validLicense = {
   isAvailable: true,

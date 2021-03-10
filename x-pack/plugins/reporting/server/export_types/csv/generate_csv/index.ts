@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,7 +13,7 @@ import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { getFieldFormats } from '../../../services';
-import { IndexPatternSavedObject, SavedSearchGeneratorResult } from '../types';
+import { IndexPatternSavedObjectDeprecatedCSV, SavedSearchGeneratorResult } from '../types';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 import { createEscapeValue } from './escape_value';
 import { fieldFormatMapFactory } from './field_format_map';
@@ -39,7 +40,7 @@ interface SearchRequest {
 export interface GenerateCsvParams {
   browserTimezone?: string;
   searchRequest: SearchRequest;
-  indexPatternSavedObject: IndexPatternSavedObject;
+  indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
   fields: string[];
   metaFields: string[];
   conflictedTypesFields: string[];

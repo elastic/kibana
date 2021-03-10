@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RGBAImage } from './image_utils';
+import { isGlDrawLayer } from './sort_layers';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLayer) {
   const mbStyle = mbMap.getStyle();
@@ -13,6 +15,11 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
   mbStyle.layers.forEach((mbLayer) => {
     // ignore mapbox layers from spatial filter layer
     if (spatialFilterLayer.ownsMbLayerId(mbLayer.id)) {
+      return;
+    }
+
+    // ignore gl-draw layers
+    if (isGlDrawLayer(mbLayer.id)) {
       return;
     }
 

@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
+import { Assign } from 'utility-types';
 import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 
-import { parseInterval } from '../../../utils';
+import { Unit } from '@elastic/datemath';
+import { parseInterval, splitStringInterval } from '../../../utils';
 import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
@@ -47,6 +37,10 @@ function isObject(o: any): o is Record<string, any> {
 
 function isValidMoment(m: any): boolean {
   return m && 'isValid' in m && m.isValid();
+}
+
+function isDurationInterval(i: any): i is moment.Duration {
+  return moment.isDuration(i) && Boolean(+i);
 }
 
 export interface TimeBucketsConfig extends Record<string, any> {
@@ -183,38 +177,26 @@ export class TimeBuckets {
    * @param {object|string|moment.duration} input - see desc
    */
   setInterval(input: null | string | Record<string, any>) {
-    let interval = input;
+    this._originalInterval = null;
+    this._i = isObject(input) ? input.val : input;
 
-    // selection object -> val
-    if (isObject(input) && !moment.isDuration(input)) {
-      interval = input.val;
-    }
-
-    if (!interval || interval === autoInterval) {
+    if (!this._i || this._i === autoInterval) {
       this._i = autoInterval;
       return;
     }
 
-    if (isString(interval)) {
-      input = interval;
+    if (isString(this._i)) {
+      const parsedInterval = parseInterval(this._i);
 
-      // Preserve the original units because they're lost when the interval is converted to a
-      // moment duration object.
-      this._originalInterval = input;
-
-      interval = parseInterval(interval);
-      if (interval === null || +interval === 0) {
-        interval = null;
+      if (isDurationInterval(parsedInterval)) {
+        this._originalInterval = this._i;
+        this._i = parsedInterval;
       }
     }
 
-    // if the value wasn't converted to a duration, and isn't
-    // already a duration, we have a problem
-    if (!moment.isDuration(interval)) {
-      throw new TypeError('"' + input + '" is not a valid interval.');
+    if (!isDurationInterval(this._i)) {
+      throw new TypeError('"' + this._i + '" is not a valid interval.');
     }
-
-    this._i = interval;
   }
 
   /**
@@ -246,15 +228,9 @@ export class TimeBuckets {
    */
   getInterval(useNormalizedEsInterval = true): TimeBucketsInterval {
     const duration = this.getDuration();
-
-    // either pull the interval from state or calculate the auto-interval
-    const readInterval = () => {
-      const interval = this._i;
-      if (moment.isDuration(interval)) return interval;
-      return calcAutoIntervalNear(this._timeBucketConfig['histogram:barTarget'], Number(duration));
-    };
-
-    const parsedInterval = readInterval();
+    const parsedInterval = isDurationInterval(this._i)
+      ? this._i
+      : calcAutoIntervalNear(this._timeBucketConfig['histogram:barTarget'], Number(duration));
 
     // check to see if the interval should be scaled, and scale it if so
     const maybeScaleInterval = (interval: moment.Duration) => {
@@ -282,10 +258,19 @@ export class TimeBuckets {
     };
 
     // append some TimeBuckets specific props to the interval
-    const decorateInterval = (interval: moment.Duration): TimeBucketsInterval => {
+    const decorateInterval = (
+      interval: Assign<moment.Duration, { scaled?: boolean }>
+    ): TimeBucketsInterval => {
+      let originalUnit: Unit | undefined;
+
+      if (!interval.scaled && this._originalInterval) {
+        originalUnit = splitStringInterval(this._originalInterval!)?.unit;
+      }
+
       const esInterval = useNormalizedEsInterval
-        ? convertDurationToNormalizedEsInterval(interval)
+        ? convertDurationToNormalizedEsInterval(interval, originalUnit)
         : convertIntervalToEsInterval(String(this._originalInterval));
+
       const prettyUnits = moment.normalizeUnits(esInterval.unit);
 
       return Object.assign(interval, {

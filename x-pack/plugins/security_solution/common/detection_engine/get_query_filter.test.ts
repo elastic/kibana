@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getQueryFilter, getAllFilters, buildEqlSearchRequest } from './get_query_filter';
@@ -980,132 +981,132 @@ describe('get_filter', () => {
         ['my custom index'],
         []
       );
-      expect(esQuery).toEqual({
-        bool: {
-          must: [],
-          filter: [
-            {
-              bool: {
-                filter: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          bool: {
-                            should: [{ match: { 'event.module': 'suricata' } }],
-                            minimum_should_match: 1,
-                          },
-                        },
-                        {
-                          bool: {
-                            should: [{ match: { 'event.kind': 'alert' } }],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      should: [
-                        {
-                          bool: {
-                            should: [{ match: { 'suricata.eve.alert.signature_id': 2610182 } }],
-                            minimum_should_match: 1,
-                          },
-                        },
-                        {
-                          bool: {
-                            should: [
-                              {
-                                bool: {
-                                  should: [
-                                    { match: { 'suricata.eve.alert.signature_id': 2610183 } },
-                                  ],
-                                  minimum_should_match: 1,
+      expect(esQuery).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "event.module": "suricata",
+                                  },
                                 },
-                              },
-                              {
-                                bool: {
-                                  should: [
-                                    {
-                                      bool: {
-                                        should: [
-                                          { match: { 'suricata.eve.alert.signature_id': 2610184 } },
-                                        ],
-                                        minimum_should_match: 1,
-                                      },
-                                    },
-                                    {
-                                      bool: {
-                                        should: [
-                                          {
-                                            bool: {
-                                              should: [
-                                                {
-                                                  match: {
-                                                    'suricata.eve.alert.signature_id': 2610185,
-                                                  },
-                                                },
-                                              ],
-                                              minimum_should_match: 1,
-                                            },
-                                          },
-                                          {
-                                            bool: {
-                                              should: [
-                                                {
-                                                  bool: {
-                                                    should: [
-                                                      {
-                                                        match: {
-                                                          'suricata.eve.alert.signature_id': 2610186,
-                                                        },
-                                                      },
-                                                    ],
-                                                    minimum_should_match: 1,
-                                                  },
-                                                },
-                                                {
-                                                  bool: {
-                                                    should: [
-                                                      {
-                                                        match: {
-                                                          'suricata.eve.alert.signature_id': 2610187,
-                                                        },
-                                                      },
-                                                    ],
-                                                    minimum_should_match: 1,
-                                                  },
-                                                },
-                                              ],
-                                              minimum_should_match: 1,
-                                            },
-                                          },
-                                        ],
-                                        minimum_should_match: 1,
-                                      },
-                                    },
-                                  ],
-                                  minimum_should_match: 1,
-                                },
-                              },
-                            ],
-                            minimum_should_match: 1,
+                              ],
+                            },
                           },
-                        },
-                      ],
-                      minimum_should_match: 1,
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "event.kind": "alert",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
                     },
-                  },
-                ],
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "suricata.eve.alert.signature_id": "2610182",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "suricata.eve.alert.signature_id": "2610183",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "suricata.eve.alert.signature_id": "2610184",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "suricata.eve.alert.signature_id": "2610185",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "suricata.eve.alert.signature_id": "2610186",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "match": Object {
+                                    "suricata.eve.alert.signature_id": "2610187",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
               },
-            },
-          ],
-          should: [],
-          must_not: [],
-        },
-      });
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        }
+      `);
     });
   });
 

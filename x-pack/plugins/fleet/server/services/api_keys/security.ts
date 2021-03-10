@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { Request } from '@hapi/hapi';
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
+
+import { KibanaRequest } from '../../../../../../src/core/server';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { FleetAdminUserInvalidError, isESClientError } from '../../errors';
-import { CallESAsCurrentUser } from '../../types';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';
 
@@ -51,16 +53,6 @@ export async function createAPIKey(
     }
 
     throw err;
-  }
-}
-export async function authenticate(callCluster: CallESAsCurrentUser) {
-  try {
-    await callCluster('transport.request', {
-      path: '/_security/_authenticate',
-      method: 'GET',
-    });
-  } catch (e) {
-    throw new Error('ApiKey is not valid: impossible to authenticate user');
   }
 }
 

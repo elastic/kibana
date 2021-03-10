@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /** @public **/
@@ -41,6 +30,7 @@ export enum ES_FIELD_TYPES {
 
   DATE = 'date',
   DATE_NANOS = 'date_nanos',
+  DATE_RANGE = 'date_range',
 
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
@@ -54,9 +44,15 @@ export enum ES_FIELD_TYPES {
   SHORT = 'short',
   UNSIGNED_LONG = 'unsigned_long',
 
+  FLOAT_RANGE = 'float_range',
+  DOUBLE_RANGE = 'double_range',
+  INTEGER_RANGE = 'integer_range',
+  LONG_RANGE = 'long_range',
+
   NESTED = 'nested',
   BYTE = 'byte',
   IP = 'ip',
+  IP_RANGE = 'ip_range',
   ATTACHMENT = 'attachment',
   TOKEN_COUNT = 'token_count',
   MURMUR3 = 'murmur3',
@@ -70,11 +66,14 @@ export enum KBN_FIELD_TYPES {
   ATTACHMENT = 'attachment',
   BOOLEAN = 'boolean',
   DATE = 'date',
+  DATE_RANGE = 'date_range',
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
   IP = 'ip',
+  IP_RANGE = 'ip_range',
   MURMUR3 = 'murmur3',
   NUMBER = 'number',
+  NUMBER_RANGE = 'number_range',
   STRING = 'string',
   UNKNOWN = 'unknown',
   CONFLICT = 'conflict',

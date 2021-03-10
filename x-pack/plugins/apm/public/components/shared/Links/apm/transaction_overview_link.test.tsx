@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
@@ -17,13 +19,11 @@ import {
 
 const history = createMemoryHistory();
 
-function wrapper({ queryParams }: { queryParams?: Record<string, unknown> }) {
-  return ({ children }: { children: React.ReactElement }) => (
+function Wrapper({ children }: { children: React.ReactElement }) {
+  return (
     <MockApmPluginContextWrapper>
       <Router history={history}>
-        <MockUrlParamsContextProvider params={queryParams}>
-          {children}
-        </MockUrlParamsContextProvider>
+        <MockUrlParamsContextProvider>{children}</MockUrlParamsContextProvider>
       </Router>
     </MockApmPluginContextWrapper>
   );
@@ -32,18 +32,24 @@ function wrapper({ queryParams }: { queryParams?: Record<string, unknown> }) {
 describe('Transactions overview link', () => {
   describe('useTransactionsOverviewHref', () => {
     it('returns transaction link', () => {
-      const { result } = renderHook(() => useTransactionsOverviewHref('foo'), {
-        wrapper: wrapper({}),
-      });
+      const { result } = renderHook(
+        () => useTransactionsOverviewHref({ serviceName: 'foo' }),
+        { wrapper: Wrapper }
+      );
       expect(result.current).toEqual(
         '/basepath/app/apm/services/foo/transactions'
       );
     });
 
     it('returns transaction link with persisted query items', () => {
-      const { result } = renderHook(() => useTransactionsOverviewHref('foo'), {
-        wrapper: wrapper({ queryParams: { latencyAggregationType: 'avg' } }),
-      });
+      const { result } = renderHook(
+        () =>
+          useTransactionsOverviewHref({
+            serviceName: 'foo',
+            latencyAggregationType: 'avg',
+          }),
+        { wrapper: Wrapper }
+      );
       expect(result.current).toEqual(
         '/basepath/app/apm/services/foo/transactions?latencyAggregationType=avg'
       );
@@ -55,13 +61,12 @@ describe('Transactions overview link', () => {
         .href;
     }
     it('returns transaction link', () => {
-      const Component = wrapper({});
       const { container } = render(
-        <Component>
+        <Wrapper>
           <TransactionOverviewLink serviceName="foo">
             Service name
           </TransactionOverviewLink>
-        </Component>
+        </Wrapper>
       );
       expect(getHref(container)).toEqual(
         'http://localhost/basepath/app/apm/services/foo/transactions'
@@ -69,15 +74,15 @@ describe('Transactions overview link', () => {
     });
 
     it('returns transaction link with persisted query items', () => {
-      const Component = wrapper({
-        queryParams: { latencyAggregationType: 'avg' },
-      });
       const { container } = render(
-        <Component>
-          <TransactionOverviewLink serviceName="foo">
+        <Wrapper>
+          <TransactionOverviewLink
+            serviceName="foo"
+            latencyAggregationType="avg"
+          >
             Service name
           </TransactionOverviewLink>
-        </Component>
+        </Wrapper>
       );
       expect(getHref(container)).toEqual(
         'http://localhost/basepath/app/apm/services/foo/transactions?latencyAggregationType=avg'

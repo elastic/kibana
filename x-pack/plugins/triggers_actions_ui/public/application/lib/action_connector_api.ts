@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpSetup } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../constants';
-import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
+import type { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
 import { ActionTypeExecutorResult } from '../../../../../plugins/actions/common';
 
 export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {

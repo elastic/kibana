@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
@@ -103,7 +105,6 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
 
     const id = `search:${embeddable.getSavedSearch().id}`;
-    const filename = embeddable.getSavedSearch().title;
     const timezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const fromTime = dateMath.parse(from);
     const toTime = dateMath.parse(to, { roundUp: true });
@@ -140,7 +141,7 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
       .then((rawResponse: string) => {
         this.isDownloading = false;
 
-        const download = `${filename}.csv`;
+        const download = `${embeddable.getSavedSearch().title}.csv`;
         const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
 
         // Hack for IE11 Support

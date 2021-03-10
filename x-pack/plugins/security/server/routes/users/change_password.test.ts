@@ -1,38 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { errors } from 'elasticsearch';
-import { ObjectType } from '@kbn/config-schema';
+
+import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import {
-  Headers,
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteConfig,
-} from '../../../../../../src/core/server';
-import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
-import { Session } from '../../session_management';
+import type { Headers, RequestHandler, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import type { AuthenticationServiceStart } from '../../authentication';
+import { AuthenticationResult } from '../../authentication';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import type { Session } from '../../session_management';
+import { sessionMock } from '../../session_management/session.mock';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
+import { routeDefinitionParamsMock } from '../index.mock';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
-import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { sessionMock } from '../../session_management/session.mock';
-import { routeDefinitionParamsMock } from '../index.mock';
-import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
-
 describe('Change password', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
-  let routeHandler: RequestHandler<any, any, any>;
+  let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockContext: DeeplyMockedKeys<RequestHandlerContext>;
+  let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext>;
 
   function checkPasswordChangeAPICall(username: string, headers?: Headers) {
     expect(
@@ -49,7 +47,10 @@ describe('Change password', () => {
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    session = routeParamsMock.session;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
+
     authc = authenticationServiceMock.createStart();
     routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
@@ -104,6 +105,7 @@ describe('Change password', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       params: { username },
       body: { password: 'old-password', newPassword: 'new-password' },
+      headers: { 'some-custom-header': 'foo' }, // the test cases below assert that this custom request header is NOT included in the ES API calls
     });
 
     it('returns 403 if old password is wrong.', async () => {
@@ -120,7 +122,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(changePasswordFailure);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -142,7 +143,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(loginFailureReason);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -159,7 +159,6 @@ describe('Change password', () => {
       expect(response.payload).toEqual(failureReason);
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
     });
@@ -171,7 +170,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
@@ -199,7 +197,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 
@@ -218,7 +215,6 @@ describe('Change password', () => {
       expect(response.payload).toBeUndefined();
 
       checkPasswordChangeAPICall(username, {
-        ...mockRequest.headers,
         authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
       });
 

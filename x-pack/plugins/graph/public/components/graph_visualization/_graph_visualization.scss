@@ -13,16 +13,16 @@
   fill: $euiColorMediumShade;
   stroke: $euiColorMediumShade;
   stroke-width: 2;
-  stroke-opacity: 0.5;
+  stroke-opacity: .5;
 
   &:hover {
-    stroke-opacity: 0.95;
+    stroke-opacity: .95;
     cursor: pointer;
   }
 
   &--selected {
     stroke: $euiColorDarkShade;
-    stroke-opacity: 0.95;
+    stroke-opacity: .95;
   }
 }
 
@@ -54,7 +54,7 @@
   fill: $euiColorMediumShade;
   &--selected {
     stroke-width: $euiSizeXS;
-    stroke: transparentize($euiColorPrimary, 0.25);
+    stroke: transparentize($euiColorPrimary, .25);
   }
 }
 

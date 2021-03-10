@@ -18,6 +18,7 @@
     "DeleteDataFrameAnalytics",
     "JobsExist",
     "GetDataFrameAnalyticsIdMap",
+    "ValidateDataFrameAnalytics",
 
     "DataVisualizer",
     "GetOverallStats",
@@ -43,7 +44,6 @@
 
     "FileDataVisualizer",
     "AnalyzeFile",
-    "ImportFile",
 
     "ResultsService",
     "GetAnomaliesTableData",
@@ -73,6 +73,7 @@
     "CloseJobs",
     "JobsSummary",
     "JobsWithTimeRange",
+    "GetJobForCloning",
     "CreateFullJobsList",
     "GetAllGroups",
     "JobsExist",

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { validateTagColor, validateTagName, validateTagDescription } from './validation';
@@ -20,10 +21,8 @@ describe('Tag attributes validation', () => {
       );
     });
 
-    it('returns an error message if the name contains invalid characters', () => {
-      expect(validateTagName('t^ag+name&')).toMatchInlineSnapshot(
-        `"Tag name can only include a-z, 0-9, _, -,:."`
-      );
+    it('does not return an error message if the name contains special characters', () => {
+      expect(validateTagName('t^ag+name&')).toBeUndefined();
     });
   });
 

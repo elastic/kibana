@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
 import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
-import { AlertsClientMock } from '../../../../../alerts/server/alerts_client.mock';
+import { AlertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
 
 describe('updateRules', () => {
   it('should call alertsClient.disable if the rule was enabled and enabled is false', async () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents, getSupertestWithoutAuth } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../../plugins/fleet/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -22,25 +24,38 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_agent_flow', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      // Wait before agent status is updated
+      return new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
+    });
+    after(async () => {
+      await esArchiver.unload('fleet/empty_fleet_server');
     });
 
     it('should work', async () => {
       const kibanaVersionAccessor = kibanaServer.version;
       const kibanaVersion = await kibanaVersionAccessor.get();
 
+      const { body: policiesRes } = await supertest.get(`/api/fleet/agent_policies`).expect(200);
+
+      expect(policiesRes.items).length(2);
+      const { id: defaultPolicyId } = policiesRes.items.find((p: any) => p.is_default);
+
       // Get enrollment token
       const { body: enrollmentApiKeysResponse } = await supertest
         .get(`/api/fleet/enrollment-api-keys`)
         .expect(200);
 
-      expect(enrollmentApiKeysResponse.list).length(1);
+      expect(enrollmentApiKeysResponse.list).length(2);
+      const { id: enrollmentKeyId } = enrollmentApiKeysResponse.list.find(
+        (key: any) => key.policy_id === defaultPolicyId
+      );
+
       const { body: enrollmentApiKeyResponse } = await supertest
-        .get(`/api/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
+        .get(`/api/fleet/enrollment-api-keys/${enrollmentKeyId}`)
         .expect(200);
 
       expect(enrollmentApiKeyResponse.item).to.have.key('api_key');
@@ -194,13 +209,23 @@ export default function (providerContext: FtrProviderContext) {
       const kibanaVersion = await kibanaVersionAccessor.get();
 
       // Get enrollment token
+      const { body: policiesRes } = await supertest.get(`/api/fleet/agent_policies`).expect(200);
+
+      expect(policiesRes.items).length(2);
+      const { id: defaultPolicyId } = policiesRes.items.find((p: any) => p.is_default);
+
+      // Get enrollment token
       const { body: enrollmentApiKeysResponse } = await supertest
         .get(`/api/fleet/enrollment-api-keys`)
         .expect(200);
 
-      expect(enrollmentApiKeysResponse.list).length(1);
+      expect(enrollmentApiKeysResponse.list).length(2);
+      const { id: enrollmentKeyId } = enrollmentApiKeysResponse.list.find(
+        (key: any) => key.policy_id === defaultPolicyId
+      );
+
       const { body: enrollmentApiKeyResponse } = await supertest
-        .get(`/api/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
+        .get(`/api/fleet/enrollment-api-keys/${enrollmentKeyId}`)
         .expect(200);
 
       expect(enrollmentApiKeyResponse.item).to.have.key('api_key');

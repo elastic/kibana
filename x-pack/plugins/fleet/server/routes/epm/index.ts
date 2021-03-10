@@ -1,10 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { IRouter } from 'src/core/server';
+
+import type { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
+import {
+  GetCategoriesRequestSchema,
+  GetPackagesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
+  DeletePackageRequestSchema,
+  BulkUpgradePackagesFromRegistryRequestSchema,
+  GetStatsRequestSchema,
+} from '../../types';
+
 import {
   getCategoriesHandler,
   getListHandler,
@@ -15,17 +30,8 @@ import {
   installPackageByUploadHandler,
   deletePackageHandler,
   bulkInstallPackagesFromRegistryHandler,
+  getStatsHandler,
 } from './handlers';
-import {
-  GetCategoriesRequestSchema,
-  GetPackagesRequestSchema,
-  GetFileRequestSchema,
-  GetInfoRequestSchema,
-  InstallPackageFromRegistryRequestSchema,
-  InstallPackageByUploadRequestSchema,
-  DeletePackageRequestSchema,
-  BulkUpgradePackagesFromRegistryRequestSchema,
-} from '../../types';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -55,6 +61,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     getLimitedListHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.STATS_PATTERN,
+      validate: GetStatsRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}`] },
+    },
+    getStatsHandler
   );
 
   router.get(

@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Execution - Short Program Name",
   "query": "process where event.type in (\"start\", \"process_started\") and length(process.name) > 0 and\n length(process.name) == 5 and host.os.name == \"Windows\" and length(process.pe.original_file_name) > 5\n",
   "risk_score": 47,
@@ -22,6 +23,7 @@
     "Threat Detection",
     "Execution"
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -31,6 +32,7 @@ export default function ({ getPageObjects, getService }) {
     after(async () => {
       await security.testUser.restoreDefaults();
     });
+
     describe('new map', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
@@ -55,7 +57,7 @@ export default function ({ getPageObjects, getService }) {
         it('should cut the originator and stay in maps application', async () => {
           await PageObjects.maps.saveMap(
             'map created from dashboard save and return with originator app cut',
-            true
+            false
           );
           await PageObjects.maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
@@ -81,6 +83,19 @@ export default function ({ getPageObjects, getService }) {
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.equal(2);
         });
+
+        it('should lose its connection to the dashboard when creating new map', async () => {
+          await PageObjects.maps.gotoMapListingPage();
+          await PageObjects.maps.openNewMap();
+          await PageObjects.maps.expectMissingSaveAndReturnButton();
+
+          // return to origin should not be present in save modal
+          await testSubjects.click('mapSaveButton');
+          const redirectToOriginCheckboxExists = await testSubjects.exists(
+            'returnToOriginModeSwitch'
+          );
+          expect(redirectToOriginCheckboxExists).to.be(false);
+        });
       });
 
       describe('save as', () => {
@@ -94,7 +109,7 @@ export default function ({ getPageObjects, getService }) {
 
       describe('save as and uncheck return to origin switch', () => {
         it('should cut the originator and stay in maps application', async () => {
-          await PageObjects.maps.saveMap('Clone 2 of map embeddable example', true);
+          await PageObjects.maps.saveMap('Clone 2 of map embeddable example', false);
           await PageObjects.maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
           await testSubjects.existOrFail('mapSaveButton');

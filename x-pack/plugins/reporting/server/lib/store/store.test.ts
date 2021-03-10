@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
 import { ElasticsearchServiceSetup } from 'src/core/server';
-import { ReportingConfig, ReportingCore } from '../..';
+import { ReportingConfig, ReportingCore } from '../../';
 import {
   createMockConfig,
   createMockConfigSchema,
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { Report } from './report';
+import { Report, ReportDocument } from './report';
 import { ReportingStore } from './store';
 
 describe('ReportingStore', () => {
@@ -186,6 +187,66 @@ describe('ReportingStore', () => {
     });
   });
 
+  it('findReport gets a report from ES and returns a Report object', async () => {
+    // setup
+    const mockReport: ReportDocument = {
+      _id: '1234-foo-78',
+      _index: '.reporting-test-17409',
+      _primary_term: 'primary_term string',
+      _seq_no: 'seq_no string',
+      _source: {
+        kibana_name: 'test',
+        kibana_id: 'test123',
+        created_at: 'some time',
+        created_by: 'some security person',
+        jobtype: 'csv',
+        status: 'pending',
+        meta: { testMeta: 'meta' } as any,
+        payload: { testPayload: 'payload' } as any,
+        browser_type: 'browser type string',
+        attempts: 0,
+        max_attempts: 1,
+        timeout: 30000,
+        output: null,
+      },
+    };
+    callClusterStub.withArgs('get').resolves(mockReport);
+    const store = new ReportingStore(mockCore, mockLogger);
+    const report = new Report({
+      ...mockReport,
+      ...mockReport._source,
+    });
+
+    expect(await store.findReportFromTask(report.toReportTaskJSON())).toMatchInlineSnapshot(`
+      Report {
+        "_id": "1234-foo-78",
+        "_index": ".reporting-test-17409",
+        "_primary_term": "primary_term string",
+        "_seq_no": "seq_no string",
+        "attempts": 0,
+        "browser_type": "browser type string",
+        "completed_at": undefined,
+        "created_at": "some time",
+        "created_by": "some security person",
+        "jobtype": "csv",
+        "kibana_id": undefined,
+        "kibana_name": undefined,
+        "max_attempts": 1,
+        "meta": Object {
+          "testMeta": "meta",
+        },
+        "output": null,
+        "payload": Object {
+          "testPayload": "payload",
+        },
+        "process_expiration": undefined,
+        "started_at": undefined,
+        "status": "pending",
+        "timeout": 30000,
+      }
+    `);
+  });
+
   it('setReportClaimed sets the status of a record to processing', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new Report({
@@ -202,7 +263,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'ABC',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportClaimed(report, { testDoc: 'test' } as any);
@@ -222,6 +282,7 @@ describe('ReportingStore', () => {
           "if_primary_term": undefined,
           "if_seq_no": undefined,
           "index": ".reporting-test-index-12345",
+          "refresh": true,
         },
       ]
     `);
@@ -243,7 +304,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'BCD',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportFailed(report, { errors: 'yes' } as any);
@@ -263,6 +323,7 @@ describe('ReportingStore', () => {
           "if_primary_term": undefined,
           "if_seq_no": undefined,
           "index": ".reporting-test-index-12345",
+          "refresh": true,
         },
       ]
     `);
@@ -284,7 +345,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'CDE',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
@@ -304,6 +364,7 @@ describe('ReportingStore', () => {
           "if_primary_term": undefined,
           "if_seq_no": undefined,
           "index": ".reporting-test-index-12345",
+          "refresh": true,
         },
       ]
     `);
@@ -325,7 +386,6 @@ describe('ReportingStore', () => {
         browserTimezone: 'utc',
       },
       timeout: 30000,
-      priority: 1,
     });
 
     await store.setReportCompleted(report, {
@@ -355,6 +415,7 @@ describe('ReportingStore', () => {
           "if_primary_term": undefined,
           "if_seq_no": undefined,
           "index": ".reporting-test-index-12345",
+          "refresh": true,
         },
       ]
     `);

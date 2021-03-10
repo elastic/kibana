@@ -21,6 +21,7 @@ readonly links: {
             readonly installation: string;
             readonly configuration: string;
             readonly elasticsearchOutput: string;
+            readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
         };
@@ -29,6 +30,15 @@ readonly links: {
         };
         readonly metricbeat: {
             readonly base: string;
+            readonly configure: string;
+            readonly httpEndpoint: string;
+            readonly install: string;
+            readonly start: string;
+        };
+        readonly enterpriseSearch: {
+            readonly base: string;
+            readonly appSearchBase: string;
+            readonly workplaceSearchBase: string;
         };
         readonly heartbeat: {
             readonly base: string;
@@ -43,6 +53,8 @@ readonly links: {
             readonly base: string;
         };
         readonly aggs: {
+            readonly composite: string;
+            readonly composite_missing_bucket: string;
             readonly date_histogram: string;
             readonly date_range: string;
             readonly date_format_pattern: string;
@@ -81,7 +93,9 @@ readonly links: {
             readonly scriptAggs: string;
             readonly painless: string;
             readonly painlessApi: string;
+            readonly painlessLangSpec: string;
             readonly painlessSyntax: string;
+            readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
@@ -103,18 +117,51 @@ readonly links: {
         };
         readonly date: {
             readonly dateMath: string;
+            readonly dateMathIndexNames: string;
         };
         readonly management: Record<string, string>;
         readonly ml: Record<string, string>;
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
-        readonly apis: Record<string, string>;
+        readonly apis: Readonly<{
+            createIndex: string;
+            createSnapshotLifecyclePolicy: string;
+            createRoleMapping: string;
+            createRoleMappingTemplates: string;
+            createApiKey: string;
+            createPipeline: string;
+            createTransformRequest: string;
+            cronExpressions: string;
+            executeWatchActionModes: string;
+            indexExists: string;
+            openIndex: string;
+            putComponentTemplate: string;
+            painlessExecute: string;
+            painlessExecuteAPIContexts: string;
+            putComponentTemplateMetadata: string;
+            putSnapshotLifecyclePolicy: string;
+            putWatch: string;
+            updateTransform: string;
+        }>;
         readonly observability: Record<string, string>;
         readonly alerting: Record<string, string>;
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
-        readonly security: Record<string, string>;
+        readonly security: Readonly<{
+            apiKeyServiceSettings: string;
+            clusterPrivileges: string;
+            elasticsearchSettings: string;
+            elasticsearchEnableSecurity: string;
+            indicesPrivileges: string;
+            kibanaTLS: string;
+            kibanaPrivileges: string;
+            mappingRoles: string;
+            mappingRolesFieldRules: string;
+            runAsPrivilege: string;
+        }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
+        readonly plugins: Record<string, string>;
+        readonly snapshotRestore: Record<string, string>;
     };
 ```

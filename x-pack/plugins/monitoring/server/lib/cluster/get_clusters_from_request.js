@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { notFound } from '@hapi/boom';
@@ -119,6 +120,13 @@ export async function getClustersFromRequest(
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
       const alertsClient = req.getAlertsClient();
+      const alertStatus = await fetchStatus(
+        alertsClient,
+        req.server.plugins.monitoring.info,
+        undefined,
+        clusters.map((cluster) => cluster.cluster_uuid)
+      );
+
       for (const cluster of clusters) {
         const verification = verifyMonitoringLicense(req.server);
         if (!verification.enabled) {
@@ -153,12 +161,20 @@ export async function getClustersFromRequest(
         if (prodLicenseInfo.clusterAlerts.enabled) {
           try {
             cluster.alerts = {
-              list: await fetchStatus(
-                alertsClient,
-                req.server.plugins.monitoring.info,
-                undefined,
-                cluster.cluster_uuid
-              ),
+              list: Object.keys(alertStatus).reduce((accum, alertName) => {
+                const value = alertStatus[alertName];
+                if (value.states && value.states.length) {
+                  accum[alertName] = {
+                    ...value,
+                    states: value.states.filter(
+                      (state) => state.state.cluster.clusterUuid === cluster.cluster_uuid
+                    ),
+                  };
+                } else {
+                  accum[alertName] = value;
+                }
+                return accum;
+              }, {}),
               alertsMeta: {
                 enabled: true,
               },
@@ -242,7 +258,11 @@ export async function getClustersFromRequest(
     : [];
   apmsByCluster.forEach((apm) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: apm.clusterUuid });
-    set(clusters[clusterIndex], 'apm', apm.stats);
+    const { stats, config } = apm;
+    clusters[clusterIndex].apm = {
+      ...stats,
+      config,
+    };
   });
 
   // check ccr configuration

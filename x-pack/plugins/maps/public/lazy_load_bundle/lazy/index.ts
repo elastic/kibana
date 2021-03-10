@@ -1,11 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-// These are map-dependencies of the embeddable.
-// By lazy-loading these, the Maps-app can register the embeddable when the plugin mounts, without actually pulling all the code.
 
 export * from '../../embeddable/map_embeddable';
 export * from '../../kibana_services';
@@ -16,3 +14,4 @@ export { registerSource } from '../../classes/sources/source_registry';
 export { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
 export { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
 export { createBasemapLayerDescriptor } from '../../classes/layers/create_basemap_layer_descriptor';
+export { createLayerDescriptor as createESSearchSourceLayerDescriptor } from '../../classes/sources/es_search_source';

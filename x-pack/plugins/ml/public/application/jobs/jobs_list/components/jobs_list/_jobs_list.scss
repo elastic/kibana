@@ -45,7 +45,7 @@
   & > tbody {
 
     td:nth-child(4) .euiTableCellContent {
-      padding: 0px;
+      padding: 0;
     }
 
     td:nth-child(10) {
@@ -68,10 +68,10 @@
     }
 
     .euiContextMenuPanel {
-       .euiContextMenuItem {
-         white-space: nowrap;
-       }
-       .euiContextMenuItem:last-child:not(.euiContextMenuItem-isDisabled) {
+      .euiContextMenuItem {
+        white-space: nowrap;
+      }
+      .euiContextMenuItem:last-child:not(.euiContextMenuItem-isDisabled) {
         color: $euiColorDanger;
       }
     }
@@ -94,7 +94,7 @@
     width: 1px;
     display: inline-block;
     vertical-align: middle;
-    margin: 0px $euiSizeXS;
+    margin: 0 $euiSizeXS;
   }
 
   .job-description {

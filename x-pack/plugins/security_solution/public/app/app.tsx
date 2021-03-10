@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { History } from 'history';
-import React, { memo, useMemo, FC } from 'react';
+import React, { memo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { AppLeaveHandler } from '../../../../../src/core/public';
 
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -29,6 +27,7 @@ import { ApolloClientContext } from '../common/utils/apollo_context';
 import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 
 interface StartAppComponent extends AppFrontendLibs {
   children: React.ReactNode;
@@ -45,15 +44,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
   store,
 }) => {
   const { i18n } = useKibana().services;
-
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-  const theme = useMemo(
-    () => ({
-      eui: darkMode ? euiDarkVars : euiLightVars,
-      darkMode,
-    }),
-    [darkMode]
-  );
 
   return (
     <EuiErrorBoundary>
@@ -63,7 +54,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
             <ReduxStoreProvider store={store}>
               <ApolloProvider client={apolloClient}>
                 <ApolloClientContext.Provider value={apolloClient}>
-                  <ThemeProvider theme={theme}>
+                  <EuiThemeProvider darkMode={darkMode}>
                     <MlCapabilitiesProvider>
                       <ManageUserInfo>
                         <PageRouter history={history} onAppLeave={onAppLeave}>
@@ -71,7 +62,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                         </PageRouter>
                       </ManageUserInfo>
                     </MlCapabilitiesProvider>
-                  </ThemeProvider>
+                  </EuiThemeProvider>
                   <ErrorToastDispatcher />
                   <GlobalToaster />
                 </ApolloClientContext.Provider>

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { authenticationMock } from './authentication/index.mock';
-import { createSessionTimeoutMock } from './session/session_timeout.mock';
 import { licenseMock } from '../common/licensing/index.mock';
+import { authenticationMock } from './authentication/index.mock';
 import { navControlServiceMock } from './nav_control/index.mock';
+import { createSessionTimeoutMock } from './session/session_timeout.mock';
 
 function createSetupMock() {
   return {

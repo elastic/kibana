@@ -1,13 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFlexGroup,
@@ -21,12 +19,12 @@ import {
   EuiLink,
   EuiPanel,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { CredentialItem } from '../../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
-
-import { CustomSource } from '../../../../types';
 import {
   SOURCES_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
@@ -35,6 +33,8 @@ import {
   getContentSourcePath,
   getSourcesPath,
 } from '../../../../routes';
+import { CustomSource } from '../../../../types';
+import { ACCESS_TOKEN_LABEL, ID_LABEL, LEARN_CUSTOM_FEATURES_BUTTON } from '../../constants';
 
 import {
   SAVE_CUSTOM_BODY1,
@@ -42,12 +42,9 @@ import {
   SAVE_CUSTOM_RETURN_BUTTON,
   SAVE_CUSTOM_API_KEYS_TITLE,
   SAVE_CUSTOM_API_KEYS_BODY,
-  SAVE_CUSTOM_ACCESS_TOKEN_LABEL,
-  SAVE_CUSTOM_API_KEY_LABEL,
   SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE,
   SAVE_CUSTOM_STYLING_RESULTS_TITLE,
   SAVE_CUSTOM_DOC_PERMISSIONS_TITLE,
-  SAVE_CUSTOM_FEATURES_BUTTON,
 } from './constants';
 
 interface SaveCustomProps {
@@ -59,7 +56,7 @@ interface SaveCustomProps {
 
 export const SaveCustom: React.FC<SaveCustomProps> = ({
   documentationUrl,
-  newCustomSource: { key, id, accessToken, name },
+  newCustomSource: { id, accessToken, name },
   isOrganization,
   header,
 }) => (
@@ -109,16 +106,12 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <p>{SAVE_CUSTOM_API_KEYS_BODY}</p>
               </EuiText>
               <EuiSpacer />
-              <CredentialItem
-                label={SAVE_CUSTOM_ACCESS_TOKEN_LABEL}
-                value={accessToken}
-                testSubj="AccessToken"
-              />
+              <CredentialItem label={ID_LABEL} value={id} testSubj="ContentSourceId" />
               <EuiSpacer />
               <CredentialItem
-                label={SAVE_CUSTOM_API_KEY_LABEL}
-                value={key}
-                testSubj="ContentSourceKey"
+                label={ACCESS_TOKEN_LABEL}
+                value={accessToken}
+                testSubj="AccessToken"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -204,7 +197,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
               <EuiSpacer size="xs" />
               <EuiText size="s">
                 <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-                  {SAVE_CUSTOM_FEATURES_BUTTON}
+                  {LEARN_CUSTOM_FEATURES_BUTTON}
                 </EuiLink>
               </EuiText>
             </div>

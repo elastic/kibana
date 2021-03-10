@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo, useCallback } from 'react';
 import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
 import {
@@ -19,6 +21,7 @@ import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
+
 import { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
@@ -32,10 +35,11 @@ import {
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
-import { AgentRefreshContext } from './hooks';
-import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
+
+import { AgentRefreshContext } from './hooks';
+import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
@@ -90,7 +94,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText className="eui-textBreakWord">
             <h1>
               {isLoading && isInitialRequest ? (
                 <Loading />

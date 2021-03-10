@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect } from 'react';
@@ -32,18 +33,24 @@ export { getAnalysisType } from '../../../../common/util/analytics_utils';
 export type IndexPattern = string;
 
 export enum ANALYSIS_ADVANCED_FIELDS {
+  ALPHA = 'alpha',
   ETA = 'eta',
+  ETA_GROWTH_RATE_PER_TREE = 'eta_growth_rate_per_tree',
+  DOWNSAMPLE_FACTOR = 'downsample_factor',
   FEATURE_BAG_FRACTION = 'feature_bag_fraction',
   FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
   GAMMA = 'gamma',
   LAMBDA = 'lambda',
   MAX_TREES = 'max_trees',
+  MAX_OPTIMIZATION_ROUNDS_PER_HYPERPARAMETER = 'max_optimization_rounds_per_hyperparameter',
   METHOD = 'method',
   N_NEIGHBORS = 'n_neighbors',
   NUM_TOP_CLASSES = 'num_top_classes',
   NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
   OUTLIER_FRACTION = 'outlier_fraction',
   RANDOMIZE_SEED = 'randomize_seed',
+  SOFT_TREE_DEPTH_LIMIT = 'soft_tree_depth_limit',
+  SOFT_TREE_DEPTH_TOLERANCE = 'soft_tree_depth_tolerance',
 }
 
 export enum OUTLIER_ANALYSIS_METHOD {
@@ -147,10 +154,20 @@ export interface ConfusionMatrix {
   other_predicted_class_doc_count: number;
 }
 
+export interface RocCurveItem {
+  fpr: number;
+  threshold: number;
+  tpr: number;
+}
+
 export interface ClassificationEvaluateResponse {
   classification: {
-    multiclass_confusion_matrix: {
+    multiclass_confusion_matrix?: {
       confusion_matrix: ConfusionMatrix[];
+    };
+    auc_roc?: {
+      curve?: RocCurveItem[];
+      value: number;
     };
   };
 }
@@ -165,7 +182,8 @@ export const getTrainingPercent = (
   analysis: AnalysisConfig
 ):
   | RegressionAnalysis['regression']['training_percent']
-  | ClassificationAnalysis['classification']['training_percent'] => {
+  | ClassificationAnalysis['classification']['training_percent']
+  | undefined => {
   let trainingPercent;
 
   if (isRegressionAnalysis(analysis)) {
@@ -237,7 +255,8 @@ export const isClassificationEvaluateResponse = (
   return (
     keys.length === 1 &&
     keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-    arg?.classification?.multiclass_confusion_matrix !== undefined
+    (arg?.classification?.multiclass_confusion_matrix !== undefined ||
+      arg?.classification?.auc_roc !== undefined)
   );
 };
 
@@ -415,7 +434,8 @@ export enum REGRESSION_STATS {
 
 interface EvaluateMetrics {
   classification: {
-    multiclass_confusion_matrix: object;
+    multiclass_confusion_matrix?: object;
+    auc_roc?: { include_curve: boolean; class_name: string };
   };
   regression: {
     r_squared: object;
@@ -435,6 +455,8 @@ interface LoadEvalDataConfig {
   ignoreDefaultQuery?: boolean;
   jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
+  rocCurveClassName?: string;
+  includeMulticlassConfusionMatrix?: boolean;
 }
 
 export const loadEvalData = async ({
@@ -447,6 +469,8 @@ export const loadEvalData = async ({
   ignoreDefaultQuery,
   jobType,
   requiresKeyword,
+  rocCurveClassName,
+  includeMulticlassConfusionMatrix = true,
 }: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -462,7 +486,10 @@ export const loadEvalData = async ({
 
   const metrics: EvaluateMetrics = {
     classification: {
-      multiclass_confusion_matrix: {},
+      ...(includeMulticlassConfusionMatrix ? { multiclass_confusion_matrix: {} } : {}),
+      ...(rocCurveClassName !== undefined
+        ? { auc_roc: { include_curve: true, class_name: rocCurveClassName } }
+        : {}),
     },
     regression: {
       r_squared: {},

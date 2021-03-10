@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "System Shells via Services",
   "query": "event.category:process and event.type:(start or process_started) and process.parent.name:services.exe and process.name:(cmd.exe or powershell.exe)",
   "risk_score": 47,
@@ -32,13 +33,21 @@
       },
       "technique": [
         {
-          "id": "T1050",
-          "name": "New Service",
-          "reference": "https://attack.mitre.org/techniques/T1050/"
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 8
 }

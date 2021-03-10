@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiTheme } from '../../../xpack_legacy/common';
+import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import {
   getLatencyChartSelector,
@@ -25,7 +26,7 @@ const latencyChartData = {
   latencyTimeseries: [{ x: 1, y: 10 }],
   anomalyTimeseries: {
     jobId: '1',
-    anomalyBoundaries: [{ x: 1, y: 2 }],
+    anomalyBoundaries: [{ x: 1, y: 2, y0: 1 }],
     anomalyScore: [{ x: 1, x0: 2 }],
   },
 } as LatencyChartsResponse;
@@ -110,30 +111,76 @@ describe('getLatencyChartSelector', () => {
         latencyAggregationType: LatencyAggregationType.p99,
       });
       expect(latencyTimeseries).toEqual({
+        anomalyTimeseries: {
+          boundaries: [
+            {
+              color: 'rgba(0,0,0,0)',
+              areaSeriesStyle: {
+                point: {
+                  opacity: 0,
+                },
+              },
+              data: [
+                {
+                  x: 1,
+                  y: 1,
+                },
+              ],
+              fit: 'lookahead',
+              hideLegend: true,
+              hideTooltipValue: true,
+              stackAccessors: ['y'],
+              title: 'anomalyBoundariesLower',
+              type: 'area',
+            },
+            {
+              color: 'rgba(0,0,255,0.5)',
+              areaSeriesStyle: {
+                point: {
+                  opacity: 0,
+                },
+              },
+              data: [
+                {
+                  x: 1,
+                  y: 1,
+                },
+              ],
+              fit: 'lookahead',
+              hideLegend: true,
+              hideTooltipValue: true,
+              stackAccessors: ['y'],
+              title: 'anomalyBoundariesUpper',
+              type: 'area',
+            },
+          ],
+          scores: {
+            color: 'yellow',
+            data: [
+              {
+                x: 1,
+                x0: 2,
+              },
+            ],
+            title: 'anomalyScores',
+            type: 'rectAnnotation',
+          },
+        },
         latencyTimeseries: [
           {
+            color: 'black',
+            data: [
+              {
+                x: 1,
+                y: 10,
+              },
+            ],
             title: '99th percentile',
             titleShort: '99th',
-            data: [{ x: 1, y: 10 }],
             type: 'linemark',
-            color: 'black',
           },
         ],
         mlJobId: '1',
-        anomalyTimeseries: {
-          bounderies: {
-            title: 'Anomaly Boundaries',
-            data: [{ x: 1, y: 2 }],
-            type: 'area',
-            color: 'rgba(0,0,255,0.5)',
-          },
-          scores: {
-            title: 'Anomaly score',
-            data: [{ x: 1, x0: 2 }],
-            type: 'rectAnnotation',
-            color: 'yellow',
-          },
-        },
       });
     });
   });

@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // handlers that handle events from agents in response to actions received
 
-import { RequestHandler } from 'kibana/server';
-import { AcksService } from '../../services/agents';
-import { AgentEvent } from '../../../common/types/models';
-import { PostAgentAcksRequest, PostAgentAcksResponse } from '../../../common/types/rest_spec';
+import type { RequestHandler } from 'kibana/server';
+
+import type { AcksService } from '../../services/agents';
+import type { AgentEvent } from '../../../common/types/models';
+import type { PostAgentAcksRequest, PostAgentAcksResponse } from '../../../common/types/rest_spec';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const postAgentAcksHandlerBuilder = function (
@@ -18,7 +20,8 @@ export const postAgentAcksHandlerBuilder = function (
   return async (context, request, response) => {
     try {
       const soClient = ackService.getSavedObjectsClientContract(request);
-      const agent = await ackService.authenticateAgentWithAccessToken(soClient, request);
+      const esClient = ackService.getElasticsearchClientContract();
+      const agent = await ackService.authenticateAgentWithAccessToken(esClient, request);
       const agentEvents = request.body.events as AgentEvent[];
 
       // validate that all events are for the authorized agent obtained from the api key
@@ -33,7 +36,12 @@ export const postAgentAcksHandlerBuilder = function (
         });
       }
 
-      const agentActions = await ackService.acknowledgeAgentActions(soClient, agent, agentEvents);
+      const agentActions = await ackService.acknowledgeAgentActions(
+        soClient,
+        esClient,
+        agent,
+        agentEvents
+      );
 
       if (agentActions.length > 0) {
         await ackService.saveAgentEvents(soClient, agentEvents);

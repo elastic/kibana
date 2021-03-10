@@ -1,24 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
-import { formatApiName } from '../../utils/format_api_name';
-import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
-
-import { HttpLogic } from '../../../shared/http';
+import { Meta } from '../../../../../common/types';
+import { DEFAULT_META } from '../../../shared/constants';
 import {
-  FlashMessagesLogic,
+  clearFlashMessages,
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
-import { AppLogic } from '../../app_logic';
+import { HttpLogic } from '../../../shared/http';
+import { updateMetaPageIndex } from '../../../shared/table_pagination';
 
-import { Meta } from '../../../../../common/types';
+import { AppLogic } from '../../app_logic';
 import { Engine } from '../../types';
+import { formatApiName } from '../../utils/format_api_name';
+
+import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
+
 import { ApiToken, CredentialsDetails, TokenReadWrite } from './types';
 
 export const defaultApiToken: ApiToken = {
@@ -31,7 +35,6 @@ export const defaultApiToken: ApiToken = {
 
 interface CredentialsLogicActions {
   addEngineName(engineName: string): string;
-  onApiKeyDelete(tokenName: string): string;
   onApiTokenCreateSuccess(apiToken: ApiToken): ApiToken;
   onApiTokenError(formErrors: string[]): string[];
   onApiTokenUpdateSuccess(apiToken: ApiToken): ApiToken;
@@ -46,8 +49,8 @@ interface CredentialsLogicActions {
   showCredentialsForm(apiToken?: ApiToken): ApiToken;
   hideCredentialsForm(): { value: boolean };
   resetCredentials(): { value: boolean };
-  initializeCredentialsData(): { value: boolean };
-  fetchCredentials(page?: number): number;
+  onPaginate(newPageIndex: number): { newPageIndex: number };
+  fetchCredentials(): void;
   fetchDetails(): { value: boolean };
   deleteApiKey(tokenName: string): string;
   onApiTokenChange(): void;
@@ -65,7 +68,7 @@ interface CredentialsLogicValues {
   isCredentialsDataComplete: boolean;
   isCredentialsDetailsComplete: boolean;
   fullEngineAccessChecked: boolean;
-  meta: Partial<Meta>;
+  meta: Meta;
   nameInputBlurred: boolean;
   shouldShowCredentialsForm: boolean;
 }
@@ -76,7 +79,6 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
   path: ['enterprise_search', 'app_search', 'credentials_logic'],
   actions: () => ({
     addEngineName: (engineName) => engineName,
-    onApiKeyDelete: (tokenName) => tokenName,
     onApiTokenCreateSuccess: (apiToken) => apiToken,
     onApiTokenError: (formErrors) => formErrors,
     onApiTokenUpdateSuccess: (apiToken) => apiToken,
@@ -91,8 +93,8 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     showCredentialsForm: (apiToken = { ...defaultApiToken }) => apiToken,
     hideCredentialsForm: false,
     resetCredentials: false,
-    initializeCredentialsData: true,
-    fetchCredentials: (page) => page,
+    onPaginate: (newPageIndex) => ({ newPageIndex }),
+    fetchCredentials: true,
     fetchDetails: true,
     deleteApiKey: (tokenName) => tokenName,
     onApiTokenChange: () => null,
@@ -108,14 +110,13 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
           ...apiTokens.filter((token) => token.name !== apiToken.name),
           apiToken,
         ],
-        onApiKeyDelete: (apiTokens, tokenName) =>
-          apiTokens.filter((token) => token.name !== tokenName),
       },
     ],
     meta: [
-      {},
+      DEFAULT_META,
       {
         setCredentialsData: (_, { meta }) => meta,
+        onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
     isCredentialsDetailsComplete: [
@@ -129,6 +130,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
       false,
       {
         setCredentialsData: () => true,
+        fetchCredentials: () => false,
         resetCredentials: () => false,
       },
     ],
@@ -217,7 +219,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     dataLoading: [
       () => [selectors.isCredentialsDetailsComplete, selectors.isCredentialsDataComplete],
       (isCredentialsDetailsComplete, isCredentialsDataComplete) => {
-        return isCredentialsDetailsComplete === false || isCredentialsDataComplete === false;
+        return isCredentialsDetailsComplete === false && isCredentialsDataComplete === false;
       },
     ],
     activeApiTokenExists: [
@@ -227,16 +229,16 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
   }),
   listeners: ({ actions, values }) => ({
     showCredentialsForm: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
-    initializeCredentialsData: () => {
-      actions.fetchCredentials();
-      actions.fetchDetails();
-    },
-    fetchCredentials: async (page = 1) => {
+    fetchCredentials: async () => {
       try {
         const { http } = HttpLogic.values;
-        const query = { 'page[current]': page };
+        const { meta } = values;
+        const query = {
+          'page[current]': meta.page.current,
+          'page[size]': meta.page.size,
+        };
         const response = await http.get('/api/app_search/credentials', { query });
         actions.setCredentialsData(response.meta, response.results);
       } catch (e) {
@@ -258,7 +260,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
         const { http } = HttpLogic.values;
         await http.delete(`/api/app_search/credentials/${tokenName}`);
 
-        actions.onApiKeyDelete(tokenName);
+        actions.fetchCredentials();
         setSuccessMessage(DELETE_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);

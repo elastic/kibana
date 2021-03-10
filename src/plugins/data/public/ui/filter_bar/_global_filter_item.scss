@@ -14,6 +14,10 @@
     flex-shrink: 1; /* 1 */
   }
 
+  .euiBadge__iconButton:focus {
+    background-color: transparentize($euiColorPrimary, .9);
+  }
+
   &:not(.globalFilterItem-isDisabled) {
     @include euiFormControlDefaultShadow;
     box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
@@ -26,7 +30,7 @@
 
 .globalFilterItem-isDisabled {
   color: $euiColorDarkShade;
-  background-color: transparentize($euiColorLightShade, 0.5);
+  background-color: transparentize($euiColorLightShade, .5);
   text-decoration: line-through;
   font-weight: $euiFontWeightRegular;
   font-style: italic;

@@ -13,7 +13,7 @@
   ],
   "interval": "10m",
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "AWS EC2 Network Access Control List Deletion",
   "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:(DeleteNetworkAcl or DeleteNetworkAclEntry) and event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.outcome:success",
@@ -44,13 +44,21 @@
       },
       "technique": [
         {
-          "id": "T1089",
-          "name": "Disabling Security Tools",
-          "reference": "https://attack.mitre.org/techniques/T1089/"
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 5
 }

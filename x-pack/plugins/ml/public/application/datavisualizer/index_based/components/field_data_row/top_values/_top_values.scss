@@ -1,0 +1,19 @@
+.mlFieldDataTopValuesContainer {
+  padding-top: $euiSizeXS;
+}
+
+.mlTopValuesValueLabelContainer {
+  margin-right: $euiSizeM;
+  &.mlTopValuesValueLabelContainer--small {
+    width:70px;
+  }
+
+  &.mlTopValuesValueLabelContainer--large {
+    width: 200px;
+  }
+}
+
+.mlTopValuesPercentLabelContainer {
+  margin-left: $euiSizeM;
+  width:70px;
+}

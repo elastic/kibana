@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Shell via Web Server",
   "query": "event.category:process and event.type:(start or process_started) and process.name:(bash or dash) and user.name:(apache or nginx or www or \"www-data\")",
   "references": [
@@ -38,13 +38,21 @@
       },
       "technique": [
         {
-          "id": "T1100",
-          "name": "Web Shell",
-          "reference": "https://attack.mitre.org/techniques/T1100/"
+          "id": "T1505",
+          "name": "Server Software Component",
+          "reference": "https://attack.mitre.org/techniques/T1505/",
+          "subtechnique": [
+            {
+              "id": "T1505.003",
+              "name": "Web Shell",
+              "reference": "https://attack.mitre.org/techniques/T1505/003/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 9
 }

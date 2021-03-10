@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "File Deletion via Shred",
   "query": "event.category:process and event.type:(start or process_started) and process.name:shred and process.args:(\"-u\" or \"--remove\" or \"-z\" or \"--zero\")",
   "risk_score": 21,
@@ -32,13 +32,21 @@
       },
       "technique": [
         {
-          "id": "T1107",
-          "name": "File Deletion",
-          "reference": "https://attack.mitre.org/techniques/T1107/"
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.004",
+              "name": "File Deletion",
+              "reference": "https://attack.mitre.org/techniques/T1070/004/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

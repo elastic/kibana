@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash/fp';
@@ -76,9 +77,14 @@ const basicTimeline: TimelineModel = {
   },
   deletedEventIds: [],
   description: '',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: '',
+    timestampField: '@timestamp',
+  },
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',
@@ -103,6 +109,7 @@ const basicTimeline: TimelineModel = {
   sort: [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ],
@@ -932,6 +939,7 @@ describe('Timeline', () => {
         sort: [
           {
             columnId: 'some column',
+            columnType: 'text',
             sortDirection: Direction.desc,
           },
         ],
@@ -943,7 +951,9 @@ describe('Timeline', () => {
     });
 
     test('should update the sort attribute', () => {
-      expect(update.foo.sort).toEqual([{ columnId: 'some column', sortDirection: Direction.desc }]);
+      expect(update.foo.sort).toEqual([
+        { columnId: 'some column', columnType: 'text', sortDirection: Direction.desc },
+      ]);
     });
   });
 

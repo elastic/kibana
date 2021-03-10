@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
@@ -15,6 +16,12 @@ import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
+import {
+  isValidFrequency,
+  isValidRetentionPolicyMaxAge,
+  ParsedDuration,
+} from '../../../../common/validators';
+
 // This custom hook uses nested reducers to provide a generic framework to manage form state
 // and apply it to a final possibly nested configuration object suitable for passing on
 // directly to an API call. For now this is only used for the transform edit form.
@@ -24,21 +31,23 @@ import { getNestedProperty, setNestedProperty } from '../../../../../../common/u
 // The outer most level reducer defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final request object will be nested.
 // For example, `destinationIndex` and `destinationPipeline` will later be nested under `dest`.
-interface EditTransformFlyoutFieldsState {
-  [key: string]: FormField;
-  description: FormField;
-  destinationIndex: FormField;
-  destinationPipeline: FormField;
-  frequency: FormField;
-  docsPerSecond: FormField;
-}
+type EditTransformFormFields =
+  | 'description'
+  | 'destinationIndex'
+  | 'destinationPipeline'
+  | 'frequency'
+  | 'docsPerSecond'
+  | 'maxPageSearchSize'
+  | 'retentionPolicyField'
+  | 'retentionPolicyMaxAge';
+type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
 
 // The inner reducers apply validation based on supplied attributes of each field.
 export interface FormField {
   formFieldName: string;
   configFieldName: string;
   defaultValue: string;
-  dependsOn: string[];
+  dependsOn: EditTransformFormFields[];
   errorMessages: string[];
   isNullable: boolean;
   isOptional: boolean;
@@ -121,14 +130,7 @@ export const stringValidator: Validator = (value, isOptional = true) => {
   return [];
 };
 
-// Only allow frequencies in the form of 1s/1h etc.
-const frequencyNotValidErrorMessage = i18n.translate(
-  'xpack.transform.transformList.editFlyoutFormFrequencyNotValidErrorMessage',
-  {
-    defaultMessage: 'The frequency value is not valid.',
-  }
-);
-export const frequencyValidator: Validator = (arg) => {
+function parseDurationAboveZero(arg: unknown, errorMessage: string): ParsedDuration | string[] {
   if (typeof arg !== 'string' || arg === null) {
     return [stringNotValidErrorMessage];
   }
@@ -141,20 +143,49 @@ export const frequencyValidator: Validator = (arg) => {
     return [frequencyNotValidErrorMessage];
   }
 
-  const valueNumber = +regexStr[0];
-  const valueTimeUnit = regexStr[1];
+  const number = +regexStr[0];
+  const timeUnit = regexStr[1];
 
   // only valid if number is an integer above 0
-  if (isNaN(valueNumber) || !Number.isInteger(valueNumber) || valueNumber === 0) {
+  if (isNaN(number) || !Number.isInteger(number) || number === 0) {
     return [frequencyNotValidErrorMessage];
   }
 
-  // only valid if value is up to 1 hour
-  return (valueTimeUnit === 's' && valueNumber <= 3600) ||
-    (valueTimeUnit === 'm' && valueNumber <= 60) ||
-    (valueTimeUnit === 'h' && valueNumber === 1)
-    ? []
-    : [frequencyNotValidErrorMessage];
+  return { number, timeUnit };
+}
+
+// Only allow frequencies in the form of 1s/1h etc.
+const frequencyNotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormFrequencyNotValidErrorMessage',
+  {
+    defaultMessage: 'The frequency value is not valid.',
+  }
+);
+export const frequencyValidator: Validator = (arg) => {
+  const parsedArg = parseDurationAboveZero(arg, frequencyNotValidErrorMessage);
+
+  if (Array.isArray(parsedArg)) {
+    return parsedArg;
+  }
+
+  return isValidFrequency(parsedArg) ? [] : [frequencyNotValidErrorMessage];
+};
+
+// Retention policy max age validator
+const retentionPolicyMaxAgeNotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeNotValidErrorMessage',
+  {
+    defaultMessage: 'Invalid max age format. Minimum of 60s required.',
+  }
+);
+export const retentionPolicyMaxAgeValidator: Validator = (arg) => {
+  const parsedArg = parseDurationAboveZero(arg, retentionPolicyMaxAgeNotValidErrorMessage);
+
+  if (Array.isArray(parsedArg)) {
+    return parsedArg;
+  }
+
+  return isValidRetentionPolicyMaxAge(parsedArg) ? [] : [retentionPolicyMaxAgeNotValidErrorMessage];
 };
 
 const validate = {
@@ -162,10 +193,11 @@ const validate = {
   frequency: frequencyValidator,
   integerAboveZero: integerAboveZeroValidator,
   integerRange10To10000: integerRange10To10000Validator,
+  retentionPolicyMaxAge: retentionPolicyMaxAgeValidator,
 } as const;
 
 export const initializeField = (
-  formFieldName: string,
+  formFieldName: EditTransformFormFields,
   configFieldName: string,
   config: TransformConfigUnion,
   overloads?: Partial<FormField>
@@ -198,7 +230,7 @@ export interface EditTransformFlyoutState {
 // This is not a redux type action,
 // since for now we only have one action type.
 interface Action {
-  field: keyof EditTransformFlyoutFieldsState;
+  field: EditTransformFormFields;
   value: string;
 }
 
@@ -206,7 +238,7 @@ interface Action {
 // of the expected final configuration request object.
 // Considers options like if a value is nullable or optional.
 const getUpdateValue = (
-  attribute: keyof EditTransformFlyoutFieldsState,
+  attribute: EditTransformFormFields,
   config: TransformConfigUnion,
   formState: EditTransformFlyoutFieldsState,
   enforceFormValue = false
@@ -250,7 +282,7 @@ export const applyFormFieldsToTransformConfig = (
 ): PostTransformsUpdateRequestSchema =>
   // Iterates over all form fields and only if necessary applies them to
   // the request object used for updating the transform.
-  Object.keys(formState).reduce(
+  (Object.keys(formState) as EditTransformFormFields[]).reduce(
     (updateConfig, field) => merge({ ...updateConfig }, getUpdateValue(field, config, formState)),
     {}
   );
@@ -291,6 +323,25 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         valueParser: (v) => +v,
       }
     ),
+
+    // retention_policy.*
+    retentionPolicyField: initializeField(
+      'retentionPolicyField',
+      'retention_policy.time.field',
+      config,
+      { dependsOn: ['retentionPolicyMaxAge'], isNullable: false, isOptional: true }
+    ),
+    retentionPolicyMaxAge: initializeField(
+      'retentionPolicyMaxAge',
+      'retention_policy.time.max_age',
+      config,
+      {
+        dependsOn: ['retentionPolicyField'],
+        isNullable: false,
+        isOptional: true,
+        validator: 'retentionPolicyMaxAge',
+      }
+    ),
   },
   isFormTouched: false,
   isFormValid: true,
@@ -299,7 +350,10 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
 // Checks each form field for error messages to return
 // if the overall form is valid or not.
 const isFormValid = (fieldsState: EditTransformFlyoutFieldsState) =>
-  Object.keys(fieldsState).reduce((p, c) => p && fieldsState[c].errorMessages.length === 0, true);
+  (Object.keys(fieldsState) as EditTransformFormFields[]).reduce(
+    (p, c) => p && fieldsState[c].errorMessages.length === 0,
+    true
+  );
 
 // Updates a form field with its new value,
 // runs validation and populates

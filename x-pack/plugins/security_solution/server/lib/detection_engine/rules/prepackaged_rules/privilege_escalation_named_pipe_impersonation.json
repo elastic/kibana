@@ -3,12 +3,14 @@
     "Elastic"
   ],
   "description": "Identifies a privilege escalation attempt via named pipe impersonation. An adversary may abuse this technique by utilizing a framework such Metasploit's meterpreter getsystem command.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Privilege Escalation via Named Pipe Impersonation",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.pe.original_file_name in (\"Cmd.Exe\", \"PowerShell.EXE\") and \n process.args : \"echo\" and process.args : \">\" and process.args : \"\\\\\\\\.\\\\pipe\\\\*\"\n",
   "references": [
@@ -41,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
 import { SavedObject } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { FieldId } from '../../../../common/types/fields';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-
-export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
+import { RollupFields } from '../../../../common/types/fields';
 
 export interface RollupJob {
   job_id: string;

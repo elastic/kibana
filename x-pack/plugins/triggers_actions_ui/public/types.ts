@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ActionGroup, AlertActionParam, AlertTypeParams } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
-import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
+  ActionGroup,
+  AlertActionParam,
   SanitizedAlert,
   AlertAction,
   AlertAggregations,
@@ -22,7 +24,10 @@ import {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
-} from '../../alerts/common';
+  AlertTypeParams,
+  ActionVariable,
+  AlertType as CommonAlertType,
+} from '../../alerting/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -38,6 +43,7 @@ export {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
+  AlertTypeParams,
 };
 export { ActionType };
 
@@ -58,6 +64,11 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   consumer?: string;
 }
 
+export enum AlertFlyoutCloseReason {
+  SAVED,
+  CANCELED,
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
@@ -71,6 +82,11 @@ export interface ActionParamsProps<TParams> {
 export interface Pagination {
   index: number;
   size: number;
+}
+
+export interface Sorting {
+  field: string;
+  direction: string;
 }
 
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
@@ -142,12 +158,6 @@ export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
 };
 
-export interface ActionVariable {
-  name: string;
-  description: string;
-  useWithTripleBracesInTemplates?: boolean;
-}
-
 type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];
 };
@@ -181,6 +191,7 @@ export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
   tagsText: string;
+  actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
 }
@@ -193,6 +204,7 @@ export interface AlertTypeParamsExpressionProps<
   alertParams: Params;
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: AlertNotifyWhenType;
   setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setAlertProperty: <Prop extends keyof Alert>(
     key: Prop,

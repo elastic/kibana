@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { getToasts } from '../../services/notifications';
 import { SECTIONS, API_STATUS } from '../../constants';
@@ -37,7 +39,7 @@ export const loadAutoFollowPatterns = (isUpdating = false) =>
     label: t.AUTO_FOLLOW_PATTERN_LOAD,
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
-    handler: async () => await loadAutoFollowPatternsRequest(),
+    handler: async () => await loadAutoFollowPatternsRequest(isUpdating),
   });
 
 export const getAutoFollowPattern = (id) =>

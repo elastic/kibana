@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
@@ -26,6 +27,11 @@ SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
+  // fixes double scrollbar on views with EventsTable
+  #kibana-body {
+    overflow: hidden;
+  }
+
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }

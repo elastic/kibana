@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
@@ -11,6 +12,7 @@ import { AggFunctionsMapping } from 'src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import {
+  getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
@@ -41,6 +43,8 @@ function ofName(name: string, percentile: number) {
 
 const DEFAULT_PERCENTILE_VALUE = 95;
 
+const supportedFieldTypes = ['number', 'histogram'];
+
 export const percentileOperation: OperationDefinition<PercentileIndexPatternColumn, 'field'> = {
   type: 'percentile',
   displayName: i18n.translate('xpack.lens.indexPattern.percentile', {
@@ -48,7 +52,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   }),
   input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
-    if (fieldType === 'number' && aggregatable && !aggregationRestrictions) {
+    if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -61,7 +65,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
 
     return Boolean(
       newField &&
-        newField.type === 'number' &&
+        supportedFieldTypes.includes(newField.type) &&
         newField.aggregatable &&
         !newField.aggregationRestrictions
     );
@@ -69,10 +73,6 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   getDefaultLabel: (column, indexPattern, columns) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
   buildColumn: ({ field, previousColumn, indexPattern }) => {
-    const existingFormat =
-      previousColumn?.params && 'format' in previousColumn?.params
-        ? previousColumn?.params?.format
-        : undefined;
     const existingPercentileParam =
       previousColumn?.operationType === 'percentile' && previousColumn?.params.percentile;
     const newPercentileParam = existingPercentileParam || DEFAULT_PERCENTILE_VALUE;
@@ -84,8 +84,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       isBucketed: false,
       scale: 'ratio',
       params: {
-        format: existingFormat,
         percentile: newPercentileParam,
+        ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },

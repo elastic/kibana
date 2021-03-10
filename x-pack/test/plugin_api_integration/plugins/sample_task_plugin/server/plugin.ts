@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -104,6 +105,20 @@ export class SampleTaskManagerFixturePlugin
         // fail after the first failed run
         maxAttempts: 1,
       },
+      sampleTaskWithSingleConcurrency: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Single Concurrency',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that can only have one concurrent instance.',
+      },
+      sampleTaskWithLimitedConcurrency: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Max Concurrency of 2',
+        maxConcurrency: 2,
+        timeout: '60s',
+        description: 'A sample task that can only have two concurrent instance.',
+      },
       sampleRecurringTaskTimingOut: {
         title: 'Sample Recurring Task that Times Out',
         description: 'A sample task that times out each run.',
@@ -167,6 +182,9 @@ export class SampleTaskManagerFixturePlugin
       },
 
       async beforeMarkRunning(context) {
+        if (context.taskInstance?.params?.originalParams?.throwOnMarkAsRunning) {
+          throw new Error(`Sample task ${context.taskInstance.id} threw on MarkAsRunning`);
+        }
         return context;
       },
     });

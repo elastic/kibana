@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import {
   ResponseObject as HapiResponseObject,
   ResponseToolkit as HapiResponseToolkit,
@@ -38,6 +28,7 @@ function setHeaders(response: HapiResponseObject, headers: Record<string, string
       response.header(header, value as any);
     }
   });
+  applyEtag(response, headers);
   return response;
 }
 
@@ -49,6 +40,7 @@ const statusHelpers = {
 
 export class HapiResponseAdapter {
   constructor(private readonly responseToolkit: HapiResponseToolkit) {}
+
   public toBadRequest(message: string) {
     const error = Boom.badRequest();
     error.output.payload.message = message;
@@ -125,6 +117,7 @@ export class HapiResponseAdapter {
         .response(kibanaResponse.payload)
         .code(kibanaResponse.status);
       setHeaders(response, kibanaResponse.options.headers);
+
       return response;
     }
 
@@ -159,4 +152,11 @@ function getErrorMessage(payload?: ResponseError): string {
 
 function getErrorAttributes(payload?: ResponseError): ResponseErrorAttributes | undefined {
   return typeof payload === 'object' && 'attributes' in payload ? payload.attributes : undefined;
+}
+
+function applyEtag(response: HapiResponseObject, headers: Record<string, string | string[]>) {
+  const etagHeader = Object.keys(headers).find((header) => header.toLowerCase() === 'etag');
+  if (etagHeader) {
+    response.etag(headers[etagHeader] as string);
+  }
 }

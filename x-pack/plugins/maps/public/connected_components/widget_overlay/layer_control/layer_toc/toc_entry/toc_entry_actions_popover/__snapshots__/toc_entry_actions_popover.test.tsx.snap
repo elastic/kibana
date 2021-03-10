@@ -109,6 +109,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
         },
       ]
     }
+    size="m"
   />
 </EuiPopover>
 `;
@@ -222,6 +223,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
         },
       ]
     }
+    size="m"
   />
 </EuiPopover>
 `;
@@ -336,6 +338,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
         },
       ]
     }
+    size="m"
   />
 </EuiPopover>
 `;
@@ -418,6 +421,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
         },
       ]
     }
+    size="m"
   />
 </EuiPopover>
 `;

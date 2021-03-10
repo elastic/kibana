@@ -1,4 +1,4 @@
-@include euiHeaderAffordForFixed;
+@import './banner';
 
 .euiDataGrid__restrictBody {
   .headerGlobalNav,
@@ -27,4 +27,19 @@
   .euiBody--collapsibleNavIsDocked & {
     display: none;
   }
+}
+
+.header__breadcrumbsWithExtensionContainer {
+  overflow: hidden; // enables text-ellipsis in the last breadcrumb
+  .euiHeaderBreadcrumbs {
+    // stop breadcrumbs from growing.
+    // this makes the extension appear right next to the last breadcrumb
+    flex-grow: 0;
+    margin-right: 0;
+
+    overflow: hidden; // enables text-ellipsis in the last breadcrumb
+  }
+}
+.header__breadcrumbsAppendExtension {
+  flex-grow: 1;
 }

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
@@ -1720,6 +1709,13 @@ describe('migration visualization', () => {
       expect(isVislibVis).toEqual(true);
     });
 
+    it('should decorate existing docs with the kibana legacy palette', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+
     describe('labels.filter', () => {
       it('should keep existing categoryAxes labels.filter value', () => {
         const migratedTestDoc = migrate(getTestDoc('area', [{ labels: { filter: false } }]));
@@ -1764,6 +1760,147 @@ describe('migration visualization', () => {
 
         expect(result.labels.filter).toEqual(true);
       });
+    });
+  });
+
+  describe('7.12.0 update "schema" in aggregations', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.12.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const testDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metric',
+          title: '[Flights] Delay Type',
+          aggs: [
+            {
+              id: '1',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '1-bucket',
+                params: {
+                  orderAgg: {
+                    schema: {
+                      name: 'orderAgg',
+                    },
+                  },
+                },
+                schema: {
+                  name: 'bucketAgg',
+                },
+              },
+              customMetric: {
+                id: '1-metric',
+                schema: {
+                  name: 'metricAgg',
+                },
+                params: {
+                  customMetric: {
+                    schema: {
+                      name: 'metricAgg',
+                    },
+                  },
+                },
+              },
+            },
+            {
+              id: '2',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '2-bucket',
+                params: {
+                  orderAgg: {
+                    schema: {
+                      name: 'orderAgg',
+                    },
+                  },
+                },
+              },
+              customMetric: {
+                id: '2-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: {
+                      name: 'metricAgg',
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    const expectedDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metric',
+          title: '[Flights] Delay Type',
+          aggs: [
+            {
+              id: '1',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '1-bucket',
+                params: {
+                  orderAgg: {
+                    schema: 'orderAgg',
+                  },
+                },
+                schema: 'bucketAgg',
+              },
+              customMetric: {
+                id: '1-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: 'metricAgg',
+                  },
+                },
+              },
+            },
+            {
+              id: '2',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '2-bucket',
+                params: {
+                  orderAgg: {
+                    schema: 'orderAgg',
+                  },
+                },
+              },
+              customMetric: {
+                id: '2-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: 'metricAgg',
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    it('should replace all schema object with schema name', () => {
+      const migratedTestDoc = migrate(testDoc);
+
+      expect(migratedTestDoc).toEqual(expectedDoc);
     });
   });
 });

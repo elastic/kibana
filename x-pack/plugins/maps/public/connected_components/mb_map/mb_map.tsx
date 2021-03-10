@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -18,6 +19,7 @@ import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 // @ts-expect-error
 import { DrawControl } from './draw_control';
+import { ScaleControl } from './scale_control';
 // @ts-expect-error
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
@@ -40,6 +42,7 @@ import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
+import { TileStatusTracker } from './tile_status_tracker';
 // @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 // @ts-expect-error
@@ -48,17 +51,15 @@ import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
-interface Props {
+export interface Props {
   isMapReady: boolean;
   settings: MapSettings;
   layerList: ILayer[];
   spatialFiltersLayer: ILayer;
   goto?: Goto | null;
   inspectorAdapters: Adapters;
+  isFullScreen: boolean;
   scrollZoom: boolean;
-  disableInteractive: boolean;
-  disableTooltipControl: boolean;
-  hideViewControl: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;
   onMapDestroyed: () => void;
@@ -72,6 +73,7 @@ interface Props {
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   geoFields: GeoFieldWithIndex[];
   renderTooltipContent?: RenderToolTipContent;
+  setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
 }
 
 interface State {
@@ -84,6 +86,9 @@ export class MBMap extends Component<Props, State> {
   private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
+  private _prevDisableInteractive?: boolean;
+  private _navigationControl = new mapboxgl.NavigationControl({ showCompass: false });
+  private _tileStatusTracker?: TileStatusTracker;
 
   state: State = {
     prevLayerList: undefined,
@@ -120,6 +125,9 @@ export class MBMap extends Component<Props, State> {
     this._isMounted = false;
     if (this._checker) {
       this._checker.destroy();
+    }
+    if (this._tileStatusTracker) {
+      this._tileStatusTracker.destroy();
     }
     if (this.state.mbMap) {
       this.state.mbMap.remove();
@@ -181,7 +189,6 @@ export class MBMap extends Component<Props, State> {
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
-        interactive: !this.props.disableInteractive,
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
       };
@@ -197,9 +204,12 @@ export class MBMap extends Component<Props, State> {
       const mbMap = new mapboxgl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
-      if (!this.props.disableInteractive) {
-        mbMap.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
-      }
+
+      this._tileStatusTracker = new TileStatusTracker({
+        mbMap,
+        getCurrentLayerList: () => this.props.layerList,
+        setAreTilesLoaded: this.props.setAreTilesLoaded,
+      });
 
       const tooManyFeaturesImageSrc =
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAA7DgAAOw4BzLahgwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAARLSURBVHic7ZnPbxRVAMe/7735sWO3293ZlUItJsivCxEE0oTYRgu1FqTQoFSwKTYx8SAH/wHjj4vRozGGi56sMcW2UfqTEuOhppE0KJc2GIuKQFDY7qzdtrudX88D3YTUdFuQN8+k87ltZt7uZz958/bNLAGwBWsYKltANmEA2QKyCQPIFpBNGEC2gGzCALIFZBMGkC0gmzCAbAHZhAFkC8gmDCBbQDZhANkCslnzARQZH6oDpNs0D5UDSUIInePcOpPLfdfnODNBuwQWIAWwNOABwHZN0x8npE6hNLJ4DPWRyFSf40wE5VOEQPBjcR0g3YlE4ybGmtK+/1NzJtOZA/xSYwZMs3nG962T2ez3It2AANaA/kSidYuivOQBs5WM1fUnk6f0u+GXJUqIuUtVXx00zRbRfkIDfBqL7a1WlIYbjvNtTTr99jXXHVpH6dMjK0R4cXq6c9rzxjcx9sKX8XitSEdhAToMI7VP10/97fsTh7PZrgWAN1lW72KE2vOm2b5chDTgtWQyn93x/bEEIetEOQIC14CxVOr1CkKefH929t0v8vn0vcdGEoljGxXl4C3PGz2YyXy+AHARDqtByAxoUdWKBKV70r4/vvTLA0CjZfX+5nkDGxirKzUTgkBIgNaysh3gnF627R+XO+dQJvP1ddcdrmSsbtA020pF+CAW21qrqmUiXIUEqGRsIwD0FQq/lzqv0bJ6rrvucBVjzwyb5ivLRTiiaW+8VV7eIEBVTAANiIIQd9RxZlc6t9Gyem647vn1jD07ZJonl4sQASoevqmgABzwwHnJzc69PGdZ3X+47sgGxuqHTPPE0ggeVtg5/QeEBMhxPg1Aa1DV2GrHPG9ZXy1G2D+wNALn9jyQEeHKAJgP+033Kgrdqij7AFwZtu3bqx3XWShMHtV1o1pRGo4YxiNd+fyEB2DKdX/4aG5u0hbwcylkBryTy/3scT6zW9Nq7ndso2Wdvea6Q1WUHuiPx1/WAXLBcWZXun94UMRcAoD/p+ddTFK6u8MwUvc7vsmyem+67oVqVT0wkEgcF+FYRNhW+L25uX6f84XThtHxIBudE5bVY/t++jFVrU/dvVSFICzAqG3PX/S8rihj2/61qK1AOUB7ksl2jdLUL7Z9rvgcQQRCFsEi5wqFmw26XnhCUQ63GcZmCly95Lrzpca0G0byk3j8tEnpU1c975tmyxoU5QcE8EAEAM5WVOzfoarHAeC2749dcpzxMwsLv07Ztg0AOzVNf03Ttu/S9T2PMlbjc25fdpyutmx2TLRbIAEA4M1otKo1EjmaoHQn4ZwBgA/kAVAK6MXXdzxv/ONcrq/HcbJBeAUWoEizqsaORaPbKglZrxMSZZyrM76f/ovzWx/m85PFWREUgQf4v7Hm/xcIA8gWkE0YQLaAbMIAsgVkEwaQLSCbMIBsAdmEAWQLyCYMIFtANmEA2QKyCQPIFpDNmg/wD3OFdEybUvJjAAAAAElFTkSuQmCC';
@@ -260,7 +270,7 @@ export class MBMap extends Component<Props, State> {
       }, 100)
     );
     // Attach event only if view control is visible, which shows lat/lon
-    if (!this.props.hideViewControl) {
+    if (!this.props.settings.hideViewControl) {
       const throttledSetMouseCoordinates = _.throttle((e: MapMouseEvent) => {
         this.props.setMouseCoordinates({
           lat: e.lngLat.lat,
@@ -333,7 +343,7 @@ export class MBMap extends Component<Props, State> {
       this.props.layerList,
       this.props.spatialFiltersLayer
     );
-    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap));
+    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap!));
     syncLayerOrder(this.state.mbMap, this.props.spatialFiltersLayer, this.props.layerList);
   };
 
@@ -355,6 +365,28 @@ export class MBMap extends Component<Props, State> {
   _syncSettings() {
     if (!this.state.mbMap) {
       return;
+    }
+
+    if (
+      this._prevDisableInteractive === undefined ||
+      this._prevDisableInteractive !== this.props.settings.disableInteractive
+    ) {
+      this._prevDisableInteractive = this.props.settings.disableInteractive;
+      if (this.props.settings.disableInteractive) {
+        this.state.mbMap.boxZoom.disable();
+        this.state.mbMap.doubleClickZoom.disable();
+        this.state.mbMap.dragPan.disable();
+        try {
+          this.state.mbMap.removeControl(this._navigationControl);
+        } catch (error) {
+          // ignore removeControl errors
+        }
+      } else {
+        this.state.mbMap.boxZoom.enable();
+        this.state.mbMap.doubleClickZoom.enable();
+        this.state.mbMap.dragPan.enable();
+        this.state.mbMap.addControl(this._navigationControl, 'top-left');
+      }
     }
 
     let zoomRangeChanged = false;
@@ -384,9 +416,10 @@ export class MBMap extends Component<Props, State> {
   render() {
     let drawControl;
     let tooltipControl;
+    let scaleControl;
     if (this.state.mbMap) {
       drawControl = <DrawControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />;
-      tooltipControl = !this.props.disableTooltipControl ? (
+      tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
           mbMap={this.state.mbMap}
           addFilters={this.props.addFilters}
@@ -397,6 +430,9 @@ export class MBMap extends Component<Props, State> {
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
+      scaleControl = this.props.settings.showScaleControl ? (
+        <ScaleControl mbMap={this.state.mbMap} isFullScreen={this.props.isFullScreen} />
+      ) : null;
     }
     return (
       <div
@@ -406,6 +442,7 @@ export class MBMap extends Component<Props, State> {
         data-test-subj="mapContainer"
       >
         {drawControl}
+        {scaleControl}
         {tooltipControl}
       </div>
     );

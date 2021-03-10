@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { shallow } from 'enzyme';
 import { OfExpression } from './of';
@@ -131,5 +133,23 @@ describe('of expression', () => {
         />
       )
     ).toBeTruthy();
+  });
+
+  it('renders a helptext when passed as a prop', () => {
+    const onChangeSelectedAggField = jest.fn();
+    const wrapper = shallow(
+      <OfExpression
+        aggType="count"
+        errors={{ aggField: [] }}
+        fields={[{ normalizedType: 'number', name: 'test', text: 'test text' }]}
+        aggField="test"
+        onChangeSelectedAggField={onChangeSelectedAggField}
+        helpText="Helptext test message"
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="availablefieldsOptionsFormRow"]').prop('helpText')).toBe(
+      'Helptext test message'
+    );
   });
 });

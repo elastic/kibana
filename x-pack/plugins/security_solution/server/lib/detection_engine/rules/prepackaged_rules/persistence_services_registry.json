@@ -3,12 +3,14 @@
     "Elastic"
   ],
   "description": "Identifies processes modifying the services registry key directly, instead of through the expected Windows APIs. This could be an indication of an adversary attempting to stealthily persist through abnormal service creation or modification of an existing service.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Unusual Persistence via Services Registry",
   "query": "registry where registry.path : (\"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\*\\\\ServiceDLL\", \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\*\\\\ImagePath\") and\n  not registry.data.strings : (\"C:\\\\windows\\\\system32\\\\Drivers\\\\*.sys\", \n                               \"\\\\SystemRoot\\\\System32\\\\drivers\\\\*.sys\", \n                               \"system32\\\\DRIVERS\\\\USBSTOR\") and\n  not (process.name : \"procexp??.exe\" and registry.data.strings : \"C:\\\\*\\\\procexp*.sys\") and\n  not process.executable : (\"C:\\\\Program Files*\\\\*.exe\", \n                            \"C:\\\\Windows\\\\System32\\\\svchost.exe\", \n                            \"C:\\\\Windows\\\\winsxs\\\\*\\\\TiWorker.exe\", \n                            \"C:\\\\Windows\\\\System32\\\\drvinst.exe\", \n                            \"C:\\\\Windows\\\\System32\\\\services.exe\", \n                            \"C:\\\\Windows\\\\System32\\\\msiexec.exe\", \n                            \"C:\\\\Windows\\\\System32\\\\regsvr32.exe\")\n",
   "risk_score": 21,
@@ -31,13 +33,21 @@
       },
       "technique": [
         {
-          "id": "T1050",
-          "name": "New Service",
-          "reference": "https://attack.mitre.org/techniques/T1050/"
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

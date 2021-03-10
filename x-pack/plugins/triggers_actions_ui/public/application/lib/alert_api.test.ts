@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Alert, AlertType, AlertUpdates } from '../../types';
@@ -25,11 +26,11 @@ import {
   updateAlert,
   muteAlertInstance,
   unmuteAlertInstance,
-  health,
+  alertingFrameworkHealth,
   mapFiltersToKql,
 } from './alert_api';
 import uuid from 'uuid';
-import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerts/common';
+import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerting/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -179,7 +180,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": undefined,
             "search_fields": undefined,
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -209,7 +210,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": "apples",
             "search_fields": "[\\"name\\",\\"tags\\"]",
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -243,7 +244,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": "foo",
             "search_fields": "[\\"name\\",\\"tags\\"]",
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -277,7 +278,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": undefined,
             "search_fields": undefined,
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -312,7 +313,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": "baz",
             "search_fields": "[\\"name\\",\\"tags\\"]",
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -347,7 +348,7 @@ describe('loadAlerts', () => {
             "per_page": 10,
             "search": "apples, foo, baz",
             "search_fields": "[\\"name\\",\\"tags\\"]",
-            "sort_field": "name.keyword",
+            "sort_field": "name",
             "sort_order": "asc",
           },
         },
@@ -801,9 +802,9 @@ describe('unmuteAlerts', () => {
   });
 });
 
-describe('health', () => {
-  test('should call health API', async () => {
-    const result = await health({ http });
+describe('alertingFrameworkHealth', () => {
+  test('should call alertingFrameworkHealth API', async () => {
+    const result = await alertingFrameworkHealth({ http });
     expect(result).toEqual(undefined);
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [

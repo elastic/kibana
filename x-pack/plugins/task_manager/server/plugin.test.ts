@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
@@ -20,6 +21,7 @@ describe('TaskManagerPlugin', () => {
         index: 'foo',
         max_attempts: 9,
         poll_interval: 3000,
+        version_conflict_threshold: 80,
         max_poll_inactivity_cycles: 10,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,
@@ -37,7 +39,7 @@ describe('TaskManagerPlugin', () => {
       pluginInitializerContext.env.instanceUuid = '';
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      expect(taskManagerPlugin.setup(coreMock.createSetup())).rejects.toEqual(
+      expect(() => taskManagerPlugin.setup(coreMock.createSetup())).toThrow(
         new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`)
       );
     });
@@ -49,6 +51,7 @@ describe('TaskManagerPlugin', () => {
         index: 'foo',
         max_attempts: 9,
         poll_interval: 3000,
+        version_conflict_threshold: 80,
         max_poll_inactivity_cycles: 10,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,
@@ -66,6 +69,15 @@ describe('TaskManagerPlugin', () => {
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
 
       const setupApi = await taskManagerPlugin.setup(coreMock.createSetup());
+
+      // we only start a poller if we have task types that we support and we track
+      // phases (moving from Setup to Start) based on whether the poller is working
+      setupApi.registerTaskDefinitions({
+        setupTimeType: {
+          title: 'setupTimeType',
+          createTaskRunner: () => ({ async run() {} }),
+        },
+      });
 
       await taskManagerPlugin.start(coreMock.createStart());
 

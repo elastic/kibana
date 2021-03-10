@@ -1,18 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo } from 'react';
 
 import * as Api from '../api';
 import { HttpStart } from '../../../../../../src/core/public';
-import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
+import {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../common/schemas';
 import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps, ApiListExportProps } from '../types';
 import { getIdsAndNamespaces } from '../utils';
+import { transformInput, transformNewItemOutput, transformOutput } from '../transforms';
 
 export interface ExceptionsApi {
+  addExceptionListItem: (arg: {
+    listItem: CreateExceptionListItemSchema;
+  }) => Promise<ExceptionListItemSchema>;
+  updateExceptionListItem: (arg: {
+    listItem: UpdateExceptionListItemSchema;
+  }) => Promise<ExceptionListItemSchema>;
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
   deleteExceptionList: (arg: ApiCallMemoProps) => Promise<void>;
   getExceptionItem: (
@@ -28,6 +41,20 @@ export interface ExceptionsApi {
 export const useApi = (http: HttpStart): ExceptionsApi => {
   return useMemo(
     (): ExceptionsApi => ({
+      async addExceptionListItem({
+        listItem,
+      }: {
+        listItem: CreateExceptionListItemSchema;
+      }): Promise<ExceptionListItemSchema> {
+        const abortCtrl = new AbortController();
+        const sanitizedItem: CreateExceptionListItemSchema = transformNewItemOutput(listItem);
+
+        return Api.addExceptionListItem({
+          http,
+          listItem: sanitizedItem,
+          signal: abortCtrl.signal,
+        });
+      },
       async deleteExceptionItem({
         id,
         namespaceType,
@@ -99,12 +126,14 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         const abortCtrl = new AbortController();
 
         try {
-          const item = await Api.fetchExceptionListItemById({
-            http,
-            id,
-            namespaceType,
-            signal: abortCtrl.signal,
-          });
+          const item = transformInput(
+            await Api.fetchExceptionListItemById({
+              http,
+              id,
+              namespaceType,
+              signal: abortCtrl.signal,
+            })
+          );
           onSuccess(item);
         } catch (error) {
           onError(error);
@@ -162,7 +191,10 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
               signal: abortCtrl.signal,
             });
             onSuccess({
-              exceptions: data,
+              // This data transform is UI specific and useful for UI concerns
+              // to compensate for the differences and preferences of how ReactJS might prefer
+              // data vs. how we want to model data. View `transformInput` for more details
+              exceptions: data.map((item) => transformInput(item)),
               pagination: {
                 page,
                 perPage,
@@ -182,6 +214,20 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         } catch (error) {
           onError(error);
         }
+      },
+      async updateExceptionListItem({
+        listItem,
+      }: {
+        listItem: UpdateExceptionListItemSchema;
+      }): Promise<ExceptionListItemSchema> {
+        const abortCtrl = new AbortController();
+        const sanitizedItem: UpdateExceptionListItemSchema = transformOutput(listItem);
+
+        return Api.updateExceptionListItem({
+          http,
+          listItem: sanitizedItem,
+          signal: abortCtrl.signal,
+        });
       },
     }),
     [http]

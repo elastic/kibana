@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
+import { nextTick } from '@kbn/test/jest';
+
+import { EngineTypes } from './types';
 
 import { EngineLogic } from './';
 
 describe('EngineLogic', () => {
+  const { mount } = new LogicMounter(EngineLogic);
+  const { http } = mockHttpValues;
+
   const mockEngineData = {
     name: 'some-engine',
-    type: 'default',
+    type: EngineTypes.default,
     created_at: 'some date timestamp',
     language: null,
     document_count: 1,
@@ -45,8 +47,6 @@ describe('EngineLogic', () => {
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
   };
-
-  const { mount } = new LogicMounter(EngineLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -94,7 +94,7 @@ describe('EngineLogic', () => {
           const mockReindexJob = {
             percentageComplete: 50,
             numDocumentsWithErrors: 2,
-            activeReindexJobId: 123,
+            activeReindexJobId: '123',
           };
           EngineLogic.actions.setIndexingStatus(mockReindexJob);
 
@@ -177,11 +177,10 @@ describe('EngineLogic', () => {
       it('fetches and sets engine data', async () => {
         mount({ engineName: 'some-engine' });
         jest.spyOn(EngineLogic.actions, 'setEngineData');
-        const promise = Promise.resolve(mockEngineData);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(mockEngineData));
 
         EngineLogic.actions.initializeEngine();
-        await promise;
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine');
         expect(EngineLogic.actions.setEngineData).toHaveBeenCalledWith(mockEngineData);
@@ -190,15 +189,11 @@ describe('EngineLogic', () => {
       it('handles errors', async () => {
         mount();
         jest.spyOn(EngineLogic.actions, 'setEngineNotFound');
-        const promise = Promise.reject('An error occured');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occured'));
 
-        try {
-          EngineLogic.actions.initializeEngine();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineLogic.actions.initializeEngine();
+        await nextTick();
+
         expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
       });
     });
@@ -220,7 +215,7 @@ describe('EngineLogic', () => {
 
     describe('isMetaEngine', () => {
       it('should be set based on engine.type', () => {
-        const mockMetaEngine = { ...mockEngineData, type: 'meta' };
+        const mockMetaEngine = { ...mockEngineData, type: EngineTypes.meta };
         mount({ engine: mockMetaEngine });
 
         expect(EngineLogic.values).toEqual({

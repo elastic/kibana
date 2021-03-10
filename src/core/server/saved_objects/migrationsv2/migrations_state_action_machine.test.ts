@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { migrationStateActionMachine } from './migrations_state_action_machine';
@@ -325,20 +314,25 @@ describe('migrationsStateActionMachine', () => {
         next: () => {
           throw new ResponseError(
             elasticsearchClientMock.createApiResponse({
-              body: { error: { type: 'snapshot_in_progress_exception', reason: 'error reason' } },
+              body: {
+                error: {
+                  type: 'snapshot_in_progress_exception',
+                  reason: 'Cannot delete indices that are being snapshotted',
+                },
+              },
             })
           );
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. ResponseError: snapshot_in_progress_exception]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Error: [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {
         "debug": Array [],
         "error": Array [
           Array [
-            "[.my-so-index] [snapshot_in_progress_exception]: error reason",
+            "[.my-so-index] [snapshot_in_progress_exception]: Cannot delete indices that are being snapshotted",
           ],
           Array [
             "[.my-so-index] migration failed, dumping execution log:",
@@ -363,7 +357,7 @@ describe('migrationsStateActionMachine', () => {
         },
       })
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Please check the health of your Elasticsearch cluster and try again. Error: this action throws]`
+      `[Error: Unable to complete saved object migrations for the [.my-so-index] index. Error: this action throws]`
     );
     expect(loggingSystemMock.collect(mockLogger)).toMatchInlineSnapshot(`
       Object {

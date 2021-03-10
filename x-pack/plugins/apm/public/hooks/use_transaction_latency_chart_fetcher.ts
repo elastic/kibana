@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo } from 'react';
@@ -11,16 +12,20 @@ import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
-import { useLatencyAggregationType } from './use_latency_Aggregation_type';
 
 export function useTransactionLatencyChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { transactionType } = useApmServiceContext();
-  const latencyAggregationType = useLatencyAggregationType();
   const theme = useTheme();
   const {
-    urlParams: { start, end, transactionName },
-    uiFilters,
+    urlParams: {
+      environment,
+      kuery,
+      start,
+      end,
+      transactionName,
+      latencyAggregationType,
+    },
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
@@ -38,11 +43,12 @@ export function useTransactionLatencyChartsFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
               latencyAggregationType,
             },
           },
@@ -50,12 +56,13 @@ export function useTransactionLatencyChartsFetcher() {
       }
     },
     [
+      environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       latencyAggregationType,
     ]
   );

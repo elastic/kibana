@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Location } from 'history';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { pickKeys } from '../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { localUIFilterNames } from '../../../server/lib/rum_client/ui_filters/local_ui_filters/config';
 import { toQuery } from '../../components/shared/Links/url_helpers';
+import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 import {
-  getEnd,
-  getStart,
+  getDateRange,
   removeUndefinedProps,
   toBoolean,
   toNumber,
@@ -48,21 +51,23 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     environment,
     searchTerm,
     percentile,
-    latencyAggregationType,
+    latencyAggregationType = LatencyAggregationType.avg,
+    comparisonEnabled,
+    comparisonType,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
 
   return removeUndefinedProps({
     // date params
-    start: getStart(state, rangeFrom),
-    end: getEnd(state, rangeTo),
+    ...getDateRange({ state, rangeFrom, rangeTo }),
     rangeFrom,
     rangeTo,
     refreshPaused: refreshPaused ? toBoolean(refreshPaused) : undefined,
     refreshInterval: refreshInterval ? toNumber(refreshInterval) : undefined,
 
     // query params
+    environment: toString(environment) || ENVIRONMENT_ALL.value,
     sortDirection,
     sortField,
     page: toNumber(page) || 0,
@@ -78,10 +83,12 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionType,
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
-    latencyAggregationType,
-
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    comparisonEnabled: comparisonEnabled
+      ? toBoolean(comparisonEnabled)
+      : undefined,
+    comparisonType: comparisonType as TimeRangeComparisonType | undefined,
     // ui filters
-    environment,
     ...localUIFilters,
   });
 }

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ANOMALY_SEVERITY } from '../../../../../ml/common';
-import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
@@ -106,9 +106,6 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
 
   return (
     <ServiceAlertTrigger
-      alertTypeName={
-        ALERT_TYPES_CONFIG['apm.transaction_duration_anomaly'].name
-      }
       fields={fields}
       defaults={defaults}
       setAlertParams={setAlertParams}

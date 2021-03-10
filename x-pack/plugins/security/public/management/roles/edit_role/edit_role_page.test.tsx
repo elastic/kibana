@@ -1,29 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
-import React from 'react';
 import { act } from '@testing-library/react';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
+
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { Capabilities } from 'src/core/public';
+import type { Capabilities } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+
 import { KibanaFeature } from '../../../../../features/public';
-import { Role } from '../../../../common/model';
-import { DocumentationLinksService } from '../documentation_links';
+import type { Space } from '../../../../../spaces/public';
+import { licenseMock } from '../../../../common/licensing/index.mock';
+import type { Role } from '../../../../common/model';
+import { userAPIClientMock } from '../../users/index.mock';
+import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
+import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
 import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
-
-import { TransformErrorSection } from './privileges/kibana/transform_error_section';
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { licenseMock } from '../../../../common/licensing/index.mock';
-import { userAPIClientMock } from '../../users/index.mock';
-import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
-import { Space } from '../../../../../spaces/public';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
-import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
+import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 
 const buildFeatures = () => {
   return [
@@ -184,7 +185,7 @@ function getProps({
     userAPIClient,
     getFeatures: () => Promise.resolve(buildFeatures()),
     notifications,
-    docLinks: new DocumentationLinksService(docLinks),
+    docLinks,
     fatalErrors,
     uiCapabilities: buildUICapabilities(canManageSpaces),
     history: scopedHistoryMock.create(),

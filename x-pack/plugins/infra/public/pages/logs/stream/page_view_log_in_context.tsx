@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
-  EuiOverlayMask,
   EuiText,
   EuiTextColor,
   EuiToolTip,
@@ -16,10 +16,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { LogEntry } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogStream } from '../../../components/log_stream';
 
 const MODAL_MARGIN = 25;
@@ -50,33 +50,26 @@ export const PageViewLogInContext: React.FC = () => {
   }
 
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={closeModal} maxWidth={false}>
-        <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
-          <EuiFlexGroup
-            direction="column"
-            responsive={false}
-            wrap={false}
-            style={{ height: '100%' }}
-          >
-            <EuiFlexItem grow={false}>
-              <LogEntryContext context={contextEntry.context} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <LogStream
-                sourceId={sourceId}
-                startTimestamp={startTimestamp}
-                endTimestamp={endTimestamp}
-                query={contextQuery}
-                center={contextEntry.cursor}
-                highlight={contextEntry.id}
-                height="100%"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </LogInContextWrapper>
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal onClose={closeModal} maxWidth={false}>
+      <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
+        <EuiFlexGroup direction="column" responsive={false} wrap={false} style={{ height: '100%' }}>
+          <EuiFlexItem grow={false}>
+            <LogEntryContext context={contextEntry.context} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <LogStream
+              sourceId={sourceId}
+              startTimestamp={startTimestamp}
+              endTimestamp={endTimestamp}
+              query={contextQuery}
+              center={contextEntry.cursor}
+              highlight={contextEntry.id}
+              height="100%"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </LogInContextWrapper>
+    </EuiModal>
   );
 };
 

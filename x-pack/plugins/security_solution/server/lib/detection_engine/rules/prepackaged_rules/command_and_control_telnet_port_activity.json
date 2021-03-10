@@ -6,13 +6,14 @@
   "false_positives": [
     "IoT (Internet of Things) devices and networks may use telnet and can be excluded if desired. Some business work-flows may use Telnet for administration of older devices. These often have a predictable behavior. Telnet activity involving an unusual source or destination may be more suspicious. Telnet activity involving a production server that has no known associated Telnet work-flow or business requirement is often suspicious."
   ],
+  "from": "now-9m",
   "index": [
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Telnet Port Activity",
   "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port:23",
   "risk_score": 47,
@@ -33,13 +34,7 @@
         "name": "Command and Control",
         "reference": "https://attack.mitre.org/tactics/TA0011/"
       },
-      "technique": [
-        {
-          "id": "T1043",
-          "name": "Commonly Used Port",
-          "reference": "https://attack.mitre.org/techniques/T1043/"
-        }
-      ]
+      "technique": []
     },
     {
       "framework": "MITRE ATT&CK",
@@ -72,6 +67,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

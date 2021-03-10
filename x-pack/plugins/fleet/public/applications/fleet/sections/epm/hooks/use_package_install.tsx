@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import createContainer from 'constate';
@@ -9,6 +10,7 @@ import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
+
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
@@ -89,9 +91,8 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         if (fromUpdate) {
-          const settingsPath = getPath('integration_details', {
+          const settingsPath = getPath('integration_details_settings', {
             pkgkey: `${name}-${version}`,
-            panel: 'settings',
           });
           history.push(settingsPath);
         }

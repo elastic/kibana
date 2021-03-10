@@ -1,69 +1,61 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
-  RequestHandlerContext,
-  FakeRequest,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { indexPatterns, IndexPatternsFetcher } from '../../../../../data/server';
 
-import { Framework } from '../../../plugin';
-import { IndexPatternsFetcher } from '../../../../../data/server';
-import { VisPayload } from '../../../../common/types';
+import type { Framework } from '../../../plugin';
+import type { FieldSpec } from '../../../../../data/common';
+import type { SanitizedFieldType } from '../../../../common/types';
+import type {
+  VisTypeTimeseriesRequest,
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
+import { getIndexPatternObject } from '../lib/get_index_pattern';
 
-/**
- * ReqFacade is a regular KibanaRequest object extended with additional service
- * references to ensure backwards compatibility for existing integrations.
- *
- * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
- */
-export interface ReqFacade<T = unknown> extends FakeRequest {
-  requestContext: RequestHandlerContext;
-  framework: Framework;
-  payload: T;
-  pre: {
-    indexPatternsService?: IndexPatternsFetcher;
-  };
-  getUiSettingsService: () => IUiSettingsClient;
-  getSavedObjectsClient: () => SavedObjectsClientContract;
-  getEsShardTimeout: () => Promise<number>;
-}
+export const toSanitizedFieldType = (fields: FieldSpec[]) => {
+  return fields
+    .filter(
+      (field) =>
+        // Make sure to only include mapped fields, e.g. no index pattern runtime fields
+        !field.runtimeField && field.aggregatable && !indexPatterns.isNestedField(field)
+    )
+    .map(
+      (field) =>
+        ({
+          name: field.name,
+          label: field.customLabel ?? field.name,
+          type: field.type,
+        } as SanitizedFieldType)
+    );
+};
 
 export abstract class AbstractSearchStrategy {
-  async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
+  constructor(private framework: Framework) {}
+  async search(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesVisDataRequest,
+    bodies: any[],
+    indexType?: string
+  ) {
     const requests: any[] = [];
-    const { sessionId } = req.payload;
 
     bodies.forEach((body) => {
       requests.push(
-        req.requestContext
-          .search!.search(
+        requestContext.search
+          .search(
             {
               indexType,
               params: {
                 ...body,
               },
             },
-            {
-              sessionId,
-            }
+            req.body.searchSession
           )
           .toPromise()
       );
@@ -72,22 +64,40 @@ export abstract class AbstractSearchStrategy {
   }
 
   checkForViability(
-    req: ReqFacade<VisPayload>,
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesRequest,
     indexPattern: string
-  ): Promise<{ isViable: boolean; capabilities: unknown }> {
+  ): Promise<{ isViable: boolean; capabilities: any }> {
     throw new TypeError('Must override method');
   }
 
-  async getFieldsForWildcard<TPayload = unknown>(
-    req: ReqFacade<TPayload>,
+  async getFieldsForWildcard(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesRequest,
     indexPattern: string,
-    capabilities?: unknown
+    capabilities?: unknown,
+    options?: Partial<{
+      type: string;
+      rollupIndex: string;
+    }>
   ) {
-    const { indexPatternsService } = req.pre;
-
-    return await indexPatternsService!.getFieldsForWildcard({
-      pattern: indexPattern,
-      fieldCapsOptions: { allow_no_indices: true },
+    const indexPatternsFetcher = new IndexPatternsFetcher(
+      requestContext.core.elasticsearch.client.asCurrentUser
+    );
+    const indexPatternsService = await this.framework.getIndexPatternsService(requestContext);
+    const { indexPatternObject } = await getIndexPatternObject(indexPattern, {
+      indexPatternsService,
     });
+
+    return toSanitizedFieldType(
+      indexPatternObject
+        ? indexPatternObject.getNonScriptedFields()
+        : await indexPatternsFetcher!.getFieldsForWildcard({
+            pattern: indexPattern,
+            fieldCapsOptions: { allow_no_indices: true },
+            metaFields: [],
+            ...options,
+          })
+    );
   }
 }

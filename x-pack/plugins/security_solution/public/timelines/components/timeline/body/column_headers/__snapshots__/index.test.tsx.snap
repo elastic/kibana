@@ -380,6 +380,50 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
           },
         },
       },
+      "nestedField": Object {
+        "fields": Object {
+          "nestedField.firstAttributes": Object {
+            "aggregatable": false,
+            "category": "nestedField",
+            "description": "",
+            "example": "",
+            "format": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "nestedField.firstAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "string",
+          },
+          "nestedField.secondAttributes": Object {
+            "aggregatable": false,
+            "category": "nestedField",
+            "description": "",
+            "example": "",
+            "format": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "nestedField.secondAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "string",
+          },
+        },
+      },
       "source": Object {
         "fields": Object {
           "source.ip": Object {
@@ -421,6 +465,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
       Object {
         "columnHeaderType": "not-filtered",
         "id": "@timestamp",
+        "type": "number",
         "width": 190,
       },
       Object {
@@ -468,10 +513,12 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
     Array [
       Object {
         "columnId": "@timestamp",
+        "columnType": "number",
         "sortDirection": "desc",
       },
     ]
   }
+  tabType="query"
   timelineId="test"
 />
 `;

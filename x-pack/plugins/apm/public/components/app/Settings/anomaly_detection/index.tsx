@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -75,7 +76,7 @@ export function AnomalyDetection() {
       <EuiSpacer size="l" />
       <EuiText>
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
-          defaultMessage: `Machine Learning's anomaly detection integration enables application health status indicators for services in each configured environment by identifying transaction duration anomalies.`,
+          defaultMessage: `Machine Learning's anomaly detection integration enables application health status indicators for services in each configured environment by identifying anomalies in latency.`,
         })}
       </EuiText>
       <EuiSpacer size="l" />

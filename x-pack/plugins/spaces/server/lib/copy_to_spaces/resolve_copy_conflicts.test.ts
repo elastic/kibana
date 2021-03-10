@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Readable } from 'stream';
-import {
-  SavedObjectsImportResponse,
-  SavedObjectsResolveImportErrorsOptions,
+
+import type {
   SavedObjectsExportByObjectOptions,
+  SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
+  SavedObjectsResolveImportErrorsOptions,
 } from 'src/core/server';
 import {
   coreMock,
   httpServerMock,
-  savedObjectsTypeRegistryMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
+  savedObjectsTypeRegistryMock,
 } from 'src/core/server/mocks';
+
 import { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
 
 interface SetupOpts {
@@ -109,6 +113,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         };
 
         return response;
@@ -173,6 +178,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     `);
 
     expect(savedObjectsExporter.exportByObjects).toHaveBeenCalledWith({
+      request: expect.any(Object),
       excludeExportDetails: true,
       includeReferencesDeep: true,
       namespace,
@@ -209,6 +215,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         });
       },
     });

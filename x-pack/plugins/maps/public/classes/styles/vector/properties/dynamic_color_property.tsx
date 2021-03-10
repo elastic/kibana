@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Map as MbMap } from 'mapbox-gl';
@@ -15,7 +16,12 @@ import {
   getPercentilesMbColorRampStops,
   getColorPalette,
 } from '../../color_palettes';
-import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
+import {
+  COLOR_MAP_TYPE,
+  DATA_MAPPING_FUNCTION,
+  FieldFormatter,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -25,6 +31,8 @@ import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
 import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
+import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
 const UP_TO = i18n.translate('xpack.maps.legend.upto', {
   defaultMessage: 'up to',
@@ -33,6 +41,20 @@ const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptions> {
+  private readonly _chartsPaletteServiceGetColor?: (value: string) => string | null;
+
+  constructor(
+    options: ColorDynamicOptions,
+    styleName: VECTOR_STYLES,
+    field: IField | null,
+    vectorLayer: IVectorLayer,
+    getFieldFormatter: (fieldName: string) => null | FieldFormatter,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
+  ) {
+    super(options, styleName, field, vectorLayer, getFieldFormatter);
+    this._chartsPaletteServiceGetColor = chartsPaletteServiceGetColor;
+  }
+
   syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
@@ -259,12 +281,16 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: fieldMeta.categories[i].key,
-        color: colors[i],
+        color: this._chartsPaletteServiceGetColor
+          ? this._chartsPaletteServiceGetColor(fieldMeta.categories[i].key)
+          : colors[i],
       });
     }
     return {
       stops,
-      defaultColor: colors[maxLength - 1],
+      defaultColor: this._chartsPaletteServiceGetColor
+        ? this._chartsPaletteServiceGetColor('__other__')
+        : colors[maxLength - 1],
     };
   }
 
@@ -387,8 +413,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   _getCategoricalBreaks(symbolId?: string): Break[] {
     const breaks: Break[] = [];
     const { stops, defaultColor } = this._getColorPaletteStops();
-    stops.forEach(({ stop, color }: { stop: string | number | null; color: string }) => {
-      if (stop !== null) {
+    stops.forEach(({ stop, color }: { stop: string | number | null; color: string | null }) => {
+      if (stop !== null && color != null) {
         breaks.push({
           color,
           symbolId,

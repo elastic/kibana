@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { compileTemplate } from './agent';
@@ -21,10 +22,23 @@ password: {{password}}
 {{#if password}}
 hidden_password: {{password}}
 {{/if}}
+{{#if optional_field}}
+optional_field: {{optional_field}}
+{{/if}}
+foo: {{bar}}
+some_text_field: {{should_be_text}}
+multi_text_field:
+{{#each multi_text}}
+  - {{this}}
+{{/each}}
       `;
     const vars = {
       paths: { value: ['/usr/local/var/log/nginx/access.log'] },
       password: { type: 'password', value: '' },
+      optional_field: { type: 'text', value: undefined },
+      bar: { type: 'text', value: 'bar' },
+      should_be_text: { type: 'text', value: '1234' },
+      multi_text: { type: 'text', value: ['1234', 'foo', 'bar'] },
     };
 
     const output = compileTemplate(vars, streamTemplate);
@@ -34,6 +48,9 @@ hidden_password: {{password}}
       exclude_files: ['.gz$'],
       processors: [{ add_locale: null }],
       password: '',
+      foo: 'bar',
+      some_text_field: '1234',
+      multi_text_field: ['1234', 'foo', 'bar'],
     });
   });
 
@@ -161,5 +178,45 @@ input: logs
     expect(output).toEqual({
       input: 'logs',
     });
+  });
+
+  it('should escape string values when necessary', () => {
+    const stringTemplate = `
+my-package:
+    asteriskOnly: {{asteriskOnly}}
+    startsWithAsterisk: {{startsWithAsterisk}}
+    numeric: {{numeric}}
+    mixed: {{mixed}}
+    concatenatedEnd: {{a}}{{b}}
+    concatenatedMiddle: {{c}}{{d}}
+    mixedMultiline: |-
+        {{{ search }}} | streamstats`;
+
+    const vars = {
+      asteriskOnly: { value: '"*"', type: 'string' },
+      startsWithAsterisk: { value: '"*lala"', type: 'string' },
+      numeric: { value: '100', type: 'string' },
+      mixed: { value: '1s', type: 'string' },
+      a: { value: '/opt/package/*', type: 'string' },
+      b: { value: '/logs/my.log*', type: 'string' },
+      c: { value: '/opt/*/package/', type: 'string' },
+      d: { value: 'logs/*my.log', type: 'string' },
+      search: { value: 'search sourcetype="access*"', type: 'text' },
+    };
+
+    const targetOutput = {
+      'my-package': {
+        asteriskOnly: '*',
+        startsWithAsterisk: '*lala',
+        numeric: '100',
+        mixed: '1s',
+        concatenatedEnd: '/opt/package/*/logs/my.log*',
+        concatenatedMiddle: '/opt/*/package/logs/*my.log',
+        mixedMultiline: 'search sourcetype="access*" | streamstats',
+      },
+    };
+
+    const output = compileTemplate(vars, stringTemplate);
+    expect(output).toEqual(targetOutput);
   });
 });

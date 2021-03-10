@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   ISavedObjectTypeRegistry,
   KibanaRequest,
   Logger,
@@ -12,9 +14,10 @@ import {
   SavedObjectsBulkUpdateObject,
   StartServicesAccessor,
 } from 'src/core/server';
-import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
+
+import type { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
-import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
+import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';
 
 interface EncryptionKeyRotationServiceOptions {

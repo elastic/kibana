@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,12 +15,13 @@ interface Props {
   contextId: string;
   endgameExitCode: string | null | undefined;
   eventId: string;
+  processExitCode: number | null | undefined;
   text: string | null | undefined;
 }
 
 export const ExitCodeDraggable = React.memo<Props>(
-  ({ contextId, endgameExitCode, eventId, text }) => {
-    if (isNillEmptyOrNotFinite(endgameExitCode)) {
+  ({ contextId, endgameExitCode, eventId, processExitCode, text }) => {
+    if (isNillEmptyOrNotFinite(processExitCode) && isNillEmptyOrNotFinite(endgameExitCode)) {
       return null;
     }
 
@@ -31,14 +33,27 @@ export const ExitCodeDraggable = React.memo<Props>(
           </TokensFlexItem>
         )}
 
-        <TokensFlexItem grow={false} component="span">
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="endgame.exit_code"
-            value={endgameExitCode}
-          />
-        </TokensFlexItem>
+        {!isNillEmptyOrNotFinite(processExitCode) && (
+          <TokensFlexItem grow={false} component="span">
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.exit_code"
+              value={`${processExitCode}`}
+            />
+          </TokensFlexItem>
+        )}
+
+        {!isNillEmptyOrNotFinite(endgameExitCode) && (
+          <TokensFlexItem grow={false} component="span">
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="endgame.exit_code"
+              value={endgameExitCode}
+            />
+          </TokensFlexItem>
+        )}
       </>
     );
   }

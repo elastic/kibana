@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { Privileges } from '../../../../../common/types/privileges';
+import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 
 export interface Capabilities {
   canGetTransform: boolean;
@@ -18,10 +20,9 @@ export interface Capabilities {
 
 export type Privilege = [string, string];
 
-function isPrivileges(arg: any): arg is Privileges {
+function isPrivileges(arg: unknown): arg is Privileges {
   return (
-    typeof arg === 'object' &&
-    arg !== null &&
+    isPopulatedObject(arg) &&
     arg.hasOwnProperty('hasAllPrivileges') &&
     typeof arg.hasAllPrivileges === 'boolean' &&
     arg.hasOwnProperty('missingPrivileges') &&

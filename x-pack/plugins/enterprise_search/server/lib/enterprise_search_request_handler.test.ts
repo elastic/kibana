@@ -1,17 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mockConfig, mockLogger } from '../__mocks__';
-import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
+
+import {
+  ENTERPRISE_SEARCH_KIBANA_COOKIE,
+  JSON_HEADER,
+  READ_ONLY_MODE_HEADER,
+} from '../../common/constants';
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
 jest.mock('node-fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fetchMock = require('node-fetch') as jest.Mock;
+
 const { Response } = jest.requireActual('node-fetch');
 
 const responseMock = {
@@ -116,15 +123,39 @@ describe('EnterpriseSearchRequestHandler', () => {
         );
       });
 
-      it('correctly encodes paths and query string parameters', async () => {
+      it('correctly encodes query string parameters', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
-          path: '/api/some example',
+          path: '/api/example',
         });
         await makeAPICall(requestHandler, { query: { 'page[current]': 1 } });
 
         EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-          'http://localhost:3002/api/some%20example?page%5Bcurrent%5D=1'
+          'http://localhost:3002/api/example?page%5Bcurrent%5D=1'
         );
+      });
+
+      describe('encodePathParams', () => {
+        it('correctly replaces :pathVariables with request.params', async () => {
+          const requestHandler = enterpriseSearchRequestHandler.createRequest({
+            path: '/api/examples/:example/some/:id',
+          });
+          await makeAPICall(requestHandler, { params: { example: 'hello', id: 'world' } });
+
+          EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+            'http://localhost:3002/api/examples/hello/some/world'
+          );
+        });
+
+        it('correctly encodes path params as URI components', async () => {
+          const requestHandler = enterpriseSearchRequestHandler.createRequest({
+            path: '/api/examples/:example',
+          });
+          await makeAPICall(requestHandler, { params: { example: 'hello#@/$%^/&[]{}/";world' } });
+
+          EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+            'http://localhost:3002/api/examples/hello%23%40%2F%24%25%5E%2F%26%5B%5D%7B%7D%2F%22%3Bworld'
+          );
+        });
       });
     });
 
@@ -141,6 +172,28 @@ describe('EnterpriseSearchRequestHandler', () => {
         expect(responseMock.custom).toHaveBeenCalledWith({
           body: {},
           statusCode: 201,
+          headers: mockExpectedResponseHeaders,
+        });
+      });
+
+      it('filters out any _sessionData passed back from Enterprise Search', async () => {
+        const jsonWithSessionData = {
+          _sessionData: {
+            secrets: 'no peeking',
+          },
+          regular: 'data',
+        };
+
+        EnterpriseSearchAPI.mockReturn(jsonWithSessionData, { headers: JSON_HEADER });
+
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/prep' });
+        await makeAPICall(requestHandler);
+
+        expect(responseMock.custom).toHaveBeenCalledWith({
+          statusCode: 200,
+          body: {
+            regular: 'data',
+          },
           headers: mockExpectedResponseHeaders,
         });
       });
@@ -348,6 +401,33 @@ describe('EnterpriseSearchRequestHandler', () => {
 
     expect(enterpriseSearchRequestHandler.headers).toEqual({
       [READ_ONLY_MODE_HEADER]: 'true',
+    });
+  });
+
+  describe('setSessionData', () => {
+    it('sets the value of wsOAuthTokenPackage in a cookie', async () => {
+      const tokenPackage = 'some_encrypted_secrets';
+
+      const mockNow = 'Thu, 04 Mar 2021 22:40:32 GMT';
+      const mockInAnHour = 'Thu, 04 Mar 2021 23:40:32 GMT';
+      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => {
+        return new Date(mockNow).valueOf();
+      });
+
+      const sessionDataBody = {
+        _sessionData: { wsOAuthTokenPackage: tokenPackage },
+        regular: 'data',
+      };
+
+      EnterpriseSearchAPI.mockReturn(sessionDataBody, { headers: JSON_HEADER });
+
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/' });
+      await makeAPICall(requestHandler);
+
+      expect(enterpriseSearchRequestHandler.headers).toEqual({
+        ['set-cookie']: `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}; Path=/; Expires=${mockInAnHour}; SameSite=Lax; HttpOnly`,
+        ...mockExpectedResponseHeaders,
+      });
     });
   });
 

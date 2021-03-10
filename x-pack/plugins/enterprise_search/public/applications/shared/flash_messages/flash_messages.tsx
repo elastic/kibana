@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
+
 import { useValues } from 'kea';
+
 import { EuiCallOut, EuiCallOutProps, EuiSpacer } from '@elastic/eui';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
@@ -14,7 +17,7 @@ const FLASH_MESSAGE_TYPES = {
   success: { color: 'success' as EuiCallOutProps['color'], icon: 'check' },
   info: { color: 'primary' as EuiCallOutProps['color'], icon: 'iInCircle' },
   warning: { color: 'warning' as EuiCallOutProps['color'], icon: 'alert' },
-  error: { color: 'danger' as EuiCallOutProps['color'], icon: 'cross' },
+  error: { color: 'danger' as EuiCallOutProps['color'], icon: 'alert' },
 };
 
 export const FlashMessages: React.FC = ({ children }) => {

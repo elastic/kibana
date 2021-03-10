@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the execution of a shell process with suspicious arguments which may be indicative of reverse shell activity.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential Reverse Shell Activity via Terminal",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name in (\"sh\", \"bash\", \"zsh\", \"dash\", \"zmodload\") and\n  process.args:(\"*/dev/tcp/*\", \"*/dev/udp/*\", \"zsh/net/tcp\", \"zsh/net/udp\")\n",
+  "references": [
+    "https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md",
+    "https://github.com/WangYihang/Reverse-Shell-Manager",
+    "https://www.netsparker.com/blog/web-security/understanding-reverse-shells/"
+  ],
+  "risk_score": 73,
+  "rule_id": "a1a0375f-22c2-48c0-81a4-7c2d11cc6856",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "macOS",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

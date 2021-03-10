@@ -21,8 +21,7 @@ install the default distribution of {kib}:
 brew install elastic/tap/kibana-full
 -------------------------
 
-This installs the most recently released default distribution of {kib}. To install the OSS distribution,
-specify `elastic/tap/kibana-oss`.
+This installs the most recently released distribution of {kib}.
 
 [[brew-layout]]
 ==== Directory layout for Homebrew installs

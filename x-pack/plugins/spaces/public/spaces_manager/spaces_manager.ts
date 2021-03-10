@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Observable, BehaviorSubject } from 'rxjs';
-import { skipWhile } from 'rxjs/operators';
-import { HttpSetup } from 'src/core/public';
-import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
-import { Space } from '../../common/model/space';
-import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
-import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
-type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
-interface GetAllSpacesOptions {
-  purpose?: GetAllSpacesPurpose;
-  includeAuthorizedPurposes?: boolean;
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { skipWhile } from 'rxjs/operators';
+
+import type { HttpSetup } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { GetAllSpacesOptions, GetSpaceResult } from '../../common';
+import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
+
+interface SavedObjectTarget {
+  type: string;
+  id: string;
 }
 
 export class SpacesManager {
@@ -85,7 +88,7 @@ export class SpacesManager {
   }
 
   public async copySavedObjects(
-    objects: SavedObject[],
+    objects: SavedObjectTarget[],
     spaces: string[],
     includeReferences: boolean,
     createNewCopies: boolean,
@@ -103,7 +106,7 @@ export class SpacesManager {
   }
 
   public async resolveCopySavedObjectsErrors(
-    objects: SavedObject[],
+    objects: SavedObjectTarget[],
     retries: unknown,
     includeReferences: boolean,
     createNewCopies: boolean
@@ -133,13 +136,13 @@ export class SpacesManager {
       });
   }
 
-  public async shareSavedObjectAdd(object: SavedObject, spaces: string[]): Promise<void> {
+  public async shareSavedObjectAdd(object: SavedObjectTarget, spaces: string[]): Promise<void> {
     return this.http.post(`/api/spaces/_share_saved_object_add`, {
       body: JSON.stringify({ object, spaces }),
     });
   }
 
-  public async shareSavedObjectRemove(object: SavedObject, spaces: string[]): Promise<void> {
+  public async shareSavedObjectRemove(object: SavedObjectTarget, spaces: string[]): Promise<void> {
     return this.http.post(`/api/spaces/_share_saved_object_remove`, {
       body: JSON.stringify({ object, spaces }),
     });
