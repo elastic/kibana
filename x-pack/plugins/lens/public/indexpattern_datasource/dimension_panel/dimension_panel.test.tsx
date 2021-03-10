@@ -33,7 +33,6 @@ import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_
 import { getFieldByNameFactory } from '../pure_helpers';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
-import { QueryInput } from '../query_input';
 import { Filtering } from './filtering';
 
 jest.mock('../loader');
