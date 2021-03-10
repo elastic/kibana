@@ -6,14 +6,15 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { isErrorWithMeta } from '../services/artifacts/utils';
+import { isESClientError } from './utils';
 
 export {
   defaultIngestErrorHandler,
   ingestErrorToResponseOptions,
   isLegacyESClientError,
-  isESClientError,
 } from './handlers';
+
+export { isESClientError } from './utils';
 
 export class IngestManagerError extends Error {
   constructor(message?: string) {
@@ -59,13 +60,13 @@ export class ArtifactsElasticsearchError extends IngestManagerError {
   constructor(public readonly meta: Error) {
     super(
       `${
-        isErrorWithMeta(meta) && meta.meta.body?.error?.reason
+        isESClientError(meta) && meta.meta.body?.error?.reason
           ? meta.meta.body?.error?.reason
           : `Elasticsearch error while working with artifacts: ${meta.message}`
       }`
     );
 
-    if (isErrorWithMeta(meta)) {
+    if (isESClientError(meta)) {
       const { method, path, querystring = '', body = '' } = meta.meta.meta.request.params;
       this.requestDetails = `${method} ${path}${querystring ? `?${querystring}` : ''}${
         body ? `\n${body}` : ''
