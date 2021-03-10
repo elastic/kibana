@@ -39,7 +39,6 @@ import {
 } from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
-import { ExternalLinkIcon } from '../external_link_icon';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
@@ -121,7 +120,6 @@ export const ExternalLink = React.memo<{
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
         <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
           {children}
-          <ExternalLinkIcon data-test-subj="externalLinkIcon" />
           {!isNil(idx) && idx < lastIndexToShow && <Comma data-test-subj="externalLinkComma" />}
         </EuiLink>
       </EuiToolTip>
