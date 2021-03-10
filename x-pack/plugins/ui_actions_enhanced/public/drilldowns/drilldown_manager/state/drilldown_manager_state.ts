@@ -254,10 +254,10 @@ export class DrilldownManagerState {
     if (!drilldownState) return;
 
     try {
-      await dynamicActionManager.createEvent(
-        drilldownState.serialize(),
-        drilldownState.triggers$.getValue()
-      );
+      const event = drilldownState.serialize();
+      const triggers = drilldownState.triggers$.getValue();
+
+      await dynamicActionManager.createEvent(event, triggers);
       toastService.addSuccess({
         title: toastDrilldownCreated.title(drilldownState.name$.getValue()),
         text: toastDrilldownCreated.text,

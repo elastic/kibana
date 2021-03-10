@@ -6,13 +6,15 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   ActionFactory,
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedAction,
 } from '../../../dynamic_actions';
+import { useSyncObservable } from '../hooks/use_sync_observable';
 import { ActionFactoryPlaceContext } from '../types';
 
 export interface DrilldownStateDeps {
@@ -69,6 +71,11 @@ export class DrilldownState {
   public readonly name$: BehaviorSubject<string>;
 
   /**
+   * Whether the `name$` is valid or is in error state.
+   */
+  public readonly nameError$: Observable<string | undefined>;
+
+  /**
    * List of all triggers the place which opened the Drilldown Manager supports.
    */
   public readonly placeTriggers: string[];
@@ -92,6 +99,12 @@ export class DrilldownState {
    */
   public readonly config$: BehaviorSubject<BaseActionConfig>;
 
+  /**
+   * Whether the drilldown state is in an error and should not be saved. I value
+   * is `undefined`, there is no error.
+   */
+  public readonly error$: Observable<string | undefined>;
+
   constructor({
     factory,
     placeTriggers,
@@ -110,6 +123,20 @@ export class DrilldownState {
     const triggersFactorySupports = this.factory.supportedTriggers();
     this.uiTriggers = triggersFactorySupports.filter((trigger) =>
       this.placeTriggers.includes(trigger)
+    );
+
+    this.nameError$ = this.name$.pipe(
+      map((currentName) => {
+        if (!currentName) return 'NAME_EMPTY';
+        return undefined;
+      })
+    );
+
+    this.error$ = combineLatest([this.nameError$]).pipe(
+      map(([nameError]) => {
+        if (nameError) return nameError;
+        return undefined;
+      })
     );
   }
 
@@ -182,5 +209,6 @@ export class DrilldownState {
   public readonly useName = () => useObservable(this.name$, this.name$.getValue());
   public readonly useTriggers = () => useObservable(this.triggers$, this.triggers$.getValue());
   public readonly useConfig = () => useObservable(this.config$, this.config$.getValue());
+  public readonly useError = () => useSyncObservable(this.error$);
   /* eslint-enable react-hooks/rules-of-hooks */
 }

@@ -34,7 +34,8 @@ const txtCreateDrilldownButton = i18n.translate(
 export const CreateDrilldownForm: React.FC = () => {
   const isMounted = useMountedState();
   const drilldowns = useDrilldownManager();
-  const drilldownState = drilldowns.getDrilldownState();
+  const drilldownState = drilldowns.getDrilldownState()!;
+  const error = drilldownState.useError();
   const [disabled, setDisabled] = React.useState(false);
 
   const handleCreate = () => {
@@ -52,7 +53,7 @@ export const CreateDrilldownForm: React.FC = () => {
       {!!drilldownState && <DrilldownStateForm state={drilldownState} disabled={disabled} />}
       {!!drilldownState && (
         <DrilldownManagerFooter>
-          <ButtonSubmit disabled={disabled} onClick={handleCreate}>
+          <ButtonSubmit disabled={disabled || !!error} onClick={handleCreate}>
             {txtCreateDrilldownButton}
           </ButtonSubmit>
         </DrilldownManagerFooter>
