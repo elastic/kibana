@@ -23,16 +23,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { PhasesExceptDelete } from '../../../../../../../common/types';
 import { ToggleField, useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
-
 import { FormInternal } from '../../../types';
-
 import { UseField } from '../../../form';
-
-import { PhaseErrorIndicator } from './phase_error_indicator';
-
 import { MinAgeField } from '../shared_fields';
 import { PhaseIcon } from '../../phase_icon';
 import { PhaseFooter } from '../../phase_footer';
+import { PhaseErrorIndicator } from './phase_error_indicator';
+
 import './phase.scss';
 
 interface Props {
@@ -115,7 +112,7 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
             <EuiSpacer size="m" />
           )}
 
-          {children && (
+          {children ? (
             <EuiAccordion
               id={`${phase}-settingsSwitch`}
               buttonContent={
@@ -130,6 +127,12 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
               <EuiSpacer />
               {children}
             </EuiAccordion>
+          ) : (
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <PhaseFooter phase={phase} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )}
         </>
       )}
