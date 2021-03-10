@@ -152,20 +152,21 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const itemPanels = [
-    ...filterByItem,
-    ...openInVisualize,
-    ...viewNodeDetail,
-    {
-      name: i18n.translate('xpack.infra.metricsExplorer.alerts.createAlertButton', {
-        defaultMessage: 'Create alert',
-      }),
-      icon: 'bell',
-      onClick() {
-        setFlyoutVisible(true);
-      },
-    },
-  ];
+  const createAlert = uiCapabilities?.infrastructure?.save
+    ? [
+        {
+          name: i18n.translate('xpack.infra.metricsExplorer.alerts.createAlertButton', {
+            defaultMessage: 'Create alert',
+          }),
+          icon: 'bell',
+          onClick() {
+            setFlyoutVisible(true);
+          },
+        },
+      ]
+    : [];
+
+  const itemPanels = [...filterByItem, ...openInVisualize, ...viewNodeDetail, ...createAlert];
 
   // If there are no itemPanels then there is no reason to show the actions button.
   if (itemPanels.length === 0) return null;
