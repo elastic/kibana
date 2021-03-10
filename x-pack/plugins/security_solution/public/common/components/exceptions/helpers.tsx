@@ -13,6 +13,7 @@ import uuid from 'uuid';
 
 import * as i18n from './translations';
 import {
+  AlertData,
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
@@ -39,6 +40,7 @@ import {
   EntryNested,
   OsTypeArray,
   EntriesArray,
+  osType,
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
@@ -357,6 +359,17 @@ export const enrichExceptionItemsWithOS = (
       os_types: osTypes,
     };
   });
+};
+
+export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
+  const osDefaults: OsTypeArray = ['windows', 'macos'];
+  if (alertData != null) {
+    const os = alertData.host && alertData.host.os && alertData.host.os.family;
+    if (os != null) {
+      return osType.is(os) ? [os] : osDefaults;
+    }
+  }
+  return osDefaults;
 };
 
 /**
