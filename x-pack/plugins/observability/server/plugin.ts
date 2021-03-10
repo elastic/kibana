@@ -13,6 +13,7 @@ import {
   ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
+import { uiSettings } from './ui_settings';
 
 type LazyScopedAnnotationsClientFactory = (
   ...args: Parameters<ScopedAnnotationsClientFactory>
@@ -31,6 +32,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
+
+    core.uiSettings.register(uiSettings);
 
     if (config.annotations.enabled) {
       annotationsApiPromise = bootstrapAnnotations({

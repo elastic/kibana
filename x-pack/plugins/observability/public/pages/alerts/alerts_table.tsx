@@ -33,27 +33,17 @@ const actions: Array<DefaultItemAction<AlertItem>> = [
     onClick: () => {},
     isPrimary: true,
   },
-  {
-    name: 'Open Alert',
-    description: 'Open alert',
-    onClick: () => {},
-  },
-  {
-    name: 'Mark in progress',
-    description: 'Mark in progress',
-    onClick: () => {},
-  },
-  {
-    name: 'Close alert',
-    description: 'Close alert',
-    onClick: () => {},
-  },
 ];
 
 const columns: Array<EuiBasicTableColumn<AlertItem>> = [
   {
     field: '@timestamp',
     name: 'Triggered',
+    dataType: 'date',
+  },
+  {
+    field: 'duration',
+    name: 'Duration',
   },
   {
     field: 'severity',

@@ -21,6 +21,7 @@ import React, { useState } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { uniqBy } from 'lodash';
 import { Alert } from '../../../../../../alerting/common';
+import { enableAlertingExperience } from '../../../../../common/ui_settings_keys';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { SectionContainer } from '..';
 
@@ -40,6 +41,10 @@ export function AlertsSection({ alerts }: Props) {
   const { core } = usePluginContext();
   const [filter, setFilter] = useState(ALL_TYPES);
 
+  const href = core.uiSettings.get(enableAlertingExperience)
+    ? '/app/observability/alerts'
+    : '/app/management/insightsAndAlerting/triggersActions/alerts';
+
   const filterOptions = uniqBy(alerts, (alert) => alert.consumer).map(({ consumer }) => ({
     value: consumer,
     text: consumer,
@@ -51,7 +56,7 @@ export function AlertsSection({ alerts }: Props) {
         defaultMessage: 'Alerts',
       })}
       appLink={{
-        href: '/app/management/insightsAndAlerting/triggersActions/alerts',
+        href,
         label: i18n.translate('xpack.observability.overview.alert.appLink', {
           defaultMessage: 'Manage alerts',
         }),

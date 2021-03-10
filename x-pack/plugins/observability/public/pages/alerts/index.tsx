@@ -18,6 +18,7 @@ import React from 'react';
 import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
 import { AlertItem, AlertsTable } from './alerts_table';
 
@@ -60,6 +61,14 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ items = [] }: AlertsPageProps) {
+  const { core } = usePluginContext();
+
+  // In a future milestone we'll have a page dedicated to rule management in
+  // observability. For now link to the settings page.
+  const manageDetectionRulesHref = core.http.basePath.prepend(
+    '/app/management/insightsAndAlerting/triggersActions/alerts'
+  );
+
   return (
     <EuiPage>
       <EuiPageHeader
@@ -70,7 +79,7 @@ export function AlertsPage({ items = [] }: AlertsPageProps) {
           </>
         }
         rightSideItems={[
-          <EuiButton fill iconType="gear">
+          <EuiButton fill href={manageDetectionRulesHref} iconType="gear">
             {i18n.translate('xpack.observability.alerts.manageDetectionRulesButtonLabel', {
               defaultMessage: 'Manage detection rules',
             })}
