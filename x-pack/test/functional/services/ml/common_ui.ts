@@ -233,7 +233,7 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       exclude?: string[],
       percentageThreshold = 1
     ) {
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(30000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
 
         const sortedExpectedColorStats = [...expectedColorStats].sort((a, b) =>
@@ -268,7 +268,7 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
     // `assertColorInCanvasElement` can be used to reduce the check to just find out
     // if a certain color is present in the canvas element.
     async assertColorInCanvasElement(dataTestSubj: string, expectedColor: string) {
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(30000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
 
         const actualColorStats = await canvasElement.getColorStats(
@@ -285,7 +285,7 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
           true,
           `Expected color '${expectedColor}' to be present within tolerance of colors (${JSON.stringify(
             actualColorStats
-          )})in canvas element '${dataTestSubj}'. Expected: 'true' (got 'false')`
+          )}) in canvas element '${dataTestSubj}'. Expected: 'true' (got 'false')`
         );
       });
     },
