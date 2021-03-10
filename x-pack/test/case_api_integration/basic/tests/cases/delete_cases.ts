@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../plugins/case/common/constants';
+import { CASES_URL } from '../../../../../plugins/cases/common/constants';
 import { postCaseReq, postCommentUserReq } from '../../../common/lib/mock';
 import {
   createCaseAction,
@@ -19,8 +19,8 @@ import {
   deleteCasesUserActions,
   deleteComments,
 } from '../../../common/lib/utils';
-import { getSubCaseDetailsUrl } from '../../../../../plugins/case/common/api/helpers';
-import { CaseResponse } from '../../../../../plugins/case/common/api';
+import { getSubCaseDetailsUrl } from '../../../../../plugins/cases/common/api/helpers';
+import { CaseResponse } from '../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

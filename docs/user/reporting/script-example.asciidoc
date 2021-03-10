@@ -38,8 +38,7 @@ Here is an example response for a successfully queued report:
     "created_by": "elastic",
     "payload": ..., <2>
     "timeout": 120000,
-    "max_attempts": 3,
-    "priority": 10
+    "max_attempts": 3
   }
 }
 ---------------------------------------------------------

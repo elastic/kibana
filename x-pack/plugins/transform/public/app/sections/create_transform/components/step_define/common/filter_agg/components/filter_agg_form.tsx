@@ -16,7 +16,7 @@ import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
 import type { RuntimeMappings } from '../../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
-import { isPopulatedObject } from '../../../../../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../../../../../../../common/utils/object_utils';
 
 /**
  * Resolves supported filters for provided field.
