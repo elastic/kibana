@@ -18,10 +18,9 @@ import {
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { ObservabilityClientPluginsSetup, ObservabilityClientPluginsStart } from '../plugin';
+import { ObservabilityClientPluginsStart } from '../plugin';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
-import { ExploratoryView } from '../components/shared/Exploratory_view/exploratory_view';
 
 const observabilityLabelBreadcrumb = {
   text: i18n.translate('xpack.observability.observability.breadcrumb.', {
