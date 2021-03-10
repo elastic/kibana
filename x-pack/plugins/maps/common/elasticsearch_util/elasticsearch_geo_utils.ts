@@ -115,7 +115,7 @@ function ensureGeometryType(type: string, expectedTypes: GEO_JSON_TYPE[]) {
  */
 export function hitsToGeoJson(
   hits: Array<Record<string, unknown>>,
-  flattenHit: (elasticSearchHit: Record<string, unknown>) => Record<string, any>,
+  flattenHit: (elasticSearchHit: Record<string, unknown>) => Record<string, unknown>,
   geoFieldName: string,
   geoFieldType: ES_GEO_FIELD_TYPE,
   epochMillisFields: string[]
@@ -130,9 +130,15 @@ export function hitsToGeoJson(
 
     ensureGeoField(geoFieldType);
     if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-      geoPointToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
+      geoPointToGeometry(
+        properties[geoFieldName] as string | string[] | undefined,
+        tmpGeometriesAccumulator
+      );
     } else {
-      geoShapeToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
+      geoShapeToGeometry(
+        properties[geoFieldName] as string | string[] | ESGeometry | ESGeometry[] | undefined,
+        tmpGeometriesAccumulator
+      );
     }
 
     // There is a bug in Elasticsearch API where epoch_millis are returned as a string instead of a number
@@ -141,7 +147,7 @@ export function hitsToGeoJson(
     for (let k = 0; k < epochMillisFields.length; k++) {
       const fieldName = epochMillisFields[k];
       if (typeof properties[fieldName] === 'string') {
-        properties[fieldName] = parseInt(properties[fieldName], 10);
+        properties[fieldName] = parseInt(properties[fieldName] as string, 10);
       }
     }
 
