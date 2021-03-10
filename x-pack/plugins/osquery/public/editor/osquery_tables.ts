@@ -6,35 +6,38 @@
  */
 
 import { flatMap, sortBy } from 'lodash';
-import osqueryTablesJSON from './osquery_schema/v4.6.0.json';
 
-type TablesJSON =
-  | string
-  | Array<{
-      name: string;
-      description: string;
-      url: string;
-      platforms: string[];
-      evented: boolean;
-      cacheable: boolean;
-      columns: Array<{
-        name: string;
-        description: string;
-        type: string;
-        hidden: boolean;
-        required: boolean;
-        index: boolean;
-      }>;
-    }>;
+type TablesJSON = Array<{
+  name: string;
+  description: string;
+  url: string;
+  platforms: string[];
+  evented: boolean;
+  cacheable: boolean;
+  columns: Array<{
+    name: string;
+    description: string;
+    type: string;
+    hidden: boolean;
+    required: boolean;
+    index: boolean;
+  }>;
+}>;
 export const normalizeTables = (tablesJSON: TablesJSON) => {
-  // osquery JSON needs less parsing than it used to
-  const parsedTables = typeof tablesJSON === 'object' ? tablesJSON : JSON.parse(tablesJSON);
-  return sortBy(parsedTables, (table) => {
+  return sortBy(tablesJSON, (table) => {
     return table.name;
   });
 };
 
-export const osqueryTables = normalizeTables(osqueryTablesJSON);
-export const osqueryTableNames = flatMap(osqueryTables, (table) => {
-  return table.name;
-});
+let osqueryTables: TablesJSON | null = null;
+export const getOsqueryTables = () => {
+  if (!osqueryTables) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    osqueryTables = normalizeTables(require('./osquery_schema/v4.6.0.json'));
+  }
+  return osqueryTables;
+};
+export const getOsqueryTableNames = () =>
+  flatMap(getOsqueryTables(), (table) => {
+    return table.name;
+  });

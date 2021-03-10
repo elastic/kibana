@@ -8,9 +8,9 @@
 import ace from 'brace';
 import 'brace/ext/language_tools';
 import { AceInterface } from './ace_types';
-import { osqueryTableNames } from './osquery_tables';
+import { getOsqueryTableNames } from './osquery_tables';
 
-const osqueryTables = osqueryTableNames.join('|');
+const osqueryTables = getOsqueryTableNames().join('|');
 
 const keywords = [
   'select',
