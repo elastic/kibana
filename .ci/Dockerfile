@@ -104,4 +104,4 @@ RUN yarn kbn bootstrap
 RUN yarn kbn run build -i @kbn/pm
 RUN node scripts/build_plugin_list_docs
 
-ENTRYPOINT [ "yarn" ]
+ENTRYPOINT "/bin/bash"
