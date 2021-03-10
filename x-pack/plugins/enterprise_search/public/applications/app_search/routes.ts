@@ -10,11 +10,15 @@ import { docLinks } from '../shared/doc_links';
 export const DOCS_PREFIX = docLinks.appSearchBase;
 
 export const ROOT_PATH = '/';
+export const NOT_FOUND_PATH = '/404';
 export const SETUP_GUIDE_PATH = '/setup_guide';
 export const LIBRARY_PATH = '/library';
 export const SETTINGS_PATH = '/settings/account';
 export const CREDENTIALS_PATH = '/credentials';
-export const ROLE_MAPPINGS_PATH = '#/role-mappings'; // This page seems to 404 if the # isn't included
+
+export const ROLE_MAPPINGS_PATH = '/role-mappings';
+export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId/edit`;
+export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 
 export const ENGINES_PATH = '/engines';
 export const ENGINE_CREATION_PATH = '/engine_creation';
