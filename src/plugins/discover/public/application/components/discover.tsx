@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover.scss';
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -42,6 +42,8 @@ import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
+import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -79,7 +81,7 @@ export function Discover({
   }, [state, opts]);
   const hideChart = useMemo(() => state.hideChart, [state]);
   const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
-  const { trackUiMetric, capabilities, indexPatterns } = services;
+  const { trackUiMetric, capabilities, indexPatterns, chrome, docLinks } = services;
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
@@ -99,6 +101,14 @@ export function Discover({
     },
     [opts]
   );
+
+  useEffect(() => {
+    const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+
+    setBreadcrumbsTitle(savedSearch, chrome);
+    addHelpMenuToAppChrome(chrome, docLinks);
+  }, [savedSearch, chrome, docLinks]);
 
   const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
     () =>

@@ -21,7 +21,6 @@ import {
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
 import indexTemplateLegacy from './discover_legacy.html';
-import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
   getAngularModule,
@@ -34,11 +33,7 @@ import {
   subscribeWithScope,
   tabifyAggResponse,
 } from '../../kibana_services';
-import {
-  getRootBreadcrumbs,
-  getSavedSearchBreadcrumbs,
-  setBreadcrumbsTitle,
-} from '../helpers/breadcrumbs';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
@@ -397,11 +392,6 @@ function discoverController($route, $scope) {
   volatileSearchSource.setParent(persistentSearchSource);
   $scope.volatileSearchSource = volatileSearchSource;
 
-  const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
-  chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-
-  setBreadcrumbsTitle(savedSearch, chrome);
-
   function getDefaultColumns() {
     if (savedSearch.columns.length > 0) {
       return [...savedSearch.columns];
@@ -573,8 +563,6 @@ function discoverController($route, $scope) {
   $scope.unmappedFieldsConfig = {
     showUnmappedFields,
   };
-
-  addHelpMenuToAppChrome(chrome);
 
   const fetch$ = merge(
     refetch$,

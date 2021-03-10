@@ -7,4 +7,4 @@
  */
 
 export { applyAggsToSearchSource } from './apply_aggs_to_search_source';
-export { get_dimensions } from './get_dimensions';
+export { getDimensions } from './get_dimensions';
