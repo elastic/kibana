@@ -408,19 +408,16 @@ export const serviceThroughputRoute = createRoute({
             ...commonProps,
             start: comparisonStart,
             end: comparisonEnd,
-          }).then((coordinates) =>
-            offsetPreviousPeriodCoordinates({
-              currentPeriodStart: start,
-              previousPeriodStart: comparisonStart,
-              previousPeriodTimeseries: coordinates,
-            })
-          )
+          })
         : [],
     ]);
 
     return {
       currentPeriod,
-      previousPeriod,
+      previousPeriod: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: currentPeriod,
+        previousPeriodTimeseries: previousPeriod,
+      }),
     };
   },
 });

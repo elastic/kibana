@@ -30,6 +30,90 @@ const serializers = {
   stringToNumber: (v: string): any => (v != null ? parseInt(v, 10) : undefined),
 };
 
+const maxNumSegmentsField = {
+  label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,
+  validations: [
+    {
+      validator: emptyField(
+        i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
+          { defaultMessage: 'A value for number of segments is required.' }
+        )
+      ),
+    },
+    {
+      validator: ifExistsNumberGreaterThanZero,
+    },
+  ],
+  serializer: serializers.stringToNumber,
+};
+
+export const searchableSnapshotFields = {
+  snapshot_repository: {
+    label: i18nTexts.editPolicy.searchableSnapshotsRepoFieldLabel,
+    validations: [
+      { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+    ],
+  },
+  storage: {
+    label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel', {
+      defaultMessage: 'Storage',
+    }),
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageHelpText',
+      {
+        defaultMessage:
+          "Type of snapshot mounted for the searchable snapshot. This is an advanced option. Only change it if you know what you're doing.",
+      }
+    ),
+  },
+};
+
+const numberOfReplicasField = {
+  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel', {
+    defaultMessage: 'Number of replicas',
+  }),
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    {
+      validator: ifExistsNumberNonNegative,
+    },
+  ],
+  serializer: serializers.stringToNumber,
+};
+
+const numberOfShardsField = {
+  label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
+    defaultMessage: 'Number of primary shards',
+  }),
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    {
+      validator: numberGreaterThanField({
+        message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+        than: 0,
+      }),
+    },
+  ],
+  serializer: serializers.stringToNumber,
+};
+
+const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
+  defaultValue: defaultIndexPriority[phase] as any,
+  label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    { validator: ifExistsNumberNonNegative },
+  ],
+  serializer: serializers.stringToNumber,
+});
+
 export const schema: FormSchema<FormInternal> = {
   _meta: {
     hot: {
@@ -110,6 +194,30 @@ export const schema: FormSchema<FormInternal> = {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
     },
+    frozen: {
+      enabled: {
+        defaultValue: false,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel',
+          { defaultMessage: 'Activate frozen phase' }
+        ),
+      },
+      freezeEnabled: {
+        defaultValue: false,
+        label: i18n.translate('xpack.indexLifecycleMgmt.frozePhase.freezeIndexLabel', {
+          defaultMessage: 'Freeze index',
+        }),
+      },
+      minAgeUnit: {
+        defaultValue: 'd',
+      },
+      dataTierAllocationType: {
+        label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
+      },
+      allocationNodeAttribute: {
+        label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+    },
     delete: {
       enabled: {
         defaultValue: false,
@@ -172,55 +280,13 @@ export const schema: FormSchema<FormInternal> = {
           },
         },
         forcemerge: {
-          max_num_segments: {
-            label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,
-            validations: [
-              {
-                validator: emptyField(
-                  i18n.translate(
-                    'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
-                    { defaultMessage: 'A value for number of segments is required.' }
-                  )
-                ),
-              },
-              {
-                validator: ifExistsNumberGreaterThanZero,
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          max_num_segments: maxNumSegmentsField,
         },
         shrink: {
-          number_of_shards: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
-              defaultMessage: 'Number of primary shards',
-            }),
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              {
-                validator: numberGreaterThanField({
-                  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
-                  than: 0,
-                }),
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          number_of_shards: numberOfShardsField,
         },
         set_priority: {
-          priority: {
-            defaultValue: defaultIndexPriority.hot as any,
-            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              { validator: ifExistsNumberNonNegative },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          priority: getPriorityField('hot'),
         },
       },
     },
@@ -235,71 +301,16 @@ export const schema: FormSchema<FormInternal> = {
       },
       actions: {
         allocate: {
-          number_of_replicas: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas',
-            }),
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              {
-                validator: ifExistsNumberNonNegative,
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          number_of_replicas: numberOfReplicasField,
         },
         shrink: {
-          number_of_shards: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
-              defaultMessage: 'Number of primary shards',
-            }),
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              {
-                validator: numberGreaterThanField({
-                  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
-                  than: 0,
-                }),
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          number_of_shards: numberOfShardsField,
         },
         forcemerge: {
-          max_num_segments: {
-            label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,
-            validations: [
-              {
-                validator: emptyField(
-                  i18n.translate(
-                    'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
-                    { defaultMessage: 'A value for number of segments is required.' }
-                  )
-                ),
-              },
-              {
-                validator: ifExistsNumberGreaterThanZero,
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          max_num_segments: maxNumSegmentsField,
         },
         set_priority: {
-          priority: {
-            defaultValue: defaultIndexPriority.warm as any,
-            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              { validator: ifExistsNumberNonNegative },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          priority: getPriorityField('warm'),
         },
       },
     },
@@ -314,42 +325,31 @@ export const schema: FormSchema<FormInternal> = {
       },
       actions: {
         allocate: {
-          number_of_replicas: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas',
-            }),
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              {
-                validator: ifExistsNumberNonNegative,
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          number_of_replicas: numberOfReplicasField,
         },
         set_priority: {
-          priority: {
-            defaultValue: defaultIndexPriority.cold as any,
-            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              { validator: ifExistsNumberNonNegative },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          priority: getPriorityField('cold'),
         },
-        searchable_snapshot: {
-          snapshot_repository: {
-            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
-            validations: [
-              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
-            ],
+        searchable_snapshot: searchableSnapshotFields,
+      },
+    },
+    frozen: {
+      min_age: {
+        defaultValue: '0',
+        validations: [
+          {
+            validator: minAgeValidator,
           },
+        ],
+      },
+      actions: {
+        allocate: {
+          number_of_replicas: numberOfReplicasField,
         },
+        set_priority: {
+          priority: getPriorityField('frozen'),
+        },
+        searchable_snapshot: searchableSnapshotFields,
       },
     },
     delete: {

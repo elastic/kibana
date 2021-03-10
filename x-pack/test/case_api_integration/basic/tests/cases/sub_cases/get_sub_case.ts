@@ -25,12 +25,12 @@ import {
 import {
   getCaseCommentsUrl,
   getSubCaseDetailsUrl,
-} from '../../../../../../plugins/case/common/api/helpers';
+} from '../../../../../../plugins/cases/common/api/helpers';
 import {
   AssociationType,
   CaseResponse,
   SubCaseResponse,
-} from '../../../../../../plugins/case/common/api';
+} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

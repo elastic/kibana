@@ -79,7 +79,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
-              "lineNumber": 34
+              "lineNumber": 43
             },
             "signature": [
               "\"cardinality\""
@@ -88,7 +88,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
-          "lineNumber": 31
+          "lineNumber": 40
         },
         "initialIsOpen": false
       },
