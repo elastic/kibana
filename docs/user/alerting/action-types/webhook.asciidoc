@@ -36,6 +36,7 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
      password: passwordkeystorevalue
 --
 
+[[webhook-connector-config-properties]]
 `config` defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]

@@ -4,6 +4,8 @@
 
 The email action type uses the SMTP protocol to send mail message, using an integration of https://nodemailer.com/[Nodemailer]. Email message text is sent as both plain text and html text.
 
+NOTE: For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+
 [float]
 [[email-connector-configuration]]
 ==== Connector configuration
@@ -37,6 +39,7 @@ Password::  password for 'login' type authentication.
      password: passwordkeystorevalue
 --
 
+[[email-connector-config-properties]]
 `config` defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]

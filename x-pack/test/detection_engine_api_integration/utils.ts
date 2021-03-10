@@ -964,6 +964,19 @@ export const getRule = async (
   return body;
 };
 
+export const waitForAlertToComplete = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  id: string
+): Promise<void> => {
+  await waitFor(async () => {
+    const { body: alertBody } = await supertest
+      .get(`/api/alerts/alert/${id}/state`)
+      .set('kbn-xsrf', 'true')
+      .expect(200);
+    return alertBody.previousStartedAt != null;
+  }, 'waitForAlertToComplete');
+};
+
 /**
  * Waits for the rule in find status to be 'succeeded'
  * or the provided status, before continuing

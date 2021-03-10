@@ -102,7 +102,7 @@ image::user/images/highlights-search-syntax.png[Global search field with syntax 
 
 [float]
 [[improved-visualization-chooser]]
-=== Simplier visualization workflow
+=== Simplified visualization workflow
 
 {kib} simplifies the visualization workflow by providing guidance for
 which visualization editor to use for your type of data. To view the new visualization selector,
@@ -232,6 +232,18 @@ To add a custom label to a field, go to *Stack Management > Index Pattern*. Deta
 [role="screenshot"]
 image::user/images/highlights-custom-field-labels.png[Drilldown table row trigger]
 
+[float]
+[[index-patterns-refresh]]
+=== Index patterns automatically refresh
+
+Updates to index patterns are now automatic, so you'll no see longer
+the refresh icon in **Stack Management > Index Patterns**. When a new
+field is added to the index, the index pattern field list is
+updated the next time the index pattern is loaded, for example, when you load
+the page or move between {kib} apps.
+
+[role="screenshot"]
+image:management/index-patterns/images/new-index-pattern.png["Create index pattern"]
 
 [float]
 [[ml-jobs-space]]

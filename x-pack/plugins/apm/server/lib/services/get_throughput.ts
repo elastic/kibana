@@ -30,14 +30,14 @@ type ESResponse = PromiseReturnType<typeof fetcher>;
 
 function transform(response: ESResponse, options: Options) {
   const { end, start } = options.setup;
-  const deltaAsMinutes = (end - start) / 1000 / 60;
+  const { bucketSize } = getBucketSize({ start, end });
   if (response.hits.total.value === 0) {
     return [];
   }
   const buckets = response.aggregations?.throughput.buckets ?? [];
   return buckets.map(({ key: x, doc_count: y }) => ({
     x,
-    y: y / deltaAsMinutes,
+    y: y / (bucketSize / 60),
   }));
 }
 

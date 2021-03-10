@@ -31,6 +31,7 @@ Password::  Password for HTTP Basic authentication.
      password: passwordkeystorevalue
 --
 
+[[servicenow-connector-config-properties]]
 `config` defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]

@@ -20,6 +20,8 @@ import {
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
   getPivotQuery,
+  getMissingBucketConfig,
+  getRequestPayload,
   isDefaultQuery,
   isMatchAllQuery,
   isSimpleQuery,
@@ -121,16 +123,64 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getPreviewTransformRequestBody() with missing_buckets config', () => {
-    const query = getPivotQuery('the-query');
-    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, {
+  test('getMissingBucketConfig()', () => {
+    expect(getMissingBucketConfig(groupByTerms)).toEqual({});
+    expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: true } })).toEqual({
+      missing_bucket: true,
+    });
+    expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: false } })).toEqual({
+      missing_bucket: false,
+    });
+  });
+
+  test('getRequestPayload()', () => {
+    expect(getRequestPayload([], [groupByTerms])).toEqual({
       pivot: {
-        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        aggregations: {},
         group_by: {
-          'the-group-by-agg-name': { terms: { field: 'the-group-by-field', missing_bucket: true } },
+          'the-group-by-agg-name': {
+            terms: {
+              field: 'the-group-by-field',
+            },
+          },
         },
       },
     });
+    expect(getRequestPayload([], [{ ...groupByTerms, ...{ missing_bucket: true } }])).toEqual({
+      pivot: {
+        aggregations: {},
+        group_by: {
+          'the-group-by-agg-name': {
+            terms: {
+              field: 'the-group-by-field',
+              missing_bucket: true,
+            },
+          },
+        },
+      },
+    });
+    expect(getRequestPayload([], [{ ...groupByTerms, ...{ missing_bucket: false } }])).toEqual({
+      pivot: {
+        aggregations: {},
+        group_by: {
+          'the-group-by-agg-name': {
+            terms: {
+              field: 'the-group-by-field',
+              missing_bucket: false,
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('getPreviewTransformRequestBody() with missing_buckets config', () => {
+    const query = getPivotQuery('the-query');
+    const request = getPreviewTransformRequestBody(
+      'the-index-pattern-title',
+      query,
+      getRequestPayload([aggsAvg], [{ ...groupByTerms, ...{ missing_bucket: true } }])
+    );
 
     expect(request).toEqual({
       pivot: {

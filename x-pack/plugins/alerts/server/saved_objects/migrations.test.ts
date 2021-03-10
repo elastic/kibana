@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { getMigrations } from './migrations';
+import { getMigrations, isAnyActionSupportIncidents } from './migrations';
 import { RawAlert } from '../types';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
@@ -321,6 +321,255 @@ describe('7.11.0', () => {
         notifyWhen: 'onThrottleInterval',
       },
     });
+  });
+});
+
+describe('7.11.2', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(
+      (shouldMigrateWhenPredicate, migration) => migration
+    );
+  });
+
+  test('transforms connectors that support incident correctly', () => {
+    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.jira',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              title: 'Jira summary',
+              issueType: '10001',
+              comments: [
+                {
+                  commentId: '1',
+                  comment: 'jira comment',
+                },
+              ],
+              description: 'Jira description',
+              savedObjectId: '{{alertId}}',
+              priority: 'Highest',
+              parent: 'CASES-78',
+              labels: ['test'],
+            },
+          },
+          id: 'b1abe42d-ae1a-4a6a-b5ec-482ce0492c14',
+        },
+        {
+          actionTypeId: '.resilient',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              savedObjectId: '{{alertId}}',
+              incidentTypes: ['17', '21'],
+              severityCode: '5',
+              title: 'IBM name',
+              description: 'IBM description',
+              comments: [
+                {
+                  commentId: 'alert-comment',
+                  comment: 'IBM comment',
+                },
+              ],
+            },
+          },
+          id: '75d63268-9a83-460f-9026-0028f4f7dac4',
+        },
+        {
+          actionTypeId: '.servicenow',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              severity: '2',
+              impact: '2',
+              urgency: '2',
+              savedObjectId: '{{alertId}}',
+              title: 'SN short desc',
+              description: 'SN desc',
+              comment: 'sn comment',
+            },
+          },
+          id: '1266562a-4e1f-4305-99ca-1b44c469b26e',
+        },
+      ],
+    });
+
+    expect(migration7112(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        actions: [
+          {
+            actionTypeId: '.jira',
+            group: 'threshold met',
+            params: {
+              subAction: 'pushToService',
+              subActionParams: {
+                incident: {
+                  summary: 'Jira summary',
+                  description: 'Jira description',
+                  issueType: '10001',
+                  priority: 'Highest',
+                  parent: 'CASES-78',
+                  labels: ['test'],
+                },
+                comments: [
+                  {
+                    commentId: '1',
+                    comment: 'jira comment',
+                  },
+                ],
+              },
+            },
+            id: 'b1abe42d-ae1a-4a6a-b5ec-482ce0492c14',
+          },
+          {
+            actionTypeId: '.resilient',
+            group: 'threshold met',
+            params: {
+              subAction: 'pushToService',
+              subActionParams: {
+                incident: {
+                  name: 'IBM name',
+                  description: 'IBM description',
+                  incidentTypes: ['17', '21'],
+                  severityCode: '5',
+                },
+                comments: [
+                  {
+                    commentId: 'alert-comment',
+                    comment: 'IBM comment',
+                  },
+                ],
+              },
+            },
+            id: '75d63268-9a83-460f-9026-0028f4f7dac4',
+          },
+          {
+            actionTypeId: '.servicenow',
+            group: 'threshold met',
+            params: {
+              subAction: 'pushToService',
+              subActionParams: {
+                incident: {
+                  short_description: 'SN short desc',
+                  description: 'SN desc',
+                  severity: '2',
+                  impact: '2',
+                  urgency: '2',
+                },
+                comments: [{ commentId: '1', comment: 'sn comment' }],
+              },
+            },
+            id: '1266562a-4e1f-4305-99ca-1b44c469b26e',
+          },
+        ],
+      },
+    });
+  });
+
+  test('it transforms only subAction=pushToService', () => {
+    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.jira',
+          group: 'threshold met',
+          params: {
+            subAction: 'issues',
+            subActionParams: { issues: 'Task' },
+          },
+          id: '1266562a-4e1f-4305-99ca-1b44c469b26e',
+        },
+      ],
+    });
+
+    expect(migration7112(alert, { log })).toEqual(alert);
+  });
+
+  test('it does not transforms other connectors', () => {
+    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.server-log',
+          group: 'threshold met',
+          params: {
+            level: 'info',
+            message: 'log message',
+          },
+          id: '99257478-e591-4560-b264-441bdd4fe1d9',
+        },
+        {
+          actionTypeId: '.servicenow',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              severity: '2',
+              impact: '2',
+              urgency: '2',
+              savedObjectId: '{{alertId}}',
+              title: 'SN short desc',
+              description: 'SN desc',
+              comment: 'sn comment',
+            },
+          },
+          id: '1266562a-4e1f-4305-99ca-1b44c469b26e',
+        },
+      ],
+    });
+
+    expect(migration7112(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        actions: [
+          alert.attributes.actions![0],
+          {
+            actionTypeId: '.servicenow',
+            group: 'threshold met',
+            params: {
+              subAction: 'pushToService',
+              subActionParams: {
+                incident: {
+                  short_description: 'SN short desc',
+                  description: 'SN desc',
+                  severity: '2',
+                  impact: '2',
+                  urgency: '2',
+                },
+                comments: [{ commentId: '1', comment: 'sn comment' }],
+              },
+            },
+            id: '1266562a-4e1f-4305-99ca-1b44c469b26e',
+          },
+        ],
+      },
+    });
+  });
+
+  test.each(['.jira', '.servicenow', '.resilient'])(
+    'isAnyActionSupportIncidents should return true when %s is in actions',
+    (actionTypeId) => {
+      const doc = {
+        attributes: { actions: [{ actionTypeId }, { actionTypeId: '.server-log' }] },
+      } as SavedObjectUnsanitizedDoc<RawAlert>;
+      expect(isAnyActionSupportIncidents(doc)).toBe(true);
+    }
+  );
+
+  test('isAnyActionSupportIncidents should return false when there is no connector that supports incidents', () => {
+    const doc = {
+      attributes: { actions: [{ actionTypeId: '.server-log' }] },
+    } as SavedObjectUnsanitizedDoc<RawAlert>;
+    expect(isAnyActionSupportIncidents(doc)).toBe(false);
   });
 });
 

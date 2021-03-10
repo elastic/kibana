@@ -150,6 +150,7 @@ Integration Key::   A 32 character PagerDuty Integration Key for an integration 
      routingKey: testroutingkey
 --
 
+[[pagerduty-connector-config-properties]]
 `config` defines the action type specific to the configuration.
 `config` contains
 `apiURL`, a string that corresponds to *API URL*.

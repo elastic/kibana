@@ -54,11 +54,10 @@ export const ColdPhase: FunctionComponent = () => {
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   const [formData] = useFormData({
-    watch: [formFieldPaths.enabled, formFieldPaths.searchableSnapshot],
+    watch: [formFieldPaths.enabled],
   });
 
-  const enabled = get(formData, formFieldPaths.enabled);
-  const showReplicasField = get(formData, formFieldPaths.searchableSnapshot) == null;
+  const enabled = !!get(formData, formFieldPaths.enabled);
 
   return (
     <div id="coldPhaseContent" aria-live="polite" role="region">
@@ -118,49 +117,45 @@ export const ColdPhase: FunctionComponent = () => {
               )}
               paddingSize="m"
             >
-              {
-                /* Replicas section */
-                showReplicasField && (
-                  <DescribedFormRow
-                    title={
-                      <h3>
-                        {i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicasTitle', {
-                          defaultMessage: 'Replicas',
-                        })}
-                      </h3>
-                    }
-                    description={i18n.translate(
-                      'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasDescription',
-                      {
-                        defaultMessage:
-                          'Set the number of replicas. Remains the same as the previous phase by default.',
-                      }
-                    )}
-                    switchProps={{
-                      'data-test-subj': 'cold-setReplicasSwitch',
-                      label: i18n.translate(
-                        'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
-                        { defaultMessage: 'Set replicas' }
-                      ),
-                      initialValue:
-                        policy.phases.cold?.actions?.allocate?.number_of_replicas != null,
-                    }}
-                    fullWidth
-                  >
-                    <UseField
-                      path="phases.cold.actions.allocate.number_of_replicas"
-                      component={NumericField}
-                      componentProps={{
-                        fullWidth: false,
-                        euiFieldProps: {
-                          'data-test-subj': `${coldProperty}-selectedReplicaCount`,
-                          min: 0,
-                        },
-                      }}
-                    />
-                  </DescribedFormRow>
-                )
-              }
+              {/* Replicas section */}
+
+              <DescribedFormRow
+                title={
+                  <h3>
+                    {i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicasTitle', {
+                      defaultMessage: 'Replicas',
+                    })}
+                  </h3>
+                }
+                description={i18n.translate(
+                  'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasDescription',
+                  {
+                    defaultMessage:
+                      'Set the number of replicas. Remains the same as the previous phase by default.',
+                  }
+                )}
+                switchProps={{
+                  'data-test-subj': 'cold-setReplicasSwitch',
+                  label: i18n.translate(
+                    'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
+                    { defaultMessage: 'Set replicas' }
+                  ),
+                  initialValue: policy.phases.cold?.actions?.allocate?.number_of_replicas != null,
+                }}
+                fullWidth
+              >
+                <UseField
+                  path="phases.cold.actions.allocate.number_of_replicas"
+                  component={NumericField}
+                  componentProps={{
+                    fullWidth: false,
+                    euiFieldProps: {
+                      'data-test-subj': `${coldProperty}-selectedReplicaCount`,
+                      min: 0,
+                    },
+                  }}
+                />
+              </DescribedFormRow>
 
               {/* Freeze section */}
               {!isUsingSearchableSnapshotInHotPhase && (

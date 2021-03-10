@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.11.2>>
 * <<release-notes-7.11.1>>
 * <<release-notes-7.11.0>>
 * <<release-notes-7.10.2>>
@@ -90,6 +91,37 @@ For detailed information about the n.n.n release, review the following sections.
 
 
 --
+
+[[release-notes-7.11.2]]
+== {kib} 7.11.2
+
+The 7.11.2 release includes the following bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+
+[float]
+[[bug-v7.11.2]]
+=== Bug fixes
+Alerting::
+* For simplistic email servers, set `rejectUnauthorized` to `false` {kibana-pull}91760[#91760]
+APM::
+* Fixes an issue preventing metric-document only services from displaying in the Services overview list  {kibana-pull}92378[#92378]
+Canvas::
+* Removes custom plot plugins when *Canvas* is unmounted {kibana-pull}90722[#90722]
+Elastic Security::
+For the Elastic Security 7.11.2 bug fixes, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens and visualizations::
+* Fixes *TSVB* chart scroll when legend has many items {kibana-pull}91394[#91394]
+* Use timestamp on brush event instead of iso dates {kibana-pull}91483[#91483]
+Machine Learning::
+* Fixes geo_shape content causing *Data Visualizer* to not load correctly {kibana-pull}92052[#92052]
+* Fixes applying missing_bucket configuration to transform request payload {kibana-pull}91635[#91635]
+Management::
+* Fixes use of undefined value in JS import {kibana-pull}92791[#92791]
+* Fixes an issue where users were unable to configure replicas in the cold phase when searchable snapshots are enabled {kibana-pull}92782[#92782]
+Metrics::
+* Fixes `ignoreLookback` behavior for Snapshot API {kibana-pull}91169[#91169]
+Security::
+* Fixes an issue where `elasticsearch.sniffInterval`, `elasticsearch.sniffOnConnectionFault`, or `elasticsearch.sniffOnStart` causes an authentication issue when performing requests against the sniffed nodes {kibana-pull}91276[#91276]
+* Fixes session idle timeout {kibana-pull}91070[#91070]
 
 [[release-notes-7.11.1]]
 == {kib} 7.11.1
@@ -258,6 +290,7 @@ Machine Learning::
 * Adds runtime_mappings to job wizards {kibana-pull}85817[#85817]
 Management::
 * Allows custom name for fields via index pattern field management {kibana-pull}70039[#70039]
+* In index pattern management - Refresh button removed as index pattern field lists are refreshed when index patterns are loaded, such as on page load or when moving between kibana apps {kibana-pull}82223[#82223]
 * Painless Lab in DevTools now supports autocompletion for keywords, and class and class members for the Painless language based on a given context {kibana-pull}80577[#80577]
 * Transforms: Remove index field limitation for custom query {kibana-pull}81467[#81467]
 * In the Index Management app, you can now click a data stream index lifecycle policy and view it in the Index Lifecycle Policies app {kibana-pull}82165[#82165]

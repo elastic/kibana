@@ -79,7 +79,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   } else if (
     indexesWithReadPrivileges.length === 0 &&
@@ -91,7 +91,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return false;
@@ -100,6 +100,7 @@ export const hasReadIndexPrivileges = async (
 export const hasTimestampFields = async (
   wroteStatus: boolean,
   timestampField: string,
+  ruleName: string,
   // any is derived from here
   // node_modules/@elastic/elasticsearch/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -110,11 +111,15 @@ export const hasTimestampFields = async (
   buildRuleMessage: BuildRuleMessage
 ): Promise<boolean> => {
   if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `The following index patterns did not match any indices: ${JSON.stringify(
+    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
-    )}`;
-    logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
+      ruleName === 'Endpoint Security'
+        ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
+        : ''
+    }`;
+    logger.error(buildRuleMessage(errorString.trimEnd()));
+    await ruleStatusService.partialFailure(errorString.trimEnd());
     return true;
   } else if (
     !wroteStatus &&
@@ -129,12 +134,13 @@ export const hasTimestampFields = async (
         ? 'timestamp field "@timestamp"'
         : `timestamp override field "${timestampField}"`
     }: ${JSON.stringify(
-      isEmpty(timestampFieldCapsResponse.body.fields)
+      isEmpty(timestampFieldCapsResponse.body.fields) ||
+        isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
         ? timestampFieldCapsResponse.body.indices
-        : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices
+        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return wroteStatus;
@@ -693,9 +699,12 @@ export const createSearchAfterReturnTypeFromResponse = ({
       searchResult._shards.failed === 0 ||
       searchResult._shards.failures?.every((failure) => {
         return (
-          failure.reason?.reason === 'No mapping found for [@timestamp] in order to sort on' ||
-          failure.reason?.reason ===
+          failure.reason?.reason?.includes(
+            'No mapping found for [@timestamp] in order to sort on'
+          ) ||
+          failure.reason?.reason?.includes(
             `No mapping found for [${timestampOverride}] in order to sort on`
+          )
         );
       }),
     lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),

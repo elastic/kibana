@@ -325,6 +325,7 @@ export const job_status = t.keyof({
   succeeded: null,
   failed: null,
   'going to run': null,
+  'partial failure': null,
   warning: null,
 });
 export type JobStatus = t.TypeOf<typeof job_status>;

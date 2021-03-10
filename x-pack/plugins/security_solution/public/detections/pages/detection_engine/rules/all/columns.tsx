@@ -39,6 +39,7 @@ import { LocalizedDateTooltip } from '../../../../../common/components/localized
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -195,7 +196,7 @@ export const getColumns = ({
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
@@ -391,7 +392,7 @@ export const getMonitoringColumns = (
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
