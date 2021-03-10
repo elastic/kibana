@@ -50,7 +50,7 @@ interface Props {
  * inside of an accordion which has an animation when it opens. We need to wait for this animation
  * to complete so that the field is in it's final position before we can start scrolling to it.
  */
-const EUI_ACCORDION_EXPAND_DELAY = 500;
+const ACCORDION_EXPAND_DELAY = 500;
 
 export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
@@ -112,7 +112,7 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-      }, EUI_ACCORDION_EXPAND_DELAY);
+      }, ACCORDION_EXPAND_DELAY);
     }
   }, [hash, phase]);
 

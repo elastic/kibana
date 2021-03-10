@@ -176,7 +176,7 @@ export interface RollupAction {
   /**
    * Policy to manage the new, rollup index created by this action.
    *
-   * Default behavior is to use the policy that created the index to manage the index too.
+   * Default behavior is for the newly created rollup index to be unmanaged. See https://www.elastic.co/guide/en/elasticsearch/reference/master/ilm-rollup.html.
    */
   rollup_policy?: string;
 }
