@@ -36,7 +36,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   constructor(
     private deps: {
       toasts: NotificationsStart['toasts'];
-      canSaveVisualizations: boolean;
+      capabilities: ApplicationStart['capabilities'];
     }
   ) {}
 
@@ -55,8 +55,14 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   }
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
+    // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
+    const canSave =
+      embeddable.type === 'map'
+        ? this.deps.capabilities.maps?.save
+        : this.deps.capabilities.visualize.save;
+
     return Boolean(
-      this.deps.canSaveVisualizations &&
+      canSave &&
         !isErrorEmbeddable(embeddable) &&
         embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&

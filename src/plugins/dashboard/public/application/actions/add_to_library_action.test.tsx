@@ -37,13 +37,19 @@ setup.registerEmbeddableFactory(
   new ContactCardEmbeddableFactory((() => null) as any, {} as any)
 );
 const start = doStart();
-const defaultCapabilities = { visualize: { save: true } };
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
 let coreStart: CoreStart;
+let capabilities: CoreStart['application']['capabilities'];
+
 beforeEach(async () => {
   coreStart = coreMock.createStart();
+  capabilities = {
+    ...coreStart.application.capabilities,
+    visualize: { save: true },
+    maps: { save: true },
+  };
 
   const containerOptions = {
     ExitFullScreenButton: () => null,
@@ -86,7 +92,7 @@ beforeEach(async () => {
 test('Add to library is incompatible with Error Embeddables', async () => {
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    canSaveVisualizations: true,
+    capabilities,
   });
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
@@ -96,10 +102,10 @@ test('Add to library is incompatible with Error Embeddables', async () => {
   expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 
-test('Add to library is incompatible without visualize save permissions', async () => {
+test('Add to library is incompatible on visualize embeddable without visualize save permissions', async () => {
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    canSaveVisualizations: false,
+    capabilities: { ...capabilities, visualize: { save: false } },
   });
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
@@ -107,7 +113,7 @@ test('Add to library is incompatible without visualize save permissions', async 
 test('Add to library is compatible when embeddable on dashboard has value type input', async () => {
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    canSaveVisualizations: true,
+    capabilities,
   });
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await action.isCompatible({ embeddable })).toBe(true);
@@ -116,7 +122,7 @@ test('Add to library is compatible when embeddable on dashboard has value type i
 test('Add to library is not compatible when embeddable input is by reference', async () => {
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    canSaveVisualizations: true,
+    capabilities,
   });
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await action.isCompatible({ embeddable })).toBe(false);
@@ -125,7 +131,7 @@ test('Add to library is not compatible when embeddable input is by reference', a
 test('Add to library is not compatible when view mode is set to view', async () => {
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    canSaveVisualizations: true,
+    capabilities,
   });
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
@@ -149,7 +155,7 @@ test('Add to library is not compatible when embeddable is not in a dashboard con
   });
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    canSaveVisualizations: true,
+    capabilities,
   });
   expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
 });
@@ -161,7 +167,7 @@ test('Add to library replaces embeddableId and retains panel count', async () =>
 
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    canSaveVisualizations: true,
+    capabilities,
   });
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
@@ -190,7 +196,7 @@ test('Add to library returns reference type input', async () => {
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    canSaveVisualizations: true,
+    capabilities,
   });
   await action.execute({ embeddable });
   const newPanelId = Object.keys(container.getInput().panels).find(

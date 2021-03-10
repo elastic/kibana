@@ -372,7 +372,7 @@ export class DashboardPlugin
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
       const addToLibraryAction = new AddToLibraryAction({
         toasts: notifications.toasts,
-        canSaveVisualizations: Boolean(application.capabilities.visualize.save),
+        capabilities: application.capabilities,
       });
       uiActions.registerAction(addToLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
@@ -389,8 +389,8 @@ export class DashboardPlugin
         overlays,
         embeddable.getStateTransfer(),
         {
-          canCreateNew: Boolean(core.application.capabilities.dashboard.createNew),
-          canEditExisting: !Boolean(core.application.capabilities.dashboard.hideWriteControls),
+          canCreateNew: Boolean(application.capabilities.dashboard.createNew),
+          canEditExisting: !Boolean(application.capabilities.dashboard.hideWriteControls),
         },
         presentationUtil.ContextProvider
       );

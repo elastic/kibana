@@ -535,9 +535,9 @@ export function App({
   const savingToLibraryPermitted = Boolean(
     state.isSaveable && application.capabilities.visualize.save
   );
-  const savingToDashboardPermitted =
-    Boolean(state.isSaveable && application.capabilities.dashboard?.showWriteControls) &&
-    !(initialInput as LensByReferenceInput)?.savedObjectId; // saving to dashboard is permitted when lens is new or by value
+  const savingToDashboardPermitted = Boolean(
+    state.isSaveable && application.capabilities.dashboard?.showWriteControls
+  );
 
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
@@ -707,6 +707,7 @@ export function App({
       <SaveModal
         isVisible={state.isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}

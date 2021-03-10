@@ -24,6 +24,7 @@ export type SaveProps = OriginSaveProps | DashboardSaveProps;
 
 export interface Props {
   isVisible: boolean;
+  savingToLibraryPermitted?: boolean;
 
   originatingApp?: string;
   allowByValueEmbeddables: boolean;
@@ -47,6 +48,7 @@ export const SaveModal = (props: Props) => {
 
   const {
     originatingApp,
+    savingToLibraryPermitted,
     savedObjectsTagging,
     tagsIds,
     lastKnownDoc,
@@ -91,7 +93,8 @@ export const SaveModal = (props: Props) => {
       }}
       onClose={onClose}
       documentInfo={{
-        id: lastKnownDoc.savedObjectId,
+        // if the user cannot save to the library - treat this as a new document.
+        id: savingToLibraryPermitted ? lastKnownDoc.savedObjectId : undefined,
         title: lastKnownDoc.title || '',
         description: lastKnownDoc.description || '',
       }}

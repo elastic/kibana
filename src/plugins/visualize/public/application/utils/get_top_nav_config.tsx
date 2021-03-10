@@ -423,7 +423,11 @@ export const getTopNavConfig = (
                 />
               ) : (
                 <SavedObjectSaveModalDashboard
-                  documentInfo={savedVis || { title: '' }}
+                  documentInfo={{
+                    id: visualizeCapabilities.save ? savedVis?.id : undefined,
+                    title: savedVis?.title || '',
+                    description: savedVis?.description || '',
+                  }}
                   onSave={onSave}
                   tagOptions={tagOptions}
                   objectType={'visualization'}
