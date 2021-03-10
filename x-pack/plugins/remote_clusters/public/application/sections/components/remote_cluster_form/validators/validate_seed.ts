@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { isAddressValid, isPortValid } from '../../../../services';
+import { isAddressValid, isPortValid } from './validate_address';
 
-export function validateSeed(seed) {
-  const errors = [];
+export function validateSeed(seed?: string): string[] {
+  const errors: string[] = [];
 
   if (!seed) {
     return errors;

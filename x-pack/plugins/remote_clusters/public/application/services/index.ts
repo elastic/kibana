@@ -9,9 +9,9 @@ export { loadClusters, addCluster, editCluster, removeClusterRequest } from './a
 
 export { showApiError, showApiWarning } from './api_errors';
 
-export { initRedirect, redirect } from './redirect';
+export { setBreadcrumbs } from './breadcrumb';
 
-export { isAddressValid, isPortValid } from './validate_address';
+export { redirect } from './redirect';
 
 export { setUserHasLeftApp, getUserHasLeftApp, registerRouter, getRouter } from './routing';
 
