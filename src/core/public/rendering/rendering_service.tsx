@@ -52,6 +52,7 @@ export class RenderingService {
           {chromeHeader}
           <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
             <div className="app-wrapper-panel">
+              <div id="app-fixed-viewport" />
               <div id="globalBannerList">{bannerComponent}</div>
               <AppContainer classes$={chrome.getApplicationClasses$()}>{appComponent}</AppContainer>
             </div>
