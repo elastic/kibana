@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export const getConfigMock = jest.fn();
-jest.doMock('../../../apm', () => ({
-  getConfig: getConfigMock,
+export const getConfigurationMock = jest.fn();
+jest.doMock('@kbn/apm-config-loader', () => ({
+  getConfiguration: getConfigurationMock,
 }));
 
 export const agentMock = {} as Record<string, any>;
