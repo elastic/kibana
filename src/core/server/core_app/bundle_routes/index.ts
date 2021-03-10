@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { createBundlesRoute } from './bundles_route';
-export { createProxyBundlesRoute } from './proxy_bundles_route';
+export { registerBundleRoutes } from './bundles_route';
