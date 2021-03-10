@@ -38,15 +38,15 @@ Public (non-private) saved object types are not impacted by this RFC. This propo
 ## 3.1 Saved Objects Service
 
 ### 3.1.1 Type registry
-The [saved objects type registry](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/src/core/server/saved_objects/saved_objects_type_registry.ts) will allow consumers to register "private" saved object types via a new `classification` property:
+The [saved objects type registry](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/src/core/server/saved_objects/saved_objects_type_registry.ts) will allow consumers to register "private" saved object types via a new `accessClassification` property:
 
 ```ts
 /**
- * The classification dictates the protection level of the saved object:
+ * The accessClassification dictates the protection level of the saved object:
  *  * public (default): instances of this saved object type will be accessible to all users within the given namespace, who are authorized to act on objects of this type.
  *  * private: instances of this saved object type will belong to the user who created them, and will not be accessible by other users, except for administrators.
  */
-export type SavedObjectsClassification = 'public' | 'private';
+export type SavedObjectsAccessClassification = 'public' | 'private';
 
 // Note: some existing properties have been omitted for brevity.
 export interface SavedObjectsType {
@@ -56,9 +56,9 @@ export interface SavedObjectsType {
   mappings: SavedObjectsTypeMappingDefinition;
 
   /**
-   * The {@link SavedObjectsClassification | classification} for the type.
+   * The {@link SavedObjectsAccessClassification | accessClassification} for the type.
    */
-  classification?: SavedObjectsClassification;
+  accessClassification?: SavedObjectsAccessClassification;
 }
 
 // Example consumer
@@ -66,7 +66,7 @@ class MyPlugin {
   setup(core: CoreSetup) {
     core.savedObjects.registerType({
       name: 'user-settings',
-      classification: 'private',
+      accessClassification: 'private',
       namespaceType: 'single',
       hidden: false,
       mappings,
@@ -235,7 +235,7 @@ Adoption for existing features (public saved object types) is not addressed in t
 
 # 7. How we teach this
 
-Updates to the saved object service's documentation to describe the different `classification`s would be required. Like other saved object security controls, we want to ensure that engineers understand that this only "works" when the security wrapper is applied. Creating a bespoke instance of the saved objects client, or using the raw repository will intentionally bypass these authorization checks.
+Updates to the saved object service's documentation to describe the different `accessClassification`s would be required. Like other saved object security controls, we want to ensure that engineers understand that this only "works" when the security wrapper is applied. Creating a bespoke instance of the saved objects client, or using the raw repository will intentionally bypass these authorization checks.
 
 # 8. Unresolved questions
 
