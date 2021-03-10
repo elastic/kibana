@@ -47,4 +47,5 @@ export {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   osTypeArray,
   OsTypeArray,
+  buildExceptionFilter,
 } from '../../lists/common';
