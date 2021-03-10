@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
 
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { ValidationStep } from './validation_step';
 import { ValidationStepDetails } from './validation_step_details';
 import { ANALYTICS_STEPS } from '../../page';
 import { useMlApiContext } from '../../../../../contexts/kibana';
-import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import {
@@ -34,15 +34,18 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
   step,
   stepActivated,
 }) => {
-  const [validationSummary, setValidationSummary] = useState<ValidationSummary>({
-    warning: 0,
-    success: 0,
-  });
   const [checksInProgress, setChecksInProgress] = useState<boolean>(false);
   const [validationMessages, setValidationMessages] = useState<CalloutMessage[]>([]);
   const [errorMessage, setErrorMessage] = useState<CalloutMessage | undefined>();
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
-  const { jobType, trainingPercent, numTopFeatureImportanceValues, numTopClasses, includes } = form;
+  const {
+    dependentVariable,
+    jobType,
+    trainingPercent,
+    numTopFeatureImportanceValues,
+    numTopClasses,
+    includes,
+  } = form;
   const showValidationStep = step === ANALYTICS_STEPS.VALIDATION;
   const showDetails = step !== ANALYTICS_STEPS.VALIDATION && stepActivated === true;
   const {
@@ -53,26 +56,18 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
     showValidationStep ? ' active' : ''
   }${showDetails ? ' summary' : ''}`;
 
-  const runValidationChecks = async () => {
+  const debouncedValidationChecks = debounce(async () => {
+    setChecksInProgress(true);
     try {
-      const analyticsJobConfig = (isAdvancedEditorEnabled
+      const analyticsJobConfig = isAdvancedEditorEnabled
         ? jobConfig
-        : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
+        : getJobConfigFromFormState(form);
       const validationResults: ValidateAnalyticsJobResponse = await validateDataFrameAnalytics(
         analyticsJobConfig
       );
 
-      const valSummary = { warning: 0, success: 0 };
-      validationResults.forEach((message) => {
-        if (message?.status === VALIDATION_STATUS.WARNING) {
-          valSummary.warning++;
-        } else if (message?.status === VALIDATION_STATUS.SUCCESS) {
-          valSummary.success++;
-        }
-      });
-
       setValidationMessages(validationResults);
-      setValidationSummary(valSummary);
+      setErrorMessage(undefined);
       setChecksInProgress(false);
     } catch (err) {
       setErrorMessage({
@@ -88,21 +83,43 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
       });
       setChecksInProgress(false);
     }
-  };
+  }, 500);
 
   useEffect(
     function beginValidationChecks() {
       if (jobType !== undefined && (showValidationStep || stepActivated === true)) {
-        setChecksInProgress(true);
-        runValidationChecks();
+        debouncedValidationChecks();
       }
     },
-    [showValidationStep, trainingPercent, numTopFeatureImportanceValues, numTopClasses, includes]
+    [
+      showValidationStep,
+      dependentVariable,
+      trainingPercent,
+      numTopFeatureImportanceValues,
+      numTopClasses,
+      includes,
+    ]
   );
 
   if (errorMessage !== undefined) {
     validationMessages.push(errorMessage);
   }
+
+  const validationSummary = useMemo(
+    () =>
+      validationMessages.reduce(
+        (acc, message) => {
+          if (message?.status === VALIDATION_STATUS.WARNING) {
+            acc.warning += 1;
+          } else if (message?.status === VALIDATION_STATUS.SUCCESS) {
+            acc.success += 1;
+          }
+          return acc;
+        },
+        { warning: 0, success: 0 }
+      ),
+    [validationMessages]
+  );
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm" data-test-subj={dataTestSubj}>

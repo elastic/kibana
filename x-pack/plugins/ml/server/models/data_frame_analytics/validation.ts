@@ -88,8 +88,9 @@ function getRegressionAndClassificationMessage(
   if (isRegressionAnalysis(analysisConfig) || isClassificationAnalysis(analysisConfig)) {
     const trainingPercent = analysisConfig[analysisType].training_percent;
     const featureImportance = analysisConfig[analysisType].num_top_feature_importance_values;
-    // @ts-ignore num_top_classes doesn't exist on Regression type
-    const topClasses: number | undefined = analysisConfig[analysisType].num_top_classes;
+    const topClasses: number | undefined = isClassificationAnalysis(analysisConfig)
+      ? analysisConfig[analysisType].num_top_classes
+      : undefined;
 
     if (trainingPercent) {
       const trainingDocs = totalDocs * (trainingPercent / 100);
@@ -106,7 +107,7 @@ function getRegressionAndClassificationMessage(
           'xpack.ml.models.dfaValidation.messages.featureImportanceWarningMessage',
           {
             defaultMessage:
-              'Enabling feature importance can result in long running jobs for jobs with a large number of training documents.',
+              'Enabling feature importance can result in long running jobs when there are a large number of training documents.',
           }
         ),
         status: VALIDATION_STATUS.WARNING,
@@ -116,24 +117,43 @@ function getRegressionAndClassificationMessage(
       });
     }
 
-    if (
-      (topClasses === ALL_CATEGORIES &&
-        depVarCardinality &&
-        depVarCardinality > NUM_CATEGORIES_THRESHOLD) ||
-      (topClasses && topClasses > NUM_CATEGORIES_THRESHOLD)
-    ) {
-      messages.push({
-        id: 'num_top_classes',
-        text: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesWarningMessage', {
-          defaultMessage:
-            'Probabilities will be reported for {numCategories} categories. There could be a significant effect on the size of your destination index.',
-          values: { numCategories: depVarCardinality },
-        }),
-        status: VALIDATION_STATUS.WARNING,
-        heading: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesHeading', {
-          defaultMessage: 'Top classes',
-        }),
-      });
+    if (topClasses !== undefined) {
+      if (
+        (topClasses === ALL_CATEGORIES &&
+          depVarCardinality &&
+          depVarCardinality > NUM_CATEGORIES_THRESHOLD) ||
+        topClasses > NUM_CATEGORIES_THRESHOLD
+      ) {
+        messages.push({
+          id: 'num_top_classes',
+          text: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesWarningMessage', {
+            defaultMessage:
+              'Probabilities will be reported for {numCategories, plural, one {# category} other {# categories}}. There could be a significant effect on the size of your destination index.',
+            values: {
+              numCategories: topClasses === ALL_CATEGORIES ? depVarCardinality : topClasses,
+            },
+          }),
+          status: VALIDATION_STATUS.WARNING,
+          heading: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesHeading', {
+            defaultMessage: 'Top classes',
+          }),
+        });
+      } else {
+        messages.push({
+          id: 'num_top_classes',
+          text: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesSuccessMessage', {
+            defaultMessage:
+              'Probabilities will be reported for {numCategories, plural, one {# category} other {# categories}}.',
+            values: {
+              numCategories: topClasses === ALL_CATEGORIES ? depVarCardinality : topClasses,
+            },
+          }),
+          status: VALIDATION_STATUS.SUCCESS,
+          heading: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesHeading', {
+            defaultMessage: 'Top classes',
+          }),
+        });
+      }
     }
   }
   return messages;
