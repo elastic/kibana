@@ -19,7 +19,7 @@ import {
   EuiLink,
   EuiPageContentBody,
 } from '@elastic/eui';
-import { CoreStart, CoreSetup } from 'kibana/public';
+import { CoreStart, CoreSetup, ApplicationStart } from 'kibana/public';
 import {
   DataPublicPluginStart,
   ExecutionContextSearch,
@@ -330,6 +330,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
+        application={core.application as ApplicationStart}
       />
     );
   };
@@ -372,6 +373,7 @@ export const InnerVisualizationWrapper = ({
   localState,
   ExpressionRendererComponent,
   dispatch,
+  application,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -384,6 +386,7 @@ export const InnerVisualizationWrapper = ({
     missingRefsErrors?: Array<{ shortMessage: string; longMessage: string }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
+  application: ApplicationStart;
 }) => {
   const context: ExecutionContextSearch = useMemo(
     () => ({
@@ -474,16 +477,26 @@ export const InnerVisualizationWrapper = ({
   }
 
   if (localState.missingRefsErrors?.length) {
+    const { management: isManagementEnabled } = application.capabilities.navLinks;
     return (
       <EuiFlexGroup data-test-subj="configuration-failure">
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={
-              <EuiButtonEmpty onClick={() => {}} data-test-subj="configuration-failure-more-errors">
-                {i18n.translate('xpack.lens.editorFrame.indexPatternReconfigure', {
-                  defaultMessage: ` Configure it in the Advances Settings`,
-                })}
-              </EuiButtonEmpty>
+              isManagementEnabled ? (
+                <EuiButtonEmpty
+                  onClick={() =>
+                    application.navigateToApp('management', {
+                      path: `/kibana/indexPatterns/create`,
+                    })
+                  }
+                  data-test-subj="configuration-failure-reconfigure-indexpatterns"
+                >
+                  {i18n.translate('xpack.lens.editorFrame.indexPatternReconfigure', {
+                    defaultMessage: `Recreate it in the index pattern management page`,
+                  })}
+                </EuiButtonEmpty>
+              ) : null
             }
             body={
               <>
