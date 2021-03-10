@@ -2887,7 +2887,7 @@
             "type": "Function",
             "label": "notHandled",
             "description": [
-              "\nUser has no credentials.\nAllows user to access a resource when authRequired: 'optional'\nRejects a request when authRequired: true"
+              "\nUser has no credentials.\nAllows user to access a resource when authRequired is 'optional' or 'try'\nRejects a request when authRequired: true"
             ],
             "source": {
               "path": "src/core/server/http/lifecycle/auth.ts",
@@ -4648,7 +4648,7 @@
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 171
+              "lineNumber": 173
             }
           },
           {
@@ -4661,7 +4661,7 @@
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 229
+              "lineNumber": 231
             },
             "signature": [
               "false | ",
@@ -4685,7 +4685,7 @@
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 234
+              "lineNumber": 236
             },
             "signature": [
               {
@@ -4701,7 +4701,7 @@
         ],
         "source": {
           "path": "src/core/server/http/router/route.ts",
-          "lineNumber": 157
+          "lineNumber": 159
         },
         "initialIsOpen": false
       },
@@ -4732,14 +4732,14 @@
             "type": "CompoundType",
             "label": "authRequired",
             "description": [
-              "\nDefines authentication mode for a route:\n- true. A user has to have valid credentials to access a resource\n- false. A user can access a resource without any credentials.\n- 'optional'. A user can access a resource if has valid credentials or no credentials at all.\nCan be useful when we grant access to a resource but want to identify a user if possible.\n\nDefaults to `true` if an auth mechanism is registered."
+              "\nDefines authentication mode for a route:\n- true. A user has to have valid credentials to access a resource\n- false. A user can access a resource without any credentials.\n- 'optional'. A user can access a resource if has valid credentials or no credentials at all.\n              Can be useful when we grant access to a resource but want to identify a user if possible.\n- 'try'. A user can access a resource with valid, invalid or without any credentials.\n         Users with valid credentials will be authenticated\n\nDefaults to `true` if an auth mechanism is registered."
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 116
+              "lineNumber": 118
             },
             "signature": [
-              "boolean | \"optional\" | undefined"
+              "boolean | \"optional\" | \"try\" | undefined"
             ]
           },
           {
@@ -4752,7 +4752,7 @@
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 125
+              "lineNumber": 127
             },
             "signature": [
               "(Method extends \"get\" ? never : boolean) | undefined"
@@ -4768,7 +4768,7 @@
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 130
+              "lineNumber": 132
             },
             "signature": [
               "readonly string[] | undefined"
@@ -4784,7 +4784,7 @@
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 135
+              "lineNumber": 137
             },
             "signature": [
               "(Method extends ",
@@ -4816,7 +4816,7 @@
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",
-              "lineNumber": 140
+              "lineNumber": 142
             },
             "signature": [
               "{ payload?: (Method extends ",
