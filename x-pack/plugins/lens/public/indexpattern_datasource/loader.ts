@@ -217,7 +217,7 @@ export async function loadInitialState({
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
 
-  const requiredPatterns = _.uniq(
+  const requiredPatterns: string[] = _.uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
@@ -227,11 +227,26 @@ export async function loadInitialState({
     // take out the undefined from the list
     .filter(Boolean);
 
-  const currentIndexPatternId = initialContext?.indexPatternId ?? requiredPatterns[0];
+  const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
+  // Priority list:
+  // * start with the indexPattern in context
+  // * then fallback to the required ones
+  // * then as last resort use a random one from the available list
+  const availableIndexPatternIds = [
+    initialContext?.indexPatternId,
+    ...requiredPatterns,
+    indexPatternRefs[0]?.id,
+  ].filter((id) => id != null && availableIndexPatterns.has(id));
+
+  const currentIndexPatternId = availableIndexPatternIds[0]!;
+
   if (currentIndexPatternId) {
     setLastUsedIndexPatternId(storage, currentIndexPatternId);
   }
 
+  if (!requiredPatterns.includes(currentIndexPatternId)) {
+    requiredPatterns.push(currentIndexPatternId);
+  }
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
