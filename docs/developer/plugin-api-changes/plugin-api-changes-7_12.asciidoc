@@ -1,7 +1,7 @@
-[[plugin-api-changes-7-12]]
+[[plugin-api-changes]]
 == Plugin API changes in 7.12
 ++++
-<titleabbrev>7.12</titleabbrev>
+<titleabbrev>Plugin API changes</titleabbrev>
 ++++
 
 This page discusses the plugin API changes that you need to be aware of when migrating
