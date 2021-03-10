@@ -8,7 +8,7 @@
 
 import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from 'kibana/server';
-import type { IEsSearchResponse } from '../../../common';
+import type { IEsSearchResponse, ISearchOptions } from '../../../common';
 import { isCompleteResponse } from '../../../common';
 import { CollectedUsage } from './register';
 
@@ -79,10 +79,14 @@ export function usageProvider(core: CoreSetup): SearchUsage {
 /**
  * Rxjs observer for easily doing `tap(searchUsageObserver(logger, usage))` in an rxjs chain.
  */
-export function searchUsageObserver(logger: Logger, usage?: SearchUsage) {
+export function searchUsageObserver(
+  logger: Logger,
+  usage?: SearchUsage,
+  { isRestore }: ISearchOptions = {}
+) {
   return {
     next(response: IEsSearchResponse) {
-      if (!isCompleteResponse(response)) return;
+      if (isRestore || !isCompleteResponse(response)) return;
       logger.debug(`trackSearchStatus:next  ${response.rawResponse.took}`);
       usage?.trackSuccess(response.rawResponse.took);
     },
