@@ -11,7 +11,7 @@ import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../
 import { getSortForSearchSource } from '../angular/doc_table';
 import { ISearchSource } from '../../../../data/common';
 import { AppState } from '../angular/discover_state';
-import { SavedSearch, SortOrder } from '../../saved_searches/types';
+import type { SavedSearch, SortOrder } from '../../saved_searches/types';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
