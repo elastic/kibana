@@ -17,8 +17,8 @@ import {
   ConnectorAddFlyout,
   ConnectorEditFlyout,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../../../../triggers_actions_ui/public';
-import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
+} from '../../../../triggers_actions_ui/public';
+import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 import { useKibana } from '../../common/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';

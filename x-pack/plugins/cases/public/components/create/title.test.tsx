@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from '@testing-library/react';
 
-import { useForm, Form, FormHook } from '../../../shared_imports';
+import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { Title } from './title';
 import { schema, FormProps } from './schema';
 

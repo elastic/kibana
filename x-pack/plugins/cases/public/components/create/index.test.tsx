@@ -11,17 +11,15 @@ import { act, waitFor } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
 import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { useInsertTimeline } from '../use_insert_timeline';
 import {
   sampleConnectorData,
   sampleData,
@@ -31,7 +29,7 @@ import {
   useGetIssueTypesResponse,
   useGetFieldsByIssueTypeResponse,
 } from './mock';
-import { Create } from '.';
+import { CreateCase } from '.';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_tags');
@@ -52,7 +50,6 @@ const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
-const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const fetchTags = jest.fn();
 
 const fillForm = (wrapper: ReactWrapper) => {
@@ -73,7 +70,7 @@ const fillForm = (wrapper: ReactWrapper) => {
   });
 };
 
-describe('Create case', () => {
+describe('CreateCase case', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
@@ -92,9 +89,7 @@ describe('Create case', () => {
   it('it renders', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
+        <CreateCase />
       </TestProviders>
     );
 
@@ -105,9 +100,7 @@ describe('Create case', () => {
   it('should redirect to all cases on cancel click', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
+        <CreateCase />
       </TestProviders>
     );
 
@@ -118,29 +111,20 @@ describe('Create case', () => {
   it('should redirect to new case when posting the case', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
+        <CreateCase />
       </TestProviders>
     );
 
     fillForm(wrapper);
     wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-
-    await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/basic-case-id'));
   });
 
   it('it should insert a timeline', async () => {
-    let attachTimeline = noop;
-    useInsertTimelineMock.mockImplementation((value, onTimelineAttached) => {
-      attachTimeline = onTimelineAttached;
-    });
+    const attachTimeline = noop;
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <Create />
-        </Router>
+        <CreateCase />
       </TestProviders>
     );
 

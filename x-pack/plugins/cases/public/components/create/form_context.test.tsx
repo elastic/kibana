@@ -11,7 +11,7 @@ import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { ConnectorTypes } from '../../../common/api';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';

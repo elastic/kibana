@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { useForm, Form, FormHook } from '../../../shared_imports';
+import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
@@ -20,7 +20,7 @@ import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
 import { schema, FormProps } from './schema';
 
-jest.mock('../../../common/lib/kibana', () => {
+jest.mock('../../common/kibana', () => {
   return {
     useKibana: () => ({
       services: {

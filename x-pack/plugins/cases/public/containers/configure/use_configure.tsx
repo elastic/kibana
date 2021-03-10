@@ -8,11 +8,7 @@
 import { useEffect, useCallback, useReducer, useRef } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
-import {
-  useStateToaster,
-  errorToToaster,
-  displaySuccessToast,
-} from '../../../common/components/toasters';
+import { useStateToaster, errorToToaster, displaySuccessToast } from '../../components/toasters';
 import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
 import { ConnectorTypes } from '../../../common/api/connectors';

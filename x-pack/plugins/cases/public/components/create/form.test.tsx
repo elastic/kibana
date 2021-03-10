@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 
-import { useForm, Form, FormHook } from '../../../shared_imports';
+import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/mock';

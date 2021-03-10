@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 
-import { useForm, Form } from '../../../shared_imports';
+import { useForm, Form } from '../../common/shared_imports';
 import { SubmitCaseButton } from './submit_button';
 import { schema, FormProps } from './schema';
 

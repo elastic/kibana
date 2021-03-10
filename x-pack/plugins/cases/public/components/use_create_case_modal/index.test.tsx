@@ -10,13 +10,13 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../common/kibana';
 import '../../../common/mock/match_media';
 import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
-import { mockTimelineModel, TestProviders } from '../../../common/mock';
+import { mockTimelineModel, TestProviders } from '../../common/mock';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../common/kibana');
 jest.mock('../create/form_context', () => {
   return {
     FormContext: ({

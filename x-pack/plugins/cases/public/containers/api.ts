@@ -43,7 +43,7 @@ import {
   getSubCaseUserActionUrl,
 } from '../../common/api/helpers';
 
-import { KibanaServices } from '../common/services';
+import { KibanaServices } from '../common/kibana';
 import { StatusAll } from '../components/status';
 
 import {

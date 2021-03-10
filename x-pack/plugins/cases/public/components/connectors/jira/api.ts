@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { ActionTypeExecutorResult } from '../../../../../../actions/common';
+import { ActionTypeExecutorResult } from '../../../../../actions/common';
 import { IssueTypes, Fields, Issues, Issue } from './types';
 
 export const BASE_ACTION_API_PATH = '/api/actions';

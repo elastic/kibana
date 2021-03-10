@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
-import { useForm, Form, FormHook } from '../../../shared_imports';
+import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { Tags } from './tags';
 import { schema, FormProps } from './schema';

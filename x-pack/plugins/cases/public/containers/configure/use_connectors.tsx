@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import { useStateToaster, errorToToaster } from '../../../common/components/toasters';
+import { useStateToaster, errorToToaster } from '../../components/toasters';
 import * as i18n from '../translations';
 import { fetchConnectors } from './api';
 import { ActionConnector } from './types';
