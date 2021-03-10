@@ -175,14 +175,7 @@ export async function getErrorRatePeriods({
           ...commonProps,
           start: comparisonStart,
           end: comparisonEnd,
-        }).then((response) => ({
-          ...response,
-          transactionErrorRate: offsetPreviousPeriodCoordinates({
-            currentPeriodStart: start,
-            previousPeriodStart: comparisonStart,
-            previousPeriodTimeseries: response.transactionErrorRate,
-          }),
-        }))
+        })
       : { noHits: true, transactionErrorRate: [], average: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
@@ -190,5 +183,18 @@ export async function getErrorRatePeriods({
     previousPeriodPromise,
   ]);
 
-  return { currentPeriod, previousPeriod };
+  const firtCurrentPeriod = currentPeriod.transactionErrorRate.length
+    ? currentPeriod.transactionErrorRate
+    : undefined;
+
+  return {
+    currentPeriod,
+    previousPeriod: {
+      ...previousPeriod,
+      transactionErrorRate: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: firtCurrentPeriod,
+        previousPeriodTimeseries: previousPeriod.transactionErrorRate,
+      }),
+    },
+  };
 }
