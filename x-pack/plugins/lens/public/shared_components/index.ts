@@ -9,3 +9,5 @@ export * from './empty_placeholder';
 export { ToolbarPopoverProps, ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend_settings_popover';
 export { PalettePicker } from './palette_picker';
+
+export const KBN_HEADER_OFFSET = 98;

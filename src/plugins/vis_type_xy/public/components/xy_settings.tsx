@@ -61,6 +61,8 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
 };
 
+const KBN_HEADER_OFFSET = 98;
+
 function getValueLabelsStyling(isHorizontal: boolean) {
   const VALUE_LABELS_MAX_FONTSIZE = 15;
   const VALUE_LABELS_MIN_FONTSIZE = 10;
@@ -148,13 +150,19 @@ export const XYSettings: FC<XYSettingsProps> = ({
       : headerValueFormatter &&
         (tooltip.detailedTooltip ? undefined : ({ value }: any) => headerValueFormatter(value));
 
+  const boudaryProps = {
+    boundary: document.body,
+    boundaryPadding: { top: KBN_HEADER_OFFSET },
+  };
+
   const tooltipProps: TooltipProps = tooltip.detailedTooltip
     ? {
         ...tooltip,
+        ...boudaryProps,
         customTooltip: tooltip.detailedTooltip(headerFormatter),
         headerFormatter: undefined,
       }
-    : { ...tooltip, headerFormatter };
+    : { ...tooltip, ...boudaryProps, headerFormatter  };
 
   return (
     <Settings

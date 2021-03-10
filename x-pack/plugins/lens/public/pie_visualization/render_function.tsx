@@ -29,7 +29,7 @@ import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieExpressionProps } from './types';
 import { getSliceValue, getFilterContext } from './render_helpers';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder, KBN_HEADER_OFFSET } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
 import {
@@ -260,6 +260,10 @@ export function PieComponent(
     >
       <Chart>
         <Settings
+          tooltip={{
+            boundary: document.body,
+            boundaryPadding: { top: KBN_HEADER_OFFSET },
+          }}
           debugState={window._echDebugStateFlag ?? false}
           // Legend is hidden in many scenarios
           // - Tiny preview

@@ -55,7 +55,7 @@ import {
   PaletteRegistry,
   SeriesLayer,
 } from '../../../../../src/plugins/charts/public';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder, KBN_HEADER_OFFSET } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
@@ -548,6 +548,8 @@ export function XYChart({
         baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
+          boundary: document.body,
+          boundaryPadding: { top: KBN_HEADER_OFFSET },
         }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
