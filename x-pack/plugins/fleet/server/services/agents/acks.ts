@@ -92,7 +92,7 @@ export async function acknowledgeAgentActions(
   const configChangeAction = getLatestConfigChangePolicyActionIfUpdated(agent, actions);
 
   if (configChangeAction) {
-    await updateAgent(soClient, esClient, agent.id, {
+    await updateAgent(esClient, agent.id, {
       policy_revision: configChangeAction.policy_revision,
       packages: configChangeAction?.ack_data?.packages,
     });
@@ -201,7 +201,6 @@ export interface AcksService {
   ) => Promise<AgentAction[]>;
 
   authenticateAgentWithAccessToken: (
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     request: KibanaRequest
   ) => Promise<Agent>;
