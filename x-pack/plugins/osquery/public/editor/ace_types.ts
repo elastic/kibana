@@ -6,7 +6,8 @@
  */
 
 /**
- * Ace#define is not defined in the published types, so this extends the published interface with the method
+ * Ace#define is not defined in the published types, so we define our own
+ * interface.
  */
 export interface AceInterface {
   define: (
