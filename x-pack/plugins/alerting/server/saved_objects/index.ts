@@ -48,6 +48,19 @@ export function setupSavedObjects(
       getTitle(obj) {
         return `Rule: [${obj.attributes.name}]`;
       },
+      onExport(ctx, objs) {
+        return objs.map((obj) => {
+          return {
+            ...obj,
+            attributes: {
+              ...obj.attributes,
+              enabled: false,
+              apiKey: null,
+              apiKeyOwner: null,
+            },
+          };
+        });
+      },
     },
   });
 

@@ -24,6 +24,24 @@ export function setupSavedObjects(
     namespaceType: 'single',
     mappings: mappings.action,
     migrations: getMigrations(encryptedSavedObjects),
+    management: {
+      importableAndExportable: true,
+      getTitle(obj) {
+        return `Connector: [${obj.attributes.name}]`;
+      },
+      onExport(ctx, objs) {
+        return objs.map((obj) => {
+          return {
+            ...obj,
+            attributes: {
+              ...obj.attributes,
+              enabled: false,
+              secrets: null,
+            },
+          };
+        });
+      },
+    },
   });
 
   // Encrypted attributes
