@@ -183,8 +183,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
-  const queryBarQuery =
-    formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
@@ -508,7 +506,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               ruleType={ruleType}
               index={index}
               query={formQuery}
-              isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
+              isDisabled={!isQueryBarValid || index.length === 0}
               threshold={thresholdFormValue}
             />
           </>
