@@ -67,7 +67,7 @@ export const useSendCurrentRequestToES = () => {
             title: errorTitle,
             toastMessage: i18n.translate('console.notification.error.historyQuotaReachedMessage', {
               defaultMessage:
-                'Request history is full. Please clear history in order to continue saving new requests.',
+                'Request history is full. Clear the Console history to save new requests.',
             }),
           });
         } else {
