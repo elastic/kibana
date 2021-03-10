@@ -196,6 +196,13 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       return await listingTable.onListingPage('map');
     }
 
+    async onMapPage() {
+      log.debug(`onMapPage`);
+      return await testSubjects.exists('mapLayerTOC', {
+        timeout: 5000,
+      });
+    }
+
     async searchForMapWithName(name: string) {
       log.debug(`searchForMapWithName: ${name}`);
 
