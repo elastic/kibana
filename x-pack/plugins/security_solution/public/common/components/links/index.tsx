@@ -118,10 +118,12 @@ export const ExternalLink = React.memo<{
     const inAllowlist = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
     return url && inAllowlist && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
-        <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
-          {children}
+        <>
+          <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
+            {children}
+          </EuiLink>
           {!isNil(idx) && idx < lastIndexToShow && <Comma data-test-subj="externalLinkComma" />}
-        </EuiLink>
+        </>
       </EuiToolTip>
     ) : null;
   }
