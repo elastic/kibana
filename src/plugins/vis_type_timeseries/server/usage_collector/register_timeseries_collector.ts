@@ -21,10 +21,10 @@ export function registerTimeseriesUsageCollector(
     schema: {
       timeseries_use_last_value_mode_total: { type: 'long' },
     },
-    fetch: async ({ esClient }) => {
+    fetch: async ({ esClient, soClient }) => {
       const { index } = (await config.pipe(first()).toPromise()).kibana;
 
-      return await getStats(esClient, index);
+      return await getStats(esClient, soClient, index);
     },
   });
 

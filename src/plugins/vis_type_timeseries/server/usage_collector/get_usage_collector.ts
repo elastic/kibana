@@ -8,7 +8,9 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
+import { SavedObjectsClientContract, ISavedObjectsRepository } from 'kibana/server';
 import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
+import { findByValueEmbeddables } from '../../../dashboard/server';
 
 type ESResponse = SearchResponse<{ visualization: { visState: string }; updated_at: string }>;
 
@@ -23,6 +25,7 @@ interface VisState {
 
 export const getStats = async (
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository,
   index: string
 ): Promise<TimeseriesUsage | undefined> => {
   const timeseriesUsage = {
@@ -50,6 +53,7 @@ export const getStats = async (
     return;
   }
 
+  const timeseriesEmbeddables: VisState[] = [];
   for (const hit of esResponse.hits.hits) {
     const visualization = hit._source?.visualization;
     let visState: VisState = {};
@@ -59,10 +63,21 @@ export const getStats = async (
       // invalid visState
     }
 
-    if (
-      visState.type === 'metrics' &&
-      visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
-    ) {
+    if (visState.type === 'metrics') {
+      timeseriesEmbeddables.push(visState);
+    }
+  }
+
+  const byValueVisualizations = await findByValueEmbeddables(soClient, 'visualization');
+
+  for (const item of byValueVisualizations) {
+    if ((item.savedVis as { type: string }).type === 'metrics') {
+      timeseriesEmbeddables.push(item.savedVis as VisState);
+    }
+  }
+
+  for (const visState of timeseriesEmbeddables) {
+    if (visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE) {
       timeseriesUsage.timeseries_use_last_value_mode_total++;
     }
   }

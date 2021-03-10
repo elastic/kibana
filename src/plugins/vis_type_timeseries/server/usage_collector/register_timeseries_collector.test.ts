@@ -13,7 +13,7 @@ import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/se
 import { registerTimeseriesUsageCollector } from './register_timeseries_collector';
 import { ConfigObservable } from '../types';
 
-describe('registerTimelionUsageCollector', () => {
+describe('registerTimeseriesUsageCollector', () => {
   const mockIndex = 'mock_index';
   const mockConfig = of({ kibana: { index: mockIndex } }) as ConfigObservable;
 
@@ -51,7 +51,11 @@ describe('registerTimelionUsageCollector', () => {
     const mockedCollectorFetchContext = createCollectorFetchContextMock();
     const fetchResult = await usageCollector.fetch(mockedCollectorFetchContext);
     expect(mockGetStats).toBeCalledTimes(1);
-    expect(mockGetStats).toBeCalledWith(mockedCollectorFetchContext.esClient, mockIndex);
+    expect(mockGetStats).toBeCalledWith(
+      mockedCollectorFetchContext.esClient,
+      mockedCollectorFetchContext.soClient,
+      mockIndex
+    );
     expect(fetchResult).toBe(mockStats);
   });
 });

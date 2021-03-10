@@ -47,25 +47,36 @@ const getMockCollectorFetchContext = (hits?: unknown[]) => {
   const fetchParamsMock = createCollectorFetchContextMock();
 
   fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: { hits: { hits } } });
+  fetchParamsMock.soClient.find = jest.fn().mockResolvedValue({ saved_objects: [] });
   return fetchParamsMock;
 };
 
-describe('Timelion visualization usage collector', () => {
+describe('Timeseries visualization usage collector', () => {
   const mockIndex = 'mock_index';
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await getStats(getMockCollectorFetchContext().esClient, mockIndex);
+    const mockCollectorFetchContext = getMockCollectorFetchContext([]);
+    const result = await getStats(
+      mockCollectorFetchContext.esClient,
+      mockCollectorFetchContext.soClient,
+      mockIndex
+    );
 
     expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await getStats(getMockCollectorFetchContext([]).esClient, mockIndex);
+    const mockCollectorFetchContext = getMockCollectorFetchContext([]);
+    const result = await getStats(
+      mockCollectorFetchContext.esClient,
+      mockCollectorFetchContext.soClient,
+      mockIndex
+    );
 
     expect(result).toBeUndefined();
   });
 
-  test('Returns undefined when no TSVB saved objects found', async () => {
+  test('Returns undefined when no timeseries saved objects found', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext([
       {
         _id: 'visualization:myvis-123',
@@ -75,14 +86,22 @@ describe('Timelion visualization usage collector', () => {
         },
       },
     ]);
-    const result = await getStats(mockCollectorFetchContext.esClient, mockIndex);
+    const result = await getStats(
+      mockCollectorFetchContext.esClient,
+      mockCollectorFetchContext.soClient,
+      mockIndex
+    );
 
     expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
     const mockCollectorFetchContext = getMockCollectorFetchContext(mockedSavedObjects);
-    const result = await getStats(mockCollectorFetchContext.esClient, mockIndex);
+    const result = await getStats(
+      mockCollectorFetchContext.esClient,
+      mockCollectorFetchContext.soClient,
+      mockIndex
+    );
 
     expect(result).toMatchObject({
       timeseries_use_last_value_mode_total: 1,
