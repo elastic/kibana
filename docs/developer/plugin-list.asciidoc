@@ -316,7 +316,7 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |"Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/case/README.md[case]
+|{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
 |Experimental Feature
 
 
