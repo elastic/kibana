@@ -168,7 +168,7 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
   };
 }
 
-interface GetAlertInstanceSummaryParams {
+export interface GetAlertInstanceSummaryParams {
   id: string;
   dateStart?: string;
 }
