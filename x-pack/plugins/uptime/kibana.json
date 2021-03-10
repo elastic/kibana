@@ -13,7 +13,7 @@
     "fleet"
   ],
   "requiredPlugins": [
-    "alerts",
+    "alerting",
     "embeddable",
     "features",
     "licensing",

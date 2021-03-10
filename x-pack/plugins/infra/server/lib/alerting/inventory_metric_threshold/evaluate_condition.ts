@@ -17,7 +17,7 @@ import {
   CallWithRequestParams,
 } from '../../adapters/framework/adapter_types';
 import { Comparator, InventoryMetricConditions } from './types';
-import { AlertServices } from '../../../../../alerts/server';
+import { AlertServices } from '../../../../../alerting/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api/snapshot_api';
 import { InfraSource } from '../../sources';

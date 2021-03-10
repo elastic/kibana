@@ -5,29 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-
 import { appContextService } from '../../app_context';
 import { bulkUpdateAgents } from '../crud';
 
-function getInternalUserSOClient() {
-  const fakeRequest = ({
-    headers: {},
-    getBasePath: () => '',
-    path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown) as KibanaRequest;
-
-  return appContextService.getInternalUserSOClient(fakeRequest);
-}
 export function agentCheckinStateConnectedAgentsFactory() {
   const connectedAgentsIds = new Set<string>();
   let agentToUpdate = new Set<string>();
@@ -58,7 +38,6 @@ export function agentCheckinStateConnectedAgentsFactory() {
       return;
     }
     const esClient = appContextService.getInternalUserESClient();
-    const internalSOClient = getInternalUserSOClient();
     const now = new Date().toISOString();
     const updates = [...agentToUpdate.values()].map((agentId) => ({
       agentId,
@@ -67,7 +46,7 @@ export function agentCheckinStateConnectedAgentsFactory() {
       },
     }));
     agentToUpdate = new Set<string>([...connectedAgentsIds.values()]);
-    await bulkUpdateAgents(internalSOClient, esClient, updates);
+    await bulkUpdateAgents(esClient, updates);
   }
 
   return {

@@ -16,7 +16,7 @@ import {
   CreateExceptionListItemSchema,
 } from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
-import { buildExceptionFilter } from './build_exceptions_filter';
+import { buildExceptionFilter } from '../shared_imports';
 import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (

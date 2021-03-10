@@ -315,6 +315,22 @@ describe('getTimeRangeSettings', () => {
       expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
     });
 
+    test('should round up "to" when from and to are both "now/d"', () => {
+      const mockTo = 'now/d';
+      const mockFrom = 'now/d';
+      mockTimeRange({ from: mockFrom, to: mockTo });
+      const { to } = getTimeRangeSettings();
+      expect(to).toContain('59:59.999Z');
+    });
+
+    test('should round up "to" when from and to are different date maths', () => {
+      const mockTo = 'now/d';
+      const mockFrom = 'now/d+1';
+      mockTimeRange({ from: mockFrom, to: mockTo });
+      const { to } = getTimeRangeSettings();
+      expect(to).toContain('59:59.999Z');
+    });
+
     test('should return the DEFAULT_TO_DATE when the from value is malformed', () => {
       const malformedTimeRange = { from: true };
       if (isMalformedTimeRange(malformedTimeRange)) {
@@ -505,6 +521,11 @@ describe('getIntervalSettings', () => {
     test('should return the second value if the first is a bad string', () => {
       const value = parseDateWithDefault('trashed string', moment('1950-05-31T13:03:54.234Z'));
       expect(value.toISOString()).toBe(new Date('1950-05-31T13:03:54.234Z').toISOString());
+    });
+
+    test('should round up a valid date string and end with 59:59.999Z', () => {
+      const value = parseDateWithDefault('now/d', moment('1950-05-31T13:03:54.234Z'), true);
+      expect(value.toISOString()).toContain('59:59.999Z');
     });
   });
 });
