@@ -31,11 +31,11 @@ Open *TSVB*, then make sure the required settings are configured.
 [[configure-the-data-series]]
 ==== Configure the series
 
-Each of the series can be thought of as a separate {es} aggregation, which prevents
-them from being compared with math. For each series, you configure the *Aggregation*, 
-or function, and the *Options* that control the styling and {es} options. *Options* are inherited from *Panel options*.
-When you have separate options for each series, you can compare different
-{es} indices, and view two time ranges from the same index.
+Each *TSVB* visualization shares the same options to create a *Series*. Each series can be thought of as a separate {es} aggregation, which prevents
+them from being compared with math. For each series, the *Options* control the styling and {es} options, and are inherited from *Panel options*.
+When you have separate options for each series, you can compare different {es} indices, and view two time ranges from the same index. 
+
+To configure the value of each series, select the function, then configure the function inputs. Only the last function is displayed.
 
 . From the *Aggregation* dropdown, select the function for the series. 
 
@@ -46,51 +46,46 @@ When you have separate options for each series, you can compare different
 * *Terms* &mdash; Displays the top values in the series. To configure for the *Time Series* visualization, click *Options*, then select an option from the *Split color theme* dropdown.
 
 . Click *Options*, then configure the inputs for the function. 
-+
-Only the last function is displayed.
 
 [float]
 [[configure-the-visualizations]]
-==== Configure the visualization-specific options
+==== TSVB visualization options
 
-To configure *TSVB* visualizations, configure the visualization-specific options.
+The configuration options differ for each *TSVB* visualization.
 
-*Time Series*::
-  By default, the y-axis displays the full range of data, including zero. To automatically scale the y-axis from
-  the minimum to maximum values of the data:
-  
-  . Click *Data > Options > Fill*.
+[float]
+[[tsvb-time-series]]
+===== Time Series
 
-  . In the *Fill* field, enter `0`.
-  
-  . To add annotations to the x-axis based on timestamped documents in a separate {es} index, 
-  click *Annotations > Add data source*, then configure the options.
+By default, the y-axis displays the full range of data, including zero. To automatically scale the y-axis from
+the minimum to maximum values of the data, click *Data > Options > Fill*, then enter `0` in the *Fill* field.
+You can add annotations to the x-axis based on timestamped documents in a separate {es} index.
 
-All chart types except *Time Series*::
-  To specify the timespan used for matching documents:
-  
-  . Click *Panel options*.
-  
-  . From the *Data timerange mode* dropdown, select an option. 
+[float]
+[[all-chart-types-except-time-series]]
+===== All chart types except Time Series
 
-*Metric*, *Top N*, and *Gauge*::
-  To add conditional coloring based on values:
-  
-  . Click *Panel options*.
+The *Data timerange mode* dropdown in *Panel options* controls the timespan that *TSVB* uses to match documents.
+*Last value* is unable to match all documents, only the specific interval. *Entire timerange* matches all documents specified in the time filter.
 
-  . Specify the *Color rules* options.
+[float]
+[[metric-topn-gauge]]
+===== Metric, Top N, and Gauge
 
-*Top N* and *Table*::
-  When you click a series, *TSVB* applies a filter based
-  on the series name. To open a URL instead of applying a filter:
-  
-  . Click *Panel options*.
-  
-  . In the *Item URL* field, enter the URL you want to open when you click the series.
+*Color rules* in *Panel options* contains conditional coloring based on the values. 
 
-*Markdown*::
-  Use the Handlebar (mustache) syntax to insert dynamic data, or create
-  custom CSS using the LESS syntax.
+[float]
+[[topn-table]]
+===== Top N and Table
+
+When you click a series, *TSVB* applies a filter based on the series name. 
+To change this behavior, click *Panel options*, then specify a URL in the *Item URL* field, which opens a URL instead of applying a filter on click. 
+
+[float]
+[[tsvb-markdown]]
+===== Markdown
+
+Supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS using the LESS syntax.
 
 [float]
 [[tsvb-function-reference]]
@@ -129,20 +124,11 @@ For answers to frequently asked *TSVB* question, review the following.
 [float]
 ===== Why is my TSVB visualization missing data?
 
-For *Time series* with a derivative function, increase the time interval:
+It depends, but most often there are two causes:
 
-. Click *Panel options*.
+* For *Time series* visualizations with a derivative function, the time interval can be too small. Derivatives require sequential values. 
 
-. In the *Interval* field, enter a larger number.
-+
-Derivatives require sequential values.
-
-For all other *TSVB* visualizations:
-
-. Click *Panel options*.
-
-. From the *Data timerange mode* dropdown, select *Entire time range*. 
-+
+* For all other *TSVB* visualizations, the cause is probably the *Data timerange mode*, which is controlled by *Panel options > Data timerange mode > Entire time range*.
 By default, *TSVB* displays the last whole bucket. For example, if the time filter is set to *Last 24 hours*, and the
 current time is 9:41, *TSVB* displays only the last 10 minutes &mdash; from 9:30 to 9:40.
 
@@ -154,7 +140,7 @@ Performing math across data series is unsupported in *TSVB*. To calculate the di
 [float]
 ===== How do I compare the current versus previous month?
 
-While math is unsupported in *TSVB*, you can use color and time offsets to compare the series.
+While math is unsupported in *TSVB*, series with tie offsets is supported.
 
 . Click *Clone Series*, then choose a color for the new series.
 +
@@ -166,26 +152,14 @@ image::images/tsvb_clone_series.png[Clone Series action]
 [float]
 ===== How do I calculate a month over month change?
   
-The ability to calculate a month over month change is not fully supported in *TSVB*, but there is a special case that is supported _if_ the *TSVB*
-time filter is set to 3 months or more _and_ the *Interval* is `1m`.
-
-. Set the <<set-time-filter, time filter>> to *Last 90 days* or more.
-
-. Click *Panel options*, then enter `1m` in the *Interval* field.
-
-. To get the absolute monthly change, create a series with the *Derivative* aggregation.
-
-. To convert to a percent, create a series with the *Math* function. 
-
-.. In the *Expression field*, enter the following:
-+
-`params.current / (params.current - params.derivative)`.
-
-.. Click *Options*, then select *Percent* from the *Data Formatter* dropdown.
+The ability to calculate a month over month change is not fully supported in *TSVB*, but there is a special case that is supported _if_ the
+time filter is set to 3 months or more _and_ the *Interval* is `1m`. Use the *Derivative* to get the absolute monthly change. To convert to a percent, 
+add the *Math* function with the `params.current / (params.current - params.derivative)` formula, then select *Percent* from the *Data Formatter* dropdown.
 
 For other types of month over month calculations, use <<create-panels-with-timelion, Timelion>> or <<vega, Vega>>.
 
 [float]
 ===== How do I calculate the duration between the start and end of an event?
   
-*TSVB* requires pre-calculated durations and is unable to calculate the duration between the start and end of an event.
+Calculating the duration between the start and end of an event is unsupported in *TSVB* because *TSVB* requires correlation between different time periods. 
+*TSVB* requires that the duration is pre-calculated.
