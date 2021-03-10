@@ -44,6 +44,8 @@ interface VisualizationErrorProps {
 }
 
 export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
+  const showMore = errors && errors.length > 1;
+  const canFixInLens = errors?.some(({ type }) => type === 'fixable');
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
@@ -55,11 +57,19 @@ export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
             {errors ? (
               <>
                 <p>{errors[0].longMessage}</p>
-                {errors.length > 1 ? (
+                {showMore && !canFixInLens ? (
                   <p>
                     <FormattedMessage
                       id="xpack.lens.embeddable.moreErrors"
                       defaultMessage="Edit in Lens editor to see more errors"
+                    />
+                  </p>
+                ) : null}
+                {canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.fixErrors"
+                      defaultMessage="Edit in Lens editor to fix the error"
                     />
                   </p>
                 ) : null}

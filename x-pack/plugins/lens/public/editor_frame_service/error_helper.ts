@@ -63,3 +63,11 @@ export function getMissingCurrentDatasource() {
     defaultMessage: 'Could not find datasource for the visualization',
   });
 }
+
+export function getMissingIndexPatterns(indexPatternIds: string[]) {
+  return i18n.translate('xpack.lens.editorFrame.expressionMissingIndexPattern', {
+    defaultMessage:
+      'Could not find the {count, plural, one {index pattern} other {index pattern}}: {ids}',
+    values: { count: indexPatternIds.length, ids: indexPatternIds.join(', ') },
+  });
+}

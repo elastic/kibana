@@ -20,7 +20,11 @@ import { Document } from '../../persistence/saved_object_store';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { getActiveDatasourceIdFromDoc } from './state_management';
 import { ErrorMessage } from '../types';
-import { getMissingCurrentDatasource, getMissingVisualizationTypeError } from '../error_helper';
+import {
+  getMissingCurrentDatasource,
+  getMissingIndexPatterns,
+  getMissingVisualizationTypeError,
+} from '../error_helper';
 
 export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
@@ -112,6 +116,18 @@ export async function persistedStateToExpression(
       errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
     };
   }
+
+  const indexPatternValidation = validateRequiredIndexPatterns(
+    datasourceStates[datasourceId].state
+  );
+
+  if (indexPatternValidation) {
+    return {
+      ast: null,
+      errors: indexPatternValidation,
+    };
+  }
+
   const validationResult = validateDatasourceAndVisualization(
     datasources[datasourceId],
     datasourceStates[datasourceId].state,
@@ -153,6 +169,31 @@ export function getMissingIndexPattern(
   const ids = Object.values(datasourceState.layers).map(({ indexPatternId }) => indexPatternId);
   return ids.filter((id) => !datasourceState.indexPatterns[id]);
 }
+
+const validateRequiredIndexPatterns = (
+  currentDatasourceState: unknown | null
+): ErrorMessage[] | undefined => {
+  if (currentDatasourceState == null) {
+    return;
+  }
+  const dataSourceState = currentDatasourceState as {
+    currentIndexPatternId: string | null;
+    layers: Record<string, { indexPatternId: string }>;
+    indexPatterns: Record<string, unknown>;
+  };
+
+  const missingIds = Object.keys(dataSourceState.layers)
+    .filter((layerId) => {
+      const id = dataSourceState.layers[layerId].indexPatternId;
+      return !dataSourceState.indexPatterns[id];
+    })
+    .map((layerId) => dataSourceState.layers[layerId].indexPatternId);
+  if (missingIds.length) {
+    return [
+      { shortMessage: '', longMessage: getMissingIndexPatterns(missingIds), type: 'fixable' },
+    ];
+  }
+};
 
 export const validateDatasourceAndVisualization = (
   currentDataSource: Datasource | null,

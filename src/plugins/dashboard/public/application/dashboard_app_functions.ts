@@ -213,8 +213,8 @@ export const getOutputSubscription = ({
     }),
     distinctUntilChanged((a, b) =>
       deepEqual(
-        a.map((ip) => ip.id),
-        b.map((ip) => ip.id)
+        a.map((ip) => ip && ip.id),
+        b.map((ip) => ip && ip.id)
       )
     ),
     // using switchMap for previous task cancellation
