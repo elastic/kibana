@@ -233,6 +233,22 @@ const getAllSavedPinnedEvents = async (
   );
 };
 
+export const savePinnedEvents = (
+  frameworkRequest: FrameworkRequest,
+  timelineSavedObjectId: string,
+  pinnedEventIds: string[]
+) =>
+  Promise.all(
+    pinnedEventIds.map((eventId) =>
+      persistPinnedEventOnTimeline(
+        frameworkRequest,
+        null, // pinnedEventSavedObjectId
+        eventId,
+        timelineSavedObjectId
+      )
+    )
+  );
+
 export const convertSavedObjectToSavedPinnedEvent = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null

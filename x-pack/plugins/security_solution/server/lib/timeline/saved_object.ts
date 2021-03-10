@@ -126,6 +126,18 @@ export const getTimeline = async (
   return getSavedTimeline(request, timelineIdToUse);
 };
 
+export const getTimelineOrNull = async (
+  frameworkRequest: FrameworkRequest,
+  savedObjectId: string
+): Promise<TimelineSavedObject | null> => {
+  let timeline = null;
+  try {
+    timeline = await getTimeline(frameworkRequest, savedObjectId);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+  return timeline;
+};
+
 export const getTimelineByTemplateTimelineId = async (
   request: FrameworkRequest,
   templateTimelineId: string
@@ -138,6 +150,19 @@ export const getTimelineByTemplateTimelineId = async (
     filter: `siem-ui-timeline.attributes.templateTimelineId: "${templateTimelineId}"`,
   };
   return getAllSavedTimeline(request, options);
+};
+
+export const getTimelineTemplateOrNull = async (
+  frameworkRequest: FrameworkRequest,
+  templateTimelineId: string
+): Promise<TimelineSavedObject | null> => {
+  let templateTimeline = null;
+  try {
+    templateTimeline = await getTimelineByTemplateTimelineId(frameworkRequest, templateTimelineId);
+  } catch (e) {
+    return null;
+  }
+  return templateTimeline?.timeline[0] ?? null;
 };
 
 /** The filter here is able to handle the legacy data,

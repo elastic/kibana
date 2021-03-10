@@ -23,7 +23,6 @@ import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constant
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
 import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
-import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
 
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
@@ -38,6 +37,7 @@ import { AlertsClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
 
 import { ExceptionListClient } from '../../../../../../lists/server';
+import { installPrepackagedTimelines } from '../../../timeline/routes/install_prepackaged_timelines';
 
 export const addPrepackedRulesRoute = (
   router: SecuritySolutionPluginRouter,

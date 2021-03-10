@@ -14,10 +14,35 @@ import { FrameworkRequest } from '../../../framework';
 import { getExistingPrepackagedTimelines } from '../../saved_object';
 
 import { CheckTimelineStatusRt } from '../schemas/check_timelines_status_schema';
+import { ImportTimelinesSchema } from '../schemas/import_timelines_schema';
 
 import { loadData, getReadables } from './common';
-import { getTimelinesToInstall } from './get_timelines_to_install';
-import { getTimelinesToUpdate } from './get_timelines_to_update';
+
+export const getTimelinesToUpdate = (
+  timelinesFromFileSystem: ImportTimelinesSchema[],
+  installedTimelines: TimelineSavedObject[]
+): ImportTimelinesSchema[] => {
+  return timelinesFromFileSystem.filter((timeline) =>
+    installedTimelines.some((installedTimeline) => {
+      return (
+        timeline.templateTimelineId === installedTimeline.templateTimelineId &&
+        timeline.templateTimelineVersion! > installedTimeline.templateTimelineVersion!
+      );
+    })
+  );
+};
+
+export const getTimelinesToInstall = (
+  timelinesFromFileSystem: ImportTimelinesSchema[],
+  installedTimelines: TimelineSavedObject[]
+): ImportTimelinesSchema[] => {
+  return timelinesFromFileSystem.filter(
+    (timeline) =>
+      !installedTimelines.some(
+        (installedTimeline) => installedTimeline.templateTimelineId === timeline.templateTimelineId
+      )
+  );
+};
 
 export const checkTimelinesStatus = async (
   frameworkRequest: FrameworkRequest,

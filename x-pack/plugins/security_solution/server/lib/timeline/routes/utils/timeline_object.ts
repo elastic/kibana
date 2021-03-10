@@ -11,8 +11,8 @@ import {
   TimelineSavedObject,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
-import { getTimeline, getTemplateTimeline } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
+import { getTimelineOrNull, getTimelineTemplateOrNull } from '../../saved_object';
 
 interface TimelineObjectProps {
   id: string | null | undefined;
@@ -47,10 +47,9 @@ export class TimelineObject {
     this.data =
       this.id != null
         ? this.type === TimelineType.template
-          ? await getTemplateTimeline(this.frameworkRequest, this.id)
-          : await getTimeline(this.frameworkRequest, this.id)
+          ? await getTimelineTemplateOrNull(this.frameworkRequest, this.id)
+          : await getTimelineOrNull(this.frameworkRequest, this.id)
         : null;
-
     return this.data;
   }
 

@@ -66,7 +66,6 @@ export class CompareTimelinesStatus {
       version: templateTimelineInput.version,
       frameworkRequest,
     });
-
     this.timelineType = timelineType ?? TimelineType.default;
     this.title = title ?? null;
     this.status = status ?? TimelineStatus.active;
