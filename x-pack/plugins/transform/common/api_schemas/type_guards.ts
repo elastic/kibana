@@ -37,25 +37,25 @@ const isGenericResponseSchema = <T>(arg: any): arg is T => {
 };
 
 export const isGetTransformNodesResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is GetTransformNodesResponseSchema => {
   return (
     isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'count') && typeof arg.count === 'number'
   );
 };
 
-export const isGetTransformsResponseSchema = (arg: any): arg is GetTransformsResponseSchema => {
+export const isGetTransformsResponseSchema = (arg: unknown): arg is GetTransformsResponseSchema => {
   return isGenericResponseSchema<GetTransformsResponseSchema>(arg);
 };
 
 export const isGetTransformsStatsResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is GetTransformsStatsResponseSchema => {
   return isGenericResponseSchema<GetTransformsStatsResponseSchema>(arg);
 };
 
 export const isDeleteTransformsResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is DeleteTransformsResponseSchema => {
   return (
     isPopulatedObject(arg) &&
@@ -63,26 +63,28 @@ export const isDeleteTransformsResponseSchema = (
   );
 };
 
-export const isEsIndices = (arg: any): arg is EsIndex[] => {
+export const isEsIndices = (arg: unknown): arg is EsIndex[] => {
   return Array.isArray(arg);
 };
 
-export const isEsSearchResponse = (arg: any): arg is SearchResponse7 => {
+export const isEsSearchResponse = (arg: unknown): arg is SearchResponse7 => {
   return isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'hits');
 };
 
-export const isFieldHistogramsResponseSchema = (arg: any): arg is FieldHistogramsResponseSchema => {
+export const isFieldHistogramsResponseSchema = (
+  arg: unknown
+): arg is FieldHistogramsResponseSchema => {
   return Array.isArray(arg);
 };
 
 export const isGetTransformsAuditMessagesResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is GetTransformsAuditMessagesResponseSchema => {
   return Array.isArray(arg);
 };
 
 export const isPostTransformsPreviewResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is PostTransformsPreviewResponseSchema => {
   return (
     isPopulatedObject(arg) &&
@@ -94,12 +96,12 @@ export const isPostTransformsPreviewResponseSchema = (
 };
 
 export const isPostTransformsUpdateResponseSchema = (
-  arg: any
+  arg: unknown
 ): arg is PostTransformsUpdateResponseSchema => {
   return isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'id') && typeof arg.id === 'string';
 };
 
-export const isPutTransformsResponseSchema = (arg: any): arg is PutTransformsResponseSchema => {
+export const isPutTransformsResponseSchema = (arg: unknown): arg is PutTransformsResponseSchema => {
   return (
     isPopulatedObject(arg) &&
     {}.hasOwnProperty.call(arg, 'transformsCreated') &&
@@ -109,13 +111,17 @@ export const isPutTransformsResponseSchema = (arg: any): arg is PutTransformsRes
   );
 };
 
-const isGenericSuccessResponseSchema = (arg: any) =>
+const isGenericSuccessResponseSchema = (arg: unknown) =>
   isPopulatedObject(arg) && Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'success')));
 
-export const isStartTransformsResponseSchema = (arg: any): arg is StartTransformsResponseSchema => {
+export const isStartTransformsResponseSchema = (
+  arg: unknown
+): arg is StartTransformsResponseSchema => {
   return isGenericSuccessResponseSchema(arg);
 };
 
-export const isStopTransformsResponseSchema = (arg: any): arg is StopTransformsResponseSchema => {
+export const isStopTransformsResponseSchema = (
+  arg: unknown
+): arg is StopTransformsResponseSchema => {
   return isGenericSuccessResponseSchema(arg);
 };

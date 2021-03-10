@@ -115,7 +115,6 @@
     "@hapi/hoek": "^9.1.1",
     "@hapi/inert": "^6.0.3",
     "@hapi/podium": "^4.1.1",
-    "@hapi/vision": "^6.0.1",
     "@hapi/wreck": "^17.1.0",
     "@kbn/ace": "link:packages/kbn-ace",
     "@kbn/analytics": "link:packages/kbn-analytics",
