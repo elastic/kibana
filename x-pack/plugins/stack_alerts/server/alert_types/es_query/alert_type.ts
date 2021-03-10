@@ -23,8 +23,8 @@ import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
 
-const ActionGroupId = 'query matched';
-const ConditionMetAlertInstanceId = 'query matched';
+export const ActionGroupId = 'query matched';
+export const ConditionMetAlertInstanceId = 'query matched';
 
 export function getAlertType(
   logger: Logger
@@ -251,12 +251,11 @@ export function getAlertType(
           .scheduleActions(ActionGroupId, actionContext);
 
         // update the timestamp based on the current search results
-        const firstHitWithSort = searchResult.hits.hits.find(
-          (hit: ESSearchHit) => hit.sort != null
+        const firstValidTimefieldSort = getValidTimefieldSort(
+          searchResult.hits.hits.find((hit: ESSearchHit) => getValidTimefieldSort(hit.sort))?.sort
         );
-        const lastTimestamp = firstHitWithSort?.sort;
-        if (lastTimestamp != null && lastTimestamp.length > 0) {
-          timestamp = lastTimestamp[0];
+        if (firstValidTimefieldSort) {
+          timestamp = firstValidTimefieldSort;
         }
       }
     }
@@ -264,6 +263,15 @@ export function getAlertType(
     return {
       latestTimestamp: timestamp,
     };
+  }
+}
+
+function getValidTimefieldSort(sortValues: Array<string | number> = []): void | string {
+  for (const sortValue of sortValues) {
+    const sortDate = typeof sortValue === 'string' ? Date.parse(sortValue) : sortValue;
+    if (!isNaN(sortDate)) {
+      return new Date(sortDate).toISOString();
+    }
   }
 }
 
