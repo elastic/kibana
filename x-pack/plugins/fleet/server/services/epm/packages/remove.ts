@@ -63,7 +63,7 @@ export async function removeInstallation(options: {
   // recreate or delete index patterns when a package is uninstalled
   // this must be done after deleting the saved object for the current package otherwise it will retrieve the package
   // from the registry again and reinstall the index patterns
-  await installIndexPatterns(savedObjectsClient);
+  await installIndexPatterns(savedObjectsClient, esClient);
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry
