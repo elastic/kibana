@@ -21,10 +21,6 @@ export function validateMetrics(metrics, dateHistogramField) {
   }
 
   const normalizedDateHistogramField = dateHistogramField.toLowerCase();
-  console.log(
-    'metrics.some(({ name }) => name.toLowerCase() === normalizedDateHistogramField)',
-    metrics.some(({ name }) => name.toLowerCase() === normalizedDateHistogramField)
-  );
   if (metrics.some(({ name }) => name.toLowerCase() === normalizedDateHistogramField)) {
     return [
       // TODO: Copy required
