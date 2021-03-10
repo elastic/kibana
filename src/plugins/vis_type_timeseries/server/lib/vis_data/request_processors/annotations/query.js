@@ -26,8 +26,8 @@ export function query(
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
-    const queries = !annotation.ignore_global_filters ? req.payload.query : [];
-    const filters = !annotation.ignore_global_filters ? req.payload.filters : [];
+    const queries = !annotation.ignore_global_filters ? req.body.query : [];
+    const filters = !annotation.ignore_global_filters ? req.body.filters : [];
     doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
     const timerange = {
       range: {

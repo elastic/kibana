@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Windows Suspicious Script Object Execution",
   "query": "/* add winlogbeat-* when process.code_signature.* fields are populated */\n\nsequence by process.entity_id with maxspan = 2m\n  [process where event.type in (\"start\", \"process_started\") and\n     /* uncomment once in winlogbeat */\n     /* process.code_signature.subject_name : \"Microsoft Corporation\" and process.code_signature.trusted : true and */\n     not process.name : (\n       \"cscript.exe\",\n       \"iexplore.exe\",\n       \"MicrosoftEdge.exe\",\n       \"msiexec.exe\",\n       \"smartscreen.exe\",\n       \"taskhostw.exe\",\n       \"w3wp.exe\",\n       \"wscript.exe\")]\n  [library where event.type == \"start\" and dll.name : \"scrobj.dll\"]\n",
   "risk_score": 21,

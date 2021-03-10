@@ -572,7 +572,6 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'src/legacy/ui/ui_render/bootstrap/kbn_bundles_loader_source.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -1288,14 +1287,19 @@ module.exports = {
      * Osquery overrides
      */
     {
-      extends: ['eslint:recommended', 'plugin:react/recommended'],
-      plugins: ['react'],
+      extends: [
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+      ],
+      plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'arrow-body-style': ['error', 'as-needed'],
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
     {

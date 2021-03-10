@@ -8,7 +8,7 @@
 import { RequestParams } from '@elastic/elasticsearch';
 
 import { AnomalyRecordDoc as Anomaly } from '@kbn/ml-utils';
-import { buildExceptionFilter } from '../../../common/detection_engine/build_exceptions_filter';
+import { buildExceptionFilter } from '../../../common/shared_imports';
 import { ExceptionListItemSchema } from '../../../../lists/common';
 import { SearchResponse } from '../types';
 
