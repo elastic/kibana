@@ -1,6 +1,7 @@
 steps:
   - command: |
       export DOCKER_BUILDKIT=1 && \
+      docker buildx create --use && \ # TODO move this to agent startup script if permanent
       docker buildx build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain \
         --output type=image,name=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
         --cache-to type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache \
