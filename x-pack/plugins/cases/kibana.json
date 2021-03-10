@@ -2,7 +2,7 @@
   "configPath": ["xpack", "cases"],
   "id": "cases",
   "kibanaVersion": "kibana",
-  "extraPublicDirs": ["common"],
+  "extraPublicDirs": ["common", "common/api"],
   "requiredPlugins": ["actions", "kibanaReact"],
   "optionalPlugins": [
     "spaces",
