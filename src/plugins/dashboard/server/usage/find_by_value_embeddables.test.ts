@@ -32,14 +32,18 @@ describe('findByValueEmbeddables', () => {
     const savedObjectsResult = {
       saved_objects: [
         {
+          id: '1',
           attributes: {
             panelsJSON: JSON.stringify([visualizationByValue, mapByValue, embeddableByRef]),
           },
+          updated_at: '2020-10-17T00:00:00',
         },
         {
+          id: '2',
           attributes: {
             panelsJSON: JSON.stringify([embeddableByRef, mapByValue, visualizationByValue]),
           },
+          updated_at: '2020-10-17T01:00:00',
         },
       ],
     };
@@ -48,13 +52,17 @@ describe('findByValueEmbeddables', () => {
     const maps = await findByValueEmbeddables(savedObjectClient, 'map');
 
     expect(maps.length).toBe(2);
-    expect(maps[0]).toEqual(mapByValue.embeddableConfig);
-    expect(maps[1]).toEqual(mapByValue.embeddableConfig);
+    expect(maps[0].embeddable).toEqual(mapByValue.embeddableConfig);
+    expect(maps[0].dashboardInfo).toEqual({ id: '1', updated_at: '2020-10-17T00:00:00' });
+    expect(maps[1].embeddable).toEqual(mapByValue.embeddableConfig);
+    expect(maps[1].dashboardInfo).toEqual({ id: '2', updated_at: '2020-10-17T01:00:00' });
 
     const visualizations = await findByValueEmbeddables(savedObjectClient, 'visualization');
 
     expect(visualizations.length).toBe(2);
-    expect(visualizations[0]).toEqual(visualizationByValue.embeddableConfig);
-    expect(visualizations[1]).toEqual(visualizationByValue.embeddableConfig);
+    expect(visualizations[0].embeddable).toEqual(visualizationByValue.embeddableConfig);
+    expect(visualizations[0].dashboardInfo).toEqual({ id: '1', updated_at: '2020-10-17T00:00:00' });
+    expect(visualizations[1].embeddable).toEqual(visualizationByValue.embeddableConfig);
+    expect(visualizations[1].dashboardInfo).toEqual({ id: '2', updated_at: '2020-10-17T01:00:00' });
   });
 });
