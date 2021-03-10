@@ -57,4 +57,21 @@ describe('CoreApp', () => {
       );
     });
   });
+
+  describe('`/app/{id}/{any*}` route', () => {
+    it('is registered with the correct parameters', () => {
+      coreApp.setup(internalCoreSetup);
+
+      expect(httpResourcesRegistrar.register).toHaveBeenCalledWith(
+        {
+          path: '/app/{id}/{any*}',
+          validate: false,
+          options: {
+            authRequired: true,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+  });
 });
