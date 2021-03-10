@@ -1,8 +1,57 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+export interface BootstrapTemplateData {
+  themeTag: string;
+  jsDependencyPaths: string[];
+  publicPathMap: string;
+}
+
+export const renderTemplate = ({
+  themeTag,
+  jsDependencyPaths,
+  publicPathMap,
+}: BootstrapTemplateData) => {
+  return `
+function kbnBundlesLoader() {
+  var modules = {};
+
+  function has(prop) {
+    return Object.prototype.hasOwnProperty.call(modules, prop);
+  }
+
+  function define(key, bundleRequire, bundleModuleKey) {
+    if (has(key)) {
+      throw new Error('__kbnBundles__ already has a module defined for "' + key + '"');
+    }
+
+    modules[key] = {
+      bundleRequire,
+      bundleModuleKey,
+    };
+  }
+
+  function get(key) {
+    if (!has(key)) {
+      throw new Error('__kbnBundles__ does not have a module defined for "' + key + '"');
+    }
+
+    return modules[key].bundleRequire(modules[key].bundleModuleKey);
+  }
+
+  return { has: has, define: define, get: get };
+}
+
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
-window.__kbnThemeTag__ = "{{themeTag}}";
-window.__kbnPublicPath__ = {{publicPathMap}};
-window.__kbnBundles__ = {{kbnBundlesLoaderSource}}
+window.__kbnThemeTag__ = "${themeTag}";
+window.__kbnPublicPath__ = ${publicPathMap};
+window.__kbnBundles__ = kbnBundlesLoader();
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
@@ -44,7 +93,6 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     var scriptsTarget = document.querySelector('head meta[name="add-scripts-here"]')
     function loadScript(url, cb) {
       var dom = document.createElement('script');
-      {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
       dom.async = false;
       dom.src = url;
       dom.addEventListener('error', failure);
@@ -73,17 +121,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     }
 
     load([
-      {{#each jsDependencyPaths}}
-        '{{this}}',
-      {{/each}}
+      ${jsDependencyPaths.map((path) => `'${path}'`).join(',')}
     ], function () {
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
-
-      load([
-        {{#each styleSheetPaths}}
-          '{{this}}',
-        {{/each}}
-      ]);
     });
   }
 }
+  `;
+};

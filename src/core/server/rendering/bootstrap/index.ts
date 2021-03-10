@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/legacy/ui'],
-};
+export { registerBootstrapRoute } from './register_bootstrap_route';
+export { bootstrapRendererFactory } from './bootstrap_renderer';
