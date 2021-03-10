@@ -9,20 +9,23 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-const i18nTexts = {
-  title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudMissingColdTierCallout.title', {
-    defaultMessage: 'Create a cold tier',
+const geti18nTexts = (tier: 'cold' | 'frozen') => ({
+  title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudMissingTierCallout.title', {
+    defaultMessage: 'Create a {tier} tier',
+    values: { tier },
   }),
-  body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudMissingColdTierCallout.body', {
-    defaultMessage: 'Edit your Elastic Cloud deployment to set up a cold tier.',
+  body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudMissingTierCallout.body', {
+    defaultMessage: 'Edit your Elastic Cloud deployment to set up a {tier} tier.',
+    values: { tier },
   }),
   linkText: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.cloudMissingColdTierCallout.linkToCloudDeploymentDescription',
+    'xpack.indexLifecycleMgmt.editPolicy.cloudMissingTierCallout.linkToCloudDeploymentDescription',
     { defaultMessage: 'View cloud deployment' }
   ),
-};
+});
 
 interface Props {
+  phase: 'cold' | 'frozen';
   linkToCloudDeployment?: string;
 }
 
@@ -31,9 +34,14 @@ interface Props {
  * This may need to be change when we have autoscaling enabled on a cluster because nodes may not
  * yet exist, but will automatically be provisioned.
  */
-export const MissingColdTierCallout: FunctionComponent<Props> = ({ linkToCloudDeployment }) => {
+export const MissingCloudTierCallout: FunctionComponent<Props> = ({
+  phase,
+  linkToCloudDeployment,
+}) => {
+  const i18nTexts = geti18nTexts(phase);
+
   return (
-    <EuiCallOut title={i18nTexts.title} data-test-subj="cloudMissingColdTierCallout">
+    <EuiCallOut title={i18nTexts.title} data-test-subj="cloudMissingTierCallout">
       {i18nTexts.body}{' '}
       {Boolean(linkToCloudDeployment) && (
         <EuiLink href={linkToCloudDeployment} external>
