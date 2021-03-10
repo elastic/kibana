@@ -197,7 +197,7 @@ export const ActionTypeForm = ({
             <EuiFlexItem grow={true}>
               <EuiFormControlLayout
                 fullWidth
-                label={
+                append={
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
                     defaultMessage="{connectorInstance} connector"
