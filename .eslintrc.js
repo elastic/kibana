@@ -383,6 +383,7 @@ module.exports = {
                 ],
                 from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  '!(src|x-pack)/plugins/**/(public|server)/mocks',
                   '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
                 ],

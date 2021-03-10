@@ -29,10 +29,9 @@ import {
   OverlayStart,
   AppMountParameters,
 } from 'kibana/public';
-// @ts-ignore
+
 import { Plugin as DataPlugin, IndexPatternsContract } from 'src/plugins/data/public';
 import { LicensingPluginStart } from 'x-pack/plugins/licensing/public';
-import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { Storage } from 'src/plugins/kibana_utils/public';
 import {
@@ -44,6 +43,10 @@ import {
 
 import './index.scss';
 import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
+
+import { checkLicense } from '../common/check_license';
+
+// @ts-ignore
 import { initGraphApp } from './app';
 
 /**

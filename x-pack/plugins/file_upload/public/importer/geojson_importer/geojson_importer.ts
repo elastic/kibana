@@ -7,8 +7,8 @@
 
 import { Feature, Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
 import { ES_FIELD_TYPES } from 'src/plugins/data/public';
+// @ts-expect-error
 import { JSONLoader, loadInBatches } from './loaders';
 import { CreateDocsResponse, ImportResults } from '../types';
 import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';

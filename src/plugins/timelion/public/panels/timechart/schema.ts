@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
-// @ts-ignore
 import {
   calculateInterval,
   DEFAULT_TIME_FORMAT,
@@ -17,6 +16,7 @@ import {
   xaxisFormatterProvider,
   generateTicksProvider,
 } from 'src/plugins/vis_type_timelion/public';
+// @ts-ignore
 import observeResize from '../../lib/observe_resize';
 import { TimelionVisualizationDependencies } from '../../application';
 

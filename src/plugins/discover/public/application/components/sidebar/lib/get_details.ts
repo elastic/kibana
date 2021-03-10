@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+// @ts-ignore
 import { fieldCalculator } from './field_calculator';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 

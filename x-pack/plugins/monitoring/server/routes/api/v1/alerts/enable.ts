@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { ActionResult } from 'x-pack/plugins/actions/common';
 import { Alert, AlertTypeParams } from 'x-pack/plugins/alerting/common';
+// @ts-ignore
 import { handleError } from '../../../../lib/errors';
 import { AlertsFactory } from '../../../../alerts';
 import { RouteDependencies } from '../../../../types';

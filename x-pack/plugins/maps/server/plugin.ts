@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from 'x-pack/plugins/features/server';
-// @ts-ignore
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ILicense } from 'x-pack/plugins/licensing/common/types';
 import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { MapsLegacyPluginSetup } from 'src/plugins/maps_legacy/server';
 import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+// @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 // @ts-ignore
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';

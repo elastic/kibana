@@ -18,7 +18,6 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
 } from 'src/core/public';
-// @ts-ignore
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from 'src/plugins/ui_actions/public';
@@ -28,6 +27,12 @@ import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { MapsLegacyConfig } from 'src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from 'x-pack/plugins/licensing/public';
+import { FileUploadPluginStart } from 'x-pack/plugins/file_upload/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
+import { SavedObjectTaggingPluginStart } from 'x-pack/plugins/saved_objects_tagging/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
+// @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
   setEMSSettings,
@@ -51,17 +56,12 @@ import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
-import { FileUploadPluginStart } from 'x-pack/plugins/file_upload/public';
-import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
-import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import {
   getIsEnterprisePlus,
   registerLicensedFeatures,
   setLicensingPluginStart,
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
-import { SavedObjectTaggingPluginStart } from 'x-pack/plugins/saved_objects_tagging/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;

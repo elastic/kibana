@@ -12,6 +12,7 @@ import { pick, trimStart, trimEnd } from 'lodash';
 
 import { KibanaRequest, RequestHandler } from 'kibana/server';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ensureRawRequest } from 'src/core/server/http/router';
 import { ESConfigForProxy } from '../../../../types';
 import {
@@ -23,7 +24,6 @@ import {
 
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 import { RouteDependencies } from '../../../';
 

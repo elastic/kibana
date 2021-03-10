@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { IServiceSettings, FileLayer } from 'src/plugins/maps_legacy/public';
+// @ts-ignore
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 import { Data, UrlObject, EmsQueryRequest } from './types';
 

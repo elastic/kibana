@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { InfraPluginSetup } from 'x-pack/plugins/infra/server';
+// @ts-ignore
 import { prefixIndexPattern } from '../ccs_utils';
 import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
