@@ -308,7 +308,7 @@ describe('alertType', () => {
     });
   });
 
-  it('alert executor ignored tie breaker sort values', async () => {
+  it('alert executor ignores tie breaker sort values', async () => {
     const params: EsQueryAlertParams = {
       index: ['index-name'],
       timeField: 'time-field',
@@ -368,20 +368,87 @@ describe('alertType', () => {
       latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
     });
   });
+
+  it('alert executor ignores results with no sort values', async () => {
+    const params: EsQueryAlertParams = {
+      index: ['index-name'],
+      timeField: 'time-field',
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '>',
+      threshold: [0],
+    };
+    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+    const oldestDocumentTimestamp = Date.now();
+
+    alertServices.callCluster.mockResolvedValueOnce(
+      generateResults(
+        [
+          {
+            'time-field': oldestDocumentTimestamp,
+          },
+          {
+            'time-field': oldestDocumentTimestamp - 1000,
+          },
+        ],
+        true,
+        true
+      )
+    );
+
+    const result = await alertType.executor({
+      alertId: uuid.v4(),
+      startedAt: new Date(),
+      previousStartedAt: new Date(),
+      services: (alertServices as unknown) as AlertServices<
+        EsQueryAlertState,
+        ActionContext,
+        typeof ActionGroupId
+      >,
+      params,
+      state: {
+        latestTimestamp: undefined,
+      },
+      spaceId: uuid.v4(),
+      name: uuid.v4(),
+      tags: [],
+      createdBy: null,
+      updatedBy: null,
+    });
+
+    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    expect(instance.replaceState).toHaveBeenCalledWith({
+      latestTimestamp: undefined,
+      dateStart: expect.any(String),
+      dateEnd: expect.any(String),
+    });
+
+    expect(result).toMatchObject({
+      latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+    });
+  });
 });
 
 function generateResults(
   docs: Array<{ 'time-field': unknown; [key: string]: unknown }>,
-  includeTieBreaker: boolean = false
+  includeTieBreaker: boolean = false,
+  skipSortOnFirst: boolean = false
 ): ESSearchResponse<unknown, ESSearchRequest> {
   const hits = docs.map((doc, index) => ({
     _index: 'foo',
     _type: '_doc',
     _id: `${index}`,
     _score: 0,
-    sort: (includeTieBreaker
-      ? ['FaslK3QBySSL_rrj9zM5', doc['time-field']]
-      : [doc['time-field']]) as string[],
+    ...(skipSortOnFirst && index === 0
+      ? {}
+      : {
+          sort: (includeTieBreaker
+            ? ['FaslK3QBySSL_rrj9zM5', doc['time-field']]
+            : [doc['time-field']]) as string[],
+        }),
     _source: doc,
   }));
   return {
