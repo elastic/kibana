@@ -165,20 +165,23 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             data-test-subj={`edit${item.id}`}
             onClick={() => editItem(item, EditConectorTabs.Configuration)}
             key={item.id}
-            disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
+            disabled={
+              (!item.isPreconfigured && !item.enabled) ||
+              (actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true)
+            }
           >
-            {value}
+            {value} {item.enabled}
           </EuiLink>
         );
 
         return checkEnabledResult.isEnabled ? (
-          !item.enabled ? (
-            link
-          ) : (
+          !item.isPreconfigured && !item.enabled ? (
             <Fragment>
               {link}
               <EuiIconTip type="questionInCircle" content="Just imported!" position="right" />
             </Fragment>
+          ) : (
+            link
           )
         ) : (
           <Fragment>
@@ -209,6 +212,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       render: (item: ActionConnectorTableItem) => {
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+            {!item.isPreconfigured && !item.enabled && <EuiLink>Fix</EuiLink>}
             <DeleteOperation
               canDelete={canDelete}
               item={item}
