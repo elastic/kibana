@@ -2016,16 +2016,6 @@
   dependencies:
     "@hapi/hoek" "9.x.x"
 
-"@hapi/vision@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@hapi/vision/-/vision-6.0.1.tgz#976c3575be56d3cb5b472ddcfe0b7403778706fd"
-  integrity sha512-xv4PwmhbXCLzDfojZ7l4+P/YynBhMInV8GtLPH4gB74prhwOl8lGcJxxK8V9rf1aMH/vonM5yVGd9FuoA9sT0A==
-  dependencies:
-    "@hapi/boom" "9.x.x"
-    "@hapi/bounce" "2.x.x"
-    "@hapi/hoek" "9.x.x"
-    "@hapi/validate" "1.x.x"
-
 "@hapi/wreck@17.x.x", "@hapi/wreck@^17.0.0", "@hapi/wreck@^17.1.0":
   version "17.1.0"
   resolved "https://registry.yarnpkg.com/@hapi/wreck/-/wreck-17.1.0.tgz#fbdc380c6f3fa1f8052dc612b2d3b6ce3e88dbec"
@@ -14213,7 +14203,7 @@ gaze@^1.0.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@^1.21.2:
+geckodriver@^1.22.2:
   version "1.22.2"
   resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.22.2.tgz#e0904bed50a1d2abaa24597d4ae43eb6662f9d72"
   integrity sha512-xcf1OLfHqNX4+wQhj4weu2gtiwtPnV8yEEKvLkC8GuFtUc5WjOGodV/2pHiYJjCSJRQfsmIgY5Xs1zaJf/OGFA==

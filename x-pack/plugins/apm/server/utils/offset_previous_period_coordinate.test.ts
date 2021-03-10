@@ -7,16 +7,16 @@
 import { Coordinate } from '../../typings/timeseries';
 import { offsetPreviousPeriodCoordinates } from './offset_previous_period_coordinate';
 
-const previousPeriodStart = new Date('2021-01-27T14:45:00.000Z').valueOf();
-const currentPeriodStart = new Date('2021-01-28T14:45:00.000Z').valueOf();
+const currentPeriodTimeseries: Coordinate[] = [
+  { x: new Date('2021-01-28T14:45:00.000Z').valueOf(), y: 0 },
+];
 
 describe('mergePeriodsTimeseries', () => {
   describe('returns empty array', () => {
     it('when previous timeseries is not defined', () => {
       expect(
         offsetPreviousPeriodCoordinates({
-          currentPeriodStart,
-          previousPeriodStart,
+          currentPeriodTimeseries,
           previousPeriodTimeseries: undefined,
         })
       ).toEqual([]);
@@ -25,8 +25,7 @@ describe('mergePeriodsTimeseries', () => {
     it('when previous timeseries is empty', () => {
       expect(
         offsetPreviousPeriodCoordinates({
-          currentPeriodStart,
-          previousPeriodStart,
+          currentPeriodTimeseries,
           previousPeriodTimeseries: [],
         })
       ).toEqual([]);
@@ -43,8 +42,7 @@ describe('mergePeriodsTimeseries', () => {
 
     expect(
       offsetPreviousPeriodCoordinates({
-        currentPeriodStart,
-        previousPeriodStart,
+        currentPeriodTimeseries,
         previousPeriodTimeseries,
       })
     ).toEqual([
