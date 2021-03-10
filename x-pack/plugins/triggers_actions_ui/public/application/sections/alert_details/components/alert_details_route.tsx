@@ -105,7 +105,7 @@ export async function getAlertData(
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertMessage',
         {
-          defaultMessage: 'Unable to load alert: {message}',
+          defaultMessage: 'Unable to load rule: {message}',
           values: {
             message: e.message,
           },

@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Loads the Alerts page', async () => {
         await pageObjects.common.navigateToApp('triggersActions');
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-        expect(headingText).to.be('Alerts and Actions');
+        expect(headingText).to.be('Rules and Connectors');
       });
     });
 
@@ -45,10 +45,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Loads the Alerts page', async () => {
-        await log.debug('Checking for section heading to say Triggers and Actions.');
+        await log.debug('Checking for section heading to say Rules and Connectors.');
 
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-        expect(headingText).to.be('Alerts and Actions');
+        expect(headingText).to.be('Rules and Connectors');
       });
 
       describe('Connectors tab', () => {

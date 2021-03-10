@@ -480,7 +480,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.alertDetailsUI.clickViewInApp();
 
-        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
+        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Rule ${alert.id}`);
       });
 
       it('renders a disabled alert details view in app button', async () => {

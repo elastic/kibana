@@ -58,7 +58,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   tabs.push({
     id: 'alerts',
     name: (
-      <FormattedMessage id="xpack.triggersActionsUI.home.alertsTabTitle" defaultMessage="Alerts" />
+      <FormattedMessage id="xpack.triggersActionsUI.home.rulesTabTitle" defaultMessage="Rules" />
     ),
   });
 
@@ -93,7 +93,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Alerts and Actions"
+                  defaultMessage="Rules and Connectors"
                 />
               </h1>
             </EuiFlexItem>
@@ -105,7 +105,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                 data-test-subj="documentationLink"
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.home.alertsAndActionsDocsLinkText"
+                  id="xpack.triggersActionsUI.home.docsLinkText"
                   defaultMessage="Documentation"
                 />
               </EuiButtonEmpty>
@@ -117,7 +117,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           <p>
             <FormattedMessage
               id="xpack.triggersActionsUI.home.sectionDescription"
-              defaultMessage="Detect conditions using alerts, and take actions using connectors."
+              defaultMessage="Detect conditions using rules, and take actions using connectors."
             />
           </p>
         </EuiText>

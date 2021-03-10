@@ -21,7 +21,7 @@ export const ConfirmAlertSave: React.FC<Props> = ({ onConfirm, onCancel }) => {
       title={i18n.translate(
         'xpack.triggersActionsUI.sections.confirmAlertSave.confirmAlertSaveTitle',
         {
-          defaultMessage: 'Save Alert with no actions?',
+          defaultMessage: 'Save rule with no actions?',
         }
       )}
       onCancel={onCancel}
@@ -29,7 +29,7 @@ export const ConfirmAlertSave: React.FC<Props> = ({ onConfirm, onCancel }) => {
       confirmButtonText={i18n.translate(
         'xpack.triggersActionsUI.sections.confirmAlertSave.confirmAlertSaveConfirmButtonText',
         {
-          defaultMessage: 'Save alert',
+          defaultMessage: 'Save rule',
         }
       )}
       cancelButtonText={i18n.translate(
