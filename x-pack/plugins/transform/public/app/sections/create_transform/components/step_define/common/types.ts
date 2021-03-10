@@ -24,7 +24,7 @@ import {
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../../../../../common/utils/object_utils';
 
 export interface ErrorMessage {
   query: string;

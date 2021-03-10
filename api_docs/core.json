@@ -10346,7 +10346,7 @@
             ],
             "source": {
               "path": "src/core/server/rendering/types.ts",
-              "lineNumber": 72
+              "lineNumber": 73
             },
             "signature": [
               "boolean | undefined"
@@ -10355,7 +10355,7 @@
         ],
         "source": {
           "path": "src/core/server/rendering/types.ts",
-          "lineNumber": 67
+          "lineNumber": 68
         },
         "initialIsOpen": false
       },
