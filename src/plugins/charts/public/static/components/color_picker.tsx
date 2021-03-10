@@ -7,7 +7,7 @@
  */
 
 import classNames from 'classnames';
-import React from 'react';
+import React, { BaseSyntheticEvent } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -88,7 +88,7 @@ interface ColorPickerProps {
   /**
    * Callback on the color change
    */
-  onChange: (color: string | null) => void;
+  onChange: (color: string | null, event: BaseSyntheticEvent) => void;
   /**
    * Initial color.
    */
@@ -135,7 +135,7 @@ export const ColorPicker = ({
             <label key={color} className="visColorPicker__colorBtn">
               <input
                 type="radio"
-                onChange={() => onChange(color)}
+                onChange={(e) => onChange(color, e)}
                 value={selectedColor}
                 name="visColorPicker__radio"
                 checked={color === selectedColor}
@@ -161,7 +161,7 @@ export const ColorPicker = ({
       </fieldset>
       {legendColors.some((c) => c === selectedColor) && colorIsOverwritten && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={(e: any) => onChange(null)}>
+          <EuiButtonEmpty size="s" onClick={(e: any) => onChange(null, e)}>
             <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Reset color" />
           </EuiButtonEmpty>
         </EuiFlexItem>
