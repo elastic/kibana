@@ -7,6 +7,11 @@
 This page discusses the plugin API changes that you need to be aware of when migrating
 your application to {kib} 7.12.
 
+Other versions: {kibana-ref-all}/7.11/plugin-api-changes-7-11.html[7.11] |
+{kibana-ref-all}/7.10/breaking-changes-7.10.html#general-plugin-API-changes-7-10[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html#general-plugin-API-changes-79[7.9] |
+{kibana-ref-all}/7.8/breaking-changes-7.8.html#general-plugin-API-changes-78[7.8] 
+
 [[breaking_plugin_v7.12.0_90764]]
 .{kib} and {es} logging config keys unified
 [%collapsible]
@@ -297,6 +302,42 @@ Refer to https://github.com/elastic/kibana/pull/87939[#87939]
 Support for the legacy {es} client was removed from the `usage collector`'s `fetch` context.
 
 Refer to https://github.com/elastic/kibana/pull/87356[#87356]
+
+====
+
+[[breaking_plugin_v7.12.0_86988]]
+.Dependences between `src/plugins/vis_default_editor` and `src/plugins/visualizations` removed
+[%collapsible]
+====
+
+In this change:
+
+* The `ISchemas` and `Schema` interfaces moved from `vis_default_editor` to the `visualizations` plugin.
+* The `Schemas` class moved from `vis_default_editor` to  the `visualizations`
+plugin. It's now a private class, and should not be used outside of the `visualizations` plugin.
+* The type definition object for visualizations changed.
+
+**Before:**
+
+```yaml
+  {
+       editorConfig: {
+         schemas: new Schemas([{schemaObject1, schemasObject2}])
+      }
+    }
+```
+
+**After:**
+
+```yaml
+  {
+       editorConfig: {
+         schemas: [{schemaObject1, schemasObject2}]
+      }
+    }
+```
+
+Refer to https://github.com/elastic/kibana/pull/86988[#86988]
 
 ====
 
