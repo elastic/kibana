@@ -36,7 +36,7 @@ export const buildResultsQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: 'logs-elastic_agent.osquery*',
+    index: 'logs-osquery_managed.result*',
     ignoreUnavailable: true,
     body: {
       query: { bool: { filter } },
