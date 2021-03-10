@@ -73,6 +73,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     policy: currentPolicy,
     existingPolicies,
     policyName,
+    license,
   } = useEditPolicyContext();
 
   const serializer = useMemo(() => {
@@ -81,6 +82,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
   const [saveAsNew, setSaveAsNew] = useState(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
+  const isAllowedByLicense = license.canUseSearchableSnapshot();
 
   const { form } = useForm({
     schema,
@@ -249,8 +251,12 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               <EuiSpacer />
               <ColdPhase />
 
-              <EuiSpacer />
-              <FrozenPhase />
+              {isAllowedByLicense && (
+                <>
+                  <EuiSpacer />
+                  <FrozenPhase />
+                </>
+              )}
 
               {/* We can't add the <EuiSpacer /> here as it breaks the layout
               and makes the connecting line go further that it needs to.

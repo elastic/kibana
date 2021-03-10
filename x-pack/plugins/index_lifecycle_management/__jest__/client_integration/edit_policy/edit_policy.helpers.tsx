@@ -401,13 +401,8 @@ export const setup = async (arg?: {
       frozen: {
         enable: enable('frozen'),
         ...createMinAgeActions('frozen'),
-        setReplicas: setReplicas('frozen'),
-        setFreeze: createSetFreeze('frozen'),
-        freezeExists: createFreezeExists('frozen'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-frozen'),
-        ...createIndexPriorityActions('frozen'),
         ...createSearchableSnapshotActions('frozen'),
-        ...createNodeAllocationActions('frozen'),
       },
       delete: {
         isShown: () => exists('delete-phaseContent'),

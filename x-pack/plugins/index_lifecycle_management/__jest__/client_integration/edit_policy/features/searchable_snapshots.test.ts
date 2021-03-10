@@ -156,16 +156,12 @@ describe('<EditPolicy /> searchable snapshots', () => {
       expect(actions.frozen.searchableSnapshotsExists()).toBeFalsy();
 
       await actions.cold.enable(true);
-      await actions.frozen.enable(true);
 
       // Still hidden in hot
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
 
       expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
       expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
-
-      expect(actions.frozen.searchableSnapshotsExists()).toBeTruthy();
-      expect(actions.frozen.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
     });
   });
 });

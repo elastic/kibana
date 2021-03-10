@@ -96,7 +96,7 @@ export const formDataToAbsoluteTimings = (formData: FormInternal): AbsoluteTimin
     hot: { min_age: undefined },
     warm: _meta.warm.enabled ? getMinAge('warm', formData) : undefined,
     cold: _meta.cold.enabled ? getMinAge('cold', formData) : undefined,
-    frozen: _meta.frozen.enabled ? getMinAge('frozen', formData) : undefined,
+    frozen: _meta.frozen?.enabled ? getMinAge('frozen', formData) : undefined,
     delete: _meta.delete.enabled ? getMinAge('delete', formData) : undefined,
   };
 };
