@@ -165,6 +165,12 @@ describe('test alerts route', () => {
     };
     ingestSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
 
+    // This workaround is only temporary. The endpoint `ArtifactClient` will be removed soon
+    // and this entire test file refactored to start using fleet's exposed FleetArtifactClient class.
+    endpointAppContextService!
+      .getManifestManager()!
+      .getArtifactsClient().getArtifact = jest.fn().mockResolvedValue(soFindResp);
+
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
