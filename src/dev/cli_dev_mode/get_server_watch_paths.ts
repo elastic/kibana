@@ -41,7 +41,6 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
       [
         fromRoot('src/core'),
         fromRoot('src/legacy/server'),
-        fromRoot('src/legacy/ui'),
         fromRoot('src/legacy/utils'),
         fromRoot('config'),
         ...pluginPaths,
