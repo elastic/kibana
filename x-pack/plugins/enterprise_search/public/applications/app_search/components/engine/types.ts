@@ -8,9 +8,14 @@
 import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/types';
 import { ApiToken } from '../credentials/types';
 
+export enum EngineTypes {
+  default,
+  indexed,
+  meta,
+}
 export interface Engine {
   name: string;
-  type: string;
+  type: EngineTypes;
   language: string | null;
   result_fields: {
     [key: string]: ResultField;

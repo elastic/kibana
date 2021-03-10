@@ -461,7 +461,9 @@ export const buildThresholdDescription = (label: string, threshold: Threshold): 
       <>
         {isEmpty(threshold.field[0])
           ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field[0]} >= ${threshold.value}`}
+          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
+              Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
+            } >= ${threshold.value}`}
       </>
     ),
   },
