@@ -6,28 +6,54 @@
  * Side Public License, v 1.
  */
 
-import { buildRequestBody } from './table/build_request_body';
-import { handleErrorResponse } from './handle_error_response';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+
+// not typed yet
+// @ts-expect-error
+import { buildRequestBody } from './table/build_request_body';
+// @ts-expect-error
+import { handleErrorResponse } from './handle_error_response';
+// @ts-expect-error
 import { processBucket } from './table/process_bucket';
-import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from '../search_strategies/lib/get_index_pattern';
 import { createFieldsFetcher } from './helpers/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
+import type {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesRequestServices,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../types';
+import type { PanelSchema } from '../../../common/types';
 
-export async function getTableData(req, panel) {
+export async function getTableData(
+  requestContext: VisTypeTimeseriesRequestHandlerContext,
+  req: VisTypeTimeseriesVisDataRequest,
+  panel: PanelSchema,
+  services: VisTypeTimeseriesRequestServices
+) {
   const panelIndexPattern = panel.index_pattern;
 
-  const {
-    searchStrategy,
-    capabilities,
-  } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
-  const esQueryConfig = await getEsQueryConfig(req);
+  const strategy = await services.searchStrategyRegistry.getViableStrategy(
+    requestContext,
+    req,
+    panelIndexPattern
+  );
+
+  if (!strategy) {
+    throw new Error(
+      i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
+        defaultMessage: 'Search strategy was not defined',
+      })
+    );
+  }
+
+  const { searchStrategy, capabilities } = strategy;
   const { indexPatternObject } = await getIndexPatternObject(panelIndexPattern, {
-    indexPatternsService: await req.getIndexPatternsService(),
+    indexPatternsService: services.indexPatternsService,
   });
 
-  const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
+  const extractFields = createFieldsFetcher(req, { requestContext, searchStrategy, capabilities });
 
   const calculatePivotLabel = async () => {
     if (panel.pivot_id && indexPatternObject?.title) {
@@ -45,17 +71,16 @@ export async function getTableData(req, panel) {
   };
 
   try {
-    const uiSettings = req.getUiSettingsService();
     const body = await buildRequestBody(
       req,
       panel,
-      esQueryConfig,
+      services.esQueryConfig,
       indexPatternObject,
       capabilities,
-      uiSettings
+      services.uiSettings
     );
 
-    const [resp] = await searchStrategy.search(req, [
+    const [resp] = await searchStrategy.search(requestContext, req, [
       {
         body,
         index: panelIndexPattern,
