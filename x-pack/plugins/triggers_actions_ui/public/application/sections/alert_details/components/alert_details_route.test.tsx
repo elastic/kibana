@@ -146,7 +146,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG',
+      title: 'Unable to load rule: OMG',
     });
   });
 
@@ -192,7 +192,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG no alert type',
+      title: 'Unable to load rule: OMG no alert type',
     });
   });
 
@@ -242,7 +242,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG no action type',
+      title: 'Unable to load rule: OMG no action type',
     });
   });
 
@@ -290,7 +290,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: `Unable to load alert: Invalid Alert Type: ${alert.alertTypeId}`,
+      title: `Unable to load rule: Invalid Alert Type: ${alert.alertTypeId}`,
     });
   });
 
@@ -349,7 +349,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: `Unable to load alert: Invalid Action Type: ${missingActionType.id}`,
+      title: `Unable to load rule: Invalid Action Type: ${missingActionType.id}`,
     });
   });
 });
@@ -374,12 +374,12 @@ function mockRouterProps(alert: Alert) {
   return {
     match: {
       isExact: false,
-      path: `/alert/${alert.id}`,
+      path: `/rule/${alert.id}`,
       url: '',
-      params: { alertId: alert.id },
+      params: { ruleId: alert.id },
     },
     history: createMemoryHistory(),
-    location: createLocation(`/alert/${alert.id}`),
+    location: createLocation(`/rule/${alert.id}`),
   };
 }
 function mockAlert(overloads: Partial<Alert> = {}): Alert {

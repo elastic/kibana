@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Loads the Alerts page', async () => {
         await pageObjects.common.navigateToApp('triggersActions');
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-        expect(headingText).to.be('Alerts and Actions');
+        expect(headingText).to.be('Rules and Connectors');
       });
     });
 
@@ -45,10 +45,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Loads the Alerts page', async () => {
-        await log.debug('Checking for section heading to say Triggers and Actions.');
+        await log.debug('Checking for section heading to say Rules and Connectors.');
 
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-        expect(headingText).to.be('Alerts and Actions');
+        expect(headingText).to.be('Rules and Connectors');
       });
 
       describe('Connectors tab', () => {
@@ -70,13 +70,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Alerts tab', () => {
         it('renders the alerts tab', async () => {
           // Navigate to the alerts tab
-          await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+          await pageObjects.triggersActionsUI.changeTabs('rulesTab');
 
           await pageObjects.header.waitUntilLoadingHasFinished();
 
           // Verify url
           const url = await browser.getCurrentUrl();
-          expect(url).to.contain(`/alerts`);
+          expect(url).to.contain(`/rules`);
 
           // Verify content
           await testSubjects.existOrFail('alertsList');
@@ -109,7 +109,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);
 
           // Verify url
-          expect(await browser.getCurrentUrl()).to.contain(`/alert/${createdAlert.id}`);
+          expect(await browser.getCurrentUrl()).to.contain(`/rule/${createdAlert.id}`);
         });
       });
     });

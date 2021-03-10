@@ -51,13 +51,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   async function refreshAlertsList() {
-    await testSubjects.click('alertsTab');
+    await testSubjects.click('rulesTab');
   }
 
   describe('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('alertsTab');
+      await testSubjects.click('rulesTab');
     });
 
     afterEach(async () => {
@@ -218,7 +218,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Deleted 1 alert');
+        expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
@@ -339,7 +339,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Deleted 1 alert');
+        expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
@@ -404,13 +404,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await (
             await alertsErrorBannerExistErrors[0].findByCssSelector('.euiCallOutHeader')
           ).getVisibleText()
-        ).to.equal('Error found in 1 alert.');
+        ).to.equal('Error found in 1 rule.');
       });
 
       await refreshAlertsList();
-      expect(await testSubjects.getVisibleText('totalAlertsCount')).to.be(
-        'Showing: 2 of 2 alerts.'
-      );
+      expect(await testSubjects.getVisibleText('totalAlertsCount')).to.be('Showing: 2 of 2 rules.');
       expect(await testSubjects.getVisibleText('totalActiveAlertsCount')).to.be('Active: 0');
       expect(await testSubjects.getVisibleText('totalOkAlertsCount')).to.be('Ok: 1');
       expect(await testSubjects.getVisibleText('totalErrorAlertsCount')).to.be('Error: 1');

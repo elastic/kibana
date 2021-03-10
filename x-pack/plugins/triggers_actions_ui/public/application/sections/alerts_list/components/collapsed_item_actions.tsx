@@ -92,7 +92,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.disableHelpText"
-              defaultMessage="When disabled, the alert is not checked."
+              defaultMessage="When disabled, the rule is not checked."
             />
           </EuiText>
         </div>
@@ -122,7 +122,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteHelpText"
-              defaultMessage="When muted, the alert is checked, but no action is performed."
+              defaultMessage="When muted, the rule is checked, but no action is performed."
             />
           </EuiText>
         </div>

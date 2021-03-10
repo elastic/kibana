@@ -24,14 +24,14 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 type AlertDetailsRouteProps = RouteComponentProps<{
-  alertId: string;
+  ruleId: string;
 }> &
   Pick<ActionApis, 'loadActionTypes'> &
   Pick<AlertApis, 'loadAlert' | 'loadAlertTypes'>;
 
 export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> = ({
   match: {
-    params: { alertId },
+    params: { ruleId },
   },
   loadAlert,
   loadAlertTypes,
@@ -48,7 +48,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
   const [refreshToken, requestRefresh] = React.useState<number>();
   useEffect(() => {
     getAlertData(
-      alertId,
+      ruleId,
       loadAlert,
       loadAlertTypes,
       loadActionTypes,
@@ -57,7 +57,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
       setActionTypes,
       toasts
     );
-  }, [alertId, http, loadActionTypes, loadAlert, loadAlertTypes, toasts, refreshToken]);
+  }, [ruleId, http, loadActionTypes, loadAlert, loadAlertTypes, toasts, refreshToken]);
 
   return alert && alertType && actionTypes ? (
     <AlertDetails
@@ -105,7 +105,7 @@ export async function getAlertData(
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.alertDetails.unableToLoadAlertMessage',
         {
-          defaultMessage: 'Unable to load alert: {message}',
+          defaultMessage: 'Unable to load rule: {message}',
           values: {
             message: e.message,
           },
