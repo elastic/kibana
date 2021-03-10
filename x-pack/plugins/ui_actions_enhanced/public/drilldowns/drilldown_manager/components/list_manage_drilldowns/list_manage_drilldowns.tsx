@@ -41,7 +41,6 @@ interface Trigger {
 
 export interface ListManageDrilldownsProps {
   items: DrilldownListItem[];
-  showTriggerColumn?: boolean;
   onCreate?: () => void;
   onDelete?: (ids: string[]) => void;
   onEdit?: (id: string) => void;
@@ -51,7 +50,6 @@ export const TEST_SUBJ_DRILLDOWN_ITEM = 'listManageDrilldownsItem';
 
 export function ListManageDrilldowns({
   items: drilldowns,
-  showTriggerColumn = true,
   onCreate,
   onDelete,
   onEdit,
@@ -95,7 +93,7 @@ export function ListManageDrilldowns({
         </EuiFlexGroup>
       ),
     },
-    showTriggerColumn && {
+    {
       name: 'Trigger',
       textOnly: true,
       render: (drilldown: DrilldownListItem) =>
