@@ -4491,6 +4491,22 @@
       },
       {
         "tags": [],
+        "id": "def-common.osType",
+        "type": "Object",
+        "label": "osType",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/lists/common/schemas/common/schemas.ts",
+          "lineNumber": 317
+        },
+        "signature": [
+          "KeyofC",
+          "<{ linux: null; macos: null; windows: null; }>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
         "id": "def-common.osTypeArray",
         "type": "Object",
         "label": "osTypeArray",

@@ -607,7 +607,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 336
+                  "lineNumber": 337
                 }
               },
               {
@@ -626,7 +626,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 336
+                  "lineNumber": 337
                 }
               }
             ],
@@ -634,7 +634,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 336
+              "lineNumber": 337
             }
           },
           {
@@ -650,7 +650,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 397
+              "lineNumber": 398
             }
           }
         ],
