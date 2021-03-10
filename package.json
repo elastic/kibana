@@ -712,7 +712,7 @@
     "json5": "^1.0.1",
     "jsondiffpatch": "0.4.1",
     "jsts": "^1.6.2",
-    "kea": "^2.2.0",
+    "kea": "^2.3.0",
     "keymirror": "0.1.1",
     "leaflet": "1.5.1",
     "leaflet-draw": "0.4.14",
