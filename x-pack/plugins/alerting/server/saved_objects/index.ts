@@ -61,6 +61,17 @@ export function setupSavedObjects(
           };
         });
       },
+      onImport(objs) {
+        return {
+          warnings: [
+            {
+              type: 'action_required',
+              message: `${objs.length} Alerts have been imported but need to be enabled`,
+              actionPath: '/app/management/insightsAndAlerting/triggersActions/alerts',
+            },
+          ],
+        };
+      },
     },
   });
 

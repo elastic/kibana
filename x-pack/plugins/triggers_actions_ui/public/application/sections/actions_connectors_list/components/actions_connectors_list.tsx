@@ -172,7 +172,14 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         );
 
         return checkEnabledResult.isEnabled ? (
-          link
+          !item.enabled ? (
+            link
+          ) : (
+            <Fragment>
+              {link}
+              <EuiIconTip type="questionInCircle" content="Just imported!" position="right" />
+            </Fragment>
+          )
         ) : (
           <Fragment>
             {link}

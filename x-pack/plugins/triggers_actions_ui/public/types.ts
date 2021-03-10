@@ -126,6 +126,7 @@ interface ActionConnectorProps<Config, Secrets> {
   id: string;
   actionTypeId: string;
   name: string;
+  enabled: boolean;
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
