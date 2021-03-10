@@ -400,7 +400,7 @@ export interface SavedObjectsClosePointInTimeResponse {
 export type SavedObjectsCreatePointInTimeFinderOptions = SavedObjectsPointInTimeFinderOptions;
 
 /**
- * @internal
+ * @public
  */
 export type SavedObjectsCreatePointInTimeFinderDependencies = Omit<
   SavedObjectsPointInTimeFinderDependencies,
