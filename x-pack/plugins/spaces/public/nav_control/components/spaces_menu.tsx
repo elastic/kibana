@@ -122,14 +122,12 @@ class SpacesMenuUI extends Component<Props, State> {
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         {
-          // @ts-ignore
           <EuiFieldSearch
             placeholder={intl.formatMessage({
               id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
               defaultMessage: 'Find a space',
             })}
             incremental={true}
-            // FIXME needs updated typedef
             onSearch={this.onSearch}
             onKeyDown={this.onSearchKeyDown}
             onFocus={this.onSearchFocus}
@@ -148,7 +146,7 @@ class SpacesMenuUI extends Component<Props, State> {
 
     const keyCode = e.keyCode;
     if (focusableKeyCodes.includes(keyCode)) {
-      // Allows the spaces list panel to recieve focus. This enables keyboard and screen reader navigation
+      // Allows the spaces list panel to receive focus. This enables keyboard and screen reader navigation
       this.setState({
         allowSpacesListFocus: true,
       });
@@ -191,7 +189,7 @@ class SpacesMenuUI extends Component<Props, State> {
         toolTipTitle={space.description && space.name}
         toolTipContent={space.description}
       >
-        {space.name}
+        <EuiText className="spcMenu__item">{space.name}</EuiText>
       </EuiContextMenuItem>
     );
   };

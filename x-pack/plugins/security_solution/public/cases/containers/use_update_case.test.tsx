@@ -84,7 +84,7 @@ describe('useUpdateCase', () => {
         isError: false,
         updateCaseProperty: result.current.updateCaseProperty,
       });
-      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id);
+      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, '123');
       expect(updateCase).toBeCalledWith(basicCase);
       expect(onSuccess).toHaveBeenCalled();
     });
