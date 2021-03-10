@@ -27,7 +27,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../../alerts/server';
+} from '../../../../../../alerting/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
@@ -199,6 +199,7 @@ export interface SortWithTieBreaker {
 
 export interface ThreatMatchNamedQuery {
   id: string;
+  index: string;
   field: string;
   value: string;
 }

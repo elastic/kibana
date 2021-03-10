@@ -8,11 +8,12 @@
 import { Dispatch } from 'react';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 import { Case, SubCase } from '../../containers/types';
 import { UpdateCase } from '../../containers/use_get_cases';
 import { statuses } from '../status';
 import * as i18n from './translations';
+import { isIndividual } from './helpers';
 
 interface GetActions {
   caseStatus: string;
@@ -20,16 +21,14 @@ interface GetActions {
   deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
-const hasSubCases = (subCases: SubCase[] | null | undefined) =>
-  subCases != null && subCases?.length > 0;
-
 export const getActions = ({
   caseStatus,
   dispatchUpdate,
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => {
   const openCaseAction = {
-    available: (item: Case) => caseStatus !== CaseStatuses.open && !hasSubCases(item.subCases),
+    available: (item: Case | SubCase) => item.status !== CaseStatuses.open,
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses.open].actions.single.title,
     icon: statuses[CaseStatuses.open].icon,
     name: statuses[CaseStatuses.open].actions.single.title,
@@ -45,8 +44,8 @@ export const getActions = ({
   };
 
   const makeInProgressAction = {
-    available: (item: Case) =>
-      caseStatus !== CaseStatuses['in-progress'] && !hasSubCases(item.subCases),
+    available: (item: Case) => item.status !== CaseStatuses['in-progress'],
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses['in-progress']].actions.single.title,
     icon: statuses[CaseStatuses['in-progress']].icon,
     name: statuses[CaseStatuses['in-progress']].actions.single.title,
@@ -62,7 +61,8 @@ export const getActions = ({
   };
 
   const closeCaseAction = {
-    available: (item: Case) => caseStatus !== CaseStatuses.closed && !hasSubCases(item.subCases),
+    available: (item: Case | SubCase) => item.status !== CaseStatuses.closed,
+    enabled: (item: Case | SubCase) => isIndividual(item),
     description: statuses[CaseStatuses.closed].actions.single.title,
     icon: statuses[CaseStatuses.closed].icon,
     name: statuses[CaseStatuses.closed].actions.single.title,
@@ -78,6 +78,9 @@ export const getActions = ({
   };
 
   return [
+    openCaseAction,
+    makeInProgressAction,
+    closeCaseAction,
     {
       description: i18n.DELETE_CASE,
       icon: 'trash',
@@ -86,8 +89,5 @@ export const getActions = ({
       type: 'icon',
       'data-test-subj': 'action-delete',
     },
-    openCaseAction,
-    makeInProgressAction,
-    closeCaseAction,
   ];
 };

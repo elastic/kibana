@@ -42,7 +42,7 @@ import { AppAction } from '../../../../../../common/store/actions';
 import { SupportedVersionNotice } from './supported_version';
 import { RadioFlexGroup } from './malware';
 
-const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows, OS.mac];
+const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows];
 const protection = 'ransomware';
 
 const ProtectionRadio = React.memo(
@@ -50,7 +50,6 @@ const ProtectionRadio = React.memo(
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const dispatch = useDispatch<(action: AppAction) => void>();
     const radioButtonId = useMemo(() => htmlIdGenerator()(), []);
-    // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
     const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
 
     const handleRadioChange: EuiRadioProps['onChange'] = useCallback(() => {
@@ -97,7 +96,6 @@ ProtectionRadio.displayName = 'ProtectionRadio';
 export const Ransomware = React.memo(() => {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const dispatch = useDispatch<(action: AppAction) => void>();
-  // currently just taking windows.ransomware, but both windows.ransomware and mac.ransomware should be the same value
   const selected = policyDetailsConfig && policyDetailsConfig.windows.ransomware.mode;
   const userNotificationSelected =
     policyDetailsConfig && policyDetailsConfig.windows.popup.ransomware.enabled;
@@ -196,14 +194,14 @@ export const Ransomware = React.memo(() => {
         </ConfigFormHeading>
         <EuiSpacer size="xs" />
         <RadioFlexGroup>
-          <EuiFlexItem className="no-right-margin-radio" grow={1}>
+          <EuiFlexItem className="no-right-margin-radio" grow={2}>
             <ProtectionRadio
               protectionMode={radios[0].id}
               key={radios[0].protection + radios[0].id}
               label={radios[0].label}
             />
           </EuiFlexItem>
-          <EuiFlexItem className="no-horizontal-margin-radio" grow={4}>
+          <EuiFlexItem className="no-horizontal-margin-radio" grow={5}>
             <ProtectionRadio
               protectionMode={radios[1].id}
               key={radios[1].protection + radios[1].id}
@@ -318,7 +316,7 @@ export const Ransomware = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.ransomware', {
         defaultMessage: 'Ransomware',
       })}
-      supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC]}
+      supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="ransomwareProtectionsForm"
       rightCorner={protectionSwitch}
     >

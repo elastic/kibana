@@ -4,12 +4,12 @@
 
 ## RouteConfigOptions.authRequired property
 
-Defines authentication mode for a route: - true. A user has to have valid credentials to access a resource - false. A user can access a resource without any credentials. - 'optional'. A user can access a resource if has valid credentials or no credentials at all. Can be useful when we grant access to a resource but want to identify a user if possible.
+Defines authentication mode for a route: - true. A user has to have valid credentials to access a resource - false. A user can access a resource without any credentials. - 'optional'. A user can access a resource if has valid credentials or no credentials at all. Can be useful when we grant access to a resource but want to identify a user if possible. - 'try'. A user can access a resource with valid, invalid or without any credentials. Users with valid credentials will be authenticated
 
 Defaults to `true` if an auth mechanism is registered.
 
 <b>Signature:</b>
 
 ```typescript
-authRequired?: boolean | 'optional';
+authRequired?: boolean | 'optional' | 'try';
 ```

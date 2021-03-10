@@ -28,8 +28,8 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
-import { CaseType } from '../../../../../case/common/api';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
+import { CaseType } from '../../../../../cases/common/api';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -469,7 +469,7 @@ describe('CaseView ', () => {
     );
     await waitFor(() => {
       wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
-      expect(fetchCaseUserActions).toBeCalledWith('1234', undefined);
+      expect(fetchCaseUserActions).toBeCalledWith('1234', 'resilient-2', undefined);
       expect(fetchCase).toBeCalled();
     });
   });
@@ -720,6 +720,32 @@ describe('CaseView ', () => {
       const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('settings');
       expect(updateObject.updateValue).toEqual({ syncAlerts: false });
+    });
+  });
+
+  it('should show the correct connector name on the push button', async () => {
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetCaseUserActionsMock.mockImplementation(() => ({
+      ...defaultUseGetCaseUserActions,
+      hasDataToPush: true,
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper
+          .find('[data-test-subj="has-data-to-push-button"]')
+          .first()
+          .text()
+          .includes('My Connector 2')
+      ).toBe(true);
     });
   });
 

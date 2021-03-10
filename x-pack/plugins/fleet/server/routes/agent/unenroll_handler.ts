@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
-import { PostAgentUnenrollResponse, PostBulkAgentUnenrollResponse } from '../../../common/types';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+
+import type {
+  PostAgentUnenrollResponse,
+  PostBulkAgentUnenrollResponse,
+} from '../../../common/types';
 import { PostAgentUnenrollRequestSchema, PostBulkAgentUnenrollRequestSchema } from '../../types';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';

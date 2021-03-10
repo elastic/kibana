@@ -2238,7 +2238,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
       eventCategoryField: 'event.category',
       query: '',
       size: 100,
-      tiebreakerField: 'event.sequence',
+      tiebreakerField: '',
       timestampField: '@timestamp',
     },
     eventIdToNoteIds: {},
@@ -2287,11 +2287,13 @@ export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
     field: 'host.name',
     values: ['apache'],
     originalValue: 'apache',
+    isObjectArray: false,
   },
   {
     field: 'user.id',
     values: ['1'],
     originalValue: 1,
+    isObjectArray: false,
   },
 ];
 

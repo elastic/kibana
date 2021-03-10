@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { CommentType } from '../../../../../case/common/api';
+import { CommentType } from '../../../../../cases/common/api';
 import { Comment } from '../../containers/types';
 
 export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => {

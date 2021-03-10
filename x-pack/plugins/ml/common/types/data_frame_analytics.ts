@@ -28,7 +28,7 @@ export interface OutlierAnalysis {
 
 interface Regression {
   dependent_variable: string;
-  training_percent?: number;
+  training_percent: number;
   num_top_feature_importance_values?: number;
   prediction_field_name?: string;
 }
@@ -36,7 +36,7 @@ interface Regression {
 interface Classification {
   class_assignment_objective?: string;
   dependent_variable: string;
-  training_percent?: number;
+  training_percent: number;
   num_top_classes?: number;
   num_top_feature_importance_values?: number;
   prediction_field_name?: string;

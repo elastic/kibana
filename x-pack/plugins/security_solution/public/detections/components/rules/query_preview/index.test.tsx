@@ -16,12 +16,14 @@ import { PreviewQuery } from './';
 import { getMockEqlResponse } from '../../../../common/hooks/eql/eql_search_response.mock';
 import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
 import { useEqlPreview } from '../../../../common/hooks/eql/';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { FilterMeta } from 'src/plugins/data/common';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiSuperDatePickerWidth: '180px',
   },
-};
+});
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/matrix_histogram');
@@ -130,21 +132,62 @@ describe('PreviewQuery', () => {
     ).toBeTruthy();
   });
 
-  test('it renders query histogram when rule type is query and preview button clicked', () => {
+  test('it renders preview button enabled if query exists', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="query"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'host.name:*', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={undefined}
-            isDisabled={false}
-          />
-        </TestProviders>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'host.name:"foo"', language: 'kql' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
       </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
+  });
+
+  test('it renders preview button enabled if no query exists but filters do exist', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{
+            query: { query: '', language: 'kuery' },
+            filters: [{ meta: {} as FilterMeta, query: {} }],
+          }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="queryPreviewButton"] button').props().disabled
+    ).toBeFalsy();
+  });
+
+  test('it renders query histogram when rule type is query and preview button clicked', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'host.name:*', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');
@@ -159,19 +202,17 @@ describe('PreviewQuery', () => {
 
   test('it renders noise warning when rule type is query, timeframe is last hour and hit average is greater than 1/hour', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="query"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'host.name:*', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={undefined}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'host.name:*', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     (useMatrixHistogram as jest.Mock).mockReturnValue([
@@ -195,19 +236,17 @@ describe('PreviewQuery', () => {
 
   test('it renders query histogram when rule type is saved_query and preview button clicked', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="saved_query"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'host.name:*', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={undefined}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="saved_query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'host.name:*', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');
@@ -222,19 +261,17 @@ describe('PreviewQuery', () => {
 
   test('it renders eql histogram when preview button clicked and rule type is eql', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="eql"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={undefined}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="eql"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');
@@ -249,19 +286,17 @@ describe('PreviewQuery', () => {
 
   test('it renders noise warning when rule type is eql, timeframe is last hour and hit average is greater than 1/hour', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="eql"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={undefined}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="eql"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     (useEqlPreview as jest.Mock).mockReturnValue([
@@ -285,24 +320,24 @@ describe('PreviewQuery', () => {
 
   test('it renders threshold histogram when preview button clicked, rule type is threshold, and threshold field is defined', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="threshold"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={{
-              field: 'agent.hostname',
-              value: 200,
-              cardinality_field: 'user.name',
-              cardinality_value: 2,
-            }}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="threshold"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={{
+            field: 'agent.hostname',
+            value: 200,
+            cardinality: {
+              field: ['user.name'],
+              value: 2,
+            },
+          }}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     (useMatrixHistogram as jest.Mock).mockReturnValue([
@@ -332,24 +367,24 @@ describe('PreviewQuery', () => {
 
   test('it renders noise warning when rule type is threshold, and threshold field is defined, timeframe is last hour and hit average is greater than 1/hour', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="query"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={{
-              field: 'agent.hostname',
-              value: 200,
-              cardinality_field: 'user.name',
-              cardinality_value: 2,
-            }}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="query"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={{
+            field: 'agent.hostname',
+            value: 200,
+            cardinality: {
+              field: ['user.name'],
+              value: 2,
+            },
+          }}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     (useMatrixHistogram as jest.Mock).mockReturnValue([
@@ -376,24 +411,24 @@ describe('PreviewQuery', () => {
 
   test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is not defined', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="threshold"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={{
-              field: undefined,
-              value: 200,
-              cardinality_field: 'user.name',
-              cardinality_value: 2,
-            }}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="threshold"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={{
+            field: undefined,
+            value: 200,
+            cardinality: {
+              field: ['user.name'],
+              value: 2,
+            },
+          }}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');
@@ -408,24 +443,24 @@ describe('PreviewQuery', () => {
 
   test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is empty string', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="threshold"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={{
-              field: '   ',
-              value: 200,
-              cardinality_field: 'user.name',
-              cardinality_value: 2,
-            }}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="threshold"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={{
+            field: '   ',
+            value: 200,
+            cardinality: {
+              field: ['user.name'],
+              value: 2,
+            },
+          }}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');
@@ -440,19 +475,17 @@ describe('PreviewQuery', () => {
 
   test('it hides histogram when timeframe changes', () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <TestProviders>
-          <PreviewQuery
-            ruleType="threshold"
-            dataTestSubj="queryPreviewSelect"
-            idAria="queryPreview"
-            query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
-            index={['foo-*']}
-            threshold={undefined}
-            isDisabled={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewQuery
+          ruleType="threshold"
+          dataTestSubj="queryPreviewSelect"
+          idAria="queryPreview"
+          query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
+          index={['foo-*']}
+          threshold={undefined}
+          isDisabled={false}
+        />
+      </TestProviders>
     );
 
     wrapper.find('[data-test-subj="queryPreviewButton"] button').at(0).simulate('click');

@@ -1,6 +1,9 @@
 [role="xpack"]
 [[slack-action-type]]
 === Slack action
+++++
+<titleabbrev>Slack</titleabbrev>
+++++
 
 The Slack action type uses https://api.slack.com/incoming-webhooks[Slack Incoming Webhooks].
 
@@ -8,7 +11,7 @@ The Slack action type uses https://api.slack.com/incoming-webhooks[Slack Incomin
 [[slack-connector-configuration]]
 ==== Connector configuration
 
-Slack connectors have the following configuration properties:
+Slack connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messaging/webhooks#getting_started[Slack Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
@@ -26,29 +29,20 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
      webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
 --
 
-**`secrets`** defines sensitive information for the action type and contains the following properties:
+Secrets defines sensitive information for the action type.
 
-[cols="2*<"]
-|===
-
-| `webhookUrl`
-| A string that corresponds to *Webhook URL*.
-
-|===
+`webhookUrl`:: A string that corresponds to *Webhook URL*.
 
 [float]
 [[slack-action-configuration]]
 ==== Action configuration
 
-Slack actions have the following properties:
+Slack actions have the following properties.
 
 Message::   The message	text, converted to the `text` field in the Webhook JSON payload. Currently only the text field is supported. Markdown, images, and other advanced formatting are not yet supported.
 
 [[configuring-slack]]
-==== Configuring Slack Accounts
-
-You configure the accounts Slack action type can use to communicate with Slack in the
-connector form.
+==== Configure a Slack account
 
 You need a https://api.slack.com/incoming-webhooks[Slack webhook URL] to 
 configure a Slack account. To create a webhook

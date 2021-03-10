@@ -22,6 +22,7 @@ import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
 import rumJsIcon from './icons/rumjs.svg';
+import rustIcon from './icons/rust.svg';
 
 const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
@@ -35,6 +36,7 @@ const agentIcons: { [key: string]: string } = {
   python: pythonIcon,
   ruby: rubyIcon,
   rum: rumJsIcon,
+  rust: rustIcon,
 };
 
 // This only needs to be exported for testing purposes, since we stub the SVG
