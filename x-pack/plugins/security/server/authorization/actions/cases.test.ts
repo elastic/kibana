@@ -10,24 +10,36 @@ import { CasesActions } from './cases';
 const version = '1.0.0-zeta1';
 
 describe('#get', () => {
-  [null, undefined, '', 1, true, {}].forEach((operation: any) => {
-    test(`operation of ${JSON.stringify(operation)} throws error`, () => {
-      const alertingActions = new CasesActions(version);
-      expect(() => alertingActions.get('consumer', operation)).toThrowErrorMatchingSnapshot();
-    });
+  it.each`
+    operation
+    ${null}
+    ${undefined}
+    ${''}
+    ${1}
+    ${true}
+    ${{}}
+  `(`operation of ${JSON.stringify('$operation')}`, ({ operation }) => {
+    const actions = new CasesActions(version);
+    expect(() => actions.get('class', operation)).toThrowErrorMatchingSnapshot();
   });
 
-  [null, undefined, '', 1, true, {}].forEach((consumer: any) => {
-    test(`consumer of ${JSON.stringify(consumer)} throws error`, () => {
-      const alertingActions = new CasesActions(version);
-      expect(() => alertingActions.get(consumer, 'operation')).toThrowErrorMatchingSnapshot();
-    });
+  it.each`
+    className
+    ${null}
+    ${undefined}
+    ${''}
+    ${1}
+    ${true}
+    ${{}}
+  `(`class of ${JSON.stringify('$className')}`, ({ className }) => {
+    const actions = new CasesActions(version);
+    expect(() => actions.get(className, 'operation')).toThrowErrorMatchingSnapshot();
   });
 
-  test('returns `cases:${consumer}/${operation}`', () => {
+  it('returns `cases:${class}/${operation}`', () => {
     const alertingActions = new CasesActions(version);
-    expect(alertingActions.get('consumer', 'bar-operation')).toBe(
-      'cases:1.0.0-zeta1:consumer/bar-operation'
+    expect(alertingActions.get('security', 'bar-operation')).toBe(
+      'cases:1.0.0-zeta1:security/bar-operation'
     );
   });
 });

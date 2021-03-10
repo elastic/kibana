@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('deletes a comment from a sub case', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        const res = await supertest
+        await supertest
           .delete(
             `${CASES_URL}/${caseInfo.id}/comments/${caseInfo.comments![0].id}?subCaseId=${
               caseInfo.subCases![0].id
