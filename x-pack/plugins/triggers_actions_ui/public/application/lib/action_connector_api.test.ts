@@ -38,7 +38,7 @@ describe('loadActionTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions/list_connector_types",
+        "/api/actions/connector_types",
       ]
     `);
   });
