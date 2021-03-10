@@ -426,6 +426,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
           .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
           // Map response
           .map(formatter)
+      // @ts-expect-error
       : [formatter(result as AggResultsResponse)]
     ).filter(isDefined);
   };

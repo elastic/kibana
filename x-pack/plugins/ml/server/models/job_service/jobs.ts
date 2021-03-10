@@ -421,13 +421,20 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     const detailed = true;
     const jobIds: string[] = [];
     try {
-      const { body } = await asInternalUser.tasks.list({ actions, detailed });
-      Object.keys(body.nodes).forEach((nodeId) => {
-        const tasks = body.nodes[nodeId].tasks;
-        Object.keys(tasks).forEach((taskId) => {
-          jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
-        });
+      const { body } = await asInternalUser.tasks.list({
+        // @ts-expect-error @elastic-elasticsearch expects it to be a string
+        actions,
+        detailed,
       });
+
+      if (body.nodes) {
+        Object.keys(body.nodes).forEach((nodeId) => {
+          const tasks = body.nodes![nodeId].tasks;
+          Object.keys(tasks).forEach((taskId) => {
+            jobIds.push(tasks[taskId].description!.replace(/^delete-job-/, ''));
+          });
+        });
+      }
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
