@@ -48,4 +48,6 @@ export {
   OsTypeArray,
 } from './schemas';
 
+export { buildExceptionFilter } from './exceptions';
+
 export { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from './constants';
