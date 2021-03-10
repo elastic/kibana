@@ -32,6 +32,8 @@ export function ChangeIndexPattern({
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
+  const isMissingCurrent = !indexPatternRefs.some(({ id }) => id === indexPatternId);
+
   const createTrigger = function () {
     const { label, title, ...rest } = trigger;
     return (
@@ -39,6 +41,7 @@ export function ChangeIndexPattern({
         title={title}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         fullWidth
+        color={isMissingCurrent ? 'danger' : undefined}
         {...rest}
       >
         {label}
