@@ -63,12 +63,14 @@ function getItemIdToExpandedRowMap(
 
 interface TransformListProps {
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
+  transformNodes: number;
   transforms: TransformListRow[];
   transformsLoading: boolean;
 }
 
 export const TransformList: FC<TransformListProps> = ({
   onCreateTransform,
+  transformNodes,
   transforms,
   transformsLoading,
 }) => {
@@ -81,7 +83,7 @@ export const TransformList: FC<TransformListProps> = ({
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
-  const bulkStartAction = useStartAction(false);
+  const bulkStartAction = useStartAction(false, transformNodes);
   const bulkDeleteAction = useDeleteAction(false);
 
   const [searchError, setSearchError] = useState<any>(undefined);
@@ -101,6 +103,7 @@ export const TransformList: FC<TransformListProps> = ({
   const { columns, modals: singleActionModals } = useColumns(
     expandedRowItemIds,
     setExpandedRowItemIds,
+    transformNodes,
     transformSelection
   );
 
@@ -125,6 +128,10 @@ export const TransformList: FC<TransformListProps> = ({
       setSearchError(undefined);
     }
   };
+
+  if (transforms.length === 0 && transformNodes === 0) {
+    return null;
+  }
 
   if (transforms.length === 0) {
     return (
@@ -157,7 +164,7 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">
       <EuiButtonEmpty onClick={() => bulkStartAction.openModal(transformSelection)}>
-        <StartActionName items={transformSelection} />
+        <StartActionName items={transformSelection} transformNodes={transformNodes} />
       </EuiButtonEmpty>
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">

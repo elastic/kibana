@@ -16,7 +16,12 @@ jest.mock('../../../../../app/app_dependencies');
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(
-      <TransformList onCreateTransform={jest.fn()} transforms={[]} transformsLoading={false} />
+      <TransformList
+        onCreateTransform={jest.fn()}
+        transformNodes={1}
+        transforms={[]}
+        transformsLoading={false}
+      />
     );
 
     expect(wrapper).toMatchSnapshot();

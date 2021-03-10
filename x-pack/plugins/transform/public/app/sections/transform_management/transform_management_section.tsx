@@ -135,6 +135,7 @@ export const TransformManagement: FC = () => {
               {typeof errorMessage === 'undefined' && (
                 <TransformList
                   onCreateTransform={onOpenModal}
+                  transformNodes={transformNodes}
                   transforms={transforms}
                   transformsLoading={transformsLoading}
                 />
