@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { run, REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
@@ -15,36 +16,32 @@ import path from 'path';
 import { PackageJson } from 'type-fest';
 
 type PuppeteerRelease = string;
-type ChromiumVersion = string;
 type ChromiumRevision = string;
 type ChromiumCommit = string;
 
 // We forked the Puppeteer node module for Kibana,
 // So we need to translate OUR version to the official Puppeteer Release
-const forkCompatibilityMap: Record<PuppeteerRelease, PuppeteerRelease> = {
+const forkCompatibilityMap: Record<string, PuppeteerRelease> = {
   '5.4.1-patch.1': '5.4.1',
 };
 
-/*
- * Look at Puppeteer source code in Github for Kibana's version
- * The src/revisions.ts file contains a revision string
- */
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json
   const puppeteerPackageJson: PackageJson = JSON.parse(
     fs.readFileSync(path.resolve(REPO_ROOT, 'node_modules', 'puppeteer', 'package.json'), 'utf8')
   );
   const { version } = puppeteerPackageJson;
+  if (version == null) {
+    throw new Error(
+      'Could not get the Puppeteer version! Check node_modules/puppteer/package.json'
+    );
+  }
   log.info(`Kibana is using Puppeteer ${version} (${forkCompatibilityMap[version]})`);
   return forkCompatibilityMap[version];
 }
 
-/*
- * Look at Puppeteer source code in Github for Kibana's version
- * The src/revisions.ts file contains a revision string
- */
 async function getChromiumRevision(
-  kibanaPuppeteerVersion,
+  kibanaPuppeteerVersion: PuppeteerRelease,
   log: ToolingLog
 ): Promise<ChromiumRevision> {
   const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/v${kibanaPuppeteerVersion}/src/revisions.ts`;
