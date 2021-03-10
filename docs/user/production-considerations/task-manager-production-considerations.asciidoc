@@ -12,11 +12,13 @@ This has three major benefits:
 
 [IMPORTANT]
 ==============================================
- Task definitions for alerts and actions are stored in the index specified by <<task-manager-settings, `xpack.task_manager.index`>>.
- The default is `.kibana_task_manager`.
+Task definitions for alerts and actions are stored in the index specified by <<task-manager-settings, `xpack.task_manager.index`>>.
+
+The default is `.kibana_task_manager`.
  
- You must have at least one replica of this index for production deployments.
- If you lose this index, all scheduled alerts and actions are lost.
+You must have at least one replica of this index for production deployments.
+
+If you lose this index, all scheduled alerts and actions are lost.
 ==============================================
 
 [float]
