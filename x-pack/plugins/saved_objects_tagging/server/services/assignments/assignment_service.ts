@@ -13,7 +13,7 @@ import {
   KibanaRequest,
   SavedObjectsBulkGetObject,
 } from 'src/core/server';
-import { SecurityPluginSetup } from '../../../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import {
   AssignableObject,
   UpdateTagAssignmentsOptions,

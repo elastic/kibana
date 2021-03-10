@@ -10,25 +10,21 @@ import { noop } from 'lodash/fp';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import * as i18n from '../translations';
-import { useKibana } from '../../../common/lib/kibana';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-  isPartialResponse,
-} from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
+import { isCompleteResponse, isErrorResponse, isPartialResponse } from 'src/plugins/data/common';
+import { AbortError } from 'src/plugins/kibana_utils/common';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-} from '../../../../../data_enhanced/common';
+} from 'x-pack/plugins/data_enhanced/common';
+import { EQL_SEARCH_STRATEGY } from 'x-pack/plugins/data_enhanced/public';
+import * as i18n from '../translations';
+import { useKibana } from '../../../common/lib/kibana';
 import { formatInspect, getEqlAggsData } from './helpers';
 import { EqlPreviewResponse, EqlPreviewRequest, Source } from './types';
 import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { inputsModel } from '../../../common/store';
-import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
 
 export const useEqlPreview = (): [
   boolean,

@@ -8,20 +8,20 @@
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
 import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
+import { actionsAuthorizationMock } from 'x-pack/plugins/actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { resolvable } from '../../test_utils';
-import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { TaskStatus } from '../../../../task_manager/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { ActionsAuthorization, ActionsClient } from 'x-pack/plugins/actions/server';
+import { TaskStatus } from 'x-pack/plugins/task_manager/server';
+import { httpServerMock } from 'src/core/server/mocks';
+import { auditServiceMock } from 'x-pack/plugins/security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
 const taskManager = taskManagerMock.createStart();

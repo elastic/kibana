@@ -13,6 +13,12 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { toMountPoint } from 'src/plugins/kibana_react/public';
+import {
+  AbortError,
+  getCombinedAbortSignal,
+  KibanaServerError,
+} from 'src/plugins/kibana_utils/public';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -29,12 +35,6 @@ import {
   EsError,
   getHttpError,
 } from './errors';
-import { toMountPoint } from '../../../kibana_react/public';
-import {
-  AbortError,
-  getCombinedAbortSignal,
-  KibanaServerError,
-} from '../../../kibana_utils/public';
 import { ISessionService } from './session';
 
 export interface SearchInterceptorDeps {

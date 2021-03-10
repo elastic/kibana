@@ -6,18 +6,18 @@
  */
 
 import { AlertingPlugin, AlertingPluginsSetup, PluginSetupContract } from './plugin';
-import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
+import { coreMock, statusServiceMock } from 'src/core/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
+import { eventLogServiceMock } from 'x-pack/plugins/event_log/server/event_log_service.mock';
 import { KibanaRequest } from 'kibana/server';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { KibanaFeature } from '../../features/server';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+import { KibanaFeature } from 'x-pack/plugins/features/server';
 import { AlertsConfig } from './config';
 import { AlertType } from './types';
-import { eventLogMock } from '../../event_log/server/mocks';
-import { actionsMock } from '../../actions/server/mocks';
+import { eventLogMock } from 'x-pack/plugins/event_log/server/mocks';
+import { actionsMock } from 'x-pack/plugins/actions/server/mocks';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {

@@ -7,8 +7,8 @@
  */
 
 import { omit } from 'lodash';
+import { SavedObjectEmbeddableInput } from 'src/plugins/embeddable/common';
 import { DashboardPanelState, SavedDashboardPanel } from '../types';
-import { SavedObjectEmbeddableInput } from '../../../embeddable/common/';
 
 export function convertSavedDashboardPanelToPanelState(
   savedDashboardPanel: SavedDashboardPanel

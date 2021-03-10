@@ -6,7 +6,7 @@
  */
 
 import { SavedObject } from 'src/core/types';
-import type { Tag, TagAttributes } from '../../../../src/plugins/saved_objects_tagging_oss/common';
+import type { Tag, TagAttributes } from 'src/plugins/saved_objects_tagging_oss/common';
 
 export type TagSavedObject = SavedObject<TagAttributes>;
 

@@ -6,12 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import {
-  Filter,
-  esKuery,
-  KueryNode,
-  esFilters,
-} from '../../../../../../../src/plugins/data/public';
+import { Filter, esKuery, KueryNode, esFilters } from 'src/plugins/data/public';
 import {
   DataProvider,
   DataProviderType,

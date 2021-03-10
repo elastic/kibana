@@ -8,11 +8,11 @@
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { toArray, map } from 'rxjs/operators';
-import { AlertingPlugin } from '../../../../alerting/server';
+import { AlertingPlugin } from 'x-pack/plugins/alerting/server';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
 import { APMConfig } from '../..';
-import { ANOMALY_SEVERITY } from '../../../../ml/common';
-import { Job, MlPluginSetup } from '../../../../ml/server';
+import { ANOMALY_SEVERITY } from 'x-pack/plugins/ml/common';
+import { Job, MlPluginSetup } from 'x-pack/plugins/ml/server';
 import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
 
 type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;

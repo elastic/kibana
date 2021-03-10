@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
-import { ActionsClient } from '../../../actions/server';
+import { ActionsClient } from 'x-pack/plugins/actions/server';
 import {
   CasePostRequest,
   CaseResponse,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FileLayer, VectorLayer } from '../../maps_legacy/public';
-import { ORIGIN } from '../../maps_legacy/public';
+import { FileLayer, VectorLayer } from 'src/plugins/maps_legacy/public';
+import { ORIGIN } from 'src/plugins/maps_legacy/public';
 
 export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
   ...layer,

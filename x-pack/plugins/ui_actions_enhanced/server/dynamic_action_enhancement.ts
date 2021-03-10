@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EnhancementRegistryDefinition } from '../../../../src/plugins/embeddable/server';
-import { SavedObjectReference } from '../../../../src/core/types';
+import { EnhancementRegistryDefinition } from 'src/plugins/embeddable/server';
+import { SavedObjectReference } from 'src/core/types';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
 import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';
 

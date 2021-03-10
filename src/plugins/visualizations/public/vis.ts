@@ -20,15 +20,15 @@ import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
-import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
 import {
   IAggConfigs,
   IndexPattern,
   ISearchSource,
   AggConfigOptions,
   SearchSourceFields,
-} from '../../../plugins/data/public';
+} from 'src/plugins/data/public';
+import { PersistedState } from './persisted_state';
+import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
 import { BaseVisType } from './vis_types';
 import { VisParams } from '../common/types';
 

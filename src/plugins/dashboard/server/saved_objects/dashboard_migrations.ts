@@ -8,10 +8,10 @@
 
 import { get, flow } from 'lodash';
 import { SavedObjectAttributes, SavedObjectMigrationFn } from 'kibana/server';
+import { EmbeddableSetup } from 'src/plugins/embeddable/server';
 import { migrations730 } from './migrations_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { DashboardDoc700To720, DashboardDoc730ToLatest } from '../../common';
-import { EmbeddableSetup } from '../../../embeddable/server';
 import { injectReferences, extractReferences } from '../../common/saved_dashboard_references';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {

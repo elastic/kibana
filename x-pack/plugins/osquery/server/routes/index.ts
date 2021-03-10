@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../src/core/server';
+import { IRouter } from 'src/core/server';
 import { initSavedQueryRoutes } from './saved_query';
 import { initScheduledQueryRoutes } from './scheduled_query';
 import { initActionRoutes } from './action';

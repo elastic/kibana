@@ -8,10 +8,10 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+import { createStateContainer } from 'src/plugins/kibana_utils/public';
 import { TimefilterSetup } from '../timefilter';
 import { FilterManager } from '../filter_manager';
 import { QueryState, QueryStateChange } from './index';
-import { createStateContainer } from '../../../../kibana_utils/public';
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 import { QueryStringContract } from '../query_string';
 

@@ -16,7 +16,7 @@ import {
   AlertInstanceState,
   ActionGroup,
   ActionGroupIdsOf,
-} from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
 import {
   AlertStates,
   Comparator,

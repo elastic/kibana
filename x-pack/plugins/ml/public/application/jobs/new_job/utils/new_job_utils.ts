@@ -7,8 +7,8 @@
 
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
-import { esQuery, Query, esKuery } from '../../../../../../../../src/plugins/data/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { esQuery, Query, esKuery } from 'src/plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/common/index_patterns';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearch } from '../../../util/index_utils';

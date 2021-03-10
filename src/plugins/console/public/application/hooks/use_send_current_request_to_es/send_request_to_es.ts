@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { XJson } from 'src/plugins/es_ui_shared/public';
 import { extractDeprecationMessages } from '../../../lib/utils';
-import { XJson } from '../../../../../es_ui_shared/public';
 const { collapseLiteralStrings } = XJson;
 // @ts-ignore
 import * as es from '../../../lib/es/es';

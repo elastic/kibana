@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { MAX_FILE_SIZE_BYTES } from '../../../file_upload/common';
+import { MAX_FILE_SIZE_BYTES } from 'x-pack/plugins/file_upload/common';
 import { InputOverrides } from '../../common/types/file_datavisualizer';
 import { wrapError } from '../client/error_wrapper';
 import { InputData, fileDataVisualizerProvider } from '../models/file_data_visualizer';

@@ -9,17 +9,9 @@
 import { BehaviorSubject } from 'rxjs';
 import { UnwrapPromise } from '@kbn/utility-types';
 
-import {
-  MetricsServiceSetup,
-  ServiceStatus,
-  ServiceStatusLevels,
-} from '../../../../../core/server';
-import {
-  contextServiceMock,
-  loggingSystemMock,
-  metricsServiceMock,
-} from '../../../../../core/server/mocks';
-import { createHttpServer } from '../../../../../core/server/test_utils';
+import { MetricsServiceSetup, ServiceStatus, ServiceStatusLevels } from 'src/core/server';
+import { contextServiceMock, loggingSystemMock, metricsServiceMock } from 'src/core/server/mocks';
+import { createHttpServer } from 'src/core/server/test_utils';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';

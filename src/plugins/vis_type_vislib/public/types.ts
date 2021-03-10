@@ -9,7 +9,7 @@
 import { $Values } from '@kbn/utility-types';
 import { Position } from '@elastic/charts';
 
-import { Labels } from '../../charts/public';
+import { Labels } from 'src/plugins/charts/public';
 import {
   CategoryAxis,
   Dimensions,
@@ -17,7 +17,7 @@ import {
   SeriesParam,
   ThresholdLine,
   ValueAxis,
-} from '../../vis_type_xy/public';
+} from 'src/plugins/vis_type_xy/public';
 import { TimeMarker } from './vislib/visualizations/time_marker';
 
 /**

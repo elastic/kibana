@@ -6,10 +6,10 @@
  */
 
 import { omit } from 'lodash/fp';
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { actionsMock } from '../../../../actions/server/mocks';
-import { validateParams } from '../../../../actions/server/lib';
+import { Logger } from 'src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { actionsMock } from 'x-pack/plugins/actions/server/mocks';
+import { validateParams } from 'x-pack/plugins/actions/server/lib';
 import {
   ConnectorTypes,
   CommentType,

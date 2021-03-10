@@ -6,11 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  VisualizationsSetup,
-  VisualizationStage,
-} from '../../../../src/plugins/visualizations/public';
-import { SavedObject } from '../../../../src/core/types/saved_objects';
+import { VisualizationsSetup, VisualizationStage } from 'src/plugins/visualizations/public';
+import { SavedObject } from 'src/core/types/saved_objects';
 import { MapSavedObject } from '../common/map_saved_object_type';
 import {
   APP_ID,

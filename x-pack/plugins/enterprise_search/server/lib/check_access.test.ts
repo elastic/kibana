@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spacesMock } from '../../../spaces/server/mocks';
+import { spacesMock } from 'x-pack/plugins/spaces/server/mocks';
 
 import { checkAccess } from './check_access';
 

@@ -6,9 +6,9 @@
  */
 
 import { isEqual } from 'lodash';
+import { MB } from 'x-pack/plugins/file_upload/public';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
-import { MB } from '../../../../../../../file_upload/public';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { KibanaFeature } from 'x-pack/plugins/features/common';
+
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { KibanaFeature } from '../../../../../features/common';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';

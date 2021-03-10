@@ -7,7 +7,7 @@
  */
 
 import { NotificationsStart } from 'kibana/public';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
 import { ExpressionsService, ExpressionRendererRegistry } from '../common';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(

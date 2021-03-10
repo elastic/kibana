@@ -8,7 +8,7 @@
 
 import { createStreamingBatchedFunction } from './create_streaming_batched_function';
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
-import { AbortError, defer, of } from '../../../kibana_utils/public';
+import { AbortError, defer, of } from 'src/plugins/kibana_utils/public';
 import { Subject } from 'rxjs';
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>

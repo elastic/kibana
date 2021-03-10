@@ -6,8 +6,8 @@
  */
 
 import type { RequestHandlerContext } from 'src/core/server';
-import type { SearchRequestHandlerContext } from '../../../../src/plugins/data/server';
-import { MlPluginSetup } from '../../ml/server';
+import type { SearchRequestHandlerContext } from 'src/plugins/data/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 export type MlAnomalyDetectors = ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;

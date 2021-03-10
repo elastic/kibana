@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Datatable, SerializedFieldFormat } from 'src/plugins/expressions/public';
+import { IFieldFormat } from 'src/plugins/data/public';
 import { XYLayerConfig } from './types';
-import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
-import { IFieldFormat } from '../../../../../src/plugins/data/public';
 
 interface FormattedMetric {
   layer: string;

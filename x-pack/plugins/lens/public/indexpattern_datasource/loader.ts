@@ -8,6 +8,11 @@
 import _ from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { HttpSetup, SavedObjectReference } from 'kibana/public';
+import {
+  IndexPatternsContract,
+  indexPatterns as indexPatternsUtils,
+} from 'src/plugins/data/public';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { InitializationOptions, StateSetter } from '../types';
 import {
   IndexPattern,
@@ -20,11 +25,6 @@ import {
 import { updateLayerIndexPattern } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
-import {
-  IndexPatternsContract,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../src/plugins/data/public';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';

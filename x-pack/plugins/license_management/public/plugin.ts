@@ -8,9 +8,9 @@
 import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup } from '../../../plugins/licensing/public';
+import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
 import { PLUGIN } from '../common/constants';
 import { ClientConfigType } from './types';
 import { AppDependencies } from './application';

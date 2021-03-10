@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
 import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
-import { HomeServerPluginSetup } from '../../../home/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { registerVegaUsageCollector } from './register_vega_collector';
 import { ConfigObservable } from '../types';
 

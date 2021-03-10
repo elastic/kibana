@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock, savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from 'src/plugins/usage_collection/server/usage_collection.mock';
 
 import { registerUiMetricUsageCollector } from './';
 

@@ -7,7 +7,7 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { jobCompletionNotifications } from '../../../../../../plugins/reporting/public';
+import { jobCompletionNotifications } from 'x-pack/plugins/reporting/public';
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
 import { getWindow } from '../../../lib/get_window';
 import { downloadWorkpad } from '../../../lib/download_workpad';

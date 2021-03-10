@@ -7,7 +7,7 @@
 
 import { EuiBasicTableProps } from '@elastic/eui';
 
-import { ListSchema } from '../../../../../lists/common/schemas/response';
+import { ListSchema } from 'x-pack/plugins/lists/common/schemas/response';
 
 export interface TableItem extends ListSchema {
   isDeleting: boolean;

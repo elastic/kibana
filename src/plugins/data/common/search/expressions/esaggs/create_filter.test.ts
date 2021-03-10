@@ -12,7 +12,7 @@ import { AggConfigs, IAggConfig } from '../../aggs';
 import { mockAggTypesRegistry } from '../../aggs/test_helpers';
 
 import { createFilter } from './create_filter';
-import { Datatable } from '../../../../../expressions/common';
+import { Datatable } from 'src/plugins/expressions/common';
 
 describe('createFilter', () => {
   let table: Datatable;

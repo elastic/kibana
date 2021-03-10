@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypeFields, ConnectorTypes } from '../../../../../case/common/api';
+import { ConnectorTypeFields, ConnectorTypes } from 'x-pack/plugins/case/common/api';
 import {
   CaseField,
   ActionType,

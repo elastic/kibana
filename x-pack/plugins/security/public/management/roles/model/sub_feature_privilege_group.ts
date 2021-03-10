@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
+import type { SubFeaturePrivilegeGroupConfig } from 'x-pack/plugins/features/common';
+
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 
 export class SubFeaturePrivilegeGroup {

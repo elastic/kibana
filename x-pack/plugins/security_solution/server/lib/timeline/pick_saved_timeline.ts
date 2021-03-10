@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { AuthenticatedUser } from '../../../../security/common/model';
+import { AuthenticatedUser } from 'x-pack/plugins/security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { SavedTimeline, TimelineType, TimelineStatus } from '../../../common/types/timeline';
 

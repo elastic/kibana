@@ -8,10 +8,7 @@
 import mustache from 'mustache';
 import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 
-import {
-  AlertAction,
-  ActionTypeRegistryContract,
-} from '../../../../../../triggers_actions_ui/public';
+import { AlertAction, ActionTypeRegistryContract } from 'x-pack/plugins/triggers_actions_ui/public';
 import * as I18n from './translations';
 
 const UUID_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;

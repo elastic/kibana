@@ -8,10 +8,10 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { RequestParams } from '@elastic/elasticsearch';
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
 import { MlLicense } from '../../../common/license';
-import { CloudSetup } from '../../../../cloud/server';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
-import { SpacesPluginStart } from '../../../../spaces/server';
 import { capabilitiesProvider } from '../../lib/capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';

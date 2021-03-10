@@ -12,8 +12,8 @@ import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from 'src/core/server';
+import { config as coreConfig } from 'src/core/server';
 
-import { config as coreConfig } from '../../../../src/core/server';
 import type { AuthenticationProvider } from '../common/model';
 
 export type ConfigType = ReturnType<typeof createConfig>;

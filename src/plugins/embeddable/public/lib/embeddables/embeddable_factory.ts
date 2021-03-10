@@ -7,12 +7,12 @@
  */
 
 import { SavedObjectAttributes } from 'src/core/public';
-import { SavedObjectMetaData } from '../../../../saved_objects/public';
+import { SavedObjectMetaData } from 'src/plugins/saved_objects/public';
+import { PersistableState } from 'src/plugins/kibana_utils/common';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
 import { PropertySpec } from '../types';
-import { PersistableState } from '../../../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../../../common/types';
 
 export interface EmbeddableInstanceConfiguration {

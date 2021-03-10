@@ -7,7 +7,7 @@
 
 import { LensFilterEvent } from './types';
 import { desanitizeFilterContext } from './utils';
-import { Datatable } from '../../../../src/plugins/expressions/common';
+import { Datatable } from 'src/plugins/expressions/common';
 
 describe('desanitizeFilterContext', () => {
   it(`When filtered value equals '(empty)' replaces it with '' in table and in value.`, () => {

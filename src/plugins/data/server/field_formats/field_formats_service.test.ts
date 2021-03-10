@@ -8,7 +8,7 @@
 
 import { FieldFormatsService } from './field_formats_service';
 import { DateFormat } from './converters/date_server';
-import { coreMock } from '../../../../core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
 
 describe('FieldFormatService', () => {
   test('DateFormat is server version', async () => {

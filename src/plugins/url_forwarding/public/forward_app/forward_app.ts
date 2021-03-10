@@ -7,7 +7,7 @@
  */
 
 import { App, AppMountParameters, CoreSetup } from 'kibana/public';
-import { AppNavLinkStatus } from '../../../../core/public';
+import { AppNavLinkStatus } from 'src/core/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
 import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 

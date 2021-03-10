@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Dimension } from '../../../../../vis_type_xy/public';
+import type { Dimension } from 'src/plugins/vis_type_xy/public';
 
 import { addToSiri, Serie } from './_add_to_siri';
 import { Point } from './_get_point';

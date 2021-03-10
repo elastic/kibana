@@ -7,7 +7,7 @@
  */
 
 import { COMPLEX_SPLIT_ACCESSOR, getComplexAccessor } from './accessors';
-import { BUCKET_TYPES } from '../../../data/common';
+import { BUCKET_TYPES } from 'src/plugins/data/common';
 import { AccessorFn, Datum } from '@elastic/charts';
 
 describe('XY chart datum accessors', () => {

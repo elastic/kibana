@@ -8,9 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EMSClient, TMSService } from '@elastic/ems-client';
+import type { MapsLegacyConfig } from 'src/plugins/maps_legacy/config';
 import { getUISettings } from '../../services';
 import { userConfiguredLayerId } from './constants';
-import type { MapsLegacyConfig } from '../../../../maps_legacy/config';
 
 type EmsClientConfig = ConstructorParameters<typeof EMSClient>[0];
 

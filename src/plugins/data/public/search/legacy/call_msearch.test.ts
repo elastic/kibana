@@ -7,7 +7,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { getCallMsearch } from './call_msearch';
 
 describe('callMsearch', () => {

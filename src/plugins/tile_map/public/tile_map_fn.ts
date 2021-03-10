@@ -8,7 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import type {
+  ExpressionFunctionDefinition,
+  Datatable,
+  Render,
+} from 'src/plugins/expressions/public';
 import { TileMapVisConfig, TileMapVisData } from './types';
 
 interface Arguments {

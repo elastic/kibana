@@ -10,9 +10,9 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { EncryptedSavedObjectsPluginSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
 import { RawAlert, RawAlertAction } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';

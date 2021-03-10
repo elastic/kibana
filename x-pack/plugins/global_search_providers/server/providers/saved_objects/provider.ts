@@ -8,7 +8,7 @@
 import { from, combineLatest, of } from 'rxjs';
 import { map, takeUntil, first } from 'rxjs/operators';
 import { SavedObjectsFindOptionsReference, ISavedObjectTypeRegistry } from 'src/core/server';
-import { GlobalSearchResultProvider } from '../../../../global_search/server';
+import { GlobalSearchResultProvider } from 'x-pack/plugins/global_search/server';
 import { mapToResults } from './map_object_to_result';
 
 export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider => {

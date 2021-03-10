@@ -16,7 +16,7 @@ import {
   ServiceStatus,
   ServiceStatusLevel,
   ServiceStatusLevels,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk } from './lib';

@@ -8,11 +8,11 @@
 import LRU from 'lru-cache';
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
-import { ExceptionListClient } from '../../../../../../lists/server';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas/response';
+import { PackagePolicyServiceInterface } from 'x-pack/plugins/fleet/server';
+import { createPackagePolicyServiceMock } from 'x-pack/plugins/fleet/server/mocks';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common/schemas/response';
 import {
   createPackagePolicyWithManifestMock,
   createPackagePolicyWithInitialManifestMock,

@@ -11,9 +11,9 @@ import {
   kibanaResponseFactory,
   Logger,
   SavedObjectsClient,
-} from '../../../../../../src/core/server';
+} from 'src/core/server';
 
-import { LicensingPluginSetup } from '../../../../licensing/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 
 import { ReindexStatus } from '../../../common/types';
 

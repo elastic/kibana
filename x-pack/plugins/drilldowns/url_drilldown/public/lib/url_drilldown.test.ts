@@ -8,11 +8,11 @@
 import { IExternalUrl } from 'src/core/public';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
-import { IEmbeddable, VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
-import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
-import { of } from '../../../../../../src/plugins/kibana_utils';
+import { IEmbeddable, VALUE_CLICK_TRIGGER } from 'src/plugins/embeddable/public';
+import { DatatableColumnType } from 'src/plugins/expressions/common';
+import { of } from 'src/plugins/kibana_utils';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
-import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import { ROW_CLICK_TRIGGER } from 'src/plugins/ui_actions/public';
 
 const mockDataPoints = [
   {

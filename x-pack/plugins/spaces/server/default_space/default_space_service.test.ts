@@ -7,6 +7,8 @@
 
 import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
+import type { ILicense } from 'x-pack/plugins/licensing/server';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
 
 import { nextTick } from '@kbn/test/jest';
 import type { Writable } from '@kbn/utility-types';
@@ -14,8 +16,6 @@ import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from 'src
 import { SavedObjectsErrorHelpers, ServiceStatusLevels } from 'src/core/server';
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import type { ILicense } from '../../../licensing/server';
-import { licensingMock } from '../../../licensing/server/mocks';
 import { SpacesLicenseService } from '../../common/licensing';
 import {
   DefaultSpaceService,

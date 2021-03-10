@@ -22,7 +22,7 @@ import {
   PrivateProvider,
   watchMultiDecorator,
   KbnAccessibleClickProvider,
-} from '../../../kibana_legacy/public';
+} from 'src/plugins/kibana_legacy/public';
 
 initAngularBootstrap();
 

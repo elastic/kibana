@@ -10,7 +10,7 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 import { EndpointAppContext } from '../../types';
 import { getArtifactId, reportErrors } from './common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';

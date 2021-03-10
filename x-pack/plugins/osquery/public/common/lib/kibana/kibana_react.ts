@@ -14,7 +14,7 @@ import {
   useUiSetting$,
   withKibana,
   reactRouterNavigate,
-} from '../../../../../../../src/plugins/kibana_react/public';
+} from 'src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;

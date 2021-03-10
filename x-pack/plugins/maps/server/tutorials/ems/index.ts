@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TutorialsCategory } from '../../../../../../src/plugins/home/server';
+import { TutorialsCategory } from 'src/plugins/home/server';
 import { getNewMapPath } from '../../../common/constants';
 
 export function emsBoundariesSpecProvider({

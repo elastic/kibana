@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
+import { AlertTypeParams, SanitizedAlert } from 'x-pack/plugins/alerting/common';
 import { ReadNotificationParams, isAlertType } from './types';
 import { findNotifications } from './find_notifications';
 import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';

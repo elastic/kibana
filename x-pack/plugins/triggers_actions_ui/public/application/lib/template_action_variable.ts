@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionVariable } from '../../../../alerting/common';
+import { ActionVariable } from 'x-pack/plugins/alerting/common';
 
 export function templateActionVariable(variable: ActionVariable) {
   return variable.useWithTripleBracesInTemplates

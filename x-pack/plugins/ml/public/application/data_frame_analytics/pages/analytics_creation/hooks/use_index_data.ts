@@ -11,7 +11,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
 
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 

@@ -23,7 +23,7 @@ import {
   logEntrySearchRequestStateRT,
   logEntrySearchStrategyProvider,
 } from './log_entry_search_strategy';
-import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import { createSearchSessionsClientMock } from 'src/plugins/data/server/search/mocks';
 
 describe('LogEntry search strategy', () => {
   it('handles initial search requests', async () => {

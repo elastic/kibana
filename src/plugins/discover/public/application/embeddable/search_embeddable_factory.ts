@@ -9,14 +9,14 @@
 import { auto } from 'angular';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { getServices } from '../../kibana_services';
 import {
   EmbeddableFactoryDefinition,
   Container,
   ErrorEmbeddable,
-} from '../../../../embeddable/public';
+} from 'src/plugins/embeddable/public';
 
-import { TimeRange } from '../../../../data/public';
+import { TimeRange } from 'src/plugins/data/public';
+import { getServices } from '../../kibana_services';
 
 import { SearchInput, SearchOutput, SearchEmbeddable } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { ConfigSchema } from '.';
 import {
   FetchDataParams,
   HasDataParams,
   ObservabilityPluginSetup,
-} from '../../observability/public';
+} from 'x-pack/plugins/observability/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -18,28 +17,29 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/public';
+} from 'src/core/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+} from 'src/plugins/data/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerting/public';
-import { FeaturesPluginSetup } from '../../features/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+} from 'x-pack/plugins/alerting/public';
+import { FeaturesPluginSetup } from 'x-pack/plugins/features/public';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
+} from 'x-pack/plugins/triggers_actions_ui/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { MlPluginSetup, MlPluginStart } from 'x-pack/plugins/ml/public';
+import { MapsStartApi } from 'x-pack/plugins/maps/public';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
-import { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import { MapsStartApi } from '../../maps/public';
+import { ConfigSchema } from '.';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;

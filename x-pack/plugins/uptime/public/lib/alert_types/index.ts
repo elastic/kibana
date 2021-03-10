@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { AlertTypeModel } from 'x-pack/plugins/triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
 import { ClientPluginsStart } from '../../apps/plugin';

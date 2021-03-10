@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { AlertingPlugin } from 'x-pack/plugins/alerting/server';
 import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerting/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,

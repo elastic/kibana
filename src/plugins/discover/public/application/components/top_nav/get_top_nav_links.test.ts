@@ -8,7 +8,7 @@
 
 import { ISearchSource } from 'src/plugins/data/public';
 import { getTopNavLinks } from './get_top_nav_links';
-import { inspectorPluginMock } from '../../../../../inspector/public/mocks';
+import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../build_services';

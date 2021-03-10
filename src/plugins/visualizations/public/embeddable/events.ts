@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ROW_CLICK_TRIGGER } from '../../../ui_actions/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../plugins/data/public';
-import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../../../../plugins/embeddable/public';
+import { ROW_CLICK_TRIGGER } from 'src/plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from 'src/plugins/data/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from 'src/plugins/embeddable/public';
 
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;

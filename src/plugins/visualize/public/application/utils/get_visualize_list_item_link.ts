@@ -8,8 +8,8 @@
 
 import { ApplicationStart } from 'kibana/public';
 import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
-import { QueryState } from '../../../../data/public';
-import { setStateToKbnUrl } from '../../../../kibana_utils/public';
+import { QueryState } from 'src/plugins/data/public';
+import { setStateToKbnUrl } from 'src/plugins/kibana_utils/public';
 import { getUISettings } from '../../services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
 import { APP_NAME } from '../visualize_constants';

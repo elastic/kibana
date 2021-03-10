@@ -17,18 +17,18 @@ import {
   AppUpdater,
   ScopedHistory,
   AppNavLinkStatus,
-} from '../../../core/public';
-import { Panel } from './panels/panel';
-import { initAngularBootstrap } from '../../kibana_legacy/public';
-import { createKbnUrlTracker } from '../../kibana_utils/public';
-import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../data/public';
-import { NavigationPublicPluginStart } from '../../navigation/public';
-import { VisualizationsStart } from '../../visualizations/public';
-import { SavedObjectsStart } from '../../saved_objects/public';
+} from 'src/core/public';
+import { initAngularBootstrap } from 'src/plugins/kibana_legacy/public';
+import { createKbnUrlTracker } from 'src/plugins/kibana_utils/public';
+import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from 'src/plugins/data/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { VisualizationsStart } from 'src/plugins/visualizations/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import {
   VisTypeTimelionPluginStart,
   VisTypeTimelionPluginSetup,
-} from '../../vis_type_timelion/public';
+} from 'src/plugins/vis_type_timelion/public';
+import { Panel } from './panels/panel';
 
 export interface TimelionPluginSetupDependencies {
   data: DataPublicPluginSetup;

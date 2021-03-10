@@ -8,8 +8,8 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { isPlainObject } from 'lodash';
+import { Datatable, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/common';
 import { IndexPattern } from '../../index_patterns/index_patterns';
-import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
 export interface TabifyDocsOptions {
   shallow?: boolean;

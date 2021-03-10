@@ -7,8 +7,8 @@
  */
 
 import _ from 'lodash';
+import { extractSearchSourceReferences } from 'src/plugins/data/public';
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { extractSearchSourceReferences } from '../../../../data/public';
 import { expandShorthand } from './field_mapping';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {

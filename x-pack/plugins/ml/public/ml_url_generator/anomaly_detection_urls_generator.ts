@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { setStateToKbnUrl } from 'src/plugins/kibana_utils/public';
 import type {
   AnomalyDetectionUrlState,
   ExplorerAppState,
@@ -19,7 +20,6 @@ import type {
 } from '../../common/types/ml_url_generator';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { createGenericMlUrl } from './common';
-import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
 import { AppPageState, ListingPageUrlState } from '../../common/types/common';
 /**

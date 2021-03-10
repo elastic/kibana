@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { IRouter, Logger } from 'kibana/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import { TelemetryCollectionManagerPluginSetup } from '../../../telemetry_collection_manager/server';
 import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
 import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';

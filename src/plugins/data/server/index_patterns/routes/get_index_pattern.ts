@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter, StartServicesAccessor } from 'src/core/server';
 import { handleErrors } from './util/handle_errors';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 export const registerGetIndexPatternRoute = (

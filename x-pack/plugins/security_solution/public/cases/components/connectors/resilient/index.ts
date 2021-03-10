@@ -7,8 +7,8 @@
 
 import { lazy } from 'react';
 
+import { ResilientFieldsType } from 'x-pack/plugins/case/common/api/connectors';
 import { CaseConnector } from '../types';
-import { ResilientFieldsType } from '../../../../../../case/common/api/connectors';
 import * as i18n from './translations';
 
 export * from './types';

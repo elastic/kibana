@@ -8,11 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/public';
-import { Adapters, InspectorViewDescription } from '../../../../inspector/public';
+import { Adapters, InspectorViewDescription } from 'src/plugins/inspector/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { DatatableColumn } from 'src/plugins/expressions/common/expression_types/specs';
 import { getDataViewComponentWrapper } from './components/data_view_wrapper';
-import { UiActionsStart } from '../../../../ui_actions/public';
 import { FieldFormatsStart } from '../../field_formats';
-import { DatatableColumn } from '../../../../expressions/common/expression_types/specs';
 
 export const getTableViewDescription = (
   getStartServices: () => {

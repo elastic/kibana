@@ -10,10 +10,7 @@
  * @param cb: callback to do something with a function that has been found
  */
 
-import {
-  ExpressionAstExpression,
-  ExpressionAstNode,
-} from '../../../../../src/plugins/expressions/common';
+import { ExpressionAstExpression, ExpressionAstNode } from 'src/plugins/expressions/common';
 
 function isExpression(
   maybeExpression: ExpressionAstNode

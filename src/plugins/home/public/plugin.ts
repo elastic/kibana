@@ -16,6 +16,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { AppNavLinkStatus } from 'src/core/public';
+import { setServices } from './application/kibana_services';
+import { ConfigSchema } from '../config';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
@@ -25,13 +32,6 @@ import {
   TutorialService,
   TutorialServiceSetup,
 } from './services';
-import { ConfigSchema } from '../config';
-import { setServices } from './application/kibana_services';
-import { DataPublicPluginStart } from '../../data/public';
-import { TelemetryPluginStart } from '../../telemetry/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 
 export interface HomePluginStartDependencies {

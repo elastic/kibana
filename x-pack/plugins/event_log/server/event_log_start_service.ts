@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 import { IClusterClient, KibanaRequest } from 'src/core/server';
-import { SpacesServiceStart } from '../../spaces/server';
+import { SpacesServiceStart } from 'x-pack/plugins/spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClientService } from './types';

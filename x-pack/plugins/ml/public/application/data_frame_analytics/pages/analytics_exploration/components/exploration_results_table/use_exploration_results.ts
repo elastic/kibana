@@ -12,8 +12,8 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
+import { IndexPattern } from 'src/plugins/data/public';
 import { MlApiServices } from '../../../../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EncryptedSavedObjectsPluginSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
 import type { AlertingRouter } from '../types';
 import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 interface XPackUsageSecurity {
   security?: {

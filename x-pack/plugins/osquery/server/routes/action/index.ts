@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from 'src/core/server';
 import { createActionRoute } from './create_action_route';
 
 export const initActionRoutes = (router: IRouter) => {

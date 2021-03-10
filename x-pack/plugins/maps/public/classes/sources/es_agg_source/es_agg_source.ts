@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
+import { IndexPattern } from 'src/plugins/data/public';
 import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 

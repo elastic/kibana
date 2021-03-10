@@ -16,7 +16,8 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
+
 import type { PostAgentAcksResponse } from '../../../common/types/rest_spec';
 import { AckEventSchema } from '../../types/models';
 import type { AcksService } from '../../services/agents';

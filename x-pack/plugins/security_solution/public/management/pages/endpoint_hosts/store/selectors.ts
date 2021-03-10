@@ -10,6 +10,7 @@ import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from 'rison-node';
+import { Query } from 'src/plugins/data/common/query/types';
 import {
   Immutable,
   HostPolicyResponseAppliedAction,
@@ -25,7 +26,6 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
-import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 

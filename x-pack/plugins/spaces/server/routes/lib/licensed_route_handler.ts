@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { RequestHandler, RequestHandlerContext } from 'src/core/server';
+import type { LicensingApiRequestHandlerContext } from 'x-pack/plugins/licensing/server';
 
-import type { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
+import type { RequestHandler, RequestHandlerContext } from 'src/core/server';
 
 export const createLicensedRouteHandler = <
   P,

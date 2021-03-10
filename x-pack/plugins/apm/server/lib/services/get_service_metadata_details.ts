@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { SortOptions } from 'x-pack/typings/elasticsearch';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { SortOptions } from '../../../../../typings/elasticsearch';
 import {
   AGENT,
   CLOUD,

@@ -7,9 +7,9 @@
 
 import { IRouter } from 'src/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { IndexManagementPluginSetup } from '../../index_management/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { IndexManagementPluginSetup } from 'x-pack/plugins/index_management/server';
 import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
 import { handleEsError } from './shared_imports';

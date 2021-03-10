@@ -10,8 +10,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 
-import { TemplateFromEs, TemplateSerialized } from '../../../../../index_management/common/types';
-import { LegacyTemplateSerialized } from '../../../../../index_management/server';
+import { TemplateFromEs, TemplateSerialized } from 'x-pack/plugins/index_management/common/types';
+import { LegacyTemplateSerialized } from 'x-pack/plugins/index_management/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 

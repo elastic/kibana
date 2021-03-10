@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID,

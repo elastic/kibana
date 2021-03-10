@@ -6,8 +6,8 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { httpServiceMock } from 'src/core/public/mocks';
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 import * as Api from '../api';
 

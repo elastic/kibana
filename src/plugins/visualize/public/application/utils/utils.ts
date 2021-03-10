@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { ChromeStart, DocLinksStart } from 'kibana/public';
-import { Filter } from '../../../../data/public';
+import { Filter } from 'src/plugins/data/public';
 import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {

@@ -14,10 +14,10 @@ import {
   SearchRequest,
   DataPublicPluginStart,
   IEsSearchResponse,
-} from '../../../data/public';
-import { search as dataPluginSearch } from '../../../data/public';
+} from 'src/plugins/data/public';
+import { search as dataPluginSearch } from 'src/plugins/data/public';
+import { RequestResponder } from 'src/plugins/inspector/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
-import { RequestResponder } from '../../../inspector/public';
 
 export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;

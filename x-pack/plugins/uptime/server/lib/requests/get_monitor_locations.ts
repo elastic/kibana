@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { SortOptions } from 'x-pack/typings/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorLocations, MonitorLocation } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { SortOptions } from '../../../../../typings/elasticsearch';
 
 /**
  * Fetch data for the monitor page title.

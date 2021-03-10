@@ -6,9 +6,9 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { AgentService } from '../../../../../../fleet/server';
-import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
-import { Agent } from '../../../../../../fleet/common/types/models';
+import { AgentService } from 'x-pack/plugins/fleet/server';
+import { AgentStatusKueryHelper } from 'x-pack/plugins/fleet/common/services';
+import { Agent } from 'x-pack/plugins/fleet/common/types/models';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 const STATUS_QUERY_MAP = new Map([

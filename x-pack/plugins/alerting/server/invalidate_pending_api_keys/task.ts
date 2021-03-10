@@ -12,13 +12,13 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { InvalidateAPIKeysParams, SecurityPluginStart } from '../../../security/server';
+import { EncryptedSavedObjectsClient } from 'x-pack/plugins/encrypted_saved_objects/server';
+import { InvalidateAPIKeysParams, SecurityPluginStart } from 'x-pack/plugins/security/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 import { InvalidateAPIKeyResult } from '../alerts_client';
 import { AlertsConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';

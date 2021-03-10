@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from 'src/core/server';
 
 import { createPackRoute } from './create_pack_route';
 import { deletePackRoute } from './delete_pack_route';

@@ -10,11 +10,11 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
-} from 'src/plugins/telemetry_collection_manager/server';
-import { SavedObjectsErrorHelpers } from '../../../../core/server';
+} from '../../../telemetry_collection_manager/server';
 import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry_config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 

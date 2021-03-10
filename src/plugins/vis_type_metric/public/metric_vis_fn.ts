@@ -14,9 +14,9 @@ import {
   Range,
   Render,
   Style,
-} from '../../expressions/public';
+} from 'src/plugins/expressions/public';
+import { ColorSchemas, vislibColorMaps, ColorMode } from 'src/plugins/charts/public';
 import { visType, DimensionsVisParam, VisParams } from './types';
-import { ColorSchemas, vislibColorMaps, ColorMode } from '../../charts/public';
 
 export type Input = Datatable;
 

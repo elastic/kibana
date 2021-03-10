@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 
 import fetch from 'node-fetch';
+import { LayerConfig } from 'src/plugins/maps_legacy/config';
 import {
   GIS_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -25,7 +26,6 @@ import {
   getEMSSettings,
 } from './kibana_services';
 import { getLicenseId } from './licensed_features';
-import { LayerConfig } from '../../../../src/plugins/maps_legacy/config';
 
 export function getKibanaRegionList(): LayerConfig[] {
   return getRegionmapLayers();

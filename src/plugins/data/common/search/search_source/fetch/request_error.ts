@@ -7,7 +7,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { KbnError } from '../../../../../kibana_utils/common';
+import { KbnError } from 'src/plugins/kibana_utils/common';
 import { SearchError } from './types';
 
 /**

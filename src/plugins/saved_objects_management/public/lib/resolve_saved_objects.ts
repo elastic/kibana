@@ -9,15 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
-import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObject, SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
   injectSearchSourceReferences,
   IndexPatternSpec,
-} from '../../../data/public';
+} from 'src/plugins/data/public';
+import { DuplicateIndexPatternError, IndexPattern } from 'src/plugins/data/public';
 import { FailedImport } from './process_import_response';
-import { DuplicateIndexPatternError, IndexPattern } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 

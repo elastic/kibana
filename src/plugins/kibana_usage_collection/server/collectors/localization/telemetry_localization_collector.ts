@@ -9,7 +9,7 @@
 import { i18nLoader } from '@kbn/i18n';
 import { size } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { I18nServiceSetup } from '../../../../../core/server';
+import { I18nServiceSetup } from 'src/core/server';
 import { getIntegrityHashes, Integrities } from './file_integrity';
 
 export interface UsageStats {

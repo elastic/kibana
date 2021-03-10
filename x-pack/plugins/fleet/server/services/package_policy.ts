@@ -13,7 +13,8 @@ import type {
 } from 'src/core/server';
 import uuid from 'uuid';
 
-import type { AuthenticatedUser } from '../../../security/server';
+import type { AuthenticatedUser } from 'x-pack/plugins/security/server';
+
 import {
   packageToPackagePolicy,
   isPackageLimited,

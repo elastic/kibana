@@ -8,14 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { DashboardStart } from '../../dashboard/public';
-import { DiscoverStart } from '../../discover/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
-import { VisualizationsStart } from '../../visualizations/public';
-import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import type { SpacesOssPluginStart } from '../../spaces_oss/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
+import { DiscoverStart } from 'src/plugins/discover/public';
+import { HomePublicPluginSetup, FeatureCatalogueCategory } from 'src/plugins/home/public';
+import { VisualizationsStart } from 'src/plugins/visualizations/public';
+import { SavedObjectTaggingOssPluginStart } from 'src/plugins/saved_objects_tagging_oss/public';
+import type { SpacesOssPluginStart } from 'src/plugins/spaces_oss/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,

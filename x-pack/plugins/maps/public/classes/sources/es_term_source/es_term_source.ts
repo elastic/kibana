@@ -8,6 +8,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, Query } from 'src/plugins/data/public';
+import { Adapters } from 'src/plugins/inspector/common/adapters';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -28,7 +29,6 @@ import {
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITermJoinSource } from '../term_join_source/term_join_source';

@@ -6,8 +6,8 @@
  */
 
 import { uniq } from 'lodash';
+import type { FeatureKibanaPrivileges, KibanaFeature } from 'x-pack/plugins/features/server';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 const readOperations: string[] = ['get', 'getAlertState', 'getAlertInstanceSummary', 'find'];

@@ -16,21 +16,21 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { APMConfig, APMXPackConfig } from '.';
+import { APMOSSPluginSetup } from 'src/plugins/apm_oss/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UI_SETTINGS } from 'src/plugins/data/common';
+import { ActionsPlugin } from 'x-pack/plugins/actions/server';
+import { AlertingPlugin } from 'x-pack/plugins/alerting/server';
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
+import { ObservabilityPluginSetup } from 'x-pack/plugins/observability/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { TaskManagerSetupContract } from 'x-pack/plugins/task_manager/server';
 import { mergeConfigs } from './index';
-import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { UI_SETTINGS } from '../../../../src/plugins/data/common';
-import { ActionsPlugin } from '../../actions/server';
-import { AlertingPlugin } from '../../alerting/server';
-import { CloudSetup } from '../../cloud/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { MlPluginSetup } from '../../ml/server';
-import { ObservabilityPluginSetup } from '../../observability/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { TaskManagerSetupContract } from '../../task_manager/server';
+import { APMConfig, APMXPackConfig } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';

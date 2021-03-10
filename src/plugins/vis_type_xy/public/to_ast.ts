@@ -8,15 +8,15 @@
 
 import moment from 'moment';
 
-import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { BUCKET_TYPES } from '../../data/public';
+import { VisToExpressionAst, getVisSchemas } from 'src/plugins/visualizations/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
+import { BUCKET_TYPES } from 'src/plugins/data/public';
 
+import { TimeRangeBounds } from 'src/plugins/data/common';
 import { DateHistogramParams, Dimensions, HistogramParams, VisParams } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
 import { XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
-import { TimeRangeBounds } from '../../data/common';
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);

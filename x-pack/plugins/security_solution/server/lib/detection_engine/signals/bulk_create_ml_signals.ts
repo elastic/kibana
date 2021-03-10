@@ -8,12 +8,12 @@
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';

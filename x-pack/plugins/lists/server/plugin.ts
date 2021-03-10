@@ -7,9 +7,8 @@
 
 import { Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import type { CoreSetup, CoreStart } from 'src/core/server';
-
-import type { SecurityPluginStart } from '../../security/server';
-import type { SpacesServiceStart } from '../../spaces/server';
+import type { SecurityPluginStart } from 'x-pack/plugins/security/server';
+import type { SpacesServiceStart } from 'x-pack/plugins/spaces/server';
 
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';

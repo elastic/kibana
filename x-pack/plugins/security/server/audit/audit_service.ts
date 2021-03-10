@@ -7,6 +7,7 @@
 
 import type { Subscription } from 'rxjs';
 import { distinctUntilKeyChanged, map } from 'rxjs/operators';
+import type { SpacesPluginSetup } from 'x-pack/plugins/spaces/server';
 
 import type {
   HttpServiceSetup,
@@ -16,7 +17,6 @@ import type {
   LoggingServiceSetup,
 } from 'src/core/server';
 
-import type { SpacesPluginSetup } from '../../../spaces/server';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';

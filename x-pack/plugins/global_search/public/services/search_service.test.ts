@@ -15,7 +15,7 @@ import { Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
-import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';

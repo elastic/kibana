@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
 import { RecoveredActionGroupId, DefaultActionGroupId } from './builtin_action_groups';
 
 export interface AlertType<

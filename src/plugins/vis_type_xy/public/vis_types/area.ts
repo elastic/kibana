@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Fit, Position } from '@elastic/charts';
 
-import { AggGroupNames } from '../../../data/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
-import { defaultCountLabel, LabelRotation } from '../../../charts/public';
+import { AggGroupNames } from 'src/plugins/data/public';
+import { VIS_EVENT_TO_TRIGGER } from 'src/plugins/visualizations/public';
+import { defaultCountLabel, LabelRotation } from 'src/plugins/charts/public';
 
 import {
   ChartMode,

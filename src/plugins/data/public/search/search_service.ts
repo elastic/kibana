@@ -15,6 +15,8 @@ import {
 } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
@@ -31,9 +33,7 @@ import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse, getEsaggs } from './expressions';
-import { ExpressionsSetup } from '../../../expressions/public';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
 import {

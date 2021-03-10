@@ -11,7 +11,7 @@ import {
   IndexSettings,
   LegacyTemplateSerialized,
   TemplateFromEs,
-} from '../../../../../index_management/common/types';
+} from 'x-pack/plugins/index_management/common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 

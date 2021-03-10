@@ -9,10 +9,11 @@ import {
   loggingSystemMock,
   savedObjectsServiceMock,
   coreMock,
-} from '../../../../../src/core/server/mocks';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
+} from 'src/core/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
+
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, AgentService } from '../services';
 import type { FleetAppContext } from '../plugin';

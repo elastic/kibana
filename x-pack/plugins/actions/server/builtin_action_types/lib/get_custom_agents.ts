@@ -9,7 +9,7 @@ import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface GetCustomAgentsResponse {

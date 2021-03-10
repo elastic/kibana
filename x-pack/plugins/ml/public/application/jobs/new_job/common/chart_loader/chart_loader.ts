@@ -7,6 +7,7 @@
 
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import { IndexPattern } from 'src/plugins/data/common';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import {
   Field,
@@ -18,7 +19,6 @@ import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 
 type DetectorIndex = number;
 export interface LineChartPoint {

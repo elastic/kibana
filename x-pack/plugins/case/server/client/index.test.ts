@@ -9,7 +9,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { nullUser } from '../common';
 import {
   connectorMappingsServiceMock,

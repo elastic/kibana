@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart } from 'x-pack/plugins/licensing/public';
 import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
 import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 import { GlobalSearchClientConfigType } from './config';

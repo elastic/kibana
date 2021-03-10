@@ -8,7 +8,7 @@
 import { ParamsSchema, Params } from './alert_type_params';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { CoreQueryParams, MAX_GROUPS } from '../../../../triggers_actions_ui/server';
+import { CoreQueryParams, MAX_GROUPS } from 'x-pack/plugins/triggers_actions_ui/server';
 
 const DefaultParams: Writable<Partial<Params>> = {
   index: 'index-name',

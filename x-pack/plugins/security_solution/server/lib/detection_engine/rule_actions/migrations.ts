@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectSanitizedDoc,
-} from '../../../../../../../src/core/server';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'src/core/server';
 import { IRuleActionsAttributesSavedObjectAttributes, RuleAlertAction } from './types';
 
 export const ruleActionsSavedObjectMigration = {

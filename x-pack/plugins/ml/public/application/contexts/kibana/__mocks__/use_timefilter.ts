@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 const timefilterMock = dataPluginMock.createStartContract().query.timefilter.timefilter;
 

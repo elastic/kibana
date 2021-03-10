@@ -10,7 +10,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Datatable } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import {
   Visualization,
   Datasource,

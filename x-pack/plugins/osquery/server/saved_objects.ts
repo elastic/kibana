@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../src/core/server';
+import { CoreSetup } from 'src/core/server';
 
 import { savedQueryType, packType } from './lib/saved_query/saved_object_mappings';
 

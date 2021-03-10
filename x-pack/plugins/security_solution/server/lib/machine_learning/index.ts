@@ -7,9 +7,9 @@
 
 import { RequestParams } from '@elastic/elasticsearch';
 
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common';
+import { AnomalyRecordDoc as Anomaly } from 'x-pack/plugins/ml/server';
 import { buildExceptionFilter } from '../../../common/shared_imports';
-import { ExceptionListItemSchema } from '../../../../lists/common';
-import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 import { SearchResponse } from '../types';
 
 export { Anomaly };

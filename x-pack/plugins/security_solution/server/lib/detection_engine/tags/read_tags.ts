@@ -6,8 +6,8 @@
  */
 
 import { has } from 'lodash/fp';
+import { AlertsClient } from 'x-pack/plugins/alerting/server';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server';
 import { findRules } from '../rules/find_rules';
 
 export interface TagType {

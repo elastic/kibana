@@ -9,10 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { StartServicesAccessor } from 'kibana/public';
 
-import type {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
+import type { EmbeddableFactoryDefinition, IContainer } from 'src/plugins/embeddable/public';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';

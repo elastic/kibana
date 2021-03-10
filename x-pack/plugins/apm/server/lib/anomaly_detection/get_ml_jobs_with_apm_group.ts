@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlPluginSetup } from '../../../../ml/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { APM_ML_JOB_GROUP } from './constants';
 

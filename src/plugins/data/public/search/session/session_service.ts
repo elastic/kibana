@@ -10,7 +10,7 @@ import { PublicContract } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
-import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
+import { UrlGeneratorId, UrlGeneratorStateMapping } from 'src/plugins/share/public';
 import { ConfigSchema } from '../../../config';
 import {
   createSessionStateContainer,

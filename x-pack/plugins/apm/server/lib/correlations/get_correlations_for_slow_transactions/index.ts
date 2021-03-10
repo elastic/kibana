@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from 'x-pack/typings/elasticsearch/aggregations';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import {
   environmentQuery,
   rangeQuery,

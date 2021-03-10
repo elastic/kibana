@@ -7,7 +7,7 @@
  */
 
 import { Datatable } from 'src/plugins/expressions/public';
-import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { Action, createAction, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 import type { Filter } from '../../common/es_query/filters';

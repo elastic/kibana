@@ -6,13 +6,13 @@
  */
 
 import { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from 'kibana/server';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { savedObjectClientsFactory } from '../util';
 import { syncSavedObjectsFactory } from '../sync';
 import { jobSavedObjectServiceFactory, JobObject } from '../service';
 import { mlLog } from '../../lib/log';
 import { ML_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { createJobSpaceOverrides } from './space_overrides';
-import type { SecurityPluginSetup } from '../../../../security/server';
 
 /**
  * Creates initializeJobs function which is used to check whether

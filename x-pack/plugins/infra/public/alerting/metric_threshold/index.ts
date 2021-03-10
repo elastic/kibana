@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
+import { AlertTypeModel } from 'x-pack/plugins/triggers_actions_ui/public/types';
+import { AlertTypeParams } from 'x-pack/plugins/alerting/common';
 import { validateMetricThreshold } from './components/validation';
-import { AlertTypeParams } from '../../../../alerting/common';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,

@@ -7,13 +7,13 @@
 
 import { Unit } from '@elastic/datemath';
 import { first } from 'lodash';
+import { ILegacyScopedClusterClient } from 'src/core/server';
 import { PreviewResult } from '../common/types';
 import { InventoryMetricConditions } from './types';
 import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InventoryItemType } from '../../../../common/inventory_models/types';

@@ -6,8 +6,8 @@
  */
 
 import { chunk } from 'lodash/fp';
+import { Filter } from 'src/plugins/data/common';
 
-import { Filter } from '../../../../../src/plugins/data/common';
 import {
   CreateExceptionListItemSchema,
   EntryExists,

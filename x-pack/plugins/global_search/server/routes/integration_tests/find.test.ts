@@ -8,7 +8,7 @@
 import { of, throwError } from 'rxjs';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { setupServer } from '../../../../../../src/core/server/test_utils';
+import { setupServer } from 'src/core/server/test_utils';
 import { GlobalSearchResult, GlobalSearchBatchedResults } from '../../../common/types';
 import { GlobalSearchFindError } from '../../../common/errors';
 import { globalSearchPluginMock } from '../../mocks';

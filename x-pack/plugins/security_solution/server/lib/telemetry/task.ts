@@ -11,7 +11,7 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 import { TelemetryEventsSender, TelemetryEvent } from './sender';
 
 export const TelemetryDiagTaskConstants = {

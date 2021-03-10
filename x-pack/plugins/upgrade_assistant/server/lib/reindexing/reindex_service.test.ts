@@ -21,8 +21,8 @@ import {
   ReindexStep,
 } from '../../../common/types';
 import { mockKibanaVersion } from '../../../common/constants';
-import { licensingMock } from '../../../../licensing/server/mocks';
-import { LicensingPluginSetup } from '../../../../licensing/server';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 
 import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';

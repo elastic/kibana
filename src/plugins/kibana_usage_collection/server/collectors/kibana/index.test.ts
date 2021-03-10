@@ -10,12 +10,12 @@ import {
   loggingSystemMock,
   pluginInitializerContextConfigMock,
   elasticsearchServiceMock,
-} from '../../../../../core/server/mocks';
+} from 'src/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { registerKibanaUsageCollector } from './';
 
 const logger = loggingSystemMock.createLogger();

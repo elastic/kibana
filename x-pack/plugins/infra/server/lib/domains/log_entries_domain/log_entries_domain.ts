@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from 'src/plugins/kibana_utils/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 
 import {

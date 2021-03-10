@@ -6,15 +6,15 @@
  */
 
 import { flatten } from 'lodash';
-import { escapeQuotes } from './lib/escape_kuery';
-import { KqlQuerySuggestionProvider } from './types';
-import { getAutocompleteService } from '../../../services';
 import {
   IFieldType,
   IIndexPattern,
   QuerySuggestion,
   QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
+} from 'src/plugins/data/public';
+import { escapeQuotes } from './lib/escape_kuery';
+import { KqlQuerySuggestionProvider } from './types';
+import { getAutocompleteService } from '../../../services';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values

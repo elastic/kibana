@@ -8,10 +8,10 @@
 import { KibanaRequest, KibanaResponseFactory, ILegacyClusterClient } from 'kibana/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
 import { AlertsHealth, AlertType } from '../../common';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(

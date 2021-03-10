@@ -20,26 +20,26 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 
-import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import {
   Storage,
   createKbnUrlTracker,
   createKbnUrlStateStorage,
   withNotifyOnErrors,
-} from '../../kibana_utils/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { SharePluginStart, SharePluginSetup } from '../../share/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { VisualizationsStart } from '../../visualizations/public';
-import { VisualizeConstants } from './application/visualize_constants';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+} from 'src/plugins/kibana_utils/public';
+import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from 'src/plugins/data/public';
+import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
+import { SharePluginStart, SharePluginSetup } from 'src/plugins/share/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { VisualizationsStart } from 'src/plugins/visualizations/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from 'src/plugins/home/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
+import type { SavedObjectTaggingOssPluginStart } from 'src/plugins/saved_objects_tagging_oss/public';
 import { VisualizeServices } from './application/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { SavedObjectsStart } from '../../saved_objects/public';
-import { EmbeddableStart } from '../../embeddable/public';
-import { DashboardStart } from '../../dashboard/public';
-import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
+import { VisualizeConstants } from './application/visualize_constants';
 import { setVisEditorsRegistry, setUISettings } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 

@@ -15,16 +15,16 @@ import {
   OverlayStart,
   SavedObjectsStart,
   DocLinksStart,
-} from '../../../core/public';
-import { TypesStart } from './vis_types';
-import { createGetterSetter } from '../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
-import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
-import { ExpressionsStart } from '../../../plugins/expressions/public';
-import { UiActionsStart } from '../../../plugins/ui_actions/public';
+} from 'src/core/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
+import { DataPublicPluginStart, TimefilterContract } from 'src/plugins/data/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { ExpressionsStart } from 'src/plugins/expressions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { SavedVisualizationsLoader } from './saved_visualizations';
-import { SavedObjectLoader } from '../../saved_objects/public';
-import { EmbeddableStart } from '../../embeddable/public';
+import { TypesStart } from './vis_types';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

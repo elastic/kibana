@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
 import { deleteRules } from './delete_rules';
 import { readRules } from './read_rules';
 jest.mock('./read_rules');

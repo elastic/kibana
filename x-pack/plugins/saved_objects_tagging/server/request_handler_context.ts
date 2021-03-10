@@ -6,7 +6,7 @@
  */
 
 import type { RequestHandlerContext, KibanaRequest } from 'src/core/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { ITagsClient } from '../common/types';
 import { ITagsRequestHandlerContext } from './types';
 import { TagsClient, IAssignmentService, AssignmentService } from './services';

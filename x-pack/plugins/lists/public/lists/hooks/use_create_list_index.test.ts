@@ -6,9 +6,9 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { httpServiceMock } from 'src/core/public/mocks';
 
 import * as Api from '../api';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getAcknowledgeSchemaResponseMock } from '../../../common/schemas/response/acknowledge_schema.mock';
 
 import { useCreateListIndex } from './use_create_list_index';

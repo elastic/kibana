@@ -9,7 +9,7 @@ import { CoreStart, HttpSetup } from 'kibana/public';
 import { History, createBrowserHistory } from 'history';
 import { applyMiddleware, Store, createStore } from 'redux';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 import { HostResultList, AppLocation } from '../../../../../common/endpoint/types';
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';

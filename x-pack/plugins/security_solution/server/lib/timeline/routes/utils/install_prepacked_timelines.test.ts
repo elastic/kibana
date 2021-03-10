@@ -8,7 +8,7 @@
 import { join, resolve } from 'path';
 
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SecurityPluginSetup } from '../../../../../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 
 import { FrameworkRequest } from '../../../framework';
 import {

@@ -13,13 +13,13 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
-import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
-import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../fleet/common/constants';
+import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from 'x-pack/plugins/fleet/common/constants';
 import {
   CreateFleetSetupResponse,
   PostIngestSetupResponse,
-} from '../../../fleet/common/types/rest_spec';
+} from 'x-pack/plugins/fleet/common/types/rest_spec';
+import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
+import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
 
 main();

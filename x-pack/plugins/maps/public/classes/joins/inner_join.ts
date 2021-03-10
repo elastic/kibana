@@ -7,6 +7,7 @@
 
 import { Query } from 'src/plugins/data/public';
 import { Feature, GeoJsonProperties } from 'geojson';
+import { Adapters } from 'src/plugins/inspector/common/adapters';
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
@@ -25,7 +26,6 @@ import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../sources/term_join_source';
 import { TableSource } from '../sources/table_source';
-import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
 
 function createJoinTermSource(
   descriptor: Partial<TermJoinSourceDescriptor> | undefined,

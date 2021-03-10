@@ -6,15 +6,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  Logger,
-  KibanaRequest,
-  ISavedObjectsRepository,
-  IBasePath,
-} from '../../../../../src/core/server';
-import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
+import { Logger, KibanaRequest, ISavedObjectsRepository, IBasePath } from 'src/core/server';
+import { RunContext } from 'x-pack/plugins/task_manager/server';
+import { EncryptedSavedObjectsClient } from 'x-pack/plugins/encrypted_saved_objects/server';
+import { PluginStartContract as ActionsPluginStartContract } from 'x-pack/plugins/actions/server';
+import { IEventLogger } from 'x-pack/plugins/event_log/server';
 import {
   AlertTypeParams,
   AlertTypeRegistry,
@@ -25,7 +21,6 @@ import {
   AlertInstanceContext,
 } from '../types';
 import { TaskRunner } from './task_runner';
-import { IEventLogger } from '../../../event_log/server';
 import { AlertsClient } from '../alerts_client';
 import { NormalizedAlertType } from '../alert_type_registry';
 

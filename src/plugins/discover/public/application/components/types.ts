@@ -8,20 +8,20 @@
 
 import { IUiSettingsClient, MountPoint, SavedObject } from 'kibana/public';
 import { Subject } from 'rxjs';
-import { Chart } from '../angular/helpers/point_series';
-import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
-import { ElasticSearchHit } from '../doc_views/doc_views_types';
-import { AggConfigs } from '../../../../data/common/search/aggs';
-
+import { IndexPattern } from 'src/plugins/data/common/index_patterns/index_patterns';
+import { AggConfigs } from 'src/plugins/data/common/search/aggs';
 import {
   DataPublicPluginStart,
   FilterManager,
   IndexPatternAttributes,
   ISearchSource,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
+import { RequestAdapter } from 'src/plugins/inspector/common';
+import { Chart } from '../angular/helpers/point_series';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
+
 import { SavedSearch } from '../../saved_searches';
 import { AppState, GetStateReturn } from '../angular/discover_state';
-import { RequestAdapter } from '../../../../inspector/common';
 import { DiscoverServices } from '../../build_services';
 import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 

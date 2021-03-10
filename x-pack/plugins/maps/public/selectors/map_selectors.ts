@@ -9,6 +9,7 @@ import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
+import { Filter, TimeRange } from 'src/plugins/data/public';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
@@ -50,7 +51,6 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';

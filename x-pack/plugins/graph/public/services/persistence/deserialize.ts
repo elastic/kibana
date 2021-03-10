@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndexPattern, indexPatterns as indexPatternsUtils } from 'src/plugins/data/public';
 import {
   SerializedNode,
   UrlTemplate,
@@ -25,10 +26,6 @@ import {
   colorChoices,
   iconChoicesByClass,
 } from '../../helpers/style_choices';
-import {
-  IndexPattern,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../../src/plugins/data/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '../../../../../src/core/public';
+import { ChromeBreadcrumb } from 'src/core/public';
 import { platformService } from '../services';
 
 export const getBaseBreadcrumb = () => ({

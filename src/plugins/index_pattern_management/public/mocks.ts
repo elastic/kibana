@@ -7,11 +7,11 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
-import { coreMock } from '../../../core/public/mocks';
-import { managementPluginMock } from '../../management/public/mocks';
-import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
-import { dataPluginMock } from '../../data/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '../../index_pattern_field_editor/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
+import { managementPluginMock } from 'src/plugins/management/public/mocks';
+import { urlForwardingPluginMock } from 'src/plugins/url_forwarding/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,

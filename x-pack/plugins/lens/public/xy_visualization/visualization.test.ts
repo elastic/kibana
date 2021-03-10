@@ -11,8 +11,8 @@ import { Operation } from '../types';
 import { State, SeriesType, XYLayerConfig } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 function exampleState(): State {
   return {

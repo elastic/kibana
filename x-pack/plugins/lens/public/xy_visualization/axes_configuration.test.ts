@@ -6,7 +6,7 @@
  */
 
 import { LayerArgs } from './types';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
+import { Datatable } from 'src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
 
 describe('axes_configuration', () => {

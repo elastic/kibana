@@ -7,23 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from 'src/plugins/home/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { IndexManagementPluginSetup } from 'x-pack/plugins/index_management/public';
+import { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 // @ts-ignore
 import { RollupIndexPatternCreationConfig } from './index_pattern_creation/rollup_index_pattern_creation_config';
 // @ts-ignore
 import { RollupIndexPatternListConfig } from './index_pattern_list/rollup_index_pattern_list_config';
 import { CONFIG_ROLLUPS, UIM_APP_NAME } from '../common';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { IndexManagementPluginSetup } from '../../index_management/public';
-import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services/index';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export interface RollupPluginSetupDependencies {
   home?: HomePublicPluginSetup;

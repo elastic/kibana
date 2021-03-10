@@ -8,6 +8,12 @@
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
+  GetAgentPoliciesResponseItem,
+  GetPackagesResponse,
+} from 'x-pack/plugins/fleet/common/types/rest_spec';
+import { EsAssetReference, KibanaAssetReference } from 'x-pack/plugins/fleet/common/types/models';
+import { agentPolicyStatuses } from 'x-pack/plugins/fleet/common/constants';
+import {
   AlertEvent,
   DataStream,
   EndpointStatus,
@@ -27,12 +33,6 @@ import {
   processNameSafeVersion,
   timestampSafeVersion,
 } from './models/event';
-import {
-  GetAgentPoliciesResponseItem,
-  GetPackagesResponse,
-} from '../../../fleet/common/types/rest_spec';
-import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
-import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import { EventOptions } from './types/generator';
 

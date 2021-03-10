@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 
 export const indexPatternsMock = (new (class {
   fieldFormats = [];

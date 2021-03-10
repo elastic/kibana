@@ -20,6 +20,10 @@ import {
   tap,
 } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
+import { Filter } from 'src/plugins/data/common/es_query/filters';
+import { Query } from 'src/plugins/data/common/query';
+import { esKuery, UI_SETTINGS } from 'src/plugins/data/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
 import {
@@ -28,14 +32,10 @@ import {
   SWIMLANE_TYPE,
   SwimlaneType,
 } from '../../application/explorer/explorer_constants';
-import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
-import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import {
   AnomalySwimlaneEmbeddableInput,

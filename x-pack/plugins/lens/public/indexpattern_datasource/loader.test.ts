@@ -16,7 +16,7 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,

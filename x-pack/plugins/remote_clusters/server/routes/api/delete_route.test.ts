@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { register } from './delete_route';
 import { API_BASE_PATH } from '../../../common/constants';
 import { LicenseStatus } from '../../types';
 
-import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
 
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   coreMock,
-} from '../../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 
 // Re-implement the mock that was imported directly from `x-pack/mocks`
 function createCoreRequestHandlerContextMock() {

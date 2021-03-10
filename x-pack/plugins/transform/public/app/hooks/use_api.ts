@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 
 import { HttpFetchError } from 'kibana/public';
 
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from 'src/plugins/data/public';
 
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {

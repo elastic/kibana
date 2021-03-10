@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ES_FIELD_TYPES, IIndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
 import {
   Field,
   Aggregation,
@@ -13,11 +14,6 @@ import {
   NewJobCaps,
   EVENT_RATE_FIELD_ID,
 } from '../../../common/types/fields';
-import {
-  ES_FIELD_TYPES,
-  IIndexPattern,
-  IndexPatternsContract,
-} from '../../../../../../src/plugins/data/public';
 import { ml } from './ml_api_service';
 import { getIndexPatternAndSavedSearch } from '../util/index_utils';
 

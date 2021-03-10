@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { sendRequest, XJson } from '../../es_ui_shared/public';
+import { sendRequest, XJson } from 'src/plugins/es_ui_shared/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 

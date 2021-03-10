@@ -14,21 +14,21 @@ import type {
   RequestHandlerContext,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { LicenseFeature, ILicense } from '../../licensing/server';
+import { LicenseFeature, ILicense } from 'x-pack/plugins/licensing/server';
 import type {
   PluginStartContract as ActionsPluginsStartContact,
   ActionsApiRequestHandlerContext,
-} from '../../actions/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
+} from 'x-pack/plugins/actions/server';
+import type { AlertingApiRequestHandlerContext } from 'x-pack/plugins/alerting/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerting/server';
-import { InfraPluginSetup } from '../../infra/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
-import { CloudSetup } from '../../cloud/server';
+} from 'x-pack/plugins/alerting/server';
+import { InfraPluginSetup } from 'x-pack/plugins/infra/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from 'x-pack/plugins/features/server';
+import { EncryptedSavedObjectsPluginSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;

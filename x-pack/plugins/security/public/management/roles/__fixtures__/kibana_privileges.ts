@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaFeature } from '../../../../../features/public';
+import type { KibanaFeature } from 'x-pack/plugins/features/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { featuresPluginMock } from '../../../../../features/server/mocks';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+
 import type { SecurityLicenseFeatures } from '../../../../common/licensing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Actions } from '../../../../server/authorization';

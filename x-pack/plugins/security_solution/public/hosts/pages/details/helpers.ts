@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Filter } from 'src/plugins/data/public';
 import { escapeQueryValue } from '../../../common/lib/keury';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 
 /** Returns the kqlQueryExpression for the `Events` widget on the `Host Details` page */
 export const getHostDetailsEventsKqlQueryExpression = ({

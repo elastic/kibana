@@ -11,7 +11,7 @@ import {
   esQuery,
   IndexPatternsContract,
   IndexPatternAttributes,
-} from '../../../../../../../src/plugins/data/public';
+} from 'src/plugins/data/public';
 
 import { matchAllQuery } from '../../common';
 

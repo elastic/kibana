@@ -10,13 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
 
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 

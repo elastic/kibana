@@ -7,7 +7,7 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../expressions/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { palette, systemPalette } from '../common';
 
 import { ThemeService, LegacyColorsService } from './services';

@@ -13,7 +13,7 @@ import {
   IndexPattern,
   FilterManager as QueryFilterManager,
   IndexPatternsContract,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
 
 describe('PhraseFilterManager', function () {

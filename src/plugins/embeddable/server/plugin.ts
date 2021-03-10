@@ -8,6 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { identity } from 'lodash';
+import { PersistableStateService, SerializableState } from 'src/plugins/kibana_utils/common';
 import {
   EmbeddableFactoryRegistry,
   EnhancementsRegistry,
@@ -21,7 +22,6 @@ import {
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
-import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../common/types';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {

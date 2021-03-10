@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { actionsClientMock } from './actions_client.mock';
 import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
 import { Services } from './types';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };

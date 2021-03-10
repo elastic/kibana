@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from 'src/plugins/data/public';
 import { ElasticsearchAdapter } from './adapter_types';
 
 export class MemoryElasticsearchAdapter implements ElasticsearchAdapter {

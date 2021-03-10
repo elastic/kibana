@@ -6,7 +6,7 @@
  */
 
 import { IRouter, Logger } from 'kibana/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 import { LicenseStatus } from '../common';
 
 export interface AppServerPluginDependencies {

@@ -8,13 +8,13 @@
 import { SearchResponse } from 'elasticsearch';
 import { get } from 'lodash';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { parseExpression } from 'src/plugins/expressions/common';
 import { collectFns } from './collector_helpers';
 import {
   TelemetryCollector,
   TelemetryCustomElement,
   TelemetryCustomElementDocument,
 } from '../../types';
-import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {

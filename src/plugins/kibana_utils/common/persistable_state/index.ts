@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectReference } from 'src/core/types';
 
 export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
 export type Serializable = SerializableValue | SerializableValue[];

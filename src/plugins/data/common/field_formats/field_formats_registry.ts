@@ -9,6 +9,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { forOwn, isFunction, memoize, identity } from 'lodash';
 
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
 import {
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
@@ -23,7 +24,6 @@ import { FormatFactory } from './utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../kbn_field_types/types';
 import { UI_SETTINGS } from '../constants';
 import { FieldFormatNotFoundError } from '../field_formats';
-import { SerializedFieldFormat } from '../../../expressions/common/types';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();

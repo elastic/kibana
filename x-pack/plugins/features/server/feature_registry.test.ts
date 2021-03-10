@@ -7,7 +7,7 @@
 
 import { FeatureRegistry } from './feature_registry';
 import { ElasticsearchFeatureConfig, KibanaFeatureConfig } from '../common';
-import { licensingMock } from '../../licensing/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
 
 describe('FeatureRegistry', () => {
   describe('Kibana Features', () => {

@@ -9,9 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { NotificationsStart } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IndexPattern, UsageCollectionStart } from '../shared_imports';
 import { pluginName } from '../constants';
-import { DataPublicPluginStart } from '../../../data/public';
 
 export async function removeFields(
   fieldNames: string[],

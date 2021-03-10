@@ -17,7 +17,7 @@ import type {
   ISearchStrategy,
   SearchStrategyDependencies,
   SearchUsage,
-} from '../../../../../src/plugins/data/server';
+} from 'src/plugins/data/server';
 import {
   getDefaultSearchParams,
   getShardTimeout,
@@ -25,7 +25,8 @@ import {
   searchUsageObserver,
   shimAbortSignal,
   shimHitsTotal,
-} from '../../../../../src/plugins/data/server';
+} from 'src/plugins/data/server';
+import { getKbnServerError, KbnServerError } from 'src/plugins/kibana_utils/server';
 import type { IAsyncSearchOptions } from '../../common';
 import { pollSearch } from '../../common';
 import {
@@ -36,7 +37,6 @@ import {
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { AsyncSearchResponse } from './types';
 import { ConfigSchema } from '../../config';
-import { getKbnServerError, KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export const enhancedEsSearchStrategyProvider = (
   config: ConfigSchema,

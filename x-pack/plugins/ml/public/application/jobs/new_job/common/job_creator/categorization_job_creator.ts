@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, mlCategory } from '../../../../../../common/types/fields';

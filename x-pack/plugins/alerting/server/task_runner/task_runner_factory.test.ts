@@ -6,17 +6,17 @@
  */
 
 import sinon from 'sinon';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from 'x-pack/plugins/task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   httpServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { actionsMock } from '../../../actions/server/mocks';
+} from 'src/core/server/mocks';
+import { actionsMock } from 'x-pack/plugins/actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { eventLoggerMock } from 'x-pack/plugins/event_log/server/event_logger.mock';
 import { UntypedNormalizedAlertType } from '../alert_type_registry';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 

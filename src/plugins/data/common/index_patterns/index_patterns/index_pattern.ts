@@ -7,9 +7,10 @@
  */
 
 import _, { each, reject } from 'lodash';
+import { DuplicateField } from 'src/plugins/kibana_utils/common';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common';
 import { FieldAttrs, FieldAttrSet } from '../..';
 import type { RuntimeField } from '../types';
-import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
@@ -17,7 +18,6 @@ import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
-import { SerializedFieldFormat } from '../../../../expressions/common';
 import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 interface IndexPatternDeps {

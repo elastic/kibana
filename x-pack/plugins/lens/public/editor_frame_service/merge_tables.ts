@@ -11,11 +11,11 @@ import {
   Datatable,
   ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/public';
-import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
+import { ExpressionValueSearchContext, search } from 'src/plugins/data/public';
 const { toAbsoluteDates } = search.aggs;
 
+import { Adapters } from 'src/plugins/inspector/common';
 import { LensMultiTable } from '../types';
-import { Adapters } from '../../../../../src/plugins/inspector/common';
 
 interface MergeTables {
   layerIds: string[];

@@ -12,7 +12,7 @@ import {
   SavedObjectsFindResult,
   Capabilities,
 } from 'src/core/server';
-import { GlobalSearchProviderResult } from '../../../../global_search/server';
+import { GlobalSearchProviderResult } from 'x-pack/plugins/global_search/server';
 
 export const mapToResults = (
   objects: Array<SavedObjectsFindResult<unknown>>,

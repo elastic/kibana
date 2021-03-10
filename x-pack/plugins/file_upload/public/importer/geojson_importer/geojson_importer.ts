@@ -8,10 +8,10 @@
 import { Feature, Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
+import { ES_FIELD_TYPES } from 'src/plugins/data/public';
 import { JSONLoader, loadInBatches } from './loaders';
 import { CreateDocsResponse, ImportResults } from '../types';
 import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { ImportDoc, ImportFailure, ImportResponse, MB } from '../../../common';

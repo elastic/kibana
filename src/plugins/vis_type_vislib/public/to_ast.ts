@@ -13,10 +13,14 @@ import {
   VisToExpressionAstParams,
   getVisSchemas,
   VisParams,
-} from '../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import type { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type_xy/public';
-import { BUCKET_TYPES } from '../../data/public';
+} from 'src/plugins/visualizations/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
+import type {
+  Dimensions,
+  DateHistogramParams,
+  HistogramParams,
+} from 'src/plugins/vis_type_xy/public';
+import { BUCKET_TYPES } from 'src/plugins/data/public';
 
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams, VislibChartType } from './types';

@@ -13,9 +13,9 @@ import {
   Plugin,
   SharedGlobalConfig,
 } from 'src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
 import type { TagsHandlerContext } from './types';

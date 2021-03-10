@@ -13,7 +13,7 @@ import { schema } from '@kbn/config-schema';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '../../../telemetry_collection_manager/server';
 
 interface SendTelemetryOptInStatusConfig {
   optInStatusUrl: string;

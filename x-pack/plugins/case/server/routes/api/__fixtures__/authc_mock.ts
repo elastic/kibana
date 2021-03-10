@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '../../../../../security/server';
-import { securityMock } from '../../../../../security/server/mocks';
+import { AuthenticatedUser } from 'x-pack/plugins/security/server';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
 import { nullUser } from '../../../common';
 
 function createAuthenticationMock({

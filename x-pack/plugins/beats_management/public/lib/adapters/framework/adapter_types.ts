@@ -8,8 +8,8 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as t from 'io-ts';
+import { RegisterManagementAppArgs } from 'src/plugins/management/public';
 import { LICENSES } from '../../../../common/constants/security';
-import { RegisterManagementAppArgs } from '../../../../../../../src/plugins/management/public';
 
 export interface FrameworkAdapter {
   // Instance vars

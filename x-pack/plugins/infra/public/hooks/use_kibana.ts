@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart } from 'src/core/public';
 import {
   createKibanaReactContext,
   KibanaReactContextValue,
   useKibana,
-} from '../../../../../src/plugins/kibana_react/public';
+} from 'src/plugins/kibana_react/public';
 import { InfraClientStartDeps } from '../types';
 
 export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps;

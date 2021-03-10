@@ -8,17 +8,17 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { isEmpty } from 'lodash';
-import { getSeverity } from '../../../common/anomaly_detection';
-import { ANOMALY_SEVERITY } from '../../../../ml/common';
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { ANOMALY_SEVERITY } from 'x-pack/plugins/ml/common';
+import { KibanaRequest } from 'src/core/server';
+import { AlertingPlugin } from 'x-pack/plugins/alerting/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
 } from '../../../common/alert_types';
-import { AlertingPlugin } from '../../../../alerting/server';
 import { APMConfig } from '../..';
-import { MlPluginSetup } from '../../../../ml/server';
+import { getSeverity } from '../../../common/anomaly_detection';
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 

@@ -6,7 +6,7 @@
  */
 
 import { LegacyAPICaller } from 'src/core/server';
-import { serializeProvider } from '../../../../../../src/plugins/expressions/common';
+import { serializeProvider } from 'src/plugins/expressions/common';
 import { RouteInitializerDeps } from '../';
 import { API_ROUTE_FUNCTIONS } from '../../../common/lib/constants';
 

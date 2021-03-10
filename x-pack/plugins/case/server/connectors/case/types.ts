@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { ActionType, ActionTypeExecutorOptions } from '../../../../actions/server';
+import { ActionType, ActionTypeExecutorOptions } from 'x-pack/plugins/actions/server';
 import {
   CaseExecutorParamsSchema,
   ExecutorSubActionCreateParamsSchema,

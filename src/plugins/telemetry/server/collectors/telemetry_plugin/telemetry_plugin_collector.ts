@@ -8,10 +8,10 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ISavedObjectsRepository, SavedObjectsClient } from '../../../../../core/server';
+import { ISavedObjectsRepository, SavedObjectsClient } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../../common/telemetry_config';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { TelemetryConfigType } from '../../config';
 
 export interface TelemetryUsageStats {

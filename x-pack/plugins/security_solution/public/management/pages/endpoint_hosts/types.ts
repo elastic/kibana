@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { GetPackagesResponse } from 'x-pack/plugins/fleet/common';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostInfo,
   Immutable,
@@ -16,8 +18,6 @@ import {
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
-import { GetPackagesResponse } from '../../../../../fleet/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export interface EndpointState {
   /** list of host **/

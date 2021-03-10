@@ -12,7 +12,7 @@ import {
   ActionTypeParams,
   ActionType,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../actions/server/types';
+} from 'x-pack/plugins/actions/server/types';
 import { CaseResponse, ConnectorTypes } from '../../common/api';
 import { CaseClientGetAlertsResponse } from '../client/alerts/types';
 import {

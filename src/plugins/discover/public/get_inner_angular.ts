@@ -16,9 +16,17 @@ import 'angular-sanitize';
 import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, PluginInitializerContext } from 'kibana/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { Storage } from '../../kibana_utils/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
+import {
+  initAngularBootstrap,
+  configureAppAngularModule,
+  PrivateProvider,
+  PromiseServiceCreator,
+  registerListenEventListener,
+  watchMultiDecorator,
+} from 'src/plugins/kibana_legacy/public';
 import { createDocTableDirective } from './application/angular/doc_table';
 import { createTableHeaderDirective } from './application/angular/doc_table/components/table_header';
 import {
@@ -32,14 +40,6 @@ import { createInfiniteScrollDirective } from './application/angular/doc_table/i
 import { createDocViewerDirective } from './application/angular/doc_viewer';
 import { createDiscoverGridDirective } from './application/components/create_discover_grid_directive';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
-import {
-  initAngularBootstrap,
-  configureAppAngularModule,
-  PrivateProvider,
-  PromiseServiceCreator,
-  registerListenEventListener,
-  watchMultiDecorator,
-} from '../../kibana_legacy/public';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 import { createDiscoverDirective } from './application/components/create_discover_directive';

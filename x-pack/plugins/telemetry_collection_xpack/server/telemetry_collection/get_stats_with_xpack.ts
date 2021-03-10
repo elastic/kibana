@@ -6,7 +6,7 @@
  */
 
 import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { TelemetryLocalStats, getLocalStats } from '../../../../../src/plugins/telemetry/server';
+import { TelemetryLocalStats, getLocalStats } from 'src/plugins/telemetry/server';
 import { getXPackUsage } from './get_xpack';
 import { ESLicense, getLicenseFromLocalOrMaster } from './get_license';
 

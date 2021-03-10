@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ValidationResult, builtInComparators } from 'x-pack/plugins/triggers_actions_ui/public';
 import { EsQueryAlertParams } from './types';
-import { ValidationResult, builtInComparators } from '../../../../triggers_actions_ui/public';
 
 export const validateExpression = (alertParams: EsQueryAlertParams): ValidationResult => {
   const {

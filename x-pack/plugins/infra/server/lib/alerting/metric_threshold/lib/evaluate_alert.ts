@@ -6,6 +6,7 @@
  */
 
 import { mapValues, first, last, isNaN } from 'lodash';
+import { AlertServices } from 'x-pack/plugins/alerting/server';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -13,7 +14,6 @@ import {
 import { InfraSource } from '../../../../../common/http_api/source_api';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
-import { AlertServices } from '../../../../../../alerting/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType } from '../../../../../../plugins/data/public';
+import { IFieldType } from 'src/plugins/data/public';
 
 export interface IndexedFieldItem extends IFieldType {
   info: string[];

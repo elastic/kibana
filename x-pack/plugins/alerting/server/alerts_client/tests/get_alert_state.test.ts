@@ -6,15 +6,15 @@
  */
 
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
-import { TaskStatus } from '../../../../task_manager/server';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { TaskStatus } from 'x-pack/plugins/task_manager/server';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
+import { actionsAuthorizationMock } from 'x-pack/plugins/actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
+import { ActionsAuthorization } from 'x-pack/plugins/actions/server';
 import { getBeforeSetup } from './lib';
 
 const taskManager = taskManagerMock.createStart();

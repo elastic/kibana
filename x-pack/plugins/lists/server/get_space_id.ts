@@ -6,8 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-
-import { SpacesServiceStart } from '../../spaces/server';
+import { SpacesServiceStart } from 'x-pack/plugins/spaces/server';
 
 export const getSpaceId = ({
   spaces,

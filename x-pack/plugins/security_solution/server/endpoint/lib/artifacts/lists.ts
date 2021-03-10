@@ -7,11 +7,11 @@
 
 import { createHash } from 'crypto';
 import { deflate } from 'zlib';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { validate } from '../../../../common/validate';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common/schemas';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { Entry, EntryNested } from 'x-pack/plugins/lists/common/schemas/types';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
+import { validate } from '../../../../common/validate';
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
   InternalArtifactSchema,

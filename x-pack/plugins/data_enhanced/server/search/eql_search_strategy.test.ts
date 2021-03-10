@@ -8,7 +8,7 @@
 import type { Logger } from 'kibana/server';
 import { EqlSearchStrategyRequest } from '../../common/search/types';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
-import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server';
+import { SearchStrategyDependencies } from 'src/plugins/data/server';
 
 const getMockEqlResponse = () => ({
   body: {

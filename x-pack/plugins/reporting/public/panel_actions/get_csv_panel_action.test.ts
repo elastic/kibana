@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { LicensingPluginSetup } from '../../../licensing/public';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
 import { GetCsvReportPanelAction } from './get_csv_panel_action';
 
 type LicenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';

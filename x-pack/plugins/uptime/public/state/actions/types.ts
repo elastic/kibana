@@ -7,7 +7,7 @@
 
 import { Action } from 'redux-actions';
 import { IHttpFetchError } from 'src/core/public';
-import { Alert } from '../../../../alerting/common';
+import { Alert } from 'x-pack/plugins/alerting/common';
 import { UptimeAlertTypeParams } from '../alerts/alerts';
 
 export interface AsyncAction<Payload, SuccessPayload> {

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
+import { ActionsClient } from 'x-pack/plugins/actions/server';
 import {
   ActionConnector,
   CaseResponse,
@@ -21,7 +22,6 @@ import {
   CommentRequestUserType,
   CommentRequestAlertType,
 } from '../../../common/api';
-import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CaseClientGetAlertsResponse } from '../../client/alerts/types';
 import {

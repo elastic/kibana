@@ -9,7 +9,7 @@
 import { createTableVisFn } from './table_vis_fn';
 import { tableVisResponseHandler } from './utils';
 
-import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 jest.mock('./utils', () => ({
   tableVisResponseHandler: jest.fn().mockReturnValue({

@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
 export function authorizationProvider(authorization: SecurityPluginSetup['authz']) {

@@ -14,7 +14,7 @@ import {
   RequestHandlerContext,
 } from 'kibana/server';
 
-import { LicensingPluginSetup, LicenseType } from '../../../licensing/server';
+import { LicensingPluginSetup, LicenseType } from 'x-pack/plugins/licensing/server';
 
 export interface LicenseStatus {
   isValid: boolean;

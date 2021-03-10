@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Storage } from 'src/plugins/kibana_utils/public';
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
-import { Storage } from '../../../kibana_utils/public';
 
 export class TelemetrySender {
   private readonly telemetryService: TelemetryService;

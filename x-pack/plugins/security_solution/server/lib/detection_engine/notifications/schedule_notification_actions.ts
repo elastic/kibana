@@ -6,7 +6,7 @@
  */
 
 import { mapKeys, snakeCase } from 'lodash/fp';
-import { AlertInstance } from '../../../../../alerting/server';
+import { AlertInstance } from 'x-pack/plugins/alerting/server';
 import { SignalSource } from '../signals/types';
 import { RuleTypeParams } from '../types';
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Alert } from 'x-pack/plugins/alerting/common';
 import { validate } from '../../../../../common/validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
@@ -24,7 +25,6 @@ import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '..
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerting/common';
 
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,

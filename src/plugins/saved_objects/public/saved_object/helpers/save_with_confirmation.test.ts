@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectAttributes, SavedObjectsCreateOptions, OverlayStart } from 'kibana/public';
-import { SavedObjectsClientContract } from '../../../../../core/public';
+import { SavedObjectsClientContract } from 'src/core/public';
 import { saveWithConfirmation } from './save_with_confirmation';
 import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from '../../constants';

@@ -14,7 +14,7 @@ import {
   getEqlResult,
 } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from 'x-pack/plugins/alerting/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { getListsClient, getExceptions, sortExceptionItems, checkPrivileges } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -24,12 +24,12 @@ import { scheduleNotificationActions } from '../notifications/schedule_notificat
 import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { listMock } from '../../../../../lists/server/mocks';
-import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
-import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { getListClientMock } from 'x-pack/plugins/lists/server/services/lists/list_client.mock';
+import { getExceptionListClientMock } from 'x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
+import { getEntryListMock } from 'x-pack/plugins/lists/common/schemas/types/entry_list.mock';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');

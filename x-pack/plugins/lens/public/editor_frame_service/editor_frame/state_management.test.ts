@@ -10,9 +10,9 @@ import { EditorFrameProps } from './index';
 import { Datasource, Visualization } from '../../types';
 import { createExpressionRendererMock } from '../mocks';
 import { coreMock } from 'src/core/public/mocks';
-import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { expressionsPluginMock } from 'src/plugins/expressions/public/mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 describe('editor_frame state management', () => {

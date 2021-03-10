@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { coreMock, httpServerMock } from '../../../core/server/mocks';
-import { usageCollectionPluginMock } from '../../usage_collection/server/mocks';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 import { CollectionStrategyConfig, StatsGetterConfig } from './types';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';

@@ -7,9 +7,9 @@
  */
 
 import { I18nStart, SavedObjectsStart, IUiSettingsClient, CoreStart } from 'src/core/public';
-import { createGetterSetter } from '../../kibana_utils/public';
-import { ChartsPluginSetup } from '../../charts/public';
-import { DataPublicPluginStart } from '../../data/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

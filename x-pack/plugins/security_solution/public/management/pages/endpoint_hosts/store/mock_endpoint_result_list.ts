@@ -7,6 +7,12 @@
 
 import { HttpStart } from 'kibana/public';
 import {
+  GetAgentPoliciesResponse,
+  GetAgentPoliciesResponseItem,
+  GetPackagesResponse,
+  GetAgentsResponse,
+} from 'x-pack/plugins/fleet/common/types/rest_spec';
+import {
   GetHostPolicyResponse,
   HostInfo,
   HostPolicyResponse,
@@ -21,12 +27,6 @@ import {
   INGEST_API_PACKAGE_POLICIES,
   INGEST_API_FLEET_AGENTS,
 } from '../../policy/store/services/ingest';
-import {
-  GetAgentPoliciesResponse,
-  GetAgentPoliciesResponseItem,
-  GetPackagesResponse,
-  GetAgentsResponse,
-} from '../../../../../../fleet/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
 
 const generator = new EndpointDocGenerator('seed');

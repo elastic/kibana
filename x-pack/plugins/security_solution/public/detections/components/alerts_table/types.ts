@@ -7,7 +7,7 @@
 
 import ApolloClient from 'apollo-client';
 
-import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import { ISearchStart } from 'src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';

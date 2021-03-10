@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from 'src/plugins/kibana_utils/common';
 
 export enum ViewMode {
   EDIT = 'edit',

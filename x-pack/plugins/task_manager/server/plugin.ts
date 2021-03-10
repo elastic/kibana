@@ -15,7 +15,7 @@ import {
   CoreStart,
   ServiceStatusLevels,
   CoreStatus,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaContext } from '../../data/public';
+import { KibanaContext } from 'src/plugins/data/public';
 
 import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';

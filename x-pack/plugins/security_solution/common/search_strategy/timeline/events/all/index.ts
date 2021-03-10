@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from 'src/plugins/data/common';
 import { Ecs } from '../../../../ecs';
 import { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Index } from '../../../plugins/index_management/server';
+import { Index } from 'x-pack/plugins/index_management/server';
 
 export const rollupDataEnricher = async (indicesList: Index[], callWithRequest: any) => {
   if (!indicesList || !indicesList.length) {

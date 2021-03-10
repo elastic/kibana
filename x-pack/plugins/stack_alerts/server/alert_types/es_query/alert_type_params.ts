@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { validateTimeWindowUnits } from 'x-pack/plugins/triggers_actions_ui/server';
+import { AlertTypeState } from 'x-pack/plugins/alerting/server';
 import { ComparatorFnNames } from '../lib';
-import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
-import { AlertTypeState } from '../../../../alerting/server';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 

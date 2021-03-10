@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
+import { ActionType } from 'x-pack/plugins/actions/common';
+import { FindActionResult } from 'x-pack/plugins/actions/server/types';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { ActionType } from '../../../../../../actions/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FindActionResult } from '../../../../../../actions/server/types';
 
 import {
   CASE_CONFIGURE_CONNECTORS_URL,

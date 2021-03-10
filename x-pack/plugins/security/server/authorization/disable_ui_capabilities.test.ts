@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { ElasticsearchFeature, KibanaFeature } from 'x-pack/plugins/features/server';
+
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { ElasticsearchFeature, KibanaFeature } from '../../../features/server';
 import type { AuthenticatedUser } from '../../common/model';
 import { Actions } from './actions';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';

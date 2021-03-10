@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticUser } from '../types';
 import {
   ActionConnector,
   ActionTypeConnector,
@@ -15,7 +14,8 @@ import {
   CasesConfigure,
   ClosureType,
   ThirdPartyField,
-} from '../../../../../case/common/api';
+} from 'x-pack/plugins/case/common/api';
+import { ElasticUser } from '../types';
 
 export {
   ActionConnector,

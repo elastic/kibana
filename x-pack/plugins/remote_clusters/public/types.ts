@@ -9,7 +9,7 @@ import { ManagementSetup } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { RegisterManagementAppArgs } from 'src/plugins/management/public';
 import { I18nStart } from 'kibana/public';
-import { CloudSetup } from '../../cloud/public';
+import { CloudSetup } from 'x-pack/plugins/cloud/public';
 
 export interface Dependencies {
   management: ManagementSetup;

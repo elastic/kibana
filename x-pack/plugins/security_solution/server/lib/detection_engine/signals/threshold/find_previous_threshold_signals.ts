@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
+} from 'x-pack/plugins/alerting/server';
+import { Logger } from 'src/core/server';
+import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import { SignalSearchResponse } from '../types';

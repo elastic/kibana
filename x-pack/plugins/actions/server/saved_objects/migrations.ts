@@ -10,9 +10,9 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { EncryptedSavedObjectsPluginSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
 import { RawAction } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 type ActionMigration = (
   doc: SavedObjectUnsanitizedDoc<RawAction>

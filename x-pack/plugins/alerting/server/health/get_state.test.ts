@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ServiceStatusLevels } from '../../../../../src/core/server';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
+import { ServiceStatusLevels } from 'src/core/server';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import {
   getHealthStatusStream,
   getHealthServiceStatusWithRetryAndErrorHandling,
   MAX_RETRY_ATTEMPTS,
 } from './get_state';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from 'x-pack/plugins/task_manager/server';
 import { HealthStatus } from '../types';
 
 const tick = () => new Promise((resolve) => setImmediate(resolve));

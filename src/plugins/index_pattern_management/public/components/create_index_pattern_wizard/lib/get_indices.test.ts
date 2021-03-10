@@ -7,7 +7,7 @@
  */
 
 import { getIndices, responseToItemArray } from './get_indices';
-import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 export const successfulResponse = {

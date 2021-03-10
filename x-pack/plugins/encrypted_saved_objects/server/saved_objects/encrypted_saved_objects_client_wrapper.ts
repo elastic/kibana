@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser } from 'x-pack/plugins/security/common/model';
+
 import type {
   ISavedObjectTypeRegistry,
   SavedObject,
@@ -28,9 +30,8 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
+import { SavedObjectsUtils } from 'src/core/server';
 
-import { SavedObjectsUtils } from '../../../../../src/core/server';
-import type { AuthenticatedUser } from '../../../security/common/model';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
 

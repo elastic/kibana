@@ -7,7 +7,7 @@
  */
 
 import { toArray } from 'lodash';
-import { SerializedFieldFormat } from '../../../../../expressions/common/types';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';
 

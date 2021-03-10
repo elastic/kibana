@@ -9,23 +9,17 @@ import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
-import { FeaturesPluginStart } from '../../features/public';
-import { KibanaFeature } from '../../features/common';
-import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
+import { FeaturesPluginStart } from 'x-pack/plugins/features/public';
+import { KibanaFeature } from 'x-pack/plugins/features/common';
+import { ManagementAppMountParams, ManagementSetup } from 'src/plugins/management/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from 'src/plugins/home/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { PluginStartContract as AlertingStart } from 'x-pack/plugins/alerting/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import type { SpacesPluginStart } from 'x-pack/plugins/spaces/public';
 import { TypeRegistry } from './application/type_registry';
-import {
-  ManagementAppMountParams,
-  ManagementSetup,
-} from '../../../../src/plugins/management/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerting/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { SpacesPluginStart } from '../../spaces/public';
+import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';

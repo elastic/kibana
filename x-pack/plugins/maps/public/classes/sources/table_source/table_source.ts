@@ -6,6 +6,8 @@
  */
 
 import uuid from 'uuid';
+import { Adapters } from 'src/plugins/inspector/common/adapters';
+import { Query } from 'src/plugins/data/common/query';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
@@ -15,11 +17,9 @@ import {
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { ITermJoinSource } from '../term_join_source';
 import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 import {
   AbstractVectorSource,
   BoundsFilters,

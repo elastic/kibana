@@ -7,14 +7,14 @@
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
-} from '../../../../../observability/server';
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
-import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
-import { ScopedAnnotationsClient } from '../../../../../observability/server';
+} from 'x-pack/plugins/observability/server';
+import { ESSearchResponse } from 'x-pack/typings/elasticsearch';
+import { Annotation as ESAnnotation } from 'x-pack/plugins/observability/common/annotations';
+import { ScopedAnnotationsClient } from 'x-pack/plugins/observability/server';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';

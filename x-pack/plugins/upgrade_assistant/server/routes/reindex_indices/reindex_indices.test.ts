@@ -6,7 +6,7 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
-import { licensingMock } from '../../../../licensing/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 

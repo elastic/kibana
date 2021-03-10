@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
+import { IndexPattern, KBN_FIELD_TYPES } from 'src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
 import { OMIT_FIELDS } from '../../../../../common/constants/field_types';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ExpressionFunction } from 'src/plugins/expressions';
 import { functions as browserFns } from '../canvas_plugin_src/functions/browser';
-import { ExpressionFunction } from '../../../../src/plugins/expressions';
 import { initFunctions } from '../public/functions';
 
 export const functionSpecs = browserFns

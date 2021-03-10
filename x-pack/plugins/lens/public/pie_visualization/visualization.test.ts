@@ -7,7 +7,7 @@
 
 import { getPieVisualization } from './visualization';
 import { PieVisualizationState } from './types';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 jest.mock('../id_generator');
 

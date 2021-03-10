@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../../features/server';
-import { featuresPluginMock } from '../../../../features/server/mocks';
+import { KibanaFeature } from 'x-pack/plugins/features/server';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 

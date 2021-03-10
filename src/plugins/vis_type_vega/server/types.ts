@@ -8,8 +8,8 @@
 
 import { Observable } from 'rxjs';
 import { SharedGlobalConfig } from 'kibana/server';
-import { HomeServerPluginSetup } from '../../home/server';
-import { UsageCollectionSetup } from '../../usage_collection/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 export type ConfigObservable = Observable<SharedGlobalConfig>;
 

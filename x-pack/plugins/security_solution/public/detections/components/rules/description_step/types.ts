@@ -6,13 +6,8 @@
  */
 
 import { ReactNode } from 'react';
+import { IIndexPattern, Filter, FilterManager } from 'src/plugins/data/public';
 import { Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
-
-import {
-  IIndexPattern,
-  Filter,
-  FilterManager,
-} from '../../../../../../../../src/plugins/data/public';
 
 export interface ListItems {
   title: NonNullable<ReactNode>;

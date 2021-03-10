@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../data/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']

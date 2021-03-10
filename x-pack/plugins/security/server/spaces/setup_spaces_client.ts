@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SpacesPluginSetup } from '../../../spaces/server';
+import type { SpacesPluginSetup } from 'x-pack/plugins/spaces/server';
+
 import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';

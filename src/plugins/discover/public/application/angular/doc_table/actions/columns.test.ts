@@ -10,7 +10,7 @@ import { getStateColumnActions } from './columns';
 import { configMock } from '../../../../__mocks__/config';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { indexPatternsMock } from '../../../../__mocks__/index_patterns';
-import { Capabilities } from '../../../../../../../core/types';
+import { Capabilities } from 'src/core/types';
 import { AppState } from '../../discover_state';
 
 function getStateColumnAction(state: {}, setAppState: (state: Partial<AppState>) => void) {

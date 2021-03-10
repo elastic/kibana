@@ -7,8 +7,8 @@
 
 import type { CoreSetup } from 'kibana/server';
 
-import { SavedObjectsClient } from '../../../../../src/core/server';
-import type { ElasticsearchClient } from '../../../../../src/core/server';
+import { SavedObjectsClient } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
 
 export async function getInternalClients(
   core: CoreSetup

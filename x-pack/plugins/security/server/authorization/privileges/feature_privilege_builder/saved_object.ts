@@ -6,8 +6,8 @@
  */
 
 import { flatten, uniq } from 'lodash';
+import type { FeatureKibanaPrivileges } from 'x-pack/plugins/features/server';
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 const readOperations: string[] = [

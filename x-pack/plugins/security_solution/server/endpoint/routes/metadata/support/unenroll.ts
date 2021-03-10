@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { AgentService } from '../../../../../../fleet/server';
-import { Agent } from '../../../../../../fleet/common/types/models';
+import { AgentService } from 'x-pack/plugins/fleet/server';
+import { Agent } from 'x-pack/plugins/fleet/common/types/models';
 
 export async function findAllUnenrolledAgentIds(
   agentService: AgentService,

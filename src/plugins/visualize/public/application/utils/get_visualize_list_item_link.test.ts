@@ -9,8 +9,8 @@
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { ApplicationStart } from 'kibana/public';
 import { createHashHistory } from 'history';
-import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
-import { esFilters } from '../../../../data/public';
+import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
+import { esFilters } from 'src/plugins/data/public';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
 
 jest.mock('../../services', () => {

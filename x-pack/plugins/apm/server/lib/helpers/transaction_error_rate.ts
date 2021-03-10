@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../typings/elasticsearch/aggregations';
+} from 'x-pack/typings/elasticsearch/aggregations';
+import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../common/event_outcome';
 
 export const getOutcomeAggregation = () => ({
   terms: {

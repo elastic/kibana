@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from '../../../../core/public';
+import { Capabilities } from 'src/core/public';
 import { canViewInApp } from './in_app_url';
 
 const createCapabilities = (sections: Record<string, any>): Capabilities => {

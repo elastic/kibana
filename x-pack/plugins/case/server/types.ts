@@ -6,8 +6,8 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { AppRequestContext } from '../../security_solution/server';
-import type { ActionsApiRequestHandlerContext } from '../../actions/server';
+import type { AppRequestContext } from 'x-pack/plugins/security_solution/server';
+import type { ActionsApiRequestHandlerContext } from 'x-pack/plugins/actions/server';
 import { CaseClient } from './client';
 
 export interface CaseRequestContext {

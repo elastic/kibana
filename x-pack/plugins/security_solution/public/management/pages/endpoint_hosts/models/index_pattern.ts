@@ -6,7 +6,7 @@
  */
 
 import { all } from 'deepmerge';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { IIndexPattern } from 'src/plugins/data/common';
 import { Immutable } from '../../../../../common/endpoint/types';
 
 export function clone(value: IIndexPattern | Immutable<IIndexPattern>): IIndexPattern {

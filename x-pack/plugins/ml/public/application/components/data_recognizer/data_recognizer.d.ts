@@ -6,8 +6,8 @@
  */
 
 import { FC } from 'react';
+import type { IIndexPattern } from 'src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
-import type { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 declare const DataRecognizer: FC<{
   indexPattern: IIndexPattern;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { IFieldType, KBN_FIELD_TYPES } from 'src/plugins/data/public';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import {
   kbnTypeToMLJobType,

@@ -8,7 +8,7 @@
 import Joi from 'joi';
 
 import { difference } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../src/core/server';
+import { Capabilities as UICapabilities } from 'src/core/server';
 import { KibanaFeatureConfig } from '../common';
 import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 

@@ -6,14 +6,14 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-
-import type { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
-
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
+
+import type { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+
 import type { ConfigType } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';

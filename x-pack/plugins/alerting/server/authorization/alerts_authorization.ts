@@ -8,15 +8,15 @@
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { PluginStartContract as FeaturesPluginStart } from 'x-pack/plugins/features/server';
+import { Space } from 'x-pack/plugins/spaces/server';
+import { KueryNode } from 'src/plugins/data/server';
 import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
-import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
-import { Space } from '../../../spaces/server';
 import { asFiltersByAlertTypeAndConsumer } from './alerts_authorization_kuery';
-import { KueryNode } from '../../../../../src/plugins/data/server';
 
 export enum ReadOperations {
   Get = 'get',

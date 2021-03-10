@@ -6,8 +6,8 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { AlertsClient } from 'x-pack/plugins/alerting/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { AlertsClient } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter } from '../types';

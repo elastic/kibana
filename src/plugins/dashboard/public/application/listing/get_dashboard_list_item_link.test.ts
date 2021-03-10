@@ -8,9 +8,9 @@
 
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { ApplicationStart } from 'kibana/public';
-import { esFilters } from '../../../../data/public';
+import { esFilters } from 'src/plugins/data/public';
 import { createHashHistory } from 'history';
-import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
+import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
 
 const DASHBOARD_ID = '13823000-99b9-11ea-9eb6-d9e8adceb647';

@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
 import { ReportingInternalStart } from '../core';
 import {
   createMockConfig,

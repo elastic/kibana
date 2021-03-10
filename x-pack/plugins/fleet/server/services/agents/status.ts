@@ -8,11 +8,13 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import pMap from 'p-map';
 
+import { esKuery } from 'src/plugins/data/server';
+
+import type { KueryNode } from 'src/plugins/data/server';
+
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
-import { esKuery } from '../../../../../../src/plugins/data/server';
-import type { KueryNode } from '../../../../../../src/plugins/data/server';
 
 import { getAgent, listAgents, removeSOAttributes } from './crud';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
+import { mockAuthenticatedUser } from 'x-pack/plugins/security/common/model/authenticated_user.mock';
+
 import { EncryptedSavedObjectsAuditLogger } from './audit_logger';
 
 it('properly logs audit events', () => {

@@ -7,8 +7,6 @@
 
 import { DslQuery, Filter } from 'src/plugins/data/common';
 import moment, { Moment } from 'moment';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
   AlertType,
   AlertTypeState,
@@ -16,7 +14,12 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
-} from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
+import { ListClient } from 'x-pack/plugins/lists/server';
+import { Logger } from 'src/core/server';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common/schemas';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
@@ -25,9 +28,6 @@ import {
   SearchTypes,
 } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
-import { ListClient } from '../../../../../lists/server';
-import { Logger } from '../../../../../../../src/core/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 

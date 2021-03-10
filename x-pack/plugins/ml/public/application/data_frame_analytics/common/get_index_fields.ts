@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from 'src/plugins/data/public';
 
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 

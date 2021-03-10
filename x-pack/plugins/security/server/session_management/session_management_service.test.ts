@@ -6,15 +6,15 @@
  */
 
 import { Subject } from 'rxjs';
+import type {
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from 'x-pack/plugins/task_manager/server';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 
 import { nextTick } from '@kbn/test/jest';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import type {
-  TaskManagerStartContract,
-  TaskRunCreatorFunction,
-} from '../../../task_manager/server';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';

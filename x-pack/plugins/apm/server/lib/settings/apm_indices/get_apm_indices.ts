@@ -8,7 +8,7 @@
 import { merge } from 'lodash';
 
 import { SavedObjectsClient } from 'src/core/server';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { PromiseReturnType } from 'x-pack/plugins/observability/typings/common';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID,

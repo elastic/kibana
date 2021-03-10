@@ -8,10 +8,10 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { reportServerError } from 'src/plugins/kibana_utils/server';
 import { SearchRouteDependencies } from '../search_service';
 
 import { getCallMsearch } from './call_msearch';
-import { reportServerError } from '../../../../kibana_utils/server';
 import type { DataPluginRouter } from '../types';
 /**
  * The msearch route takes in an array of searches, each consisting of header

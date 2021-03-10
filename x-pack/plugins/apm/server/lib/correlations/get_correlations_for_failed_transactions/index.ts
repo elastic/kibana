@@ -6,13 +6,13 @@
  */
 
 import { isEmpty, omit, merge } from 'lodash';
+import { AggregationOptionsByType } from 'x-pack/typings/elasticsearch/aggregations';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import { EventOutcome } from '../../../../common/event_outcome';
 import {
   processSignificantTermAggs,
   TopSigTerm,
 } from '../process_significant_term_aggs';
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   environmentQuery,
   rangeQuery,

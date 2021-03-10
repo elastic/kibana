@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
+import { QuerySuggestion, esKuery } from 'src/plugins/data/public';
 import { ElasticsearchAdapter } from './adapter_types';
-import { QuerySuggestion, esKuery } from '../../../../../../../src/plugins/data/public';
 import { services } from '../../../kbn_services';
 
 export class RestElasticsearchAdapter implements ElasticsearchAdapter {

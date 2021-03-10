@@ -12,7 +12,7 @@ import {
   ISearchOptions,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common';
+} from 'src/plugins/data/common';
 
 export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
 

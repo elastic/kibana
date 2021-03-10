@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
-import { FeatureCatalogueCategory } from '../../home/public';
+import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 import { AppSetupUIPluginDependencies } from './types';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {

@@ -8,10 +8,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ColorMode, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
-import { RangeValues } from '../../vis_default_editor/public';
-import { AggGroupNames } from '../../data/public';
-import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import {
+  ColorMode,
+  ColorSchemas,
+  ColorSchemaParams,
+  Labels,
+  Style,
+} from 'src/plugins/charts/public';
+import { RangeValues } from 'src/plugins/vis_default_editor/public';
+import { AggGroupNames } from 'src/plugins/data/public';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from 'src/plugins/visualizations/public';
 
 import { Alignment, GaugeType, VislibChartType } from './types';
 import { toExpressionAst } from './to_ast';

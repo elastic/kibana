@@ -7,7 +7,7 @@
  */
 
 import { createMetricVisFn } from './metric_vis_fn';
-import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(createMetricVisFn());

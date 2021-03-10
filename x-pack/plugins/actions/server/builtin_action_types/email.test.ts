@@ -9,7 +9,7 @@ jest.mock('./lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 
 import { actionsConfigMock } from '../actions_config.mock';
 import { validateConfig, validateSecrets, validateParams } from '../lib';

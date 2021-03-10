@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
+import { esFilters } from 'src/plugins/data/public';
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';

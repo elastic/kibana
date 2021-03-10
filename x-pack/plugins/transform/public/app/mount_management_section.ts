@@ -6,8 +6,8 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public/';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
 
 import { PluginsDependencies } from '../plugin';
 import { getMlSharedImports } from '../shared_imports';

@@ -9,8 +9,8 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';

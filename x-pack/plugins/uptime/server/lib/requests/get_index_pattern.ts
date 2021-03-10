@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
+import { FieldDescriptor, IndexPatternsFetcher } from 'src/plugins/data/server';
 import { UptimeESClient } from '../lib';
 import { savedObjectsAdapter } from '../saved_objects';
 

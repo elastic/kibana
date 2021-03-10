@@ -6,13 +6,13 @@
  */
 
 import { Observable } from 'rxjs';
-import { AlertingPlugin } from '../../../../alerting/server';
-import { ActionsPlugin } from '../../../../actions/server';
+import { AlertingPlugin } from 'x-pack/plugins/alerting/server';
+import { ActionsPlugin } from 'x-pack/plugins/actions/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
 import { registerErrorCountAlertType } from './register_error_count_alert_type';
 import { APMConfig } from '../..';
-import { MlPluginSetup } from '../../../../ml/server';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
 
 interface Params {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createGetterSetter } from '../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 export const [getAutocompleteService, setAutocompleteService] = createGetterSetter<
   DataPublicPluginStart['autocomplete']

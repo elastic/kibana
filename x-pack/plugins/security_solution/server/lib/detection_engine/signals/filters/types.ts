@@ -7,9 +7,9 @@
 
 import { Logger } from 'src/core/server';
 
-import { ListClient } from '../../../../../../lists/server';
+import { ListClient } from 'x-pack/plugins/lists/server';
+import { ExceptionListItemSchema, Type } from 'x-pack/plugins/lists/common/schemas';
 import { BuildRuleMessage } from '../rule_messages';
-import { ExceptionListItemSchema, Type } from '../../../../../../lists/common/schemas';
 import { SearchResponse } from '../../../types';
 
 export interface FilterEventsAgainstListOptions<T> {

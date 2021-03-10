@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup } from '../../../../src/core/server';
+import { CoreSetup } from 'src/core/server';
 import {
   APP_ID,
   DEFAULT_INDEX_KEY,

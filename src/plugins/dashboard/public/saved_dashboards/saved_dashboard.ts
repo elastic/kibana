@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectAttributes, SavedObjectReference } from 'src/core/types';
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
 
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
-
-import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;

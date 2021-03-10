@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerting/common';
+import { AlertTypeParams } from 'x-pack/plugins/alerting/common';
 
 export interface Comparator {
   text: string;

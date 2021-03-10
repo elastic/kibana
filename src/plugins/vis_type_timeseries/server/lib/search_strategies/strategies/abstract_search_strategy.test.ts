@@ -19,15 +19,15 @@ jest.mock('../../../../../data/server', () => ({
 
 import { from } from 'rxjs';
 import { AbstractSearchStrategy, toSanitizedFieldType } from './abstract_search_strategy';
-import type { IFieldType } from '../../../../../data/common';
-import type { FieldSpec, RuntimeField } from '../../../../../data/common';
+import type { IFieldType } from 'src/plugins/data/common';
+import type { FieldSpec, RuntimeField } from 'src/plugins/data/common';
 import {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
 import { Framework } from '../../../plugin';
-import { indexPatterns } from '../../../../../data/server';
+import { indexPatterns } from 'src/plugins/data/server';
 
 class FooSearchStrategy extends AbstractSearchStrategy {}
 

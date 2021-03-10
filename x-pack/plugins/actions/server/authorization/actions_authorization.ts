@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from 'src/core/server';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { ActionsAuthorizationAuditLogger } from './audit_logger';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { AuthorizationMode } from './get_authorization_mode_by_source';

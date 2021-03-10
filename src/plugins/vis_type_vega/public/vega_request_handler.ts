@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, esQuery, TimeRange, Query } from '../../data/public';
+import { Filter, esQuery, TimeRange, Query } from 'src/plugins/data/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';

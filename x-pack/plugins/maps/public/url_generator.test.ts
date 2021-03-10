@@ -7,7 +7,7 @@
 
 import { createMapsUrlGenerator } from './url_generator';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../common/constants';
-import { esFilters } from '../../../../src/plugins/data/public';
+import { esFilters } from 'src/plugins/data/public';
 
 const APP_BASE_PATH: string = 'test/app/maps';
 const MAP_ID: string = '2c9c1f60-1909-11e9-919b-ffe5949a18d2';

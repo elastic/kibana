@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ExceptionListClient } from '../../../../../lists/server';
-import { listMock } from '../../../../../lists/server/mocks';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { getFoundExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
+import { EntriesArray, EntryList } from 'x-pack/plugins/lists/common/schemas/types';
 import {
   buildArtifact,
   getEndpointExceptionList,
@@ -18,7 +18,7 @@ import {
 } from './lists';
 import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from 'x-pack/plugins/lists/common';
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;

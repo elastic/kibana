@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiActionsSetup } from '../../ui_actions/public';
+import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import {
   contextMenuTrigger,
   panelBadgeTrigger,

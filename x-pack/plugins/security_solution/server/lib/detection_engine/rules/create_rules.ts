@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Alert } from 'x-pack/plugins/alerting/common';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { Alert } from '../../../../../alerting/common';
 import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';

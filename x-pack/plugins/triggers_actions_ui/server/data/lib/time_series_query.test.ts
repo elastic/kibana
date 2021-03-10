@@ -7,7 +7,7 @@
 
 // test error conditions of calling timeSeriesQuery - postive results tested in FT
 
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { TimeSeriesQueryParameters, TimeSeriesQuery, timeSeriesQuery } from './time_series_query';
 
 const DefaultQueryParams: TimeSeriesQuery = {

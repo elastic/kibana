@@ -6,7 +6,7 @@
  */
 
 import { SanitizedAlert, AlertInstanceSummary } from '../types';
-import { IValidatedEvent } from '../../../event_log/server';
+import { IValidatedEvent } from 'x-pack/plugins/event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 import { alertInstanceSummaryFromEventLog } from './alert_instance_summary_from_event_log';
 

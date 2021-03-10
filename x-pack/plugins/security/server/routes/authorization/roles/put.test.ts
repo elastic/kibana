@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { KibanaFeature } from 'x-pack/plugins/features/server';
+import type { LicenseCheck } from 'x-pack/plugins/licensing/server';
+
 import type { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
-import { KibanaFeature } from '../../../../../features/server';
-import type { LicenseCheck } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 import { routeDefinitionParamsMock } from '../../index.mock';

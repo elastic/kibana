@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
 import { updateNotifications } from './update_notifications';
 import { readNotifications } from './read_notifications';
 import { createNotifications } from './create_notifications';

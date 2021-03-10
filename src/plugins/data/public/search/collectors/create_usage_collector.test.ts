@@ -7,9 +7,9 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart } from '../../../../../core/public';
-import { coreMock } from '../../../../../core/public/mocks';
-import { usageCollectionPluginMock, Setup } from '../../../../usage_collection/public/mocks';
+import { CoreSetup, CoreStart } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
+import { usageCollectionPluginMock, Setup } from 'src/plugins/usage_collection/public/mocks';
 import { createUsageCollector } from './create_usage_collector';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
 import { METRIC_TYPE } from '@kbn/analytics';

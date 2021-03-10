@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { Alert } from '../../../alerting/common';
+import { Alert } from 'x-pack/plugins/alerting/common';
 
 const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts'];
 

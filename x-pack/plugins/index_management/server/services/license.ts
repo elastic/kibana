@@ -8,8 +8,8 @@
 import { Logger } from 'src/core/server';
 import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'kibana/server';
 
-import { LicensingPluginSetup } from '../../../licensing/server';
-import { LicenseType } from '../../../licensing/common/types';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
 import type { IndexManagementRequestHandlerContext } from '../types';
 
 export interface LicenseStatus {

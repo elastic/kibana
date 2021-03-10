@@ -19,7 +19,7 @@ import {
   ESIndexActionTypeExecutorOptions,
 } from './es_index';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 const ACTION_TYPE_ID = '.index';
 

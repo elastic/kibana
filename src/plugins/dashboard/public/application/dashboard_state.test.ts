@@ -17,7 +17,7 @@ import { createKbnUrlStateStorage } from '../services/kibana_utils';
 import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;

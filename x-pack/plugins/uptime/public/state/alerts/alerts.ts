@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { handleActions, Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
+import { ActionConnector as RawActionConnector } from 'x-pack/plugins/triggers_actions_ui/public';
+import { Alert } from 'x-pack/plugins/alerting/common';
 import { createAsyncAction } from '../actions/utils';
 import { asyncInitState, handleAsyncAction } from '../reducers/utils';
 import { AppState } from '../index';
@@ -21,8 +23,6 @@ import {
   fetchMonitorAlertRecords,
   NewAlertParams,
 } from '../api/alerts';
-import { ActionConnector as RawActionConnector } from '../../../../triggers_actions_ui/public';
-import { Alert } from '../../../../alerting/common';
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
 import { AlertsResult, MonitorIdParam } from '../actions/types';

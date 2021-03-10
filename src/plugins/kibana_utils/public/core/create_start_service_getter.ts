@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, StartServicesAccessor } from '../../../../core/public';
+import { CoreStart, StartServicesAccessor } from 'src/core/public';
 
 export interface StartServices<Plugins = unknown, OwnContract = unknown, Core = CoreStart> {
   plugins: Plugins;

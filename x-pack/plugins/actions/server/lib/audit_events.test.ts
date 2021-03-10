@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventOutcome } from '../../../security/server/audit';
+import { EventOutcome } from 'x-pack/plugins/security/server/audit';
 import { ConnectorAuditAction, connectorAuditEvent } from './audit_events';
 
 describe('#connectorAuditEvent', () => {

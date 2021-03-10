@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '../../../data/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { extractIndexPatternsFromSpec } from './extract_index_pattern';
 import { setData } from '../services';
 

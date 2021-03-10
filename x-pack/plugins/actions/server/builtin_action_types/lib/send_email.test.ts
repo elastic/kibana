@@ -9,9 +9,9 @@ jest.mock('nodemailer', () => ({
   createTransport: jest.fn(),
 }));
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import { sendEmail } from './send_email';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';

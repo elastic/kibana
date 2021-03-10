@@ -8,9 +8,9 @@
 
 // @ts-ignore
 import React from 'react';
+import { uiToReactComponent } from 'src/plugins/kibana_react/public';
 import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable, PresentableGrouping } from '../util/presentable';
-import { uiToReactComponent } from '../../../kibana_react/public';
 
 /**
  * @internal

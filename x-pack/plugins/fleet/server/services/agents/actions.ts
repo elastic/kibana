@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
+import { nodeTypes } from 'src/plugins/data/common';
+
 import type {
   Agent,
   AgentAction,
@@ -18,7 +20,6 @@ import type {
 } from '../../../common/types/models';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_ACTIONS_INDEX } from '../../../common/constants';
 import { appContextService } from '../app_context';
-import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
 import {
   isAgentActionSavedObject,

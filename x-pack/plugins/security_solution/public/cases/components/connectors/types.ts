@@ -12,7 +12,7 @@ import {
   CaseField,
   ActionConnector,
   ConnectorTypeFields,
-} from '../../../../../case/common/api';
+} from 'x-pack/plugins/case/common/api';
 
 export { ThirdPartyField as AllThirdPartyFields } from '../../../../../case/common/api';
 export type CaseActionConnector = ActionConnector;

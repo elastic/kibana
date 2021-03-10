@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Coordinates } from 'x-pack/plugins/observability/typings/common';
 import { rangeQuery } from '../../../server/utils/queries';
-import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { calculateThroughput } from '../helpers/calculate_throughput';

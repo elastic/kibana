@@ -7,6 +7,9 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
+import { EncryptedSavedObjectsClient } from 'x-pack/plugins/encrypted_saved_objects/server';
+import { SpacesServiceStart } from 'x-pack/plugins/spaces/server';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from 'x-pack/plugins/event_log/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
   ActionTypeExecutorResult,
@@ -15,10 +18,7 @@ import {
   RawAction,
   PreConfiguredAction,
 } from '../types';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { SpacesServiceStart } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 

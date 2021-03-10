@@ -14,7 +14,7 @@ import {
 import moment from 'moment';
 import { EMPTY, from } from 'rxjs';
 import { expand, mergeMap } from 'rxjs/operators';
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
+import { nodeBuilder } from 'src/plugins/data/common';
 import {
   SearchSessionStatus,
   SearchSessionSavedObjectAttributes,

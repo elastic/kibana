@@ -8,10 +8,10 @@
 import { FeatureRegistry } from '../feature_registry';
 import { defineRoutes } from './index';
 
-import { httpServerMock, httpServiceMock, coreMock } from '../../../../../src/core/server/mocks';
-import { LicenseType } from '../../../licensing/server/';
-import { licensingMock } from '../../../licensing/server/mocks';
-import { RequestHandler } from '../../../../../src/core/server';
+import { httpServerMock, httpServiceMock, coreMock } from 'src/core/server/mocks';
+import { LicenseType } from 'x-pack/plugins/licensing/server';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
+import { RequestHandler } from 'src/core/server';
 import { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '../../common';
 
 function createContextMock(licenseType: LicenseType = 'platinum') {

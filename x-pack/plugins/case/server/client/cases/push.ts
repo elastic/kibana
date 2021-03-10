@@ -14,7 +14,7 @@ import {
   SavedObjectsFindResponse,
   SavedObject,
 } from 'kibana/server';
-import { ActionResult, ActionsClient } from '../../../../actions/server';
+import { ActionResult, ActionsClient } from 'x-pack/plugins/actions/server';
 import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../routes/api/utils';
 
 import {

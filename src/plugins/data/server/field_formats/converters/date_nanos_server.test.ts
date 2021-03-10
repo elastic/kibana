@@ -7,7 +7,7 @@
  */
 
 import { DateNanosFormat } from './date_nanos_server';
-import { FieldFormatsGetConfigFn } from 'src/plugins/data/common';
+import { FieldFormatsGetConfigFn } from '../../../common';
 
 describe('Date Nanos Format: Server side edition', () => {
   let convert: Function;

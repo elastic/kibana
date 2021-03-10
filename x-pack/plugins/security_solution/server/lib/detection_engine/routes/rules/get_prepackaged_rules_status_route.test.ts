@@ -14,7 +14,7 @@ import {
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig } from '../__mocks__';
-import { SecurityPluginSetup } from '../../../../../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { checkTimelinesStatus } from '../../../timeline/routes/utils/check_timelines_status';
 import {
   mockCheckTimelinesStatusBeforeInstallResult,

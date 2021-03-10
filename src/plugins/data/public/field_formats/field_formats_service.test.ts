@@ -7,7 +7,7 @@
  */
 
 import { FieldFormatsService } from './field_formats_service';
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { DateFormat } from './converters/date';
 
 describe('FieldFormatService', () => {

@@ -7,7 +7,7 @@
  */
 
 import { getStats } from './get_usage_collector';
-import { HomeServerPluginSetup } from '../../../home/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 const mockedSavedObjects = [

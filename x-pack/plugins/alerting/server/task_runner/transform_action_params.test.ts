@@ -6,7 +6,10 @@
  */
 
 import { transformActionParams } from './transform_action_params';
-import { actionsMock, renderActionParameterTemplatesDefault } from '../../../actions/server/mocks';
+import {
+  actionsMock,
+  renderActionParameterTemplatesDefault,
+} from 'x-pack/plugins/actions/server/mocks';
 
 const actionsPlugin = actionsMock.createStart();
 const actionTypeId = 'test-actionTypeId';

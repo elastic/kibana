@@ -10,7 +10,7 @@ import type { SavedObject, SavedObjectError } from 'src/core/types';
 import type { SavedObjectsFindResponse } from 'src/core/server';
 import { findRelationships } from './find_relationships';
 import { managementMock } from '../services/management.mock';
-import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 const createObj = (parts: Partial<SavedObject<any>>): SavedObject<any> => ({
   id: 'id',

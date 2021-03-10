@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { Logger } from 'src/core/server';
 import { TelemetryEventsSender, TelemetryEvent } from '../../telemetry/sender';
 import { RuleTypeParams } from '../types';
 import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse, SignalSource } from './types';
-import { Logger } from '../../../../../../../src/core/server';
 
 export interface SearchResultWithSource {
   _source: SignalSource;

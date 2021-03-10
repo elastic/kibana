@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  CoreStart,
-  CoreSetup,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { registerSettingsRoute } from './routes/settings';
 
 interface SetupPluginDeps {

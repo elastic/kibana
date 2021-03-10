@@ -15,7 +15,7 @@ import {
   SharedGlobalConfig,
   IContextProvider,
 } from 'src/core/server';
-import { SpacesPluginStart } from '../../spaces/server';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
 
 import type {
   EventLogRequestHandlerContext,

@@ -7,7 +7,7 @@
 
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { url } from 'src/plugins/kibana_utils/public';
 import { LocalUIFilterName } from '../../../../common/ui_filter';
 
 export function toQuery(search?: string): APMQueryParamsRaw {

@@ -7,9 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from 'x-pack/plugins/features/server';
 // @ts-ignore
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ILicense } from 'x-pack/plugins/licensing/common/types';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { MapsLegacyPluginSetup } from 'src/plugins/maps_legacy/server';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 // @ts-ignore
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
@@ -21,16 +27,10 @@ import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
 import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 // @ts-ignore
 import { initRoutes } from './routes';
-import { ILicense } from '../../licensing/common/types';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
 import { EMSSettings } from '../common/ems_settings';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;

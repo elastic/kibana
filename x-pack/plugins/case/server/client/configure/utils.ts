@@ -6,16 +6,16 @@
  */
 
 import {
-  ConnectorField,
-  ConnectorMappingsAttributes,
-  ConnectorTypes,
-} from '../../../common/api/connectors';
-import {
   JiraGetFieldsResponse,
   ResilientGetFieldsResponse,
   ServiceNowGetFieldsResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../actions/server/types';
+} from 'x-pack/plugins/actions/server/types';
+import {
+  ConnectorField,
+  ConnectorMappingsAttributes,
+  ConnectorTypes,
+} from '../../../common/api/connectors';
 
 const normalizeJiraFields = (jiraFields: JiraGetFieldsResponse): ConnectorField[] =>
   Object.keys(jiraFields).reduce<ConnectorField[]>(

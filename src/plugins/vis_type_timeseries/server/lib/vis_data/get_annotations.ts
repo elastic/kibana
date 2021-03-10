@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  AnnotationItemsSchema,
-  PanelSchema,
-  SeriesItemsSchema,
-} from 'src/plugins/vis_type_timeseries/common/types';
+import { AnnotationItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../common/types';
 // @ts-expect-error
 import { handleAnnotationResponse } from './response_processors/annotations';
 import { AnnotationServices, getAnnotationRequestParams } from './annotations/get_request_params';

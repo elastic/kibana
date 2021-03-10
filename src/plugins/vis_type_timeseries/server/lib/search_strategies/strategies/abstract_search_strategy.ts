@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { indexPatterns, IndexPatternsFetcher } from '../../../../../data/server';
+import { indexPatterns, IndexPatternsFetcher } from 'src/plugins/data/server';
 
+import type { FieldSpec } from 'src/plugins/data/common';
 import type { Framework } from '../../../plugin';
-import type { FieldSpec } from '../../../../../data/common';
 import type { SanitizedFieldType } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequest,

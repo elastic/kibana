@@ -16,18 +16,14 @@ import {
   SavedObject,
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server';
-import {
-  IKibanaSearchRequest,
-  ISearchOptions,
-  nodeBuilder,
-} from '../../../../../../src/plugins/data/common';
-import { esKuery, ISearchSessionService } from '../../../../../../src/plugins/data/server';
-import { AuthenticatedUser, SecurityPluginSetup } from '../../../../security/server';
+} from 'src/core/server';
+import { IKibanaSearchRequest, ISearchOptions, nodeBuilder } from 'src/plugins/data/common';
+import { esKuery, ISearchSessionService } from 'src/plugins/data/server';
+import { AuthenticatedUser, SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 import {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,

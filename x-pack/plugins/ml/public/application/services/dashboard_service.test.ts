@@ -6,12 +6,9 @@
  */
 
 import { dashboardServiceProvider } from './dashboard_service';
-import { savedObjectsServiceMock } from '../../../../../../src/core/public/mocks';
-import { DashboardSavedObject } from '../../../../../../src/plugins/dashboard/public/saved_dashboards';
-import {
-  DashboardUrlGenerator,
-  SavedDashboardPanel,
-} from '../../../../../../src/plugins/dashboard/public';
+import { savedObjectsServiceMock } from 'src/core/public/mocks';
+import { DashboardSavedObject } from 'src/plugins/dashboard/public/saved_dashboards';
+import { DashboardUrlGenerator, SavedDashboardPanel } from 'src/plugins/dashboard/public';
 
 jest.mock('@elastic/eui', () => {
   return {

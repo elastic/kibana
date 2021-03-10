@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CheckLicense } from '../../../../licensing/server';
+import { CheckLicense } from 'x-pack/plugins/licensing/server';
 
 export const checkLicense: CheckLicense = (license) => {
   if (!license.isAvailable) {

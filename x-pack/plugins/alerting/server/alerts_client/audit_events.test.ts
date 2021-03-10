@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventOutcome } from '../../../security/server/audit';
+import { EventOutcome } from 'x-pack/plugins/security/server/audit';
 import { AlertAuditAction, alertAuditEvent } from './audit_events';
 
 describe('#alertAuditEvent', () => {

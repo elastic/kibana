@@ -6,9 +6,9 @@
  */
 
 import { HttpSetup } from 'kibana/public';
+import { ActionTypeExecutorResult } from 'x-pack/plugins/actions/common';
 import { BASE_ACTION_API_PATH } from '../constants';
 import type { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
-import { ActionTypeExecutorResult } from '../../../../../plugins/actions/common';
 
 export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
   return await http.get(`${BASE_ACTION_API_PATH}/list_action_types`);

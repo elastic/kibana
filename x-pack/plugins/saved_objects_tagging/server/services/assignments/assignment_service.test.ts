@@ -10,8 +10,8 @@ import {
   httpServerMock,
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
-} from '../../../../../../src/core/server/mocks';
-import { securityMock } from '../../../../security/server/mocks';
+} from 'src/core/server/mocks';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
 import { createSavedObject, createReference } from '../../../common/test_utils';
 import { taggableTypes } from '../../../common/constants';
 import { AssignmentService } from './assignment_service';

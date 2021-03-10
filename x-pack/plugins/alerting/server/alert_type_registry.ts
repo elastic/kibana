@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { RunContext, TaskManagerSetupContract } from 'x-pack/plugins/task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
   AlertType,

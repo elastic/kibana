@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { createSavedSheetClass } from './_saved_sheet';
 import { RenderDeps } from '../application';
 

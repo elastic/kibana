@@ -10,9 +10,9 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   RunContext,
-} from '../../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
+import { CoreSetup, SavedObjectsClient, Logger } from 'src/core/server';
 import { checkRunningSessions } from './check_running_sessions';
-import { CoreSetup, SavedObjectsClient, Logger } from '../../../../../../src/core/server';
 import { ConfigSchema } from '../../../config';
 import { SEARCH_SESSION_TYPE } from '../../../common';
 

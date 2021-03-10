@@ -11,7 +11,7 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
-} from '../../../../../../../src/core/server';
+} from 'src/core/server';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleStatusSOAttributes } from '../rules/types';
 

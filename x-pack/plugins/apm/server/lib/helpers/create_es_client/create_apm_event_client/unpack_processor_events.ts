@@ -6,12 +6,9 @@
  */
 
 import { uniq, defaultsDeep, cloneDeep } from 'lodash';
+import { ESSearchRequest, ESFilter } from 'x-pack/typings/elasticsearch';
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
-import {
-  ESSearchRequest,
-  ESFilter,
-} from '../../../../../../../typings/elasticsearch';
 import { APMEventESSearchRequest } from '.';
 import {
   ApmIndicesConfig,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   Threshold,

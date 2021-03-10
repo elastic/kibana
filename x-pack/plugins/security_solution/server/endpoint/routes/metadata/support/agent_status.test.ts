@@ -7,14 +7,11 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { findAgentIDsByStatus } from './agent_status';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../../../src/core/server/mocks';
-import { AgentService } from '../../../../../../fleet/server/services';
-import { createMockAgentService } from '../../../../../../fleet/server/mocks';
-import { Agent } from '../../../../../../fleet/common/types/models';
-import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { AgentService } from 'x-pack/plugins/fleet/server/services';
+import { createMockAgentService } from 'x-pack/plugins/fleet/server/mocks';
+import { Agent } from 'x-pack/plugins/fleet/common/types/models';
+import { AgentStatusKueryHelper } from 'x-pack/plugins/fleet/common/services';
 
 describe('test filtering endpoint hosts by agent status', () => {
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;

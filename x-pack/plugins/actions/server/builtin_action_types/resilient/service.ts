@@ -8,7 +8,7 @@
 import axios from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import {
   ExternalServiceCredentials,
   ExternalService,

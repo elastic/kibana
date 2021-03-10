@@ -11,12 +11,12 @@ import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import {
   createKbnUrlStateStorage,
   IKbnUrlStateStorage,
   Storage,
-} from '../../../../kibana_utils/public';
+} from 'src/plugins/kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from '@kbn/test/jest';
 import { TimefilterContract } from '../timefilter';

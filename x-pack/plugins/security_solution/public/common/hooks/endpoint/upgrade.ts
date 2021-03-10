@@ -7,13 +7,13 @@
 
 import { useEffect } from 'react';
 import { HttpFetchOptions, HttpStart } from 'src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from 'src/plugins/kibana_react/public';
 import {
   epmRouteService,
   appRoutesService,
   CheckPermissionsResponse,
   BulkInstallPackagesResponse,
-} from '../../../../../fleet/common';
+} from 'x-pack/plugins/fleet/common';
 import { StartServices } from '../../../types';
 import { useIngestEnabledCheck } from './ingest_enabled';
 

@@ -14,7 +14,7 @@ import {
   fromKueryExpression,
   toElasticsearchQuery,
   luceneStringToDsl,
-} from '../../../../../../src/plugins/data/common';
+} from 'src/plugins/data/common';
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?

@@ -30,21 +30,21 @@ import {
   AppMountParameters,
 } from 'kibana/public';
 // @ts-ignore
-import { initGraphApp } from './app';
-import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
-import { LicensingPluginStart } from '../../licensing/public';
+import { Plugin as DataPlugin, IndexPatternsContract } from 'src/plugins/data/public';
+import { LicensingPluginStart } from 'x-pack/plugins/licensing/public';
 import { checkLicense } from '../common/check_license';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
   KibanaLegacyStart,
-} from '../../../../src/plugins/kibana_legacy/public';
+} from 'src/plugins/kibana_legacy/public';
 
 import './index.scss';
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import { initGraphApp } from './app';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies

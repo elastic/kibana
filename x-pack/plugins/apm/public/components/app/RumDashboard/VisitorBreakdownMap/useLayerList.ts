@@ -11,7 +11,7 @@ import {
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
   VectorStyleDescriptor,
-} from '../../../../../../maps/common/descriptor_types';
+} from 'x-pack/plugins/maps/common/descriptor_types';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
@@ -20,9 +20,9 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-} from '../../../../../../maps/common/constants';
+} from 'x-pack/plugins/maps/common/constants';
 
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
+import { APM_STATIC_INDEX_PATTERN_ID } from 'src/plugins/apm_oss/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,

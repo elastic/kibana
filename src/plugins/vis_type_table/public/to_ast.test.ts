@@ -9,7 +9,7 @@
 import { Vis } from 'src/plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { AggTypes, TableVisParams } from '../common';
-import { buildExpressionFunction } from '../../expressions/public';
+import { buildExpressionFunction } from 'src/plugins/expressions/public';
 
 const mockSchemas = {
   metric: [{ accessor: 1, format: { id: 'number' }, params: {}, label: 'Count', aggType: 'count' }],

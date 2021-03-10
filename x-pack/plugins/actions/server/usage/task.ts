@@ -16,7 +16,7 @@ import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 import { ActionResult } from '../types';
 import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 

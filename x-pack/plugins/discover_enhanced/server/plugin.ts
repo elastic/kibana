@@ -7,13 +7,8 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Config } from '../common';
 
 interface SetupDependencies {

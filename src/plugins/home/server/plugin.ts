@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -15,7 +16,6 @@ import {
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
 } from './services';
-import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';

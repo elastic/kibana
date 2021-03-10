@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PluginSetupContract } from '../../../../alerting/server';
+import { PluginSetupContract } from 'x-pack/plugins/alerting/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import { registerMetricThresholdAlertType } from './metric_threshold/register_metric_threshold_alert_type';
 import { registerMetricInventoryThresholdAlertType } from './inventory_metric_threshold/register_inventory_metric_threshold_alert_type';
 import { registerMetricAnomalyAlertType } from './metric_anomaly/register_metric_anomaly_alert_type';
 
 import { registerLogThresholdAlertType } from './log_threshold/register_log_threshold_alert_type';
 import { InfraBackendLibs } from '../infra_types';
-import { MlPluginSetup } from '../../../../ml/server';
 
 const registerAlertTypes = (
   alertingPlugin: PluginSetupContract,

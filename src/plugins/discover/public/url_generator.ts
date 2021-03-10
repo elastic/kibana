@@ -13,9 +13,9 @@ import {
   esFilters,
   QueryState,
   RefreshInterval,
-} from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../share/public';
+} from 'src/plugins/data/public';
+import { setStateToKbnUrl } from 'src/plugins/kibana_utils/public';
+import { UrlGeneratorsDefinition } from 'src/plugins/share/public';
 
 export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
 

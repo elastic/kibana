@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { AlertTypeModel } from 'x-pack/plugins/triggers_actions_ui/public';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
   PartialAlertParams,

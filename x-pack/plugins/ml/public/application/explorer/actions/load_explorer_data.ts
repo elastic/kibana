@@ -13,6 +13,7 @@ import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
+import { TimefilterContract } from 'src/plugins/data/public';
 import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
 import { explorerService } from '../explorer_dashboard_service';
 import {
@@ -34,7 +35,6 @@ import { AnomalyTimelineService } from '../../services/anomaly_timeline_service'
 import { mlResultsServiceProvider } from '../../services/results_service';
 import { isViewBySwimLaneData } from '../swimlane_container';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
-import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument

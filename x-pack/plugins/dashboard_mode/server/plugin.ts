@@ -12,9 +12,9 @@ import {
   Plugin,
   SavedObjectsClient,
   Logger,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 
-import { SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { setupDashboardModeRequestInterceptor } from './interceptors';
 
 import { getUiSettings } from './ui_settings';

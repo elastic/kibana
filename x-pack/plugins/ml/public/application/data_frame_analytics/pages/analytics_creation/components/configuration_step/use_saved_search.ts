@@ -6,8 +6,8 @@
  */
 
 import { useState, useEffect } from 'react';
+import { esQuery, esKuery } from 'src/plugins/data/public';
 import { useMlContext } from '../../../../../contexts/ml';
-import { esQuery, esKuery } from '../../../../../../../../../../src/plugins/data/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { getQueryFromSavedSearch } from '../../../../../util/index_utils';
 

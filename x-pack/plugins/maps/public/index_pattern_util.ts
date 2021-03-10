@@ -7,8 +7,8 @@
 
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
+import { indexPatterns } from 'src/plugins/data/public';
 import { getIndexPatternService } from './kibana_services';
-import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 import { getIsGoldPlus } from './licensed_features';
 

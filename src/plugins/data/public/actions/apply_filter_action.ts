@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../kibana_react/public';
-import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { toMountPoint } from 'src/plugins/kibana_react/public';
+import { Action, createAction, IncompatibleActionError } from 'src/plugins/ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';

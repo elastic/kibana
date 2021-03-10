@@ -12,13 +12,13 @@ import {
   savedObjectsServiceMock,
 } from 'src/core/server/mocks';
 import { LicenseService } from '../../../../common/license/license';
-import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
+import { createPackagePolicyServiceMock } from 'x-pack/plugins/fleet/server/mocks';
 import { PolicyWatcher } from './license_watch';
-import { ILicense } from '../../../../../licensing/common/types';
-import { licenseMock } from '../../../../../licensing/common/licensing.mock';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
-import { PackagePolicy } from '../../../../../fleet/common';
-import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
+import { ILicense } from 'x-pack/plugins/licensing/common/types';
+import { licenseMock } from 'x-pack/plugins/licensing/common/licensing.mock';
+import { PackagePolicyServiceInterface } from 'x-pack/plugins/fleet/server';
+import { PackagePolicy } from 'x-pack/plugins/fleet/common';
+import { createPackagePolicyMock } from 'x-pack/plugins/fleet/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import { PolicyConfig } from '../../../../common/endpoint/types';
 

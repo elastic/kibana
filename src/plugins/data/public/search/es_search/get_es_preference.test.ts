@@ -8,8 +8,8 @@
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { getEsPreference } from './get_es_preference';
-import { CoreStart } from '../../../../../core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { CoreStart } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
 import { UI_SETTINGS } from '../../../common';
 
 describe('Get ES preference', () => {

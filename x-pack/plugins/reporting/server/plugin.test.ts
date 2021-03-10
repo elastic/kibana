@@ -16,8 +16,8 @@ jest.mock('./browsers/install', () => ({
 }));
 
 import { coreMock } from 'src/core/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { TaskManagerSetupContract } from '../../task_manager/server';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+import { TaskManagerSetupContract } from 'x-pack/plugins/task_manager/server';
 import { ReportingPlugin } from './plugin';
 import { createMockConfigSchema } from './test_helpers';
 

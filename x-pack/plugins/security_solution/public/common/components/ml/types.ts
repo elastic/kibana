@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Influencer } from '../../../../../ml/public';
+import { Influencer } from 'x-pack/plugins/ml/public';
 
 import { HostsType } from '../../../hosts/store/model';
 import { NetworkType } from '../../../network/store/model';

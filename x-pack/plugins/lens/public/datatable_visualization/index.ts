@@ -6,9 +6,9 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 interface DatatableVisualizationPluginStartPlugins {
   data: DataPublicPluginStart;

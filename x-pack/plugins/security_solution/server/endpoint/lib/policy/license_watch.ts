@@ -19,9 +19,9 @@ import {
   PackagePolicy,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   UpdatePackagePolicy,
-} from '../../../../../fleet/common';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
-import { ILicense } from '../../../../../licensing/common/types';
+} from 'x-pack/plugins/fleet/common';
+import { PackagePolicyServiceInterface } from 'x-pack/plugins/fleet/server';
+import { ILicense } from 'x-pack/plugins/licensing/common/types';
 import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAboveLicenseLevel,

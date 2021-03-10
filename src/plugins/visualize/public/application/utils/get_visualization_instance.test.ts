@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createSavedSearchesLoader } from '../../../../discover/public';
+import { createSavedSearchesLoader } from 'src/plugins/discover/public';
 import type {
   VisualizeInput,
   VisSavedObject,

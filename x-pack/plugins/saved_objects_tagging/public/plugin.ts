@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { SavedObjectTaggingOssPluginSetup } from '../../../../src/plugins/saved_objects_tagging_oss/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { SavedObjectTaggingOssPluginSetup } from 'src/plugins/saved_objects_tagging_oss/public';
 import { tagManagementSectionId } from '../common/constants';
 import { getTagsCapabilities } from '../common/capabilities';
 import { SavedObjectTaggingPluginStart } from './types';

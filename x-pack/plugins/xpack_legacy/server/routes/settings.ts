@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { IRouter, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
-import { KIBANA_SETTINGS_TYPE } from '../../../monitoring/common/constants';
-import { KibanaSettingsCollector } from '../../../monitoring/server';
+import { IRouter, ServiceStatus, ServiceStatusLevels } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { KIBANA_SETTINGS_TYPE } from 'x-pack/plugins/monitoring/common/constants';
+import { KibanaSettingsCollector } from 'x-pack/plugins/monitoring/server';
 
 const SNAPSHOT_REGEX = /-snapshot/i;
 

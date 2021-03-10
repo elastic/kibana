@@ -12,7 +12,7 @@ import {
   PackageService,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
-} from '../../../fleet/server';
+} from 'x-pack/plugins/fleet/server';
 import { ConfigType } from '../config';
 
 export type OsqueryAppContextServiceStartContract = Partial<

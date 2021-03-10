@@ -8,8 +8,8 @@
 import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
-import { SecurityPluginSetup } from '../../security/server';
-import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { PluginSetupContract as ActionsPluginSetup } from 'x-pack/plugins/actions/server';
 import { APP_ID } from '../common/constants';
 
 import { ConfigType } from './config';

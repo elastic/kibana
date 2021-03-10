@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
+
 import { KibanaRequest, Logger } from 'src/core/server';
 
-import { SecurityPluginSetup } from '../../../security/server';
-import { SpacesPluginStart } from '../../../spaces/server';
 import { ProductAccess } from '../../common/types';
 import { ConfigType } from '../index';
 

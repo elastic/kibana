@@ -8,7 +8,7 @@
 
 import { flow, get } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
+import { DEFAULT_QUERY_LANGUAGE } from 'src/plugins/data/common';
 
 /**
  * This migration script is related to:

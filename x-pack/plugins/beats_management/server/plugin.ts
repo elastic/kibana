@@ -6,9 +6,9 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, Logger } from 'src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { LicensingPluginStart } from '../../licensing/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { LicensingPluginStart } from 'x-pack/plugins/licensing/server';
 import { BeatsManagementConfigType } from '../common';
 import type { BeatsManagementRequestHandlerContext, CMServerLibs } from './lib/types';
 import { registerRoutes } from './routes';

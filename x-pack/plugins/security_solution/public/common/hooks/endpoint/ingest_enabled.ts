@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from 'src/plugins/kibana_react/public';
 /**
  * Returns an object which fleet permissions are allowed
  */

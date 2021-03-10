@@ -9,15 +9,15 @@ import Boom from '@hapi/boom';
 import Joi from 'joi';
 import { errors } from '@elastic/elasticsearch';
 import { has, snakeCase } from 'lodash/fp';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert } from 'x-pack/plugins/alerting/common';
 
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
   SavedObjectsFindResult,
-} from '../../../../../../../src/core/server';
-import { AlertsClient } from '../../../../../alerting/server';
+} from 'src/core/server';
+import { AlertsClient } from 'x-pack/plugins/alerting/server';
 import { BadRequestError } from '../errors/bad_request_error';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 

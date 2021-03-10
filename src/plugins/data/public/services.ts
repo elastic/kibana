@@ -7,7 +7,7 @@
  */
 
 import { NotificationsStart, CoreStart } from 'src/core/public';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
 import { IndexPatternsContract } from './index_patterns';
 import { DataPublicPluginStart } from './types';
 

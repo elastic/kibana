@@ -8,7 +8,7 @@
 
 /* eslint-disable dot-notation */
 import { FetcherTask } from './fetcher';
-import { coreMock } from '../../../core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
 
 describe('FetcherTask', () => {
   describe('sendIfDue', () => {

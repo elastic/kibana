@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { wrapRouteWithLicenseCheck } from 'x-pack/plugins/licensing/server';
 import type { LogstashPluginRouter } from '../../types';
 
 import { Pipeline } from '../../models/pipeline';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { checkLicense } from '../../lib/check_license';
 
 export function registerPipelineLoadRoute(router: LogstashPluginRouter) {

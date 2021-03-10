@@ -9,7 +9,7 @@ import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
 import { setupEnvironment } from '../../helpers/setup_environment';
 import { getDefaultHotPhasePolicy } from '../constants';
 import { act } from 'react-dom/test-utils';
-import { licensingMock } from '../../../../../licensing/public/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/public/mocks';
 
 describe('<EditPolicy /> timeline', () => {
   let testBed: EditPolicyTestBed;

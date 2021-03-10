@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { SecurityPluginSetup } from '../../security/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
 
 import { bootstrap } from './bootstrap';
 import { BeatsManagementConfigType } from '../common';

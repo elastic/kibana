@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { ILicense } from '../../../../licensing/server';
+import { ILicense } from 'x-pack/plugins/licensing/server';
 import {
   createAnnotationRt,
   deleteAnnotationRt,

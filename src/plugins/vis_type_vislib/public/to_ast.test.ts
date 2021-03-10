@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../visualizations/public';
-import { buildExpression } from '../../expressions/public';
+import { Vis } from 'src/plugins/visualizations/public';
+import { buildExpression } from 'src/plugins/expressions/public';
 
 import { BasicVislibParams } from './types';
 import { toExpressionAst } from './to_ast';
-import { sampleAreaVis } from '../../vis_type_xy/public/sample_vis.test.mocks';
+import { sampleAreaVis } from 'src/plugins/vis_type_xy/public/sample_vis.test.mocks';
 
 jest.mock('../../expressions/public', () => ({
   ...(jest.requireActual('../../expressions/public') as any),

@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
+import { ES_FIELD_TYPES } from 'src/plugins/data/server';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';

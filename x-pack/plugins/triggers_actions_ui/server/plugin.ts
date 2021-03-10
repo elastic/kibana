@@ -6,8 +6,8 @@
  */
 
 import { Logger, Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { PluginSetupContract as AlertsPluginSetup } from '../../alerting/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
+import { PluginSetupContract as AlertsPluginSetup } from 'x-pack/plugins/alerting/server';
+import { EncryptedSavedObjectsPluginSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute } from './routes/health';
 

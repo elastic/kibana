@@ -8,7 +8,7 @@
 
 import { registerRoutes } from './index';
 import { ISavedObjectsManagement } from '../services';
-import { coreMock, httpServiceMock } from '../../../../core/server/mocks';
+import { coreMock, httpServiceMock } from 'src/core/server/mocks';
 
 describe('registerRoutes', () => {
   it('registers the management routes', () => {

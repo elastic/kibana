@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server/';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from 'src/core/server';
+
 import {
   ExceptionListSchema,
   ExceptionListSoSchema,

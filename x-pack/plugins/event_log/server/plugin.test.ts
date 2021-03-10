@@ -9,7 +9,7 @@ import { CoreSetup, CoreStart } from 'src/core/server';
 import { coreMock } from 'src/core/server/mocks';
 import { IEventLogService } from './index';
 import { Plugin } from './plugin';
-import { spacesMock } from '../../spaces/server/mocks';
+import { spacesMock } from 'x-pack/plugins/spaces/server/mocks';
 
 describe('event_log plugin', () => {
   it('can setup and start', async () => {

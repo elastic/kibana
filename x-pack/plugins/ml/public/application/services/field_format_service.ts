@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { IndexPattern } from 'src/plugins/data/public';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;

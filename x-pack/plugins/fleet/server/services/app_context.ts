@@ -19,11 +19,13 @@ import type {
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
-} from '../../../encrypted_saved_objects/server';
-import type { SecurityPluginStart } from '../../../security/server';
+} from 'x-pack/plugins/encrypted_saved_objects/server';
+import type { SecurityPluginStart } from 'x-pack/plugins/security/server';
+
+import type { CloudSetup } from 'x-pack/plugins/cloud/server';
+
 import type { FleetConfigType } from '../../common';
 import type { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
-import type { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;

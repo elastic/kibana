@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from 'kibana/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { COLOR_MAPPING_SETTING, palette, systemPalette } from '../common';
-import { ExpressionsServerSetup } from '../../expressions/server';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;

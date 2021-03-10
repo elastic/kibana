@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ensureRawRequest } from 'src/core/server/http/router';
 import type { BeatsManagementRouter } from '../../lib/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../src/core/server/http/router';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { CMBeat } from '../../../common/domain_types';
 import { ReturnTypeUpdate } from '../../../common/return_types';

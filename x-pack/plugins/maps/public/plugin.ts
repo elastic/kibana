@@ -17,8 +17,17 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
+} from 'src/core/public';
 // @ts-ignore
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from 'src/plugins/ui_actions/public';
+import { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { MapsLegacyConfig } from 'src/plugins/maps_legacy/config';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { LicensingPluginSetup, LicensingPluginStart } from 'x-pack/plugins/licensing/public';
 import { MapView } from './inspector/views/map_view';
 import {
   setEMSSettings,
@@ -29,13 +38,7 @@ import {
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import {
-  VisualizationsSetup,
-  VisualizationsStart,
-} from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   createMapsUrlGenerator,
   createRegionMapUrlGenerator,
@@ -43,28 +46,22 @@ import {
 } from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
-import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { FileUploadPluginStart } from '../../file_upload/public';
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
-import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
+import { FileUploadPluginStart } from 'x-pack/plugins/file_upload/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import {
   getIsEnterprisePlus,
   registerLicensedFeatures,
   setLicensingPluginStart,
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
-import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { SavedObjectTaggingPluginStart } from 'x-pack/plugins/saved_objects_tagging/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;

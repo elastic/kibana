@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { SerializableState } from 'src/plugins/kibana_utils/common/persistable_state';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 
 export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType) => {

@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
 export function useWelcomeMessage(storage: IStorageWrapper): [boolean, () => void] {
   const key = `drilldowns:hidWelcomeMessage`;

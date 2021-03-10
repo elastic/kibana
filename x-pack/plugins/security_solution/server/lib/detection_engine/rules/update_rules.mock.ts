@@ -6,8 +6,8 @@
  */
 
 import { UpdateRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   getUpdateRulesSchemaMock,
   getUpdateMachineLearningSchemaMock,

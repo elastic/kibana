@@ -10,7 +10,7 @@ import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 import { AlertsConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';

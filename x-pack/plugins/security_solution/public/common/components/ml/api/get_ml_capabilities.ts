@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '../../../../../../../../src/core/public';
-import { MlCapabilitiesResponse } from '../../../../../../ml/public';
+import { HttpSetup } from 'src/core/public';
+import { MlCapabilitiesResponse } from 'x-pack/plugins/ml/public';
 import { InfluencerInput } from '../types';
 
 export interface Body {

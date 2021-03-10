@@ -6,6 +6,7 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
+import { Query } from 'src/plugins/data/public';
 import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
 import { navTabs } from '../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../app/types';
@@ -14,7 +15,6 @@ import { inputsActions } from '../../store/actions';
 import { CONSTANTS } from './constants';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { UrlStateContainerPropTypes, LocationTypes } from './types';
-import { Query } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../../network/store';
 import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';

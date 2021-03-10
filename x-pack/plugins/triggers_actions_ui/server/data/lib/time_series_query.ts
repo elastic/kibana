@@ -7,7 +7,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'kibana/server';
-import { LegacyScopedClusterClient } from '../../../../../../src/core/server';
+import { LegacyScopedClusterClient } from 'src/core/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 

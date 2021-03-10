@@ -7,9 +7,9 @@
  */
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
+import { ISearchSource } from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { getSortForSearchSource } from '../angular/doc_table';
-import { ISearchSource } from '../../../../data/common';
 import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
 

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaContext, TimeRange, Filter, esQuery, Query } from '../../../data/public';
+import { KibanaContext, TimeRange, Filter, esQuery, Query } from 'src/plugins/data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';

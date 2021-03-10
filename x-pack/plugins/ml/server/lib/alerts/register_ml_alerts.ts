@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { AlertingPlugin } from '../../../../alerting/server';
+import { AlertingPlugin } from 'x-pack/plugins/alerting/server';
 import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
 import { SharedServices } from '../../shared_services';
 

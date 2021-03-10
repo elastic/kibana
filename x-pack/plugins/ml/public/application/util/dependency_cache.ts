@@ -21,9 +21,9 @@ import type {
 } from 'kibana/public';
 import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import type { SecurityPluginSetup } from '../../../../security/public';
-import type { MapsStartApi } from '../../../../maps/public';
-import type { FileUploadPluginStart } from '../../../../file_upload/public';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/public';
+import type { MapsStartApi } from 'x-pack/plugins/maps/public';
+import type { FileUploadPluginStart } from 'x-pack/plugins/file_upload/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;

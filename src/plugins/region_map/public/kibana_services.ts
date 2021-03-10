@@ -8,11 +8,11 @@
 
 import { CoreStart } from 'kibana/public';
 import { NotificationsStart } from 'kibana/public';
-import { createGetterSetter } from '../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { SharePluginStart } from '../../share/public';
-import { VectorLayer, TmsLayer } from '../../maps_legacy/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { SharePluginStart } from 'src/plugins/share/public';
+import { VectorLayer, TmsLayer } from 'src/plugins/maps_legacy/public';
 
 export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');
 

@@ -21,7 +21,7 @@ import {
 } from '../../../../../common/mock/endpoint';
 import { HttpFetchOptions } from 'kibana/public';
 import { cloneDeep } from 'lodash';
-import { licenseMock } from '../../../../../../../licensing/common/licensing.mock';
+import { licenseMock } from 'x-pack/plugins/licensing/common/licensing.mock';
 
 describe('policy details: ', () => {
   let store: Store;

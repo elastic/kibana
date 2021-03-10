@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import { IEsSearchRequest } from 'src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   ActionsStrategyResponse,

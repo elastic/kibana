@@ -7,6 +7,7 @@
  */
 
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { PersistableStateDefinition } from 'src/plugins/kibana_utils/common';
 import { ArgumentType } from './arguments';
 import { TypeToString } from '../types/common';
 import { ExecutionContext } from '../execution/types';
@@ -21,7 +22,6 @@ import {
   ExpressionFunctionMovingAverage,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
-import { PersistableStateDefinition } from '../../../kibana_utils/common';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to

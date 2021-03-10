@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import {
   SERVICE_NAME,

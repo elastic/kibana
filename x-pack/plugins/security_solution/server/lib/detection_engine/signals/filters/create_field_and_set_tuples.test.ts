@@ -8,10 +8,10 @@
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
 import { mockLogger, sampleDocWithSortId } from '../__mocks__/es_results';
 
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
-import { EntryList } from '../../../../../../lists/common';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { getSearchListItemResponseMock } from 'x-pack/plugins/lists/common/schemas/response/search_list_item_schema.mock';
+import { EntryList } from 'x-pack/plugins/lists/common';
 import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
 
 describe('filterEventsAgainstList', () => {

@@ -6,8 +6,8 @@
  */
 
 import { getFilter } from './get_filter';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { alertsMock, AlertServicesMock } from 'x-pack/plugins/alerting/server/mocks';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
 
 describe('get_filter', () => {
   let servicesMock: AlertServicesMock;

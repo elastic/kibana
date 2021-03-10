@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '../../../../core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from 'src/core/server';
 import { TelemetrySavedObject } from './';
 
 type GetTelemetrySavedObject = (

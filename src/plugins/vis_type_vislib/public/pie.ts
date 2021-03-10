@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
-import { AggGroupNames } from '../../data/public';
-import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { AggGroupNames } from 'src/plugins/data/public';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from 'src/plugins/visualizations/public';
 
 import { CommonVislibParams } from './types';
 import { PieOptions } from './editor';

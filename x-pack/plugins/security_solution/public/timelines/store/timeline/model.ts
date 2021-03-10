@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/public';
+import { Filter, IFieldSubType } from 'src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Alert } from 'x-pack/plugins/triggers_actions_ui/public';
 import { createAsyncAction } from './utils';
 import { MonitorIdParam } from './types';
-import { Alert } from '../../../../triggers_actions_ui/public';
 
 export const getExistingAlertAction = createAsyncAction<MonitorIdParam, Alert>(
   'GET EXISTING ALERTS'

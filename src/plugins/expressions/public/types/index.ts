@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Adapters } from '../../../inspector/public';
+import { Adapters } from 'src/plugins/inspector/public';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,

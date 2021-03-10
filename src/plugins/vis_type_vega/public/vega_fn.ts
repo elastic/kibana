@@ -8,12 +8,16 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExecutionContextSearch } from '../../data/public';
-import { ExecutionContext, ExpressionFunctionDefinition, Render } from '../../expressions/public';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
+import {
+  ExecutionContext,
+  ExpressionFunctionDefinition,
+  Render,
+} from 'src/plugins/expressions/public';
+import { KibanaContext, TimeRange, Query } from 'src/plugins/data/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 import { VegaInspectorAdapters } from './vega_inspector/index';
-import { KibanaContext, TimeRange, Query } from '../../data/public';
 import { VegaParser } from './data_model/vega_parser';
 
 type Input = KibanaContext | { type: 'null' };

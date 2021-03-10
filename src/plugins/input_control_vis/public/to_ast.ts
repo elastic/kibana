@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { Vis } from '../../visualizations/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
+import { Vis } from 'src/plugins/visualizations/public';
 import { InputControlExpressionFunctionDefinition } from './input_control_fn';
 import { InputControlVisParams } from './types';
 

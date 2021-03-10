@@ -22,6 +22,8 @@ import {
 import { first, switchMap, tap } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { KbnServerError } from 'src/plugins/kibana_utils/server';
 import type {
   IScopedSearchClient,
   ISearchSetup,
@@ -39,7 +41,6 @@ import { IndexPatternsServiceStart } from '../index_patterns';
 import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
@@ -64,7 +65,6 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
-import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;

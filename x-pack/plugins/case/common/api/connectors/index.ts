@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import { ActionResult, ActionType } from '../../../../actions/common';
+import { ActionResult, ActionType } from 'x-pack/plugins/actions/common';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';

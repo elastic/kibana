@@ -11,7 +11,7 @@ import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
   VisualizeFieldContext,
-} from '../../../../../src/plugins/ui_actions/public';
+} from 'src/plugins/ui_actions/public';
 import {
   getVisualizeCapabilities,
   getIndexPatternService,

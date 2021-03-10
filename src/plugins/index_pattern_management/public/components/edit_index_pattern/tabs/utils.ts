@@ -8,7 +8,7 @@
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
+import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { IndexPatternManagementStart } from '../../../../../../plugins/index_pattern_management/public';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 

@@ -12,11 +12,8 @@ import {
   UseRequestConfig as _UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
-} from '../../../../../../../../src/plugins/es_ui_shared/public';
-import type {
-  SendRequestConfig,
-  SendRequestResponse,
-} from '../../../../../../../../src/plugins/es_ui_shared/public';
+} from 'src/plugins/es_ui_shared/public';
+import type { SendRequestConfig, SendRequestResponse } from 'src/plugins/es_ui_shared/public';
 
 let httpClient: HttpSetup;
 

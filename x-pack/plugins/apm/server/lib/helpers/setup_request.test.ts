@@ -8,7 +8,7 @@
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 

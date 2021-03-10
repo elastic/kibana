@@ -16,13 +16,13 @@ import { i18n } from '@kbn/i18n';
 
 import { logger, Warn, version as vegaVersion } from 'vega';
 import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
+import { IServiceSettings } from 'src/plugins/maps_legacy/public';
 import { EsQueryParser } from './es_query_parser';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
-import { IServiceSettings } from '../../../maps_legacy/public';
 import {
   Bool,
   Data,

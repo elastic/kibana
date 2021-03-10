@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { UI_SETTINGS } from 'src/plugins/data/public';
 import { openSans } from '../../../common/lib/fonts';
 import { ElementFactory } from '../../../types';
 import { SetupInitializer } from '../../plugin';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 export const metricElementInitializer: SetupInitializer<ElementFactory> = (core, setup) => {
   return () => ({

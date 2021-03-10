@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../src/core/server';
+import { CoreSetup } from 'src/core/server';
 
 import { type as noteType } from './lib/note/saved_object_mappings';
 import { type as pinnedEventType } from './lib/pinned_event/saved_object_mappings';

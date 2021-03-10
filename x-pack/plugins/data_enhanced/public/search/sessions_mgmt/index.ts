@@ -11,11 +11,11 @@ import { CoreSetup } from 'kibana/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import type { ManagementSetup } from 'src/plugins/management/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from 'src/plugins/data/public';
 import type { ConfigSchema } from '../../../config';
 import type { DataEnhancedStartDependencies } from '../../plugin';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/public';
 
 export interface IManagementSectionsPluginsSetup {
   data: DataPublicPluginSetup;

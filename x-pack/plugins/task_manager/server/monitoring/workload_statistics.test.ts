@@ -6,7 +6,7 @@
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import {
   WorkloadAggregation,
   createWorkloadAggregator,
@@ -14,7 +14,7 @@ import {
   estimateRecurringTaskScheduling,
 } from './workload_statistics';
 import { ConcreteTaskInstance } from '../task';
-import { AggregationResultOf, ESSearchResponse } from '../../../../typings/elasticsearch';
+import { AggregationResultOf, ESSearchResponse } from 'x-pack/typings/elasticsearch';
 import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';
 import { of, Subject } from 'rxjs';

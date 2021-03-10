@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindResult } from '../../../../../alerting/server';
+import { FindResult } from 'x-pack/plugins/alerting/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams } from '../types';
 import { FindRuleOptions } from './types';

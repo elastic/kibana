@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import type { Dimensions } from '../../../../../vis_type_xy/public';
+import type { Dimensions } from 'src/plugins/vis_type_xy/public';
 
 import { buildPointSeriesData } from './point_series';
 import { Table, Column } from '../../types';

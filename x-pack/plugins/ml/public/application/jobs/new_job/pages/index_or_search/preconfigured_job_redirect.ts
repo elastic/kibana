@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { Datafeed, Job } from '../../../../../../common/types/anomaly_detection_jobs';

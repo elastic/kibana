@@ -11,8 +11,8 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
 import { IndexPattern, IndexPatternsService, RuntimeField } from 'src/plugins/data/common';
+import { UI_SETTINGS } from 'src/plugins/data/server';
 import { BASE_API_URL } from '../../common';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 import { PluginStartContract } from '../plugin';
 
 export function isBoomError(error: { isBoom?: boolean }): error is Boom.Boom {

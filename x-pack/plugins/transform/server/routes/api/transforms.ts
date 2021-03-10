@@ -19,6 +19,7 @@ import {
   TransformGetTransform,
   TransformGetTransformStats,
 } from '@elastic/elasticsearch/api/requestParams';
+import { IIndexPattern } from 'src/plugins/data/common/index_patterns';
 import { TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
@@ -58,7 +59,6 @@ import { addBasePath } from '../index';
 
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import { isLatestTransform } from '../../../common/types/transform';
 
 enum TRANSFORM_ACTIONS {

@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertTypeModel } from 'x-pack/plugins/triggers_actions_ui/public/types';
+import { AlertTypeParams } from 'x-pack/plugins/alerting/common';
 import {
   InventoryMetricConditions,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server/lib/alerting/inventory_metric_threshold/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { AlertTypeParams } from '../../../../alerting/common';
 import { validateMetricThreshold } from './components/validation';
 
 interface InventoryMetricAlertTypeParams extends AlertTypeParams {

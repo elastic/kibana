@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { AlertTypeParams } from 'x-pack/plugins/alerting/common';
 import { AnomalyResultType } from './anomalies';
 import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import { AlertTypeParams } from '../../../alerting/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';

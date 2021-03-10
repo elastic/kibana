@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { LicensingPluginStart } from '../../licensing/server';
+import { LicensingPluginStart } from 'x-pack/plugins/licensing/server';
 import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
 import { SearchService, SearchServiceStart } from './services';
 import { registerRoutes } from './routes';

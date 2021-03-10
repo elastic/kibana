@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import { getMigrations } from './migrations';
 import { RawAction } from '../types';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
 import { migrationMocks } from 'src/core/server/mocks';
 
 const context = migrationMocks.createContext();

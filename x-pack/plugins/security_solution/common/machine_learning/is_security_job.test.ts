@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '../../../ml/common/types/anomaly_detection_jobs';
+import { MlSummaryJob } from 'x-pack/plugins/ml/common/types/anomaly_detection_jobs';
 import { isSecurityJob } from './is_security_job';
 
 describe('isSecurityJob', () => {

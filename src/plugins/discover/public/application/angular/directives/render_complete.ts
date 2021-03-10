@@ -7,7 +7,7 @@
  */
 
 import { IScope } from 'angular';
-import { RenderCompleteListener } from '../../../../../kibana_utils/public';
+import { RenderCompleteListener } from 'src/plugins/kibana_utils/public';
 
 export function createRenderCompleteDirective() {
   return {

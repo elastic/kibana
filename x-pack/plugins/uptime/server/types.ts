@@ -6,8 +6,8 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
-import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
+import type { AlertingApiRequestHandlerContext } from 'x-pack/plugins/alerting/server';
+import type { LicensingApiRequestHandlerContext } from 'x-pack/plugins/licensing/server';
 /**
  * @internal
  */

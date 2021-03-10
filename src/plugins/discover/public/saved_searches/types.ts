@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SearchSource } from '../../../data/public';
-import { SavedObjectSaveOpts } from '../../../saved_objects/public';
+import { SearchSource } from 'src/plugins/data/public';
+import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { DiscoverGridSettings } from '../application/components/discover_grid/types';
 
 export type SortOrder = [string, string];

@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter, Query } from 'src/plugins/data/public';
 import { State } from '../types';
 
 import { InputsModel, InputsRange, GlobalQuery } from './model';

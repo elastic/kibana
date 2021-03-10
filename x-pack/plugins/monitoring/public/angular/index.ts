@@ -6,9 +6,9 @@
  */
 
 import angular, { IModule } from 'angular';
+import { configureAppAngularModule } from 'src/plugins/kibana_legacy/public';
 import { uiRoutes } from './helpers/routes';
 import { Legacy } from '../legacy_shims';
-import { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';
 import { localAppModule, appModuleName } from './app_modules';
 
 import { MonitoringStartPluginDependencies } from '../types';

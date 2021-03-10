@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  coreMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '../../../core/server/mocks';
+import { coreMock, savedObjectsRepositoryMock, uiSettingsServiceMock } from 'src/core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../usage_collection/server/usage_collection.mock';
+} from 'src/plugins/usage_collection/server/usage_collection.mock';
 
 import { plugin } from './';
 

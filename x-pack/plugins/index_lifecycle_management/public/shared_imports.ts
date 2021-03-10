@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useKibana as _useKibana } from 'src/plugins/kibana_react/public';
 import { AppServicesContext } from './types';
-import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
 
 export {
   useForm,

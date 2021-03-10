@@ -7,8 +7,8 @@
 
 import { lazy } from 'react';
 
+import { JiraFieldsType } from 'x-pack/plugins/case/common/api/connectors';
 import { CaseConnector } from '../types';
-import { JiraFieldsType } from '../../../../../../case/common/api/connectors';
 import * as i18n from './translations';
 
 export * from './types';

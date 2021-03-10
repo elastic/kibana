@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
-import { ESFilter } from '../../../../../typings/elasticsearch';
 
 export interface GetSnapshotCountParams {
   dateRangeStart: string;

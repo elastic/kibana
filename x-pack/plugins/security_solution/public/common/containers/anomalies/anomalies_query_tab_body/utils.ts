@@ -7,7 +7,7 @@
 
 import deepmerge from 'deepmerge';
 
-import { MlSummaryJob } from '../../../../../../ml/public';
+import { MlSummaryJob } from 'x-pack/plugins/ml/public';
 import { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';
 import { FlowTarget } from '../../../../graphql/types';

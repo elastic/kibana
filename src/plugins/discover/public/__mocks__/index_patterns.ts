@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsService } from '../../../data/common';
+import { IndexPatternsService } from 'src/plugins/data/common';
 import { indexPatternMock } from './index_pattern';
 
 export const indexPatternsMock = ({

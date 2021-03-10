@@ -11,9 +11,9 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
-} from '../../../../../../ui_actions/public';
+} from 'src/plugins/ui_actions/public';
+import { IndexPatternField, KBN_FIELD_TYPES } from 'src/plugins/data/public';
 import { getUiActions } from '../../../../kibana_services';
-import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../data/public';
 
 function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE

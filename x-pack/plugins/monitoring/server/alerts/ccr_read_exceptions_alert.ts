@@ -6,6 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertInstance } from 'x-pack/plugins/alerting/server';
+import { parseDuration } from 'x-pack/plugins/alerting/common/parse_duration';
+import { SanitizedAlert, RawAlertInstance } from 'x-pack/plugins/alerting/common';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -20,7 +23,6 @@ import {
   CommonAlertFilter,
   CCRReadExceptionsStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_CCR_READ_EXCEPTIONS,
@@ -29,8 +31,6 @@ import {
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { parseDuration } from '../../../alerting/common/parse_duration';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';

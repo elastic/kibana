@@ -12,11 +12,8 @@ import moment from 'moment';
 import Puid from 'puid';
 import sinon from 'sinon';
 import { ReportingConfig, ReportingCore } from '../../';
-import { fieldFormats, UI_SETTINGS } from '../../../../../../src/plugins/data/server';
-import {
-  CSV_QUOTE_VALUES_SETTING,
-  CSV_SEPARATOR_SETTING,
-} from '../../../../../../src/plugins/share/server';
+import { fieldFormats, UI_SETTINGS } from 'src/plugins/data/server';
+import { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from 'src/plugins/share/server';
 import { CancellationToken } from '../../../common';
 import { CSV_BOM_CHARS } from '../../../common/constants';
 import { LevelLogger } from '../../lib';

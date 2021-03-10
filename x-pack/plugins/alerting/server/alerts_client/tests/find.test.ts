@@ -6,18 +6,18 @@
  */
 
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
-import { nodeTypes } from '../../../../../../src/plugins/data/common';
-import { esKuery } from '../../../../../../src/plugins/data/server';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { nodeTypes } from 'src/plugins/data/common';
+import { esKuery } from 'src/plugins/data/server';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
+import { actionsAuthorizationMock } from 'x-pack/plugins/actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { ActionsAuthorization } from 'x-pack/plugins/actions/server';
+import { httpServerMock } from 'src/core/server/mocks';
+import { auditServiceMock } from 'x-pack/plugins/security/server/audit/index.mock';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryAlertType } from '../../alert_type_registry';

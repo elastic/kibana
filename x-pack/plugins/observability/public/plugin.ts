@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -16,8 +16,8 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
   CoreStart,
-} from '../../../../src/core/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+} from 'src/core/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 

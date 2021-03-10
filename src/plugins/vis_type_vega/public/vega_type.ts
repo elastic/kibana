@@ -9,8 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { parse } from 'hjson';
 
-import { DefaultEditorSize } from '../../vis_default_editor/public';
-import { VIS_EVENT_TO_TRIGGER, VisGroups, VisTypeDefinition } from '../../visualizations/public';
+import { DefaultEditorSize } from 'src/plugins/vis_default_editor/public';
+import {
+  VIS_EVENT_TO_TRIGGER,
+  VisGroups,
+  VisTypeDefinition,
+} from 'src/plugins/visualizations/public';
 
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaReactOverlays } from '../../../../src/plugins/kibana_react/public';
+import { KibanaReactOverlays } from 'src/plugins/kibana_react/public';
 import { ActionFactory } from './dynamic_actions';
 
 export interface CommonlyUsedRange {

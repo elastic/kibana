@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
+import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import {
   getLatencyChartSelector,

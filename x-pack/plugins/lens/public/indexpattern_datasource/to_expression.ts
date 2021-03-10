@@ -9,14 +9,14 @@ import type { IUiSettingsClient } from 'kibana/public';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../../../src/plugins/data/public';
+} from 'src/plugins/data/public';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpression,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
-} from '../../../../../src/plugins/expressions/public';
+} from 'src/plugins/expressions/public';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';

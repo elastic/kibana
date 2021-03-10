@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 
 import { MapServiceSettings, getAttributionsForTmsService } from './map_service_settings';
-import { MapsLegacyConfig } from '../../../../maps_legacy/config';
+import { MapsLegacyConfig } from 'src/plugins/maps_legacy/config';
 import { EMSClient, TMSService } from '@elastic/ems-client';
 import { setUISettings } from '../../services';
 

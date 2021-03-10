@@ -10,9 +10,9 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
 
 import { getCapabilitiesForRollupIndices } from 'src/plugins/data/server';
-import { IndexManagementPluginSetup } from '../../index_management/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { IndexManagementPluginSetup } from 'x-pack/plugins/index_management/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 import { License } from './services';
 import { IndexPatternsFetcher } from './shared_imports';
 import { isEsError } from './shared_imports';

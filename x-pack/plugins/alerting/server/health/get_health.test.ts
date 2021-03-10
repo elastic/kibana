@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import { AlertExecutionStatusErrorReasons, HealthStatus } from '../types';
 import { getHealth } from './get_health';
 

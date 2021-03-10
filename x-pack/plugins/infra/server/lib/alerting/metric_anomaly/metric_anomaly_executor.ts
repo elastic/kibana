@@ -8,20 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import moment from 'moment';
-import { stateToAlertMessage } from '../common/messages';
-import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { MappedAnomalyHit } from '../../infra_ml';
-import { AlertStates } from '../common/types';
 import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-} from '../../../../../alerting/common';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/common';
+import { AlertExecutorOptions } from 'x-pack/plugins/alerting/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
+import { KibanaRequest } from 'src/core/server';
+import { stateToAlertMessage } from '../common/messages';
+import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
+import { MappedAnomalyHit } from '../../infra_ml';
+import { AlertStates } from '../common/types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_alert_type';
-import { MlPluginSetup } from '../../../../../ml/server';
-import { KibanaRequest } from '../../../../../../../src/core/server';
 import { InfraBackendLibs } from '../../infra_types';
 import { evaluateCondition } from './evaluate_condition';
 

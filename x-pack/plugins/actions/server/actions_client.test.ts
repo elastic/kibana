@@ -11,24 +11,21 @@ import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_regist
 import { ActionsClient } from './actions_client';
 import { ExecutorType, ActionType } from './types';
 import { ActionExecutor, TaskRunnerFactory, ILicenseState } from './lib';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
-import { licensingMock } from '../../licensing/server/mocks';
-import { httpServerMock } from '../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../security/server/audit/index.mock';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
+import { auditServiceMock } from 'x-pack/plugins/security/server/audit/index.mock';
 
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {

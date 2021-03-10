@@ -9,7 +9,7 @@ import { Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
-import { httpServiceMock, httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
+import { httpServiceMock, httpServerMock, coreMock } from 'src/core/server/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';

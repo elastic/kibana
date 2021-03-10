@@ -10,7 +10,7 @@ import './app.scss';
 import _ from 'lodash';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { LensAppState } from './types';
 import { Document } from '../persistence';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
-import { getEntryNestedMock } from '../../../../../../lists/common/schemas/types/entry_nested.mock';
-import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
+import { getEntryMatchMock } from 'x-pack/plugins/lists/common/schemas/types/entry_match.mock';
+import { getEntryNestedMock } from 'x-pack/plugins/lists/common/schemas/types/entry_nested.mock';
+import { getEntryListMock } from 'x-pack/plugins/lists/common/schemas/types/entry_list.mock';
 
 import { ExceptionsBuilderExceptionItem } from '../types';
 import { Action, State, exceptionsBuilderReducer } from './reducer';

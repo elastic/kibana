@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '../../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from 'src/plugins/data/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
 
 import { VisToExpressionAst } from '../types';
 

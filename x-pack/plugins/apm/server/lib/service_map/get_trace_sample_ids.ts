@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,

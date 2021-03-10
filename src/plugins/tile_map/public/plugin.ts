@@ -13,10 +13,12 @@ import {
   PluginInitializerContext,
   IUiSettingsClient,
 } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
-import { DataPublicPluginStart } from '../../data/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from 'src/plugins/maps_legacy/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { SharePluginStart } from 'src/plugins/share/public';
 import {
   setCoreService,
   setFormatService,
@@ -24,8 +26,6 @@ import {
   setKibanaLegacy,
   setShareService,
 } from './services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { SharePluginStart } from '../../share/public';
 
 import { createTileMapFn } from './tile_map_fn';
 import { createTileMapTypeDefinition } from './tile_map_type';

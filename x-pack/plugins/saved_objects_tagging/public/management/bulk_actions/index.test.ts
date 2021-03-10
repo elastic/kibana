@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
 import { TagsCapabilities } from '../../../common/capabilities';
 import { tagClientMock } from '../../services/tags/tags_client.mock';

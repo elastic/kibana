@@ -7,7 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter } from 'src/plugins/data/public';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
   DataProvider,

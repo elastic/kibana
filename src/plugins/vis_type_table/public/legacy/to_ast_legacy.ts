@@ -9,9 +9,9 @@
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { getVisSchemas, VisToExpressionAst } from '../../../visualizations/public';
+} from 'src/plugins/data/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
+import { getVisSchemas, VisToExpressionAst } from 'src/plugins/visualizations/public';
 import { TableVisParams } from '../../common';
 import { TableExpressionFunctionDefinition } from './table_vis_legacy_fn';
 

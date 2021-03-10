@@ -18,13 +18,9 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import {
-  IndexPattern,
-  IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../src/plugins/data/public';
+import { IndexPattern, IFieldType, ES_FIELD_TYPES, KBN_FIELD_TYPES } from 'src/plugins/data/public';
 
+import type { RuntimeField } from 'src/plugins/data/common/index_patterns';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
 import {
@@ -48,7 +44,6 @@ import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
-import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { RuntimeMappings } from '../../../../common/types/fields';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
 

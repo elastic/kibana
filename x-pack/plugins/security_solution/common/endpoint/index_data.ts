@@ -9,8 +9,6 @@ import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
-import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
-import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -30,7 +28,9 @@ import {
   PostAgentCheckinResponse,
   PostAgentAcksResponse,
   PostAgentAcksRequest,
-} from '../../../fleet/common';
+} from 'x-pack/plugins/fleet/common';
+import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
+import { firstNonNullValue } from './models/ecs_safety_helpers';
 import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';

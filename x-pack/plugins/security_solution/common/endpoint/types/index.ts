@@ -6,7 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
+import { NewPackagePolicy, PackagePolicy } from 'x-pack/plugins/fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
 export * from './os';

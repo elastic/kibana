@@ -13,7 +13,7 @@ import { ApplicationStart, AppNavLinkStatus, AppStatus, PublicAppInfo } from 'sr
 import {
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
-} from '../../../global_search/public';
+} from 'x-pack/plugins/global_search/public';
 import { applicationServiceMock } from 'src/core/public/mocks';
 import { createApplicationResultProvider } from './application';
 

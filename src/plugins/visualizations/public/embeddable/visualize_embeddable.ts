@@ -9,7 +9,6 @@
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
   TimeRange,
@@ -17,7 +16,7 @@ import {
   esFilters,
   Filter,
   TimefilterContract,
-} from '../../../../plugins/data/public';
+} from 'src/plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -27,18 +26,19 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
   AttributeService,
-} from '../../../../plugins/embeddable/public';
+} from 'src/plugins/embeddable/public';
 import {
   IExpressionLoaderParams,
   ExpressionsStart,
   ExpressionRenderError,
   ExpressionAstExpression,
-} from '../../../../plugins/expressions/public';
+} from 'src/plugins/expressions/public';
+import { SavedObjectAttributes } from 'src/core/types';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { SavedObjectAttributes } from '../../../../core/types';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';

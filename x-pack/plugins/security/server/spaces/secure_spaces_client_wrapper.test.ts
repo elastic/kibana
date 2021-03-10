@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { GetAllSpacesPurpose, Space } from 'x-pack/plugins/spaces/server';
+import { spacesClientMock } from 'x-pack/plugins/spaces/server/mocks';
+
 import { deepFreeze } from '@kbn/std';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import type { GetAllSpacesPurpose, Space } from '../../../spaces/server';
-import { spacesClientMock } from '../../../spaces/server/mocks';
 import type { AuditEvent, AuditLogger } from '../audit';
 import { EventOutcome, SpaceAuditAction } from '../audit';
 import { auditServiceMock } from '../audit/index.mock';

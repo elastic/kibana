@@ -6,8 +6,8 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
+import { licenseMock } from 'x-pack/plugins/licensing/common/licensing.mock';
 
-import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { SecurityLicenseService } from './license_service';
 
 describe('license features', function () {

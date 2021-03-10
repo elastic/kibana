@@ -9,13 +9,13 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { APMConfig } from '../..';
 import {
   AlertingPlugin,
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
-} from '../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
+import { APMConfig } from '../..';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,

@@ -12,11 +12,11 @@ import {
   ISavedObjectsRepository,
 } from 'kibana/server';
 import chalk from 'chalk';
+import { ESSearchResponse } from 'x-pack/typings/elasticsearch';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
 import { savedObjectsAdapter } from './saved_objects';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
 
 export interface UMDomainLibs {
   requests: UptimeRequests;

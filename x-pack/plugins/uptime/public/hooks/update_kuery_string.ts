@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { esKuery, IIndexPattern } from 'src/plugins/data/public';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 
 const getKueryString = (urlFilters: string): string => {

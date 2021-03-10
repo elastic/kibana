@@ -6,13 +6,13 @@
  */
 
 import { of } from 'rxjs';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { coreMock } from 'src/core/server/mocks';
 
-import { featuresPluginMock } from '../../features/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ConfigSchema } from './config';
 import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';

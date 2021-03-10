@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PartialAlert } from '../../../../../alerting/server';
+import { PartialAlert } from 'x-pack/plugins/alerting/server';
 import { readNotifications } from './read_notifications';
 import { RuleNotificationAlertTypeParams, UpdateNotificationParams } from './types';
 import { addTags } from './add_tags';

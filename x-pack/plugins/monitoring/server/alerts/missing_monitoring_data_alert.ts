@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { AlertInstance } from 'x-pack/plugins/alerting/server';
+import { RawAlertInstance, SanitizedAlert } from 'x-pack/plugins/alerting/common';
+import { parseDuration } from 'x-pack/plugins/alerting/common/parse_duration';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -17,7 +20,6 @@ import {
   CommonAlertParams,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN,
   ALERT_MISSING_MONITORING_DATA,
@@ -25,8 +27,6 @@ import {
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
-import { parseDuration } from '../../../alerting/common/parse_duration';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { AlertingDefaults, createLink } from './alert_helpers';

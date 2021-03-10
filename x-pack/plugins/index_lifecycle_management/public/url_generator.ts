@@ -6,13 +6,13 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public/';
+import { UrlGeneratorsDefinition } from 'src/plugins/share/public';
+import { MANAGEMENT_APP_ID } from 'src/plugins/management/public';
 import {
   getPoliciesListPath,
   getPolicyCreatePath,
   getPolicyEditPath,
 } from './application/services/navigation';
-import { MANAGEMENT_APP_ID } from '../../../../src/plugins/management/public';
 import { SetupDependencies } from './types';
 import { PLUGIN } from '../common/constants';
 

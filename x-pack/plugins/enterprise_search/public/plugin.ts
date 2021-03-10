@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { CloudSetup } from 'x-pack/plugins/cloud/public';
+
+import { LicensingPluginStart } from 'x-pack/plugins/licensing/public';
+
 import {
   AppMountParameters,
   CoreStart,
@@ -13,14 +17,9 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { CloudSetup } from '../../cloud/public';
-import { LicensingPluginStart } from '../../licensing/public';
+} from 'src/core/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from 'src/plugins/home/public';
 
 import {
   APP_SEARCH_PLUGIN,

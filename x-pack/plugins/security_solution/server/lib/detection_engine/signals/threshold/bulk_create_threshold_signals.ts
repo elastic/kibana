@@ -8,17 +8,17 @@
 import { get } from 'lodash/fp';
 import set from 'set-value';
 
+import { Logger } from 'src/core/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from 'x-pack/plugins/alerting/server';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger } from '../../../../../../../../src/core/server';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
 import { BaseHit, RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
 import { RuleTypeParams, RefreshTypes } from '../../types';

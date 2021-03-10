@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
+import type { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 
 export type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
 export { shouldShowTelemetryOptIn };

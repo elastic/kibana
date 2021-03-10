@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { LegacyAPICaller } from 'src/core/server';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
+import { wrapRouteWithLicenseCheck } from 'x-pack/plugins/licensing/server';
 
 import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { CoreSetup, IRouter, KibanaRequest, RouteMethod } from 'src/core/server';
+import { RequestHandler } from 'src/core/server';
+import { IndexPatternsFetcher, UI_SETTINGS } from 'src/plugins/data/server';
 import {
   InfraRouteConfig,
   InfraTSVBResponse,
@@ -17,16 +20,8 @@ import {
   InfraDatabaseGetIndicesAliasResponse,
 } from './adapter_types';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
-import {
-  CoreSetup,
-  IRouter,
-  KibanaRequest,
-  RouteMethod,
-} from '../../../../../../../src/core/server';
-import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
 
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;

@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { LegacyAPICaller } from 'src/core/server';
+import { wrapRouteWithLicenseCheck } from 'x-pack/plugins/licensing/server';
 import type { LogstashPluginRouter } from '../../types';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { PipelineListItem } from '../../models/pipeline_list_item';
 import { checkLicense } from '../../lib/check_license';

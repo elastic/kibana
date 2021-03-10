@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { MlServicesContext } from '../../app';
 

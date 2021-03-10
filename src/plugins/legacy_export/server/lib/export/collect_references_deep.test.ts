@@ -7,7 +7,7 @@
  */
 
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { collectReferencesDeep } from './collect_references_deep';
 
 const data: Array<SavedObject<SavedObjectAttributes>> = [

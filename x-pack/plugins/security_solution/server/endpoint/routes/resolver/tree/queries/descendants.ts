@@ -8,8 +8,8 @@
 import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
+import { JsonObject, JsonValue } from 'src/plugins/kibana_utils/common';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
 import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 
 interface DescendantsParams {

@@ -9,16 +9,13 @@ import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { LegacyAPICaller } from 'kibana/server';
 import { URL } from 'url';
-import { Logger, CoreStart } from '../../../../../../src/core/server';
-import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
-import {
-  TelemetryPluginStart,
-  TelemetryPluginSetup,
-} from '../../../../../../src/plugins/telemetry/server';
+import { Logger, CoreStart } from 'src/core/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
+import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import { TelemetryDiagTask } from './task';
 
 export type SearchTypes =

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { defer, of, interval, Observable, throwError, timer } from 'rxjs';
 import { catchError, mergeMap, retryWhen, switchMap } from 'rxjs/operators';
-import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { ServiceStatus, ServiceStatusLevels } from 'src/core/server';
+import { TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
 import { HEALTH_TASK_ID } from './task';
 import { HealthStatus } from '../types';
 

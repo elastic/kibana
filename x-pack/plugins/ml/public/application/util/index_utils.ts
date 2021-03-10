@@ -12,7 +12,7 @@ import {
   IndexPatternsContract,
   Query,
   IndexPatternAttributes,
-} from '../../../../../../src/plugins/data/public';
+} from 'src/plugins/data/public';
 import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 

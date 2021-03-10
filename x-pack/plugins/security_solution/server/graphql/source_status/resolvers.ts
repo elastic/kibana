@@ -6,12 +6,12 @@
  */
 
 import { GraphQLScalarType, Kind } from 'graphql';
+import { IFieldSubType } from 'src/plugins/data/common/index_patterns/types';
 import { SourceStatusResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { IndexFields } from '../../lib/index_fields';
 import { SourceStatus } from '../../lib/source_status';
 import { QuerySourceResolver } from '../sources/resolvers';
-import { IFieldSubType } from '../../../../../../src/plugins/data/common/index_patterns/types';
 
 export type SourceStatusIndicesExistResolver = ChildResolverOf<
   AppResolverOf<SourceStatusResolvers.IndicesExistResolver>,

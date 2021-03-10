@@ -6,10 +6,7 @@
  */
 
 import { RequestHandler, RequestHandlerContext } from 'src/core/server';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 export const routeHandlerContextMock = ({
   core: {

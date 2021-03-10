@@ -7,7 +7,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/server';
-import { UI_SETTINGS } from '../../../../../data/server';
+import { UI_SETTINGS } from 'src/plugins/data/server';
 
 export async function getEsQueryConfig(uiSettings: IUiSettingsClient) {
   const allowLeadingWildcards = await uiSettings.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS);

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { createSessionRestorationDataProvider } from './session_restoration';
 import { getAppStateDefaults } from './get_app_state_defaults';
 import { getSavedDashboardMock } from '../test_helpers';
-import { SavedObjectTagDecoratorTypeGuard } from '../../../../saved_objects_tagging_oss/public';
+import { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
 import { ViewMode } from '../../services/embeddable';
 
 describe('createSessionRestorationDataProvider', () => {

@@ -16,7 +16,7 @@ import {
   CasePatchRequest,
   CaseType,
   AssociationType,
-} from '../../../../case/common/api';
+} from 'x-pack/plugins/case/common/api';
 import { CaseStatusWithAllStatus } from '../components/status';
 
 export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';

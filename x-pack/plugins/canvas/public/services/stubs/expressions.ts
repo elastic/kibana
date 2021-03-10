@@ -6,8 +6,8 @@
  */
 
 import { AnyExpressionRenderDefinition } from 'src/plugins/expressions';
+import { plugin } from 'src/plugins/expressions/public';
 import { ExpressionsService } from '../';
-import { plugin } from '../../../../../../src/plugins/expressions/public';
 import { functions as functionDefinitions } from '../../../canvas_plugin_src/functions/common';
 import { renderFunctions } from '../../../canvas_plugin_src/renderers/core';
 

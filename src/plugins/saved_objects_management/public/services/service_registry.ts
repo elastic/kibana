@@ -7,7 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 
 export interface SavedObjectsManagementServiceRegistryEntry {
   id: string;

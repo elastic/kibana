@@ -6,8 +6,8 @@
  */
 
 import { Action } from 'src/plugins/ui_actions/public';
+import { DatatableColumnType } from 'src/plugins/expressions';
 import { RawValue } from '../../common/constants';
-import { DatatableColumnType } from '../../../../../src/plugins/expressions';
 
 export function isUrlDrilldown(action: Action) {
   return action.type === 'URL_DRILLDOWN';

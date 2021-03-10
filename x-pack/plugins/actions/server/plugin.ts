@@ -18,18 +18,22 @@ import {
   ElasticsearchServiceStart,
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { SpacesPluginStart } from '../../spaces/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
+} from 'x-pack/plugins/encrypted_saved_objects/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from 'x-pack/plugins/task_manager/server';
+import { LicensingPluginSetup, LicensingPluginStart } from 'x-pack/plugins/licensing/server';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 
+import { IEventLogger, IEventLogService } from 'x-pack/plugins/event_log/server';
 import { ActionsConfig } from './config';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
@@ -50,7 +54,6 @@ import {
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   setupSavedObjects,

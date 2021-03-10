@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
   MappingsDefinition,
-} from '../../../../../observability/server';
+} from 'x-pack/plugins/observability/server';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 

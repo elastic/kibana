@@ -10,18 +10,16 @@ import { first, map, share } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import { SecurityPluginSetup, SecurityPluginStart } from 'x-pack/plugins/security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { SpacesPluginStart } from '../../spaces/server';
-import { AlertsClient } from './alerts_client';
-import { AlertTypeRegistry } from './alert_type_registry';
-import { TaskRunnerFactory } from './task_runner';
-import { AlertsClientFactory } from './alerts_client_factory';
-import { ILicenseState, LicenseState } from './lib/license_state';
+} from 'x-pack/plugins/encrypted_saved_objects/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from 'x-pack/plugins/task_manager/server';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
 import {
   KibanaRequest,
   Logger,
@@ -35,7 +33,27 @@ import {
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
-} from '../../../../src/core/server';
+} from 'src/core/server';
+import {
+  LICENSE_TYPE,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from 'x-pack/plugins/licensing/server';
+import {
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from 'x-pack/plugins/actions/server';
+import {
+  IEventLogger,
+  IEventLogService,
+  IEventLogClientService,
+} from 'x-pack/plugins/event_log/server';
+import { PluginStartContract as FeaturesPluginStart } from 'x-pack/plugins/features/server';
+import { AlertsClient } from './alerts_client';
+import { AlertTypeRegistry } from './alert_type_registry';
+import { TaskRunnerFactory } from './task_runner';
+import { AlertsClientFactory } from './alerts_client_factory';
+import { ILicenseState, LicenseState } from './lib/license_state';
 import type { AlertingRequestHandlerContext } from './types';
 
 import {
@@ -57,11 +75,6 @@ import {
   unmuteAlertInstanceRoute,
   healthRoute,
 } from './routes';
-import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import {
-  PluginSetupContract as ActionsPluginSetupContract,
-  PluginStartContract as ActionsPluginStartContract,
-} from '../../actions/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -73,8 +86,6 @@ import {
 } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 import {
   initializeApiKeyInvalidator,

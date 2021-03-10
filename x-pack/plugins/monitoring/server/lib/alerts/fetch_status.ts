@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { AlertsClient } from 'x-pack/plugins/alerting/server';
 import { AlertInstanceState } from '../../../common/types/alerts';
-import { AlertsClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import {
   CommonAlertStatus,

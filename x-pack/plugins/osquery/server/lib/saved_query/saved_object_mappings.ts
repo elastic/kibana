@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../src/core/server';
+import { SavedObjectsType } from 'src/core/server';
 
 import { savedQuerySavedObjectType, packSavedObjectType } from '../../../common/types';
 

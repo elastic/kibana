@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, DatatableColumn, DatatableRow } from '../../../../expressions/common';
+import { Datatable, DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
 
 type DataViewColumnRender = (value: string, _item: DatatableRow) => string;
 

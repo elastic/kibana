@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { ActionType, AlertAction } from 'x-pack/plugins/triggers_actions_ui/public';
+import { Alert, AlertTypeParams } from 'x-pack/plugins/alerting/common';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
-import { ActionType, AlertAction } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { Alert, AlertTypeParams } from '../../../../alerting/common';
 import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions } from './alert_actions';

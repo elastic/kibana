@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
+
 import { coreMock } from 'src/core/server/mocks';
 
-import { securityMock } from '../../security/server/mocks';
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 

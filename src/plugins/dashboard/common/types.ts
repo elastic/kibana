@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput, PanelState } from '../../../../src/plugins/embeddable/common/types';
-import { SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
+import { EmbeddableInput, PanelState } from 'src/plugins/embeddable/common/types';
+import { SavedObjectEmbeddableInput } from 'src/plugins/embeddable/common/lib/saved_object_embeddable';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,

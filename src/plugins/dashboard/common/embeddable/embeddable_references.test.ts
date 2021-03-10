@@ -12,9 +12,9 @@ import {
   InjectDeps,
   injectPanelsReferences,
 } from './embeddable_references';
-import { createEmbeddablePersistableStateServiceMock } from '../../../embeddable/common/mocks';
+import { createEmbeddablePersistableStateServiceMock } from 'src/plugins/embeddable/common/mocks';
 import { SavedDashboardPanel } from '../types';
-import { EmbeddableStateWithType } from '../../../embeddable/common';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 
 const embeddablePersistableStateService = createEmbeddablePersistableStateServiceMock();
 const deps: InjectDeps & ExtractDeps = {

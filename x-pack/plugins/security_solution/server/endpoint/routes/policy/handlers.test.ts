@@ -10,7 +10,7 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { createMockAgentService } from '../../../../../fleet/server/mocks';
+import { createMockAgentService } from 'x-pack/plugins/fleet/server/mocks';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
 import {
   ILegacyScopedClusterClient,
@@ -22,13 +22,13 @@ import {
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { SearchResponse } from 'elasticsearch';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
-import { Agent } from '../../../../../fleet/common/types/models';
-import { AgentService } from '../../../../../fleet/server/services';
+import { Agent } from 'x-pack/plugins/fleet/common/types/models';
+import { AgentService } from 'x-pack/plugins/fleet/server/services';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;

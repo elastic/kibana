@@ -17,8 +17,8 @@ import {
   ApplicationStart,
 } from 'kibana/public';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { TelemetryPluginStart } from '../../../telemetry/public';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
+import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { TutorialService } from '../services/tutorials';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';

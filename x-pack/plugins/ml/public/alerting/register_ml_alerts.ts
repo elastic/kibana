@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
+import { TriggersAndActionsUIPublicPluginSetup } from 'x-pack/plugins/triggers_actions_ui/public';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 
 export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
   triggersActionsUi.alertTypeRegistry.register({

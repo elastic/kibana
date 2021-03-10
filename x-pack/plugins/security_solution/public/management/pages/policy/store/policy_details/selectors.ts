@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { ILicense } from '../../../../../../../licensing/common/types';
+import { ILicense } from 'x-pack/plugins/licensing/common/types';
 import { unsetPolicyFeaturesAboveLicenseLevel } from '../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../types';
 import {

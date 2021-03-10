@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema, entriesList } from '../../../../../../lists/common/schemas';
+import { ExceptionListItemSchema, entriesList } from 'x-pack/plugins/lists/common/schemas';
 import { hasLargeValueList } from '../../../../../common/detection_engine/utils';
 import { FilterEventsAgainstListOptions } from './types';
 import { filterEvents } from './filter_events';

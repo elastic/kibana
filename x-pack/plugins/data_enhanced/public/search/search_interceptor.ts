@@ -15,7 +15,7 @@ import {
   UI_SETTINGS,
   IKibanaSearchRequest,
   SearchSessionState,
-} from '../../../../../src/plugins/data/public';
+} from 'src/plugins/data/public';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {

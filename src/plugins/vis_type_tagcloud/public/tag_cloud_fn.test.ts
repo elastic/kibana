@@ -8,7 +8,7 @@
 
 import { createTagCloudFn } from './tag_cloud_fn';
 
-import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 describe('interpreter/functions#tagcloud', () => {
   const fn = functionWrapper(createTagCloudFn());

@@ -12,9 +12,9 @@ import {
   saveObjects,
   saveObject,
 } from './resolve_saved_objects';
-import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
-import { IndexPatternsContract } from '../../../data/public';
-import { dataPluginMock } from '../../../data/public/mocks';
+import { SavedObject, SavedObjectLoader } from 'src/plugins/saved_objects/public';
+import { IndexPatternsContract } from 'src/plugins/data/public';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 class SavedObjectNotFound extends Error {
   constructor(options: Record<string, any>) {

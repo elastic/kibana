@@ -6,7 +6,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from 'src/plugins/data/common';
 
 import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptionsPaginated } from '../..';

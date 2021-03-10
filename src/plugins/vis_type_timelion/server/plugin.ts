@@ -11,8 +11,8 @@ import { TypeOf, schema } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 
-import type { PluginStart, DataRequestHandlerContext } from '../../../../src/plugins/data/server';
-import { CoreSetup, PluginInitializerContext, Plugin } from '../../../../src/core/server';
+import type { PluginStart, DataRequestHandlerContext } from 'src/plugins/data/server';
+import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';

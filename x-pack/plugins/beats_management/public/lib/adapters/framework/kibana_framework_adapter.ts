@@ -11,8 +11,10 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/public';
+import { ManagementSetup, RegisterManagementAppArgs } from 'src/plugins/management/public';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
 import { MANAGEMENT_SECTION } from '../../../../common/constants';
-import { SecurityPluginSetup } from '../../../../../security/public';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
   FrameworkAdapter,
@@ -21,11 +23,6 @@ import {
   RuntimeFrameworkInfo,
   RuntimeFrameworkUser,
 } from './adapter_types';
-import {
-  ManagementSetup,
-  RegisterManagementAppArgs,
-} from '../../../../../../../src/plugins/management/public';
-import { LicensingPluginSetup } from '../../../../../licensing/public';
 import { BeatsManagementConfigType } from '../../../../common';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {

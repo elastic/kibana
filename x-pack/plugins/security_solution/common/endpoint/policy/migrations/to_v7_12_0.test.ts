@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { PackagePolicy } from '../../../../../fleet/common';
+import { PackagePolicy } from 'x-pack/plugins/fleet/common';
 import { PolicyData, ProtectionModes } from '../../types';
 import { migratePackagePolicyToV7120 } from './to_v7_12_0';
 

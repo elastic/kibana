@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { textService } from '../text';
 import {
   linkToHome,

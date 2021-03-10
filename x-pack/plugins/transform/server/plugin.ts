@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
 
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';

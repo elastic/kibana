@@ -7,13 +7,7 @@
 
 // import { curry } from 'lodash';
 // import { ActionTypeExecutorResult } from '../../actions/server/types';
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../../src/core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
 
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';

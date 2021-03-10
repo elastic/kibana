@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/data/public';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../../../../src/plugins/embeddable/public';
+import { APPLY_FILTER_TRIGGER } from 'src/plugins/data/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from 'src/plugins/embeddable/public';
 
 /**
  * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.

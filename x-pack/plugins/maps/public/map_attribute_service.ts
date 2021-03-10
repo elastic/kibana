@@ -6,11 +6,11 @@
  */
 
 import { SavedObjectReference } from 'src/core/types';
-import { AttributeService } from '../../../../src/plugins/embeddable/public';
+import { AttributeService } from 'src/plugins/embeddable/public';
+import { checkForDuplicateTitle, OnSaveProps } from 'src/plugins/saved_objects/public';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';

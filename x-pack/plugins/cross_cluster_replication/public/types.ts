@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { IndexManagementPluginSetup } from '../../index_management/public';
-import { RemoteClustersPluginSetup } from '../../remote_clusters/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { IndexManagementPluginSetup } from 'x-pack/plugins/index_management/public';
+import { RemoteClustersPluginSetup } from 'x-pack/plugins/remote_clusters/public';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
 
 export interface PluginDependencies {
   usageCollection: UsageCollectionSetup;

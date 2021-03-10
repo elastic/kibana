@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { FleetStart } from '../../../../../fleet/public';
-import {
-  dataPluginMock,
-  Start as DataPublicStartMock,
-} from '../../../../../../../src/plugins/data/public/mocks';
-import { fleetMock } from '../../../../../fleet/public/mocks';
+import { FleetStart } from 'x-pack/plugins/fleet/public';
+import { dataPluginMock, Start as DataPublicStartMock } from 'src/plugins/data/public/mocks';
+import { fleetMock } from 'x-pack/plugins/fleet/public/mocks';
 
 type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
   indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {

@@ -6,11 +6,11 @@
  */
 
 import _ from 'lodash';
+import type { KibanaFeature } from 'x-pack/plugins/features/server';
 
 import type { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
 import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { KibanaFeature } from '../../../features/server';
 import type { PluginsStart } from '../plugin';
 import type { SpacesServiceStart } from '../spaces_service';
 

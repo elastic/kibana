@@ -8,7 +8,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
 import { AppMountParameters } from 'kibana/public';
-import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
+import { Embeddable, IContainer } from 'src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable/types';
 import { SourceRegistryEntry } from '../classes/sources/source_registry';

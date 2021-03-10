@@ -8,7 +8,7 @@
 
 import { once } from 'lodash';
 import type { CoreSetup, Logger } from 'kibana/server';
-import { SavedObjectsErrorHelpers } from '../../../../../core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import type { IEsSearchResponse } from '../../../common';
 
 const SAVED_OBJECT_ID = 'search-telemetry';

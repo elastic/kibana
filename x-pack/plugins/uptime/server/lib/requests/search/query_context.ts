@@ -6,11 +6,11 @@
  */
 
 import moment from 'moment';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 import { UptimeESClient } from '../../lib';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
 
 export class QueryContext {
   callES: UptimeESClient;

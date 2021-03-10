@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter, esFilters } from 'src/plugins/data/public';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';

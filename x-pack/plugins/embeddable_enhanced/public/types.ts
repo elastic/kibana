@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IEmbeddable } from '../../../../src/plugins/embeddable/public';
-import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '../../ui_actions_enhanced/public';
+import { IEmbeddable } from 'src/plugins/embeddable/public';
+import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from 'x-pack/plugins/ui_actions_enhanced/public';
 
 export type EnhancedEmbeddable<E extends IEmbeddable = IEmbeddable> = E & {
   enhancements: {

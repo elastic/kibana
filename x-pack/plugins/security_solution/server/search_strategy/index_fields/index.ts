@@ -7,9 +7,9 @@
 
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
-import { IndexPatternsFetcher, ISearchStrategy } from '../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher, ISearchStrategy } from 'src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FieldDescriptor } from '../../../../../../src/plugins/data/server/index_patterns';
+import { FieldDescriptor } from 'src/plugins/data/server/index_patterns';
 import {
   IndexFieldsStrategyResponse,
   IndexField,

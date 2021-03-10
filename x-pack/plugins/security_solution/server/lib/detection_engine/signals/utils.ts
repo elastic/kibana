@@ -12,19 +12,20 @@ import dateMath from '@elastic/datemath';
 import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import {
-  TimestampOverrideOrUndefined,
-  Privilege,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
   parseDuration,
-} from '../../../../../alerting/server';
-import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
+} from 'x-pack/plugins/alerting/server';
+import { ExceptionListClient, ListClient, ListPluginSetup } from 'x-pack/plugins/lists/server';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common/schemas';
+import { MAX_EXCEPTION_LIST_SIZE } from 'x-pack/plugins/lists/common/constants';
+import {
+  TimestampOverrideOrUndefined,
+  Privilege,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
   BulkResponse,
@@ -39,7 +40,6 @@ import {
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
-import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 import { ShardError } from '../../types';
 import { RuleStatusService } from './rule_status_service';
 

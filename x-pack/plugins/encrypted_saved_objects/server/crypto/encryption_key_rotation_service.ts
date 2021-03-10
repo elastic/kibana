@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser, SecurityPluginSetup } from 'x-pack/plugins/security/server';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ISavedObjectTypeRegistry,
@@ -15,7 +17,6 @@ import type {
   StartServicesAccessor,
 } from 'src/core/server';
 
-import type { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';

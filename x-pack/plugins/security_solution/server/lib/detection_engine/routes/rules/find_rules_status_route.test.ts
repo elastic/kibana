@@ -10,7 +10,7 @@ import { getFindResultStatus, ruleStatusRequest, getResult } from '../__mocks__/
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
 import { RuleStatusResponse } from '../../rules/types';
-import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
+import { AlertExecutionStatusErrorReasons } from 'x-pack/plugins/alerting/common';
 
 jest.mock('../../signals/rule_status_service');
 

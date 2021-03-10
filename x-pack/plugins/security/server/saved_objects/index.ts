@@ -6,8 +6,8 @@
  */
 
 import type { CoreSetup, LegacyRequest } from 'src/core/server';
+import { KibanaRequest, SavedObjectsClient } from 'src/core/server';
 
-import { KibanaRequest, SavedObjectsClient } from '../../../../../src/core/server';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
 import type { SpacesService } from '../plugin';

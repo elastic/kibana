@@ -9,8 +9,11 @@
 import './index.scss';
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import type {
+  SecurityOssPluginSetup,
+  SecurityOssPluginStart,
+} from 'src/plugins/security_oss/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
 import {

@@ -10,10 +10,10 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { securityMock } from '../../../../../../plugins/security/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { securityMock } from 'x-pack/plugins/security/public/mocks';
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -36,8 +36,8 @@ import {
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlUrlGenerator } from '../../../../../ml/public';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { MlUrlGenerator } from 'x-pack/plugins/ml/public';
+import { EuiTheme } from 'src/plugins/kibana_react/common';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },

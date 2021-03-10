@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { OnPreResponseHandler } from '../../../../src/core/server';
+import { OnPreResponseHandler } from 'src/core/server';
 import { ILicense } from '../common/types';
 
 export function createOnPreResponseHandler(

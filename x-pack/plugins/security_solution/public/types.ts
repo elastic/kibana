@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { AppFrontendLibs } from './common/lib/lib';
-import { CoreStart } from '../../../../src/core/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
-import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { TelemetryManagementSectionPluginSetup } from '../../../../src/plugins/telemetry_management_section/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { FleetStart } from '../../fleet/public';
-import { PluginStart as ListsPluginStart } from '../../lists/public';
+import { CoreStart } from 'src/core/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { NewsfeedPublicPluginStart } from 'src/plugins/newsfeed/public';
+import { Start as InspectorStart } from 'src/plugins/inspector/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { TelemetryManagementSectionPluginSetup } from 'src/plugins/telemetry_management_section/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import { FleetStart } from 'x-pack/plugins/fleet/public';
+import { PluginStart as ListsPluginStart } from 'x-pack/plugins/lists/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
-} from '../../triggers_actions_ui/public';
-import { SecurityPluginSetup } from '../../security/public';
+} from 'x-pack/plugins/triggers_actions_ui/public';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/public';
+import { MlPluginSetup, MlPluginStart } from 'x-pack/plugins/ml/public';
+import { LicensingPluginStart, LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
-import { MlPluginSetup, MlPluginStart } from '../../ml/public';
 
 import { Detections } from './detections';
 import { Cases } from './cases';
@@ -34,7 +34,7 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
-import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
+import { AppFrontendLibs } from './common/lib/lib';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;

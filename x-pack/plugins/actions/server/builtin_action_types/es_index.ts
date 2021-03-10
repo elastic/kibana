@@ -9,7 +9,7 @@ import { curry, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType, unknown>;

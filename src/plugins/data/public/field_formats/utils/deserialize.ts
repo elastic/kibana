@@ -8,7 +8,7 @@
 
 import { identity } from 'lodash';
 
-import { SerializedFieldFormat } from '../../../../expressions/common/types';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
 
 import { FieldFormat } from '../../../common';
 import { FormatFactory } from '../../../common/field_formats/utils';

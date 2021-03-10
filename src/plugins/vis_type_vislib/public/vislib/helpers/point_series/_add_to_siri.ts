@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getAggId } from '../../../../../vis_type_xy/public';
-import type { Dimension } from '../../../../../vis_type_xy/public';
+import { getAggId } from 'src/plugins/vis_type_xy/public';
+import type { Dimension } from 'src/plugins/vis_type_xy/public';
 
 import { Point } from './_get_point';
 

@@ -7,15 +7,15 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart, SavedObject } from '../../../../core/server';
-import { coreMock } from '../../../../core/server/mocks';
+import { CoreSetup, CoreStart, SavedObject } from 'src/core/server';
+import { coreMock } from 'src/core/server/mocks';
 
 import { DataPluginStart } from '../plugin';
 import { createFieldFormatsStartMock } from '../field_formats/mocks';
 import { createIndexPatternsStartMock } from '../index_patterns/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
-import { bfetchPluginMock } from '../../../bfetch/server/mocks';
+import { bfetchPluginMock } from 'src/plugins/bfetch/server/mocks';
 import { of } from 'rxjs';
 import {
   IEsSearchRequest,
@@ -27,7 +27,7 @@ import {
   ISearchStrategy,
 } from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { expressionsPluginMock } from '../../../expressions/public/mocks';
+import { expressionsPluginMock } from 'src/plugins/expressions/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
 
 describe('Search service', () => {

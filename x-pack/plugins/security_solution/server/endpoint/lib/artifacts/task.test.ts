@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '../../../../../task_manager/server/mocks';
-import { TaskStatus } from '../../../../../task_manager/server';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
+import { TaskStatus } from 'x-pack/plugins/task_manager/server';
 
 import { createMockEndpointAppContext } from '../../mocks';
 

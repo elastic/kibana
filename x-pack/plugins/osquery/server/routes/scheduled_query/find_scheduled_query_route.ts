@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from 'src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const findScheduledQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {

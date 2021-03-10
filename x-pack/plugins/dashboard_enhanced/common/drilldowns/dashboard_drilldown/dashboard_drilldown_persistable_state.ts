@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '../../../../../../src/core/types';
-import { PersistableStateService } from '../../../../../../src/plugins/kibana_utils/common';
-import { SerializedAction, SerializedEvent } from '../../../../ui_actions_enhanced/common';
+import { SavedObjectReference } from 'src/core/types';
+import { PersistableStateService } from 'src/plugins/kibana_utils/common';
+import { SerializedAction, SerializedEvent } from 'x-pack/plugins/ui_actions_enhanced/common';
 import { DrilldownConfig } from './types';
 
 type DashboardDrilldownPersistableState = PersistableStateService<SerializedEvent>;

@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { IndexManagementPluginSetup } from '../../index_management/public';
-import { SharePluginSetup } from '../../../../src/plugins/share/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { IndexManagementPluginSetup } from 'x-pack/plugins/index_management/public';
+import { SharePluginSetup } from 'src/plugins/share/public';
 
-import { CloudSetup } from '../../cloud/public';
-import { LicensingPluginStart, ILicense } from '../../licensing/public';
+import { CloudSetup } from 'x-pack/plugins/cloud/public';
+import { LicensingPluginStart, ILicense } from 'x-pack/plugins/licensing/public';
 
 import { BreadcrumbService } from './application/services/breadcrumbs';
 

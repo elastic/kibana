@@ -12,7 +12,7 @@ import {
   InjectDeps,
   ExtractDeps,
 } from './saved_dashboard_references';
-import { createEmbeddablePersistableStateServiceMock } from '../../embeddable/common/mocks';
+import { createEmbeddablePersistableStateServiceMock } from 'src/plugins/embeddable/common/mocks';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
 const deps: InjectDeps & ExtractDeps = {

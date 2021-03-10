@@ -7,16 +7,16 @@
 
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-import { listMock } from '../../../lists/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
-import { alertsMock } from '../../../alerting/server/mocks';
-import { xpackMocks } from '../../../../mocks';
-import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
+import { alertsMock } from 'x-pack/plugins/alerting/server/mocks';
+import { xpackMocks } from 'x-pack/mocks';
+import { FleetStartContract, ExternalCallback, PackageService } from 'x-pack/plugins/fleet/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
-} from '../../../fleet/server/mocks';
+} from 'x-pack/plugins/fleet/server/mocks';
 import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {

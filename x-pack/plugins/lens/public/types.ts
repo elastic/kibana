@@ -9,20 +9,20 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
-import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
+import { RowClickContext } from 'src/plugins/ui_actions/public';
 import {
   ExpressionAstExpression,
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
   SerializedFieldFormat,
-} from '../../../../src/plugins/expressions/public';
+} from 'src/plugins/expressions/public';
+import { Query, Filter, SavedQuery, IFieldFormat } from 'src/plugins/data/public';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
+import { RangeSelectContext, ValueClickContext } from 'src/plugins/embeddable/public';
 import { DragContextState, DragDropIdentifier } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
-import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
-import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
-import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,

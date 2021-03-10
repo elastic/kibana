@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
+import { FetchDataParams, MetricsFetchDataResponse } from 'x-pack/plugins/observability/public';
 import { OverviewRequest, OverviewResponse } from '../common/http_api/overview_api';
 import { InfraClientCoreSetup } from './types';
 

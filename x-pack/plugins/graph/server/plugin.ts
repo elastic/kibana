@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
+import { LicensingPluginSetup, LicensingPluginStart } from 'x-pack/plugins/licensing/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';
 import { registerExploreRoute } from './routes/explore';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { registerSampleData } from './sample_data';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { graphWorkspace } from './saved_objects';
 
 export class GraphPlugin implements Plugin {

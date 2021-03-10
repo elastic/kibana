@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { NetworkRoutes } from './routes';
 import { initialNetworkState, networkReducer, NetworkState } from './store';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndexPattern } from 'src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
@@ -20,7 +21,6 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
 import { ml } from '../../../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 export interface RichDetector {
   agg: Aggregation | null;

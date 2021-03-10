@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
+import { AlertExecutorOptions, AlertInstanceContext } from 'x-pack/plugins/alerting/server';
+import { ESSearchHit } from 'x-pack/typings/elasticsearch';
 import { EsQueryAlertParams } from './alert_type_params';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 // alert type context provided to actions
 

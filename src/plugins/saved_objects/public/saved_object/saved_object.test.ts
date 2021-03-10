@@ -16,11 +16,11 @@ import {
 } from '../types';
 import { SavedObjectDecorator } from './decorators';
 
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
-import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
+import { coreMock } from 'src/core/public/mocks';
+import { dataPluginMock, createSearchSourceMock } from 'src/plugins/data/public/mocks';
+import { getStubIndexPattern, StubIndexPattern } from 'src/plugins/data/public/test_utils';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { IIndexPattern } from '../../../data/common/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/common/index_patterns';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 const getConfig = (cfg: any) => cfg;

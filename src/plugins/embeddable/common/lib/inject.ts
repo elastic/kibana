@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectReference } from 'src/core/types';
+import { SerializableState } from 'src/plugins/kibana_utils/common/persistable_state';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
-import { SavedObjectReference } from '../../../../core/types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 
 export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {

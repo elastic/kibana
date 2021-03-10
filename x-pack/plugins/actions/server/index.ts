@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 import { ActionsPlugin } from './plugin';
 import { configSchema, ActionsConfig } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';

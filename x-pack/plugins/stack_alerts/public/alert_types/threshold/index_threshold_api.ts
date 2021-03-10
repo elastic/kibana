@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { TimeSeriesResult } from '../../../../triggers_actions_ui/common';
+import { TimeSeriesResult } from 'x-pack/plugins/triggers_actions_ui/common';
 import { IndexThresholdAlertParams } from './types';
 
 const INDEX_THRESHOLD_DATA_API_ROOT = '/api/triggers_actions_ui/data';

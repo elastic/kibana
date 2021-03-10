@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ClusterDetailsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import { ElasticsearchClient } from 'src/core/server';
+import { ClusterDetailsGetter } from '../../../telemetry_collection_manager/server';
 import { TIMEOUT } from './constants';
 /**
  * Get the cluster stats from the connected cluster.

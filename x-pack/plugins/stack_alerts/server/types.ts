@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { PluginStartContract as TriggersActionsUiStartContract } from '../../triggers_actions_ui/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
+import { PluginStartContract as TriggersActionsUiStartContract } from 'x-pack/plugins/triggers_actions_ui/server';
+import { PluginSetupContract as AlertingSetup } from 'x-pack/plugins/alerting/server';
 
 export {
   PluginSetupContract as AlertingSetup,
   AlertType,
   AlertExecutorOptions,
 } from '../../alerting/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {

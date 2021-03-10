@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { TimefilterSetup } from '../query';
 import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
@@ -16,7 +17,6 @@ import {
 } from './providers/value_suggestion_provider';
 
 import { ConfigSchema } from '../../config';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { createUsageCollector } from './collectors';
 
 export class AutocompleteService {

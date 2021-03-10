@@ -9,7 +9,7 @@
 import { IconType } from '@elastic/eui';
 import { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
-import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
+import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from 'src/plugins/data/public';
 import { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 
 export interface VisTypeOptions {

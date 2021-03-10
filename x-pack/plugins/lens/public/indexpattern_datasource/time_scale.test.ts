@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { Datatable } from 'src/plugins/expressions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 import { getTimeScaleFunction, TimeScaleArgs } from './time_scale';
 

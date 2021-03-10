@@ -5,11 +5,8 @@
  * 2.0.
  */
 
+import { ExpressionsService, serializeProvider } from 'src/plugins/expressions/common';
 import { CanvasServiceFactory } from '.';
-import {
-  ExpressionsService,
-  serializeProvider,
-} from '../../../../../src/plugins/expressions/common';
 import { API_ROUTE_FUNCTIONS } from '../../common/lib/constants';
 
 export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService> = async (

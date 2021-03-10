@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 import { createTileMapFn } from './tile_map_fn';
 
 jest.mock('./utils', () => ({

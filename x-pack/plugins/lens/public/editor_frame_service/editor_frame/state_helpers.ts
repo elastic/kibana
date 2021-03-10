@@ -7,6 +7,7 @@
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import {
   Datasource,
   DatasourcePublicAPI,
@@ -17,7 +18,6 @@ import {
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { getActiveDatasourceIdFromDoc } from './state_management';
 import { ErrorMessage } from '../types';
 import { getMissingCurrentDatasource, getMissingVisualizationTypeError } from '../error_helper';

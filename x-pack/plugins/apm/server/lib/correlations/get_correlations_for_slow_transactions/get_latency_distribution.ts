@@ -6,8 +6,8 @@
  */
 
 import { isEmpty, dropRightWhile } from 'lodash';
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from 'x-pack/typings/elasticsearch/aggregations';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';

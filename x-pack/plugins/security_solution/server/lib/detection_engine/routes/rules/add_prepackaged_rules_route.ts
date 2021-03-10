@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AlertsClient } from 'x-pack/plugins/alerting/server';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
 import type {
   AppClient,
   SecuritySolutionPluginRouter,
@@ -33,10 +35,7 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 
 import { transformError, buildSiemResponse } from '../utils';
-import { AlertsClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
-
-import { ExceptionListClient } from '../../../../../../lists/server';
 
 export const addPrepackedRulesRoute = (
   router: SecuritySolutionPluginRouter,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Filter } from 'src/plugins/data/public';
 import { ESTermQuery } from '../../../../common/typed_json';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import { NarrowDateRange } from '../../../common/components/ml/types';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { HostsTableType, HostsType } from '../../store/model';

@@ -9,9 +9,9 @@
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { getVisSchemas, VisToExpressionAst } from '../../visualizations/public';
+} from 'src/plugins/data/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
+import { getVisSchemas, VisToExpressionAst } from 'src/plugins/visualizations/public';
 import { RegionMapExpressionFunctionDefinition } from './region_map_fn';
 import { RegionMapVisConfig, RegionMapVisParams } from './region_map_types';
 

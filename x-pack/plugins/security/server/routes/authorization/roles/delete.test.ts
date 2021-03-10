@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
+import type { LicenseCheck } from 'x-pack/plugins/licensing/server';
 
 import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
-import type { LicenseCheck } from '../../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../../index.mock';
 import { defineDeleteRolesRoutes } from './delete';
 

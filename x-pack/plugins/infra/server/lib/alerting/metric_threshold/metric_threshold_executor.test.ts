@@ -13,7 +13,7 @@ import {
   alertsMock,
   AlertServicesMock,
   AlertInstanceMock,
-} from '../../../../../alerting/server/mocks';
+} from 'x-pack/plugins/alerting/server/mocks';
 import { InfraSources } from '../../sources';
 import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 

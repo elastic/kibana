@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectConfig } from '../../../saved_objects/public';
+import { SavedObjectConfig } from 'src/plugins/saved_objects/public';
 import { injectTagReferences } from './inject_tag_references';
 import { extractTagReferences } from './extract_tag_references';
 

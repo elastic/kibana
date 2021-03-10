@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { PluginStartContract as ActionsPluginStartContract } from 'x-pack/plugins/actions/server';
 import {
   AlertActionParams,
   AlertInstanceState,
   AlertInstanceContext,
   AlertTypeParams,
 } from '../types';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 
 interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;

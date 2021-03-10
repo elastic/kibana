@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Range } from '../../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Range } from 'src/plugins/expressions/public';
 
 interface Arguments {
   from: number;

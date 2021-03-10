@@ -7,10 +7,10 @@
 
 import { Logger } from 'src/core/server';
 import { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'src/core/server';
-import type { CcrRequestHandlerContext } from '../types';
 
-import { LicensingPluginSetup } from '../../../licensing/server';
-import { LicenseType } from '../../../licensing/common/types';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
+import type { CcrRequestHandlerContext } from '../types';
 
 export interface LicenseStatus {
   isValid: boolean;

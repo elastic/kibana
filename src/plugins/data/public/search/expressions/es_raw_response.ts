@@ -7,7 +7,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { ExpressionTypeDefinition } from '../../../../expressions/common';
+import { ExpressionTypeDefinition } from 'src/plugins/expressions/common';
 
 const name = 'es_raw_response';
 

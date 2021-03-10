@@ -13,14 +13,14 @@
  *
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
-import { SavedObjectsStart, SavedObject } from '../../../../plugins/saved_objects/public';
+import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 // @ts-ignore
+import { IIndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
+import { createSavedSearchesLoader } from 'src/plugins/discover/public';
+import { SavedObjectsClientContract } from 'src/core/public';
 import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern, IndexPatternsContract } from '../../../../plugins/data/public';
 import { ISavedVis, SerializedVis } from '../types';
-import { createSavedSearchesLoader } from '../../../discover/public';
-import { SavedObjectsClientContract } from '../../../../core/public';
 
 export interface SavedVisServices {
   savedObjectsClient: SavedObjectsClientContract;

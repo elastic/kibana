@@ -7,7 +7,8 @@
 
 import { getOr } from 'lodash/fp';
 
-import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
+import { SavedObjectsFindOptions } from 'src/core/server';
+import { AuthenticatedUser } from 'x-pack/plugins/security/server';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../common/types/timeline/pinned_event';
@@ -35,7 +36,6 @@ import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_sav
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from './saved_object_mappings';
 import { draftTimelineDefaults } from './default_timeline';
-import { AuthenticatedUser } from '../../../../security/server';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];

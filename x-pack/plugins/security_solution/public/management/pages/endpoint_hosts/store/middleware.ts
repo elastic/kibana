@@ -6,6 +6,8 @@
  */
 
 import { HttpStart } from 'kibana/public';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from 'x-pack/plugins/fleet/common';
+import { IIndexPattern, Query } from 'src/plugins/data/public';
 import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
@@ -27,9 +29,7 @@ import {
   sendGetAgentPolicyList,
   sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
-import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,

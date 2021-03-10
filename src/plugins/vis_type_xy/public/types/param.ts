@@ -8,8 +8,8 @@
 
 import { Fit, Position } from '@elastic/charts';
 
-import { Style, Labels, PaletteOutput } from '../../../charts/public';
-import { SchemaConfig } from '../../../visualizations/public';
+import { Style, Labels, PaletteOutput } from 'src/plugins/charts/public';
+import { SchemaConfig } from 'src/plugins/visualizations/public';
 
 import { ChartType } from '../../common';
 import {

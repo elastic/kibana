@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import {
   ChartsPluginSetup,
   PaletteDefinition,

@@ -6,13 +6,12 @@
  */
 
 import { pick } from 'lodash';
-import { RawAlert } from '../types';
-
 import {
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { RawAlert } from '../types';
 
 import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from './index';
 

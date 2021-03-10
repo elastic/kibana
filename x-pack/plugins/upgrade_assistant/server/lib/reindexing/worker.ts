@@ -7,11 +7,11 @@
 
 import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
 import moment from 'moment';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
-import { LicensingPluginSetup } from '../../../../licensing/server';
 import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
 
 const POLL_INTERVAL = 30000;

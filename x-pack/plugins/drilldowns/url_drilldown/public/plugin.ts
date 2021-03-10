@@ -6,14 +6,14 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
   urlDrilldownGlobalScopeProvider,
-} from '../../../ui_actions_enhanced/public';
+} from 'x-pack/plugins/ui_actions_enhanced/public';
+import { createStartServicesGetter } from 'src/plugins/kibana_utils/public';
 import { UrlDrilldown } from './lib';
-import { createStartServicesGetter } from '../../../../../src/plugins/kibana_utils/public';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;

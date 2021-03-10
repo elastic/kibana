@@ -8,6 +8,8 @@
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { KibanaRequest, Headers, Logger } from 'src/core/server';
+import { ILicense, LicensingPluginStart } from 'x-pack/plugins/licensing/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import {
   BackendFrameworkAdapter,
   FrameworkInfo,
@@ -18,8 +20,6 @@ import {
   RuntimeKibanaUser,
 } from './adapter_types';
 import { BeatsManagementConfigType } from '../../../../common';
-import { ILicense, LicensingPluginStart } from '../../../../../licensing/server';
-import { SecurityPluginSetup } from '../../../../../security/server';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public readonly internalUser = internalUser;

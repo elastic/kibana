@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../core/public/mocks';
-import { homePluginMock } from '../../home/public/mocks';
-import { managementPluginMock } from '../../management/public/mocks';
-import { dataPluginMock } from '../../data/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
+import { homePluginMock } from 'src/plugins/home/public/mocks';
+import { managementPluginMock } from 'src/plugins/management/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
 
 describe('SavedObjectsManagementPlugin', () => {

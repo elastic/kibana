@@ -16,7 +16,7 @@ import {
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
-} from '../../../../../../../fleet/common';
+} from 'x-pack/plugins/fleet/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../types';
 import { NewPolicyData } from '../../../../../../common/endpoint/types';
 

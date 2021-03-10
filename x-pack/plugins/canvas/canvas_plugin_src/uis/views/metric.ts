@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { UI_SETTINGS } from 'src/plugins/data/public';
 import { openSans } from '../../../common/lib/fonts';
 import { ViewStrings } from '../../../i18n';
 import { SetupInitializer } from '../../plugin';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 const { Metric: strings } = ViewStrings;
 

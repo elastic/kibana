@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from 'src/core/server';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 
 export const createActionRoute = (router: IRouter) => {

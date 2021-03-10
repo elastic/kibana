@@ -11,7 +11,7 @@ import type {
   DataRequestHandlerContext,
   EsQueryConfig,
   IndexPatternsService,
-} from '../../data/server';
+} from 'src/plugins/data/server';
 import { VisPayload } from '../common/types';
 import { SearchStrategyRegistry } from './lib/search_strategies';
 

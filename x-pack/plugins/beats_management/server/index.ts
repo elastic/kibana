@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '../../../../src/core/server';
+import { PluginInitializer } from 'src/core/server';
 import { beatsManagementConfigSchema } from '../common';
 import { BeatsManagementPlugin } from './plugin';
 

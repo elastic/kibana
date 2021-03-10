@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter } from 'src/plugins/data/public';
 
 export const createFilter = (
   key: string,

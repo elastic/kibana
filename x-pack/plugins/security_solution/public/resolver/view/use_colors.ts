@@ -8,7 +8,7 @@
 import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
 import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
 import { useMemo } from 'react';
-import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting } from 'src/plugins/kibana_react/public';
 
 type ResolverColorNames =
   | 'copyableFieldBackground'

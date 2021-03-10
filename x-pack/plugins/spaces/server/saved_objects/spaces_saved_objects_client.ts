@@ -24,8 +24,8 @@ import type {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
+import { SavedObjectsUtils } from 'src/core/server';
 
-import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
 import type { ISpacesClient } from '../spaces_client';

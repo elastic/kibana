@@ -9,7 +9,7 @@
 jest.mock('node-fetch');
 import fetch from 'node-fetch';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
-import { StatsGetterConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { StatsGetterConfig } from '../../../telemetry_collection_manager/server';
 
 describe('sendTelemetryOptInStatus', () => {
   it('calls fetch with the opt in status returned from the telemetryCollectionManager', async () => {

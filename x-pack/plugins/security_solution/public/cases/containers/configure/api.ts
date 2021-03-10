@@ -12,14 +12,13 @@ import {
   CasesConfigurePatch,
   CasesConfigureResponse,
   CasesConfigureRequest,
-} from '../../../../../case/common/api';
-import { KibanaServices } from '../../../common/lib/kibana';
-
+} from 'x-pack/plugins/case/common/api';
 import {
   CASE_CONFIGURE_CONNECTORS_URL,
   CASE_CONFIGURE_URL,
   ACTION_TYPES_URL,
-} from '../../../../../case/common/constants';
+} from 'x-pack/plugins/case/common/constants';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 import { ApiProps } from '../types';
 import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';

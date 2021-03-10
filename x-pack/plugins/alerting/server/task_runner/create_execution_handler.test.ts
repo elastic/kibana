@@ -6,15 +6,15 @@
  */
 
 import { createExecutionHandler, CreateExecutionHandlerOptions } from './create_execution_handler';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import {
   actionsMock,
   actionsClientMock,
   renderActionParameterTemplatesDefault,
-} from '../../../actions/server/mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+} from 'x-pack/plugins/actions/server/mocks';
+import { eventLoggerMock } from 'x-pack/plugins/event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
-import { asSavedObjectExecutionSource } from '../../../actions/server';
+import { asSavedObjectExecutionSource } from 'x-pack/plugins/actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
 import { NormalizedAlertType } from '../alert_type_registry';
 import {

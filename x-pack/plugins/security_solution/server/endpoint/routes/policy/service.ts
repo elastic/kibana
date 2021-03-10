@@ -11,9 +11,9 @@ import {
   ILegacyScopedClusterClient,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { Agent } from 'x-pack/plugins/fleet/common/types/models';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from './index';
-import { Agent } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext } from '../../types';
 
 export function getESQueryPolicyResponseByAgentID(agentID: string, index: string) {

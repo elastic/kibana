@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin as IPlugin,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
+import { CoreSetup, CoreStart, Plugin as IPlugin, PluginInitializerContext } from 'src/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 

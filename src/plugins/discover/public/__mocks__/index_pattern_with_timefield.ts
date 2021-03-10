@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common/index_patterns/fields';
-import { IndexPattern } from '../../../data/common';
-import { indexPatterns } from '../../../data/public';
+import { IIndexPatternFieldList } from 'src/plugins/data/common/index_patterns/fields';
+import { IndexPattern } from 'src/plugins/data/common';
+import { indexPatterns } from 'src/plugins/data/public';
 
 const fields = [
   {

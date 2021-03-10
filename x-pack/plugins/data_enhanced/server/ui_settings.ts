@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from 'kibana/server';
-import { UI_SETTINGS } from '../../../../src/plugins/data/server';
+import { UI_SETTINGS } from 'src/plugins/data/server';
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {

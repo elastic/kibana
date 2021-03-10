@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
+import { PromiseReturnType } from 'x-pack/plugins/observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,

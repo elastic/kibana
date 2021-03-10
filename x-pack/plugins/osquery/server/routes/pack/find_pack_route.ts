@@ -8,7 +8,7 @@
 import { find, map, uniq } from 'lodash/fp';
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from 'src/core/server';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 
 export const findPackRoute = (router: IRouter) => {

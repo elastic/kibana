@@ -7,7 +7,7 @@
 
 import { ChangeEvent, KeyboardEvent } from 'react';
 import * as React from 'react';
-import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from 'src/plugins/data/public';
 
 const KEY_CODES = {
   LEFT: 37,

@@ -9,9 +9,9 @@
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
-import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;

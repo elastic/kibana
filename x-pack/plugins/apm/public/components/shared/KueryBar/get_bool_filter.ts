@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,

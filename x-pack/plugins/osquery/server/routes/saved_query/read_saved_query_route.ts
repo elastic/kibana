@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from 'src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const readSavedQueryRoute = (router: IRouter) => {

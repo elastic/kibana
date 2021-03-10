@@ -8,8 +8,8 @@
 
 import { ScaleContinuousType } from '@elastic/charts';
 
-import { Datatable } from '../../../expressions/public';
-import { BUCKET_TYPES } from '../../../data/public';
+import { Datatable } from 'src/plugins/expressions/public';
+import { BUCKET_TYPES } from 'src/plugins/data/public';
 
 import {
   Aspect,

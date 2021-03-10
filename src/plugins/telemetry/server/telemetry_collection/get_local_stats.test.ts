@@ -12,8 +12,8 @@ import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
   usageCollectionPluginMock,
   createCollectorFetchContextMock,
-} from '../../../usage_collection/server/mocks';
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+} from 'src/plugins/usage_collection/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { StatsCollectionConfig } from '../../../telemetry_collection_manager/server';
 
 function mockUsageCollection(kibanaUsage = {}) {

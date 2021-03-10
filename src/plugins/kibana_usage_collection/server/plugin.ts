@@ -21,7 +21,7 @@ import {
   OpsMetrics,
   Logger,
   CoreUsageDataStart,
-} from '../../../core/server';
+} from 'src/core/server';
 import {
   registerApplicationUsageCollector,
   registerKibanaUsageCollector,

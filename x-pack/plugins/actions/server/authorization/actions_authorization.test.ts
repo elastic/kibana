@@ -6,12 +6,12 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { securityMock } from '../../../../plugins/security/server/mocks';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
 import { actionsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { ActionsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { AuthenticatedUser } from '../../../security/server';
+import { AuthenticatedUser } from 'x-pack/plugins/security/server';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 const request = {} as KibanaRequest;

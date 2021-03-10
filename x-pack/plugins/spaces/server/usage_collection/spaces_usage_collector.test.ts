@@ -6,15 +6,15 @@
  */
 
 import * as Rx from 'rxjs';
+import type { KibanaFeature } from 'x-pack/plugins/features/server';
+import type { ILicense, LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 
 import {
   elasticsearchServiceMock,
   pluginInitializerContextConfigMock,
 } from 'src/core/server/mocks';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
-import { createCollectorFetchContextMock } from '../../../../../src/plugins/usage_collection/server/mocks';
-import type { KibanaFeature } from '../../../features/server';
-import type { ILicense, LicensingPluginSetup } from '../../../licensing/server';
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';

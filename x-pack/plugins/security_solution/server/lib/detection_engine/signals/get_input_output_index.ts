@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
+import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 
 export const getInputIndex = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,

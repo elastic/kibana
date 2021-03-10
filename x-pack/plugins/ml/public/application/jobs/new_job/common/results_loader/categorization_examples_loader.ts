@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';

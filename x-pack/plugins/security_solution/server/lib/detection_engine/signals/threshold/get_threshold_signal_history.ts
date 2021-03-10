@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
+} from 'x-pack/plugins/alerting/server';
+import { Logger } from 'src/core/server';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { ThresholdSignalHistory } from '../types';
 import { BuildRuleMessage } from '../rule_messages';
 import { findPreviousThresholdSignals } from './find_previous_threshold_signals';

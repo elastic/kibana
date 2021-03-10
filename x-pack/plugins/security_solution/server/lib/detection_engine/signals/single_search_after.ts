@@ -10,8 +10,8 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerting/server';
-import { Logger } from '../../../../../../../src/core/server';
+} from 'x-pack/plugins/alerting/server';
+import { Logger } from 'src/core/server';
 import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';

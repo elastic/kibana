@@ -7,8 +7,8 @@
 
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
+import { PromiseReturnType } from 'x-pack/plugins/observability/typings/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   environmentQuery,
   rangeQuery,

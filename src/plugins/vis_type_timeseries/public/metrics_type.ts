@@ -8,10 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from 'src/plugins/visualizations/public';
 import { TSVB_EDITOR_NAME } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
 import { toExpressionAst } from './to_ast';
-import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
 
 export const metricsVisDefinition = {

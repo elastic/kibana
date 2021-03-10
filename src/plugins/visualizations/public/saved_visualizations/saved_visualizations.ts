@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectReference, SavedObjectsFindOptionsReference } from 'kibana/public';
-import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
+import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { findListItems } from './find_list_items';
 import { createSavedVisClass, SavedVisServices } from './_saved_vis';
 import { TypesStart } from '../vis_types';

@@ -7,13 +7,13 @@
  */
 
 import { get } from 'lodash';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from 'src/plugins/visualizations/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../data/public';
+} from 'src/plugins/data/public';
+import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
 import { VisParams } from './types';
 
 const prepareDimension = (params: SchemaConfig) => {

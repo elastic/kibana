@@ -11,7 +11,7 @@ import { RequestParams } from '@elastic/elasticsearch';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../typings/elasticsearch';
+} from 'x-pack/typings/elasticsearch';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';

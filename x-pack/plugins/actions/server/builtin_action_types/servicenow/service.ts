@@ -7,10 +7,10 @@
 
 import axios, { AxiosResponse } from 'axios';
 
+import { Logger } from 'src/core/server';
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
 
 import * as i18n from './translations';
-import { Logger } from '../../../../../../src/core/server';
 import {
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,

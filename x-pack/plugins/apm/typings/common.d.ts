@@ -6,10 +6,10 @@
  */
 
 import type { UnwrapPromise } from '@kbn/utility-types';
-import '../../../typings/rison_node';
-import '../../infra/types/eui';
+import 'x-pack/typings/rison_node';
+import 'x-pack/plugins/infra/types/eui';
 // EUIBasicTable
-import '../../reporting/public/components/report_listing';
+import 'x-pack/plugins/reporting/public/components/report_listing';
 import './apm_rum_react';
 
 // Allow unknown properties in an object

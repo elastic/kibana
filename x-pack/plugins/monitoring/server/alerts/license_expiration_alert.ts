@@ -6,6 +6,8 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { AlertExecutorOptions, AlertInstance } from 'x-pack/plugins/alerting/server';
+import { SanitizedAlert } from 'x-pack/plugins/alerting/common';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -19,7 +21,6 @@ import {
   AlertLicense,
   AlertLicenseState,
 } from '../../common/types/alerts';
-import { AlertExecutorOptions, AlertInstance } from '../../../alerting/server';
 import {
   ALERT_LICENSE_EXPIRATION,
   LEGACY_ALERT_DETAILS,
@@ -27,7 +28,6 @@ import {
 } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';

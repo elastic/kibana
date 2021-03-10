@@ -6,11 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { ESSearchRequest, ESFilter } from 'x-pack/typings/elasticsearch';
 import { OBSERVER_VERSION_MAJOR } from '../../../../../common/elasticsearch_fieldnames';
-import {
-  ESSearchRequest,
-  ESFilter,
-} from '../../../../../../../typings/elasticsearch';
 
 /*
   Adds a range query to the ES request to exclude legacy data

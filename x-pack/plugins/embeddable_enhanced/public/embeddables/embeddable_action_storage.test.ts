@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Embeddable, ViewMode } from '../../../../../src/plugins/embeddable/public';
+import { Embeddable, ViewMode } from 'src/plugins/embeddable/public';
 import {
   EmbeddableActionStorage,
   EmbeddableWithDynamicActionsInput,
 } from './embeddable_action_storage';
-import { UiActionsEnhancedSerializedEvent } from '../../../ui_actions_enhanced/public';
-import { of } from '../../../../../src/plugins/kibana_utils/public';
+import { UiActionsEnhancedSerializedEvent } from 'x-pack/plugins/ui_actions_enhanced/public';
+import { of } from 'src/plugins/kibana_utils/public';
 // use real const to make test fail in case someone accidentally changes it
-import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/data/public';
+import { APPLY_FILTER_TRIGGER } from 'src/plugins/data/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableWithDynamicActionsInput> {
   public readonly type = 'test';

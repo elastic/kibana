@@ -9,8 +9,8 @@ import levenshtein from 'js-levenshtein';
 import { ApplicationStart } from 'kibana/public';
 import { from, of } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { GlobalSearchResultProvider } from '../../global_search/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { GlobalSearchResultProvider } from 'x-pack/plugins/global_search/public';
 import { getFullPath } from '../common';
 
 /**

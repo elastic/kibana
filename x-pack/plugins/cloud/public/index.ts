@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import { PluginInitializerContext } from 'src/core/public';
 import { CloudPlugin } from './plugin';
 
 export { CloudSetup, CloudConfigType } from './plugin';

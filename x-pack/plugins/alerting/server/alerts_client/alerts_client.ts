@@ -15,9 +15,19 @@ import {
   SavedObject,
   PluginInitializerContext,
   SavedObjectsUtils,
-} from '../../../../../src/core/server';
-import { esKuery } from '../../../../../src/plugins/data/server';
-import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
+} from 'src/core/server';
+import { esKuery } from 'src/plugins/data/server';
+import { ActionsClient, ActionsAuthorization } from 'x-pack/plugins/actions/server';
+import {
+  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
+  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
+} from 'x-pack/plugins/security/server';
+import { EncryptedSavedObjectsClient } from 'x-pack/plugins/encrypted_saved_objects/server';
+import { TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
+import { IEventLogClient } from 'x-pack/plugins/event_log/server';
+import { IEvent } from 'x-pack/plugins/event_log/server';
+import { AuditLogger, EventOutcome } from 'x-pack/plugins/security/server';
+import { nodeBuilder } from 'src/plugins/data/common';
 import {
   Alert,
   PartialAlert,
@@ -37,26 +47,16 @@ import {
   alertExecutionStatusFromRaw,
   getAlertNotifyWhenType,
 } from '../lib';
-import {
-  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
-  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../../security/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_registry';
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
-import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
-import { IEvent } from '../../../event_log/server';
-import { AuditLogger, EventOutcome } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {

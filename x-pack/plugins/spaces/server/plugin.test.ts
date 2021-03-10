@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
+
 import type { CoreSetup } from 'src/core/server';
 import { coreMock } from 'src/core/server/mocks';
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
 
-import { featuresPluginMock } from '../../features/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
 import type { PluginsStart } from './plugin';
 import { SpacesPlugin } from './plugin';
 

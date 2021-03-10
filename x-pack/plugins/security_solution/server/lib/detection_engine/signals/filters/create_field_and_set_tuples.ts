@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntryList, entriesList } from '../../../../../../lists/common';
+import { EntryList, entriesList } from 'x-pack/plugins/lists/common';
 import { createSetToFilterAgainst } from './create_set_to_filter_against';
 import { CreateFieldAndSetTuplesOptions, FieldSet } from './types';
 

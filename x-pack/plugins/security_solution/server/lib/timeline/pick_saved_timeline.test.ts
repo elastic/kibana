@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '../../../../security/common/model';
+import { AuthenticatedUser } from 'x-pack/plugins/security/common/model';
 
 import { TimelineStatus, TimelineType } from '../../../common/types/timeline';
 

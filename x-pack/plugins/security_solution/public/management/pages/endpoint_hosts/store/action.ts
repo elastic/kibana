@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { GetPackagesResponse } from 'x-pack/plugins/fleet/common';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostResultList,
   HostInfo,
@@ -12,9 +14,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { GetPackagesResponse } from '../../../../../../fleet/common';
 import { EndpointState } from '../types';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';

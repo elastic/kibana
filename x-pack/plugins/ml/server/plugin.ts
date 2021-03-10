@@ -17,10 +17,10 @@ import {
   IClusterClient,
   SavedObjectsServiceStart,
 } from 'kibana/server';
-import type { SecurityPluginSetup } from '../../security/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
+import { SpacesPluginSetup } from 'x-pack/plugins/spaces/server';
 import { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import { SpacesPluginSetup } from '../../spaces/server';
 import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 

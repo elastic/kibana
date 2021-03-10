@@ -12,7 +12,7 @@ jest.mock('../../../../../../src/core/server', () => ({
     isNotFoundError: jest.fn(),
   },
 }));
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 import { getSavedObjectAttributesFromRepo, incrementUICounter } from './telemetry';
 

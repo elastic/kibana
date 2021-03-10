@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
+import { CoreStart } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
 
 export const services = {
   I18nContext: (null as any) as CoreStart['i18n']['Context'],

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UserMenuLink } from '../../security/public';
+import { UserMenuLink } from 'x-pack/plugins/security/public';
 import { CloudConfigType } from '.';
 
 export const createUserMenuLinks = (config: CloudConfigType): UserMenuLink[] => {

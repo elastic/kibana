@@ -15,8 +15,8 @@ import {
   DEFAULT_APP_CATEGORIES,
   AppStatus,
   AppUpdater,
-} from '../../../../src/core/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+} from 'src/core/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,

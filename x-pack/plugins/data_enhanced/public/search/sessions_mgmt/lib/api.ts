@@ -11,10 +11,7 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import {
-  ISessionsClient,
-  SearchUsageCollector,
-} from '../../../../../../../src/plugins/data/public';
+import { ISessionsClient, SearchUsageCollector } from 'src/plugins/data/public';
 import { SearchSessionStatus } from '../../../../common/search';
 import { ACTION } from '../components/actions';
 import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';

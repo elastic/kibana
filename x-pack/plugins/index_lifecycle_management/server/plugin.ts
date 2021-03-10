@@ -13,9 +13,9 @@ import {
   PluginInitializerContext,
   LegacyAPICaller,
 } from 'src/core/server';
+import { Index as IndexWithoutIlm } from 'x-pack/plugins/index_management/common/types';
 import { handleEsError } from './shared_imports';
 
-import { Index as IndexWithoutIlm } from '../../index_management/common/types';
 import { PLUGIN } from '../common/constants';
 import { Index, IndexLifecyclePolicy } from '../common/types';
 import { Dependencies } from './types';

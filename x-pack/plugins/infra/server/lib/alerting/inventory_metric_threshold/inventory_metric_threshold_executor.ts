@@ -8,16 +8,16 @@
 import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertStates, InventoryMetricConditions } from './types';
 import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroup,
-} from '../../../../../alerting/common';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/common';
+import { AlertExecutorOptions } from 'x-pack/plugins/alerting/server';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { AlertStates, InventoryMetricConditions } from './types';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';

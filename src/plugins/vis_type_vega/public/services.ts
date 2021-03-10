@@ -8,8 +8,8 @@
 
 import { CoreStart, NotificationsStart, IUiSettingsClient } from 'src/core/public';
 
-import { DataPublicPluginStart } from '../../data/public';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
 import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settings';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');

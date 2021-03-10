@@ -15,7 +15,7 @@ import {
   ExpressionFunction,
   ExpressionFunctionParameter,
   getByAlias,
-} from '../../../../../src/plugins/expressions/common';
+} from 'src/plugins/expressions/common';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
 

@@ -11,7 +11,7 @@ import {
   CasesConfigureResponse,
   CasesConfigureRequest,
   ConnectorTypes,
-} from '../../../../../case/common/api';
+} from 'x-pack/plugins/case/common/api';
 import { CaseConfigure, CaseConnectorMapping } from './types';
 
 export const mappings: CaseConnectorMapping[] = [

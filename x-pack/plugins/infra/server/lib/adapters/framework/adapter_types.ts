@@ -8,18 +8,18 @@
 import { GenericParams, SearchResponse } from 'elasticsearch';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
+import { RouteConfig, RouteMethod } from 'src/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../../../../src/plugins/data/server';
-import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
-import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
-import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
-import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';
-import { MlPluginSetup } from '../../../../../ml/server';
-import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
+} from 'src/plugins/data/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
+import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { SpacesPluginSetup } from 'x-pack/plugins/spaces/server';
+import { PluginSetupContract as AlertingPluginContract } from 'x-pack/plugins/alerting/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
+import { JsonArray, JsonValue } from 'src/plugins/kibana_utils/common';
 
 export interface InfraServerPluginSetupDeps {
   data: DataPluginSetup;

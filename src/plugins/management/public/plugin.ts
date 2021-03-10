@@ -8,8 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { ManagementSetup, ManagementStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from 'src/plugins/home/public';
 import {
   CoreSetup,
   CoreStart,
@@ -21,7 +20,8 @@ import {
   AppStatus,
   AppNavLinkStatus,
   AppSearchDeepLink,
-} from '../../../core/public';
+} from 'src/core/public';
+import { ManagementSetup, ManagementStart } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import {

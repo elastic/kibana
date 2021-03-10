@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from 'kibana/server';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { fetchProvider } from './fetch';
 
 export interface CollectedUsage {

@@ -6,7 +6,7 @@
  */
 
 import { toExpression } from './map';
-import { MapEmbeddableInput } from '../../../../../../plugins/maps/public/embeddable';
+import { MapEmbeddableInput } from 'x-pack/plugins/maps/public/embeddable';
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 const baseSavedMapInput = {

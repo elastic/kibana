@@ -7,7 +7,7 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { UiSettingsType, StringValidation, ImageValidation } from '../../../../core/public';
+import { UiSettingsType, StringValidation, ImageValidation } from 'src/core/public';
 
 export interface FieldSetting {
   displayName: string;

@@ -12,11 +12,8 @@ import type {
   IEsSearchRequest,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '../../../../../../src/plugins/data/common';
-import type {
-  ISearchStrategy,
-  PluginStart as DataPluginStart,
-} from '../../../../../../src/plugins/data/server';
+} from 'src/plugins/data/common';
+import type { ISearchStrategy, PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import { getLogEntryCursorFromHit } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {

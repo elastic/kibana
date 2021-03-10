@@ -11,7 +11,7 @@ import {
   createStateContainer,
   syncState,
   createKbnUrlStateStorage,
-} from '../../../../../plugins/kibana_utils/public';
+} from 'src/plugins/kibana_utils/public';
 
 interface IEditIndexPatternState {
   tab: string;

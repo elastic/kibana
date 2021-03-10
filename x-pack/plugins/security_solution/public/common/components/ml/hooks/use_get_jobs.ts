@@ -6,9 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
+import { CombinedJobWithStats } from 'x-pack/plugins/ml/common/types/anomaly_detection_jobs';
 import { useAsync, withOptionalSignal } from '../../../../shared_imports';
 import { getJobs } from '../api/get_jobs';
-import { CombinedJobWithStats } from '../../../../../../ml/common/types/anomaly_detection_jobs';
 
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';

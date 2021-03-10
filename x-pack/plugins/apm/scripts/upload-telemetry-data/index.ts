@@ -17,9 +17,9 @@ import { Client } from '@elastic/elasticsearch';
 import { argv } from 'yargs';
 import { Logger } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { unwrapEsResponse } from 'x-pack/plugins/observability/server/utils/unwrap_es_response';
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { unwrapEsResponse } from '../../../observability/server/utils/unwrap_es_response';
 import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
 import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
 import { generateSampleDocuments } from './generate-sample-documents';

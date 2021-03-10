@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { HttpStart, NotificationsStart } from 'src/core/public';
+
 import {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
@@ -18,7 +20,6 @@ import {
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
 } from '../../common/schemas';
-import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
 
 export interface FilterExceptionsOptions {
   filter: string;

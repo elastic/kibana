@@ -8,17 +8,13 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  CoreSetup,
-  Logger,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server';
-import { unwrapEsResponse } from '../../../../observability/server';
-import { APMConfig } from '../..';
+import { CoreSetup, Logger, SavedObjectsErrorHelpers } from 'src/core/server';
+import { unwrapEsResponse } from 'x-pack/plugins/observability/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
+import { APMConfig } from '../..';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,

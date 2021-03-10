@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { VisTypeDefinition } from '../../visualizations/public';
-import { ORIGIN } from '../../maps_legacy/public';
+import { VisTypeDefinition } from 'src/plugins/visualizations/public';
+import { ORIGIN } from 'src/plugins/maps_legacy/public';
 
 import { getDeprecationMessage } from './get_deprecation_message';
 import { RegionMapVisualizationDependencies } from './plugin';

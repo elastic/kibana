@@ -8,10 +8,11 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
-import { addSpaceIdToPath } from '../../../spaces/server';
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
+import { addSpaceIdToPath } from 'x-pack/plugins/spaces/server';
+import { Logger, KibanaRequest } from 'src/core/server';
+import { ConcreteTaskInstance, throwUnrecoverableError } from 'x-pack/plugins/task_manager/server';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from 'x-pack/plugins/event_log/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import {
@@ -36,7 +37,6 @@ import {
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';

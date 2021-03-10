@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { colorSchemas } from '../../../charts/public';
-import { getPositions, getScaleTypes } from '../../../vis_type_xy/public';
+import { colorSchemas } from 'src/plugins/charts/public';
+import { getPositions, getScaleTypes } from 'src/plugins/vis_type_xy/public';
 
 import { Alignment, GaugeType } from '../types';
 

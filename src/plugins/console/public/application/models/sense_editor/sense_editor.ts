@@ -7,8 +7,8 @@
  */
 
 import _ from 'lodash';
+import { XJson } from 'src/plugins/es_ui_shared/public';
 import RowParser from '../../../lib/row_parser';
-import { XJson } from '../../../../../es_ui_shared/public';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore

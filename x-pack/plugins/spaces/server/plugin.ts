@@ -6,6 +6,11 @@
  */
 
 import type { Observable } from 'rxjs';
+import type {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from 'x-pack/plugins/features/server';
+import type { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 
 import type {
   CoreSetup,
@@ -17,11 +22,6 @@ import type {
 import type { HomeServerPluginSetup } from 'src/plugins/home/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup } from '../../licensing/server';
 import { SpacesLicenseService } from '../common/licensing';
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';

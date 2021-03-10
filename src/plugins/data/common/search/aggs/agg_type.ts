@@ -9,9 +9,9 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { ISearchSource } from 'src/plugins/data/public';
 import { DatatableColumnType, SerializedFieldFormat } from 'src/plugins/expressions/common';
 import type { RequestAdapter } from 'src/plugins/inspector/common';
+import { ISearchSource } from '../../../public';
 
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';

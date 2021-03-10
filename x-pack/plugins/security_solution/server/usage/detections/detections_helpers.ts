@@ -10,8 +10,8 @@ import {
   SavedObjectsClientContract,
   KibanaRequest,
   SearchResponse,
-} from '../../../../../../src/core/server';
-import { MlPluginSetup } from '../../../../ml/server';
+} from 'src/core/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
 import { DetectionRulesUsage, MlJobsUsage, MlJobMetric } from './index';
 import { isJobStarted } from '../../../common/machine_learning/helpers';

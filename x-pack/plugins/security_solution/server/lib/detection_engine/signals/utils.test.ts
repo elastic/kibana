@@ -9,12 +9,12 @@ import moment from 'moment';
 import sinon from 'sinon';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
-import { listMock } from '../../../../../lists/server/mocks';
+import { alertsMock, AlertServicesMock } from 'x-pack/plugins/alerting/server/mocks';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
 // @ts-expect-error

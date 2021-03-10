@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import chalk from 'chalk';
-import { KibanaRequest } from '../../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
 
 function formatObj(obj: Record<string, any>) {
   return JSON.stringify(obj, null, 2);

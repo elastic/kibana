@@ -7,7 +7,7 @@
 
 import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { get } from 'lodash';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
 import { ActionsUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {

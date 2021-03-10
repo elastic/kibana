@@ -7,7 +7,7 @@
 
 import { get } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from 'src/plugins/data/common';
 import {
   HostAggEsData,
   HostAggEsItem,

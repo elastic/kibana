@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchHit } from '../../../../../../typings/elasticsearch';
+import { ESSearchHit } from 'x-pack/typings/elasticsearch';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 // needed for backwards compatability

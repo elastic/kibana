@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertExecutorOptions, AlertInstanceContext } from 'x-pack/plugins/alerting/server';
 import { Params } from './alert_type_params';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
 
 // alert type context provided to actions
 

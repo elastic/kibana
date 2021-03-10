@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '../../../../../ml/public';
+import { MlSummaryJob } from 'x-pack/plugins/ml/public';
 import {
   Group,
   Module,

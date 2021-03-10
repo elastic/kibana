@@ -11,16 +11,17 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import { ExceptionListClient } from '../../../lists/server';
-import { SecurityPluginSetup } from '../../../security/server';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import {
   AgentService,
   FleetStartContract,
   PackageService,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
-} from '../../../fleet/server';
-import { PluginStartContract as AlertsPluginStartContract } from '../../../alerting/server';
+} from 'x-pack/plugins/fleet/server';
+import { PluginStartContract as AlertsPluginStartContract } from 'x-pack/plugins/alerting/server';
+import { ElasticsearchAssetType } from 'x-pack/plugins/fleet/common/types/models';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -32,7 +33,6 @@ import {
   metadataQueryStrategyV1,
   metadataQueryStrategyV2,
 } from './routes/metadata/support/query_strategies';
-import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';

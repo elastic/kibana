@@ -13,7 +13,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   ActionGroupIdsOf,
-} from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,

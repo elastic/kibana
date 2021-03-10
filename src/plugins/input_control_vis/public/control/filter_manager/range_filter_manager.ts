@@ -8,8 +8,8 @@
 
 import _ from 'lodash';
 
+import { esFilters, RangeFilter, RangeFilterParams, IFieldType } from 'src/plugins/data/public';
 import { FilterManager } from './filter_manager';
-import { esFilters, RangeFilter, RangeFilterParams, IFieldType } from '../../../../data/public';
 
 interface SliderValue {
   min?: string | number;

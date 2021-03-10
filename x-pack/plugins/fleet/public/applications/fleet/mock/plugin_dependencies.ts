@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { licensingMock } from '../../../../../licensing/public/mocks';
-import { homePluginMock } from '../../../../../../../src/plugins/home/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/public/mocks';
+import { homePluginMock } from 'src/plugins/home/public/mocks';
 
 import type { MockedFleetSetupDeps, MockedFleetStartDeps } from './types';
 

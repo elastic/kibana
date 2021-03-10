@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import { Unit } from '@elastic/datemath';
+import { EqlSearchStrategyResponse } from 'x-pack/plugins/data_enhanced/common';
 import { inputsModel } from '../../../common/store';
 
-import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { InspectResponse } from '../../../types';
 import { EqlPreviewResponse, Source } from './types';
 import { BaseHit, EqlSearchResponse } from '../../../../common/detection_engine/types';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SortDirection } from '../../../../../../../data/public';
+import { SortDirection } from 'src/plugins/data/public';
 
 export type IntervalValue = number | null;
 

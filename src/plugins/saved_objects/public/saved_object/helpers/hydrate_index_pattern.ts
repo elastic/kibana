@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { IndexPatternsContract } from '../../../../data/public';
 
 /**
  * After creation or fetching from ES, ensure that the searchSources index indexPattern

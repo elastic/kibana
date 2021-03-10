@@ -7,10 +7,10 @@
  */
 
 import { createDashboardUrlGenerator } from './url_generator';
-import { hashedItemStore } from '../../kibana_utils/public';
-import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
-import { esFilters, Filter } from '../../data/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { hashedItemStore } from 'src/plugins/kibana_utils/public';
+import { mockStorage } from 'src/plugins/kibana_utils/public/storage/hashed_item_store/mock';
+import { esFilters, Filter } from 'src/plugins/data/public';
+import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 
 const APP_BASE_PATH: string = 'xyz/app/dashboards';
 

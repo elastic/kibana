@@ -6,9 +6,12 @@
  */
 
 import moment from 'moment';
+import {
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from 'x-pack/plugins/task_manager/server';
 import { LevelLogger, ReportingStore } from '../';
 import { ReportingCore } from '../../';
-import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../../task_manager/server';
 import { numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { Report } from '../store';

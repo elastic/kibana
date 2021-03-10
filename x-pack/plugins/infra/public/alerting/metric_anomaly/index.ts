@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { AlertTypeParams } from '../../../../alerting/common';
+import { AlertTypeModel } from 'x-pack/plugins/triggers_actions_ui/public/types';
+import { AlertTypeParams } from 'x-pack/plugins/alerting/common';
+import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
 import { validateMetricAnomaly } from './components/validation';
 
 interface MetricAnomalyAlertTypeParams extends AlertTypeParams {

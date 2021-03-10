@@ -10,10 +10,10 @@ import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
+import { esKuery } from 'src/plugins/data/server';
 import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
-import { esKuery } from '../../../../../src/plugins/data/server';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;

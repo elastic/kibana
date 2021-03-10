@@ -7,8 +7,8 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 
-import { KibanaRequest } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,

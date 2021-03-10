@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializedFieldFormat } from '../../../../expressions/common/types';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
 import { IFieldFormat } from '../index';
 
 export { asPrettyString } from './as_pretty_string';

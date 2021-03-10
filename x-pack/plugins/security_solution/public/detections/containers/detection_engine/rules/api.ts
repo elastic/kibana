@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { HttpStart } from 'src/core/public';
 import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
-import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
+import { DEFAULT_MAX_SIGNALS } from 'x-pack/plugins/security_solution/common/constants';
 
 export const APP_ID = 'case';
 

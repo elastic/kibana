@@ -6,9 +6,9 @@
  */
 
 import { AlertingBuiltinsPlugin } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
-import { alertsMock } from '../../alerting/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
+import { alertsMock } from 'x-pack/plugins/alerting/server/mocks';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 describe('AlertingBuiltins Plugin', () => {

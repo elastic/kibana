@@ -14,13 +14,13 @@ import $ from 'jquery';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import { tableVisLegacyTypeDefinition } from './table_vis_legacy_type';
-import { Vis } from '../../../visualizations/public';
-import { stubFields } from '../../../data/public/stubs';
+import { Vis } from 'src/plugins/visualizations/public';
+import { stubFields } from 'src/plugins/data/public/stubs';
 import { tableVisLegacyResponseHandler } from './table_vis_legacy_response_handler';
-import { coreMock } from '../../../../core/public/mocks';
-import { IAggConfig, search } from '../../../data/public';
-import { getStubIndexPattern } from '../../../data/public/test_utils';
-import { searchServiceMock } from '../../../data/public/search/mocks';
+import { coreMock } from 'src/core/public/mocks';
+import { IAggConfig, search } from 'src/plugins/data/public';
+import { getStubIndexPattern } from 'src/plugins/data/public/test_utils';
+import { searchServiceMock } from 'src/plugins/data/public/search/mocks';
 
 const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
 

@@ -12,9 +12,8 @@ import {
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
-
-import type { SecurityPluginStart } from '../../security/server';
-import type { SpacesPluginStart } from '../../spaces/server';
+import type { SecurityPluginStart } from 'x-pack/plugins/security/server';
+import type { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
 
 import { ListClient } from './services/lists/list_client';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';

@@ -6,8 +6,7 @@
  */
 
 import type { ISavedObjectTypeRegistry } from 'src/core/server';
-
-import { SavedObjectsUtils } from '../../../../../src/core/server';
+import { SavedObjectsUtils } from 'src/core/server';
 
 export const getDescriptorNamespace = (
   typeRegistry: ISavedObjectTypeRegistry,

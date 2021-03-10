@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
-import { MlPluginSetup } from '../../../../ml/server';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { ESSearchResponse } from 'x-pack/typings/elasticsearch';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
+import { PromiseReturnType } from 'x-pack/plugins/observability/typings/common';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';

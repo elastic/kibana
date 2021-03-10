@@ -15,8 +15,8 @@ import {
   IAggType,
   IndexPattern,
   IndexPatternField,
-} from '../../../data/public';
-import type { Schema } from '../../../visualizations/public';
+} from 'src/plugins/data/public';
+import type { Schema } from 'src/plugins/visualizations/public';
 
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';

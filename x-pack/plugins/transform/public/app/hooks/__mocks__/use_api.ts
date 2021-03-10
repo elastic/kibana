@@ -7,7 +7,7 @@
 
 import { HttpFetchError } from 'kibana/public';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from 'src/plugins/data/public';
 
 import { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';

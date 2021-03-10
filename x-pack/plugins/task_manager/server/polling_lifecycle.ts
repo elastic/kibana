@@ -9,7 +9,7 @@ import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
-import { Logger } from '../../../../src/core/server';
+import { Logger } from 'src/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';

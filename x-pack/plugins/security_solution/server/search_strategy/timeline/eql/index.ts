@@ -6,15 +6,11 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
-import {
-  ISearchStrategy,
-  PluginStart,
-  shimHitsTotal,
-} from '../../../../../../../src/plugins/data/server';
+import { ISearchStrategy, PluginStart, shimHitsTotal } from 'src/plugins/data/server';
 import {
   EqlSearchStrategyResponse,
   EQL_SEARCH_STRATEGY,
-} from '../../../../../data_enhanced/common';
+} from 'x-pack/plugins/data_enhanced/common';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import {
   TimelineEqlRequestOptions,

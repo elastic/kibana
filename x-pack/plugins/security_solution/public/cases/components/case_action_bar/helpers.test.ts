@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from 'x-pack/plugins/case/common/api';
 import { basicCase } from '../../containers/mock';
 import { getStatusDate, getStatusTitle } from './helpers';
 

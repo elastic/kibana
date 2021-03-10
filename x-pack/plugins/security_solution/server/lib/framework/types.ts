@@ -8,8 +8,8 @@
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 
-import { KibanaRequest } from '../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../../security/common/model';
+import { KibanaRequest } from 'src/core/server';
+import { AuthenticatedUser } from 'x-pack/plugins/security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import {

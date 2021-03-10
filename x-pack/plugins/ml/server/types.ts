@@ -7,16 +7,16 @@
 
 import type { HomeServerPluginSetup } from 'src/plugins/home/server';
 import type { IRouter } from 'kibana/server';
-import type { CloudSetup } from '../../cloud/server';
-import type { SecurityPluginSetup } from '../../security/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { LicensingPluginSetup } from '../../licensing/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+import type { CloudSetup } from 'x-pack/plugins/cloud/server';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import type { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from 'x-pack/plugins/spaces/server';
+import type { AlertingPlugin } from 'x-pack/plugins/alerting/server';
+import type { ActionsPlugin } from 'x-pack/plugins/actions/server';
 import type { MlLicense } from '../common/license';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { RouteGuard } from './lib/route_guard';
-import type { AlertingPlugin } from '../../alerting/server';
-import type { ActionsPlugin } from '../../actions/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;

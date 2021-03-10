@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
 import { extractErrorMessage } from '../../../../common/util/errors';
 

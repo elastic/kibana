@@ -22,12 +22,12 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
+import { configureAppAngularModule } from 'src/plugins/kibana_legacy/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 
-import { configureAppAngularModule } from '../../kibana_legacy/public';
 import { TimelionPluginStartDependencies } from './plugin';
-import { DataPublicPluginStart } from '../../data/public';
 // @ts-ignore
 import { initTimelionApp } from './app';
 

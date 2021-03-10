@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { actionsClientMock } from '../../../../../actions/server/mocks';
+import { actionsClientMock } from 'x-pack/plugins/actions/server/mocks';
 import {
   getActions,
   getActionTypes,

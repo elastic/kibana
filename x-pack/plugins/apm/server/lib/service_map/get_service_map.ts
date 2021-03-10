@@ -7,7 +7,7 @@
 
 import { Logger } from 'kibana/server';
 import { chunk } from 'lodash';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { PromiseReturnType } from 'x-pack/plugins/observability/typings/common';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,

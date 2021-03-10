@@ -7,7 +7,7 @@
 
 import { useCallback, useRef } from 'react';
 
-import { ErrorToastOptions, ToastsStart, Toast } from '../../../../../../src/core/public';
+import { ErrorToastOptions, ToastsStart, Toast } from 'src/core/public';
 import { useToasts } from '../lib/kibana';
 import { isAppError, AppError } from '../utils/api';
 

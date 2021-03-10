@@ -7,10 +7,10 @@
  */
 
 import { flatten } from 'lodash';
+import type { IndexPattern } from 'src/plugins/data/public';
 import { getData } from '../services';
 
 import type { Data, VegaSpec } from '../data_model/types';
-import type { IndexPattern } from '../../../data/public';
 
 export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
   const { indexPatterns } = getData();

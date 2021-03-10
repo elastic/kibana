@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { HttpStart } from '../../../../../src/core/public';
+import { HttpStart } from 'src/core/public';
+
 import { Type } from '../../common/schemas';
 
 export interface ApiParams {

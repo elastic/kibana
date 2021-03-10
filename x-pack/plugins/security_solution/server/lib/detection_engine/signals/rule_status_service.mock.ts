@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
 import { RuleStatusService } from './rule_status_service';
 

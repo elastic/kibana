@@ -16,13 +16,16 @@ import {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
-} from '../../../../src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from 'src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { DEFAULT_SPACE_ID } from 'x-pack/plugins/spaces/common/constants';
+import { SpacesPluginSetup } from 'x-pack/plugins/spaces/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from 'x-pack/plugins/task_manager/server';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';

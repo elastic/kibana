@@ -8,10 +8,10 @@
 import { healthRoute } from './health';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
 import { alertsClientMock } from '../alerts_client.mock';
 import { HealthStatus } from '../types';
 import { alertsMock } from '../mocks';

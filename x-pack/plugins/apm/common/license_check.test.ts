@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { License } from '../../licensing/common/license';
+import { License } from 'x-pack/plugins/licensing/common/license';
 import { isActiveGoldLicense, isActivePlatinumLicense } from './license_check';
 
 describe('License check', () => {

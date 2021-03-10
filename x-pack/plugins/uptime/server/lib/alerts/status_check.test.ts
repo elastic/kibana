@@ -18,11 +18,11 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-} from '../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
 import { UMServerLibs } from '../lib';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { alertsMock, AlertServicesMock } from '../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from 'x-pack/plugins/alerting/server/mocks';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { makePing } from '../../../common/runtime_types/ping';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';

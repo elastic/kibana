@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from 'src/plugins/data/public';
 
 export interface ElasticsearchAdapter {
   convertKueryToEsQuery: (kuery: string) => Promise<string>;

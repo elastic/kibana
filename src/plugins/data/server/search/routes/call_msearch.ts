@@ -11,8 +11,8 @@ import { first } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
+import { getKbnServerError } from 'src/plugins/kibana_utils/server';
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
-import { getKbnServerError } from '../../../../kibana_utils/server';
 import { getShardTimeout, getDefaultSearchParams, shimAbortSignal, shimHitsTotal } from '..';
 
 /** @internal */

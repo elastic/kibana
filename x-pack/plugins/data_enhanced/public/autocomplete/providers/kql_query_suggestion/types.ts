@@ -6,11 +6,7 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import {
-  KueryNode,
-  QuerySuggestionBasic,
-  QuerySuggestionGetFnArgs,
-} from '../../../../../../../src/plugins/data/public';
+import { KueryNode, QuerySuggestionBasic, QuerySuggestionGetFnArgs } from 'src/plugins/data/public';
 
 export type KqlQuerySuggestionProvider<T = QuerySuggestionBasic> = (
   core: CoreSetup

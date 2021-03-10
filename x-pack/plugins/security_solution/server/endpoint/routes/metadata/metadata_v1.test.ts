@@ -13,14 +13,14 @@ import {
   RouteConfig,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import {
   HostInfo,
   HostResultList,
@@ -36,9 +36,9 @@ import {
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { Agent, EsAssetReference } from '../../../../../fleet/common/types/models';
+import { Agent, EsAssetReference } from 'x-pack/plugins/fleet/common/types/models';
 import { createV1SearchResponse } from './support/test_support';
-import { PackageService } from '../../../../../fleet/server/services';
+import { PackageService } from 'x-pack/plugins/fleet/server/services';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
 describe('test endpoint route v1', () => {

@@ -6,20 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
 
+import { EmbeddableSetup } from 'src/plugins/embeddable/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { createDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { EmbeddableSetup } from '../../embeddable/server';
-import { UsageCollectionSetup } from '../../usage_collection/server';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 
 interface SetupDeps {

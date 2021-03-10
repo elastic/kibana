@@ -7,7 +7,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { LegacyAPICaller } from 'kibana/server';
-import { ESLicense } from '../../../telemetry_collection_xpack/server';
+import { ESLicense } from 'x-pack/plugins/telemetry_collection_xpack/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**

@@ -7,7 +7,7 @@
 
 import { curry } from 'lodash';
 import { Logger } from 'src/core/server';
-import { ActionTypeExecutorResult } from '../../../../actions/common';
+import { ActionTypeExecutorResult } from 'x-pack/plugins/actions/common';
 import {
   CasePatchRequest,
   CasePostRequest,

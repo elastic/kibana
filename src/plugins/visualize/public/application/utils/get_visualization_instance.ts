@@ -17,7 +17,7 @@ import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
-import { createSavedSearchesLoader } from '../../../../discover/public';
+import { createSavedSearchesLoader } from 'src/plugins/discover/public';
 import { VisualizeServices } from '../types';
 
 const createVisualizeEmbeddableAndLinkSavedSearch = async (

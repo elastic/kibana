@@ -8,10 +8,10 @@
 import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
+import type { AuthenticatedUser } from 'x-pack/plugins/security/common/model';
 
 import type { Logger } from 'src/core/server';
 
-import type { AuthenticatedUser } from '../../../security/common/model';
 import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';

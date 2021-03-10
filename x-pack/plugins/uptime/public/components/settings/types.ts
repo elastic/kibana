@@ -15,7 +15,7 @@ import {
   TeamsActionTypeId,
   WebhookActionTypeId,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../actions/server/builtin_action_types';
+} from 'x-pack/plugins/actions/server/builtin_action_types';
 
 export type ActionTypeId =
   | typeof SlackActionTypeId

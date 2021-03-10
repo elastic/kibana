@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '../../../../../src/core/server';
+import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from 'src/core/server';
 import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
 
 export const migrations: SavedObjectMigrationMap = {

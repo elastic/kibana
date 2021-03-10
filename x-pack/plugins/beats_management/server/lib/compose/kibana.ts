@@ -7,8 +7,8 @@
 
 import { camelCase } from 'lodash';
 import type { ElasticsearchServiceStart, Logger } from 'src/core/server';
-import { SecurityPluginSetup } from '../../../../security/server';
-import { LicensingPluginStart } from '../../../../licensing/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { LicensingPluginStart } from 'x-pack/plugins/licensing/server';
 import { PLUGIN } from '../../../common/constants';
 import { BeatsManagementConfigType } from '../../../common';
 import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats_adapter';

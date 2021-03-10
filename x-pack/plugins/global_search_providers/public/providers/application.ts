@@ -8,7 +8,7 @@
 import { from, of } from 'rxjs';
 import { take, map, takeUntil, mergeMap, shareReplay } from 'rxjs/operators';
 import { ApplicationStart } from 'src/core/public';
-import { GlobalSearchResultProvider } from '../../../global_search/public';
+import { GlobalSearchResultProvider } from 'x-pack/plugins/global_search/public';
 import { getAppResults } from './get_app_results';
 
 const applicationType = 'application';

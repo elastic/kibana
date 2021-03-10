@@ -8,6 +8,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import { OnSaveProps } from 'src/plugins/saved_objects/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
@@ -32,7 +33,6 @@ import {
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
 import { getMapAttributeService } from '../../../map_attribute_service';
-import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
 import {
   getCoreChrome,

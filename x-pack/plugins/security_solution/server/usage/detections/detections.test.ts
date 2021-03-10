@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockJobSummaryResponse,

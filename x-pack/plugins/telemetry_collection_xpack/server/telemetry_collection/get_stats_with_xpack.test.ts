@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 
 const kibana = {

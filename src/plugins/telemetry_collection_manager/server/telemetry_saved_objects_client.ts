@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsFindOptions, SavedObjectsFindResponse } from 'src/core/server';
-import { SavedObjectsClient } from '../../../core/server';
+import { SavedObjectsClient } from 'src/core/server';
 
 /**
  * Extends the SavedObjectsClient to fit the telemetry fetching requirements (i.e.: find objects from all namespaces by default)

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
-import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
+import { EmbeddableStart } from '../../../../../plugin';
 import { ViewMode } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { IContainer } from '../../../../containers';

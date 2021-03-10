@@ -12,7 +12,7 @@ import {
   ConnectorTypes,
 } from '../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FindActionResult } from '../../../../../actions/server/types';
+import { FindActionResult } from 'x-pack/plugins/actions/server/types';
 
 export const newCase: CasePostRequest = {
   title: 'My new case',

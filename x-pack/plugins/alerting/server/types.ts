@@ -19,7 +19,7 @@ import {
   KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 import {
   Alert,
   AlertActionParams,
@@ -35,7 +35,7 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
 } from '../common';
-import { LicenseType } from '../../licensing/server';
+import { LicenseType } from 'x-pack/plugins/licensing/server';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;

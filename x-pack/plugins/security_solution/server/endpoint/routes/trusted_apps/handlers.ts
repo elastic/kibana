@@ -6,9 +6,8 @@
  */
 
 import type { RequestHandler } from 'kibana/server';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
-
-import { ExceptionListClient } from '../../../../../lists/server';
 
 import {
   DeleteTrustedAppsRequestParams,

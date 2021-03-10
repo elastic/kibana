@@ -9,6 +9,7 @@ import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
 import { Unit } from '@elastic/datemath';
 
+import { Filter } from 'src/plugins/data/common/es_query';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
 import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
@@ -16,7 +17,6 @@ import { Type, Language } from '../../../../../common/detection_engine/schemas/c
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { FieldValueQueryBar } from '../query_bar';
 import { ESQuery } from '../../../../../common/typed_json';
-import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 
 /**
  * Determines whether or not to display noise warning.

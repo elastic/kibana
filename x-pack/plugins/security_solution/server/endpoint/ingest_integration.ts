@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ExceptionListClient } from '../../../lists/server';
-import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
-import { SecurityPluginSetup } from '../../../security/server';
-import { ExternalCallback } from '../../../fleet/server';
-import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
-import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common/types/models';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
+import { PluginStartContract as AlertsStartContract } from 'x-pack/plugins/alerting/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { ExternalCallback } from 'x-pack/plugins/fleet/server';
+import { KibanaRequest, Logger, RequestHandlerContext } from 'src/core/server';
+import { NewPackagePolicy, UpdatePackagePolicy } from 'x-pack/plugins/fleet/common/types/models';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,

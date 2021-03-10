@@ -6,9 +6,9 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { coreMock } from 'src/core/public/mocks';
 
 import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as api from '../api';
 import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../common/schemas/request/update_exception_list_item_schema.mock';

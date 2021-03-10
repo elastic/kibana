@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, Plugin } from 'src/core/public';
-import { GlobalSearchPluginSetup } from '../../global_search/public';
+import { GlobalSearchPluginSetup } from 'x-pack/plugins/global_search/public';
 import { createApplicationResultProvider } from './providers';
 
 export interface GlobalSearchProvidersPluginSetupDeps {

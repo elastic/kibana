@@ -9,8 +9,13 @@
 import './index.scss';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  Storage,
+  IStorageWrapper,
+  createStartServicesGetter,
+} from 'src/plugins/kibana_utils/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ConfigSchema } from '../config';
-import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -48,7 +53,6 @@ import {
 import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { getIndexPatternLoad } from './index_patterns/expressions';
-import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
 

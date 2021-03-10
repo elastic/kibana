@@ -15,11 +15,11 @@ import {
   Logger,
   SavedObjectsClient,
   SavedObjectsServiceStart,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 
-import { CloudSetup } from '../../cloud/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { ReindexWorker } from './lib/reindexing';

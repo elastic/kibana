@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from 'kibana/public';
-import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 

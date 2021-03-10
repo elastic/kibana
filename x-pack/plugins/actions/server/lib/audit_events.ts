@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuditEvent, EventOutcome, EventCategory, EventType } from '../../../security/server';
+import { AuditEvent, EventOutcome, EventCategory, EventType } from 'x-pack/plugins/security/server';
 
 export enum ConnectorAuditAction {
   CREATE = 'connector_create',

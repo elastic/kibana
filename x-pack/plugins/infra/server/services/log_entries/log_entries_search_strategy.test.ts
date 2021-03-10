@@ -18,7 +18,7 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
-import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import { createSearchSessionsClientMock } from 'src/plugins/data/server/search/mocks';
 import { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {

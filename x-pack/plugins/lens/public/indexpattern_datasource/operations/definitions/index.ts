@@ -7,6 +7,8 @@
 
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { ExpressionAstFunction } from 'src/plugins/expressions/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
 import { filtersOperation, FiltersIndexPatternColumn } from './filters';
 import { cardinalityOperation, CardinalityIndexPatternColumn } from './cardinality';
@@ -40,8 +42,6 @@ import { OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange } from '../../../../common';
-import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
 
 /**

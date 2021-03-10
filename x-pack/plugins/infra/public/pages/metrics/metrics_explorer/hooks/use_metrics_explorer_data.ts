@@ -9,6 +9,7 @@ import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState, useCallback } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { useKibana } from 'src/plugins/kibana_react/public';
 import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
 import {
   MetricsExplorerResponse,
@@ -16,7 +17,6 @@ import {
 } from '../../../../../common/http_api/metrics_explorer';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOptions) {

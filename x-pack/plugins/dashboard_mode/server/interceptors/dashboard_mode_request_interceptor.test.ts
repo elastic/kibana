@@ -13,10 +13,10 @@ import {
   LifecycleResponseFactory,
   IUiSettingsClient,
 } from 'kibana/server';
-import { coreMock } from '../../../../../src/core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
 
-import { AuthenticatedUser } from '../../../security/server';
-import { securityMock } from '../../../security/server/mocks';
+import { AuthenticatedUser } from 'x-pack/plugins/security/server';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
 
 import { setupDashboardModeRequestInterceptor } from './dashboard_mode_request_interceptor';
 

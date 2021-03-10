@@ -7,9 +7,9 @@
 
 import axios from 'axios';
 import { Agent as HttpsAgent } from 'https';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 

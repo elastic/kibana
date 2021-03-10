@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LicenseType } from '../../licensing/common/types';
-import { AlertType } from '../common/alert_types';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
 import {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
-} from '../../licensing/server';
+} from 'x-pack/plugins/licensing/server';
+import { AlertType } from '../common/alert_types';
 
 export const APM_FEATURE = {
   id: 'apm',

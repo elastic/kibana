@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 
 import { AppUpdater } from 'src/core/public';
-import { LicenseType } from '../../../../licensing/common/types';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
+import { AppMeta } from 'src/core/public';
 import { SecuritySubPluginNames, SecurityDeepLinks } from '../types';
-import { AppMeta } from '../../../../../../src/core/public';
 
 const securityDeepLinks: SecurityDeepLinks = {
   detections: {

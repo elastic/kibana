@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
 import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
 import { SecuritySubPluginWithStore } from '../app/types';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';

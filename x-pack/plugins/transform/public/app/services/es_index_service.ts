@@ -6,8 +6,8 @@
  */
 
 import { HttpSetup, SavedObjectsClientContract } from 'kibana/public';
+import { IIndexPattern } from 'src/plugins/data/common/index_patterns';
 import { API_BASE_PATH } from '../../../common/constants';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
 export class IndexService {
   async canDeleteIndex(http: HttpSetup) {

@@ -9,9 +9,11 @@
 import './application/index.scss';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
-import { VisualizePluginSetup } from '../../visualize/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { VisualizePluginSetup } from 'src/plugins/visualize/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { EditorController, TSVB_EDITOR_NAME } from './application';
 
 import { createMetricsFn } from './metrics_fn';
@@ -25,8 +27,6 @@ import {
   setDataStart,
   setChartsSetup,
 } from './services';
-import { DataPublicPluginStart } from '../../data/public';
-import { ChartsPluginSetup } from '../../charts/public';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 
 /** @internal */

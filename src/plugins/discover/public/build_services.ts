@@ -28,12 +28,12 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 
 import { UiCounterMetricType } from '@kbn/analytics';
+import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { UrlForwardingStart } from '../../url_forwarding/public';
-import { NavigationPublicPluginStart } from '../../navigation/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;

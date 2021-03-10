@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionGroup } from '../../../alerting/common';
+import { ActionGroup } from 'x-pack/plugins/alerting/common';
 import { MINIMUM_FULL_LICENSE } from '../license';
 import { PLUGIN_ID } from './app';
 

@@ -18,14 +18,14 @@ import {
   StateContainer,
   syncState,
   withNotifyOnErrors,
-} from '../../../../kibana_utils/public';
+} from 'src/plugins/kibana_utils/public';
 import {
   DataPublicPluginStart,
   esFilters,
   Filter,
   Query,
   SearchSessionInfoProvider,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';

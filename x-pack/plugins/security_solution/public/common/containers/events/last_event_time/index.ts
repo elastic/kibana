@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from 'src/plugins/data/common';
 import { inputsModel } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -19,10 +20,6 @@ import {
   LastTimeDetails,
   LastEventIndexKey,
 } from '../../../../../common/search_strategy/timeline';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
 

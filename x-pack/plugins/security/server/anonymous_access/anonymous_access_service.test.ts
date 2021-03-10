@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { spacesMock } from 'x-pack/plugins/spaces/server/mocks';
 
 import type { Logger } from 'src/core/server';
 import {
@@ -15,7 +16,6 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-import { spacesMock } from '../../../spaces/server/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
 import { AnonymousAccessService } from './anonymous_access_service';

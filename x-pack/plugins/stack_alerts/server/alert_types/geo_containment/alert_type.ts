@@ -8,16 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import { getGeoContainmentExecutor } from './geo_containment';
 import {
   AlertType,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   AlertTypeParams,
-} from '../../../../alerting/server';
-import { Query } from '../../../../../../src/plugins/data/common/query';
+} from 'x-pack/plugins/alerting/server';
+import { Query } from 'src/plugins/data/common/query';
+import { STACK_ALERTS_FEATURE_ID } from '../../../common';
+import { getGeoContainmentExecutor } from './geo_containment';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
 export const ActionGroupId = 'Tracked entity contained';

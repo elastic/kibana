@@ -7,11 +7,11 @@
  */
 
 import { updateSearchSource } from './update_search_source';
-import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
+import { createSearchSourceMock } from 'src/plugins/data/common/search/search_source/mocks';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { IUiSettingsClient } from 'kibana/public';
 import { DiscoverServices } from '../../build_services';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { SortOrder } from '../../saved_searches/types';
 

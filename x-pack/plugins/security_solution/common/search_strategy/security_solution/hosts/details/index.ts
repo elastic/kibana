@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from 'src/plugins/data/common';
 
 import { Inspect, Maybe, TimerangeInput } from '../../../common';
 import { HostItem, HostsFields } from '../common';

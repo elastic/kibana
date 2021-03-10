@@ -9,11 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
-import { RangeValues } from '../../vis_default_editor/public';
-import { AggGroupNames } from '../../data/public';
-import { ColorSchemas, ColorSchemaParams } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../visualizations/public';
-import { ValueAxis, ScaleType, AxisType } from '../../vis_type_xy/public';
+import { RangeValues } from 'src/plugins/vis_default_editor/public';
+import { AggGroupNames } from 'src/plugins/data/public';
+import { ColorSchemas, ColorSchemaParams } from 'src/plugins/charts/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from 'src/plugins/visualizations/public';
+import { ValueAxis, ScaleType, AxisType } from 'src/plugins/vis_type_xy/public';
 
 import { HeatmapOptions } from './editor';
 import { TimeMarker } from './vislib/visualizations/time_marker';

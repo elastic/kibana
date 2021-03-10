@@ -10,14 +10,14 @@ import {
   elasticsearchClientMock,
   MockedTransportRequestPromise,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../core/server/elasticsearch/client/mocks';
-import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
+} from 'src/core/server/elasticsearch/client/mocks';
+import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../types';
 
 import * as indexNotFoundException from '../../../common/search/test_data/index_not_found_exception.json';
 import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { KbnServerError } from '../../../../kibana_utils/server';
+import { KbnServerError } from 'src/plugins/kibana_utils/server';
 
 describe('ES search strategy', () => {
   const successBody = {

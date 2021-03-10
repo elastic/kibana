@@ -8,7 +8,7 @@
 
 import './index.scss';
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from 'src/core/public';
 import { InspectorPublicPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

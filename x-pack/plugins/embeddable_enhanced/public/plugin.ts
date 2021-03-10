@@ -19,17 +19,17 @@ import {
   EmbeddableContext,
   PANEL_NOTIFICATION_TRIGGER,
   ViewMode,
-} from '../../../../src/plugins/embeddable/public';
+} from 'src/plugins/embeddable/public';
+import {
+  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
+} from 'x-pack/plugins/ui_actions_enhanced/public';
 import { EnhancedEmbeddable } from './types';
 import {
   EmbeddableActionStorage,
   EmbeddableWithDynamicActions,
 } from './embeddables/embeddable_action_storage';
-import {
-  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
-  AdvancedUiActionsSetup,
-  AdvancedUiActionsStart,
-} from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction } from './actions';
 
 export interface SetupDependencies {

@@ -18,21 +18,21 @@ import {
   ConcreteTaskInstance,
   isUnrecoverableError,
   TaskStatus,
-} from '../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   httpServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
+} from 'src/core/server/mocks';
+import { PluginStartContract as ActionsPluginStart } from 'x-pack/plugins/actions/server';
+import { actionsMock, actionsClientMock } from 'x-pack/plugins/actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { IEventLogger } from '../../../event_log/server';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { eventLoggerMock } from 'x-pack/plugins/event_log/server/event_logger.mock';
+import { IEventLogger } from 'x-pack/plugins/event_log/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
 import { UntypedNormalizedAlertType } from '../alert_type_registry';

@@ -6,10 +6,10 @@
  */
 
 import { difference } from 'lodash';
+import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 import { MlJobFieldType } from '../../../../../../common/types/field_types';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
-import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 export function getFieldNames(results: FindFileStructureResponse) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;
 

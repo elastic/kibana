@@ -6,10 +6,9 @@
  */
 
 import { isString } from 'lodash';
+import { uiCapabilitiesRegex } from 'x-pack/plugins/features/server';
 
 import type { Capabilities as UICapabilities } from 'src/core/server';
-
-import { uiCapabilitiesRegex } from '../../../../features/server';
 
 export class UIActions {
   private readonly prefix: string;

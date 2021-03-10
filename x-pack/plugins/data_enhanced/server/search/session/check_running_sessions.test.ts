@@ -12,7 +12,7 @@ import {
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
 } from '../../../common';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import type { SavedObjectsClientContract } from 'kibana/server';
 import { SearchSessionsConfig, SearchStatus } from './types';
 import moment from 'moment';

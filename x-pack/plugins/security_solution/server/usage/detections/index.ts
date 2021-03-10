@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import {
   getMlJobsUsage,
   getMlJobMetrics,
@@ -13,7 +14,6 @@ import {
   initialRulesUsage,
   initialMlJobsUsage,
 } from './detections_helpers';
-import { MlPluginSetup } from '../../../../ml/server';
 
 interface FeatureUsage {
   enabled: number;

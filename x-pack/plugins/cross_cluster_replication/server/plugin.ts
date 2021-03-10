@@ -17,7 +17,7 @@ import {
   LegacyAPICaller,
 } from 'src/core/server';
 
-import { Index } from '../../index_management/server';
+import { Index } from 'x-pack/plugins/index_management/server';
 import { PLUGIN } from '../common/constants';
 import type { Dependencies, CcrRequestHandlerContext } from './types';
 import { registerApiRoutes } from './routes';

@@ -28,11 +28,13 @@ import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../saved_objects/public';
-import { createKbnUrlTracker } from '../../kibana_utils/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { UrlGeneratorState } from '../../share/public';
+import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from 'src/plugins/data/public';
+import { SavedObjectLoader, SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import { createKbnUrlTracker } from 'src/plugins/kibana_utils/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { UrlGeneratorState } from 'src/plugins/share/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { replaceUrlHashQuery } from 'src/plugins/kibana_utils/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
@@ -59,8 +61,6 @@ import {
   SEARCH_SESSION_ID_QUERY_PARAM,
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
-import { UsageCollectionSetup } from '../../usage_collection/public';
-import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {

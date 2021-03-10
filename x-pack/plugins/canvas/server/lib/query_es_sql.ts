@@ -6,10 +6,10 @@
  */
 
 import { map, zipObject } from 'lodash';
+import { LegacyAPICaller } from 'src/core/server';
 import { buildBoolArray } from './build_bool_array';
 import { sanitizeName } from './sanitize_name';
 import { normalizeType } from './normalize_type';
-import { LegacyAPICaller } from '../../../../../src/core/server';
 import { ExpressionValueFilter } from '../../types';
 
 interface Args {

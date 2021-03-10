@@ -17,25 +17,29 @@ import {
   PluginInitializerContext,
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+} from 'src/plugins/data/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
-} from '../../alerting/server';
-import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
-import { PluginSetupContract as FeaturesSetup } from '../../features/server';
-import { MlPluginSetup as MlSetup } from '../../ml/server';
-import { ListPluginSetup } from '../../lists/server';
-import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
-import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { ILicense, LicensingPluginStart } from '../../licensing/server';
-import { FleetStartContract } from '../../fleet/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from 'x-pack/plugins/alerting/server';
+import { SecurityPluginSetup as SecuritySetup } from 'x-pack/plugins/security/server';
+import { PluginSetupContract as FeaturesSetup } from 'x-pack/plugins/features/server';
+import { MlPluginSetup as MlSetup } from 'x-pack/plugins/ml/server';
+import { ListPluginSetup } from 'x-pack/plugins/lists/server';
+import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
+import { SpacesPluginSetup as SpacesSetup } from 'x-pack/plugins/spaces/server';
+import { ILicense, LicensingPluginStart } from 'x-pack/plugins/licensing/server';
+import { FleetStartContract } from 'x-pack/plugins/fleet/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from 'x-pack/plugins/task_manager/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
@@ -70,10 +74,6 @@ import { securitySolutionSearchStrategyProvider } from './search_strategy/securi
 import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
 import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
-import {
-  TelemetryPluginStart,
-  TelemetryPluginSetup,
-} from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';

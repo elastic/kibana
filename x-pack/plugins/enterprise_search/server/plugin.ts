@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
+
 import {
   Plugin,
   PluginInitializerContext,
@@ -14,11 +18,8 @@ import {
   IRouter,
   KibanaRequest,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginStart } from '../../spaces/server';
+} from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import {
   ENTERPRISE_SEARCH_PLUGIN,

@@ -6,16 +6,13 @@
  */
 
 import { ValuesType } from 'utility-types';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
-import {
-  ElasticsearchClient,
-  KibanaRequest,
-} from '../../../../../../../../src/core/server';
+import { ElasticsearchClient, KibanaRequest } from 'src/core/server';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../../typings/elasticsearch';
-import { unwrapEsResponse } from '../../../../../../observability/server';
+} from 'x-pack/typings/elasticsearch';
+import { unwrapEsResponse } from 'x-pack/plugins/observability/server';
+import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';

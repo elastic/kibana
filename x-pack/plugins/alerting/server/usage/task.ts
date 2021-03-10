@@ -11,7 +11,7 @@ import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 
 import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
 

@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { SearchResponse } from 'src/core/server';
-import { CollectorFetchContext } from '../../../../../usage_collection/server';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 
 interface SearchHit {
   _id: string;

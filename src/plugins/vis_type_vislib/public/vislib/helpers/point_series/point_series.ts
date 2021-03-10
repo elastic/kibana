@@ -13,7 +13,7 @@ import type {
   Dimensions,
   DateHistogramParams,
   HistogramParams,
-} from '../../../../../vis_type_xy/public';
+} from 'src/plugins/vis_type_xy/public';
 
 import { getSeries } from './_get_series';
 import { getAspects } from './_get_aspects';

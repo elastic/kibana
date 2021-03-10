@@ -7,12 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { MlPluginSetup } from '../../../../../ml/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import {
   AlertType,
   AlertInstanceState,
   AlertInstanceContext,
-} from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
+import { RecoveredActionGroupId } from 'x-pack/plugins/alerting/common';
 import {
   createMetricAnomalyExecutor,
   FIRED_ACTIONS,
@@ -22,7 +23,6 @@ import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../../common/alerting/metric
 import { InfraBackendLibs } from '../../infra_types';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import { alertStateActionVariableDescription } from '../common/messages';
-import { RecoveredActionGroupId } from '../../../../../alerting/common';
 
 export type MetricAnomalyAllowedActionGroups = typeof FIRED_ACTIONS_ID;
 

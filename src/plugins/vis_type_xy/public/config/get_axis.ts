@@ -10,8 +10,8 @@ import { identity, isNil } from 'lodash';
 
 import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
 
-import { LabelRotation } from '../../../charts/public';
-import { BUCKET_TYPES } from '../../../data/public';
+import { LabelRotation } from 'src/plugins/charts/public';
+import { BUCKET_TYPES } from 'src/plugins/data/public';
 
 import {
   Aspect,

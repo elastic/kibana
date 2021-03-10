@@ -9,11 +9,14 @@ import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/ser
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { AuthenticatedUser, SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { SpacesPluginSetup } from 'x-pack/plugins/spaces/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from 'x-pack/plugins/task_manager/server';
 import { CancellationToken } from '../common';
 import { BaseParams, TaskRunResult } from '../common/types';
 import { ReportingConfigType } from './config';

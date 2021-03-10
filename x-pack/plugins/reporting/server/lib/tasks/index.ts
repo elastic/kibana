@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskRunCreatorFunction } from '../../../../task_manager/server';
+import { TaskRunCreatorFunction } from 'x-pack/plugins/task_manager/server';
 import { ReportSource, TaskRunResult } from '../../../common/types';
 import { BasePayload } from '../../types';
 

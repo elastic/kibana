@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { HomePublicPluginSetup } from '../../../home/public';
-import { DevToolsSetup } from '../../../dev_tools/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { DevToolsSetup } from 'src/plugins/dev_tools/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;

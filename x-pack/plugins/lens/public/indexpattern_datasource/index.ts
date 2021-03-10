@@ -6,13 +6,10 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { Datasource, EditorFrameSetup } from '../types';
 
 export interface IndexPatternDatasourceSetupPlugins {

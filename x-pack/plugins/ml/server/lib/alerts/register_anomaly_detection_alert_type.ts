@@ -8,6 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest } from 'kibana/server';
 import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from 'x-pack/plugins/alerting/common';
+import {
   ML_ALERT_TYPES,
   ML_ALERT_TYPES_CONFIG,
   AnomalyScoreMatchGroupId,
@@ -20,11 +25,6 @@ import {
 } from '../../routes/schemas/alerting_schema';
 import { RegisterAlertParams } from './register_ml_alerts';
 import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeState,
-} from '../../../../alerting/common';
 
 const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_DETECTION];
 

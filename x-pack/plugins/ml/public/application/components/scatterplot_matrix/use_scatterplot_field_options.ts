@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import type { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { IndexPattern } from 'src/plugins/data/public';
 
 import { ML__INCREMENTAL_ID } from '../../data_frame_analytics/common/fields';
 

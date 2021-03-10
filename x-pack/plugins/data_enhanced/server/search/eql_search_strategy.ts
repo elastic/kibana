@@ -7,13 +7,13 @@
 
 import { tap } from 'rxjs/operators';
 import type { IScopedClusterClient, Logger } from 'kibana/server';
-import type { ISearchStrategy } from '../../../../../src/plugins/data/server';
+import type { ISearchStrategy } from 'src/plugins/data/server';
+import { getDefaultSearchParams, shimAbortSignal } from 'src/plugins/data/server';
 import type {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
   IAsyncSearchOptions,
 } from '../../common';
-import { getDefaultSearchParams, shimAbortSignal } from '../../../../../src/plugins/data/server';
 import { pollSearch } from '../../common';
 import { getDefaultAsyncGetParams, getIgnoreThrottled } from './request_utils';
 import { toEqlKibanaSearchResponse } from './response_utils';

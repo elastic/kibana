@@ -8,8 +8,8 @@
 
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
+import { HomeServerPluginSetup, TutorialProvider } from 'src/plugins/home/server';
 import { APMOSSConfig } from './';
-import { HomeServerPluginSetup, TutorialProvider } from '../../home/server';
 import { tutorialProvider } from './tutorial';
 
 export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {

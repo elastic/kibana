@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 
 export const configSchema = schema.object({

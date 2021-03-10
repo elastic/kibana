@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, LegacyAuditLogger } from '../../../security/server';
+import type { AuthenticatedUser, LegacyAuditLogger } from 'x-pack/plugins/security/server';
+
 import type { SavedObjectDescriptor } from '../crypto';
 import { descriptorToArray } from '../crypto';
 

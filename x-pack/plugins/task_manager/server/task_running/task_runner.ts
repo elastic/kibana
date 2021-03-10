@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
-import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { Logger, SavedObjectsErrorHelpers } from 'src/core/server';
 
 import { Middleware } from '../lib/middleware';
 import {

@@ -8,14 +8,14 @@
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/public';
+import { SharePluginStart } from 'src/plugins/share/public';
 import { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
 import { setDependencyCache, clearCache } from '../../util/dependency_cache';
 import './_index.scss';
-import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
-import { SpacesPluginStart } from '../../../../../spaces/public';
 
 const renderApp = (
   element: HTMLElement,

@@ -7,7 +7,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { SavedObjectsStart } from '../../../saved_objects/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 
 // Used only by the savedSheets service, usually no reason to change this
 export function createSavedSheetClass(savedObjects: SavedObjectsStart, config: IUiSettingsClient) {

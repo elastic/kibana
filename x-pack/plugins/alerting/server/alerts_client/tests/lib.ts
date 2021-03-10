@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { IEventLogClient } from '../../../../event_log/server';
-import { actionsClientMock } from '../../../../actions/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
+import { IEventLogClient } from 'x-pack/plugins/event_log/server';
+import { actionsClientMock } from 'x-pack/plugins/actions/server/mocks';
+import { eventLogClientMock } from 'x-pack/plugins/event_log/server/mocks';
 import { ConstructorOptions } from '../alerts_client';
-import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { AlertTypeRegistry } from '../../alert_type_registry';
 import { RecoveredActionGroup } from '../../../common';
 

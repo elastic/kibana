@@ -10,10 +10,7 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { Observable } from 'rxjs';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
-import {
-  coreMock,
-  pluginInitializerContextConfigMock,
-} from '../../../../../../src/core/server/mocks';
+import { coreMock, pluginInitializerContextConfigMock } from 'src/core/server/mocks';
 import { convertRequestBody, getCallMsearch } from './call_msearch';
 
 describe('callMsearch', () => {

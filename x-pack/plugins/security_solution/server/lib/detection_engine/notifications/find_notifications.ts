@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams, FindResult } from '../../../../../alerting/server';
+import { AlertTypeParams, FindResult } from 'x-pack/plugins/alerting/server';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { FindNotificationParams } from './types';
 

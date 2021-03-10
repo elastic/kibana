@@ -8,9 +8,9 @@
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { TutorialsRegistry } from './tutorials_registry';
-import { coreMock } from '../../../../../core/server/mocks';
-import { CoreSetup } from '../../../../../core/server';
-import { httpServerMock } from '../../../../../core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
+import { CoreSetup } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
 import {
   TutorialProvider,

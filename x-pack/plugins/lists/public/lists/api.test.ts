@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { HttpFetchOptions } from '../../../../../src/core/public';
-import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { HttpFetchOptions } from 'src/core/public';
+import { httpServiceMock } from 'src/core/public/mocks';
+
 import { getAcknowledgeSchemaResponseMock } from '../../common/schemas/response/acknowledge_schema.mock';
 import { getListResponseMock } from '../../common/schemas/response/list_schema.mock';
 import { getListItemIndexExistSchemaResponseMock } from '../../common/schemas/response/list_item_index_exist_schema.mock';

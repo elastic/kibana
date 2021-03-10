@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Filter } from 'src/plugins/data/public';
 import { ITooltipProperty } from './tooltip_property';
 import { InnerJoin } from '../joins/inner_join';
-import { Filter } from '../../../../../../src/plugins/data/public';
 
 export class JoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;

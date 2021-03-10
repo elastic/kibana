@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from 'src/plugins/data/common';
 
 import { UserEcs } from '../../../../ecs/user';
 import { SourceEcs } from '../../../../ecs/source';

@@ -8,12 +8,12 @@
 import type { MockedKeys } from '@kbn/utility-types/jest';
 
 import type { CoreSetup, Logger } from 'kibana/server';
-import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import type {
   PluginStart as DataPluginStart,
   DataRequestHandlerContext,
-} from '../../../../../src/plugins/data/server';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
+} from 'src/plugins/data/server';
+import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { registerSessionRoutes } from './session';
 
 enum PostHandlerIndex {

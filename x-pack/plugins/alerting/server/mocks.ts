@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { alertsClientMock } from './alerts_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertInstance } from './alert_instance';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
 import { AlertInstanceContext, AlertInstanceState } from './types';
 
 export { alertsClientMock };

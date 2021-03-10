@@ -13,7 +13,7 @@ import {
   IndexPattern,
   Filter,
   IndexPatternsContract,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
 
 export abstract class FilterManager {
   protected indexPattern: IndexPattern | undefined;

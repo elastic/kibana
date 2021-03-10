@@ -7,7 +7,7 @@
 
 import { snapshotReducer } from './snapshot';
 import { getSnapshotCountAction } from '../actions';
-import { IHttpFetchError } from '../../../../../../src/core/public';
+import { IHttpFetchError } from 'src/core/public';
 
 describe('snapshot reducer', () => {
   it('updates existing state', () => {

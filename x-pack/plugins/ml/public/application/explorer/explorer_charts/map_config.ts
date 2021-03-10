@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common/constants';
+import { FIELD_ORIGIN, STYLE_TYPE } from 'x-pack/plugins/maps/common/constants';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
 
 const FEATURE = 'Feature';

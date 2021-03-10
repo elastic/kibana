@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { SortOptions } from 'x-pack/typings/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
 import { AfterKey } from './get_monitor_status';
-import { SortOptions } from '../../../../../typings/elasticsearch';
 
 export interface AvailabilityKey {
   monitorId: string;

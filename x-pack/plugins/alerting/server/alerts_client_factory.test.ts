@@ -8,22 +8,22 @@
 import { Request } from '@hapi/hapi';
 import { AlertsClientFactory, AlertsClientFactoryOpts } from './alerts_client_factory';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { KibanaRequest } from '../../../../src/core/server';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
+import { KibanaRequest } from 'src/core/server';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   loggingSystemMock,
-} from '../../../../src/core/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { AuthenticatedUser } from '../../../plugins/security/common/model';
-import { securityMock } from '../../security/server/mocks';
-import { PluginStartContract as ActionsStartContract } from '../../actions/server';
-import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { LegacyAuditLogger } from '../../security/server';
+} from 'src/core/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
+import { AuthenticatedUser } from 'x-pack/plugins/security/common/model';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
+import { PluginStartContract as ActionsStartContract } from 'x-pack/plugins/actions/server';
+import { actionsMock, actionsAuthorizationMock } from 'x-pack/plugins/actions/server/mocks';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+import { LegacyAuditLogger } from 'x-pack/plugins/security/server';
 import { ALERTS_FEATURE_ID } from '../common';
-import { eventLogMock } from '../../event_log/server/mocks';
+import { eventLogMock } from 'x-pack/plugins/event_log/server/mocks';
 
 jest.mock('./alerts_client');
 jest.mock('./authorization/alerts_authorization');

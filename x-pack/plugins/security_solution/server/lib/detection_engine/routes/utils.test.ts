@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
@@ -29,7 +29,7 @@ import {
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from '../signals/__mocks__/es_results';
 import { getResult } from './__mocks__/request_responses';
-import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
+import { AlertExecutionStatusErrorReasons } from 'x-pack/plugins/alerting/common';
 
 let alertsClient: ReturnType<typeof alertsClientMock.create>;
 

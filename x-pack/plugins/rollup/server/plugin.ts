@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
+import { getCapabilitiesForRollupIndices } from 'src/plugins/data/server';
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
 import { Dependencies, RollupHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
@@ -28,7 +29,6 @@ import { IndexPatternsFetcher } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
 import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
-import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();

@@ -10,14 +10,14 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 // @ts-ignore
-import observeResize from '../../lib/observe_resize';
 import {
   calculateInterval,
   DEFAULT_TIME_FORMAT,
   tickFormatters,
   xaxisFormatterProvider,
   generateTicksProvider,
-} from '../../../../vis_type_timelion/public';
+} from 'src/plugins/vis_type_timelion/public';
+import observeResize from '../../lib/observe_resize';
 import { TimelionVisualizationDependencies } from '../../application';
 
 const DEBOUNCE_DELAY = 50;

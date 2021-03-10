@@ -7,13 +7,13 @@
 
 import { ActionExecutor, TaskRunnerFactory } from '../lib';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { registerBuiltInActionTypes } from './index';
-import { Logger } from '../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { Logger } from 'src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { licensingMock } from '../../../licensing/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
 
 const ACTION_TYPE_IDS = [
   '.index',

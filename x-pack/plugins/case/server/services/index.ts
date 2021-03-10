@@ -18,7 +18,7 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 
-import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
+import { AuthenticatedUser, SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import {
   ESCaseAttributes,
   CommentAttributes,

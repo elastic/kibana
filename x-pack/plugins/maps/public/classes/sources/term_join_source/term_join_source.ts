@@ -6,8 +6,8 @@
  */
 
 import { GeoJsonProperties } from 'geojson';
+import { Query } from 'src/plugins/data/common/query';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 import {
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,

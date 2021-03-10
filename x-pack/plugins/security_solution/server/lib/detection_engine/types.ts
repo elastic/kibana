@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { LegacyCallAPIOptions } from 'src/core/server';
+import { Filter } from 'src/plugins/data/server';
+import { AlertTypeParams } from 'x-pack/plugins/alerting/common';
 import {
   AnomalyThresholdOrUndefined,
   Description,
@@ -50,10 +53,7 @@ import {
   ThreatIndicatorPathOrUndefined,
 } from '../../../common/detection_engine/schemas/types/threat_mapping';
 
-import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
-import { Filter } from '../../../../../../src/plugins/data/server';
 import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
-import { AlertTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;
 

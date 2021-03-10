@@ -6,7 +6,7 @@
  */
 
 import { readRules } from './read_rules';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
 import { getResult, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 
 export class TestError extends Error {

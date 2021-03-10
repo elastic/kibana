@@ -8,12 +8,12 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ActionGroupIdsOf } from '../../../../alerting/common';
+import { ActionGroupIdsOf } from 'x-pack/plugins/alerting/common';
+import { AnomaliesTableRecord } from 'x-pack/plugins/ml/common/types/anomalies';
+import { getSeverityType } from 'x-pack/plugins/ml/common/util/anomaly_utils';
 import { updateState } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
-import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
-import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
 import { UptimeCorePlugins } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';

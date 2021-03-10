@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESSearchBody, ESSearchRequest } from '../../../typings/elasticsearch';
-import { SortOrder } from '../../../typings/elasticsearch/aggregations';
+import { ESSearchBody, ESSearchRequest } from 'x-pack/typings/elasticsearch';
+import { SortOrder } from 'x-pack/typings/elasticsearch/aggregations';
 
 type BuildSortedEventsQueryOpts = Pick<ESSearchBody, 'aggs' | 'track_total_hits'> &
   Pick<Required<ESSearchRequest>, 'index' | 'size'>;

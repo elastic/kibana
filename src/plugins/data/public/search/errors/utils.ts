@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { KibanaServerError } from 'src/plugins/kibana_utils/common';
 import { FailedShard } from './types';
-import { KibanaServerError } from '../../../../kibana_utils/common';
 
 export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
   const errorInfo = err.attributes;

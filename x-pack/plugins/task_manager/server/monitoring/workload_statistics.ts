@@ -10,9 +10,9 @@ import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
 import { Logger } from 'src/core/server';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
+import { AggregationResultOf } from 'x-pack/typings/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
-import { AggregationResultOf } from '../../../../typings/elasticsearch';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
 

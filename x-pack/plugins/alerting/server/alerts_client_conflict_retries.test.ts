@@ -8,17 +8,17 @@
 import { cloneDeep } from 'lodash';
 
 import { AlertsClient, ConstructorOptions } from './alerts_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
+import { actionsClientMock, actionsAuthorizationMock } from 'x-pack/plugins/actions/server/mocks';
 import { AlertsAuthorization } from './authorization/alerts_authorization';
-import { ActionsAuthorization } from '../../actions/server';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
+import { ActionsAuthorization } from 'x-pack/plugins/actions/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
-import { TaskStatus } from '../../../plugins/task_manager/server/task';
+import { TaskStatus } from 'x-pack/plugins/task_manager/server/task';
 import { RecoveredActionGroup } from '../common';
 
 let alertsClient: AlertsClient;

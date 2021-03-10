@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsAggregationResponsePart } from '../../../../../../typings/elasticsearch/aggregations';
+import { MetricsAggregationResponsePart } from 'x-pack/typings/elasticsearch/aggregations';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,

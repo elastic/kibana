@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from 'src/core/server/mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from 'src/plugins/usage_collection/server/usage_collection.mock';
 
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
@@ -19,7 +19,7 @@ import {
   transformByApplicationViews,
   ApplicationUsageViews,
 } from './telemetry_application_usage_collector';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
+import { MAIN_APP_DEFAULT_VIEW_ID } from 'src/plugins/usage_collection/common/constants';
 import {
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,

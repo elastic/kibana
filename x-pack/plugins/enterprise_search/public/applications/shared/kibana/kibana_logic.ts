@@ -10,9 +10,10 @@ import { FC } from 'react';
 import { History } from 'history';
 import { kea, MakeLogicType } from 'kea';
 
-import { ApplicationStart, ChromeBreadcrumb } from '../../../../../../../src/core/public';
-import { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
-import { CloudSetup } from '../../../../../cloud/public';
+import { CloudSetup } from 'x-pack/plugins/cloud/public';
+
+import { ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';

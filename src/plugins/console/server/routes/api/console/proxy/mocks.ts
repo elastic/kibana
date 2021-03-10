@@ -11,10 +11,10 @@ jest.mock('../../../../lib/proxy_request', () => ({
 }));
 
 import { duration } from 'moment';
+import { coreMock, httpServiceMock } from 'src/core/server/mocks';
 import { ProxyConfigCollection } from '../../../../lib';
 import { RouteDependencies, ProxyDependencies } from '../../../../routes';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../services';
-import { coreMock, httpServiceMock } from '../../../../../../../core/server/mocks';
 
 const defaultProxyValue = Object.freeze({
   readLegacyESConfig: async () => ({

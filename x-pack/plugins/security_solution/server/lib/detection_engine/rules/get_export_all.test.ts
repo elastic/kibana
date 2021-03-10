@@ -10,7 +10,7 @@ import {
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';

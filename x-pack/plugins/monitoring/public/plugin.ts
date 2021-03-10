@@ -14,14 +14,11 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from 'src/plugins/home/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { TriggersAndActionsUIPublicPluginSetup } from 'x-pack/plugins/triggers_actions_ui/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import {
   ALERT_THREAD_POOL_SEARCH_REJECTIONS,
   ALERT_THREAD_POOL_WRITE_REJECTIONS,

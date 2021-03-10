@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 
-import { esKuery, esQuery, Query } from '../../../../../../../../../../src/plugins/data/public';
+import { esKuery, esQuery, Query } from 'src/plugins/data/public';
 
 import { getPivotQuery } from '../../../../../common';
 

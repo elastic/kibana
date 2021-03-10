@@ -15,8 +15,8 @@ import {
   Datum,
 } from '@elastic/charts';
 
-import { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
-import { Datatable } from '../../../../expressions/public';
+import { RangeSelectContext, ValueClickContext } from 'src/plugins/embeddable/public';
+import { Datatable } from 'src/plugins/expressions/public';
 
 export interface ClickTriggerEvent {
   name: 'filterBucket';

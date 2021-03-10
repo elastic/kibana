@@ -12,7 +12,7 @@ import { asOk, asErr } from '../lib/result_type';
 import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '../task_running';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent, TaskRun } from '../task_events';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';

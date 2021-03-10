@@ -6,15 +6,15 @@
  */
 
 import moment from 'moment';
-import { apiService } from './utils';
-import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
-import { API_URLS, ML_MODULE_ID } from '../../../common/constants';
 import {
   DataRecognizerConfigResponse,
   JobExistResult,
   MlCapabilitiesResponse,
-} from '../../../../../plugins/ml/public';
-import { extractErrorMessage } from '../../../../../plugins/ml/common';
+} from 'x-pack/plugins/ml/public';
+import { extractErrorMessage } from 'x-pack/plugins/ml/common';
+import { apiService } from './utils';
+import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
+import { API_URLS, ML_MODULE_ID } from '../../../common/constants';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,

@@ -8,8 +8,8 @@
 import { sortBy, take } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { AggregationOptionsByType } from 'x-pack/typings/elasticsearch';
+import { PromiseReturnType } from 'x-pack/plugins/observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,

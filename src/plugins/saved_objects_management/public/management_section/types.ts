@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectReference } from 'src/core/types';
 
 export interface ObjectField {
   type: FieldType;

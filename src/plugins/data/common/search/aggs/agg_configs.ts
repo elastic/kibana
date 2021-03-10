@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 
-import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
+import { ISearchOptions, ISearchSource } from '../../../public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';

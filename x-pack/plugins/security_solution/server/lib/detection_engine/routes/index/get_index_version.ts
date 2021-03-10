@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { LegacyAPICaller } from '../../../../../../../../src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 import { readIndex } from '../../index/read_index';
 
 interface IndicesAliasResponse {

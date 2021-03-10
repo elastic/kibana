@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
-import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { eventLogMock } from '../../event_log/server/mocks';
+import { PluginInitializerContext, RequestHandlerContext } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+import { encryptedSavedObjectsMock } from 'x-pack/plugins/encrypted_saved_objects/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
+import { eventLogMock } from 'x-pack/plugins/event_log/server/mocks';
 import { ActionType, ActionsApiRequestHandlerContext } from './types';
 import { ActionsConfig } from './config';
 import {

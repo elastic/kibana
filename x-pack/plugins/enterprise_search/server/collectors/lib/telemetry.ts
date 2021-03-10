@@ -13,7 +13,7 @@ import {
 } from 'src/core/server';
 
 // This throws `Error: Cannot find module 'src/core/server'` if I import it via alias ¯\_(ツ)_/¯
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 /**
  * Fetches saved objects attributes - used by collectors

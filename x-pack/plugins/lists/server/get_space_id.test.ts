@@ -7,8 +7,7 @@
 
 import { httpServerMock } from 'src/core/server/mocks';
 import { KibanaRequest } from 'src/core/server';
-
-import { spacesServiceMock } from '../../spaces/server/spaces_service/spaces_service.mock';
+import { spacesServiceMock } from 'x-pack/plugins/spaces/server/spaces_service/spaces_service.mock';
 
 import { getSpaceId } from './get_space_id';
 

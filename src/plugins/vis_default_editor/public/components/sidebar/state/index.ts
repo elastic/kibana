@@ -10,10 +10,10 @@ import { useReducer, useCallback } from 'react';
 import { EventEmitter } from 'events';
 
 import { Vis } from 'src/plugins/visualizations/public';
+import { useKibana } from 'src/plugins/kibana_react/public';
 import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction } from './actions';
-import { useKibana } from '../../../../../kibana_react/public';
 import { VisDefaultEditorKibanaServices } from '../../../types';
 
 export * from './editor_form_state';

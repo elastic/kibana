@@ -12,6 +12,8 @@ import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
+import { Setup as InspectorSetup } from 'src/plugins/inspector/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
@@ -19,8 +21,6 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
-import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
-import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
 
 export interface DataPublicPluginEnhancements {

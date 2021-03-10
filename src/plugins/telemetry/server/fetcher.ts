@@ -10,17 +10,17 @@ import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
 import fetch from 'node-fetch';
 import {
-  TelemetryCollectionManagerPluginStart,
-  UsageStatsPayload,
-} from 'src/plugins/telemetry_collection_manager/server';
-import {
   PluginInitializerContext,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
   ICustomClusterClient,
-} from '../../../core/server';
+} from 'src/core/server';
+import {
+  TelemetryCollectionManagerPluginStart,
+  UsageStatsPayload,
+} from '../../telemetry_collection_manager/server';
 import {
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,

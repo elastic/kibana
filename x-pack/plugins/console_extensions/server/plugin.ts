@@ -8,7 +8,7 @@
 import { join } from 'path';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
-import { ConsoleSetup, ConsoleStart } from '../../../../src/plugins/console/server';
+import { ConsoleSetup, ConsoleStart } from 'src/plugins/console/server';
 
 import { processors } from './lib/spec_definitions/js';
 

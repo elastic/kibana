@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { esKuery } from '../../../../../../../src/plugins/data/server';
+import { esKuery } from 'src/plugins/data/server';
 import { EndpointAppContext, MetadataQueryStrategy } from '../../types';
 
 export interface QueryBuilderOptions {

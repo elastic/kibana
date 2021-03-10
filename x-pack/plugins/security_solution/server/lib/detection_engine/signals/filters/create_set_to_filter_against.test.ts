@@ -7,8 +7,8 @@
 
 import { mockLogger, sampleDocWithSortId } from '../__mocks__/es_results';
 
-import { listMock } from '../../../../../../lists/server/mocks';
-import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { getSearchListItemResponseMock } from 'x-pack/plugins/lists/common/schemas/response/search_list_item_schema.mock';
 import { createSetToFilterAgainst } from './create_set_to_filter_against';
 import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
 

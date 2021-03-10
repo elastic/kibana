@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Logger } from 'src/core/server';
 import { TaskDefinition, taskDefinitionSchema } from './task';
-import { Logger } from '../../../../src/core/server';
 
 export type TaskDefinitionRegistry = Record<
   string,

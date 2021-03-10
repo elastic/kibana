@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
 export async function getTitle(
   client: SavedObjectsClientContract,

@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
+import { INDEX_META_DATA_CREATED_BY } from 'x-pack/plugins/file_upload/common';
 import {
   JOB_MAP_NODE_TYPES,
   JobMapNodeTypes,
@@ -19,7 +20,6 @@ import {
   DataFrameAnalyticsStats,
   MapElements,
 } from '../../../common/types/data_frame_analytics';
-import { INDEX_META_DATA_CREATED_BY } from '../../../../file_upload/common';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   ExtendAnalyticsMapArgs,

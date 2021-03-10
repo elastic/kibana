@@ -21,7 +21,7 @@ import {
   ResponseError,
   Plugin,
 } from 'kibana/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,

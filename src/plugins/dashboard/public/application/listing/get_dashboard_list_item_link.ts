@@ -7,8 +7,8 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { QueryState } from '../../../../data/public';
-import { setStateToKbnUrl } from '../../../../kibana_utils/public';
+import { QueryState } from 'src/plugins/data/public';
+import { setStateToKbnUrl } from 'src/plugins/kibana_utils/public';
 import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';

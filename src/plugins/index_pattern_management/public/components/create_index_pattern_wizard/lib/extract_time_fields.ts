@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IFieldType } from '../../../../../../plugins/data/public';
+import { IFieldType } from 'src/plugins/data/public';
 
 export function extractTimeFields(fields: IFieldType[]) {
   const dateFields = fields.filter((field) => field.type === 'date');

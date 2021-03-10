@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../src/core/server';
-import { TaskManagerStartContract } from '../../task_manager/server';
+import { SavedObjectsClientContract } from 'src/core/server';
+import { TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
 import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';

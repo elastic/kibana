@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 
 describe('test endpoint app context services', () => {

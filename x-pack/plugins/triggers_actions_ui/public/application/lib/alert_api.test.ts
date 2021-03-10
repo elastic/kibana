@@ -6,7 +6,7 @@
  */
 
 import { Alert, AlertType, AlertUpdates } from '../../types';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import {
   createAlert,
   deleteAlerts,
@@ -30,7 +30,7 @@ import {
   mapFiltersToKql,
 } from './alert_api';
 import uuid from 'uuid';
-import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerting/common';
+import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from 'x-pack/plugins/alerting/common';
 
 const http = httpServiceMock.createStartContract();
 

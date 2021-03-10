@@ -6,12 +6,12 @@
  */
 
 import { compose, withProps } from 'recompose';
+import { UI_SETTINGS } from 'src/plugins/data/public';
 import { NumberFormatArgInput as Component, Props as ComponentProps } from './number_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
 import { SetupInitializer } from '../../../plugin';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 
 const { NumberFormat: strings } = ArgumentStrings;
 

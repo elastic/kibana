@@ -10,10 +10,10 @@ import {
   ElasticsearchClient,
   SavedObjectsErrorHelpers,
   Logger,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { BehaviorSubject } from 'rxjs';
 import { fetchProvider } from './fetch';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 describe('fetchProvider', () => {
   let fetchFn: any;

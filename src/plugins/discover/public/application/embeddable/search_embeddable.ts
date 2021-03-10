@@ -11,8 +11,8 @@ import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from '../../../../ui_actions/public';
-import { RequestAdapter, Adapters } from '../../../../inspector/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { RequestAdapter, Adapters } from 'src/plugins/inspector/public';
 import {
   APPLY_FILTER_TRIGGER,
   esFilters,
@@ -21,8 +21,8 @@ import {
   FilterManager,
   Query,
   IFieldType,
-} from '../../../../data/public';
-import { Container, Embeddable } from '../../../../embeddable/public';
+} from 'src/plugins/data/public';
+import { Container, Embeddable } from 'src/plugins/embeddable/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
 import searchTemplateGrid from './search_template_datagrid.html';

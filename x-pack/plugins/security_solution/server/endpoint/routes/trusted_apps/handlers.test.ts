@@ -7,11 +7,11 @@
 
 import { KibanaResponseFactory } from 'kibana/server';
 
-import { xpackMocks } from '../../../../../../mocks';
-import { loggingSystemMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
-import { listMock } from '../../../../../lists/server/mocks';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { xpackMocks } from 'x-pack/mocks';
+import { loggingSystemMock, httpServerMock } from 'src/core/server/mocks';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common/schemas/response';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 
 import { ConditionEntryField, OperatingSystem } from '../../../../common/endpoint/types';

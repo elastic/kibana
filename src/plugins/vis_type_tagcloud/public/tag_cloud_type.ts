@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggGroupNames } from '../../data/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { AggGroupNames } from 'src/plugins/data/public';
+import { VIS_EVENT_TO_TRIGGER } from 'src/plugins/visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
 import { toExpressionAst } from './to_ast';

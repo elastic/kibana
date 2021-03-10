@@ -6,8 +6,8 @@
  */
 
 import { Legacy } from 'kibana';
-import { KibanaRequest } from '../../../../../src/core/server';
-import { SpacesPluginStart } from '../../../spaces/server';
+import { KibanaRequest } from 'src/core/server';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
 import { PLUGIN_ID } from '../../common/constants/app';
 
 export type RequestFacade = KibanaRequest | Legacy.Request;

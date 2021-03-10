@@ -14,8 +14,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   AlertExecutorOptions,
-} from '../../../../../alerting/server';
-import { Alert } from '../../../../../alerting/common';
+} from 'x-pack/plugins/alerting/server';
+import { Alert } from 'x-pack/plugins/alerting/common';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 

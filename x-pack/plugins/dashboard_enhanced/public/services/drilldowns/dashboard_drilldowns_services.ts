@@ -6,11 +6,11 @@
  */
 
 import { CoreSetup } from 'src/core/public';
+import { CONTEXT_MENU_TRIGGER } from 'src/plugins/embeddable/public';
+import { createStartServicesGetter } from 'src/plugins/kibana_utils/public';
 import { SetupDependencies, StartDependencies } from '../../plugin';
-import { CONTEXT_MENU_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
 import { FlyoutCreateDrilldownAction, FlyoutEditDrilldownAction } from './actions';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
-import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 
 interface BootstrapParams {
   enableDrilldowns: boolean;

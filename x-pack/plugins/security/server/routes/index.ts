@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { KibanaFeature } from 'x-pack/plugins/features/server';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpResources, IBasePath, Logger } from 'src/core/server';
 
-import type { KibanaFeature } from '../../../features/server';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetup } from '../authorization';

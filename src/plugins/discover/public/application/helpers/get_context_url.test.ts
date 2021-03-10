@@ -7,7 +7,7 @@
  */
 
 import { getContextUrl } from './get_context_url';
-import { FilterManager } from '../../../../data/public/query/filter_manager';
+import { FilterManager } from 'src/plugins/data/public/query/filter_manager';
 const filterManager = ({
   getGlobalFilters: () => [],
   getAppFilters: () => [],

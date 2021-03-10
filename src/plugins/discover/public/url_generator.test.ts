@@ -7,9 +7,9 @@
  */
 
 import { DiscoverUrlGenerator } from './url_generator';
-import { hashedItemStore, getStatesFromKbnUrl } from '../../kibana_utils/public';
-import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
-import { FilterStateStore } from '../../data/common';
+import { hashedItemStore, getStatesFromKbnUrl } from 'src/plugins/kibana_utils/public';
+import { mockStorage } from 'src/plugins/kibana_utils/public/storage/hashed_item_store/mock';
+import { FilterStateStore } from 'src/plugins/data/common';
 
 const appBasePath: string = 'xyz/app/discover';
 const indexPatternId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';

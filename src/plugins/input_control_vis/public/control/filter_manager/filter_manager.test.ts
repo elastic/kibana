@@ -9,12 +9,12 @@
 import expect from '@kbn/expect';
 
 import { FilterManager } from './filter_manager';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import {
   Filter,
   FilterManager as QueryFilterManager,
   IndexPatternsContract,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
 
 const setupMock = coreMock.createSetup();
 

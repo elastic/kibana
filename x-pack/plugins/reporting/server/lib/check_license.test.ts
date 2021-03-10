@@ -6,7 +6,7 @@
  */
 
 import { checkLicense } from './check_license';
-import { ILicense } from '../../../licensing/server';
+import { ILicense } from 'x-pack/plugins/licensing/server';
 import { ExportTypesRegistry } from './export_types_registry';
 
 describe('check_license', () => {

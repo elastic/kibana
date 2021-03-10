@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { VisToExpressionAst } from '../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { VisToExpressionAst } from 'src/plugins/visualizations/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
 import { MarkdownVisExpressionFunctionDefinition } from './markdown_fn';
 import { MarkdownVisParams } from './types';
 

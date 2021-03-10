@@ -10,7 +10,7 @@ import {
   transformValidateFindAlerts,
   transformValidateBulkError,
 } from './validate';
-import { FindResult } from '../../../../../../alerting/server';
+import { FindResult } from 'x-pack/plugins/alerting/server';
 import { BulkError } from '../utils';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { getResult, getFindResultStatus } from '../__mocks__/request_responses';

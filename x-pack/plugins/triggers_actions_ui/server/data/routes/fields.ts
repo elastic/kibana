@@ -14,7 +14,7 @@ import {
   KibanaResponseFactory,
   ILegacyScopedClusterClient,
 } from 'kibana/server';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 
 const bodySchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),

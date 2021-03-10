@@ -10,9 +10,9 @@ import _ from 'lodash';
 import { createHashHistory } from 'history';
 import { ScopedHistory, AppMountParameters } from 'kibana/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
+import { search } from 'src/plugins/data/public';
 import { DiscoverServices } from './build_services';
-import { createGetterSetter } from '../../kibana_utils/public';
-import { search } from '../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 
 let angularModule: any = null;

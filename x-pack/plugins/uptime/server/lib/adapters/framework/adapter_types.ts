@@ -11,9 +11,9 @@ import type {
   ISavedObjectsRepository,
   IScopedClusterClient,
 } from 'src/core/server';
+import { PluginSetupContract } from 'x-pack/plugins/features/server';
+import { MlPluginSetup as MlSetup } from 'x-pack/plugins/ml/server';
 import { UMKibanaRoute } from '../../../rest_api';
-import { PluginSetupContract } from '../../../../../features/server';
-import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { UptimeESClient } from '../../lib';
 import type { UptimeRouter } from '../../../types';
 

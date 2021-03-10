@@ -21,7 +21,7 @@ import {
   TimefilterContract,
 } from 'src/plugins/data/public';
 
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';

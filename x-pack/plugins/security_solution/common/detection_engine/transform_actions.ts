@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertAction } from '../../../alerting/common';
+import { AlertAction } from 'x-pack/plugins/alerting/common';
 import { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({

@@ -11,7 +11,7 @@ import { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
-import { redirectWhenMissing } from '../../../../../kibana_utils/public';
+import { redirectWhenMissing } from 'src/plugins/kibana_utils/public';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';

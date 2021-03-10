@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
 import { getAlertType as getLogsAlertType } from './alerting/log_threshold';

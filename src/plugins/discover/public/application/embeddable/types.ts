@@ -12,8 +12,8 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from 'src/plugins/embeddable/public';
+import { Filter, IIndexPattern, TimeRange, Query } from 'src/plugins/data/public';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { Filter, IIndexPattern, TimeRange, Query } from '../../../../data/public';
 import { SavedSearch } from '../..';
 
 export interface SearchInput extends EmbeddableInput {

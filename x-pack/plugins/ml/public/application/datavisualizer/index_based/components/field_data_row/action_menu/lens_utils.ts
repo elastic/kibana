@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { TypedLensByValueInput } from 'x-pack/plugins/lens/public';
+import type { IndexPatternColumn, XYLayerConfig } from 'x-pack/plugins/lens/public';
+import type { IIndexPattern } from 'src/plugins/data/common/index_patterns';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../../common/constants/field_types';
-import type { TypedLensByValueInput } from '../../../../../../../../lens/public';
 import type { FieldVisConfig } from '../../../../stats_table/types';
-import type { IndexPatternColumn, XYLayerConfig } from '../../../../../../../../lens/public';
 import type { CombinedQuery } from '../../../common';
-import type { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 interface ColumnsAndLayer {
   columns: Record<string, IndexPatternColumn>;
   layer: XYLayerConfig;

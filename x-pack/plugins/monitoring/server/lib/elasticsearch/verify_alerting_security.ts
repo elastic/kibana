@@ -6,7 +6,7 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;

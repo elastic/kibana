@@ -10,12 +10,12 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
 
-import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import {
   ExpressionAstExpression,
   ExpressionAstArgument,
   SerializedFieldFormat,
 } from 'src/plugins/expressions/common';
+import { ISearchOptions, ISearchSource } from '../../../public';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';

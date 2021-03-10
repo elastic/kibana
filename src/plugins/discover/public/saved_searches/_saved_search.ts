@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectsStart } from '../../../saved_objects/public';
+import { SavedObject, SavedObjectsStart } from 'src/plugins/saved_objects/public';
 
 export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
   class SavedSearch extends savedObjects.SavedObjectClass {

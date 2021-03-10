@@ -7,14 +7,14 @@
  */
 
 import { get } from 'lodash';
-import { getIndexPatterns } from './plugin_services';
-import { TimelionFunctionArgs } from '../../common/types';
-import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
 import {
   IndexPatternField,
   indexPatterns as indexPatternsUtils,
   KBN_FIELD_TYPES,
-} from '../../../data/public';
+} from 'src/plugins/data/public';
+import { getIndexPatterns } from './plugin_services';
+import { TimelionFunctionArgs } from '../../common/types';
+import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
 
 const isRuntimeField = (field: IndexPatternField) => Boolean(field.runtimeField);
 

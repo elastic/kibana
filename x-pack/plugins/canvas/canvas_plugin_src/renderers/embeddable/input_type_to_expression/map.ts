@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapEmbeddableInput } from '../../../../../../plugins/maps/public/embeddable';
+import { MapEmbeddableInput } from 'x-pack/plugins/maps/public/embeddable';
 
 export function toExpression(input: MapEmbeddableInput): string {
   const expressionParts = [] as string[];

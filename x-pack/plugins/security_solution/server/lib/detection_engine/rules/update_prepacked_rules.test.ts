@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';

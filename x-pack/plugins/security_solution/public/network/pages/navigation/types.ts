@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IIndexPattern } from 'src/plugins/data/common';
 import { ESTermQuery } from '../../../../common/typed_json';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 import { NavTab } from '../../../common/components/navigation/types';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Alert } from 'x-pack/plugins/alerting/common';
 import { ThreadPoolRejectionsAlertBase } from './thread_pool_rejections_alert_base';
 import { ALERT_THREAD_POOL_SEARCH_REJECTIONS, ALERT_DETAILS } from '../../common/constants';
-import { Alert } from '../../../alerting/common';
 
 export class ThreadPoolSearchRejectionsAlert extends ThreadPoolRejectionsAlertBase {
   private static TYPE = ALERT_THREAD_POOL_SEARCH_REJECTIONS;

@@ -11,7 +11,7 @@ import {
   UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
-} from '../../../../ml/server';
+} from 'x-pack/plugins/ml/server';
 
 export class NoLogAnalysisMlJobError extends Error {
   constructor(message?: string) {

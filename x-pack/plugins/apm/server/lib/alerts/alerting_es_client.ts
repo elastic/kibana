@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ThresholdMetActionGroupId } from '../../../common/alert_types';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
+} from 'x-pack/typings/elasticsearch';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
+import { ThresholdMetActionGroupId } from '../../../common/alert_types';
 
 export function alertingEsClient<TParams extends ESSearchRequest>(
   services: AlertServices<

@@ -8,8 +8,8 @@
 
 import { PluginInitializerContext } from 'kibana/server';
 import { first } from 'rxjs/operators';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { fetchProvider, TelemetryResponse } from './collector_fetch';
-import { UsageCollectionSetup } from '../../../../../usage_collection/server';
 
 export async function makeSampleDataUsageCollector(
   usageCollection: UsageCollectionSetup,

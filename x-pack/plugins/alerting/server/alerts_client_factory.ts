@@ -11,18 +11,18 @@ import {
   SavedObjectsServiceStart,
   PluginInitializerContext,
 } from 'src/core/server';
-import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
-import { AlertsClient } from './alerts_client';
-import { ALERTS_FEATURE_ID } from '../common';
-import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../task_manager/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { PluginStartContract as ActionsPluginStartContract } from 'x-pack/plugins/actions/server';
+import { SecurityPluginSetup, SecurityPluginStart } from 'x-pack/plugins/security/server';
+import { EncryptedSavedObjectsClient } from 'x-pack/plugins/encrypted_saved_objects/server';
+import { TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
+import { PluginStartContract as FeaturesPluginStart } from 'x-pack/plugins/features/server';
+import { Space } from 'x-pack/plugins/spaces/server';
+import { IEventLogClientService } from 'x-pack/plugins/event_log/server';
 import { AlertsAuthorization } from './authorization/alerts_authorization';
 import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
-import { Space } from '../../spaces/server';
-import { IEventLogClientService } from '../../../plugins/event_log/server';
+import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
+import { ALERTS_FEATURE_ID } from '../common';
+import { AlertsClient } from './alerts_client';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;

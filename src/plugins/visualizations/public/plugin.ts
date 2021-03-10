@@ -15,8 +15,31 @@ import {
   Plugin,
   ApplicationStart,
   SavedObjectsClientContract,
-} from '../../../core/public';
-import { TypesService, TypesSetup, TypesStart } from './vis_types';
+} from 'src/core/public';
+import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { Setup as InspectorSetup, Start as InspectorStart } from 'src/plugins/inspector/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { createStartServicesGetter, StartServicesGetter } from 'src/plugins/kibana_utils/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { createSavedSearchesLoader } from 'src/plugins/discover/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
+import { SerializedVis, Vis } from './vis';
+import { showNewVisModal } from './wizard';
+import {
+  convertFromSerializedVis,
+  convertToSerializedVis,
+} from './saved_visualizations/_saved_vis';
+import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
+import { range as rangeExpressionFunction } from './expression_functions/range';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeEmbeddableFactory,
+  createVisEmbeddableFromObject,
+} from './embeddable';
 import {
   setUISettings,
   setTypes,
@@ -37,33 +60,7 @@ import {
   setEmbeddable,
   setDocLinks,
 } from './services';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeEmbeddableFactory,
-  createVisEmbeddableFromObject,
-} from './embeddable';
-import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { range as rangeExpressionFunction } from './expression_functions/range';
-import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
-import {
-  Setup as InspectorSetup,
-  Start as InspectorStart,
-} from '../../../plugins/inspector/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
-import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
-import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
-import { SerializedVis, Vis } from './vis';
-import { showNewVisModal } from './wizard';
-import { UiActionsStart } from '../../ui_actions/public';
-import {
-  convertFromSerializedVis,
-  convertToSerializedVis,
-} from './saved_visualizations/_saved_vis';
-import { createSavedSearchesLoader } from '../../discover/public';
-import { DashboardStart } from '../../dashboard/public';
-import { SavedObjectsStart } from '../../saved_objects/public';
+import { TypesService, TypesSetup, TypesStart } from './vis_types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.

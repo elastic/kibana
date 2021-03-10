@@ -10,7 +10,7 @@ import {
   UrlGeneratorContract,
   UrlGeneratorId,
   UrlGeneratorStateMapping,
-} from '../../../../../../src/plugins/share/public';
+} from 'src/plugins/share/public';
 import { useAppContext } from '../app_context';
 
 export const useUrlGenerator = ({

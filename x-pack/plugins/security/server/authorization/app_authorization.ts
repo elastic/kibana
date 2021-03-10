@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+
 import type { HttpServiceSetup, Logger } from 'src/core/server';
 
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
 import type { AuthorizationServiceSetup } from './authorization_service';
 
 class ProtectedApplications {

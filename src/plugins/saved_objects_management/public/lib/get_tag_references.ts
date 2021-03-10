@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsFindOptionsReference } from 'kibana/server';
-import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
 
 export const getTagFindReferences = ({
   selectedTags,

@@ -24,7 +24,7 @@ import { convertSavedObjectToSavedNote } from '../../note/saved_object';
 import { convertSavedObjectToSavedPinnedEvent } from '../../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
 import { mockGetCurrentUser } from './__mocks__/import_timelines';
-import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 
 jest.mock('../convert_saved_object_to_savedtimeline', () => {
   return {

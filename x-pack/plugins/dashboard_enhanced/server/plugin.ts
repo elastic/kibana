@@ -6,7 +6,10 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../ui_actions_enhanced/server';
+import {
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
+} from 'x-pack/plugins/ui_actions_enhanced/server';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN, createExtract, createInject } from '../common';
 
 export interface SetupDependencies {

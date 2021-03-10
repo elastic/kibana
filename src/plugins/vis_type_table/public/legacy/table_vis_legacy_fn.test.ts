@@ -9,7 +9,7 @@
 import { createTableVisLegacyFn } from './table_vis_legacy_fn';
 import { tableVisLegacyResponseHandler } from './table_vis_legacy_response_handler';
 
-import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 jest.mock('./table_vis_legacy_response_handler', () => ({
   tableVisLegacyResponseHandler: jest.fn().mockReturnValue({

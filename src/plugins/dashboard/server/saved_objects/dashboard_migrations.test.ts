@@ -7,8 +7,8 @@
  */
 
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { savedObjectsServiceMock } from '../../../../core/server/mocks';
-import { createEmbeddableSetupMock } from '../../../embeddable/server/mocks';
+import { savedObjectsServiceMock } from 'src/core/server/mocks';
+import { createEmbeddableSetupMock } from 'src/plugins/embeddable/server/mocks';
 import { createDashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 import { DashboardDoc730ToLatest } from '../../common';
 

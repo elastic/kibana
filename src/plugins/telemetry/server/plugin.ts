@@ -9,10 +9,6 @@
 import { URL } from 'url';
 import { AsyncSubject, Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  TelemetryCollectionManagerPluginSetup,
-  TelemetryCollectionManagerPluginStart,
-} from 'src/plugins/telemetry_collection_manager/server';
 import { take } from 'rxjs/operators';
 import {
   CoreSetup,
@@ -23,7 +19,11 @@ import {
   Plugin,
   Logger,
   UiSettingsServiceStart,
-} from '../../../core/server';
+} from 'src/core/server';
+import {
+  TelemetryCollectionManagerPluginSetup,
+  TelemetryCollectionManagerPluginStart,
+} from '../../telemetry_collection_manager/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {

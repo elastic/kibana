@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
-
 import {
   CommentResponse,
   CaseStatuses,
@@ -20,9 +18,11 @@ import {
   CommentType,
   AssociationType,
   CaseType,
-} from '../../../../case/common/api';
+} from 'x-pack/plugins/case/common/api';
+import { ConnectorTypes } from 'x-pack/plugins/case/common/api/connectors';
+import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
-import { ConnectorTypes } from '../../../../case/common/api/connectors';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';

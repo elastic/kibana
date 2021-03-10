@@ -6,7 +6,7 @@
  */
 
 import { RequestHandler, RouteMethod } from 'src/core/server';
-import { AuthenticatedUser } from '../../../../security/server';
+import { AuthenticatedUser } from 'x-pack/plugins/security/server';
 import { ReportingCore } from '../../core';
 import { getUserFactory } from './get_user';
 import type { ReportingRequestHandlerContext } from '../../types';

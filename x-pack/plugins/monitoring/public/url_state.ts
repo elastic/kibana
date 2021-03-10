@@ -7,15 +7,7 @@
 
 import { Subscription } from 'rxjs';
 import { History, createHashHistory } from 'history';
-import { MonitoringStartPluginDependencies } from './types';
-import { Legacy } from './legacy_shims';
-
-import {
-  RefreshInterval,
-  TimeRange,
-  syncQueryStateWithUrl,
-} from '../../../../src/plugins/data/public';
-
+import { RefreshInterval, TimeRange, syncQueryStateWithUrl } from 'src/plugins/data/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -25,7 +17,9 @@ import {
   ISyncStateRef,
   syncState,
   withNotifyOnErrors,
-} from '../../../../src/plugins/kibana_utils/public';
+} from 'src/plugins/kibana_utils/public';
+import { MonitoringStartPluginDependencies } from './types';
+import { Legacy } from './legacy_shims';
 
 interface Route {
   params: { _g: unknown };

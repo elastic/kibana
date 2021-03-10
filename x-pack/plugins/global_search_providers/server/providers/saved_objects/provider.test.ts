@@ -14,11 +14,11 @@ import {
   SavedObjectsType,
   SavedObjectTypeRegistry,
 } from 'src/core/server';
-import { globalSearchPluginMock } from '../../../../global_search/server/mocks';
+import { globalSearchPluginMock } from 'x-pack/plugins/global_search/server/mocks';
 import {
   GlobalSearchResultProvider,
   GlobalSearchProviderFindOptions,
-} from '../../../../global_search/server';
+} from 'x-pack/plugins/global_search/server';
 import { createSavedObjectsResultProvider } from './provider';
 
 const getTestScheduler = () =>

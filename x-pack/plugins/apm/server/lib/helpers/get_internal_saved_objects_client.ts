@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { PromiseReturnType } from 'x-pack/plugins/observability/typings/common';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 export type InternalSavedObjectsClient = PromiseReturnType<

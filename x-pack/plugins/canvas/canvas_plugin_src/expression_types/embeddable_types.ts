@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../plugins/maps/public';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../src/plugins/visualizations/public';
-import { LENS_EMBEDDABLE_TYPE } from '../../../../plugins/lens/common/constants';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../src/plugins/discover/public';
+import { MAP_SAVED_OBJECT_TYPE } from 'x-pack/plugins/maps/public';
+import { VISUALIZE_EMBEDDABLE_TYPE } from 'src/plugins/visualizations/public';
+import { LENS_EMBEDDABLE_TYPE } from 'x-pack/plugins/lens/common/constants';
+import { SEARCH_EMBEDDABLE_TYPE } from 'src/plugins/discover/public';
 
 export const EmbeddableTypes: {
   lens: string;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Alert } from 'x-pack/plugins/alerting/common';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -21,7 +22,6 @@ import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerting/common';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,

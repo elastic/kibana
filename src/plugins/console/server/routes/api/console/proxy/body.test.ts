@@ -10,7 +10,7 @@ import { getProxyRouteHandlerDeps } from './mocks';
 
 import { Readable } from 'stream';
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { createHandler } from './create_handler';
 import * as requestModule from '../../../../lib/proxy_request';
 import { createResponseStub } from './stubs';

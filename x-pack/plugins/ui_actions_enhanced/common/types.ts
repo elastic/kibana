@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 
 export type BaseActionConfig = SerializableState;
 

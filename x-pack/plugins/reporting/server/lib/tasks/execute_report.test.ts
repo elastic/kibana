@@ -6,8 +6,8 @@
  */
 
 import { ReportingCore } from '../..';
-import { RunContext } from '../../../../task_manager/server';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { RunContext } from 'x-pack/plugins/task_manager/server';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { ReportingConfigType } from '../../config';
 import {
   createMockConfig,

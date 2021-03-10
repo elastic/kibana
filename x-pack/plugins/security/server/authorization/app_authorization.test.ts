@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { PluginSetupContract as FeaturesSetupContract } from 'x-pack/plugins/features/server';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
+
 import {
   coreMock,
   httpServerMock,
@@ -12,8 +15,6 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 
-import type { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
 import { initAppAuthorization } from './app_authorization';
 import { authorizationMock } from './index.mock';
 

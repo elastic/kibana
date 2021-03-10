@@ -6,7 +6,7 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
+import type { LicensingApiRequestHandlerContext } from 'x-pack/plugins/licensing/server';
 
 /**
  * @internal

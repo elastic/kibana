@@ -6,9 +6,9 @@
  */
 
 import { IRouter } from 'kibana/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { CloudSetup } from '../../cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;

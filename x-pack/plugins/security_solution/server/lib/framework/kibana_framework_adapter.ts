@@ -8,13 +8,9 @@
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
-import type {
-  CoreSetup,
-  KibanaResponseFactory,
-  KibanaRequest,
-} from '../../../../../../src/core/server';
-import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../src/plugins/data/server';
-import { AuthenticatedUser } from '../../../../security/common/model';
+import type { CoreSetup, KibanaResponseFactory, KibanaRequest } from 'src/core/server';
+import { IndexPatternsFetcher, UI_SETTINGS } from 'src/plugins/data/server';
+import { AuthenticatedUser } from 'x-pack/plugins/security/common/model';
 import { SetupPlugins } from '../../plugin';
 import type {
   SecuritySolutionRequestHandlerContext,

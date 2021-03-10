@@ -7,12 +7,12 @@
 
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
 import { BehaviorSubject } from 'rxjs';
-import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server/search';
+import { SearchStrategyDependencies } from 'src/plugins/data/server/search';
 import moment from 'moment';
-import { KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
+import { KbnServerError } from 'src/plugins/kibana_utils/server';
 import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
-import * as indexNotFoundException from '../../../../../src/plugins/data/common/search/test_data/index_not_found_exception.json';
-import * as xContentParseException from '../../../../../src/plugins/data/common/search/test_data/x_content_parse_exception.json';
+import * as indexNotFoundException from 'src/plugins/data/common/search/test_data/index_not_found_exception.json';
+import * as xContentParseException from 'src/plugins/data/common/search/test_data/x_content_parse_exception.json';
 
 const mockAsyncResponse = {
   body: {

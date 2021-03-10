@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
-import { LicensingPluginSetup } from '../../../../licensing/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 
 import {
   IndexGroup,

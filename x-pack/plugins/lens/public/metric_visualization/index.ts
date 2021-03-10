@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 
 export interface MetricVisualizationPluginSetupPlugins {

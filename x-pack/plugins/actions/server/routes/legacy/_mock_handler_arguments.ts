@@ -8,7 +8,7 @@
 import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock } from 'src/core/server/mocks';
 import { ActionType } from '../../../common';
 import { ActionsClientMock, actionsClientMock } from '../../actions_client.mock';
 import { ActionsRequestHandlerContext } from '../../types';

@@ -6,8 +6,8 @@
  */
 
 import { remove } from 'lodash';
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
-import { KueryNode } from '../../../../../src/plugins/data/server';
+import { nodeBuilder } from 'src/plugins/data/common';
+import { KueryNode } from 'src/plugins/data/server';
 import { RegistryAlertTypeWithAuth } from './alerts_authorization';
 
 export function asFiltersByAlertTypeAndConsumer(

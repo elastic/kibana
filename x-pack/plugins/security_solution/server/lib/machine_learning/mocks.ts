@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MlPluginSetup } from '../../../../ml/server';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const createMockClient = () => elasticsearchServiceMock.createLegacyClusterClient();
 const createMockMlSystemProvider = () =>

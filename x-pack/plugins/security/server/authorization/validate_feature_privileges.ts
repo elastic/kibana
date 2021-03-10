@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaFeature } from '../../../features/server';
+import type { KibanaFeature } from 'x-pack/plugins/features/server';
 
 export function validateFeaturePrivileges(features: KibanaFeature[]) {
   for (const feature of features) {

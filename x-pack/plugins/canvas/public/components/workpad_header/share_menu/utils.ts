@@ -8,9 +8,9 @@
 import rison from 'rison-node';
 import { IBasePath } from 'kibana/public';
 import moment from 'moment-timezone';
+import { url } from 'src/plugins/kibana_utils/public';
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 interface PageCount {
   pageCount: number;

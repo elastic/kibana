@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import {
   CreateCommentParams,
   CreateIncidentParams,

@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { unhashUrl } from 'src/plugins/kibana_utils/public';
+import { Adapters } from 'src/plugins/inspector/common/adapters';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../helpers/get_sharing_data';
-import { unhashUrl } from '../../../../../kibana_utils/public';
 import { DiscoverServices } from '../../../build_services';
-import { Adapters } from '../../../../../inspector/common/adapters';
 import { SavedSearch } from '../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../angular/discover_state';

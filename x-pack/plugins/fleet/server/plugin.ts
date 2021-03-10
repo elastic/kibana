@@ -22,21 +22,23 @@ import {
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
+import { LicensingPluginSetup, ILicense } from 'x-pack/plugins/licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
-} from '../../encrypted_saved_objects/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+} from 'x-pack/plugins/encrypted_saved_objects/server';
+import { SecurityPluginSetup, SecurityPluginStart } from 'x-pack/plugins/security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
+
 import {
   EsAssetReference,
   FleetConfigType,
   NewPackagePolicy,
   UpdatePackagePolicy,
 } from '../common';
-import { CloudSetup } from '../../cloud/server';
 
 import {
   PLUGIN_ID,

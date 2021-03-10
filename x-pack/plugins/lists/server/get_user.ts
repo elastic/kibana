@@ -6,8 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-
-import { SecurityPluginStart } from '../../security/server';
+import { SecurityPluginStart } from 'x-pack/plugins/security/server';
 
 export interface GetUserOptions {
   security: SecurityPluginStart | null | undefined;

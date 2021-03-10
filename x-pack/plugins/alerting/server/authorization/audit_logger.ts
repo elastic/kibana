@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegacyAuditLogger } from '../../../security/server';
+import { LegacyAuditLogger } from 'x-pack/plugins/security/server';
 
 export enum ScopeType {
   Consumer,

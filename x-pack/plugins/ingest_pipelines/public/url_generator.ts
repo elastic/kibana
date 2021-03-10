@@ -6,8 +6,8 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { MANAGEMENT_APP_ID } from '../../../../src/plugins/management/public';
-import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
+import { MANAGEMENT_APP_ID } from 'src/plugins/management/public';
+import { UrlGeneratorsDefinition } from 'src/plugins/share/public';
 import {
   getClonePath,
   getCreatePath,

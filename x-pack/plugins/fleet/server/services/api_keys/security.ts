@@ -7,8 +7,9 @@
 
 import type { Request } from '@hapi/hapi';
 
-import { KibanaRequest } from '../../../../../../src/core/server';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { KibanaRequest } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { FleetAdminUserInvalidError, isESClientError } from '../../errors';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';

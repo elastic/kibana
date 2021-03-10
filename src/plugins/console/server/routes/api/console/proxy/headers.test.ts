@@ -10,10 +10,10 @@ jest.mock('../../../../../../../core/server/http/router/request', () => ({
   ensureRawRequest: jest.fn(),
 }));
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../../core/server/http/router/request';
+import { ensureRawRequest } from 'src/core/server/http/router/request';
 
 import { getProxyRouteHandlerDeps } from './mocks';
 

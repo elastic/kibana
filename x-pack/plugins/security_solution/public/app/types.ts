@@ -17,7 +17,7 @@ import {
   CombinedState,
 } from 'redux';
 
-import { AppMountParameters, AppSearchDeepLink } from '../../../../../src/core/public';
+import { AppMountParameters, AppSearchDeepLink } from 'src/core/public';
 import { StartServices } from '../types';
 import { AppFrontendLibs } from '../common/lib/lib';
 

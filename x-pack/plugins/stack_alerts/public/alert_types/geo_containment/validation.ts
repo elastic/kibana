@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '../../../../triggers_actions_ui/public';
+import { ValidationResult } from 'x-pack/plugins/triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from './types';
 
 export const validateExpression = (alertParams: GeoContainmentAlertParams): ValidationResult => {

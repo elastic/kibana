@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  StatsGetter,
-  StatsCollectionContext,
-} from 'src/plugins/telemetry_collection_manager/server';
+import { StatsGetter, StatsCollectionContext } from '../../../telemetry_collection_manager/server';
 import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';

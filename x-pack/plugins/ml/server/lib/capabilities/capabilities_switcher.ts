@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
-import { ILicense } from '../../../../licensing/common/types';
+import { ILicense } from 'x-pack/plugins/licensing/common/types';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import { MlCapabilities, basicLicenseMlCapabilities } from '../../../common/types/capabilities';
 

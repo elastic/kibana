@@ -6,12 +6,15 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
-import { SharePluginStart, SharePluginSetup } from '../../../../src/plugins/share/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { SharePluginStart, SharePluginSetup } from 'src/plugins/share/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import {
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
+} from 'x-pack/plugins/ui_actions_enhanced/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import { DashboardDrilldownsService } from './services';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../ui_actions_enhanced/public';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;

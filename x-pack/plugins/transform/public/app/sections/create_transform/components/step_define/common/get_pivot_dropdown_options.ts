@@ -6,11 +6,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  ES_FIELD_TYPES,
-  IndexPattern,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES, IndexPattern, KBN_FIELD_TYPES } from 'src/plugins/data/public';
 
 import { getNestedProperty } from '../../../../../../../common/utils/object_utils';
 

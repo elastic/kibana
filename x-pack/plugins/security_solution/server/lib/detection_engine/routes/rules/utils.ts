@@ -9,10 +9,10 @@ import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 
+import { PartialAlert, FindResult } from 'x-pack/plugins/alerting/server';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,

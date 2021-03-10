@@ -33,7 +33,7 @@ import {
   CommentRequest,
   User,
   CaseStatuses,
-} from '../../../../../case/common/api';
+} from 'x-pack/plugins/case/common/api';
 
 export const getCase = async (
   caseId: string,

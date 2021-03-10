@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { setup } from '../../../../../core/test_helpers/http_test_setup';
+import { setup } from 'src/core/test_helpers/http_test_setup';
 
 export const { http } = setup((injectedMetadata) => {
   injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');

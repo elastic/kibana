@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { fetchProvider, Usage } from './fetch';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
 
 export async function makeKQLUsageCollector(
   usageCollection: UsageCollectionSetup,

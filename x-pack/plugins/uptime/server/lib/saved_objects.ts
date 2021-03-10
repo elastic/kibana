@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { SavedObjectsType, SavedObjectsErrorHelpers } from 'src/core/server';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../common/constants';
 import { DynamicSettings } from '../../common/runtime_types';
-import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { UMSavedObjectsQueryFn } from './adapters';
 
 export interface UMSavedObjectsAdapter {

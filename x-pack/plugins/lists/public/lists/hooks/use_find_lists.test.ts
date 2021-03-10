@@ -6,9 +6,9 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { httpServiceMock } from 'src/core/public/mocks';
 
 import * as Api from '../api';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../common/schemas/response/found_list_schema.mock';
 
 import { useFindLists } from './use_find_lists';

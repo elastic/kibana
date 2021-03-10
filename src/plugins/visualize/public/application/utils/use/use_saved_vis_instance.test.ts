@@ -9,15 +9,15 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
-import { redirectWhenMissing } from '../../../../../kibana_utils/public';
+import { redirectWhenMissing } from 'src/plugins/kibana_utils/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
 import { setVisEditorsRegistry } from '../../../services';
 import { createVisEditorsRegistry } from '../../../vis_editors_registry';
-import { createEmbeddableStateTransferMock } from '../../../../../embeddable/public/mocks';
+import { createEmbeddableStateTransferMock } from 'src/plugins/embeddable/public/mocks';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
 const mockEmbeddableHandlerDestroy = jest.fn();

@@ -9,15 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { UrlForwardingSetup } from '../../url_forwarding/public';
+import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
+
+import { ManagementSetup } from 'src/plugins/management/public';
+import { IndexPatternFieldEditorStart } from 'src/plugins/index_pattern_field_editor/public';
 import {
   IndexPatternManagementService,
   IndexPatternManagementServiceSetup,
   IndexPatternManagementServiceStart,
 } from './service';
-
-import { ManagementSetup } from '../../management/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;

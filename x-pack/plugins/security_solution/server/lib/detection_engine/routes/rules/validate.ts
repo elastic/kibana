@@ -10,6 +10,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 
+import { PartialAlert, FindResult } from 'x-pack/plugins/alerting/server';
 import {
   FullResponseSchema,
   fullResponseSchema,
@@ -22,7 +23,6 @@ import {
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { formatErrors } from '../../../../../common/format_errors';
 import { exactCheck } from '../../../../../common/exact_check';
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
 import {
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,

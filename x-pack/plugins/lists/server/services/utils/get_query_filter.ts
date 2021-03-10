@@ -6,8 +6,7 @@
  */
 
 import { DslQuery, EsQueryConfig } from 'src/plugins/data/common';
-
-import { Filter, Query, esQuery } from '../../../../../../src/plugins/data/server';
+import { Filter, Query, esQuery } from 'src/plugins/data/server';
 
 import { escapeQuotes } from './escape_query';
 

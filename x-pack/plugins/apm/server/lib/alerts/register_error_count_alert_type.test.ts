@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { toArray, map } from 'rxjs/operators';
 
-import { AlertingPlugin } from '../../../../alerting/server';
+import { AlertingPlugin } from 'x-pack/plugins/alerting/server';
 import { APMConfig } from '../..';
 
 import { registerErrorCountAlertType } from './register_error_count_alert_type';

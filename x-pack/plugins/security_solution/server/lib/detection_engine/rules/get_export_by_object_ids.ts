@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { AlertsClient } from 'x-pack/plugins/alerting/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { AlertsClient } from '../../../../../alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../rules/types';
 import { readRules } from './read_rules';

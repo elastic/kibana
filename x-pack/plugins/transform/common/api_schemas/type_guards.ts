@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchResponse7 } from '../../../ml/common';
+import type { SearchResponse7 } from 'x-pack/plugins/ml/common';
 
 import type { EsIndex } from '../types/es_index';
 import { isPopulatedObject } from '../utils/object_utils';

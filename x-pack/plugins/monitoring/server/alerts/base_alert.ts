@@ -13,9 +13,15 @@ import {
   AlertInstance,
   AlertsClient,
   AlertServices,
-} from '../../../alerting/server';
-import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
-import { ActionsClient } from '../../../actions/server';
+} from 'x-pack/plugins/alerting/server';
+import {
+  Alert,
+  AlertTypeParams,
+  RawAlertInstance,
+  SanitizedAlert,
+} from 'x-pack/plugins/alerting/common';
+import { ActionsClient } from 'x-pack/plugins/actions/server';
+import { parseDuration } from 'x-pack/plugins/alerting/common/parse_duration';
 import {
   AlertState,
   AlertNodeState,
@@ -34,7 +40,6 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
 type ExecutedState =

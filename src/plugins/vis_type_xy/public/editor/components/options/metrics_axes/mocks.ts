@@ -8,8 +8,8 @@
 
 import { Position } from '@elastic/charts';
 
-import { Vis } from '../../../../../../visualizations/public';
-import { Style } from '../../../../../../charts/public';
+import { Vis } from 'src/plugins/visualizations/public';
+import { Style } from 'src/plugins/charts/public';
 
 import {
   ValueAxis,

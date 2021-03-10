@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertServices } from '../../../../../alerting/server';
+import { AlertServices } from 'x-pack/plugins/alerting/server';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 interface GetSignalsCount {

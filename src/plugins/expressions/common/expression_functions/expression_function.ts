@@ -7,13 +7,13 @@
  */
 
 import { identity } from 'lodash';
+import { SavedObjectReference } from 'src/core/types';
+import { PersistableState, SerializableState } from 'src/plugins/kibana_utils/common';
 import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
 import { ExpressionValue } from '../expression_types/types';
 import { ExecutionContext } from '../execution';
 import { ExpressionAstFunction } from '../ast';
-import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState, SerializableState } from '../../../kibana_utils/common';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**

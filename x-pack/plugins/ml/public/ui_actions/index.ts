@@ -6,11 +6,11 @@
  */
 
 import { CoreSetup } from 'kibana/public';
+import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { CONTEXT_MENU_TRIGGER } from 'src/plugins/embeddable/public';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
-import { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
 import { MlPluginStart, MlStartDependencies } from '../plugin';
-import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import { SWIM_LANE_SELECTION_TRIGGER, swimLaneSelectionTrigger } from './triggers';
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';

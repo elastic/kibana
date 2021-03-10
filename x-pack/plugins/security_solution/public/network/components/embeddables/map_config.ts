@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import { euiPaletteColorBlind } from '@elastic/eui';
+import { SOURCE_TYPES } from 'x-pack/plugins/maps/common/constants';
 import {
   IndexPatternMapping,
   LayerMapping,
@@ -14,7 +15,6 @@ import {
   LayerMappingDetails,
 } from './types';
 import * as i18n from './translations';
-import { SOURCE_TYPES } from '../../../../../maps/common/constants';
 const euiVisColorPalette = euiPaletteColorBlind();
 
 // Update field mappings to modify what fields will be returned to map tooltip

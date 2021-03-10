@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
+import { IndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
 
 async function popularizeField(
   indexPattern: IndexPattern,

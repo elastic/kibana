@@ -8,7 +8,7 @@
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { toArray, map } from 'rxjs/operators';
-import { AlertingPlugin } from '../../../../alerting/server';
+import { AlertingPlugin } from 'x-pack/plugins/alerting/server';
 import { APMConfig } from '../..';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
 

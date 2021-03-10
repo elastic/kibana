@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
+import { AppNavLinkStatus } from 'src/core/public';
 
-import { AppNavLinkStatus } from '../../../../../src/core/public';
 import type { AuthenticationServiceSetup } from '../authentication';
 
 interface CreateDeps {

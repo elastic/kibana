@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup } from '../../../../src/core/public';
+import { CoreSetup } from 'src/core/public';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 
 import { ExtensionsService } from './services';

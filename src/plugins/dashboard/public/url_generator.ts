@@ -13,11 +13,11 @@ import {
   esFilters,
   QueryState,
   RefreshInterval,
-} from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../share/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
-import { ViewMode } from '../../embeddable/public';
+} from 'src/plugins/data/public';
+import { setStateToKbnUrl } from 'src/plugins/kibana_utils/public';
+import { UrlGeneratorsDefinition } from 'src/plugins/share/public';
+import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
 import { SavedDashboardPanel } from '../common/types';
 

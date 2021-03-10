@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IContainer, ErrorEmbeddable, AttributeService } from 'src/plugins/embeddable/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { Vis } from '../types';
 import {
   VisualizeInput,
@@ -14,11 +16,6 @@ import {
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import {
-  IContainer,
-  ErrorEmbeddable,
-  AttributeService,
-} from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
   getSavedVisualizationsLoader,
@@ -30,7 +27,6 @@ import {
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
-import { IndexPattern } from '../../../data/public';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,

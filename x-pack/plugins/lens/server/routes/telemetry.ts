@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
 

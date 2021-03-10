@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  FieldFormat,
-  FieldFormatInstanceType,
-  KBN_FIELD_TYPES,
-} from '../../../../../src/plugins/data/public';
+import { FieldFormat, FieldFormatInstanceType, KBN_FIELD_TYPES } from 'src/plugins/data/public';
 import { FormatFactory } from '../types';
 import { TimeScaleUnit } from './time_scale';
 

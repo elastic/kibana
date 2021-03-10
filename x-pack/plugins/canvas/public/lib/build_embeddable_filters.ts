@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { TimeRange, esFilters, Filter as DataFilter } from 'src/plugins/data/public';
 import { ExpressionValueFilter } from '../../types';
 // @ts-expect-error untyped local
 import { buildBoolArray } from './build_bool_array';
-import { TimeRange, esFilters, Filter as DataFilter } from '../../../../../src/plugins/data/public';
 
 export interface EmbeddableFilterInput {
   filters: DataFilter[];

@@ -13,9 +13,9 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 
 import { registerRoutes } from './routes';
 import type { LogstashRequestHandlerContext } from './types';

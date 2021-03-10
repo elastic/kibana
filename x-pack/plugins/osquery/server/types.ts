@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ActionsPlugin } from '../../actions/server';
+import { ActionsPlugin } from 'x-pack/plugins/actions/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import { FleetStartContract } from '../../fleet/server';
+} from 'src/plugins/data/server';
+import { FleetStartContract } from 'x-pack/plugins/fleet/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}

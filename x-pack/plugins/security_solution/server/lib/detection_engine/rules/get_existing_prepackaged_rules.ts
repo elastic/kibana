@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { AlertsClient } from 'x-pack/plugins/alerting/server';
 import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
 

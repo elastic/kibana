@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
-import { DataPublicPluginStart } from '../../data/public';
 
 export interface NavigationPublicPluginSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];

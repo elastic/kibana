@@ -6,12 +6,12 @@
  */
 
 import { SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common/constants/agent';
-import { Agent } from '../../../../fleet/common';
+} from 'x-pack/plugins/fleet/common/constants/agent';
+import { Agent } from 'x-pack/plugins/fleet/common';
+import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
 import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 
 const testAgentId = 'testAgentId';

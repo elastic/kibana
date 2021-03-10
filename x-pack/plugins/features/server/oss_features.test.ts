@@ -9,7 +9,7 @@ import { buildOSSFeatures } from './oss_features';
 // @ts-expect-error
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
 import { KibanaFeature } from '.';
-import { LicenseType } from '../../licensing/server';
+import { LicenseType } from 'x-pack/plugins/licensing/server';
 
 describe('buildOSSFeatures', () => {
   it('returns features including timelion', () => {

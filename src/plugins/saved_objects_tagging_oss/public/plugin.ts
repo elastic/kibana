@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/public';
-import { SavedObjectSetup } from '../../saved_objects/public';
+import { SavedObjectSetup } from 'src/plugins/saved_objects/public';
 import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 import { SavedObjectsTaggingApi } from './api';
 import { tagDecoratorConfig } from './decorator';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '../../../core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { UsageCollectionSetup } from './plugin';
 import { CollectorSet } from './collector';
 export { Collector, createCollectorFetchContextMock } from './usage_collection.mock';

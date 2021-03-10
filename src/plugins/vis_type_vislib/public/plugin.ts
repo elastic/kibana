@@ -8,12 +8,12 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
-import { ChartsPluginSetup } from '../../charts/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { LEGACY_CHARTS_LIBRARY } from '../../vis_type_xy/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { LEGACY_CHARTS_LIBRARY } from 'src/plugins/vis_type_xy/public';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';

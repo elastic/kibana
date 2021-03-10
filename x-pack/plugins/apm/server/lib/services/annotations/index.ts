@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { ScopedAnnotationsClient } from '../../../../../observability/server';
+import { ScopedAnnotationsClient } from 'x-pack/plugins/observability/server';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getStoredAnnotations } from './get_stored_annotations';

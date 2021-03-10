@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ES_FIELD_TYPES } from 'src/plugins/data/public';
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
@@ -19,7 +20,6 @@ import {
   DOC_COUNT,
   _DOC_COUNT,
 } from '../../../../../../../common/constants/field_types';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   EVENT_RATE_FIELD_ID,
   Field,

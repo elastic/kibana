@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { AlertInstance } from 'x-pack/plugins/alerting/server';
+import { RawAlertInstance, SanitizedAlert } from 'x-pack/plugins/alerting/common';
+import { parseDuration } from 'x-pack/plugins/alerting/common/parse_duration';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -21,7 +24,6 @@ import {
   CommonAlertParams,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_CPU_USAGE,
@@ -32,8 +34,6 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
-import { parseDuration } from '../../../alerting/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';

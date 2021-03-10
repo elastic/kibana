@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { createStateContainer, syncState, IKbnUrlStateStorage } from '../../kibana_utils/public';
+import {
+  createStateContainer,
+  syncState,
+  IKbnUrlStateStorage,
+} from 'src/plugins/kibana_utils/public';
 
 import { TimelionAppState, TimelionAppStateTransitions } from './types';
 

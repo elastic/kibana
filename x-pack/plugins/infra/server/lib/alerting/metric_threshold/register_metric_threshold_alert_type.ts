@@ -13,7 +13,7 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
   ActionGroupIdsOf,
-} from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import {
   createMetricThresholdExecutor,

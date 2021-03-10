@@ -6,6 +6,10 @@
  */
 
 import { camelCase } from 'lodash';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/public';
+import { CoreSetup } from 'src/core/public';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
@@ -23,10 +27,6 @@ import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
 import { PLUGIN } from '../../../common/constants/plugin';
 import { FrameworkLib } from './../framework';
-import { ManagementSetup } from '../../../../../../src/plugins/management/public';
-import { SecurityPluginSetup } from '../../../../security/public';
-import { CoreSetup } from '../../../../../../src/core/public';
-import { LicensingPluginSetup } from '../../../../licensing/public';
 import { BeatsManagementConfigType } from '../../../common';
 
 interface ComposeDeps {

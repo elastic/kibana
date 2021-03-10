@@ -8,7 +8,7 @@
 
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import { HomeServerPlugin } from './plugin';
-import { coreMock, httpServiceMock } from '../../../core/server/mocks';
+import { coreMock, httpServiceMock } from 'src/core/server/mocks';
 
 describe('HomeServerPlugin', () => {
   beforeEach(() => {

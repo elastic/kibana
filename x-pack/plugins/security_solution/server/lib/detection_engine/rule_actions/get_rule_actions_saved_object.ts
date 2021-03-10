@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { AlertServices } from 'x-pack/plugins/alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { AlertServices } from '../../../../../alerting/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 import { getRuleActionsFromSavedObject } from './utils';

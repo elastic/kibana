@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
 import { KibanaFeatureConfig } from '../common';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];

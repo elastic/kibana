@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { Vis } from 'src/plugins/visualizations/public';
+import { buildExpression, buildExpressionFunction } from 'src/plugins/expressions/public';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../data/public';
+} from 'src/plugins/data/public';
 
 /**
  * Get esaggs expressions function

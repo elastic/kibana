@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 
 export interface InputOverrides {
   [key: string]: string;

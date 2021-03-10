@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter } from 'src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';

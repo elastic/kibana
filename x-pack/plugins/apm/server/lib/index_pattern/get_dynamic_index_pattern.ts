@@ -6,10 +6,7 @@
  */
 
 import LRU from 'lru-cache';
-import {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-} from '../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher, FieldDescriptor } from 'src/plugins/data/server';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 

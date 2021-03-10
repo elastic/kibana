@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsServiceMock } from '../../../../core/server/mocks';
+import { savedObjectsServiceMock } from 'src/core/server/mocks';
 import { createDashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 import { migrations730 } from './migrations_730';
 import { DashboardDoc700To720, DashboardDoc730ToLatest, DashboardDocPre700 } from '../../common';
 import { RawSavedDashboardPanel730ToLatest } from '../../common';
-import { createEmbeddableSetupMock } from '../../../embeddable/server/mocks';
+import { createEmbeddableSetupMock } from 'src/plugins/embeddable/server/mocks';
 
 const mockContext = savedObjectsServiceMock.createMigrationContext();
 const migrations = createDashboardSavedObjectTypeMigrations({

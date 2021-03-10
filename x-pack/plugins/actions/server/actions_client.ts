@@ -16,8 +16,8 @@ import {
   SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
-} from '../../../../src/core/server';
-import { AuditLogger, EventOutcome } from '../../security/server';
+} from 'src/core/server';
+import { AuditLogger, EventOutcome } from 'x-pack/plugins/security/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';

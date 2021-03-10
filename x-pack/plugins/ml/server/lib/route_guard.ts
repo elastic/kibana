@@ -13,8 +13,8 @@ import {
   RequestHandler,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { SpacesPluginSetup } from '../../../spaces/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+import { SpacesPluginSetup } from 'x-pack/plugins/spaces/server';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 
 import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
 import { MlLicense } from '../../common/license';

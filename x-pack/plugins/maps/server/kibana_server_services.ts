@@ -6,10 +6,10 @@
  */
 
 import { ElasticsearchClient, ISavedObjectsRepository } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../src/core/server';
-import { IndexPatternsCommonService } from '../../../../src/plugins/data/server';
+import { SavedObjectsClient } from 'src/core/server';
+import { IndexPatternsCommonService } from 'src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsServiceStart } from '../../../../src/plugins/data/server/index_patterns';
+import { IndexPatternsServiceStart } from 'src/plugins/data/server/index_patterns';
 
 let internalRepository: ISavedObjectsRepository;
 export const setInternalRepository = (

@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import '../../../common/mock/match_media';
-import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { getField } from 'src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { IFieldType } from 'src/plugins/data/common';
 
 import * as i18n from './translations';
 import {
@@ -26,8 +26,8 @@ import {
   typeMatch,
   filterFieldToList,
 } from './helpers';
-import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { ListSchema } from '../../../../../lists/common';
+import { getListResponseMock } from 'x-pack/plugins/lists/common/schemas/response/list_schema.mock';
+import { ListSchema } from 'x-pack/plugins/lists/common';
 
 describe('helpers', () => {
   // @ts-ignore

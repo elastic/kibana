@@ -14,7 +14,7 @@ import {
 } from 'src/core/server';
 import LRU from 'lru-cache';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { authenticateAgentWithAccessToken } from '../../../../../fleet/server/services/agents/authenticate';
+import { authenticateAgentWithAccessToken } from 'x-pack/plugins/fleet/server/services/agents/authenticate';
 import { LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG } from '../../../../common/endpoint/constants';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ArtifactConstants } from '../../lib/artifacts';

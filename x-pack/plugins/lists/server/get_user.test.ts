@@ -7,8 +7,7 @@
 
 import { httpServerMock } from 'src/core/server/mocks';
 import { KibanaRequest } from 'src/core/server';
-
-import { securityMock } from '../../security/server/mocks';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
 
 import { getUser } from './get_user';
 

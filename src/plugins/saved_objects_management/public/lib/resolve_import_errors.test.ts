@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsImportUnknownError } from 'src/core/public';
-import { httpServiceMock } from '../../../../core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import { resolveImportErrors } from './resolve_import_errors';
 
 function getFormData(form: Map<string, any>) {

@@ -7,10 +7,10 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { SecurityPluginStart } from '../../security/public';
+import { SecurityPluginStart } from 'x-pack/plugins/security/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 
 export interface CloudConfigType {

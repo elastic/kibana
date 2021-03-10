@@ -6,17 +6,17 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionTypeRegistry } from './action_type_registry';
-import { PluginSetupContract, PluginStartContract } from './plugin';
-import { ActionsClient } from './actions_client';
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
 import {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   ElasticsearchClient,
   RequestHandlerContext,
-} from '../../../../src/core/server';
+} from 'src/core/server';
+import { ActionTypeRegistry } from './action_type_registry';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { ActionsClient } from './actions_client';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
 export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';

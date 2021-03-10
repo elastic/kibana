@@ -7,13 +7,10 @@
 
 import { trimStart } from 'lodash';
 import { CoreSetup } from 'kibana/public';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { UrlForwardingStart } from '../../../../src/plugins/url_forwarding/public';
-import {
-  createDashboardEditUrl,
-  DashboardConstants,
-} from '../../../../src/plugins/dashboard/public';
-import { AppNavLinkStatus } from '../../../../src/core/public';
+import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { createDashboardEditUrl, DashboardConstants } from 'src/plugins/dashboard/public';
+import { AppNavLinkStatus } from 'src/core/public';
 
 function defaultUrl(defaultAppId: string) {
   const isDashboardId = defaultAppId.startsWith(dashboardAppIdPrefix());

@@ -6,10 +6,10 @@
  */
 
 import { of } from 'rxjs';
+import { licenseMock } from 'x-pack/plugins/licensing/common/licensing.mock';
+import type { LicenseType } from 'x-pack/plugins/licensing/common/types';
+import { LICENSE_TYPE } from 'x-pack/plugins/licensing/common/types';
 
-import { licenseMock } from '../../../licensing/common/licensing.mock';
-import type { LicenseType } from '../../../licensing/common/types';
-import { LICENSE_TYPE } from '../../../licensing/common/types';
 import { SpacesLicenseService } from './license_service';
 
 describe('license#isEnabled', function () {

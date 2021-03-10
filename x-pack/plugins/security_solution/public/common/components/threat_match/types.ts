@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IFieldType } from 'src/plugins/data/common';
 import { ThreatMap, ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
 export interface FormattedEntry {
   id: string;

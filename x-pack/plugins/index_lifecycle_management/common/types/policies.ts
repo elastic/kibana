@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Index as IndexInterface } from '../../../index_management/common/types';
+import { Index as IndexInterface } from 'x-pack/plugins/index_management/common/types';
 
 export type PhaseWithAllocation = 'warm' | 'cold';
 

@@ -7,6 +7,7 @@
 import { keyBy, last } from 'lodash';
 import { Logger } from 'kibana/server';
 import util from 'util';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
 import { maybe } from '../../../../common/utils/maybe';
 import { ProfileStackFrame } from '../../../../typings/es_schemas/ui/profile';
 import {
@@ -15,7 +16,6 @@ import {
   getValueTypeConfig,
 } from '../../../../common/profiling';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   PROFILE_STACK,
   PROFILE_TOP_ID,

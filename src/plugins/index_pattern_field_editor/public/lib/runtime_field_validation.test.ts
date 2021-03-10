@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '../../../data/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { getRuntimeFieldValidator } from './runtime_field_validation';
 
 const dataStart = dataPluginMock.createStartContract();

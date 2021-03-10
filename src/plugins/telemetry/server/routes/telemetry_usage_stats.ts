@@ -11,7 +11,7 @@ import { IRouter } from 'kibana/server';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '../../../telemetry_collection_manager/server';
 
 export function registerTelemetryUsageStatsRoutes(
   router: IRouter,

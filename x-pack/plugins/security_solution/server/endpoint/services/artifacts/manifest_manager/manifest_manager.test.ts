@@ -8,9 +8,9 @@
 import { inflateSync } from 'zlib';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { PackagePolicy } from '../../../../../../fleet/common/types/models';
+import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from 'x-pack/plugins/lists/common';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
+import { PackagePolicy } from 'x-pack/plugins/fleet/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
 import {
   InternalArtifactCompleteSchema,

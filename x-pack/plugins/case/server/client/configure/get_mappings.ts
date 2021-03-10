@@ -6,10 +6,10 @@
  */
 
 import { SavedObjectsClientContract, Logger } from 'src/core/server';
-import { ActionsClient } from '../../../../actions/server';
+import { ActionsClient } from 'x-pack/plugins/actions/server';
+import { ACTION_SAVED_OBJECT_TYPE } from 'x-pack/plugins/actions/server/saved_objects';
 import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
 import { ConnectorMappingsServiceSetup } from '../../services';
 import { CaseClientHandler } from '..';
 import { createCaseError } from '../../common/error';

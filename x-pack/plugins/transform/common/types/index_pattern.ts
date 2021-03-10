@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexPattern } from '../../../../../src/plugins/data/common';
+import type { IndexPattern } from 'src/plugins/data/common';
 
 import { isPopulatedObject } from '../utils/object_utils';
 

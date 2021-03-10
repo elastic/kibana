@@ -8,10 +8,10 @@
 import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry, ConstructorOptions } from './alert_type_registry';
 import { ActionGroup, AlertType } from './types';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
-import { licensingMock } from '../../licensing/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let alertTypeRegistryParams: ConstructorOptions;
 

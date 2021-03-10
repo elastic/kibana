@@ -9,16 +9,16 @@
 import {
   PushToServiceApiParams as JiraPushToServiceApiParams,
   Incident as JiraIncident,
-} from '../../../../actions/server/builtin_action_types/jira/types';
+} from 'x-pack/plugins/actions/server/builtin_action_types/jira/types';
 import {
   PushToServiceApiParams as ResilientPushToServiceApiParams,
   Incident as ResilientIncident,
-} from '../../../../actions/server/builtin_action_types/resilient/types';
+} from 'x-pack/plugins/actions/server/builtin_action_types/resilient/types';
 import {
   PushToServiceApiParamsITSM as ServiceNowITSMPushToServiceApiParams,
   PushToServiceApiParamsSIR as ServiceNowSIRPushToServiceApiParams,
   ServiceNowITSMIncident,
-} from '../../../../actions/server/builtin_action_types/servicenow/types';
+} from 'x-pack/plugins/actions/server/builtin_action_types/servicenow/types';
 import { CaseResponse, ConnectorMappingsAttributes } from '../../../common/api';
 
 export type Incident = JiraIncident | ResilientIncident | ServiceNowITSMIncident;

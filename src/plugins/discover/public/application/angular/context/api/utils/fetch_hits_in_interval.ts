@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource, EsQuerySortValue, SortDirection } from '../../../../../../../data/public';
+import { ISearchSource, EsQuerySortValue, SortDirection } from 'src/plugins/data/public';
 import { convertTimeValueToIso } from './date_conversion';
 import { EsHitRecordList, EsHitRecord } from '../context';
 import { IntervalValue } from './generate_intervals';

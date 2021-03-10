@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ISearchRequestParams } from 'src/plugins/data/common';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { NetworkOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
 
 export const buildOverviewNetworkQuery = ({

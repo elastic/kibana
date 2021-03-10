@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlCapabilitiesResponse } from '../../../ml/common/types/capabilities';
+import { MlCapabilitiesResponse } from 'x-pack/plugins/ml/common/types/capabilities';
 
 export const hasMlAdminPermissions = (capabilities: MlCapabilitiesResponse): boolean =>
   getDataFeedPermissions(capabilities) &&

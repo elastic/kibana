@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ActionResult } from '../../../../../../actions/server';
+import { ActionResult } from 'x-pack/plugins/actions/server';
 import { SignalSearchResponse } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,

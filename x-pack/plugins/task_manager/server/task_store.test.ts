@@ -14,7 +14,7 @@ import {
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
 } from './task';
-import { elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { TaskStore, SearchOpts } from './task_store';
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {

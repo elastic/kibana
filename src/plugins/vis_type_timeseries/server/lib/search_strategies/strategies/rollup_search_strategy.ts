@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getCapabilitiesForRollupIndices } from '../../../../../data/server';
+import { getCapabilitiesForRollupIndices } from 'src/plugins/data/server';
 import {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,

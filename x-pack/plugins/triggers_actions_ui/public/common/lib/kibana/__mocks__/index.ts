@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { notificationServiceMock } from 'src/core/public/mocks';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,

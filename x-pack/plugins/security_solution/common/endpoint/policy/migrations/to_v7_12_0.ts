@@ -7,7 +7,7 @@
 
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { cloneDeep } from 'lodash';
-import { PackagePolicy } from '../../../../../fleet/common';
+import { PackagePolicy } from 'x-pack/plugins/fleet/common';
 import { ProtectionModes } from '../../types';
 
 export const migratePackagePolicyToV7120: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (

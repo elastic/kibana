@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ArtifactsSchema, TutorialsCategory } from 'src/plugins/home/server';
 import { onPremInstructions } from './envs/on_prem';
 import apmIndexPattern from './index_pattern.json';
-import { ArtifactsSchema, TutorialsCategory } from '../../../../../src/plugins/home/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 
 const apmIntro = i18n.translate('apmOss.tutorial.introduction', {

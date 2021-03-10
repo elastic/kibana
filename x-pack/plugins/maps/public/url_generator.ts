@@ -13,9 +13,9 @@ import {
   esFilters,
   QueryState,
   RefreshInterval,
-} from '../../../../src/plugins/data/public';
-import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
+} from 'src/plugins/data/public';
+import { setStateToKbnUrl } from 'src/plugins/kibana_utils/public';
+import { UrlGeneratorsDefinition } from 'src/plugins/share/public';
 import { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY } from '../common/constants';
 import { lazyLoadMapModules } from './lazy_load_bundle';

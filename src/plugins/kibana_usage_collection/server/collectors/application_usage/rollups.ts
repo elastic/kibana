@@ -8,6 +8,8 @@
 
 import { ISavedObjectsRepository, SavedObject, Logger } from 'kibana/server';
 import moment from 'moment';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { MAIN_APP_DEFAULT_VIEW_ID } from 'src/plugins/usage_collection/common/constants';
 import {
   ApplicationUsageDaily,
   ApplicationUsageTotal,
@@ -16,8 +18,6 @@ import {
   SAVED_OBJECTS_TOTAL_TYPE,
   SAVED_OBJECTS_TRANSACTIONAL_TYPE,
 } from './saved_objects_types';
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
 
 /**
  * For Rolling the daily data, we only care about the stored attributes and the version (to avoid overwriting via concurrent requests)

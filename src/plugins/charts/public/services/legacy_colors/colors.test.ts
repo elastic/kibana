@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { seedColors } from '../../static/colors';
 import { LegacyColorsService } from './colors';

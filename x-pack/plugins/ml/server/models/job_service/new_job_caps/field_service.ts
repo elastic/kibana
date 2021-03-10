@@ -8,8 +8,8 @@
 import { IScopedClusterClient } from 'kibana/server';
 import { cloneDeep } from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/server';
+import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 import { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider, RollupJob } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';

@@ -8,8 +8,8 @@
 import moment from 'moment';
 import { loggingSystemMock } from 'src/core/server/mocks';
 
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { TaskStatus } from '../../../../task_manager/server';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
+import { TaskStatus } from 'x-pack/plugins/task_manager/server';
 
 import { TelemetryDiagTask, TelemetryDiagTaskConstants } from './task';
 import { createMockTelemetryEventsSender, MockTelemetryDiagnosticTask } from './mocks';

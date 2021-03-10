@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { mockAuthenticatedUser } from 'x-pack/plugins/security/common/model/authenticated_user.mock';
+
 import type { SavedObjectsClientContract } from 'src/core/server';
 import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
 
-import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptionError } from '../crypto';
 import { EncryptionErrorOperation } from '../crypto/encryption_error';

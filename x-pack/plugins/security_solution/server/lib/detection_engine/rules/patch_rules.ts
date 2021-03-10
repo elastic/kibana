@@ -6,8 +6,8 @@
  */
 
 import { defaults } from 'lodash/fp';
+import { PartialAlert } from 'x-pack/plugins/alerting/server';
 import { validate } from '../../../../common/validate';
-import { PartialAlert } from '../../../../../alerting/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PatchRulesOptions } from './types';
 import { addTags } from './add_tags';

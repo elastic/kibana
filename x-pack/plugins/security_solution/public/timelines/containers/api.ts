@@ -12,7 +12,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 // eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
 
-import { throwErrors } from '../../../../case/common/api';
+import { throwErrors } from 'x-pack/plugins/case/common/api';
 import {
   TimelineResponse,
   TimelineResponseType,

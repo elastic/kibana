@@ -7,7 +7,7 @@
  */
 
 import { TickFormatter } from '@elastic/charts';
-import { DatatableRow } from '../../../expressions/public';
+import { DatatableRow } from 'src/plugins/expressions/public';
 import { Column, Aspect } from '../types';
 
 interface SplitAccessors {

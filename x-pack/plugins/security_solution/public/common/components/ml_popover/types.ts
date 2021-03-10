@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { MlSummaryJob } from 'x-pack/plugins/ml/public';
 import { MlError } from '../ml/types';
-import { MlSummaryJob } from '../../../../../ml/public';
 
 export interface Group {
   id: string;

@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server/';
-import { ILicense } from '../../../../licensing/server';
-import { MlPluginSetup } from '../../../../ml/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import { ILicense } from 'x-pack/plugins/licensing/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import { SetupPlugins } from '../../plugin';
 import { MINIMUM_ML_LICENSE } from '../../../common/constants';
 import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';

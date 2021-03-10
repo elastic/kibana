@@ -8,13 +8,13 @@
 import { Action } from 'redux';
 import { Observable } from 'rxjs';
 
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import { CoreStart } from 'src/core/public';
 import { AppApolloClient } from '../../../common/lib/lib';
 import { inputsModel } from '../../../common/store/inputs';
 import { NotesById } from '../../../common/store/app/model';
 
 import { TimelineModel } from './model';
-import { CoreStart } from '../../../../../../../src/core/public';
 
 export interface AutoSavedWarningMsg {
   timelineId: string | null;

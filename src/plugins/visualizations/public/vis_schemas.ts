@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SerializedFieldFormat } from '../../expressions/public';
-import { IAggConfig, search } from '../../data/public';
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
+import { IAggConfig, search } from 'src/plugins/data/public';
 
 import { Vis, VisToExpressionAstParams } from './types';
 

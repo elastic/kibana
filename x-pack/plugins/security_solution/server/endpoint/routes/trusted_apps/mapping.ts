@@ -7,16 +7,16 @@
 
 import uuid from 'uuid';
 
-import { OsType } from '../../../../../lists/common/schemas/common';
+import { OsType } from 'x-pack/plugins/lists/common/schemas/common';
 import {
   EntriesArray,
   EntryMatch,
   EntryNested,
   ExceptionListItemSchema,
   NestedEntriesArray,
-} from '../../../../../lists/common/shared_exports';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
-import { CreateExceptionListItemOptions } from '../../../../../lists/server';
+} from 'x-pack/plugins/lists/common/shared_exports';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from 'x-pack/plugins/lists/common';
+import { CreateExceptionListItemOptions } from 'x-pack/plugins/lists/server';
 import {
   ConditionEntry,
   ConditionEntryField,

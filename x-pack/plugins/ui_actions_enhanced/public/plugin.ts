@@ -6,28 +6,27 @@
  */
 
 import { BehaviorSubject, Subscription } from 'rxjs';
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '../../../../src/core/public';
-import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
-import { UI_SETTINGS } from '../../../../src/plugins/data/public';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { createReactOverlays } from 'src/plugins/kibana_react/public';
+import { UI_SETTINGS } from 'src/plugins/data/public';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
+} from 'src/plugins/embeddable/public';
+import {
+  ILicense,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from 'x-pack/plugins/licensing/public';
+import { createStartServicesGetter, Storage } from 'src/plugins/kibana_utils/public';
 import { CustomTimeRangeAction } from './custom_time_range_action';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
-import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { createFlyoutManageDrilldowns } from './drilldowns';
-import { createStartServicesGetter, Storage } from '../../../../src/plugins/kibana_utils/public';
 import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
 interface SetupDependencies {

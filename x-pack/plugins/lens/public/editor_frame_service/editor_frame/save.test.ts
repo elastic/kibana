@@ -7,7 +7,7 @@
 
 import { getSavedObjectFormat, Props } from './save';
 import { createMockDatasource, createMockFramePublicAPI, createMockVisualization } from '../mocks';
-import { esFilters, IIndexPattern, IFieldType } from '../../../../../../src/plugins/data/public';
+import { esFilters, IIndexPattern, IFieldType } from 'src/plugins/data/public';
 
 jest.mock('./expression_helpers');
 

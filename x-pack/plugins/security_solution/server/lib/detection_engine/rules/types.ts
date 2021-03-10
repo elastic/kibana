@@ -14,6 +14,8 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { AlertsClient, PartialAlert } from 'x-pack/plugins/alerting/server';
+import { Alert, SanitizedAlert } from 'x-pack/plugins/alerting/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
@@ -99,8 +101,6 @@ import {
   ThreatIndicatorPathOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 
-import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
-import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';

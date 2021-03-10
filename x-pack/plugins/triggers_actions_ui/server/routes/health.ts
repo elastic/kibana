@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 
 export function createHealthRoute(
   logger: Logger,

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { IndexPattern } from 'src/plugins/data/public';
+import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { updateSearchSource } from './update_search_source';
-import { IndexPattern } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
 import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
-import { SavedObjectSaveOpts } from '../../../../saved_objects/public';
 import { DiscoverServices } from '../../build_services';
 
 /**

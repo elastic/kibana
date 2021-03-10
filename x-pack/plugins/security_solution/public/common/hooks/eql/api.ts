@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-} from '../../../../../data_enhanced/common';
-import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
+} from 'x-pack/plugins/data_enhanced/common';
+import { EQL_SEARCH_STRATEGY } from 'x-pack/plugins/data_enhanced/public';
 import {
   getValidationErrors,
   isErrorResponse,

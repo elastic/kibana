@@ -20,7 +20,7 @@ import {
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ConnectorTypes } from 'x-pack/plugins/case/common/api/connectors';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

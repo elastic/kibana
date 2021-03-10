@@ -14,7 +14,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
-} from '../../../../core/server/mocks';
+} from 'src/core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
 

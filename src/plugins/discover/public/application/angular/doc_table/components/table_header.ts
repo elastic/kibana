@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { UI_SETTINGS } from 'src/plugins/data/public';
 import { TableHeader } from './table_header/table_header';
 import { getServices } from '../../../../kibana_services';
 import { SORT_DEFAULT_ORDER_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
-import { UI_SETTINGS } from '../../../../../../data/public';
 
 export function createTableHeaderDirective(reactDirective: any) {
   const { uiSettings: config } = getServices();

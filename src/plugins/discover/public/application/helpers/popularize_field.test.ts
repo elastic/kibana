@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, IndexPatternsService } from '../../../../data/public';
+import { IndexPattern, IndexPatternsService } from 'src/plugins/data/public';
 import { popularizeField } from './popularize_field';
 
 describe('Popularize field', () => {

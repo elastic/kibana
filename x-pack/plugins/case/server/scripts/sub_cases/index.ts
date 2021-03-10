@@ -8,10 +8,10 @@
 import yargs from 'yargs';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
+import { ActionResult, ActionTypeExecutorResult } from 'x-pack/plugins/actions/common';
 import { CaseResponse, CaseType, ConnectorTypes } from '../../../common/api';
 import { CommentType } from '../../../common/api/cases/comment';
 import { CASES_URL } from '../../../common/constants';
-import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
 import { ContextTypeGeneratedAlertType, createAlertsString } from '../../connectors';
 
 main();

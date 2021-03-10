@@ -20,7 +20,7 @@ import {
   ILegacyScopedClusterClient,
 } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 
 const bodySchema = schema.object({
   pattern: schema.string(),

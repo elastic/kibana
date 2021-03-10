@@ -8,8 +8,8 @@
 import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'src/core/server';
+import { AlertServices } from 'x-pack/plugins/alerting/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import { AlertServices } from '../../../../alerting/server';
 import {
   ActionGroupId,
   GEO_CONTAINMENT_ID,

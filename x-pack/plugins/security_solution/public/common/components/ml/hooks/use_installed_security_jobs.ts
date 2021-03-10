@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { MlSummaryJob } from '../../../../../../ml/public';
+import { MlSummaryJob } from 'x-pack/plugins/ml/public';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';

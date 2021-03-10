@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Adapters } from 'src/plugins/inspector/common/adapters';
+import { LayerConfig } from 'src/plugins/maps_legacy/config';
 import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
 import { getKibanaRegionList } from '../../../meta';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -13,9 +15,7 @@ import { FIELD_ORIGIN, FORMAT_TYPE, SOURCE_TYPES } from '../../../../common/cons
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
 import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
-import { LayerConfig } from '../../../../../../../src/plugins/maps_legacy/config';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
   defaultMessage: 'Configured GeoJSON',

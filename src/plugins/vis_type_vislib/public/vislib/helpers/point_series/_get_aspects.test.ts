@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Dimension, Dimensions } from '../../../../../vis_type_xy/public';
+import type { Dimension, Dimensions } from 'src/plugins/vis_type_xy/public';
 
 import { getAspects } from './_get_aspects';
 import { Aspect } from './point_series';

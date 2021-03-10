@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicensingPluginSetup } from '../../../licensing/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 import { CallAsCurrentUser } from '../types';
 
 const getStartBasicPath = (acknowledge: boolean) =>

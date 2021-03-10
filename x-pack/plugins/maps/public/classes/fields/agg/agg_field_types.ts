@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IndexPattern } from 'src/plugins/data/common/index_patterns/index_patterns';
 import { IField } from '../field';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 

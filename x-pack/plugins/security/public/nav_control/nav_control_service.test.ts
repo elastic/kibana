@@ -6,11 +6,11 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { ILicense } from 'x-pack/plugins/licensing/public';
 
 import { nextTick } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 
-import type { ILicense } from '../../../licensing/public';
 import { SecurityLicenseService } from '../../common/licensing';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityMock } from '../mocks';

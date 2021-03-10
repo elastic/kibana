@@ -9,7 +9,7 @@
 import { cloneDeep } from 'lodash';
 
 import { Vis } from 'src/plugins/visualizations/public';
-import { AggGroupNames, DataPublicPluginStart } from '../../../../../data/public';
+import { AggGroupNames, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';

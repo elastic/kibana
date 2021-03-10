@@ -8,10 +8,10 @@
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { ApiResponse } from '@elastic/elasticsearch';
+import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { PaginationBuilder } from '../utils/pagination';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 interface TimeRange {
   from: string;

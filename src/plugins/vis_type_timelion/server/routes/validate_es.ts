@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { IRouter } from 'kibana/server';
-import type { DataRequestHandlerContext } from '../../../data/server';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 
 export function validateEsRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(

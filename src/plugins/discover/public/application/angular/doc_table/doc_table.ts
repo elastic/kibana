@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { dispatchRenderComplete } from 'src/plugins/kibana_utils/public';
 import html from './doc_table.html';
-import { dispatchRenderComplete } from '../../../../../kibana_utils/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 // @ts-ignore
 import { getLimitedSearchResultsMessage } from './doc_table_strings';

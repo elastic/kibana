@@ -9,7 +9,7 @@ import { ConnectorTypes } from '../../../common/api';
 
 import { createMockSavedObjectsRepository, mockCaseMappings } from '../../routes/api/__fixtures__';
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
-import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
+import { actionsClientMock } from 'x-pack/plugins/actions/server/actions_client.mock';
 import { mappings, mockGetFieldsResponse } from './mock';
 
 describe('get_mappings', () => {

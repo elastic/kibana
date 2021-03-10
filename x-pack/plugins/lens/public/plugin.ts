@@ -6,20 +6,24 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
+import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
+import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
+import { GlobalSearchPluginSetup } from 'x-pack/plugins/global_search/public';
+import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
+import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import { AppNavLinkStatus } from 'src/core/public';
+import type { SavedObjectTaggingPluginStart } from 'x-pack/plugins/saved_objects_tagging/public';
 import {
-  VisualizationsSetup,
-  VisualizationsStart,
-} from '../../../../src/plugins/visualizations/public';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
-import { GlobalSearchPluginSetup } from '../../global_search/public';
-import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
-import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
+  UiActionsStart,
+  ACTION_VISUALIZE_FIELD,
+  VISUALIZE_FIELD_TRIGGER,
+} from 'src/plugins/ui_actions/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -32,14 +36,7 @@ import {
   DatatableVisualizationPluginSetupPlugins,
 } from './datatable_visualization';
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
-import { AppNavLinkStatus } from '../../../../src/core/public';
-import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
-import {
-  UiActionsStart,
-  ACTION_VISUALIZE_FIELD,
-  VISUALIZE_FIELD_TRIGGER,
-} from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';

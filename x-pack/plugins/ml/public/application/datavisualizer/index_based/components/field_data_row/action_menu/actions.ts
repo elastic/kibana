@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { IIndexPattern } from 'src/plugins/data/common/index_patterns';
+import type { LensPublicStart } from 'x-pack/plugins/lens/public';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 import type { CombinedQuery } from '../../../common';
-import type { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
-import type { LensPublicStart } from '../../../../../../../../lens/public';
 import type { FieldVisConfig } from '../../../../stats_table/types';
 
 export function getActions(

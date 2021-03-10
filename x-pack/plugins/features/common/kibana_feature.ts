@@ -7,7 +7,7 @@
 
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { AppCategory } from 'src/core/types';
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';

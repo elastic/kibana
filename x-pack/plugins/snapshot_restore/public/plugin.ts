@@ -8,12 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from 'src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 
 import { ClientConfigType } from './types';

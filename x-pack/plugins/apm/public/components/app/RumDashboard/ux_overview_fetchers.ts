@@ -10,7 +10,7 @@ import {
   HasDataParams,
   UxFetchDataResponse,
   UXHasDataResponse,
-} from '../../../../../observability/public/';
+} from 'x-pack/plugins/observability/public';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
 export { createCallApmApi } from '../../../services/rest/createCallApmApi';

@@ -6,8 +6,8 @@
  */
 
 import { mapValues } from 'lodash';
-import { PackagePolicy, PackagePolicyConfigRecord } from '../../../../../fleet/common';
-import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
+import { PackagePolicy, PackagePolicyConfigRecord } from 'x-pack/plugins/fleet/common';
+import { createPackagePolicyMock } from 'x-pack/plugins/fleet/common/mocks';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import {
   getInternalArtifactMock,

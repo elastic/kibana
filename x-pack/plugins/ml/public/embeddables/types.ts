@@ -6,19 +6,11 @@
  */
 
 import type { CoreStart } from 'kibana/public';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
+import type { Filter } from 'src/plugins/data/common/es_query/filters';
+import type { Query, RefreshInterval, TimeRange } from 'src/plugins/data/common/query';
+import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
-import type { Filter } from '../../../../../src/plugins/data/common/es_query/filters';
-import type {
-  Query,
-  RefreshInterval,
-  TimeRange,
-} from '../../../../../src/plugins/data/common/query';
-import type {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../../src/plugins/embeddable/public';
+import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
 import type { MlDependencies } from '../application/app';

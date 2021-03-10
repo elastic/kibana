@@ -7,6 +7,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { IndexSettings } from 'x-pack/plugins/index_management/common/types';
 import {
   PolicyFromES,
   SerializedPolicy,
@@ -23,7 +24,6 @@ import {
 } from '../constants';
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
-import { IndexSettings } from '../../../../index_management/common/types';
 
 export const useLoadNodes = () => {
   return useRequest<ListNodesRouteResponse>({

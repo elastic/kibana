@@ -6,7 +6,7 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 let uiMetricService: UiMetricService;
 

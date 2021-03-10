@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '../../../../../plugins/expressions/public';
+import { Datatable } from 'src/plugins/expressions/public';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns, getSearchService } from '../../../public/services';
 import { AggConfigSerialized } from '../../../common/search/aggs';

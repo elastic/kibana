@@ -14,7 +14,8 @@ import type {
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
-import type { AuthenticatedUser } from '../../../security/server';
+import type { AuthenticatedUser } from 'x-pack/plugins/security/server';
+
 import {
   DEFAULT_AGENT_POLICY,
   AGENT_POLICY_SAVED_OBJECT_TYPE,

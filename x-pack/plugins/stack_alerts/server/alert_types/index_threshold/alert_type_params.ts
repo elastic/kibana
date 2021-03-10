@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ComparatorFnNames } from '../lib';
 import {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
-} from '../../../../triggers_actions_ui/server';
+} from 'x-pack/plugins/triggers_actions_ui/server';
+import { ComparatorFnNames } from '../lib';
 
 // alert type parameters
 

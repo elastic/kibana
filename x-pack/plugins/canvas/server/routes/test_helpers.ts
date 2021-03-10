@@ -10,8 +10,8 @@ import {
   loggingSystemMock,
   elasticsearchServiceMock,
 } from 'src/core/server/mocks';
-import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/server/mocks';
-import { expressionsPluginMock } from '../../../../../src/plugins/expressions/server/mocks';
+import { bfetchPluginMock } from 'src/plugins/bfetch/server/mocks';
+import { expressionsPluginMock } from 'src/plugins/expressions/server/mocks';
 
 export function getMockedRouterDeps() {
   const httpService = httpServiceMock.createSetupContract();

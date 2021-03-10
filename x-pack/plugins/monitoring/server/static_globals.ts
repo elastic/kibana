@@ -7,7 +7,7 @@
 
 import { CoreSetup, ILegacyCustomClusterClient, Logger } from 'kibana/server';
 import url from 'url';
-import { CloudSetup } from '../../cloud/server';
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
 import { MonitoringConfig } from './config';
 
 type GetLogger = (...scopes: string[]) => Logger;

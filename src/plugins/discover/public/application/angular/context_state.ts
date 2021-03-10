@@ -15,8 +15,8 @@ import {
   syncStates,
   BaseStateContainer,
   withNotifyOnErrors,
-} from '../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
+} from 'src/plugins/kibana_utils/public';
+import { esFilters, FilterManager, Filter, Query } from 'src/plugins/data/public';
 import { handleSourceColumnState } from './helpers';
 
 export interface AppState {

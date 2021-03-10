@@ -9,9 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 
+import { RequestStatistics, RequestAdapter } from 'src/plugins/inspector/common';
 import { getSearchService, getUiSettings } from '../../services';
 import { EsRawResponse } from './es_raw_response';
-import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
 import { IEsSearchResponse, KibanaContext } from '../../../common/search';
 import { buildEsQuery, getEsQueryConfig } from '../../../common/es_query/es_query';
 import { DataPublicPluginStart } from '../../types';

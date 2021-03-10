@@ -22,13 +22,14 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
 
-import { ElasticsearchAssetType } from '../../../../types';
-import type { Installation, RegistryPackage } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectsClientMock } from 'src/core/server/saved_objects/service/saved_objects_client.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
 import { getInstallation, getInstallationObject } from '../../packages';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
+import type { Installation, RegistryPackage } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
 import { appContextService } from '../../../app_context';
 
 import { getAsset } from './common';

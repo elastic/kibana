@@ -12,7 +12,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from 'src/plugins/data/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';

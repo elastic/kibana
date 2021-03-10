@@ -13,7 +13,7 @@ import {
   RequestHandlerContext,
 } from 'kibana/server';
 
-import { LicensingPluginSetup } from '../../../licensing/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 import { LicenseType, ILicense } from '../shared_imports';
 
 export interface LicenseStatus {

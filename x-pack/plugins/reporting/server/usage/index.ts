@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '../../../licensing/server';
+import { LicenseType } from 'x-pack/plugins/licensing/server';
 
 export interface FeaturesAvailability {
   isAvailable: () => boolean;

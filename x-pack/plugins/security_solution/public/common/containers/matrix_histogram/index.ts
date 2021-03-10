@@ -10,6 +10,7 @@ import { getOr, isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isErrorResponse, isCompleteResponse } from 'src/plugins/data/common';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
@@ -20,7 +21,6 @@ import {
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
 } from '../../../../common/search_strategy/security_solution';
-import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';

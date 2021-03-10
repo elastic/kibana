@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
+import { HttpStart } from 'src/core/public';
 
 import * as Api from '../api';
-import { HttpStart } from '../../../../../../src/core/public';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,

@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { SavedObjectNotFound } from 'src/plugins/kibana_utils/common';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -31,7 +32,6 @@ import {
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
-import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';

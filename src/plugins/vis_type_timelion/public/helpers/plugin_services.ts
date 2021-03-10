@@ -7,7 +7,7 @@
  */
 
 import type { IndexPatternsContract, ISearchStart } from 'src/plugins/data/public';
-import { createGetterSetter } from '../../../kibana_utils/public';
+import { createGetterSetter } from 'src/plugins/kibana_utils/public';
 
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'

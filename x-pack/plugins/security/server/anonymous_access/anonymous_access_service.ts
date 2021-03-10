@@ -6,6 +6,8 @@
  */
 
 import type { Request } from '@hapi/hapi';
+import { addSpaceIdToPath } from 'x-pack/plugins/spaces/common';
+import type { SpacesServiceStart } from 'x-pack/plugins/spaces/server';
 
 import type {
   Capabilities,
@@ -14,10 +16,8 @@ import type {
   IClusterClient,
   Logger,
 } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 
-import { KibanaRequest } from '../../../../../src/core/server';
-import { addSpaceIdToPath } from '../../../spaces/common';
-import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
 import type { HTTPAuthorizationHeader } from '../authentication';
 import { AnonymousAuthenticationProvider } from '../authentication';

@@ -8,7 +8,7 @@
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../typings/elasticsearch';
+} from 'x-pack/typings/elasticsearch';
 import {
   inspectSearchParams,
   SearchParamsMock,

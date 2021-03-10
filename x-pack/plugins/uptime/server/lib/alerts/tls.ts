@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+import { ActionGroupIdsOf } from 'x-pack/plugins/alerting/common';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState } from './common';
 import { TLS } from '../../../common/constants/alerts';
@@ -15,7 +16,6 @@ import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
-import { ActionGroupIdsOf } from '../../../../alerting/common';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 

@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreSetup, CoreStart, AppUpdater } from '../../../../../src/core/public';
+import { CoreSetup, CoreStart, AppUpdater } from 'src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';

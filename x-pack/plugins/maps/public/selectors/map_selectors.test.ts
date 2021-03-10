@@ -29,7 +29,7 @@ import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
 import { areLayersLoaded, getDataFilters, getTimeFilters } from './map_selectors';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
-import { Filter } from '../../../../../src/plugins/data/public';
+import { Filter } from 'src/plugins/data/public';
 
 describe('getDataFilters', () => {
   const mapExtent = {

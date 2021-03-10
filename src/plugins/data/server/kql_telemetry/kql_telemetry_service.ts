@@ -8,8 +8,8 @@
 
 import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { registerKqlTelemetryRoute } from './route';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { makeKQLUsageCollector } from './usage_collector';
 import { kqlTelemetry } from '../saved_objects';
 

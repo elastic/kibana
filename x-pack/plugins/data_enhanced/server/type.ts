@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from 'kibana/server';
-import type { DataRequestHandlerContext } from '../../../../src/plugins/data/server';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 
 /**
  * @internal

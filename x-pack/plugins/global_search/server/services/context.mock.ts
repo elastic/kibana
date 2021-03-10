@@ -13,7 +13,7 @@ import {
   elasticsearchServiceMock,
   uiSettingsServiceMock,
   capabilitiesServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 
 const createContextMock = (capabilities: Partial<Capabilities> = {}) => {
   return {

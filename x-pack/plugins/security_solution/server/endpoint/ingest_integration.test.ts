@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
+import { createNewPackagePolicyMock } from 'x-pack/plugins/fleet/common/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -20,20 +20,20 @@ import { KibanaRequest } from 'kibana/server';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from './mocks';
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licenseMock } from 'x-pack/plugins/licensing/common/licensing.mock';
 import { LicenseService } from '../../common/license/license';
 import { Subject } from 'rxjs';
-import { ILicense } from '../../../licensing/common/types';
+import { ILicense } from 'x-pack/plugins/licensing/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../types';
-import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
-import { ExceptionListClient } from '../../../lists/server';
+import { getExceptionListClientMock } from 'x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
 import { InternalArtifactCompleteSchema } from './schemas/artifacts';
 import { ManifestManager } from './services/artifacts/manifest_manager';
 import { getMockArtifacts, toArtifactRecords } from './lib/artifacts/mocks';
 import { Manifest } from './lib/artifacts';
-import { NewPackagePolicy } from '../../../fleet/common/types/models';
+import { NewPackagePolicy } from 'x-pack/plugins/fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
 
 describe('ingest_integration tests ', () => {

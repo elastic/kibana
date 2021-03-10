@@ -10,7 +10,7 @@ import type {
   SharePluginSetup,
   UrlGeneratorsDefinition,
   UrlGeneratorState,
-} from '../../../../../src/plugins/share/public';
+} from 'src/plugins/share/public';
 import type { MlStartDependencies } from '../plugin';
 import { ML_PAGES, ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
 import type { MlUrlGeneratorState } from '../../common/types/ml_url_generator';

@@ -11,7 +11,7 @@ import {
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 
 import { CollectorOptions, Collector, UsageCollector } from './collector';
 import { UsageCollectionSetup, CollectorFetchContext } from './index';

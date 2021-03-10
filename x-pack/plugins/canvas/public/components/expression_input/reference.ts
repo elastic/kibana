@@ -5,11 +5,8 @@
  * 2.0.
  */
 
+import { ExpressionFunction, ExpressionFunctionParameter } from 'src/plugins/expressions';
 import { ComponentStrings } from '../../../i18n';
-import {
-  ExpressionFunction,
-  ExpressionFunctionParameter,
-} from '../../../../../../src/plugins/expressions';
 
 const { ExpressionInput: strings } = ComponentStrings;
 

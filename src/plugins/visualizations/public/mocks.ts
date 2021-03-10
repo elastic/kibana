@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { Schema, VisualizationsSetup, VisualizationsStart } from './';
-import { Schemas } from './vis_types';
+import { PluginInitializerContext } from 'src/core/public';
+import { coreMock, applicationServiceMock } from 'src/core/public/mocks';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { expressionsPluginMock } from 'src/plugins/expressions/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
+import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { dashboardPluginMock } from 'src/plugins/dashboard/public/mocks';
+import { savedObjectsPluginMock } from 'src/plugins/saved_objects/public/mocks';
 import { VisualizationsPlugin } from './plugin';
-import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
-import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
-import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
-import { dataPluginMock } from '../../../plugins/data/public/mocks';
-import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
-import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
-import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
-import { dashboardPluginMock } from '../../../plugins/dashboard/public/mocks';
-import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
+import { Schemas } from './vis_types';
+import { Schema, VisualizationsSetup, VisualizationsStart } from './';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),

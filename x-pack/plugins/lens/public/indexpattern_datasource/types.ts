@@ -6,8 +6,8 @@
  */
 
 import { IFieldType } from 'src/plugins/data/common';
+import { IndexPatternAggRestrictions } from 'src/plugins/data/public';
 import { IndexPatternColumn, IncompleteColumn } from './operations';
-import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
 import { DragDropIdentifier } from '../drag_drop/providers';
 
 export {

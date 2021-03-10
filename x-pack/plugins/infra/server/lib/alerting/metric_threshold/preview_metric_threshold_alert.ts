@@ -7,11 +7,11 @@
 
 import { first, zip } from 'lodash';
 import { Unit } from '@elastic/datemath';
+import { ILegacyScopedClusterClient } from 'src/core/server';
 import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { PreviewResult } from '../common/types';

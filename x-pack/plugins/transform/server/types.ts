@@ -6,8 +6,8 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
 import { License } from './services';
 
 export interface Dependencies {

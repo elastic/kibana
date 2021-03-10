@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsService, IndexPattern } from '../../../../../data/server';
+import { IndexPatternsService, IndexPattern } from 'src/plugins/data/server';
 
 interface IndexPatternObjectDependencies {
   indexPatternsService: IndexPatternsService;

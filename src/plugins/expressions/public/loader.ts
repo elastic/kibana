@@ -9,7 +9,7 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { defaults } from 'lodash';
-import { Adapters } from '../../inspector/public';
+import { Adapters } from 'src/plugins/inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';

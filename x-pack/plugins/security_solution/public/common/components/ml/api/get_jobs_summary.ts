@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '../../../../../../../../src/core/public';
-import { MlSummaryJob } from '../../../../../../ml/public';
+import { HttpSetup } from 'src/core/public';
+import { MlSummaryJob } from 'x-pack/plugins/ml/public';
 
 export interface GetJobsSummaryArgs {
   http: HttpSetup;

@@ -13,10 +13,10 @@ import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
 
+import { ESSearchResponse } from 'x-pack/typings/elasticsearch';
 import { getVisualizationCounts } from './visualization_counts';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats

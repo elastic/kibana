@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { KibanaFeatureConfig } from '../../features/server';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/server';
+import { KibanaFeatureConfig } from 'x-pack/plugins/features/server';
 import { tagSavedObjectTypeName, tagManagementSectionId, tagFeatureId } from '../common/constants';
 
 export const savedObjectsTaggingFeature: KibanaFeatureConfig = {

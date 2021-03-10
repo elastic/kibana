@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CaseConnectorsRegistry } from './types';
-import { createCaseConnectorsRegistry } from './connectors_registry';
-import { getCaseConnector as getJiraCaseConnector } from './jira';
-import { getCaseConnector as getResilientCaseConnector } from './resilient';
-import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
 import {
   JiraFieldsType,
   ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
   ResilientFieldsType,
-} from '../../../../../case/common/api/connectors';
+} from 'x-pack/plugins/case/common/api/connectors';
+import { CaseConnectorsRegistry } from './types';
+import { createCaseConnectorsRegistry } from './connectors_registry';
+import { getCaseConnector as getJiraCaseConnector } from './jira';
+import { getCaseConnector as getResilientCaseConnector } from './resilient';
+import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
 
 export { getActionType as getCaseConnectorUI } from './case';
 

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { NewAlertParams } from './alerts';
-import { AlertAction } from '../../../../triggers_actions_ui/public';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
-import { MonitorStatusTranslations } from '../../../common/translations';
+import { AlertAction } from 'x-pack/plugins/triggers_actions_ui/public';
 import {
   IndexActionParams,
   PagerDutyActionParams,
@@ -17,7 +14,10 @@ import {
   JiraActionParams,
   WebhookActionParams,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../actions/server';
+} from 'x-pack/plugins/actions/server';
+import { NewAlertParams } from './alerts';
+import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
+import { MonitorStatusTranslations } from '../../../common/translations';
 import { ActionTypeId } from '../../components/settings/types';
 
 export const SLACK_ACTION_ID: ActionTypeId = '.slack';

@@ -9,7 +9,7 @@ import { connectorTypesRoute } from './connector_types';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { LicenseType } from '../../../../plugins/licensing/server';
+import { LicenseType } from 'x-pack/plugins/licensing/server';
 import { actionsClientMock } from '../mocks';
 import { verifyAccessAndContext } from './verify_access_and_context';
 

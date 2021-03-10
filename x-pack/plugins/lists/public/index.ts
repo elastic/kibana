@@ -7,7 +7,7 @@
 
 export * from './shared_exports';
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import { PluginInitializerContext } from 'src/core/public';
 
 import { Plugin } from './plugin';
 import { PluginSetup, PluginStart } from './types';

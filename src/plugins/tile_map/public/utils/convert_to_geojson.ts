@@ -7,7 +7,7 @@
  */
 
 import { Feature } from 'geojson';
-import type { Datatable } from '../../../expressions/public';
+import type { Datatable } from 'src/plugins/expressions/public';
 import type { TileMapVisDimensions, TileMapVisData } from '../types';
 import { decodeGeoHash } from './decode_geo_hash';
 import { gridDimensions } from './grid_dimensions';

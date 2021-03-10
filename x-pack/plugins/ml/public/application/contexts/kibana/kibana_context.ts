@@ -7,20 +7,17 @@
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
-import {
-  useKibana,
-  KibanaReactContextValue,
-} from '../../../../../../../src/plugins/kibana_react/public';
-import { SecurityPluginSetup } from '../../../../../security/public';
-import { LicenseManagementUIPluginSetup } from '../../../../../license_management/public';
-import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
+import { useKibana, KibanaReactContextValue } from 'src/plugins/kibana_react/public';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/public';
+import { LicenseManagementUIPluginSetup } from 'x-pack/plugins/license_management/public';
+import { SharePluginStart } from 'src/plugins/share/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import type { EmbeddableStart } from 'src/plugins/embeddable/public';
+import type { MapsStartApi } from 'x-pack/plugins/maps/public';
+import type { FileUploadPluginStart } from 'x-pack/plugins/file_upload/public';
+import type { LensPublicStart } from 'x-pack/plugins/lens/public';
+import { TriggersAndActionsUIPublicPluginStart } from 'x-pack/plugins/triggers_actions_ui/public';
 import { MlServicesContext } from '../../app';
-import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
-import type { EmbeddableStart } from '../../../../../../../src/plugins/embeddable/public';
-import type { MapsStartApi } from '../../../../../maps/public';
-import type { FileUploadPluginStart } from '../../../../../file_upload/public';
-import type { LensPublicStart } from '../../../../../lens/public';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;

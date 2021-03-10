@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from 'src/plugins/data/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {

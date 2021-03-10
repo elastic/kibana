@@ -7,13 +7,13 @@
  */
 
 import { omit } from 'lodash';
+import { SavedObjectReference } from 'src/core/types';
+import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common/types';
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
 } from './embeddable_saved_object_converters';
 import { SavedDashboardPanel } from '../types';
-import { SavedObjectReference } from '../../../../core/types';
-import { EmbeddablePersistableStateService } from '../../../embeddable/common/types';
 
 export interface InjectDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;

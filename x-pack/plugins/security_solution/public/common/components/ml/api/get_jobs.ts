@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CombinedJobWithStats } from '../../../../../../ml/common/types/anomaly_detection_jobs';
-import { HttpSetup } from '../../../../../../../../src/core/public';
+import { CombinedJobWithStats } from 'x-pack/plugins/ml/common/types/anomaly_detection_jobs';
+import { HttpSetup } from 'src/core/public';
 
 export interface GetJobsArgs {
   http: HttpSetup;

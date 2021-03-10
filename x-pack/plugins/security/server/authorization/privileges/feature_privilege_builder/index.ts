@@ -6,8 +6,8 @@
  */
 
 import { flatten } from 'lodash';
+import type { FeatureKibanaPrivileges, KibanaFeature } from 'x-pack/plugins/features/server';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import type { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
 import { FeaturePrivilegeApiBuilder } from './api';

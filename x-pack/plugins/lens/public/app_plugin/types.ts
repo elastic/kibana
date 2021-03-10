@@ -15,29 +15,23 @@ import {
   NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
-} from '../../../../../src/core/public';
+} from 'src/core/public';
 import {
   DataPublicPluginStart,
   Filter,
   IndexPattern,
   Query,
   SavedQuery,
-} from '../../../../../src/plugins/data/public';
-import { Document } from '../persistence';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
-import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
+} from 'src/plugins/data/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
+import type { SavedObjectTaggingPluginStart } from 'x-pack/plugins/saved_objects_tagging/public';
+import { VisualizeFieldContext, ACTION_VISUALIZE_LENS_FIELD } from 'src/plugins/ui_actions/public';
+import { EmbeddableEditorState, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { LensAttributeService } from '../lens_attribute_service';
-import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
-import { DashboardFeatureFlagConfig } from '../../../../../src/plugins/dashboard/public';
-import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
-import {
-  VisualizeFieldContext,
-  ACTION_VISUALIZE_LENS_FIELD,
-} from '../../../../../src/plugins/ui_actions/public';
-import {
-  EmbeddableEditorState,
-  EmbeddableStateTransfer,
-} from '../../../../../src/plugins/embeddable/public';
+import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
+import { Document } from '../persistence';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { EditorFrameInstance } from '../types';
 

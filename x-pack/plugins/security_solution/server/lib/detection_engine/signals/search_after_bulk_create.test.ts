@@ -18,13 +18,13 @@ import {
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { buildRuleMessageFactory } from './rule_messages';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, AlertServicesMock } from 'x-pack/plugins/alerting/server/mocks';
 import uuid from 'uuid';
-import { listMock } from '../../../../../lists/server/mocks';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
 import { BulkResponse, RuleRangeTuple } from './types';
-import { SearchListItemArraySchema } from '../../../../../lists/common/schemas';
-import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
+import { SearchListItemArraySchema } from 'x-pack/plugins/lists/common/schemas';
+import { getSearchListItemResponseMock } from 'x-pack/plugins/lists/common/schemas/response/search_list_item_schema.mock';
 import { getRuleRangeTuples } from './utils';
 
 const buildRuleMessage = buildRuleMessageFactory({

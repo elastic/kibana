@@ -19,12 +19,12 @@ import {
   checkForDuplicateTitle,
   saveWithConfirmation,
   isErrorNonFatal,
-} from '../../../../../src/plugins/saved_objects/public';
+} from 'src/plugins/saved_objects/public';
+import { SavedObjectNotFound } from 'src/plugins/kibana_utils/public';
 import {
   injectReferences,
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
-import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/public';
 import { GraphWorkspaceSavedObject } from '../types';
 
 const savedWorkspaceType = 'graph-workspace';

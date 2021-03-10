@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { get } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { TaskManagerStartContract } from 'x-pack/plugins/task_manager/server';
 
 import { LensUsage, LensTelemetryState } from './types';
 import { lensUsageSchema } from './schema';

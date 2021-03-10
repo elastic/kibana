@@ -9,10 +9,10 @@
 import {
   Collector,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from 'src/plugins/usage_collection/server/usage_collection.mock';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { registerCoreUsageCollector } from '.';
-import { coreUsageDataServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { coreUsageDataServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { CoreUsageData } from 'src/core/server/';
 
 const logger = loggingSystemMock.createLogger();

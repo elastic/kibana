@@ -11,14 +11,14 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerting/server';
+} from 'x-pack/plugins/alerting/server';
+import { Logger } from 'src/core/server';
 import { SignalSearchResponse, BulkResponse, SignalHit, WrappedSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { BuildRuleMessage } from './rule_messages';
-import { Logger } from '../../../../../../../src/core/server';
 import { isEventTypeSignal } from './build_event_type_signal';
 
 interface SingleBulkCreateParams {

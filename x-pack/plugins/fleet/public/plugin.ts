@@ -14,15 +14,13 @@ import type {
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from 'src/core/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { FeatureCatalogueCategory } from 'src/plugins/home/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import type { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
+
 import { PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 

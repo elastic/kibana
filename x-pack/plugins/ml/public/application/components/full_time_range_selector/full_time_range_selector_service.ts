@@ -10,9 +10,9 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { Query } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
+import { IndexPattern } from 'src/plugins/data/public';
 import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export interface TimeRange {
   from: number;

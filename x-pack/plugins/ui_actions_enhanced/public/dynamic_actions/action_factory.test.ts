@@ -7,8 +7,8 @@
 
 import { ActionFactory } from './action_factory';
 import { ActionFactoryDefinition } from './action_factory_definition';
-import { licensingMock } from '../../../licensing/public/mocks';
-import { PublicLicense } from '../../../licensing/public';
+import { licensingMock } from 'x-pack/plugins/licensing/public/mocks';
+import { PublicLicense } from 'x-pack/plugins/licensing/public';
 
 const def: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',

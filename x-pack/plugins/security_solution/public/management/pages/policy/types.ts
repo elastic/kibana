@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { ILicense } from '../../../../../licensing/common/types';
+import { ILicense } from 'x-pack/plugins/licensing/common/types';
+import {
+  GetAgentStatusResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  GetPackagesResponse,
+  UpdatePackagePolicyResponse,
+} from 'x-pack/plugins/fleet/common';
 import {
   AppLocation,
   Immutable,
@@ -14,13 +21,6 @@ import {
   UIPolicyConfig,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
-import {
-  GetAgentStatusResponse,
-  GetOnePackagePolicyResponse,
-  GetPackagePoliciesResponse,
-  GetPackagesResponse,
-  UpdatePackagePolicyResponse,
-} from '../../../../../fleet/common';
 
 /**
  * Policy list store state

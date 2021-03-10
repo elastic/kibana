@@ -7,10 +7,10 @@
 
 import type { Crypto } from '@elastic/node-crypto';
 import nodeCrypto from '@elastic/node-crypto';
+import { mockAuthenticatedUser } from 'x-pack/plugins/security/common/model/authenticated_user.mock';
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 
-import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { encryptedSavedObjectsAuditLoggerMock } from '../audit/index.mock';
 import { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';

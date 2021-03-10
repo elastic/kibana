@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ANOMALY_SEVERITY } from '../../ml/common';
+import { ANOMALY_SEVERITY } from 'x-pack/plugins/ml/common';
 import {
   getSeverityType,
   getSeverityColor as mlGetSeverityColor,
-} from '../../ml/common';
+} from 'x-pack/plugins/ml/common';
 import { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceAnomalyStats {

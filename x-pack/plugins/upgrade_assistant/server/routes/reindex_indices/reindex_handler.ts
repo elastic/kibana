@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
 
-import { LicensingPluginSetup } from '../../../../licensing/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 
 import { ReindexOperation, ReindexStatus } from '../../../common/types';
 

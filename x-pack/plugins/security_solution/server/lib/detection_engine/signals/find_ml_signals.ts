@@ -6,10 +6,10 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { ExceptionListItemSchema } from '../../../../../lists/common';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common';
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { MlPluginSetup } from '../../../../../ml/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import { AnomalyResults, getAnomalies } from '../../machine_learning';
 
 export const findMlSignals = async ({

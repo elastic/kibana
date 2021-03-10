@@ -21,7 +21,7 @@ import {
   SavedObjectsClientContract,
   ServiceStatus,
   ServiceStatusLevels,
-} from '../../../../../core/server';
+} from 'src/core/server';
 import { CollectorSet } from '../../collector';
 
 const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMessage', {

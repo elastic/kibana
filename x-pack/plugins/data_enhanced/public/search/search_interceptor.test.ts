@@ -6,11 +6,11 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
+import { UI_SETTINGS } from 'src/plugins/data/common';
+import { AbortError } from 'src/plugins/kibana_utils/public';
 import {
   ISessionService,
   SearchTimeoutError,
@@ -18,8 +18,8 @@ import {
   PainlessError,
   DataPublicPluginSetup,
 } from 'src/plugins/data/public';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { bfetchPluginMock } from 'src/plugins/bfetch/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import * as xpackResourceNotFoundException from '../../common/search/test_data/search_phase_execution_exception.json';
 

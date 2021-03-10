@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { PromiseReturnType } from 'x-pack/plugins/observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 

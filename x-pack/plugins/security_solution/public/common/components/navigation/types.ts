@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter, Query } from 'src/plugins/data/public';
 import { HostsTableType } from '../../../hosts/store/model';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';

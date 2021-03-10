@@ -16,17 +16,14 @@ import {
   SELECT_RANGE_TRIGGER,
   ValueClickContext,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../../src/plugins/embeddable/public';
+} from 'src/plugins/embeddable/public';
+import { RowClickContext, ROW_CLICK_TRIGGER } from 'src/plugins/ui_actions/public';
+import type { UrlTemplateEditorVariable } from 'src/plugins/kibana_react/public';
 import type {
   ActionContext,
   ActionFactoryContext,
   EmbeddableWithQueryInput,
 } from '../url_drilldown';
-import {
-  RowClickContext,
-  ROW_CLICK_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
-import type { UrlTemplateEditorVariable } from '../../../../../../../src/plugins/kibana_react/public';
 import { deleteUndefinedKeys, toPrimitiveOrUndefined, Primitive } from './util';
 
 /**

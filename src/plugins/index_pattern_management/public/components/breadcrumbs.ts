@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
 export function getListBreadcrumbs() {
   return [

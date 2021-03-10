@@ -6,12 +6,12 @@
  */
 
 import { createAction } from 'redux-actions';
-import { createAsyncAction } from './utils';
 import {
   MlCapabilitiesResponse,
   AnomaliesTableRecord,
   JobExistResult,
-} from '../../../../../plugins/ml/public';
+} from 'x-pack/plugins/ml/public';
+import { createAsyncAction } from './utils';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,

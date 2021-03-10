@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
-import { VisualizationsSetup } from '../../visualizations/public';
-import { Setup as InspectorSetup } from '../../inspector/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { Setup as InspectorSetup } from 'src/plugins/inspector/public';
 
+import { IServiceSettings, MapsLegacyPluginSetup } from 'src/plugins/maps_legacy/public';
 import {
   setNotifications,
   setData,
@@ -23,7 +24,6 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
-import { ChartsPluginSetup } from '../../charts/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 import { createVisTypeXyVisFn } from './xy_vis_fn';
 import {

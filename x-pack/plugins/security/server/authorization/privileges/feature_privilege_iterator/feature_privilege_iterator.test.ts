@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../../../features/server';
+import { KibanaFeature } from 'x-pack/plugins/features/server';
+
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
 
 describe('featurePrivilegeIterator', () => {

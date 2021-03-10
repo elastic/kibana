@@ -15,7 +15,7 @@ import {
   IndexPattern,
   FilterManager as QueryFilterManager,
   IndexPatternsContract,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
 
 describe('RangeFilterManager', function () {
   const controlId = 'control1';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from 'x-pack/plugins/lists/common';
 
 import {
   DeleteTrustedAppsRequestParams,

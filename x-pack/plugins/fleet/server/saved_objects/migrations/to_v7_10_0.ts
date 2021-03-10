@@ -7,7 +7,8 @@
 
 import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 
-import type { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
+import type { EncryptedSavedObjectsPluginSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
+
 import type {
   Agent,
   AgentEvent,

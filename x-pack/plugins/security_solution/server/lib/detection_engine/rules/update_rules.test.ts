@@ -8,7 +8,7 @@
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
 import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
-import { AlertsClientMock } from '../../../../../alerting/server/alerts_client.mock';
+import { AlertsClientMock } from 'x-pack/plugins/alerting/server/alerts_client.mock';
 
 describe('updateRules', () => {
   it('should call alertsClient.disable if the rule was enabled and enabled is false', async () => {

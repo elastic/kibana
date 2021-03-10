@@ -8,10 +8,10 @@
 import { SearchResponse } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { parseExpression } from 'src/plugins/expressions/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
 import { TelemetryCollector, CanvasWorkpad } from '../../types';
-import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
 interface WorkpadSearch {
   [CANVAS_TYPE]: CanvasWorkpad;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ESSearchBody } from 'x-pack/typings/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
 import { UptimeESClient } from '../lib';
-import { ESSearchBody } from '../../../../../typings/elasticsearch';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;

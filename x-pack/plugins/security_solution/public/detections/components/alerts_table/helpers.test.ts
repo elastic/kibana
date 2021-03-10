@@ -6,7 +6,7 @@
  */
 
 import { TimelineType } from '../../../../common/types/timeline';
-import { esFilters, Filter } from '../../../../../../../src/plugins/data/public';
+import { esFilters, Filter } from 'src/plugins/data/public';
 import {
   DataProvider,
   DataProviderType,

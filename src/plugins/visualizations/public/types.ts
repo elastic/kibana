@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../plugins/saved_objects/public';
+import { SavedObject } from 'src/plugins/saved_objects/public';
 import {
   AggConfigOptions,
   IAggConfigs,
   SearchSourceFields,
   TimefilterContract,
-} from '../../../plugins/data/public';
-import { ExpressionAstExpression } from '../../expressions/public';
+} from 'src/plugins/data/public';
+import { ExpressionAstExpression } from 'src/plugins/expressions/public';
 
 import { SerializedVis, Vis } from './vis';
 import { PersistedState } from './persisted_state';

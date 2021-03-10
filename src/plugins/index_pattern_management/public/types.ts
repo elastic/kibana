@@ -16,10 +16,10 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ManagementAppMountParams } from '../../management/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { KibanaReactContextValue } from 'src/plugins/kibana_react/public';
+import { IndexPatternFieldEditorStart } from 'src/plugins/index_pattern_field_editor/public';
 import { IndexPatternManagementStart } from './index';
-import { KibanaReactContextValue } from '../../kibana_react/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;

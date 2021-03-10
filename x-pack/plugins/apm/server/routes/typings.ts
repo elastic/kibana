@@ -14,10 +14,10 @@ import {
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { RequiredKeys } from 'utility-types';
-import { ObservabilityPluginSetup } from '../../../observability/server';
-import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
-import { SecurityPluginSetup } from '../../../security/server';
-import { MlPluginSetup } from '../../../ml/server';
+import { ObservabilityPluginSetup } from 'x-pack/plugins/observability/server';
+import { LicensingApiRequestHandlerContext } from 'x-pack/plugins/licensing/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { MlPluginSetup } from 'x-pack/plugins/ml/server';
 import { FetchOptions } from '../../common/fetch_options';
 import { APMConfig } from '..';
 

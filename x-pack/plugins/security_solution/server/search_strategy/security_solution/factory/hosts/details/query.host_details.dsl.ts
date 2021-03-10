@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import { ISearchRequestParams } from 'src/plugins/data/common';
 import { cloudFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { buildFieldsTermAggregation } from '../../../../../lib/hosts/helpers';

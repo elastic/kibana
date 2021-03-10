@@ -7,14 +7,14 @@
 
 import { ExploreDataContextMenuAction } from './explore_data_context_menu_action';
 import { Params, PluginDeps } from './abstract_explore_data_action';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
+import { coreMock } from 'src/core/public/mocks';
+import { UrlGeneratorContract } from 'src/plugins/share/public';
 import { i18n } from '@kbn/i18n';
 import {
   VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
-} from '../../../../../../src/plugins/visualizations/public';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
+} from 'src/plugins/visualizations/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 
 const i18nTranslateSpy = (i18n.translate as unknown) as jest.SpyInstance;
 

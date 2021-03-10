@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../visualizations/public';
-import { buildExpression } from '../../expressions/public';
+import { Vis } from 'src/plugins/visualizations/public';
+import { buildExpression } from 'src/plugins/expressions/public';
 import { sampleAreaVis } from './sample_vis.test.mocks';
 
 import { toExpressionAst } from './to_ast';

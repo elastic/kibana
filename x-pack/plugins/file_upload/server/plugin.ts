@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '../common';
 
 interface SetupDeps {

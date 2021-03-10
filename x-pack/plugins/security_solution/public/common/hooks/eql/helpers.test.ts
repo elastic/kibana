@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
+import { EqlSearchStrategyResponse } from 'x-pack/plugins/data_enhanced/common';
 import { Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { inputsModel } from '../../../common/store';

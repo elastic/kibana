@@ -6,7 +6,7 @@
  */
 
 import { AlertType, RecoveredActionGroup } from '../common';
-import { httpServiceMock } from '../../../../src/core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import { loadAlert, loadAlertType, loadAlertTypes } from './alert_api';
 import uuid from 'uuid';
 

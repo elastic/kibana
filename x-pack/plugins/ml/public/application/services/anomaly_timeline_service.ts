@@ -6,11 +6,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import {
-  TimefilterContract,
-  TimeRange,
-  UI_SETTINGS,
-} from '../../../../../../src/plugins/data/public';
+import { TimefilterContract, TimeRange, UI_SETTINGS } from 'src/plugins/data/public';
 import { getBoundsRoundedToInterval, TimeBuckets, TimeRangeBounds } from '../util/time_buckets';
 import {
   ExplorerJob,

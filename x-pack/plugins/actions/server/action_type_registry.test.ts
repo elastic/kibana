@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from 'x-pack/plugins/task_manager/server/mocks';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionType, ExecutorType } from './types';
 import { ActionExecutor, ExecutorError, ILicenseState, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { licensingMock } from '../../licensing/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
 
 const mockTaskManager = taskManagerMock.createSetup();
 let mockedLicenseState: jest.Mocked<ILicenseState>;

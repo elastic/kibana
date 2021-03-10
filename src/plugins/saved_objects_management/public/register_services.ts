@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from '../../../core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { SavedObjectsManagementPluginStart, StartDependencies } from './plugin';
 import { ISavedObjectsManagementServiceRegistry } from './services';
 

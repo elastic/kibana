@@ -11,8 +11,8 @@ import {
   AsyncSearchSubmit,
   Search,
 } from '@elastic/elasticsearch/api/requestParams';
-import { ISearchOptions, UI_SETTINGS } from '../../../../../src/plugins/data/common';
-import { getDefaultSearchParams } from '../../../../../src/plugins/data/server';
+import { ISearchOptions, UI_SETTINGS } from 'src/plugins/data/common';
+import { getDefaultSearchParams } from 'src/plugins/data/server';
 import { ConfigSchema } from '../../config';
 
 /**

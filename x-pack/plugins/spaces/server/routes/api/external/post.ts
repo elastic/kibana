@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';

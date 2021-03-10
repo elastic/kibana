@@ -30,11 +30,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import {
-  esFilters,
-  Filter,
-  MatchAllFilter,
-} from '../../../../../../.../../../src/plugins/data/public';
+import { esFilters, Filter, MatchAllFilter } from 'src/plugins/data/public';
 import { TimelineStatus, TimelineErrorResponse } from '../../../../common/types/timeline';
 import { inputsModel } from '../../../common/store/inputs';
 import {

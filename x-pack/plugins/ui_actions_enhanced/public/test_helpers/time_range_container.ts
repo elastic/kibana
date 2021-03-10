@@ -10,8 +10,8 @@ import {
   Container,
   ContainerOutput,
   EmbeddableStart,
-} from '../../../../../src/plugins/embeddable/public';
-import { TimeRange } from '../../../../../src/plugins/data/public';
+} from 'src/plugins/embeddable/public';
+import { TimeRange } from 'src/plugins/data/public';
 
 /**
  * interfaces are not allowed to specify a sub-set of the required types until

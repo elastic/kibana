@@ -6,9 +6,9 @@
  */
 
 import { get } from 'lodash';
+import { formatMsg } from 'src/plugins/kibana_legacy/public';
+import { ToastInputFields } from 'src/core/public';
 import { CanvasServiceFactory } from '.';
-import { formatMsg } from '../../../../../src/plugins/kibana_legacy/public';
-import { ToastInputFields } from '../../../../../src/core/public';
 
 const getToast = (err: Error | string, opts: ToastInputFields = {}) => {
   const errData = (get(err, 'response') || err) as Error | string;

@@ -6,7 +6,7 @@
  */
 
 import { RequestHandlerContext, IRouter } from 'src/core/server';
-import { LicensingApiRequestHandlerContext } from '../../licensing/server';
+import { LicensingApiRequestHandlerContext } from 'x-pack/plugins/licensing/server';
 
 export interface BannersRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;

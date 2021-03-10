@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from 'src/plugins/data/public';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';

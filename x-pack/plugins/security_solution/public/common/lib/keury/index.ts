@@ -14,8 +14,8 @@ import {
   esQuery,
   esKuery,
   IIndexPattern,
-} from '../../../../../../../src/plugins/data/public';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+} from 'src/plugins/data/public';
+import { JsonObject } from 'src/plugins/kibana_utils/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,

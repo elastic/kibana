@@ -6,17 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '../../../../core/public';
-import { VisSavedObject } from '../types';
+import { SavedObjectAttribute, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   SearchSourceFields,
-} from '../../../data/public';
+} from 'src/plugins/data/public';
+import { VisSavedObject } from '../types';
 
 export function extractReferences({
   attributes,

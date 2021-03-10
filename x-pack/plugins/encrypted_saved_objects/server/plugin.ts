@@ -6,10 +6,10 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 
-import type { SecurityPluginSetup } from '../../security/server';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import type { ConfigType } from './config';
 import type { CreateEncryptedSavedObjectsMigrationFn } from './create_migration';

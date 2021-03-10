@@ -6,12 +6,12 @@
  */
 
 import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
-import { SpacesPluginStart } from '../../../spaces/server';
-import { KibanaRequest } from '../../.././../../src/core/server';
-import { MlLicense } from '../../common/license';
+import { SpacesPluginStart } from 'x-pack/plugins/spaces/server';
+import { KibanaRequest } from 'src/core/server';
 
-import type { CloudSetup } from '../../../cloud/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+import type { CloudSetup } from 'x-pack/plugins/cloud/server';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { MlLicense } from '../../common/license';
 import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';

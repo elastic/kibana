@@ -12,7 +12,7 @@ import {
   ExpressionValueBoxed,
   Datatable,
   DatatableColumn,
-} from '../../../expressions/public';
+} from 'src/plugins/expressions/public';
 
 interface Arguments {
   accessor: string | number;

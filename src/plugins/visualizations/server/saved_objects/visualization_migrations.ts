@@ -10,7 +10,7 @@ import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
-import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
+import { DEFAULT_QUERY_LANGUAGE } from 'src/plugins/data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');

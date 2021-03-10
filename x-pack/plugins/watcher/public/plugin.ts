@@ -10,11 +10,11 @@ import { CoreSetup, Plugin, CoreStart, Capabilities } from 'kibana/public';
 import { first, map, skip } from 'rxjs/operators';
 
 import { Subject, combineLatest } from 'rxjs';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
+import { ILicense } from 'x-pack/plugins/licensing/public';
 import { LicenseStatus } from '../common/types/license_status';
 
-import { ILicense } from '../../licensing/public';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
 

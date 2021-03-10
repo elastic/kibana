@@ -8,6 +8,8 @@
 import Boom from '@hapi/boom';
 import type { Logger, RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
+import { Agent, AgentStatus, PackagePolicy } from 'x-pack/plugins/fleet/common/types/models';
+import { AgentNotFoundError } from 'x-pack/plugins/fleet/server';
 import {
   HostInfo,
   HostMetadata,
@@ -18,8 +20,6 @@ import {
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
-import { Agent, AgentStatus, PackagePolicy } from '../../../../../fleet/common/types/models';
-import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';

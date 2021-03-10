@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsServiceStart, KibanaRequest } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../../src/core/server';
+import { SavedObjectsClient } from 'src/core/server';
 import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
 export function savedObjectClientsFactory(

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { LicenseCheck } from 'x-pack/plugins/licensing/server';
+
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import type { LicenseCheck } from '../../../../../licensing/server';
 import type { RawKibanaPrivileges } from '../../../../common/model';
 import type { SecurityRequestHandlerContext } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';

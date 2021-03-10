@@ -9,9 +9,9 @@ import semver from 'semver';
 import LRU from 'lru-cache';
 import { isEqual } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
-import { ListResult } from '../../../../../../fleet/common';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import { ExceptionListClient } from '../../../../../../lists/server';
+import { ListResult } from 'x-pack/plugins/fleet/common';
+import { PackagePolicyServiceInterface } from 'x-pack/plugins/fleet/server';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
   manifestDispatchSchema,

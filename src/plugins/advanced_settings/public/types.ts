@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ComponentRegistry } from './component_registry';
-import { HomePublicPluginSetup } from '../../home/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
 
-import { ManagementSetup } from '../../management/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { ManagementSetup } from 'src/plugins/management/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { ComponentRegistry } from './component_registry';
 
 export interface AdvancedSettingsSetup {
   component: ComponentRegistry['setup'];

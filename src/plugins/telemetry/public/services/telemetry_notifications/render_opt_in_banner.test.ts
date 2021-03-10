@@ -8,7 +8,7 @@
 
 import { renderOptInBanner } from './render_opt_in_banner';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { overlayServiceMock } from '../../../../../core/public/overlays/overlay_service.mock';
+import { overlayServiceMock } from 'src/core/public/overlays/overlay_service.mock';
 
 describe('renderOptInBanner', () => {
   it('adds a banner to banners with priority of 10000', () => {

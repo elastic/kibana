@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock } from 'src/core/public/mocks';
 import { ToastNotifications } from './toast_notifications';
 import { Toast } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';

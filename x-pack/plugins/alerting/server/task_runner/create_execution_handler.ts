@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
-import { transformActionParams } from './transform_action_params';
+import { Logger, KibanaRequest } from 'src/core/server';
 import {
   PluginStartContract as ActionsPluginStartContract,
   asSavedObjectExecutionSource,
-} from '../../../actions/server';
-import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+} from 'x-pack/plugins/actions/server';
+import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from 'x-pack/plugins/event_log/server';
+import { transformActionParams } from './transform_action_params';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import {

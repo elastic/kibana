@@ -9,7 +9,7 @@ import { mean } from 'lodash';
 import {
   ApmFetchDataResponse,
   FetchDataParams,
-} from '../../../../observability/public';
+} from 'x-pack/plugins/observability/public';
 import { callApmApi } from './createCallApmApi';
 
 export { createCallApmApi } from './createCallApmApi';

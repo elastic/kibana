@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { TimelineType } from '../../../../common/types/timeline';
 
 import {

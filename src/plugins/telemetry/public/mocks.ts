@@ -7,11 +7,11 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { overlayServiceMock } from '../../../core/public/overlays/overlay_service.mock';
+import { overlayServiceMock } from 'src/core/public/overlays/overlay_service.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServiceMock } from '../../../core/public/http/http_service.mock';
+import { httpServiceMock } from 'src/core/public/http/http_service.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
+import { notificationServiceMock } from 'src/core/public/notifications/notifications_service.mock';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
 import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../core/public/mocks';
-import { savedObjectsPluginMock } from '../../saved_objects/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
+import { savedObjectsPluginMock } from 'src/plugins/saved_objects/public/mocks';
 import { tagDecoratorConfig } from './decorator';
 import { taggingApiMock } from './api.mock';
 import { SavedObjectTaggingOssPlugin } from './plugin';

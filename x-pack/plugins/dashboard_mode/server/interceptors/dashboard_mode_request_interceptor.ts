@@ -6,7 +6,7 @@
  */
 
 import { HttpServiceSetup, OnPostAuthHandler, IUiSettingsClient } from 'kibana/server';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { UI_SETTINGS } from '../../common';
 
 const superuserRole = 'superuser';

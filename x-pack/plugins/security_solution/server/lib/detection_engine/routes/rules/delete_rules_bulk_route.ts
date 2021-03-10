@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RouteConfig, RequestHandler } from 'src/core/server';
 import { validate } from '../../../../../common/validate';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -13,7 +14,6 @@ import {
   QueryRulesBulkSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import type { RouteConfig, RequestHandler } from '../../../../../../../../src/core/server';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,

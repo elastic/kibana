@@ -19,7 +19,7 @@ import {
   IndexPatternsContract,
   ISearchSource,
   SearchSourceFields,
-} from '../../data/public';
+} from 'src/plugins/data/public';
 
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };

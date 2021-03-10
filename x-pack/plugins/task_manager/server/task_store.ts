@@ -18,8 +18,9 @@ import {
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 
+import { ESSearchResponse, ESSearchBody } from 'x-pack/typings/elasticsearch';
 import { asOk, asErr, Result } from './lib/result_type';
 
 import {
@@ -31,7 +32,6 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;

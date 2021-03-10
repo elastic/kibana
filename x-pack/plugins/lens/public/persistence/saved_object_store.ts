@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectReference,
 } from 'kibana/public';
-import { Query } from '../../../../../src/plugins/data/public';
+import { Query } from 'src/plugins/data/public';
 import { DOC_TYPE, PersistableFilter } from '../../common';
 
 export interface Document {

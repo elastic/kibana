@@ -11,8 +11,8 @@ import { unitOfTime } from 'moment';
 
 import { DomainRange } from '@elastic/charts';
 
-import { getAdjustedInterval } from '../../../charts/public';
-import { Datatable } from '../../../expressions/public';
+import { getAdjustedInterval } from 'src/plugins/charts/public';
+import { Datatable } from 'src/plugins/expressions/public';
 
 import { Aspect, DateHistogramParams, HistogramParams } from '../types';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
-import { getExceptionListItemSchemaMock } from '../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { ESFilter } from 'x-pack/typings/elasticsearch';
+import { getExceptionListItemSchemaMock } from 'x-pack/plugins/lists/common/schemas/response/exception_list_item_schema.mock';
 import { getAnomalies, AnomaliesSearchParams } from '.';
 
 const getFiltersFromMock = (mock: jest.Mock) => {

@@ -8,13 +8,13 @@
 
 import _ from 'lodash';
 
-import { FilterManager } from './filter_manager';
 import {
   PhraseFilter,
   esFilters,
   IndexPatternsContract,
   FilterManager as QueryFilterManager,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
+import { FilterManager } from './filter_manager';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(

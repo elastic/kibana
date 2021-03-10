@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position } from '@elastic/charts';
 
-import { AggGroupNames } from '../../../data/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
+import { AggGroupNames } from 'src/plugins/data/public';
+import { VIS_EVENT_TO_TRIGGER } from 'src/plugins/visualizations/public';
 
+import { defaultCountLabel, LabelRotation } from 'src/plugins/charts/public';
 import {
   ChartMode,
   AxisType,
@@ -26,7 +27,6 @@ import {
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { getOptionTabs } from '../editor/common_config';
-import { defaultCountLabel, LabelRotation } from '../../../charts/public';
 
 export const getHistogramVisTypeDefinition = (
   showElasticChartsOptions = false

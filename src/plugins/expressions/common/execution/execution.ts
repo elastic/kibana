@@ -8,11 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
+import { abortSignalToPromise, Defer, now } from 'src/plugins/kibana_utils/common';
+import { RequestAdapter, Adapters } from 'src/plugins/inspector/common';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { abortSignalToPromise, Defer, now } from '../../../kibana_utils/common';
-import { RequestAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstExpression,

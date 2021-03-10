@@ -8,7 +8,7 @@
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../../../src/plugins/data/server';
+} from 'src/plugins/data/server';
 import { InfraSources } from '../../lib/sources';
 
 export interface LogEntriesServiceSetupDeps {

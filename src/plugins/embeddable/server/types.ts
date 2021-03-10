@@ -10,7 +10,7 @@ import {
   PersistableState,
   PersistableStateDefinition,
   SerializableState,
-} from '../../kibana_utils/common';
+} from 'src/plugins/kibana_utils/common';
 import { EmbeddableStateWithType } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;

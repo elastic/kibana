@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from 'src/plugins/expressions/public';
 
 import { ChartType, XyVisType } from '../common';
 import { VisParams } from './types';

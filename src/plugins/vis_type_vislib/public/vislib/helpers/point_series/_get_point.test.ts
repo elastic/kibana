@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IFieldFormatsRegistry } from '../../../../../data/common';
+import { IFieldFormatsRegistry } from 'src/plugins/data/common';
 
 import { getPoint } from './_get_point';
 import { setFormatService } from '../../../services';

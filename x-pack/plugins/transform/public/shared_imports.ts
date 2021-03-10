@@ -18,6 +18,6 @@ export {
   HITS_TOTAL_RELATION,
 } from '../../ml/public';
 
-import { XJson } from '../../../../src/plugins/es_ui_shared/public';
+import { XJson } from 'src/plugins/es_ui_shared/public';
 const { expandLiteralStrings, collapseLiteralStrings } = XJson;
 export { expandLiteralStrings, collapseLiteralStrings };

@@ -6,13 +6,17 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from 'x-pack/plugins/task_manager/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
   usageProvider,
-} from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+} from 'src/plugins/data/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
 import { searchSessionMapping } from './saved_objects';
@@ -25,7 +29,6 @@ import { getUiSettings } from './ui_settings';
 import type { DataEnhancedRequestHandlerContext } from './type';
 import { ConfigSchema } from '../config';
 import { registerUsageCollector } from './collectors';
-import { SecurityPluginSetup } from '../../security/server';
 
 interface SetupDependencies {
   data: DataPluginSetup;

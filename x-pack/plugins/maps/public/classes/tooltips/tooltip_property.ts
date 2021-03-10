@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { Filter } from '../../../../../../src/plugins/data/public';
+import { Filter } from 'src/plugins/data/public';
 import { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';
 
 export interface ITooltipProperty {

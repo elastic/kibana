@@ -9,8 +9,8 @@ import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { CloudSetup } from '../../cloud/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { CloudSetup } from 'x-pack/plugins/cloud/public';
+import { ManagementSetup } from 'src/plugins/management/public';
 
 import { Config } from '../common/config';
 

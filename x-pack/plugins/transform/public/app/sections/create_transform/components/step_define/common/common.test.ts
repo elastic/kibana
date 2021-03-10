@@ -6,9 +6,9 @@
  */
 
 import { getPivotDropdownOptions } from '../common';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { FilterAggForm } from './filter_agg/components';
-import type { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import type { RuntimeField } from 'src/plugins/data/common/index_patterns';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {

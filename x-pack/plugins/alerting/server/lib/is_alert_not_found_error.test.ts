@@ -7,7 +7,7 @@
 
 import { isAlertSavedObjectNotFoundError } from './is_alert_not_found_error';
 import { ErrorWithReason } from './error_with_reason';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import uuid from 'uuid';
 import { AlertExecutionStatusErrorReasons } from '../types';
 

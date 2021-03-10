@@ -13,9 +13,9 @@ import {
   DashboardUrlGenerator,
   SavedDashboardPanel,
   DashboardSavedObject,
-} from '../../../../../../src/plugins/dashboard/public';
+} from 'src/plugins/dashboard/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
 import { useMlKibana } from '../contexts/kibana';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 

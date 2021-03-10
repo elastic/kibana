@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from 'src/core/server';
 import { TimeSeriesQueryParameters } from '../lib/time_series_query';
 
 import { TimeSeriesQuery, TimeSeriesQuerySchema, TimeSeriesResult } from '../lib/time_series_types';

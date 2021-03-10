@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Query,
-  RefreshInterval,
-  TimeRange,
-} from '../../../../../src/plugins/data/common/query';
+import type { Query, RefreshInterval, TimeRange } from 'src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
 import { ML_PAGES } from '../constants/ml_url_generator';
 import type { DataFrameAnalysisConfigType } from './data_frame_analytics';

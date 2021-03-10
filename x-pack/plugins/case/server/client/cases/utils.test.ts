@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
+import { actionsClientMock } from 'x-pack/plugins/actions/server/actions_client.mock';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { mockCases } from '../../routes/api/__fixtures__';
 

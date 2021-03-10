@@ -8,7 +8,7 @@
 import {
   SavedObjectsTaggingApiUi,
   TagDecoratedSavedObject,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+} from 'src/plugins/saved_objects_tagging_oss/public';
 
 export const hasTagDecoration: SavedObjectsTaggingApiUi['hasTagDecoration'] = (
   object

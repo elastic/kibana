@@ -7,15 +7,15 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart } from '../../../../core/public';
-import { coreMock } from '../../../../core/public/mocks';
+import { CoreSetup, CoreStart } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
 import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
-import { AbortError } from '../../../kibana_utils/public';
+import { AbortError } from 'src/plugins/kibana_utils/public';
 import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from './errors';
 import { searchServiceMock } from './mocks';
 import { ISearchStart, ISessionService } from '.';
-import { bfetchPluginMock } from '../../../bfetch/public/mocks';
+import { bfetchPluginMock } from 'src/plugins/bfetch/public/mocks';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 
 import * as searchPhaseException from '../../common/search/test_data/search_phase_execution_exception.json';

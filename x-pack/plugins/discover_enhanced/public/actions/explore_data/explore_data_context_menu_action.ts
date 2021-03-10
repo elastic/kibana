@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import {
-  EmbeddableContext,
-  EmbeddableInput,
-  IEmbeddable,
-} from '../../../../../../src/plugins/embeddable/public';
-import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
-import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
-import { KibanaURL } from '../../../../../../src/plugins/share/public';
+import { Action } from 'src/plugins/ui_actions/public';
+import { EmbeddableContext, EmbeddableInput, IEmbeddable } from 'src/plugins/embeddable/public';
+import { Query, Filter, TimeRange } from 'src/plugins/data/public';
+import { DiscoverUrlGeneratorState } from 'src/plugins/discover/public';
+import { KibanaURL } from 'src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 

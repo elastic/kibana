@@ -7,13 +7,13 @@
  */
 
 import _ from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
-import { SavedObjectNotFound } from '../../../../kibana_utils/public';
+import { SavedObjectNotFound } from 'src/plugins/kibana_utils/public';
 import {
   IndexPattern,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
+import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 import { expandShorthand } from './field_mapping';
 
 /**

@@ -9,6 +9,7 @@
 import Joi from 'joi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { SavedObject } from 'src/core/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   SampleDatasetProvider,
   SampleDatasetSchema,
@@ -19,7 +20,6 @@ import { sampleDataSchema } from './lib/sample_dataset_schema';
 
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
 import { createListRoute, createInstallRoute } from './routes';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 

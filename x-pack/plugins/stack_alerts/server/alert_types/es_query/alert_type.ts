@@ -7,7 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse } from 'x-pack/typings/elasticsearch';
+import { parseDuration } from 'x-pack/plugins/alerting/server';
+import { ESSearchHit } from 'x-pack/typings/elasticsearch';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
 import {
@@ -17,9 +19,7 @@ import {
 } from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { parseDuration } from '../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
 

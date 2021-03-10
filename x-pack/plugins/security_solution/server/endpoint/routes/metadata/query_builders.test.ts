@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';

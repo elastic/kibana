@@ -10,12 +10,8 @@ import moment from 'moment';
 import { LicenseType } from '../common/types';
 import { ElasticsearchError, RawLicense } from './types';
 import { LicensingPlugin } from './plugin';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '../../../../src/core/server/mocks';
-import { ILegacyClusterClient } from '../../../../src/core/server/';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { ILegacyClusterClient } from 'src/core/server';
 
 function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   const defaultRawLicense: RawLicense = {

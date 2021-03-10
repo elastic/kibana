@@ -6,16 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-
-import type { KibanaRequest } from 'src/core/server';
-
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
   ISpacesClient,
   Space,
-} from '../../../spaces/server';
+} from 'x-pack/plugins/spaces/server';
+
+import type { KibanaRequest } from 'src/core/server';
+
 import type { AuditLogger } from '../audit';
 import { EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';

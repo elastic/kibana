@@ -11,7 +11,7 @@ import { createMemoryHistory, History } from 'history';
 import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { App, AppUpdater, ToastsSetup } from 'kibana/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { unhashUrl } from './hash_unhash_url';
 
 jest.mock('./hash_unhash_url', () => ({

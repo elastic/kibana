@@ -11,7 +11,7 @@ import {
   CoreSetup,
   Plugin as PluginType,
   ISavedObjectsRepository,
-} from '../../../../src/core/server';
+} from 'src/core/server';
 import { initServerWithKibana } from './kibana.index';
 import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
 import { umDynamicSettings } from './lib/saved_objects';

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
+import { SavedObjectAttributes, SavedObjectReference } from 'src/core/types';
+import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common/types';
 import {
   extractPanelsReferences,
   injectPanelsReferences,
 } from './embeddable/embeddable_references';
 import { SavedDashboardPanel730ToLatest } from './types';
-import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
 
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;

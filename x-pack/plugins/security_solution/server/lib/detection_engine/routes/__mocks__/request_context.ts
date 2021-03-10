@@ -6,13 +6,9 @@
  */
 
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../../alerting/server/mocks';
-import { licensingMock } from '../../../../../../licensing/server/mocks';
+import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
+import { licensingMock } from 'x-pack/plugins/licensing/server/mocks';
 import { siemMock } from '../../../../mocks';
 
 const createMockClients = () => ({

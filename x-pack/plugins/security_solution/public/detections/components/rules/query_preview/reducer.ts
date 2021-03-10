@@ -8,8 +8,8 @@
 import { Unit } from '@elastic/datemath';
 import { EuiSelectOption } from '@elastic/eui';
 
+import { Filter } from 'src/plugins/data/common/es_query';
 import * as i18n from './translations';
-import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { ESQuery } from '../../../../../common/typed_json';
 import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FieldValueQueryBar } from '../query_bar';

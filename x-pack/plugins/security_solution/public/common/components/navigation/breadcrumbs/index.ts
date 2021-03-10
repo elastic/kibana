@@ -7,7 +7,7 @@
 
 import { getOr, omit } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from 'src/core/public';
 import { APP_NAME, APP_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';

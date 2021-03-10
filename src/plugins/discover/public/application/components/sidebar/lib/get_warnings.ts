@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPatternField } from '../../../../../../data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 
 export function getWarnings(field: IndexPatternField) {
   let warnings = [];

@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import {
-  DiscoverUrlGeneratorState,
-  SearchInput,
-} from '../../../../../../src/plugins/discover/public';
-import {
-  ApplyGlobalFilterActionContext,
-  esFilters,
-} from '../../../../../../src/plugins/data/public';
-import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { KibanaURL } from '../../../../../../src/plugins/share/public';
+import { Action } from 'src/plugins/ui_actions/public';
+import { DiscoverUrlGeneratorState, SearchInput } from 'src/plugins/discover/public';
+import { ApplyGlobalFilterActionContext, esFilters } from 'src/plugins/data/public';
+import { IEmbeddable } from 'src/plugins/embeddable/public';
+import { KibanaURL } from 'src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 

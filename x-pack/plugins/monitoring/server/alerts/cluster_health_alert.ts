@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertInstance } from 'x-pack/plugins/alerting/server';
+import { SanitizedAlert } from 'x-pack/plugins/alerting/common';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -17,7 +19,6 @@ import {
   AlertClusterHealth,
   AlertInstanceState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
 import {
   ALERT_CLUSTER_HEALTH,
   LEGACY_ALERT_DETAILS,
@@ -25,7 +26,6 @@ import {
 } from '../../common/constants';
 import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';

@@ -12,22 +12,16 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../../src/plugins/home/public';
-import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from 'src/plugins/home/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../../triggers_actions_ui/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
+} from 'x-pack/plugins/triggers_actions_ui/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { FetchDataParams, ObservabilityPluginSetup } from 'x-pack/plugins/observability/public';
 import { alertTypeInitializers } from '../lib/alert_types';
-import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
 
 export interface ClientPluginsSetup {

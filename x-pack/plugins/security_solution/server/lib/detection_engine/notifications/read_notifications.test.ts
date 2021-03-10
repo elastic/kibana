@@ -6,7 +6,7 @@
  */
 
 import { readNotifications } from './read_notifications';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
 import {
   getNotificationResult,
   getFindNotificationsResultWithSingleHit,

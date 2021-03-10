@@ -9,7 +9,7 @@
 import uuid from 'uuid';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
-import { createStateContainer, StateContainer } from '../../../../kibana_utils/public';
+import { createStateContainer, StateContainer } from 'src/plugins/kibana_utils/public';
 
 /**
  * Possible state that current session can be in

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../../../src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { SetupPlugins } from '../../plugin';
 
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';

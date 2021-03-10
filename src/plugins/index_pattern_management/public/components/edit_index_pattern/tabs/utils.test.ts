@@ -7,7 +7,7 @@
  */
 
 import { getPath } from './utils';
-import { IndexPatternField, IndexPattern } from '../../../../../data/public';
+import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 
 test('getPath() should encode "fieldName"', () => {
   expect(

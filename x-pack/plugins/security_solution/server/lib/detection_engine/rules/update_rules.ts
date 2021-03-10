@@ -7,9 +7,9 @@
 
 /* eslint-disable complexity */
 
+import { PartialAlert } from 'x-pack/plugins/alerting/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { PartialAlert } from '../../../../../alerting/server';
 import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';

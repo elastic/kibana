@@ -8,13 +8,13 @@
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { LevelLogger } from '../';
-import { ReportingCore } from '../../';
 import {
   RunContext,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
-} from '../../../../task_manager/server';
+} from 'x-pack/plugins/task_manager/server';
+import { LevelLogger } from '../';
+import { ReportingCore } from '../../';
 import { CancellationToken } from '../../../common';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';

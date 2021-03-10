@@ -6,12 +6,8 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
-import {
-  ISearchStrategy,
-  PluginStart,
-  shimHitsTotal,
-} from '../../../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/common';
+import { ISearchStrategy, PluginStart, shimHitsTotal } from 'src/plugins/data/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from 'x-pack/plugins/data_enhanced/common';
 import {
   FactoryQueryTypes,
   StrategyResponseType,

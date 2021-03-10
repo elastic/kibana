@@ -12,8 +12,8 @@ jest.mock('../browsers');
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { coreMock } from 'src/core/server/mocks';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
-import { featuresPluginMock } from '../../../features/server/mocks';
 import {
   chromium,
   HeadlessChromiumDriverFactory,

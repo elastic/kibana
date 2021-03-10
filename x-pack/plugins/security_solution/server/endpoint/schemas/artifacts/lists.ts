@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { operator } from '../../../../../lists/common/schemas';
+import { operator } from 'x-pack/plugins/lists/common/schemas';
 
 export const translatedEntryMatchAnyMatcher = t.keyof({
   exact_cased_any: null,

@@ -7,7 +7,7 @@
  */
 
 import { toExpressionAst } from './to_ast';
-import { Vis } from '../../visualizations/public';
+import { Vis } from 'src/plugins/visualizations/public';
 
 describe('markdown vis toExpressionAst function', () => {
   let vis: Vis;

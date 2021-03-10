@@ -8,17 +8,17 @@
 
 import { SavedObjectAttributes } from 'kibana/public';
 import {
+  PersistableState,
+  PersistableStateDefinition,
+  SerializableState,
+} from 'src/plugins/kibana_utils/common';
+import {
   EmbeddableFactory,
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
   EmbeddableFactoryDefinition,
 } from './lib/embeddables';
-import {
-  PersistableState,
-  PersistableStateDefinition,
-  SerializableState,
-} from '../../kibana_utils/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;

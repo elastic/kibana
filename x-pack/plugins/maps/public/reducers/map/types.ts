@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Filter, TimeRange } from 'src/plugins/data/public';
 import {
   DrawState,
   Goto,
@@ -18,7 +19,6 @@ import {
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
-import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 
 export type MapContext = {
   zoom?: number;

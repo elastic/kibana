@@ -11,7 +11,7 @@ import {
   getServiceNowSIRActionType,
   getJiraActionType,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/common';
+} from 'x-pack/plugins/triggers_actions_ui/public/common';
 import { ConnectorConfiguration } from './types';
 
 const resilient = getResilientActionType();

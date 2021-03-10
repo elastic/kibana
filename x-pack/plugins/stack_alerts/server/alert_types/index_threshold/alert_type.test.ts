@@ -6,7 +6,7 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { getAlertType } from './alert_type';
 import { Params } from './alert_type_params';
 

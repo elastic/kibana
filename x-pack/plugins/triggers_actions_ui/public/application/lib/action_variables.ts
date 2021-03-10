@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ActionVariable } from 'x-pack/plugins/alerting/common';
 import { ActionVariables } from '../../types';
-import { ActionVariable } from '../../../../alerting/common';
 
 // return a "flattened" list of action variables for an alertType
 export function transformActionVariables(actionVariables: ActionVariables): ActionVariable[] {

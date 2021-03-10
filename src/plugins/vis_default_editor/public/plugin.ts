@@ -8,7 +8,7 @@
 
 import { CoreSetup, Plugin } from 'kibana/public';
 
-import { VisualizePluginSetup } from '../../visualize/public';
+import { VisualizePluginSetup } from 'src/plugins/visualize/public';
 import { DefaultEditorController } from './default_editor_controller';
 
 export interface VisDefaultEditorSetupDependencies {

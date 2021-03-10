@@ -8,16 +8,16 @@
 import { set } from '@elastic/safer-lodash-set';
 
 import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from 'x-pack/plugins/alerting/server';
+import { Logger } from 'src/core/server';
+import {
   Threshold,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
 import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import { SignalSearchResponse } from '../types';

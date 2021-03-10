@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginSetup } from 'x-pack/plugins/encrypted_saved_objects/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 

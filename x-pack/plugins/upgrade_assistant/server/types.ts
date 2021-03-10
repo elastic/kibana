@@ -6,9 +6,9 @@
  */
 
 import { IRouter, Logger, SavedObjectsServiceStart } from 'src/core/server';
-import { CloudSetup } from '../../cloud/server';
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
 import { CredentialStore } from './lib/reindexing/credential_store';
-import { LicensingPluginSetup } from '../../licensing/server';
 
 export interface RouteDependencies {
   router: IRouter;

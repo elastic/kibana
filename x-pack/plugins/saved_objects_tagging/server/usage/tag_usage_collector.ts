@@ -8,7 +8,7 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'src/core/server';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TaggingUsageData } from './types';
 import { fetchTagUsageData } from './fetch_tag_usage_data';
 import { tagUsageCollectorSchema } from './schema';

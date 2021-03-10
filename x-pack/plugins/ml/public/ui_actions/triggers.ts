@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Trigger } from '../../../../../src/plugins/ui_actions/public';
+import { Trigger } from 'src/plugins/ui_actions/public';
 
 export const SWIM_LANE_SELECTION_TRIGGER = 'SWIM_LANE_SELECTION_TRIGGER';
 

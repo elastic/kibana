@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
+import { AbortError, abortSignalToPromise, defer } from 'src/plugins/kibana_utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,

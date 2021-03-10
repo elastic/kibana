@@ -9,17 +9,13 @@ import { BehaviorSubject } from 'rxjs';
 import { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
 
-import {
-  LegacyAPICaller,
-  ServiceStatus,
-  ServiceStatusLevels,
-} from '../../../../../src/core/server';
+import { LegacyAPICaller, ServiceStatus, ServiceStatusLevels } from 'src/core/server';
 import {
   contextServiceMock,
   elasticsearchServiceMock,
   savedObjectsServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { createHttpServer } from '../../../../../src/core/server/test_utils';
+} from 'src/core/server/mocks';
+import { createHttpServer } from 'src/core/server/test_utils';
 import { registerSettingsRoute } from './settings';
 
 type HttpService = ReturnType<typeof createHttpServer>;

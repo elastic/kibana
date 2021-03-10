@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import {
-  Filter,
-  IIndexPattern,
-  buildEsQuery,
-  EsQueryConfig,
-} from '../../../../../src/plugins/data/common';
+import { Filter, IIndexPattern, buildEsQuery, EsQueryConfig } from 'src/plugins/data/common';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-} from '../../../lists/common/schemas';
+} from 'x-pack/plugins/lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
 import { buildExceptionFilter } from '../shared_imports';
 import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';

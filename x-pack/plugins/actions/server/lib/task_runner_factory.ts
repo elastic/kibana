@@ -9,18 +9,18 @@ import { pick } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
-import { addSpaceIdToPath } from '../../../spaces/server';
+import { addSpaceIdToPath } from 'x-pack/plugins/spaces/server';
 import {
   Logger,
   SavedObjectsClientContract,
   KibanaRequest,
   SavedObjectReference,
   IBasePath,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
+import { RunContext } from 'x-pack/plugins/task_manager/server';
+import { EncryptedSavedObjectsClient } from 'x-pack/plugins/encrypted_saved_objects/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,

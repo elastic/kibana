@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Range } from '../../expressions/public';
-import { SchemaConfig } from '../../visualizations/public';
-import { ColorMode, Labels, Style, ColorSchemas } from '../../charts/public';
+import { Range } from 'src/plugins/expressions/public';
+import { SchemaConfig } from 'src/plugins/visualizations/public';
+import { ColorMode, Labels, Style, ColorSchemas } from 'src/plugins/charts/public';
 
 export const visType = 'metric';
 

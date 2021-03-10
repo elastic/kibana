@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
-import { listMock } from '../../../../../lists/server/mocks';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common/schemas/response';
+import { listMock } from 'x-pack/plugins/lists/server/mocks';
+import { ExceptionListClient } from 'x-pack/plugins/lists/server';
 import { ConditionEntryField, OperatingSystem } from '../../../../common/endpoint/types';
 import { createConditionEntry, createEntryMatch } from './mapping';
 import {

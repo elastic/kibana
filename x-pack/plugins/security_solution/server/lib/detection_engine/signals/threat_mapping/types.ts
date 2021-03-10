@@ -7,7 +7,14 @@
 
 import { SearchResponse } from 'elasticsearch';
 
-import { ListClient } from '../../../../../../lists/server';
+import { ListClient } from 'x-pack/plugins/lists/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from 'x-pack/plugins/alerting/server';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common/schemas';
+import { ILegacyScopedClusterClient, Logger } from 'src/core/server';
 import {
   Type,
   LanguageOrUndefined,
@@ -23,13 +30,6 @@ import {
   ThreatIndicatorPathOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';

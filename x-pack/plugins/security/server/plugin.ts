@@ -8,6 +8,16 @@
 import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
+import type {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from 'x-pack/plugins/features/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from 'x-pack/plugins/licensing/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from 'x-pack/plugins/spaces/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from 'x-pack/plugins/task_manager/server';
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { RecursiveReadonly } from '@kbn/utility-types';
@@ -22,13 +32,6 @@ import type {
 import type { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
 import type { AuthenticatedUser } from '../common/model';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert } from 'x-pack/plugins/alerting/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { RuleTypeParams } from '../types';
 import { findRules } from './find_rules';

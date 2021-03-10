@@ -7,13 +7,13 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
-import { ChartsPluginSetup } from '../../charts/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { createTagCloudFn } from './tag_cloud_fn';
 import { tagCloudVisTypeDefinition } from './tag_cloud_type';
-import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
 import { ConfigSchema } from '../config';
 import { getTagCloudVisRenderer } from './tag_cloud_vis_renderer';

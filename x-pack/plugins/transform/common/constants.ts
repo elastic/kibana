@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from 'x-pack/plugins/licensing/common/types';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 export const MINIMUM_REFRESH_INTERVAL_MS = 1000;

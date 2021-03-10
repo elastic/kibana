@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CreateExceptionListItemOptions } from '../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import { CreateExceptionListItemOptions } from 'x-pack/plugins/lists/server';
+import { ExceptionListItemSchema } from 'x-pack/plugins/lists/common/schemas/response';
 
 import {
   ConditionEntryField,

@@ -13,7 +13,7 @@ import {
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { SavedSearch } from '../../saved_searches';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 

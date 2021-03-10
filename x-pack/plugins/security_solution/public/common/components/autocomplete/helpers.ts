@@ -8,7 +8,7 @@
 import dateMath from '@elastic/datemath';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { IFieldType } from 'src/plugins/data/common';
 
 import {
   EXCEPTION_OPERATORS,

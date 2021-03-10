@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../../src/core/server';
+import { SavedObjectsType } from 'src/core/server';
 
 export const ruleStatusSavedObjectType = 'siem-detection-engine-rule-status';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { coreMock } from '../../../../src/core/public/mocks';
-import { globalSearchPluginMock } from '../../global_search/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
+import { globalSearchPluginMock } from 'x-pack/plugins/global_search/public/mocks';
 import { GlobalSearchProvidersPlugin } from './plugin';
 
 describe('GlobalSearchProvidersPlugin', () => {

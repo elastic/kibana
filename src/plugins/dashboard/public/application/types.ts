@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { SharePluginStart } from '../services/share';
 import { EmbeddableStart } from '../services/embeddable';
 import { UsageCollectionSetup } from '../services/usage_collection';
@@ -24,7 +25,6 @@ import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, IndexPatternsContract } from '../services/data';
 import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
 import { DashboardPanelStorage } from './lib';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =

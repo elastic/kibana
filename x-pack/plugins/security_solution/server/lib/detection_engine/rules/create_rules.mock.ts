@@ -6,7 +6,7 @@
  */
 
 import { CreateRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { alertsClientMock } from 'x-pack/plugins/alerting/server/mocks';
 
 export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],

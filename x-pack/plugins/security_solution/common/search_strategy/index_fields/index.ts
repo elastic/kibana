@@ -6,11 +6,7 @@
  */
 
 import { IIndexPattern } from 'src/plugins/data/public';
-import {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IFieldSubType,
-} from '../../../../../../src/plugins/data/common';
+import { IEsSearchRequest, IEsSearchResponse, IFieldSubType } from 'src/plugins/data/common';
 import { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';

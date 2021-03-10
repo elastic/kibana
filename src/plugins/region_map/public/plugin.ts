@@ -14,13 +14,16 @@ import {
   IUiSettingsClient,
   NotificationsStart,
 } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 // @ts-ignore
-import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
-import { createRegionMapTypeDefinition } from './region_map_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from 'src/plugins/maps_legacy/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { MapsLegacyConfig } from 'src/plugins/maps_legacy/config';
+import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { SharePluginStart } from 'src/plugins/share/public';
+import { RegionMapsConfigType } from './index';
 import {
   setCoreService,
   setFormatService,
@@ -29,11 +32,8 @@ import {
   setQueryService,
   setShareService,
 } from './kibana_services';
-import { DataPublicPluginStart } from '../../data/public';
-import { RegionMapsConfigType } from './index';
-import { MapsLegacyConfig } from '../../maps_legacy/config';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { SharePluginStart } from '../../share/public';
+import { createRegionMapTypeDefinition } from './region_map_type';
+import { createRegionMapFn } from './region_map_fn';
 import { getRegionMapRenderer } from './region_map_renderer';
 
 /** @private */

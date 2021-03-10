@@ -8,8 +8,8 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import uuid from 'uuid';
+import { Filter } from 'src/plugins/data/public';
 import { ToggleDetailPanel } from './actions';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';

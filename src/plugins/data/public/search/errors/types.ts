@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaServerError } from '../../../../kibana_utils/common';
+import { KibanaServerError } from 'src/plugins/kibana_utils/common';
 
 export interface FailedShard {
   shard: number;

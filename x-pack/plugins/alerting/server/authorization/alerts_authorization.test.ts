@@ -7,12 +7,12 @@
 
 import { KibanaRequest } from 'kibana/server';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
-import { securityMock } from '../../../../plugins/security/server/mocks';
+import { securityMock } from 'x-pack/plugins/security/server/mocks';
 import {
   PluginStartContract as FeaturesStartContract,
   KibanaFeature,
-} from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
+} from 'x-pack/plugins/features/server';
+import { featuresPluginMock } from 'x-pack/plugins/features/server/mocks';
 import { AlertsAuthorization, WriteOperations, ReadOperations } from './alerts_authorization';
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';

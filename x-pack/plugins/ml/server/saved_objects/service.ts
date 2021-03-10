@@ -12,7 +12,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
 } from 'kibana/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+import type { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
 import { getSavedObjectClientError } from './util';

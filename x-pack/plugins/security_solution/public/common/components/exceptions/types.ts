@@ -6,9 +6,9 @@
  */
 
 import { ReactNode } from 'react';
+import { IFieldType } from 'src/plugins/data/common';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
-import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
 import {
   EntryNested,

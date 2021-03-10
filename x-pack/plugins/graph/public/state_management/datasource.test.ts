@@ -11,7 +11,7 @@ import { datasourceSelector, requestDatasource } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 

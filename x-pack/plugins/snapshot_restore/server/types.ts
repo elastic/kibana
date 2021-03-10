@@ -11,10 +11,10 @@ import type {
   IRouter,
   RequestHandlerContext,
 } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { CloudSetup } from '../../cloud/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
+import { CloudSetup } from 'x-pack/plugins/cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from 'x-pack/plugins/features/server';
 import { License } from './services';
 import { wrapEsError } from './lib';
 import { isEsError } from './shared_imports';

@@ -8,12 +8,12 @@
 
 import { History } from 'history';
 import { filter } from 'rxjs/operators';
-import { DataPublicPluginStart } from '../../../../data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   createQueryParamObservable,
   getQueryParams,
   removeQueryParam,
-} from '../../../../kibana_utils/public';
+} from 'src/plugins/kibana_utils/public';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
 
 export interface DiscoverSearchSessionManagerDeps {

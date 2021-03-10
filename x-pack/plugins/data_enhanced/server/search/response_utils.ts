@@ -6,7 +6,7 @@
  */
 
 import { ApiResponse } from '@elastic/elasticsearch';
-import { getTotalLoaded } from '../../../../../src/plugins/data/server';
+import { getTotalLoaded } from 'src/plugins/data/server';
 import { AsyncSearchResponse, EqlSearchResponse } from './types';
 import { EqlSearchStrategyResponse } from '../../common/search';
 

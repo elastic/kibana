@@ -6,7 +6,7 @@
  */
 
 import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
 import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs/operators';

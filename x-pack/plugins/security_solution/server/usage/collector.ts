@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
+import { CoreSetup, SavedObjectsClientContract } from 'src/core/server';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
 import {
   DetectionsUsage,

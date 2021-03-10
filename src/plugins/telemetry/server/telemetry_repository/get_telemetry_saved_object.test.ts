@@ -7,7 +7,7 @@
  */
 
 import { getTelemetrySavedObject } from './get_telemetry_saved_object';
-import { SavedObjectsErrorHelpers } from '../../../../core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 describe('getTelemetrySavedObject', () => {
   it('returns null when saved object not found', async () => {

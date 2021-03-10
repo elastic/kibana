@@ -17,11 +17,11 @@ import {
 import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
 import { first, map } from 'rxjs/operators';
-import { VisTypeTimeseriesConfig } from './config';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { PluginStart } from 'src/plugins/data/server';
+import { IndexPatternsService } from 'src/plugins/data/common';
 import { getVisData } from './lib/get_vis_data';
-import { UsageCollectionSetup } from '../../usage_collection/server';
-import { PluginStart } from '../../data/server';
-import { IndexPatternsService } from '../../data/common';
+import { VisTypeTimeseriesConfig } from './config';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { uiSettings } from './ui_settings';

@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { LicensingPluginSetup, ILicense } from '../../licensing/public';
+import { LicensingPluginSetup, ILicense } from 'x-pack/plugins/licensing/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these

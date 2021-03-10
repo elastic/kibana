@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock, httpServiceMock } from '../../../../../../../src/core/server/mocks';
+import { loggingSystemMock, httpServiceMock } from 'src/core/server/mocks';
 import { CaseService, CaseConfigureService, ConnectorMappingsService } from '../../../services';
 import { authenticationMock } from '../__fixtures__';
 import { RouteDeps } from '../types';

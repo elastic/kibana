@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
+import { actionTypeRegistryMock } from 'x-pack/plugins/triggers_actions_ui/public/application/action_type_registry.mock';
 import { isUuid, getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 describe('stepRuleActions utils', () => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnnotationItemsSchema, PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
+import { AnnotationItemsSchema, PanelSchema } from '../../../../common/types';
 import { buildAnnotationRequest } from './build_request_body';
 import { getIndexPatternObject } from '../../search_strategies/lib/get_index_pattern';
 import {

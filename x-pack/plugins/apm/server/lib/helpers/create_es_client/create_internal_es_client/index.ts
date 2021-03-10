@@ -8,12 +8,12 @@
 import { KibanaRequest } from 'src/core/server';
 import { RequestParams } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMRequestHandlerContext } from '../../../../routes/typings';
+import { unwrapEsResponse } from 'x-pack/plugins/observability/server';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../../../typings/elasticsearch';
+} from 'x-pack/typings/elasticsearch';
+import { APMRequestHandlerContext } from '../../../../routes/typings';
 import {
   callAsyncWithDebug,
   getDebugBody,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from '../../../../data/common';
+import { IndexPattern } from 'src/plugins/data/common';
 
 /**
  * Function to provide fallback when

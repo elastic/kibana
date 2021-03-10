@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from 'src/plugins/expressions/public';
 import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
 import { tableVisResponseHandler } from './utils';

@@ -7,13 +7,13 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, AsyncPlugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { Plugin as ExpressionsPublicPlugin } from 'src/plugins/expressions/public';
+import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-import { DataPublicPluginStart } from '../../data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { setFormatService } from './services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 interface ClientConfigType {
   legacyVisEnabled: boolean;

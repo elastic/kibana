@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from 'src/core/public';
 import { DashboardPlugin } from './plugin';
 
 export {

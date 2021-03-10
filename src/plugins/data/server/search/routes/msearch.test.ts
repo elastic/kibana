@@ -19,7 +19,7 @@ import {
   coreMock,
   httpServerMock,
   pluginInitializerContextConfigMock,
-} from '../../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
 import { convertRequestBody } from './call_msearch';
 import { registerMsearchRoute } from './msearch';
 import { DataPluginStart } from '../../plugin';

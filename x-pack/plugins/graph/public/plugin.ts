@@ -10,25 +10,22 @@ import { CoreSetup, CoreStart } from 'kibana/public';
 import { AppMountParameters, Plugin } from 'src/core/public';
 import { PluginInitializerContext } from 'kibana/public';
 
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import {
-  initAngularBootstrap,
-  KibanaLegacyStart,
-} from '../../../../src/plugins/kibana_legacy/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import { initAngularBootstrap, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
-import { toggleNavLink } from './services/toggle_nav_link';
-import { LicensingPluginStart } from '../../licensing/public';
-import { checkLicense } from '../common/check_license';
+import { LicensingPluginStart } from 'x-pack/plugins/licensing/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
   HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+} from 'src/plugins/home/public';
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
+import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import { ConfigSchema } from '../config';
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import { checkLicense } from '../common/check_license';
+import { toggleNavLink } from './services/toggle_nav_link';
 
 export interface GraphPluginSetupDependencies {
   home?: HomePublicPluginSetup;

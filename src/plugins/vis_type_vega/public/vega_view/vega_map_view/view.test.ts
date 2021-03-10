@@ -15,10 +15,10 @@ import { VegaParser } from '../../data_model/vega_parser';
 import { TimeCache } from '../../data_model/time_cache';
 import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
-import { coreMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { IServiceSettings } from '../../../../maps_legacy/public';
-import type { MapsLegacyConfig } from '../../../../maps_legacy/config';
+import { coreMock } from 'src/core/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { IServiceSettings } from 'src/plugins/maps_legacy/public';
+import type { MapsLegacyConfig } from 'src/plugins/maps_legacy/config';
 import { MapServiceSettings } from './map_service_settings';
 import { userConfiguredLayerId } from './constants';
 import {

@@ -8,16 +8,16 @@
 import { CoreSetup } from 'kibana/public';
 import { $Keys } from 'utility-types';
 import { flatten, uniqBy } from 'lodash';
-import { setupGetFieldSuggestions } from './field';
-import { setupGetValueSuggestions } from './value';
-import { setupGetOperatorSuggestions } from './operator';
-import { setupGetConjunctionSuggestions } from './conjunction';
 import {
   esKuery,
   QuerySuggestion,
   QuerySuggestionGetFnArgs,
   QuerySuggestionGetFn,
-} from '../../../../../../../src/plugins/data/public';
+} from 'src/plugins/data/public';
+import { setupGetFieldSuggestions } from './field';
+import { setupGetValueSuggestions } from './value';
+import { setupGetOperatorSuggestions } from './operator';
+import { setupGetConjunctionSuggestions } from './conjunction';
 
 const cursorSymbol = '@kuery-cursor@';
 

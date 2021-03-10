@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup } from 'x-pack/plugins/security/server';
 import type { LogstashPluginRouter } from '../types';
 import { registerClusterLoadRoute } from './cluster';
 import {

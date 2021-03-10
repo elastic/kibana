@@ -16,15 +16,15 @@ import {
   PluginInitializerContext,
 } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
-import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
+import { CONTEXT_MENU_TRIGGER } from 'src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
   HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
+} from 'src/plugins/home/public';
+import { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
+import { LicensingPluginSetup, LicensingPluginStart } from 'x-pack/plugins/licensing/public';
 import { constants, getDefaultLayoutSelectors } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';

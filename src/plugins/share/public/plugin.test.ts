@@ -9,8 +9,8 @@
 import { registryMock, managerMock } from './plugin.test.mocks';
 import { SharePlugin } from './plugin';
 import { CoreStart } from 'kibana/public';
-import { coreMock } from '../../../core/public/mocks';
-import { mockSecurityOssPlugin } from '../../security_oss/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
+import { mockSecurityOssPlugin } from 'src/plugins/security_oss/public/mocks';
 
 describe('SharePlugin', () => {
   beforeEach(() => {

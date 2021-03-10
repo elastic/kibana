@@ -7,11 +7,11 @@
 
 import _ from 'lodash';
 import { CoreStart } from 'kibana/public';
-import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
+import { MapsLegacyConfig } from 'src/plugins/maps_legacy/config';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { EMSSettings } from '../common/ems_settings';
-import { PaletteRegistry } from '../../../../src/plugins/charts/public';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);

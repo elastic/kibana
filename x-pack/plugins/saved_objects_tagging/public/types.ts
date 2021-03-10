@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectsTaggingApi } from '../../../../src/plugins/saved_objects_tagging_oss/public';
+import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
 
 export type SavedObjectTaggingPluginStart = SavedObjectsTaggingApi;

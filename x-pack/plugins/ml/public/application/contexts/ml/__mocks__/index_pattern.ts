@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
 export const indexPatternMock = ({
   id: 'the-index-pattern-id',

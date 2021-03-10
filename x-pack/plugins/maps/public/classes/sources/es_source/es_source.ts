@@ -8,6 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { search } from 'src/plugins/data/public';
+import { TimeRange } from 'src/plugins/data/common';
+import { Adapters, RequestResponder } from 'src/plugins/inspector/common/adapters';
 import { AbstractVectorSource, BoundsFilters } from '../vector_source';
 import {
   getAutocompleteService,
@@ -19,9 +22,7 @@ import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
-import { search } from '../../../../../../../src/plugins/data/public';
 import { IVectorSource } from '../vector_source';
-import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import {
   AbstractESSourceDescriptor,
   AbstractSourceDescriptor,
@@ -35,10 +36,6 @@ import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
-import {
-  Adapters,
-  RequestResponder,
-} from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 
 export function isSearchSourceAbortError(error: Error) {
