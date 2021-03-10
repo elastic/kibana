@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function validateServerName(serverName) {
+export function validateServerName(serverName?: string) {
   if (!serverName || !serverName.trim()) {
     return (
       <FormattedMessage
