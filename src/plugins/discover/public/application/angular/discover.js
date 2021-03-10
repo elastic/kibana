@@ -34,19 +34,17 @@ import {
   tabifyAggResponse,
 } from '../../kibana_services';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
+import { getStateDefaults } from '../helpers/get_state_default';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
-  DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
-import { getDefaultSort } from './doc_table/lib/get_default_sort';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { applyAggsToSearchSource, getDimensions } from '../components/histogram';
 
@@ -185,7 +183,14 @@ function discoverController($route, $scope) {
   });
 
   const stateContainer = getState({
-    getStateDefaults,
+    getStateDefaults: () =>
+      getStateDefaults({
+        config,
+        data,
+        indexPattern: $scope.indexPattern,
+        savedSearch,
+        searchSource: persistentSearchSource,
+      }),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
     toasts: core.notifications.toasts,
@@ -391,40 +396,6 @@ function discoverController($route, $scope) {
 
   volatileSearchSource.setParent(persistentSearchSource);
   $scope.volatileSearchSource = volatileSearchSource;
-
-  function getDefaultColumns() {
-    if (savedSearch.columns.length > 0) {
-      return [...savedSearch.columns];
-    }
-    return [...config.get(DEFAULT_COLUMNS_SETTING)];
-  }
-
-  function getStateDefaults() {
-    const query =
-      persistentSearchSource.getField('query') || data.query.queryString.getDefaultQuery();
-    const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
-    const columns = getDefaultColumns();
-
-    const defaultState = {
-      query,
-      sort: !sort.length
-        ? getDefaultSort($scope.indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
-        : sort,
-      columns,
-      index: $scope.indexPattern.id,
-      interval: 'auto',
-      filters: _.cloneDeep(persistentSearchSource.getOwnField('filter')),
-    };
-    if (savedSearch.grid) {
-      defaultState.grid = savedSearch.grid;
-    }
-    if (savedSearch.hideChart) {
-      defaultState.hideChart = savedSearch.hideChart;
-    }
-
-    return defaultState;
-  }
-
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
