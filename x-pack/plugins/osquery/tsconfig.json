@@ -10,7 +10,7 @@
   "include": [
     // add all the folders contains files to be compiled
     "common/**/*",
-    "public/**/*",
+    "public/**/*.{json,tsx,ts}",
     "server/**/*"
   ],
   "references": [
