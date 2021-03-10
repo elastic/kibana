@@ -467,17 +467,31 @@ export const InnerVisualizationWrapper = ({
 
   if (localState.missingRefsErrors?.length) {
     return (
-      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+      <EuiFlexGroup data-test-subj="configuration-failure">
         <EuiFlexItem>
-          <EuiIcon type="alert" size="xl" color="danger" />
-        </EuiFlexItem>
-        <EuiFlexItem data-test-subj="missing-refs-failure">
-          <FormattedMessage
-            id="xpack.lens.editorFrame.indexPatternNotFound"
-            defaultMessage="Index pattern not found"
+          <EuiEmptyPrompt
+            actions={
+              <EuiButtonEmpty onClick={() => {}} data-test-subj="configuration-failure-more-errors">
+                {i18n.translate('xpack.lens.editorFrame.indexPatternReconfigure', {
+                  defaultMessage: ` Configure it in the Advances Settings`,
+                })}
+              </EuiButtonEmpty>
+            }
+            body={
+              <>
+                <p className="eui-textBreakAll" data-test-subj="missing-refs-failure">
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.indexPatternNotFound"
+                    defaultMessage="Index pattern not found"
+                  />
+                </p>
+                <p className="eui-textBreakAll">{localState.missingRefsErrors[0].longMessage}</p>
+              </>
+            }
+            iconColor="danger"
+            iconType="alert"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{localState.missingRefsErrors[0].longMessage}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
