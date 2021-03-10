@@ -8,8 +8,10 @@
 import Boom from '@hapi/boom';
 import { errors } from 'elasticsearch';
 import { httpServerMock } from 'src/core/server/mocks';
+
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
+
 import {
   IngestManagerError,
   RegistryError,

@@ -13,14 +13,24 @@ To view the data summary for a field, click *i* next to the field.
 [role="screenshot"]
 image::images/lens_data_info_documents.png[Data summary analyzed documents]
 
-*Lens* uses a sample of 5,000 documents to perform the field analysis. The bottom line of the summary shows the percentage of sampled documents over all available documents.
+*Lens* uses a sample of 5,000 documents to analyze the fields. The bottom line of the summary shows the percentage of sampled documents over all available documents.
 
-When *Lens* presents the top 10 values distribution, it also shows the percentage of *Other* values. For array value fields, the percentage distribution considers each value in the array as separate.
+When *Lens* displays the top 10 values distribution, the percentage of *Other* values is also shown. For array value fields, the percentage distribution considers each value in the array as separate.
 
 [role="screenshot"]
 image::images/lens_data_info.png[Data summary window with Other]
 
-NOTE: The sum of all the *Other* fields can equal more than 100% by a small amount.
+For sparse datasets, *Empty fields* can still contain data. it is possible that a field is marked as empty even if it has data within the given filters: 
+Lens samples the first 500 documents for the given filters set to establish whether the field has data or it is empty.
+
+The field is still usable in the visualization and if it contains data it will be correctly visualized.
+
+In this case the search field box and the field filters can be useful to work with all fields in this case:
+
+[role="screenshot"]
+image::images/lens_fields_indexpattern.png[Lens fields list can be filtered]
+
+NOTE: The sum of the *Other* fields can equal more than 100% by a small amount.
 
 [float]
 [[drag-and-drop-keyboard-navigation]]
@@ -52,89 +62,120 @@ image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
 [[lens-faq]]
 ==== Frequently asked questions
 
-For specific information about *Lens* visualization, review to the frequently asked questions. 
+For the answers to common *Lens* questions, review the following. 
 
-// [float]
-// [[how-are-pie-chart-sliced-sized]]
-// ===== How are pie chart slices sized?
+[float]
+[[how-does-the-percentage-chart-calculate-percentages]]
+===== How does Lens calculate percentages in percentage charts?
 
-// [float]
-// [[how-does-the-percentage-chart-calculate-percentages]]
-// ===== How does the percentage chart calculate percentages?
+Similar to filter ratio, percentage charts are useful for comparing one or multiple parts to a whole. 
+Use percentage charts when you have bucketed aggregations and time series data.
 
-// [float]
-// [[how-is-the-y-axis-of-multiple-layers-merged-in-a-chart]]
-// ===== How is the y-axis of multiple layers merged in a chart?
+The percentages for each value are computed for each bucket with the division between the metric for 
+the value, and the metric of all documents. For example, the percentage for date histogram is calculated 
+for each time bucket. If the bucket has 0 documents, then the percentage chart displays 0%, not a 100% value.
+
+When you use a bucketed metric, such as *Top values*, you can display the <<what-is-the-other-category, *Other* field>> 
+in the percentage chart. When you display the *Other* field, the final result displays the correct ratio.
+
+[role="screenshot"]
+image::images/lens_area_percentage.png[Lens Area percentage]
 
 [float]
 [[can-i-show-value-labels-for-my-chart]]
-===== Can I show value labels for my chart?
+===== How do I display value labels?
 
-At the moment only a subset of *Lens* visualization allows to show value labels:
+A subset of *Lens* visualizations support value labels. Value labels are unsupported in date histogram.
 
-* `Bar` / `Horizontal Bar` charts.
-
+* *Bar* and *Horizontal Bar*
++
 [role="screenshot"]
 image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
 
-*Note*: Date histograms cannot show value labels even when a Bar chart is used.
-
-* `Pie` / `Donut` / `Treemap` charts (enabled by default)
-
+* *Pie*, *Donut*, and *Treemap*
++
 [role="screenshot"]
 image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
 
 [float]
+[[how-are-ip-address-sorted]]
+===== How does Lens sort IP addresses?
+
+In a *Data table* that contains IP address fields, *Lens* sorts the IP addresses by IPv4 and IPv6 formats.
+To easily find IP addresses within the same subset, each block of IP addresses is compared and sorted. 
+
+[role="screenshot"]
+image::images/lens_ipv4_sorting.png[Lens datatable with IPv4 sorted field]
+
+When your data contains IPv4 and IPv6 fields, IPv4 addresses are mapped into IPv6-mapped addresses, and sorted as IPv6 addresses.
+
+[role="screenshot"]
+image::images/lens_ip_mixed_sorting.png[Lens datatable with IPv4 and IPv6 sorted field]
+
+NOTE: Values grouped as *Other* always appear last.
+
+[float]
+[[what-is-the-other-category]]
+===== What data is categorized as Other?
+
+The *Other* category contains all of the documents that do not match the specified criteria or filters. 
+Use *Other* when you want to compare a value, or multiple values, to a whole.
+By default, *Group other values as "Other"* is enabled when you select the *Top values* function. 
+
+To disable *Group other values as "Other"*:
+
+. In the editor, click *Advanced*. 
+
+. Deselect *Group other values as "Other"*.
+
+[float]
+[[how-can-i-include-documents-without-the-field-in-the-operation]]
+===== How can I include documents without the field?
+
+By default, *Lens* retrieves only the documents from the specified field. 
+For bucket aggregations, such as *Top values*, you can choose to include documents that do not contain the specified field, 
+which is helpful when you want to compare to the whole documentation set.
+
+. In the editor, click *Advanced*.
+
+. Select *Include documents without this field*.
++
+[role="screenshot"]
+image::images/lens_bucketed_aggregation_advanced_dropdown.png[Lens Advanced options for bucketed aggregations]
+
+[float]
+[[is-it-possible-to-select-color-for-specific-bar-or-point]]
+===== How do I change the color for a single data point?
+
+*Lens* provides you with color pallettes that you can apply to the entire visualization, but you are unable to change the color for a single data point, such as a bar or line.
+
+[float]
 [[can-i-sort-by-multiple-columns]]
-===== Can I sort by multiple columns?
+===== How do I sort by multiple columns?
 
 Multiple column sorting is unsupported in *Lens*, but is supported in *Discover*. For information on how to sort multiple columns in *Discover*, 
 refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 
 [float]
-[[how-are-ip-address-sorted]]
-===== How are IP addresses sorted?
+[[is-it-possible-to-inspect-elasticsearch-queries]]
+===== How do I inspect {es} queries?
 
-The *Lens* data table sorts IP addresses in IPv4 and IPv6 formats.
-For both formats, each block of IP addresses are compared and sorted, therefore it becomes easier to find addresses within the same subnet:
+Inspecting {es} queries in visualizations is unsupported in *Lens*. 
 
-[role="screenshot"]
-image::images/lens_ipv4_sorting.png[Lens datatable with IPv4 sorted field]
+[float]
+[[is-it-possible-to-sort-dimensions-in-a-chart]]
+===== How do I sort the dimensions in a chart?
 
-When IP addresses of both formats are found as field content, then IPv4 addresses are mapped into IPv6-mapped addresses, and sorted as IPv6 addresses.
+Sorting dimensions in visualizations is unsupported in *Lens*.
 
-[role="screenshot"]
-image::images/lens_ip_mixed_sorting.png[Lens datatable with IPv4 and IPv6 sorted field]
+[float]
+[[is-it-possible-to-use-saved-serches-in-lens]]
+===== How do I visualize saved searches?
 
-NOTE: `Other` is always at the bottom of the sorting, no matter the direction.
+Visualizing saved searches in unsupported in *Lens*.
 
 [float]
 [[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
-===== Is it possible to decrease or increase the number of suggestions?
+===== How do I change the number of suggestions?
 
-At the moment it is not possible to either increase or reduce the number of suggestions in the *Lens* editor.
-// Can we point to the hide/show issue?
-
-// [float]
-// [[how-can-i-include-documents-without-the-field-in-the-operation]]
-// ===== How can I include documents without the field in the operation?
-
-// [float]
-// [[what-is-the-other-category]]
-// ===== What is the "Other" category?
-
-[float]
-[[is-it-possible-to-inspect-elasticsearch-queries]]
-===== Is it possible to inspect {es} queries?
-
-At the moment it is not possible to inspect the Elasticsearch query for a *Lens* visualization.
-
-// [float]
-// [[is-it-possible-to-sort-dimensions-in-a-chart]]
-// ===== Is it possible to sort dimensions in a chart?
-
-// [float]
-// [[what-elasticsearch-aggregations-are-renamed-as-lens-functions]]
-// ===== What {es} aggregations are renamed as Lens functions?
-
-// Show a table here like the aggregation-reference in Kibana guide
+Configuring the *Suggestions* that *Lens* automatically populates is unsupported.

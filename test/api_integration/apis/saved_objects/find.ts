@@ -286,9 +286,8 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message:
-                  'KQLSyntaxError: Expected AND, OR, end of input, ' +
-                  'whitespace but "<" found.\ndashboard.attributes.title:foo' +
-                  '<invalid\n------------------------------^: Bad Request',
+                  'KQLSyntaxError: Expected AND, OR, end of input but "<" found.\ndashboard.' +
+                  'attributes.title:foo<invalid\n------------------------------^: Bad Request',
                 statusCode: 400,
               });
             }));

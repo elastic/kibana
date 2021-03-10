@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import {
+import { KibanaRequest } from 'src/core/server';
+import type {
   ElasticsearchClient,
-  KibanaRequest,
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'src/core/server';
 import uuid from 'uuid';
-import { AuthenticatedUser } from '../../../security/server';
+
+import type { AuthenticatedUser } from '../../../security/server';
 import {
+  packageToPackagePolicy,
+  isPackageLimited,
+  doesAgentPolicyAlreadyIncludePackage,
+} from '../../common';
+import type {
   DeletePackagePoliciesResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
@@ -21,22 +27,19 @@ import {
   PackageInfo,
   ListWithKuery,
   ListResult,
-  packageToPackagePolicy,
-  isPackageLimited,
-  doesAgentPolicyAlreadyIncludePackage,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { IngestManagerError, ingestErrorToResponseOptions } from '../errors';
-import {
+import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
+import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
-  CallESAsCurrentUser,
-  NewPackagePolicySchema,
-  UpdatePackagePolicySchema,
 } from '../types';
+import { ExternalCallback } from '..';
+
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
@@ -45,7 +48,6 @@ import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
-import { ExternalCallback } from '..';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -57,7 +59,6 @@ class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    callCluster: CallESAsCurrentUser,
     packagePolicy: NewPackagePolicy,
     options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
   ): Promise<PackagePolicy> {
@@ -91,7 +92,7 @@ class PackagePolicyService {
         ensureInstalledPackage({
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
-          callCluster,
+          esClient,
         }),
         getPackageInfo({
           savedObjectsClient: soClient,

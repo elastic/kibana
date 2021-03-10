@@ -150,8 +150,8 @@ export interface ActionLicense {
 
 export interface DeleteCase {
   id: string;
+  type: CaseType | null;
   title?: string;
-  type?: CaseType;
 }
 
 export interface FieldMappings {
@@ -167,7 +167,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, subCaseId?: string) => void;
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;
