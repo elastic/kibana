@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { pointInTimeFinderMock } from './repository.test.mock';
+
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
+import { PointInTimeFinder } from './point_in_time_finder';
 import { ALL_NAMESPACES_STRING } from './utils';
+import { loggerMock } from '../../../logging/logger.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -39,6 +43,7 @@ describe('SavedObjectsRepository', () => {
   let client;
   let savedObjectsRepository;
   let migrator;
+  let logger;
 
   let serializer;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
@@ -238,11 +243,13 @@ describe('SavedObjectsRepository', () => {
   };
 
   beforeEach(() => {
+    pointInTimeFinderMock.mockClear();
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = mockKibanaMigrator.create();
     documentMigrator.prepareMigrations();
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = async () => ({ status: 'skipped' });
+    logger = loggerMock.create();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = {
@@ -269,6 +276,7 @@ describe('SavedObjectsRepository', () => {
       typeRegistry: registry,
       serializer,
       allowedTypes,
+      logger,
     });
 
     savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
@@ -4630,6 +4638,31 @@ describe('SavedObjectsRepository', () => {
         const response = await savedObjectsRepository.closePointInTime('abc123');
         expect(response).toEqual(results);
       });
+    });
+  });
+
+  describe('#createPointInTimeFinder', () => {
+    it('returns a new PointInTimeFinder instance', async () => {
+      const result = await savedObjectsRepository.createPointInTimeFinder({}, {});
+      expect(result).toBeInstanceOf(PointInTimeFinder);
+    });
+
+    it('calls PointInTimeFinder with the provided options and dependencies', async () => {
+      const options = Symbol();
+      const dependencies = {
+        find: Symbol(),
+        openPointInTimeForType: Symbol(),
+        closePointInTime: Symbol(),
+      };
+
+      await savedObjectsRepository.createPointInTimeFinder(options, dependencies);
+      expect(pointInTimeFinderMock).toHaveBeenCalledWith(
+        options,
+        expect.objectContaining({
+          ...dependencies,
+          logger,
+        })
+      );
     });
   });
 });
