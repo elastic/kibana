@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { uiRenderMixin } from './ui_render_mixin';
+export const getConfigMock = jest.fn();
+jest.doMock('../../../apm', () => ({
+  getConfig: getConfigMock,
+}));
+
+export const agentMock = {} as Record<string, any>;
+jest.doMock('elastic-apm-node', () => agentMock);
