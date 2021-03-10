@@ -182,7 +182,7 @@ export const validateDatasourceAndVisualization = (
     : undefined;
 
   const visualizationValidationErrors = currentVisualizationState
-    ? currentVisualization?.getErrorMessages(currentVisualizationState)
+    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI.datasourceLayers)
     : undefined;
 
   if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {

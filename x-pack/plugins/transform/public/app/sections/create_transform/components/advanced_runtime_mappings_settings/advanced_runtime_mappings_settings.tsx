@@ -155,6 +155,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                     fill
                     onClick={applyChanges}
                     disabled={!isRuntimeMappingsEditorApplyButtonEnabled}
+                    data-test-subj="transformRuntimeMappingsApplyButton"
                   >
                     {i18n.translate(
                       'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',
