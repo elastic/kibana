@@ -900,7 +900,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            etag: '1234',
+            age: '42',
           },
         });
       });
@@ -910,7 +910,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
     });
 
     it('supports configuring non-standard headers', async () => {
@@ -921,7 +921,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            etag: '1234',
+            age: '42',
             'x-kibana': 'key',
           },
         });
@@ -932,7 +932,7 @@ describe('Response factory', () => {
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
       expect(result.header['x-kibana']).toBe('key');
     });
 
@@ -944,7 +944,7 @@ describe('Response factory', () => {
         return res.ok({
           body: 'value',
           headers: {
-            ETag: '1234',
+            AgE: '42',
           },
         });
       });
@@ -953,7 +953,7 @@ describe('Response factory', () => {
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
-      expect(result.header.etag).toBe('1234');
+      expect(result.header.age).toBe('42');
     });
 
     it('accept array of headers', async () => {
@@ -1774,5 +1774,57 @@ describe('Response factory', () => {
         ]
       `);
     });
+  });
+});
+
+describe('ETag', () => {
+  it('returns the `etag` header', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+    const router = createRouter('');
+    router.get(
+      {
+        path: '/route',
+        validate: false,
+      },
+      (context, req, res) =>
+        res.ok({
+          body: { foo: 'bar' },
+          headers: {
+            etag: 'etag-1',
+          },
+        })
+    );
+
+    await server.start();
+    const response = await supertest(innerServer.listener)
+      .get('/route')
+      .expect(200, { foo: 'bar' });
+    expect(response.get('etag')).toEqual('"etag-1"');
+  });
+
+  it('returns a 304 when the etag value matches', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+
+    const router = createRouter('');
+    router.get(
+      {
+        path: '/route',
+        validate: false,
+      },
+      (context, req, res) =>
+        res.ok({
+          body: { foo: 'bar' },
+          headers: {
+            etag: 'etag-1',
+          },
+        })
+    );
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .get('/route')
+      .set('If-None-Match', '"etag-1"')
+      .expect(304, '');
   });
 });
