@@ -18,6 +18,7 @@ import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 import { LICENSED_FEATURES } from '../../licensed_features';
+import { PreIndexedShape } from '../../../common/elasticsearch_util';
 
 export type SourceEditorArgs = {
   onChange: (...args: OnSourceChangeArgs[]) => void;
@@ -33,12 +34,6 @@ export type ImmutableSourceProperty = {
 export type Attribution = {
   url: string;
   label: string;
-};
-
-export type PreIndexedShape = {
-  index: string;
-  id: string | number;
-  path: string;
 };
 
 export interface ISource {
