@@ -36,7 +36,7 @@ export const getSplitByTermsColor = ({
   if (!seriesName) {
     return null;
   }
-
+  if (!seriesPalette) return null;
   const paletteName =
     seriesPalette.name === PALETTES.RAINBOW || seriesPalette.name === PALETTES.GRADIENT
       ? 'custom'
