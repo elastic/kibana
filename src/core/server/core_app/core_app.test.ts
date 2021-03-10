@@ -9,7 +9,14 @@
 import { mockCoreContext } from '../core_context.mock';
 import { coreMock } from '../mocks';
 import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
+import type { UiPlugins } from '../plugins';
 import { CoreApp } from './core_app';
+
+const emptyPlugins = (): UiPlugins => ({
+  internal: new Map(),
+  public: new Map(),
+  browserConfigs: new Map(),
+});
 
 describe('CoreApp', () => {
   let coreApp: CoreApp;
@@ -27,7 +34,7 @@ describe('CoreApp', () => {
   describe('`/status` route', () => {
     it('is registered with `authRequired: false` is the status page is anonymous', () => {
       internalCoreSetup.status.isStatusPageAnonymous.mockReturnValue(true);
-      coreApp.setup(internalCoreSetup);
+      coreApp.setup(internalCoreSetup, emptyPlugins());
 
       expect(httpResourcesRegistrar.register).toHaveBeenCalledWith(
         {
@@ -43,7 +50,7 @@ describe('CoreApp', () => {
 
     it('is registered with `authRequired: true` is the status page is not anonymous', () => {
       internalCoreSetup.status.isStatusPageAnonymous.mockReturnValue(false);
-      coreApp.setup(internalCoreSetup);
+      coreApp.setup(internalCoreSetup, emptyPlugins());
 
       expect(httpResourcesRegistrar.register).toHaveBeenCalledWith(
         {
@@ -60,7 +67,7 @@ describe('CoreApp', () => {
 
   describe('`/app/{id}/{any*}` route', () => {
     it('is registered with the correct parameters', () => {
-      coreApp.setup(internalCoreSetup);
+      coreApp.setup(internalCoreSetup, emptyPlugins());
 
       expect(httpResourcesRegistrar.register).toHaveBeenCalledWith(
         {
