@@ -95,14 +95,14 @@ export function TableDimensionEditor(
       {!column.isTransposed && (
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
-            defaultMessage: 'Column hidden in table',
+            defaultMessage: 'Hide column',
           })}
           display="columnCompressedSwitch"
         >
           <EuiSwitch
             compressed
             label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
-              defaultMessage: 'Column hidden in table',
+              defaultMessage: 'Hide column',
             })}
             showLabel={false}
             data-test-subj="lns-table-column-hidden"

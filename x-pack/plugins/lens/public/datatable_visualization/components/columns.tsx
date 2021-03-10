@@ -183,7 +183,7 @@ export const createGridColumns = (
           onClick: () => handleTransposedColumnClick(bucketValues, false),
           iconType: 'plusInCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
-            defaultMessage: 'Filter',
+            defaultMessage: 'Filter for column',
           }),
           'data-test-subj': 'lensDatatableHide',
         });
@@ -194,7 +194,7 @@ export const createGridColumns = (
           onClick: () => handleTransposedColumnClick(bucketValues, true),
           iconType: 'minusInCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
-            defaultMessage: 'Filter out',
+            defaultMessage: 'Filter out column',
           }),
           'data-test-subj': 'lensDatatableHide',
         });
