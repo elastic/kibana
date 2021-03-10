@@ -10,11 +10,14 @@ import React, { FunctionComponent } from 'react';
 import { useFieldChooserContext } from '../../../field_chooser_context';
 import { useForm } from '../../../../../../../../shared_imports';
 
-import { FieldChooser as FieldChooserView } from './field_chooser';
+import { FieldChooser as FieldChooserView, Props as FieldChooserViewProps } from './field_chooser';
 
 import { CustomFieldForm } from './types';
 
-type Props = object;
+type Props = Omit<
+  FieldChooserViewProps,
+  'customFieldForm' | 'indexPattern' | 'onIndexPatternChange' | 'currentTab' | 'onCurrentTabChange'
+>;
 
 export const FieldChooser: FunctionComponent<Props> = (props) => {
   const { indexPattern, updateIndexPattern, currentTab, setCurrentTab } = useFieldChooserContext();

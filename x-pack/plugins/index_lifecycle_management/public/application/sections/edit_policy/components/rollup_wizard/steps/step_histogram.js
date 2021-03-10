@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -59,7 +59,10 @@ export class StepHistogram extends Component {
     const columns = [
       {
         field: 'name',
-        name: 'Field',
+        name: i18n.translate(
+          'xpack.indexLifecycleMgmt.rollup.create.stepHistogram.fieldColumnLabel',
+          { defaultMessage: 'Field' }
+        ),
         sortable: true,
       },
     ];

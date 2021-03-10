@@ -249,7 +249,7 @@ export class StepMetrics extends Component<Props, State> {
   }
 
   getListColumns() {
-    return StepMetrics.chooserColumns.concat({
+    return StepMetrics.fieldListColumns.concat({
       name: i18n.translate(
         'xpack.indexLifecycleMgmt.rollup.create.stepMetrics.metricsColumnHeader',
         {
@@ -438,7 +438,7 @@ export class StepMetrics extends Component<Props, State> {
     return <StepError title={errorMetrics} />;
   };
 
-  static chooserColumns: Array<EuiBasicTableColumn<{ name: string; types: string[] }>> = [
+  static fieldListColumns: Array<EuiBasicTableColumn<{ name: string; types: string[] }>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.stepMetrics.fieldColumnLabel', {
@@ -447,4 +447,11 @@ export class StepMetrics extends Component<Props, State> {
       sortable: true,
     },
   ];
+
+  /**
+   * Same columns as {@link fieldListColumns} but typed differently
+   */
+  static chooserColumns = StepMetrics.fieldListColumns as Array<
+    EuiBasicTableColumn<{ name: string }>
+  >;
 }

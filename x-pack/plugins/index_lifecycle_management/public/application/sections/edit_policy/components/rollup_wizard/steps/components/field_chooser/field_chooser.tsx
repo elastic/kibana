@@ -79,9 +79,9 @@ function sortFields(a: { name: string }, b: { name: string }): number {
   return 0;
 }
 
-interface Props {
+export interface Props {
   buttonLabel: React.ReactNode;
-  columns: Array<EuiBasicTableColumn<{ name: string; type: string }>>;
+  columns: Array<EuiBasicTableColumn<{ name: string }>>;
   selectedFields: Array<{ name: string }>;
   onSelectField: (field: { name: string }) => void;
   indexPattern: string;
