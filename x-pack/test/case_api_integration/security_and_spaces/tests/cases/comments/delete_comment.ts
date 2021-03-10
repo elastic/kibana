@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('deletes a comment from a sub case', async () => {
         const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        await supertest
+        const res = await supertest
           .delete(
             `${CASES_URL}/${caseInfo.id}/comments/${caseInfo.comments![0].id}?subCaseId=${
               caseInfo.subCases![0].id
@@ -108,9 +108,11 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(204);
+
         const { body } = await supertest.get(
           `${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`
         );
+
         expect(body.length).to.eql(0);
       });
 
