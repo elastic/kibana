@@ -14,62 +14,7 @@ import {
 } from '../../../../../utils/build_query';
 import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
 import * as i18n from './translations';
-
-export const buildThresholdTermsQuery = ({ query, fields, value }) => {
-  if (fields.length > 0) {
-    return {
-      eventActionGroup: {
-        ...query.eventActionGroup,
-        terms: {
-          ...query.eventActionGroup.terms,
-          script: {
-            lang: 'painless',
-            source: fields.map((f) => `doc["${f}"].value`).join(' : '),
-          },
-          min_doc_count: value,
-        },
-      },
-    };
-  } else {
-    return {
-      eventActionGroup: {
-        ...query.eventActionGroup,
-        terms: {
-          ...query.eventActionGroup.terms,
-          min_doc_count: value,
-        },
-      },
-    };
-  }
-};
-
-export const buildThresholdCardinalityQuery = ({ query, cardinalityField, cardinalityValue }) => {
-  if (cardinalityField != null && cardinalityValue > 0) {
-    return {
-      eventActionGroup: {
-        ...query.eventActionGroup,
-        aggs: {
-          ...query.eventActionGroup.aggs,
-          cardinality_count: {
-            cardinality: {
-              field: cardinalityField,
-            },
-          },
-          cardinality_check: {
-            bucket_selector: {
-              buckets_path: {
-                cardinalityCount: 'cardinality_count',
-              },
-              script: `params.cardinalityCount >= ${cardinalityValue}`,
-            },
-          },
-        },
-      },
-    };
-  } else {
-    return query;
-  }
-};
+import { BaseQuery, buildThresholdCardinalityQuery, buildThresholdTermsQuery } from './helpers';
 
 export const buildEventsHistogramQuery = ({
   filterQuery,
@@ -98,7 +43,7 @@ export const buildEventsHistogramQuery = ({
       date_histogram: {
         field: histogramTimestampField,
         fixed_interval: interval,
-        min_doc_count: 0,
+        min_doc_count: threshold?.value ?? 0,
         extended_bounds: {
           min: moment(from).valueOf(),
           max: moment(to).valueOf(),
@@ -114,7 +59,7 @@ export const buildEventsHistogramQuery = ({
         : {};
 
     if (threshold != null) {
-      const query = {
+      const query: BaseQuery = {
         eventActionGroup: {
           terms: {
             order: {
@@ -129,8 +74,10 @@ export const buildEventsHistogramQuery = ({
       };
       const baseQuery = buildThresholdTermsQuery({
         query,
-        fields: threshold.field,
+        fields: threshold.field ?? [],
         value: threshold.value,
+        stackByField,
+        missing,
       });
       const enrichedQuery = buildThresholdCardinalityQuery({
         query: baseQuery,
