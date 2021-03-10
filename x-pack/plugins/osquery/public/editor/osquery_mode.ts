@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import * as ace from 'brace';
+import ace from 'brace';
+import 'brace/mode/sql';
+import 'brace/ext/language_tools';
 import { AceInterface } from './ace_types';
 import './osquery_highlight_rules';
 
@@ -13,8 +15,6 @@ import './osquery_highlight_rules';
   'ace/mode/osquery',
   ['require', 'exports', 'ace/mode/sql', 'ace/mode/osquery_highlight_rules'],
   function (acequire, exports) {
-    'use strict';
-
     const TextMode = acequire('./sql').Mode;
     const OsqueryHighlightRules = acequire('./osquery_highlight_rules').OsqueryHighlightRules;
 
