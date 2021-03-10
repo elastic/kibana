@@ -1435,7 +1435,15 @@
             "section": "def-server.SearchUsage",
             "text": "SearchUsage"
           },
-          " | undefined) => { next(response: ",
+          " | undefined, { isRestore }: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchOptions",
+            "text": "ISearchOptions"
+          },
+          ") => { next(response: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1459,7 +1467,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/collectors/usage.ts",
-              "lineNumber": 82
+              "lineNumber": 83
             }
           },
           {
@@ -1479,7 +1487,26 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/collectors/usage.ts",
-              "lineNumber": 82
+              "lineNumber": 84
+            }
+          },
+          {
+            "type": "Object",
+            "label": "{ isRestore }",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/collectors/usage.ts",
+              "lineNumber": 85
             }
           }
         ],
