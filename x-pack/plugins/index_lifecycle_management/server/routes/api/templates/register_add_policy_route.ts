@@ -78,7 +78,6 @@ async function updateIndexTemplate(
   }
 
   if (isLegacy) {
-    // @ts-expect-error Mapping doesn't satisfy TypeMapping from @elastic/elasticsearch
     return client.indices.putTemplate({ name: templateName, body: indexTemplate });
   }
   return client.indices.putIndexTemplate({ name: templateName, body: indexTemplate });

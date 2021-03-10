@@ -289,7 +289,7 @@ interface WaitForTaskResponse {
   error: Option.Option<{ type: string; reason: string; index: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
-  description: string;
+  description?: string;
 }
 
 /**
@@ -303,12 +303,7 @@ const waitForTask = (
   timeout: string
 ): TaskEither.TaskEither<RetryableEsClientError, WaitForTaskResponse> => () => {
   return client.tasks
-    .get<{
-      completed: boolean;
-      response: { failures: any[] };
-      task: { description: string };
-      error: { type: string; reason: string; index: string };
-    }>({
+    .get({
       task_id: taskId,
       wait_for_completion: true,
       timeout,

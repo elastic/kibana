@@ -134,7 +134,7 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
     return;
   }
 
-  const { body: templates } = await client.cat.templates<Array<{ name: string }>>({
+  const { body: templates } = await client.cat.templates({
     format: 'json',
     name: obsoleteIndexTemplatePattern,
   });
@@ -147,7 +147,7 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
 
   log.info(`Removing index templates: ${templateNames}`);
 
-  return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name })));
+  return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name: name! })));
 }
 
 /**
