@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import 'ace';
+import * as ace from 'brace';
 import { AceInterface } from './ace_types';
 import './osquery_highlight_rules';
 
-(ace as AceInterface).define(
+((ace as unknown) as AceInterface).define(
   'ace/mode/osquery',
   ['require', 'exports', 'ace/mode/sql', 'ace/mode/osquery_highlight_rules'],
   function (acequire, exports) {

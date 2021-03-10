@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
-import 'brace/mode/sql';
 import 'brace/theme/tomorrow';
 import 'brace/ext/language_tools';
 

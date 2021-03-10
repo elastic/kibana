@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import 'ace';
 /**
  * Ace#define is not defined in the published types, so this extends the published interface with the method
  */
-export type AceInterface = AceAjax.Ace & {
+export interface AceInterface {
   define: (
     name: string,
     deps: string[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cb: (acequire: (name: string) => any, exports: any) => void
   ) => void;
-};
+}
