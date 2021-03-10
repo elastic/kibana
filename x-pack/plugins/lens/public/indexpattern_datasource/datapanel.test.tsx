@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, MouseEvent } from 'react';
+import React, { ChangeEvent, ReactElement } from 'react';
 import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
@@ -820,9 +820,10 @@ describe('IndexPattern Data Panel', () => {
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
         act(() => {
-          wrapper.find('[data-test-subj="indexPattern-add-field"]').first().prop('onClick')!(
-            {} as MouseEvent
-          );
+          (wrapper
+            .find('[data-test-subj="lnsIndexPatternActions-popover"]')
+            .first()
+            .prop('children') as ReactElement).props.items[0].props.onClick();
         });
 
         // wait for indx pattern to be loaded
@@ -853,9 +854,10 @@ describe('IndexPattern Data Panel', () => {
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
         act(() => {
-          wrapper.find('[data-test-subj="indexPattern-add-field"]').first().prop('onClick')!(
-            {} as MouseEvent
-          );
+          (wrapper
+            .find('[data-test-subj="lnsIndexPatternActions-popover"]')
+            .first()
+            .prop('children') as ReactElement).props.items[0].props.onClick();
         });
         // wait for indx pattern to be loaded
         await new Promise((r) => setTimeout(r, 0));

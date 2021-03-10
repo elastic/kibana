@@ -800,6 +800,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async clickAddField() {
+      await testSubjects.click('lnsIndexPatternActions');
+      await testSubjects.existOrFail('indexPattern-add-field');
       await testSubjects.click('indexPattern-add-field');
     },
   });

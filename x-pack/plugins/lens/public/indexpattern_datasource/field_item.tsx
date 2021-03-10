@@ -10,7 +10,6 @@ import './field_item.scss';
 import React, { useCallback, useState, useMemo } from 'react';
 import DateMath from '@elastic/datemath';
 import {
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -285,11 +284,13 @@ function FieldPanelHeader({
   field,
   hasSuggestionForField,
   dropOntoWorkspace,
+  editField,
 }: {
   field: IndexPatternField;
   indexPatternId: string;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  editField?: (name: string) => void;
 }) {
   const draggableField = {
     indexPatternId,
@@ -313,6 +314,19 @@ function FieldPanelHeader({
         dropOntoWorkspace={dropOntoWorkspace}
         field={draggableField}
       />
+      {editField && (
+        <EuiButtonIcon
+          onClick={() => editField(field.name)}
+          iconType="pencil"
+          data-test-subj="lnsFieldListPanelEdit"
+          title={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+            defaultMessage: 'Edit field in index pattern',
+          })}
+          aria-label={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+            defaultMessage: 'Edit field in index pattern',
+          })}
+        />
+      )}
     </EuiFlexGroup>
   );
 }
@@ -342,24 +356,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     topValues && topValues.buckets.reduce((prev, bucket) => bucket.count + prev, 0);
   const otherCount = sampledValues && totalValuesCount ? sampledValues - totalValuesCount : 0;
 
-  const runtimeFieldControls = editField && (
-    <>
-      <EuiSpacer />
-      <EuiButtonEmpty
-        onClick={() => editField(field.name)}
-        size="xs"
-        data-test-subj="lnsFieldListPanelEdit"
-      >
-        {i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-          defaultMessage: 'Edit field in {pattern}',
-          values: {
-            pattern: indexPattern.title,
-          },
-        })}
-      </EuiButtonEmpty>
-    </>
-  );
-
   if (
     totalValuesCount &&
     histogram &&
@@ -379,16 +375,12 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
       field={field}
       dropOntoWorkspace={dropOntoWorkspace}
       hasSuggestionForField={hasSuggestionForField}
+      editField={editField}
     />
   );
 
   if (hideDetails) {
-    return (
-      <>
-        {panelHeader}
-        {runtimeFieldControls}
-      </>
-    );
+    return panelHeader;
   }
 
   let formatter: { convert: (data: unknown) => string };
@@ -415,12 +407,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   let title = <></>;
 
   if (props.isLoading) {
-    return (
-      <>
-        <EuiLoadingSpinner />
-        {runtimeFieldControls}
-      </>
-    );
+    return <EuiLoadingSpinner />;
   } else if (field.type.includes('range')) {
     return (
       <>
@@ -447,8 +434,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
           })}
         </EuiText>
-
-        {runtimeFieldControls}
       </>
     );
   }
@@ -541,8 +526,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         ) : (
           <></>
         )}
-
-        {runtimeFieldControls}
       </>
     );
   }

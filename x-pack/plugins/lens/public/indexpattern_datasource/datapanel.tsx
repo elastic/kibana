@@ -20,11 +20,10 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiScreenReaderOnly,
-  EuiLink,
-  EuiButtonEmpty,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
 import { htmlIdGenerator } from '@elastic/eui';
@@ -41,7 +40,6 @@ import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
-import { RedirectAppLinks, toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
@@ -517,45 +515,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   patterns: [currentIndexPattern.id],
                 });
                 onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
-                core.notifications.toasts.add({
-                  text: toMountPoint(
-                    <RedirectAppLinks application={core.application}>
-                      <I18nProvider>
-                        <FormattedMessage
-                          id="xpack.lens.indexPatterns.fieldListEditSuccessMessage"
-                          defaultMessage="You can manage your field list in {managementLink}"
-                          values={{
-                            managementLink: (
-                              <EuiLink
-                                href={core.http.basePath.prepend(
-                                  `management/kibana/indexPatterns/patterns/${currentIndexPattern.id}`
-                                )}
-                              >
-                                {i18n.translate('xpack.lens.indexPatterns.indexPatternManagement', {
-                                  defaultMessage: 'index pattern management',
-                                })}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </I18nProvider>
-                    </RedirectAppLinks>
-                  ),
-                });
               },
             });
           }
         : undefined,
-    [
-      data,
-      indexPatternFieldEditor,
-      currentIndexPattern,
-      editPermission,
-      onUpdateIndexPattern,
-      core.notifications.toasts,
-      core.http.basePath,
-      core.application,
-    ]
+    [data, indexPatternFieldEditor, currentIndexPattern, editPermission, onUpdateIndexPattern]
   );
 
   const addField = useMemo(
@@ -586,6 +550,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     ]
   );
 
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
   return (
     <ChildDragDropProvider {...dragDropContext}>
       <EuiFlexGroup
@@ -595,23 +561,83 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <div className="lnsInnerIndexPatternDataPanel__header">
-            <ChangeIndexPattern
-              data-test-subj="indexPattern-switcher"
-              trigger={{
-                label: currentIndexPattern.title,
-                title: currentIndexPattern.title,
-                'data-test-subj': 'indexPattern-switch-link',
-                fontWeight: 'bold',
-              }}
-              indexPatternId={currentIndexPatternId}
-              indexPatternRefs={indexPatternRefs}
-              onChangeIndexPattern={(newId: string) => {
-                onChangeIndexPattern(newId);
-                clearLocalState();
-              }}
-            />
-          </div>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            className="lnsInnerIndexPatternDataPanel__header"
+          >
+            <EuiFlexItem grow={true}>
+              <ChangeIndexPattern
+                data-test-subj="indexPattern-switcher"
+                trigger={{
+                  label: currentIndexPattern.title,
+                  title: currentIndexPattern.title,
+                  'data-test-subj': 'indexPattern-switch-link',
+                  fontWeight: 'bold',
+                }}
+                indexPatternId={currentIndexPatternId}
+                indexPatternRefs={indexPatternRefs}
+                onChangeIndexPattern={(newId: string) => {
+                  onChangeIndexPattern(newId);
+                  clearLocalState();
+                }}
+              />
+            </EuiFlexItem>
+            {addField && (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  panelPaddingSize="s"
+                  isOpen={popoverOpen}
+                  closePopover={() => {
+                    setPopoverOpen(false);
+                  }}
+                  data-test-subj="lnsIndexPatternActions-popover"
+                  button={
+                    <EuiButtonIcon
+                      iconType="boxesVertical"
+                      data-test-subj="lnsIndexPatternActions"
+                      onClick={() => {
+                        setPopoverOpen(!popoverOpen);
+                      }}
+                    />
+                  }
+                >
+                  <EuiContextMenuPanel
+                    size="s"
+                    items={[
+                      <EuiContextMenuItem
+                        key="add"
+                        icon="indexOpen"
+                        data-test-subj="indexPattern-add-field"
+                        onClick={() => {
+                          setPopoverOpen(false);
+                          addField();
+                        }}
+                      >
+                        {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
+                          defaultMessage: 'Add field to index pattern',
+                        })}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="manage"
+                        icon="indexSettings"
+                        onClick={() => {
+                          setPopoverOpen(false);
+                          core.application.navigateToApp('management', {
+                            path: `/kibana/indexPatterns/patterns/${currentIndexPattern.id}`,
+                          });
+                        }}
+                      >
+                        {i18n.translate('xpack.lens.indexPatterns.manageFieldButton', {
+                          defaultMessage: 'Manage index pattern fields',
+                        })}
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormControlLayout
@@ -736,26 +762,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             editField={editField}
           />
         </EuiFlexItem>
-        {addField && (
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-            <EuiButtonEmpty
-              size="xs"
-              iconType="plus"
-              iconSide="left"
-              onClick={addField}
-              data-test-subj="indexPattern-add-field"
-            >
-              {i18n.translate('xpack.lens.indexPatterns.addFieldButton', {
-                defaultMessage: 'Add field to {pattern}',
-                values: {
-                  pattern: currentIndexPattern.title,
-                },
-              })}
-            </EuiButtonEmpty>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </ChildDragDropProvider>
   );
