@@ -29,9 +29,8 @@ export default function ({ getService, getPageObjects }) {
         it('should take users to Maps application when Maps is clicked', async () => {
           await PageObjects.visualize.clickMapsApp();
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.maps.waitForLayersToLoad();
-          const doesLayerExist = await PageObjects.maps.doesLayerExist('Road map');
-          expect(doesLayerExist).to.equal(true);
+          const onMapPage = await PageObjects.maps.onMapPage();
+          expect(onMapPage).to.equal(true);
         });
       });
 

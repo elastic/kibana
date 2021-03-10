@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@
 import {
   ConnectorTypes,
   ServiceNowSIRFieldsType,
-} from '../../../../../../case/common/api/connectors';
+} from '../../../../../../cases/common/api/connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
