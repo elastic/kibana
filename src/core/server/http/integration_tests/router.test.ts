@@ -114,19 +114,30 @@ describe('Options', () => {
         });
       });
 
-      it('User with invalid credentials cannot access a route', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+      it('User with invalid credentials can access a route', async () => {
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => res.unauthorized());
 
         router.get(
           { path: '/', validate: false, options: { authRequired: 'optional' } },
-          (context, req, res) => res.ok({ body: 'ok' })
+          (context, req, res) =>
+            res.ok({
+              body: {
+                httpAuthIsAuthenticated: auth.isAuthenticated(req),
+                requestIsAuthenticated: req.auth.isAuthenticated,
+              },
+            })
         );
         await server.start();
 
-        await supertest(innerServer.listener).get('/').expect(401);
+        await supertest(innerServer.listener).get('/').expect(200, {
+          httpAuthIsAuthenticated: false,
+          requestIsAuthenticated: false,
+        });
       });
 
       it('does not redirect user and allows access to a resource', async () => {

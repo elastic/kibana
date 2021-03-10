@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export default function (kbnServer, server) {
-  server.decorate('server', 'config', function () {
-    return kbnServer.config;
-  });
-}
+require('../src/setup_node_env');
+require('../src/dev/chromium_version');
