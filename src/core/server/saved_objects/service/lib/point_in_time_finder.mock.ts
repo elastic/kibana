@@ -8,29 +8,8 @@
 
 import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
 import type { SavedObjectsClientContract } from '../../types';
-import type { SavedObjectsFindResponse } from '../saved_objects_client';
 import type { ISavedObjectsRepository } from './repository';
 import { PointInTimeFinder } from './point_in_time_finder';
-
-const mockHits: SavedObjectsFindResponse[] = [
-  {
-    total: 1,
-    saved_objects: [
-      {
-        id: '1',
-        type: 'visualization',
-        attributes: {
-          title: 'test vis',
-        },
-        score: 1,
-        references: [],
-      },
-    ],
-    pit_id: 'test',
-    per_page: 1,
-    page: 1,
-  },
-];
 
 const createPointInTimeFinderMock = ({
   logger = loggerMock.create(),
@@ -41,10 +20,9 @@ const createPointInTimeFinderMock = ({
 }): jest.Mock => {
   const mock = jest.fn();
 
-  for (const hit of mockHits) {
-    savedObjectsMock.find.mockResolvedValue(hit);
-  }
-
+  // To simplify testing, we use the actual implementation here, but pass through the
+  // mocked dependencies. This allows users to set their own `mockResolvedValue` on
+  // the SO client mock and have it reflected when using `createPointInTimeFinder`.
   mock.mockImplementation((findOptions) => {
     return new PointInTimeFinder(findOptions, {
       logger,

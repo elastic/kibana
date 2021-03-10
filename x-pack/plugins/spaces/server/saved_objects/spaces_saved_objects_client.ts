@@ -432,6 +432,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * results is received that's smaller than the designated `perPage`.
    *
    * @param {object} findOptions - {@link SavedObjectsCreatePointInTimeFinderOptions}
+   * @param {object} [dependencies] - {@link SavedObjectsCreatePointInTimeFinderDependencies}
    */
   createPointInTimeFinder(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
@@ -446,6 +447,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       find: this.find.bind(this),
       openPointInTimeForType: this.openPointInTimeForType.bind(this),
       closePointInTime: this.closePointInTime.bind(this),
+      // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });
   }

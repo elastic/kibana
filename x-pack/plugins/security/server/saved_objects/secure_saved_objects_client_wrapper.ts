@@ -629,6 +629,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       find: this.find.bind(this),
       openPointInTimeForType: this.openPointInTimeForType.bind(this),
       closePointInTime: this.closePointInTime.bind(this),
+      // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });
   }
